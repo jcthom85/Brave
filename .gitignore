@@ -1,0 +1,10 @@
+.venv
+.venv_incomplete_mountfs/
+chrome-ui-test/
+chrome-ui-test-2/
+tmp_ui_debug/
+brave-webclient-ui*.png
+Screenshot*.png
+share_*.png
+__pycache__/
+*.py[cod]
