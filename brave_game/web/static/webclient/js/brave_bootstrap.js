@@ -67,6 +67,37 @@
         return !!(names.Main && names.input);
     }
 
+    function isMobileViewport() {
+        return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
+    }
+
+    function rewriteMobileInputLayout(node) {
+        if (!node || typeof node !== "object") {
+            return;
+        }
+
+        if (node.type === "component" && node.id === "inputComponent") {
+            node.height = 1;
+            node.minHeight = 1;
+        } else if (node.type === "component" && node.componentName === "Main") {
+            node.height = 99;
+        }
+
+        if (Array.isArray(node.content)) {
+            node.content.forEach(rewriteMobileInputLayout);
+        }
+    }
+
+    function normalizeLayoutForViewport() {
+        if (!window.goldenlayout_config) {
+            return;
+        }
+        if (!isMobileViewport()) {
+            return;
+        }
+        rewriteMobileInputLayout(window.goldenlayout_config);
+    }
+
     function resetToDefaultLayout() {
         if (!window.localStorage || !window.goldenlayout_config) {
             return;
@@ -80,6 +111,8 @@
         if (!window.localStorage || !window.goldenlayout_config) {
             return;
         }
+
+        normalizeLayoutForViewport();
 
         // Brave uses a fixed browser-first shell. Persisted GoldenLayout state
         // is more likely to strand users in a broken or invisible layout than

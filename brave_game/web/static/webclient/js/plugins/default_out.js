@@ -2694,6 +2694,61 @@ let defaultout_plugin = (function () {
             );
         };
 
+        var renderForm = function (section) {
+            var fieldName = section && section.field_name ? section.field_name : "value";
+            var fieldId = "brave-form-" + escapeHtml(fieldName).replace(/[^a-zA-Z0-9_-]/g, "-");
+            var submitMode = section && section.submit_mode ? section.submit_mode : "command";
+            var submitLabel = section && section.submit_label ? section.submit_label : "Submit";
+            var submitToneClass = section && section.submit_tone ? " brave-view__action--" + escapeHtml(section.submit_tone) : "";
+            var attrs = "";
+            if (section && section.maxlength) {
+                attrs += " maxlength='" + escapeHtml(String(section.maxlength)) + "'";
+            }
+            if (section && section.minlength) {
+                attrs += " minlength='" + escapeHtml(String(section.minlength)) + "'";
+            }
+            if (section && section.placeholder) {
+                attrs += " placeholder='" + escapeHtml(section.placeholder) + "'";
+            }
+            if (section && section.autocomplete) {
+                attrs += " autocomplete='" + escapeHtml(section.autocomplete) + "'";
+            }
+            if (section && section.autocapitalize) {
+                attrs += " autocapitalize='" + escapeHtml(section.autocapitalize) + "'";
+            }
+            if (section && section.enterkeyhint) {
+                attrs += " enterkeyhint='" + escapeHtml(section.enterkeyhint) + "'";
+            }
+            if (section && section.spellcheck === false) {
+                attrs += " spellcheck='false'";
+            }
+            if (section && section.autofocus) {
+                attrs += " data-brave-autofocus='1'";
+            }
+
+            return (
+                "<form class='brave-view__form' data-brave-form='1'"
+                + " data-brave-submit-mode='" + escapeHtml(submitMode) + "'"
+                + (section && section.submit_command ? " data-brave-submit-command='" + escapeHtml(section.submit_command) + "'" : "")
+                + (section && section.submit_prefix ? " data-brave-submit-prefix='" + escapeHtml(section.submit_prefix) + "'" : "")
+                + ">"
+                + (section && section.field_label
+                    ? "<label class='brave-view__field-label' for='" + fieldId + "'>" + escapeHtml(section.field_label) + "</label>"
+                    : "")
+                + "<input type='text' class='brave-view__field-input'"
+                + " id='" + fieldId + "'"
+                + " name='" + escapeHtml(fieldName) + "'"
+                + " value='" + escapeHtml(section && section.value ? section.value : "") + "'"
+                + attrs
+                + ">"
+                + "<button type='submit' class='brave-view__action brave-view__form-submit" + submitToneClass + "'>"
+                + icon(section && section.submit_icon ? section.submit_icon : "arrow_forward", "brave-view__action-icon")
+                + "<span>" + escapeHtml(submitLabel) + "</span>"
+                + "</button>"
+                + "</form>"
+            );
+        };
+
         var renderPre = function (section) {
             var toneClass = section && section.tone ? " brave-view__pre--" + escapeHtml(section.tone) : "";
             return "<pre class='brave-view__pre" + toneClass + "'>" + escapeHtml(section && section.text ? section.text : "") + "</pre>";
@@ -2947,6 +3002,8 @@ let defaultout_plugin = (function () {
                 body = renderEntries(section.items || []);
             } else if (kind === "list") {
                 body = renderList(section.items || []);
+            } else if (kind === "form") {
+                body = renderForm(section);
             } else if (kind === "arcade") {
                 body = renderArcadeSurface(section);
             } else if (kind === "navpad") {
@@ -3053,6 +3110,7 @@ let defaultout_plugin = (function () {
             }
             renderPackPanel();
             syncMobileShell();
+            focusViewAutofocusField();
             return;
         }
 
@@ -3072,6 +3130,7 @@ let defaultout_plugin = (function () {
         }
         renderPackPanel();
         syncMobileShell();
+        focusViewAutofocusField();
         resetAllScrollPositions();
     };
 
@@ -3155,6 +3214,20 @@ let defaultout_plugin = (function () {
             closeMobileCommandTray();
         }
         plugin_handler.onSend(command);
+    };
+
+    var focusViewAutofocusField = function () {
+        var field = document.querySelector(".brave-view [data-brave-autofocus='1']");
+        if (!field || typeof field.focus !== "function") {
+            return;
+        }
+        window.setTimeout(function () {
+            field.focus();
+            if (typeof field.setSelectionRange === "function") {
+                var length = String(field.value || "").length;
+                field.setSelectionRange(length, length);
+            }
+        }, 0);
     };
 
     var startMobileSwipe = function (surface, x, y, identifier, mode, options) {
@@ -3299,6 +3372,36 @@ let defaultout_plugin = (function () {
                 return;
             }
             sendBrowserCommand(target.getAttribute("data-brave-command"), target.getAttribute("data-brave-confirm"));
+        }, true);
+
+        document.addEventListener("submit", function (event) {
+            var form = event.target.closest("[data-brave-form='1']");
+            if (!form) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            var input = form.querySelector(".brave-view__field-input");
+            var rawValue = input ? String(input.value || "") : "";
+            var value = rawValue.trim();
+            if (!value) {
+                if (input && typeof input.focus === "function") {
+                    input.focus();
+                }
+                return;
+            }
+            var mode = form.getAttribute("data-brave-submit-mode") || "command";
+            var command = "";
+            if (mode === "raw") {
+                command = value;
+            } else if (form.hasAttribute("data-brave-submit-command")) {
+                command = form.getAttribute("data-brave-submit-command") + " " + value;
+            } else if (form.hasAttribute("data-brave-submit-prefix")) {
+                command = form.getAttribute("data-brave-submit-prefix") + " " + value;
+            } else {
+                command = value;
+            }
+            sendBrowserCommand(command);
         }, true);
 
         document.addEventListener("pointerdown", function (event) {
