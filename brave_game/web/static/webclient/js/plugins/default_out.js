@@ -1464,10 +1464,7 @@ let defaultout_plugin = (function () {
     var buildMobileDockToolsMarkup = function () {
         return (
             "<div class='brave-mobile-tools'>"
-            + buildMobileUtilityButton("map", "Map", "explore", currentMobileUtilityTab === "map")
-            + buildMobileUtilityButton("pack", "Pack", "inventory_2", currentMobileUtilityTab === "pack")
-            + buildMobileUtilityButton("quest", "Journal", "assignment", currentMobileUtilityTab === "quest")
-            + buildMobileUtilityButton("more", "More", "widgets", currentMobileUtilityTab === "more")
+            + buildMobileUtilityButton("menu", "Menu", "menu", currentMobileUtilityTab === "menu")
             + "</div>"
         );
     };
@@ -1481,25 +1478,19 @@ let defaultout_plugin = (function () {
     };
 
     var getMobileUtilityTabLabel = function (tab) {
-        if (tab === "map") {
-            return "Map";
+        if (tab === "menu") {
+            return "Menu";
         }
-        if (tab === "pack") {
-            return "Pack";
-        }
-        if (tab === "quest") {
-            return "Journal";
-        }
-        return "More";
+        return "Menu";
     };
 
     var buildMobileSheetTabsMarkup = function () {
         return (
             "<div class='brave-mobile-sheet__tabs'>"
-            + buildMobileUtilityButton("map", "Map", "explore", currentMobileUtilityTab === "map")
-            + buildMobileUtilityButton("pack", "Pack", "inventory_2", currentMobileUtilityTab === "pack")
-            + buildMobileUtilityButton("quest", "Journal", "assignment", currentMobileUtilityTab === "quest")
-            + buildMobileUtilityButton("more", "More", "widgets", currentMobileUtilityTab === "more")
+            + "<div class='brave-mobile-sheet__titlewrap'>"
+            + "<div class='brave-mobile-sheet__eyebrow'>Brave</div>"
+            + "<div class='brave-mobile-sheet__title'>" + escapeHtml(getMobileUtilityTabLabel(currentMobileUtilityTab)) + "</div>"
+            + "</div>"
             + "<button type='button' class='brave-mobile-sheet__close' data-brave-mobile-action='close'>"
             + icon("close", "brave-mobile-sheet__close-icon")
             + "<span>Close</span>"
@@ -1510,77 +1501,21 @@ let defaultout_plugin = (function () {
 
     var buildMobileUtilitySheetMarkup = function (tab, roomView) {
         var bodyMarkup = "";
-        var tracked = currentSceneData && currentSceneData.tracked_quest ? currentSceneData.tracked_quest : null;
-        var pack = roomView && roomView.mobile_pack ? roomView.mobile_pack : null;
 
-        if (tab === "map") {
+        if (tab === "menu") {
             bodyMarkup =
                 "<div class='brave-mobile-sheet__section'>"
-                + "<div class='brave-mobile-sheet__eyebrow'>Local Map</div>"
-                + (currentMapText
-                    ? "<pre class='brave-mobile-sheet__map'>" + escapeHtml(currentMapText) + "</pre>"
-                    : "<div class='brave-mobile-sheet__empty'>No map sketch is available here yet.</div>")
-                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='map'>Open Full Map</button>"
-                + "</div>";
-        } else if (tab === "pack") {
-            var preview = pack && Array.isArray(pack.preview) ? pack.preview : [];
-            var previewMarkup = preview.length
-                ? (
-                    "<div class='brave-mobile-sheet__list'>"
-                    + preview.map(function (entry) {
-                        return (
-                            "<div class='brave-mobile-sheet__row'>"
-                            + "<span class='brave-mobile-sheet__row-label'>" + escapeHtml(entry.label || "") + "</span>"
-                            + "<span class='brave-mobile-sheet__row-value'>x" + escapeHtml(String(entry.quantity || 0)) + "</span>"
-                            + "</div>"
-                        );
-                    }).join("")
-                    + ((pack && pack.overflow)
-                        ? "<div class='brave-mobile-sheet__more'>+" + escapeHtml(String(pack.overflow)) + " more item kinds</div>"
-                        : "")
-                    + "</div>"
-                )
-                : "<div class='brave-mobile-sheet__empty'>Your pack is empty.</div>";
-            bodyMarkup =
-                "<div class='brave-mobile-sheet__section'>"
-                + "<div class='brave-mobile-sheet__eyebrow'>Pack Summary</div>"
-                + "<div class='brave-mobile-sheet__stats'>"
-                + "<div class='brave-mobile-sheet__stat'><span>Silver</span><strong>" + escapeHtml(String(pack && pack.silver ? pack.silver : 0)) + "</strong></div>"
-                + "<div class='brave-mobile-sheet__stat'><span>Meals</span><strong>" + escapeHtml(String(pack && pack.meals ? pack.meals : 0)) + "</strong></div>"
-                + "<div class='brave-mobile-sheet__stat'><span>Ingredients</span><strong>" + escapeHtml(String(pack && pack.ingredients ? pack.ingredients : 0)) + "</strong></div>"
-                + "</div>"
-                + previewMarkup
-                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='pack'>Open Full Pack</button>"
-                + "</div>";
-        } else if (tab === "quest") {
-            var objectives = tracked && Array.isArray(tracked.objectives) ? tracked.objectives : [];
-            bodyMarkup =
-                "<div class='brave-mobile-sheet__section'>"
-                + "<div class='brave-mobile-sheet__eyebrow'>Tracked Quest</div>"
-                + (tracked
-                    ? (
-                        "<div class='brave-mobile-sheet__quest-title'>" + escapeHtml(tracked.title || "") + "</div>"
-                        + (tracked.giver ? "<div class='brave-mobile-sheet__quest-meta'>" + escapeHtml(tracked.giver) + "</div>" : "")
-                        + (objectives.length
-                            ? "<div class='brave-mobile-sheet__list'>"
-                                + objectives.map(function (entry) {
-                                    return "<div class='brave-mobile-sheet__bullet'>" + escapeHtml(entry || "") + "</div>";
-                                }).join("")
-                                + "</div>"
-                            : "<div class='brave-mobile-sheet__empty'>No current objective is set.</div>")
-                    )
-                    : "<div class='brave-mobile-sheet__empty'>No quest is currently tracked.</div>")
-                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='quests'>Open Journal</button>"
-                + "</div>";
-        } else {
-            bodyMarkup =
-                "<div class='brave-mobile-sheet__section'>"
-                + "<div class='brave-mobile-sheet__eyebrow'>More</div>"
                 + "<div class='brave-mobile-sheet__list'>"
-                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='party'>Open Party</button>"
-                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='sheet'>Open Sheet</button>"
-                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='gear'>Open Gear</button>"
-                + "<button type='button' class='brave-mobile-sheet__action' data-brave-mobile-action='command'>Open Command</button>"
+                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='sheet'>Character Sheet</button>"
+                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='gear'>Equipment</button>"
+                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='pack'>Pack</button>"
+                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='quests'>Journal</button>"
+                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='map'>Map</button>"
+                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='party'>Party</button>"
+                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='theme'>Theme</button>"
+                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='help'>Help</button>"
+                + "<button type='button' class='brave-mobile-sheet__action' data-brave-mobile-action='command'>Command</button>"
+                + "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='quit'>Quit</button>"
                 + "</div>"
                 + "</div>";
         }
@@ -3212,6 +3147,11 @@ let defaultout_plugin = (function () {
         }
         clearPickerSheet();
         if (isMobileViewport()) {
+            if (currentMobileUtilityTab) {
+                currentMobileUtilityTab = null;
+                renderMobileUtilitySheet();
+                renderMobileNavDock();
+            }
             closeMobileCommandTray();
         }
         plugin_handler.onSend(command);

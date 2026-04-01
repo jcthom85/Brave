@@ -5713,8 +5713,8 @@ body.brave-scene-combat-enter .inputwrap {
     .brave-mobile-nav-dock__inner {
         display: flex;
         flex-direction: column;
-        gap: 8px;
-        padding: 8px;
+        gap: 6px;
+        padding: 6px;
         border: 1px solid color-mix(in srgb, var(--brave-world-line) 76%, rgba(var(--brave-accent-rgb), 0.18));
         border-radius: calc(var(--brave-radius-panel) + 2px);
         background:
@@ -5748,12 +5748,12 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-mobile-tools {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .brave-mobile-nav-dock__inner > .brave-mobile-tools {
-        margin: -8px -8px 0;
-        padding: 8px;
+        margin: -6px -6px 0;
+        padding: 6px 6px 4px;
         border-radius: calc(var(--brave-radius-panel) + 2px) calc(var(--brave-radius-panel) + 2px) 0 0;
     }
 
@@ -5775,8 +5775,8 @@ body.brave-scene-combat-enter .inputwrap {
         justify-content: center;
         gap: 6px;
         min-width: 0;
-        min-height: 42px;
-        padding: 10px 8px;
+        min-height: 38px;
+        padding: 8px 8px;
         border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.14));
         border-radius: var(--brave-radius-control);
         background:
@@ -5809,10 +5809,25 @@ body.brave-scene-combat-enter .inputwrap {
 
     .brave-mobile-sheet__tabs {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+        grid-template-columns: minmax(0, 1fr) auto;
         gap: 8px;
         padding: 12px 12px 10px;
         border-bottom: 1px solid color-mix(in srgb, var(--brave-world-line) 70%, rgba(var(--brave-accent-rgb), 0.14));
+    }
+
+    .brave-mobile-sheet__titlewrap {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .brave-mobile-sheet__title {
+        color: var(--brave-text-bright);
+        font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        letter-spacing: calc(var(--brave-letter-spacing) + 0.04em);
+        text-transform: uppercase;
     }
 
     .brave-mobile-sheet__close {
@@ -6016,8 +6031,8 @@ body.brave-scene-combat-enter .inputwrap {
 
     #mobile-nav-dock .brave-view__navpad--mobile {
         gap: 6px;
-        margin: 0 -8px -8px;
-        padding: 0 8px 8px;
+        margin: 0 -6px -6px;
+        padding: 8px 6px 8px;
         border: 0;
         border-radius: 0 0 calc(var(--brave-radius-panel) + 2px) calc(var(--brave-radius-panel) + 2px);
         background:
