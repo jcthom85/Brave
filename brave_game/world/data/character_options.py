@@ -197,6 +197,194 @@ CLASSES = {
 }
 
 
+def ability_key(name):
+    """Return the canonical normalized key for an ability name."""
+
+    return "".join(char for char in (name or "").lower() if char.isalnum())
+
+
+ABILITY_LIBRARY = {
+    "strike": {"name": "Strike", "class": "warrior", "resource": "stamina", "cost": 8, "target": "enemy"},
+    "defend": {"name": "Defend", "class": "warrior", "resource": "stamina", "cost": 6, "target": "self"},
+    "shieldbash": {"name": "Shield Bash", "class": "warrior", "resource": "stamina", "cost": 10, "target": "enemy"},
+    "battlecry": {"name": "Battle Cry", "class": "warrior", "resource": "stamina", "cost": 12, "target": "none"},
+    "intercept": {"name": "Intercept", "class": "warrior", "resource": "stamina", "cost": 11, "target": "ally"},
+    "tauntingblow": {"name": "Taunting Blow", "class": "warrior", "resource": "stamina", "cost": 10, "target": "enemy"},
+    "brace": {"name": "Brace", "class": "warrior", "resource": "stamina", "cost": 10, "target": "self"},
+    "laststand": {"name": "Last Stand", "class": "warrior", "resource": "stamina", "cost": 16, "target": "self"},
+    "quickshot": {"name": "Quick Shot", "class": "ranger", "resource": "stamina", "cost": 8, "target": "enemy"},
+    "markprey": {"name": "Mark Prey", "class": "ranger", "resource": "stamina", "cost": 6, "target": "enemy"},
+    "aimedshot": {"name": "Aimed Shot", "class": "ranger", "resource": "stamina", "cost": 11, "target": "enemy"},
+    "snaretrap": {"name": "Snare Trap", "class": "ranger", "resource": "stamina", "cost": 9, "target": "enemy"},
+    "volley": {"name": "Volley", "class": "ranger", "resource": "stamina", "cost": 13, "target": "none"},
+    "evasiveroll": {"name": "Evasive Roll", "class": "ranger", "resource": "stamina", "cost": 8, "target": "self"},
+    "barbedarrow": {"name": "Barbed Arrow", "class": "ranger", "resource": "stamina", "cost": 10, "target": "enemy"},
+    "rainofarrows": {"name": "Rain of Arrows", "class": "ranger", "resource": "stamina", "cost": 16, "target": "none"},
+    "firebolt": {"name": "Firebolt", "class": "mage", "resource": "mana", "cost": 9, "target": "enemy"},
+    "frostbind": {"name": "Frost Bind", "class": "mage", "resource": "mana", "cost": 10, "target": "enemy"},
+    "arcspark": {"name": "Arc Spark", "class": "mage", "resource": "mana", "cost": 11, "target": "enemy"},
+    "flamewave": {"name": "Flame Wave", "class": "mage", "resource": "mana", "cost": 14, "target": "none"},
+    "manashield": {"name": "Mana Shield", "class": "mage", "resource": "mana", "cost": 12, "target": "self"},
+    "staticfield": {"name": "Static Field", "class": "mage", "resource": "mana", "cost": 13, "target": "none"},
+    "icelance": {"name": "Ice Lance", "class": "mage", "resource": "mana", "cost": 12, "target": "enemy"},
+    "meteorsigil": {"name": "Meteor Sigil", "class": "mage", "resource": "mana", "cost": 18, "target": "enemy"},
+    "heal": {"name": "Heal", "class": "cleric", "resource": "mana", "cost": 10, "target": "ally"},
+    "smite": {"name": "Smite", "class": "cleric", "resource": "mana", "cost": 8, "target": "enemy"},
+    "blessing": {"name": "Blessing", "class": "cleric", "resource": "mana", "cost": 10, "target": "ally"},
+    "renewinglight": {"name": "Renewing Light", "class": "cleric", "resource": "mana", "cost": 14, "target": "ally"},
+    "sanctuary": {"name": "Sanctuary", "class": "cleric", "resource": "mana", "cost": 14, "target": "none"},
+    "cleanse": {"name": "Cleanse", "class": "cleric", "resource": "mana", "cost": 10, "target": "ally"},
+    "radiantburst": {"name": "Radiant Burst", "class": "cleric", "resource": "mana", "cost": 15, "target": "none"},
+    "guardianlight": {"name": "Guardian Light", "class": "cleric", "resource": "mana", "cost": 18, "target": "ally"},
+    "stab": {"name": "Stab", "class": "rogue", "resource": "stamina", "cost": 7, "target": "enemy"},
+    "feint": {"name": "Feint", "class": "rogue", "resource": "stamina", "cost": 6, "target": "self"},
+    "backstab": {"name": "Backstab", "class": "rogue", "resource": "stamina", "cost": 10, "target": "enemy"},
+    "poisonblade": {"name": "Poison Blade", "class": "rogue", "resource": "stamina", "cost": 9, "target": "enemy"},
+    "vanish": {"name": "Vanish", "class": "rogue", "resource": "stamina", "cost": 10, "target": "self"},
+    "cheapshot": {"name": "Cheap Shot", "class": "rogue", "resource": "stamina", "cost": 11, "target": "enemy"},
+    "shadowstep": {"name": "Shadowstep", "class": "rogue", "resource": "stamina", "cost": 12, "target": "enemy"},
+    "eviscerate": {"name": "Eviscerate", "class": "rogue", "resource": "stamina", "cost": 16, "target": "enemy"},
+    "holystrike": {"name": "Holy Strike", "class": "paladin", "resource": "stamina", "cost": 8, "target": "enemy"},
+    "guardingaura": {"name": "Guarding Aura", "class": "paladin", "resource": "stamina", "cost": 8, "target": "ally"},
+    "judgement": {"name": "Judgement", "class": "paladin", "resource": "stamina", "cost": 10, "target": "enemy"},
+    "handofmercy": {"name": "Hand of Mercy", "class": "paladin", "resource": "stamina", "cost": 11, "target": "ally"},
+    "consecrate": {"name": "Consecrate", "class": "paladin", "resource": "stamina", "cost": 13, "target": "none"},
+    "shieldofdawn": {"name": "Shield of Dawn", "class": "paladin", "resource": "stamina", "cost": 12, "target": "ally"},
+    "rebukeevil": {"name": "Rebuke Evil", "class": "paladin", "resource": "stamina", "cost": 12, "target": "enemy"},
+    "avenginglight": {"name": "Avenging Light", "class": "paladin", "resource": "stamina", "cost": 18, "target": "none"},
+    "thornlash": {"name": "Thorn Lash", "class": "druid", "resource": "mana", "cost": 8, "target": "enemy"},
+    "minormend": {"name": "Minor Mend", "class": "druid", "resource": "mana", "cost": 8, "target": "ally"},
+    "entanglingroots": {"name": "Entangling Roots", "class": "druid", "resource": "mana", "cost": 10, "target": "enemy"},
+    "moonfire": {"name": "Moonfire", "class": "druid", "resource": "mana", "cost": 10, "target": "enemy"},
+    "barkskin": {"name": "Barkskin", "class": "druid", "resource": "mana", "cost": 10, "target": "ally"},
+    "livingcurrent": {"name": "Living Current", "class": "druid", "resource": "mana", "cost": 12, "target": "ally"},
+    "swarm": {"name": "Swarm", "class": "druid", "resource": "mana", "cost": 14, "target": "none"},
+    "rejuvenationgrove": {"name": "Rejuvenation Grove", "class": "druid", "resource": "mana", "cost": 16, "target": "none"},
+    "wrathofthegrove": {"name": "Wrath of the Grove", "class": "druid", "resource": "mana", "cost": 18, "target": "enemy"},
+}
+
+
+IMPLEMENTED_ABILITY_KEYS = {
+    "strike",
+    "defend",
+    "shieldbash",
+    "battlecry",
+    "intercept",
+    "tauntingblow",
+    "brace",
+    "laststand",
+    "quickshot",
+    "markprey",
+    "aimedshot",
+    "snaretrap",
+    "volley",
+    "evasiveroll",
+    "barbedarrow",
+    "rainofarrows",
+    "heal",
+    "smite",
+    "blessing",
+    "renewinglight",
+    "sanctuary",
+    "cleanse",
+    "radiantburst",
+    "guardianlight",
+    "firebolt",
+    "frostbind",
+    "arcspark",
+    "flamewave",
+    "manashield",
+    "staticfield",
+    "icelance",
+    "meteorsigil",
+    "stab",
+    "feint",
+    "backstab",
+    "poisonblade",
+    "vanish",
+    "cheapshot",
+    "shadowstep",
+    "eviscerate",
+    "holystrike",
+    "guardingaura",
+    "judgement",
+    "handofmercy",
+    "consecrate",
+    "shieldofdawn",
+    "rebukeevil",
+    "avenginglight",
+    "thornlash",
+    "minormend",
+    "entanglingroots",
+    "moonfire",
+    "barkskin",
+    "livingcurrent",
+    "swarm",
+    "rejuvenationgrove",
+    "wrathofthegrove",
+}
+
+
+PASSIVE_ABILITY_BONUSES = {
+    "ironwill": {"name": "Iron Will", "bonuses": {"max_hp": 12, "threat": 2}},
+    "thickhide": {"name": "Thick Hide", "bonuses": {"armor": 3}},
+    "bulwark": {"name": "Bulwark", "bonuses": {"max_hp": 12, "armor": 3, "threat": 2}},
+    "trailwise": {"name": "Trailwise", "bonuses": {"dodge": 2}},
+    "predatorseye": {"name": "Predator's Eye", "bonuses": {"accuracy": 4, "precision": 2}},
+    "deadlyrhythm": {"name": "Deadly Rhythm", "bonuses": {"attack_power": 3, "crit_chance": 2}},
+    "deepfocus": {"name": "Deep Focus", "bonuses": {"max_mana": 14}},
+    "spellecho": {"name": "Spell Echo", "bonuses": {"spell_power": 3}},
+    "elementalattunement": {"name": "Elemental Attunement", "bonuses": {"spell_power": 2, "accuracy": 2}},
+    "serenesoul": {"name": "Serene Soul", "bonuses": {"max_mana": 12, "spell_power": 2}},
+    "purity": {"name": "Purity", "bonuses": {"armor": 2, "healing_power": 2}},
+    "gracefulhands": {"name": "Graceful Hands", "bonuses": {"spell_power": 2, "healing_power": 3}},
+    "lightfeet": {"name": "Light Feet", "bonuses": {"dodge": 3}},
+    "ruthlesstiming": {"name": "Ruthless Timing", "bonuses": {"attack_power": 3, "accuracy": 2}},
+    "killersfocus": {"name": "Killer's Focus", "bonuses": {"precision": 3, "crit_chance": 3}},
+    "steadfastfaith": {"name": "Steadfast Faith", "bonuses": {"max_hp": 10, "max_mana": 8}},
+    "blessedarmor": {"name": "Blessed Armor", "bonuses": {"armor": 3, "threat": 1}},
+    "beaconsoul": {"name": "Beacon Soul", "bonuses": {"spell_power": 2, "healing_power": 2, "threat": 1}},
+    "wildgrace": {"name": "Wild Grace", "bonuses": {"dodge": 2, "accuracy": 2}},
+    "naturesmemory": {"name": "Nature's Memory", "bonuses": {"max_mana": 10, "spell_power": 2, "healing_power": 2}},
+}
+
+
+def get_progression_ability_names(class_key, level):
+    """Return progression ability names unlocked for a class at a given level."""
+
+    class_data = CLASSES[class_key]
+    return [ability for unlock_level, ability in class_data["progression"] if unlock_level <= level]
+
+
+def split_unlocked_abilities(class_key, level):
+    """Split unlocked progression abilities into combat actions and passive traits."""
+
+    actions = []
+    passives = []
+    unknown = []
+    for ability_name in get_progression_ability_names(class_key, level):
+        key = ability_key(ability_name)
+        if key in IMPLEMENTED_ABILITY_KEYS:
+            actions.append(ability_name)
+        elif key in PASSIVE_ABILITY_BONUSES:
+            passives.append(ability_name)
+        else:
+            unknown.append(ability_name)
+    return actions, passives, unknown
+
+
+def get_passive_ability_bonuses(class_key, level):
+    """Aggregate all passive bonuses unlocked for a class at a given level."""
+
+    totals = {}
+    _actions, passives, _unknown = split_unlocked_abilities(class_key, level)
+    for ability_name in passives:
+        bonus_def = PASSIVE_ABILITY_BONUSES.get(ability_key(ability_name), {})
+        for stat, amount in bonus_def.get("bonuses", {}).items():
+            totals[stat] = totals.get(stat, 0) + amount
+    return totals
+
+
 def xp_needed_for_next_level(level):
     """Return the XP needed to reach the next level, or None at cap."""
 

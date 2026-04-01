@@ -3,7 +3,7 @@
 from world.browser_panels import build_build_panel, build_gear_panel, build_pack_panel, build_quests_panel, build_sheet_panel
 from world.browser_views import build_gear_view, build_pack_view, build_quests_view, build_sheet_view
 from world.chapel import get_active_blessing
-from world.data.character_options import CLASSES, RACES, VERTICAL_SLICE_CLASSES, xp_needed_for_next_level
+from world.data.character_options import CLASSES, RACES, VERTICAL_SLICE_CLASSES, split_unlocked_abilities, xp_needed_for_next_level
 from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES
 from world.data.quests import QUESTS, STARTING_QUESTS
 from world.questing import clear_tracked_quest, get_tracked_quest, resolve_active_quest_query, set_tracked_quest
@@ -190,7 +190,7 @@ class CmdSheet(BraveCharacterCommand):
     Usage:
       sheet
 
-    Shows your race, class, level, resources, stats, and unlocked abilities.
+    Shows your race, class, level, resources, stats, combat actions, and passive traits.
     """
 
     key = "sheet"
@@ -207,7 +207,10 @@ class CmdSheet(BraveCharacterCommand):
         primary = character.db.brave_primary_stats
         derived = character.db.brave_derived_stats
         resources = character.db.brave_resources
-        abilities = character.get_unlocked_abilities()
+        active_abilities, passive_abilities, unknown_abilities = split_unlocked_abilities(
+            character.db.brave_class,
+            character.db.brave_level,
+        )
         next_level_xp = xp_needed_for_next_level(character.db.brave_level)
         resonance_key = get_resonance_key(character)
         resonance_label = get_resonance_label(character)
@@ -275,12 +278,23 @@ class CmdSheet(BraveCharacterCommand):
             ),
             ("Combat Stats", format_pairs(combat_pairs)),
             (
-                "Unlocked Abilities",
-                [f"  {format_ability_display(ability, character)}" for ability in abilities]
-                if abilities
+                "Combat Actions",
+                [f"  {format_ability_display(ability, character)}" for ability in active_abilities]
+                if active_abilities
                 else ["  None yet"],
             ),
         ]
+
+        if passive_abilities:
+            sections.append(
+                (
+                    "Passive Traits",
+                    [f"  {format_ability_display(ability, character)}" for ability in passive_abilities],
+                )
+            )
+
+        if unknown_abilities:
+            sections.append(("Progression Notes", [f"  Unclassified: {', '.join(unknown_abilities)}"]))
 
         meal_buff = character.db.brave_meal_buff or {}
         if meal_buff:

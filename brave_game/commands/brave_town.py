@@ -15,6 +15,7 @@ from world.browser_views import (
     build_prayer_view,
     build_read_view,
     build_shop_view,
+    build_talk_list_view,
     build_talk_view,
 )
 from world.activities import format_recipe_list
@@ -461,7 +462,12 @@ class CmdTalk(BraveCharacterCommand):
             if not npcs:
                 self.msg("No one here looks free for conversation.")
                 return
-            self.msg("You can talk to: " + ", ".join(npc.key for npc in npcs))
+            screen = render_screen(
+                "Conversation",
+                subtitle="Choose someone nearby to speak with.",
+                sections=[("Nearby NPCs", [f"  - {npc.key}" for npc in npcs])],
+            )
+            self.scene_msg(screen, view=build_talk_list_view(character, npcs))
             return
 
         target, npcs = self.find_local_entity(character, self.args.strip(), kind="npc")

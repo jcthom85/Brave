@@ -11,7 +11,7 @@ from world.activities import (
     start_fishing,
 )
 from world.browser_panels import build_cook_panel, build_map_panel, build_travel_panel
-from world.browser_views import build_cook_view, build_map_view, build_travel_view
+from world.browser_views import build_cook_view, build_map_view, build_more_view, build_travel_view
 from world.navigation import render_map, render_minimap, sort_exits
 from world.screen_text import format_entry, render_screen, wrap_text
 
@@ -282,6 +282,30 @@ class CmdMap(BraveCharacterCommand):
             panel=build_map_panel(character, mode="map"),
             view=build_map_view(character.location, character, mode="map"),
         )
+
+
+class CmdMore(BraveCharacterCommand):
+    """
+    Show the miscellaneous utilities and settings menu.
+
+    Usage:
+      more
+      menu
+
+    Provides access to character sheets, party management, and theme settings.
+    """
+
+    key = "more"
+    aliases = ["menu", "widgets"]
+    help_category = "Brave"
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+
+        self.send_browser_view(build_more_view(character))
+        self.msg("Opening menu...")
 
 
 class CmdRest(BraveCharacterCommand):

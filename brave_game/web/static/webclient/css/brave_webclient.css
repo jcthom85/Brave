@@ -1954,11 +1954,13 @@ body.brave-mainview-active .scene-rail {
 .brave-view--connection {
     max-width: 440px;
     gap: 12px;
+    min-height: 100%;
 }
 
 .brave-view--chargen {
     max-width: 920px;
     gap: 14px;
+    min-height: 100%;
 }
 
 .brave-view--connection {
@@ -1976,6 +1978,8 @@ body.brave-mainview-active .scene-rail {
 .brave-view--connection .brave-view__sections {
     grid-template-columns: minmax(0, 1fr);
     gap: 12px;
+    flex: 1 1 auto;
+    align-content: start;
 }
 
 .brave-view--account .brave-view__sections {
@@ -1990,6 +1994,8 @@ body.brave-mainview-active .scene-rail {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
     max-width: 920px;
+    flex: 1 1 auto;
+    align-content: start;
 }
 
 .brave-view--account .brave-view__entry,
@@ -2012,6 +2018,20 @@ body.brave-mainview-active .scene-rail {
 .brave-view--connection .brave-view__section,
 .brave-view--chargen .brave-view__section {
     padding: 14px 14px 12px;
+}
+
+.brave-view--account .brave-view__section,
+.brave-view--connection .brave-view__section {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+.brave-view--account .brave-view__entries,
+.brave-view--connection .brave-view__entries {
+    flex: 1 1 auto;
+    align-content: start;
 }
 
 .brave-view--account .brave-view__wordmark-text,
@@ -2045,6 +2065,7 @@ body.brave-mainview-active .scene-rail {
 
 .brave-view--room {
     display: grid;
+    width: 100%;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr);
     max-width: 980px;
@@ -2533,11 +2554,12 @@ body.brave-mainview-active .scene-rail {
 
 .brave-view--room .brave-view__sections {
     display: grid;
-    grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-        "routes threats"
-        "routes entities";
-    grid-template-rows: minmax(178px, auto) minmax(178px, auto);
+        "routes"
+        "vicinity";
+    grid-template-rows: auto auto;
     gap: 16px;
     align-items: start;
     align-content: start;
@@ -2641,19 +2663,29 @@ body.brave-mainview-active .scene-rail {
     grid-area: routes;
     width: 100%;
     max-width: none;
-    min-height: 372px;
+    min-height: 0;
     max-height: none;
     justify-self: stretch;
-    align-self: stretch;
+    align-self: start;
 }
 
 .brave-view--room .brave-view__section--list {
-    min-height: 178px;
-    align-self: stretch;
+    min-height: 0;
+    width: 100%;
+    justify-self: stretch;
+    align-self: start;
 }
 
 .brave-view--room .brave-view__section--threats {
     grid-area: threats;
+}
+
+.brave-view--room .brave-view__section--vicinity {
+    grid-area: vicinity;
+    min-height: 0;
+    width: 100%;
+    justify-self: stretch;
+    align-self: start;
 }
 
 .brave-view--room .brave-view__section--entities {
@@ -5396,7 +5428,7 @@ body.brave-scene-combat-enter .inputwrap {
 
 @media screen and (max-width: 900px) {
     body {
-        --brave-mobile-dock-clearance: 252px;
+        --brave-mobile-dock-clearance: 136px;
         --brave-mobile-input-pane-height: 104px;
         --brave-mobile-input-gap: 10px;
         --brave-mobile-input-bottom-offset: 12px;
@@ -5601,7 +5633,16 @@ body.brave-scene-combat-enter .inputwrap {
 
     body.brave-mobile-nav-active .content,
     body.brave-mobile-nav-active #messagewindow {
-        padding-bottom: calc(var(--brave-mobile-dock-clearance) + 12px);
+        padding-bottom: calc(var(--brave-mobile-dock-clearance) + 8px);
+    }
+
+    body[data-brave-view="account"].brave-mobile-nav-active .content,
+    body[data-brave-view="account"].brave-mobile-nav-active #messagewindow,
+    body[data-brave-view="connection"].brave-mobile-nav-active .content,
+    body[data-brave-view="connection"].brave-mobile-nav-active #messagewindow,
+    body[data-brave-view="chargen"].brave-mobile-nav-active .content,
+    body[data-brave-view="chargen"].brave-mobile-nav-active #messagewindow {
+        padding-bottom: 16px;
     }
 
     body[data-brave-scene="combat"].brave-mobile-nav-active .content,
@@ -5625,9 +5666,30 @@ body.brave-scene-combat-enter .inputwrap {
         bottom: var(--brave-mobile-input-reserve) !important;
     }
 
+    body[data-brave-view="account"] .brave-gl-main-item,
+    body[data-brave-view="connection"] .brave-gl-main-item,
+    body[data-brave-view="chargen"] .brave-gl-main-item {
+        bottom: 0 !important;
+    }
+
     body.brave-mobile-input-open .content,
     body.brave-mobile-input-open #messagewindow {
         padding-bottom: calc(var(--brave-mobile-input-reserve) + 10px);
+    }
+
+    body[data-brave-view="account"].brave-mobile-input-open .content,
+    body[data-brave-view="account"].brave-mobile-input-open #messagewindow,
+    body[data-brave-view="connection"].brave-mobile-input-open .content,
+    body[data-brave-view="connection"].brave-mobile-input-open #messagewindow,
+    body[data-brave-view="chargen"].brave-mobile-input-open .content,
+    body[data-brave-view="chargen"].brave-mobile-input-open #messagewindow,
+    body[data-brave-view="account"].brave-mobile-nav-active .content,
+    body[data-brave-view="account"].brave-mobile-nav-active #messagewindow,
+    body[data-brave-view="connection"].brave-mobile-nav-active .content,
+    body[data-brave-view="connection"].brave-mobile-nav-active #messagewindow,
+    body[data-brave-view="chargen"].brave-mobile-nav-active .content,
+    body[data-brave-view="chargen"].brave-mobile-nav-active #messagewindow {
+        padding-bottom: 16px;
     }
 
     #mobile-nav-dock {
@@ -6032,6 +6094,7 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--room .brave-view__sections {
+        width: 100%;
         grid-template-columns: 1fr;
         grid-template-areas: none;
         grid-template-rows: auto;
@@ -6041,7 +6104,8 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--room .brave-view__section--threats,
-    .brave-view--room .brave-view__section--entities {
+    .brave-view--room .brave-view__section--entities,
+    .brave-view--room .brave-view__section--vicinity {
         grid-area: auto;
         min-height: 0;
     }
@@ -6052,6 +6116,7 @@ body.brave-scene-combat-enter .inputwrap {
 
     .brave-view--room {
         display: flex;
+        width: 100%;
         min-height: 0;
         max-width: none;
         gap: 12px;
@@ -6064,6 +6129,42 @@ body.brave-scene-combat-enter .inputwrap {
         z-index: auto;
         gap: 10px;
         padding: 14px 14px 12px;
+        width: 100%;
+        flex: 0 0 auto;
+        align-self: stretch;
+    }
+
+    .brave-view__micromap {
+        position: relative;
+        margin: 4px auto 12px;
+        width: 80px;
+        height: 80px;
+        background:
+            radial-gradient(circle at 50% 35%, rgba(var(--brave-accent-rgb), 0.05), transparent 62%),
+            rgba(8, 10, 12, 0.18);
+        border: 1px solid rgba(var(--brave-accent-rgb), 0.16);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--brave-font-family);
+        font-size: 9.5px;
+        line-height: 1;
+        white-space: pre;
+        color: color-mix(in srgb, var(--brave-accent) 68%, var(--brave-text-soft));
+        pointer-events: none;
+        backdrop-filter: blur(2px);
+        overflow: hidden;
+        text-align: center;
+        z-index: 5;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.025),
+            0 8px 16px rgba(0, 0, 0, 0.12);
+        opacity: 0.9;
+    }
+
+    .brave-view__micromap[aria-hidden="true"] {
+        display: none !important;
     }
 
     .brave-view__wordmark-text {
@@ -6072,10 +6173,17 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--room .brave-view__section--list {
-        width: auto;
+        width: 100%;
         min-height: 0;
         max-height: none;
-        align-self: auto;
+        justify-self: stretch;
+        align-self: stretch;
+    }
+
+    .brave-view--room .brave-view__section--vicinity {
+        width: 100%;
+        justify-self: stretch;
+        align-self: stretch;
     }
 
     .brave-view:not(.brave-view--room) .brave-view__sections {
@@ -6122,7 +6230,7 @@ body.brave-scene-combat-enter .inputwrap {
 
 @media screen and (max-width: 640px) {
     body {
-        --brave-mobile-dock-clearance: 232px;
+        --brave-mobile-dock-clearance: 124px;
         --brave-mobile-input-pane-height: 112px;
         --brave-mobile-combat-log-height: clamp(132px, 28vh, 196px);
     }
@@ -6566,6 +6674,24 @@ body.brave-scene-combat-enter .inputwrap {
 
     .brave-view__sections {
         grid-template-columns: 1fr;
+    }
+
+    .brave-view--room,
+    .brave-view--room .brave-view__sections,
+    .brave-view--room .brave-view__sections > .brave-view__section,
+    .brave-view--room .brave-view__section--vicinity,
+    .brave-view--room .brave-view__section--list {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        justify-self: stretch !important;
+    }
+
+    .brave-view--room .brave-view__sections {
+        flex: 0 0 auto;
+        align-self: stretch !important;
     }
 
     .brave-view--chargen .brave-view__entries {

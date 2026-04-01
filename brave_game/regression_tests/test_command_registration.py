@@ -26,7 +26,7 @@ class CommandRegistrationTests(unittest.TestCase):
 
         self.assertTrue({"CmdArcade", "CmdArcadeSubmit"} <= self.imports["brave_arcade"])
         self.assertTrue({"CmdAttack", "CmdEnemies", "CmdFight", "CmdFlee", "CmdUse"} <= self.imports["brave_combat"])
-        self.assertTrue({"CmdCook", "CmdEat", "CmdFish", "CmdMap", "CmdReel", "CmdRest", "CmdTravel"} <= self.imports["brave_explore"])
+        self.assertTrue({"CmdCook", "CmdEat", "CmdFish", "CmdMap", "CmdMore", "CmdReel", "CmdRest", "CmdTravel"} <= self.imports["brave_explore"])
         self.assertIn("CmdParty", self.imports["brave_party"])
         self.assertTrue({"CmdBuild", "CmdClass", "CmdGear", "CmdPack", "CmdQuests", "CmdRace", "CmdSheet"} <= self.imports["brave_profile"])
         self.assertTrue(
@@ -70,6 +70,7 @@ class CommandRegistrationTests(unittest.TestCase):
             "CmdEat",
             "CmdTravel",
             "CmdMap",
+            "CmdMore",
             "CmdRest",
             "CmdArcade",
             "CmdArcadeSubmit",

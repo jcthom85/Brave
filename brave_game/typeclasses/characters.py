@@ -16,6 +16,8 @@ from world.data.character_options import (
     STARTING_CLASS,
     STARTING_RACE,
     XP_FOR_LEVEL,
+    get_passive_ability_bonuses,
+    split_unlocked_abilities,
 )
 from world.chapel import get_active_blessing
 from world.data.activities import COZY_BONUS
@@ -54,10 +56,8 @@ class Character(ObjectParent, DefaultCharacter):
             handle_room_enter(self, self.location)
             if move_type not in {"defeat", "flee"}:
                 from world.party import handle_party_follow
-                from typeclasses.scripts import BraveEncounter
 
                 handle_party_follow(self, source_location, move_type=move_type)
-                BraveEncounter.maybe_auto_aggro(self)
 
     def at_pre_move(self, destination, **kwargs):
         if kwargs.get("move_type") not in {"defeat", "flee"}:
@@ -74,21 +74,6 @@ class Character(ObjectParent, DefaultCharacter):
         super().at_post_puppet(**kwargs)
         self.ensure_brave_character()
         if not self.db.brave_seen_welcome:
-            if is_tutorial_active(self):
-                self.msg(
-                    "|yWelcome to Brave.|n Sergeant Tamsin is ready to square you away. "
-                    "Use |wtalk tamsin|n to begin, |wquests|n to keep the lesson in view, and cardinal movement "
-                    "with |wn|n, |we|n, |ws|n, |ww|n, |wu|n, and |wd|n to move around the yard."
-                )
-            else:
-                self.msg(
-                    "|yWelcome to Brave.|n Use |wsheet|n to view your adventurer, "
-                    "|wgear|n to inspect your kit, |wquests|n to check objectives, and "
-                    "|wmap|n to see the local layout. Cardinal movement works with |wn|n, |we|n, "
-                    "|ws|n, |ww|n, |wu|n, and |wd|n. Named |wtravel|n still works as a fallback. "
-                    "Use |wparty where|n to find family and |wparty follow|n to stay together. "
-                    "Brambleford's wharf supports |wfish|n and the inn hearth supports |wcook|n."
-                )
             self.db.brave_seen_welcome = True
 
     def ensure_brave_character(self):
@@ -138,6 +123,10 @@ class Character(ObjectParent, DefaultCharacter):
         for stat in PRIMARY_STATS:
             primary[stat] = class_data["base_stats"].get(stat, 0) + race["bonuses"].get(stat, 0)
 
+        passive_bonuses = get_passive_ability_bonuses(self.db.brave_class, level)
+        for stat in PRIMARY_STATS:
+            primary[stat] += passive_bonuses.get(stat, 0)
+
         equipment_bonuses = self.get_equipment_bonuses()
         for stat in PRIMARY_STATS:
             primary[stat] += equipment_bonuses.get(stat, 0)
@@ -162,7 +151,12 @@ class Character(ObjectParent, DefaultCharacter):
             "crit_chance": 5 + (primary["agility"] // 2),
             "dodge": 3 + primary["agility"] + (level // 2),
             "threat": 5 + primary["vitality"] + (5 if self.db.brave_class in ("warrior", "paladin") else 0),
+            "healing_power": 0,
         }
+        for stat, bonus in passive_bonuses.items():
+            if stat in PRIMARY_STATS:
+                continue
+            derived[stat] = derived.get(stat, 0) + bonus
         for stat, bonus in equipment_bonuses.items():
             if stat in PRIMARY_STATS:
                 continue
@@ -263,6 +257,18 @@ class Character(ObjectParent, DefaultCharacter):
         class_data = CLASSES[self.db.brave_class]
         level = self.db.brave_level
         return [ability for unlock_level, ability in class_data["progression"] if unlock_level <= level]
+
+    def get_unlocked_combat_abilities(self):
+        """Return unlocked combat actions that can be queued with `use`."""
+
+        actions, _passives, _unknown = split_unlocked_abilities(self.db.brave_class, self.db.brave_level)
+        return actions
+
+    def get_unlocked_passive_abilities(self):
+        """Return unlocked passive traits that apply automatically."""
+
+        _actions, passives, _unknown = split_unlocked_abilities(self.db.brave_class, self.db.brave_level)
+        return passives
 
     def ensure_starter_loadout(self, force=False):
         """Apply the class starter loadout if it has not been seeded yet."""

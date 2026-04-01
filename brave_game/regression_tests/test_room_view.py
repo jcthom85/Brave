@@ -3,6 +3,7 @@ import sys
 import types
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import django
 
@@ -15,7 +16,7 @@ chargen_stub.get_next_chargen_step = lambda *args, **kwargs: None
 chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
-from world.browser_views import build_room_view
+from world.browser_views import WELCOME_PAGES, build_room_view
 
 
 def _section(view, label):
@@ -66,6 +67,8 @@ class DummyCharacter:
             brave_party_leader_id=None,
             brave_party_invites=[],
             brave_follow_target_id=None,
+            brave_tutorial={},
+            brave_welcome_shown=False,
         )
 
 
@@ -94,10 +97,23 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual(["N", "E"], [item.get("badge") for item in ways_forward.get("items", [])])
         self.assertEqual(["U"], [item.get("badge") for item in ways_forward.get("vertical_items", [])])
 
-        threats = _section(view, "Threats Here")
-        visible = _section(view, "Visible Here")
-        self.assertEqual("No immediate threats.", threats.get("items", [])[0].get("text"))
-        self.assertEqual("Nothing notable in view.", visible.get("items", [])[0].get("text"))
+        vicinity = _section(view, "The Vicinity")
+        self.assertEqual("vicinity", vicinity.get("variant"))
+        self.assertEqual("list", vicinity.get("kind"))
+        self.assertEqual("The vicinity is quiet.", vicinity.get("items", [])[0].get("text"))
+        self.assertEqual([], view.get("guidance", []))
+        self.assertEqual([], view.get("welcome_pages", []))
+
+    def test_room_view_includes_tutorial_guidance_and_welcome_pages(self):
+        character = DummyCharacter()
+        tutorial_state = {"status": "active", "step": "first_steps", "flags": {}}
+
+        with patch("world.browser_views.ensure_tutorial_state", return_value=tutorial_state):
+            view = build_room_view(DummyRoom(), character)
+
+        self.assertGreater(len(view.get("guidance", [])), 1)
+        self.assertEqual(WELCOME_PAGES, view.get("welcome_pages"))
+        self.assertTrue(character.db.brave_welcome_shown)
 
 
 if __name__ == "__main__":

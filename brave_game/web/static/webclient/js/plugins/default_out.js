@@ -1756,14 +1756,28 @@ let defaultout_plugin = (function () {
 
     var renderMap = function (mapText) {
         var overlay = document.getElementById("minimap-overlay");
-        if (!overlay) {
-            return;
-        }
+        var micromaps = document.querySelectorAll(".brave-view__micromap");
         var raw = typeof mapText === "string" ? mapText : "";
         currentMapText = raw.replace(/\n+$/, "");
-        overlay.textContent = raw.replace(/\n+$/, "");
+        if (overlay) {
+            overlay.textContent = currentMapText;
+        }
+        if (micromaps.length) {
+            micromaps.forEach(function (micromap) {
+                micromap.textContent = currentMapText;
+                micromap.setAttribute("aria-hidden", String(!currentMapText.trim()));
+            });
+        }
         syncSceneRailLayout();
         syncMobileShell();
+    };
+
+    var clearMicromap = function () {
+        var micromaps = document.querySelectorAll(".brave-view__micromap");
+        micromaps.forEach(function (micromap) {
+            micromap.textContent = "";
+            micromap.setAttribute("aria-hidden", "true");
+        });
     };
 
     var syncSceneRailLayout = function () {
@@ -2279,6 +2293,7 @@ let defaultout_plugin = (function () {
         setBodyState("world-tone", "neutral");
         setBodyState("danger", "");
         setBodyState("boss", "");
+        setBodyState("view", "");
         document.body.classList.remove("brave-tone-shift", "brave-scene-shift", "brave-scene-combat-enter");
     };
 
@@ -2367,6 +2382,7 @@ let defaultout_plugin = (function () {
             overlay.textContent = "";
         }
         currentMapText = "";
+        clearMicromap();
         clearPackPanel();
         clearSceneCard();
         syncSceneRailLayout();
@@ -3057,6 +3073,7 @@ let defaultout_plugin = (function () {
                     + (viewData.eyebrow ? "<span>" + escapeHtml(viewData.eyebrow) + "</span>" : "")
                     + "</div>"
                 : "")
+            + (viewData.variant === "room" ? "<div class='brave-view__micromap' aria-hidden='true'></div>" : "")
             + ((viewData.title_icon || viewData.title)
                 ? "<div class='brave-view__title'>"
                     + (viewData.title_icon ? icon(viewData.title_icon, "brave-view__title-icon") : "")
@@ -3077,7 +3094,7 @@ let defaultout_plugin = (function () {
             + "</div>"
             + "</div>";
 
-            if (stickyView) {
+        if (stickyView) {
             if (!preserveRail) {
                 clearSceneRail();
             }
@@ -3085,12 +3102,16 @@ let defaultout_plugin = (function () {
             setStickyViewMode(true);
             suppressNextLookText = false;
             currentViewData = viewData;
+            setBodyState("view", viewData && viewData.variant ? viewData.variant : "");
 
             var stickyContainer = mwin.children(".brave-sticky-view");
             if (stickyContainer.length) {
                 stickyContainer.html(viewMarkup);
             } else {
                 mwin.prepend("<div class='brave-sticky-view'>" + viewMarkup + "</div>");
+            }
+            if (currentMapText) {
+                renderMap(currentMapText);
             }
             if (viewData.variant === "combat") {
                 ensureCombatLog();
@@ -3108,8 +3129,12 @@ let defaultout_plugin = (function () {
         setStickyViewMode(false);
         suppressNextLookText = !!(viewData.variant === "room" || viewData.layout === "explore");
         currentViewData = viewData;
+        setBodyState("view", viewData && viewData.variant ? viewData.variant : "");
 
         mwin.html(viewMarkup);
+        if (currentMapText) {
+            renderMap(currentMapText);
+        }
         renderPackPanel();
         syncMobileShell();
         resetAllScrollPositions();
