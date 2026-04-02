@@ -22,7 +22,9 @@ from evennia.utils.ansi import strip_ansi
 from evennia.utils import create
 
 from world.bootstrap import get_room
+from world.combat_execution import execute_combat_ability
 from world.data.character_options import ABILITY_LIBRARY, PASSIVE_ABILITY_BONUSES
+from world.data.items import ITEM_TEMPLATES, get_item_use_profile, match_inventory_item
 from world.data.encounters import (
     ENEMY_TEMPLATES,
     ROOM_ENCOUNTERS,
@@ -636,6 +638,19 @@ class BraveEncounter(Script):
             destination_name = action.get("destination_name") or "the previous room"
             return f"flee -> {destination_name}"
 
+        if action["kind"] == "item":
+            item = ITEM_TEMPLATES.get(action.get("item"))
+            use = get_item_use_profile(item) or {}
+            verb = use.get("verb", "use")
+            target_name = item["name"] if item else "item"
+            if use.get("target") == "enemy":
+                target = self.get_enemy(action.get("target")) if action.get("target") else self._default_enemy_target()
+                target_name = _combat_target_name(target, target_name)
+            elif use.get("target") == "ally":
+                target = self._get_character(action.get("target")) if action.get("target") else character
+                target_name = target.key if target else character.key
+            return f"{verb} -> {target_name}"
+
         return "action queued"
 
     def format_enemy_status(self):
@@ -728,15 +743,13 @@ class BraveEncounter(Script):
 
     def format_combat_snapshot(self):
         """Return a balanced, boxed snapshot of the current fight."""
-
-        round_label = f"ROUND {self.db.round}" if self.db.round else "PREPARING"
         
         from world.resonance import get_resonance_profile
         profile = get_resonance_profile(self.obj)
         cp = profile["color_primary"]
         cb = "|x" # Subtle grey border
 
-        header = f"|r{round_label}|n | {cp}{self.db.encounter_title.upper()}|n"
+        header = f"{cp}{self.db.encounter_title.upper()}|n"
         
         snapshot = [
             "\n" + f"{cb}" + "=" * 70 + "|n",
@@ -786,6 +799,11 @@ class BraveEncounter(Script):
             if query_norm in _normalize_token(participant.key):
                 return participant
         return None
+
+    def find_consumable(self, character, query, *, context="combat", verb=None):
+        """Find a carried combat-usable consumable by fuzzy name."""
+
+        return match_inventory_item(character, query, context=context, category="consumable", verb=verb)
 
     def add_participant(self, character):
         """Join a character to the encounter."""
@@ -928,6 +946,51 @@ class BraveEncounter(Script):
         self.db.pending_actions = pending
         self._refresh_browser_combat_views()
         return True, f"You look for an opening to fall back to {destination.key}."
+
+    def queue_item(self, character, query, target_query=None):
+        """Queue a combat-usable consumable for the next round."""
+
+        match = self.find_consumable(character, query, context="combat")
+        if isinstance(match, list):
+            names = ", ".join(ITEM_TEMPLATES[key]["name"] for key in match)
+            return False, f"Be more specific. That could mean: {names}"
+        if not match:
+            return False, "You do not have a combat-usable consumable matching that."
+
+        use = get_item_use_profile(match, context="combat") or {}
+        target_type = use.get("target", "self")
+        target = None
+        if target_type == "enemy":
+            target = self.find_enemy(target_query)
+            if target_query and not target:
+                return False, "No enemy here matches that target."
+        elif target_type == "ally":
+            target = self.find_participant(target_query, default=character)
+            if target_query and not target:
+                return False, "No ally here matches that target."
+            if not target:
+                target = character
+        elif target_type == "none":
+            target = None
+        else:
+            target = character
+
+        pending = dict(self.db.pending_actions or {})
+        pending[str(character.id)] = {
+            "kind": "item",
+            "item": match,
+            "target": _combat_target_id(target),
+        }
+        self.db.pending_actions = pending
+
+        target_text = "the field" if target_type == "none" else _combat_target_name(target, character.key)
+        self._refresh_browser_combat_views()
+        return True, f"You ready {ITEM_TEMPLATES[match]['name']} for {target_text}."
+
+    def queue_meal(self, character, query):
+        """Backward-compatible meal wrapper for older command paths."""
+
+        return self.queue_item(character, query)
 
     def _get_participant_state(self, character):
         states = dict(self.db.participant_states or {})
@@ -1272,6 +1335,8 @@ class BraveEncounter(Script):
                     self.obj.msg_contents(f"{enemy['key']} falls.")
                     for participant in self.get_registered_participants():
                         advance_enemy_defeat(participant, enemy["tags"])
+                    for participant in self.get_registered_participants():
+                        advance_enemy_defeat(participant, enemy["tags"])
 
     def _handle_enemy_specials(self, enemy):
         """Apply special boss or elite behaviors before an enemy acts."""
@@ -1514,679 +1579,17 @@ class BraveEncounter(Script):
         level = max(1, int(character.db.brave_level or 1))
         allies = list(self.get_active_participants())
         enemies = list(self.get_active_enemies())
-
-        if action["ability"] == "strike":
-            if not self._roll_hit(derived["accuracy"], target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} glances off {target['key']}.")
-                self._add_threat(character, 4)
-                return
-            damage = self._weapon_damage(derived["attack_power"], target["armor"], bonus=4)
-            self._damage_enemy(character, target, damage, extra_text=" A heavy blow lands.")
-            self._add_threat(character, 8)
-            return
-
-        if action["ability"] == "defend":
-            state = self._get_participant_state(character)
-            state["guard"] = 7 + level * 2
-            self._save_participant_state(character, state)
-            self.obj.msg_contents(f"{character.key} braces for the next exchange.")
-            self._add_threat(character, 5)
-            return
-
-        if action["ability"] == "shieldbash":
-            if not self._roll_hit(derived["accuracy"] + 2, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} slams wide of {target['key']}.")
-                self._add_threat(character, 5)
-                return
-            damage = self._weapon_damage(derived["attack_power"], target["armor"], bonus=2)
-            self._damage_enemy(character, target, damage, extra_text=" The impact staggers the target.")
-            if target["hp"] > 0:
-                target["bound_turns"] = max(target.get("bound_turns", 0), 1)
-                self._save_enemy(target)
-                self.obj.msg_contents(f"{target['key']} is knocked off-balance.")
-            self._add_threat(character, 9)
-            return
-
-        if action["ability"] == "battlecry":
-            guard_value = 3 + level
-            for ally in allies:
-                state = self._get_participant_state(ally)
-                state["guard"] = max(state.get("guard", 0), guard_value)
-                self._save_participant_state(ally, state)
-            self.obj.msg_contents(f"{character.key} bellows a battle cry that hardens the whole line.")
-            self._add_threat(character, 10)
-            return
-
-        if action["ability"] == "intercept":
-            primary_guard = 8 + level * 2
-            target_state = self._get_participant_state(target)
-            target_state["guard"] = max(target_state.get("guard", 0), primary_guard)
-            self._save_participant_state(target, target_state)
-            if target.id != character.id:
-                self_state = self._get_participant_state(character)
-                self_state["guard"] = max(self_state.get("guard", 0), 4 + level)
-                self._save_participant_state(character, self_state)
-                self.obj.msg_contents(f"{character.key} steps in front of the next hit for {target.key}.")
-            else:
-                self.obj.msg_contents(f"{character.key} plants their feet and prepares to intercept the next hit.")
-            self._add_threat(character, 10)
-            return
-
-        if action["ability"] == "tauntingblow":
-            if not self._roll_hit(derived["accuracy"] + 1, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} misses {target['key']} but still draws attention.")
-                self._add_threat(character, 8)
-                return
-            damage = self._weapon_damage(derived["attack_power"], target["armor"], bonus=3)
-            self._damage_enemy(character, target, damage, extra_text=" The taunt lands as hard as the steel.")
-            if target["hp"] > 0:
-                target["marked_turns"] = max(target.get("marked_turns", 0), 2)
-                self._save_enemy(target)
-            self._add_threat(character, 14)
-            return
-
-        if action["ability"] == "brace":
-            state = self._get_participant_state(character)
-            state["guard"] = max(state.get("guard", 0), 10 + level * 2)
-            if state.get("snare_turns", 0) > 0:
-                state["snare_turns"] = 0
-                state["snare_accuracy_penalty"] = 0
-                state["snare_dodge_penalty"] = 0
-            self._save_participant_state(character, state)
-            self.obj.msg_contents(f"{character.key} locks into a braced stance and refuses to yield ground.")
-            self._add_threat(character, 8)
-            return
-
-        if action["ability"] == "laststand":
-            max_hp = character.db.brave_derived_stats.get("max_hp", 1)
-            amount = max(18, max_hp // 3)
-            self._heal_character(character, character, amount)
-            state = self._get_participant_state(character)
-            state["guard"] = max(state.get("guard", 0), 8 + level)
-            self._save_participant_state(character, state)
-            self.obj.msg_contents(f"{character.key} digs in and refuses to fall.")
-            self._add_threat(character, 12)
-            return
-
-        if action["ability"] == "quickshot":
-            if not self._roll_hit(derived["accuracy"] + 10, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} misses {target['key']}.")
-                self._add_threat(character, 3)
-                return
-            damage = self._weapon_damage(derived["attack_power"], target["armor"], bonus=3)
-            self._damage_enemy(character, target, damage)
-            return
-
-        if action["ability"] == "markprey":
-            target["marked_turns"] = 3
-            self._save_enemy(target)
-            self.obj.msg_contents(f"{character.key} uses {ability_name} on {target['key']}.")
-            self._add_threat(character, 3)
-            return
-
-        if action["ability"] == "aimedshot":
-            if not self._roll_hit(derived["accuracy"] + 6, target["dodge"]):
-                self.obj.msg_contents(f"{character.key} takes the shot but {target['key']} slips the line.")
-                self._add_threat(character, 4)
-                return
-            damage_bonus = 6 + (4 if target.get("marked_turns", 0) > 0 else 0)
-            self._damage_enemy(
-                character,
-                target,
-                self._weapon_damage(derived["attack_power"], target["armor"], bonus=damage_bonus),
-            )
-            return
-
-        if action["ability"] == "snaretrap":
-            if not self._roll_hit(derived["accuracy"] + 2, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} snaps shut in the wrong place.")
-                self._add_threat(character, 3)
-                return
-            self._damage_enemy(
-                character,
-                target,
-                self._weapon_damage(derived["attack_power"], target["armor"], bonus=2),
-                extra_text=" The trap bites into the target's movement.",
-            )
-            if target["hp"] > 0:
-                target["bound_turns"] = max(target.get("bound_turns", 0), 1)
-                target["marked_turns"] = max(target.get("marked_turns", 0), 1)
-                self._save_enemy(target)
-            return
-
-        if action["ability"] == "volley":
-            fired = False
-            for enemy in enemies:
-                fired = True
-                if not self._roll_hit(derived["accuracy"] - 2, enemy["dodge"]):
-                    self.obj.msg_contents(f"{character.key}'s {ability_name} misses {enemy['key']}.")
-                    continue
-                damage = self._weapon_damage(derived["attack_power"], enemy["armor"], bonus=1)
-                self._damage_enemy(character, enemy, damage)
-            if not fired:
-                self.obj.msg_contents(f"{character.key}'s {ability_name} finds no targets.")
-            return
-
-        if action["ability"] == "evasiveroll":
-            state = self._get_participant_state(character)
-            state["guard"] = max(state.get("guard", 0), 3 + level)
-            state["feint_turns"] = max(state.get("feint_turns", 0), 1)
-            state["feint_accuracy_bonus"] = max(state.get("feint_accuracy_bonus", 0), 2)
-            state["feint_dodge_bonus"] = max(state.get("feint_dodge_bonus", 0), 12)
-            self._save_participant_state(character, state)
-            self.obj.msg_contents(f"{character.key} rolls clear and resets the angle of the fight.")
-            return
-
-        if action["ability"] == "barbedarrow":
-            if not self._roll_hit(derived["accuracy"] + 2, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} scrapes past {target['key']} without purchase.")
-                self._add_threat(character, 3)
-                return
-            self._damage_enemy(character, target, self._weapon_damage(derived["attack_power"], target["armor"], bonus=4))
-            if target["hp"] > 0:
-                self._apply_enemy_bleed(
-                    target,
-                    turns=2,
-                    damage=4,
-                    message=f"|rBarbs tear into {target['key']} and leave it bleeding!|n",
-                )
-            return
-
-        if action["ability"] == "rainofarrows":
-            fired = False
-            for enemy in enemies:
-                fired = True
-                if not self._roll_hit(derived["accuracy"], enemy["dodge"]):
-                    self.obj.msg_contents(f"{character.key}'s {ability_name} misses {enemy['key']}.")
-                    continue
-                self._damage_enemy(character, enemy, self._weapon_damage(derived["attack_power"], enemy["armor"], bonus=4))
-                if enemy["hp"] > 0:
-                    enemy["marked_turns"] = max(enemy.get("marked_turns", 0), 1)
-                    self._save_enemy(enemy)
-            if not fired:
-                self.obj.msg_contents(f"{character.key}'s {ability_name} finds no targets.")
-            return
-
-        if action["ability"] == "heal":
-            amount = self._scaled_heal_amount(derived, 12, variance=4, divisor=2)
-            self._heal_character(character, target, amount)
-            return
-
-        if action["ability"] == "smite":
-            if not self._roll_hit(derived["accuracy"], target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} fails to connect with {target['key']}.")
-                self._add_threat(character, 3)
-                return
-            damage = self._spell_damage(derived["spell_power"], target["armor"], bonus=2)
-            self._damage_enemy(character, target, damage)
-            return
-
-        if action["ability"] == "blessing":
-            self._heal_character(character, target, self._scaled_heal_amount(derived, 6, variance=2, divisor=4))
-            state = self._get_participant_state(target)
-            state["guard"] = max(state.get("guard", 0), 4 + level + derived.get("healing_power", 0))
-            self._save_participant_state(target, state)
-            self.obj.msg_contents(f"{character.key} wraps {target.key} in a brief blessing of shelter.")
-            return
-
-        if action["ability"] == "renewinglight":
-            self._heal_character(character, target, self._scaled_heal_amount(derived, 18, variance=5, divisor=2))
-            cleared = self._clear_one_harmful_effect(target)
-            if cleared:
-                self.obj.msg_contents(f"|gRenewing light strips the {cleared} from {target.key}.|n")
-            return
-
-        if action["ability"] == "sanctuary":
-            guard_value = 4 + level + max(1, derived.get("spell_power", 0) // 4)
-            heal_amount = max(1, 4 + derived.get("healing_power", 0) // 2)
-            for ally in allies:
-                state = self._get_participant_state(ally)
-                state["guard"] = max(state.get("guard", 0), guard_value)
-                self._save_participant_state(ally, state)
-                self._heal_character(character, ally, heal_amount)
-            self.obj.msg_contents(f"{character.key} raises a sanctuary around the party.")
-            return
-
-        if action["ability"] == "cleanse":
-            cleared = self._clear_one_harmful_effect(target)
-            if cleared:
-                self.obj.msg_contents(f"|g{character.key} cleanses the {cleared} from {target.key}.|n")
-            else:
-                self.obj.msg_contents(f"{character.key} finds nothing fouled on {target.key} to cleanse.")
-            self._heal_character(character, target, self._scaled_heal_amount(derived, 5, variance=2, divisor=4))
-            return
-
-        if action["ability"] == "radiantburst":
-            fired = False
-            for enemy in enemies:
-                fired = True
-                if not self._roll_hit(derived["accuracy"], enemy["dodge"]):
-                    self.obj.msg_contents(f"{character.key}'s {ability_name} misses {enemy['key']}.")
-                    continue
-                damage = self._spell_damage(derived["spell_power"], enemy["armor"], bonus=3)
-                self._damage_enemy(character, enemy, damage)
-            if not fired:
-                self.obj.msg_contents(f"{character.key}'s {ability_name} finds no targets.")
-            return
-
-        if action["ability"] == "guardianlight":
-            self._heal_character(character, target, self._scaled_heal_amount(derived, 15, variance=4, divisor=2))
-            target_state = self._get_participant_state(target)
-            target_state["guard"] = max(target_state.get("guard", 0), 6 + level + derived.get("healing_power", 0))
-            self._save_participant_state(target, target_state)
-            return
-
-        if action["ability"] == "holystrike":
-            if not self._roll_hit(derived["accuracy"] + 2, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} skids off {target['key']} without purchase.")
-                self._add_threat(character, 4)
-                return
-            holy_bonus = max(1, derived.get("spell_power", 0) // 4)
-            extra_text = " Sacred force rides the impact."
-            if "undead" in target.get("tags", []):
-                holy_bonus += 4
-                extra_text = " Holy force bites especially deep into the restless dead."
-            damage = self._weapon_damage(derived["attack_power"], target["armor"], bonus=3 + holy_bonus)
-            self._damage_enemy(character, target, damage, extra_text=extra_text)
-            self._add_threat(character, 7)
-            return
-
-        if action["ability"] == "guardingaura":
-            guard_value = 6 + character.db.brave_level * 2 + max(1, derived.get("spell_power", 0) // 4)
-            state = self._get_participant_state(target)
-            state["guard"] = max(state.get("guard", 0), guard_value)
-            self._save_participant_state(target, state)
-            if target.id == character.id:
-                self.obj.msg_contents(f"{character.key} gathers a guarding aura around themself.")
-            else:
-                self.obj.msg_contents(f"{character.key} throws a guarding aura over {target.key}.")
-            self._add_threat(character, 8)
-            return
-
-        if action["ability"] == "judgement":
-            if not self._roll_hit(derived["accuracy"] + 3, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} fails to pin {target['key']} in place.")
-                self._add_threat(character, 4)
-                return
-            bonus = 2 + max(1, derived.get("spell_power", 0) // 4)
-            if target.get("marked_turns", 0) > 0 or target.get("bound_turns", 0) > 0:
-                bonus += 2
-            self._damage_enemy(
-                character,
-                target,
-                self._weapon_damage(derived["attack_power"], target["armor"], bonus=bonus),
-                extra_text=" Judgement rides the blow.",
-            )
-            self._add_threat(character, 8)
-            return
-
-        if action["ability"] == "handofmercy":
-            self._heal_character(character, target, self._scaled_heal_amount(derived, 15, variance=4, divisor=4))
-            cleared = self._clear_one_harmful_effect(target)
-            if cleared:
-                self.obj.msg_contents(f"|gMercy steadies {target.key} and clears the {cleared}.|n")
-            return
-
-        if action["ability"] == "consecrate":
-            for enemy in enemies:
-                self._damage_enemy(
-                    character,
-                    enemy,
-                    self._spell_damage(derived["spell_power"], enemy["armor"], bonus=2),
-                    extra_text=" Consecrated light scorches the ground beneath it.",
-                )
-            for ally in allies:
-                state = self._get_participant_state(ally)
-                state["guard"] = max(state.get("guard", 0), 2 + max(1, derived.get("spell_power", 0) // 5))
-                self._save_participant_state(ally, state)
-            self._add_threat(character, 9)
-            return
-
-        if action["ability"] == "shieldofdawn":
-            state = self._get_participant_state(target)
-            state["guard"] = max(state.get("guard", 0), 8 + level + max(1, derived.get("spell_power", 0) // 3))
-            self._save_participant_state(target, state)
-            self.obj.msg_contents(f"{character.key} turns a shield of dawn toward {target.key}.")
-            return
-
-        if action["ability"] == "rebukeevil":
-            if not self._roll_hit(derived["accuracy"] + 2, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} leaves only ringing light in the air.")
-                self._add_threat(character, 4)
-                return
-            bonus = 3 + (6 if "undead" in target.get("tags", []) else 0)
-            self._damage_enemy(character, target, self._spell_damage(derived["spell_power"], target["armor"], bonus=bonus))
-            if target["hp"] > 0 and "undead" in target.get("tags", []):
-                target["bound_turns"] = max(target.get("bound_turns", 0), 1)
-                self._save_enemy(target)
-            self._add_threat(character, 7)
-            return
-
-        if action["ability"] == "avenginglight":
-            for enemy in enemies:
-                bonus = 5 + (3 if "undead" in enemy.get("tags", []) else 0)
-                self._damage_enemy(character, enemy, self._spell_damage(derived["spell_power"], enemy["armor"], bonus=bonus))
-            heal_amount = max(1, 6 + derived.get("healing_power", 0) // 2)
-            for ally in allies:
-                self._heal_character(character, ally, heal_amount)
-            self._add_threat(character, 10)
-            return
-
-        if action["ability"] == "firebolt":
-            if not self._roll_hit(derived["accuracy"] + 4, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} flies wide of {target['key']}.")
-                self._add_threat(character, 3)
-                return
-            damage = self._spell_damage(derived["spell_power"], target["armor"], bonus=4)
-            extra_text = ""
-            if target.get("bound_turns", 0) > 0:
-                damage += 4
-                extra_text = " The frozen target bursts in a wash of steam."
-            self._damage_enemy(character, target, damage, extra_text=extra_text)
-            return
-
-        if action["ability"] == "frostbind":
-            if not self._roll_hit(derived["accuracy"] + 2, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} breaks apart before it can hold {target['key']}.")
-                self._add_threat(character, 3)
-                return
-            damage = self._spell_damage(derived["spell_power"], target["armor"], bonus=1)
-            self._damage_enemy(character, target, damage, extra_text=" Frost locks around its limbs.")
-            if target["hp"] > 0:
-                target["bound_turns"] = max(target.get("bound_turns", 0), 1)
-                self._save_enemy(target)
-                self.obj.msg_contents(f"{target['key']} is bound in frost.")
-            return
-
-        if action["ability"] == "arcspark":
-            if not self._roll_hit(derived["accuracy"] + 5, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} crackles harmlessly past {target['key']}.")
-                self._add_threat(character, 3)
-                return
-            primary_damage = self._spell_damage(derived["spell_power"], target["armor"], bonus=3)
-            self._damage_enemy(character, target, primary_damage)
-            other_enemies = [enemy for enemy in enemies if enemy["id"] != target["id"]]
-            if other_enemies:
-                secondary = other_enemies[0]
-                splash = max(1, primary_damage // 2)
-                self._damage_enemy(character, secondary, splash, extra_text=" Arc spark leaps to a second target.")
-            return
-
-        if action["ability"] == "flamewave":
-            fired = False
-            for enemy in enemies:
-                fired = True
-                bonus = 3 + (3 if enemy.get("bound_turns", 0) > 0 else 0)
-                self._damage_enemy(character, enemy, self._spell_damage(derived["spell_power"], enemy["armor"], bonus=bonus))
-            if not fired:
-                self.obj.msg_contents(f"{character.key}'s {ability_name} washes across empty ground.")
-            return
-
-        if action["ability"] == "manashield":
-            state = self._get_participant_state(character)
-            state["guard"] = max(state.get("guard", 0), 6 + max(1, derived.get("spell_power", 0) // 2))
-            self._save_participant_state(character, state)
-            self.obj.msg_contents(f"{character.key} draws mana tight into a shimmering shield.")
-            return
-
-        if action["ability"] == "staticfield":
-            for enemy in enemies:
-                self._damage_enemy(character, enemy, self._spell_damage(derived["spell_power"], enemy["armor"], bonus=1))
-                if enemy["hp"] > 0:
-                    enemy["marked_turns"] = max(enemy.get("marked_turns", 0), 2)
-                    self._save_enemy(enemy)
-            return
-
-        if action["ability"] == "icelance":
-            if not self._roll_hit(derived["accuracy"] + 4, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} shatters wide of {target['key']}.")
-                self._add_threat(character, 3)
-                return
-            bonus = 4 + (6 if target.get("bound_turns", 0) > 0 else 0)
-            self._damage_enemy(
-                character,
-                target,
-                self._spell_damage(derived["spell_power"], target["armor"], bonus=bonus),
-                extra_text=" The lance spears through the cold already holding the target.",
-            )
-            return
-
-        if action["ability"] == "meteorsigil":
-            if not self._roll_hit(derived["accuracy"] + 2, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} detonates just off the mark.")
-                self._add_threat(character, 4)
-                return
-            self._damage_enemy(
-                character,
-                target,
-                self._spell_damage(derived["spell_power"], target["armor"], bonus=10),
-                extra_text=" The sigil lands with catastrophic force.",
-            )
-            for enemy in [enemy for enemy in enemies if enemy["id"] != target["id"]]:
-                splash = max(3, derived.get("spell_power", 0) // 3 + random.randint(2, 4))
-                self._damage_enemy(character, enemy, splash, extra_text=" Meteor fire splashes across the line.")
-            return
-
-        if action["ability"] == "stab":
-            if not self._roll_hit(derived["accuracy"] + 8, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} slips past {target['key']} without finding anything vital.")
-                self._add_threat(character, 3)
-                return
-            setup_bonus = self._consume_feint_bonus(character)
-            damage = self._weapon_damage(derived["attack_power"], target["armor"], bonus=3 + setup_bonus)
-            openings = []
-            if target.get("marked_turns", 0) > 0:
-                damage += 4
-                openings.append("mark")
-            if target.get("bound_turns", 0) > 0:
-                damage += 4
-                openings.append("bind")
-
-            extra_text = ""
-            if setup_bonus and openings:
-                extra_text = " The feint and the opening line up perfectly."
-            elif setup_bonus:
-                extra_text = " The feint leaves the strike perfectly placed."
-            elif openings:
-                extra_text = " You drive into the opening without mercy."
-
-            self._damage_enemy(character, target, damage, extra_text=extra_text)
-            return
-
-        if action["ability"] == "feint":
-            state = self._get_participant_state(character)
-            state["guard"] = max(state.get("guard", 0), 4 + character.db.brave_level)
-            state["feint_turns"] = 2
-            state["feint_accuracy_bonus"] = 6
-            state["feint_dodge_bonus"] = 10
-            self._save_participant_state(character, state)
-            self.obj.msg_contents(f"{character.key} slips into a false opening, ready to punish the first bad reaction.")
-            return
-
-        if action["ability"] == "backstab":
-            if not self._roll_hit(derived["accuracy"] + 10, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} never finds the angle on {target['key']}.")
-                self._add_threat(character, 4)
-                return
-            openings = 0
-            if target.get("marked_turns", 0) > 0:
-                openings += 4
-            if target.get("bound_turns", 0) > 0:
-                openings += 4
-            stealth_bonus = self._consume_stealth_bonus(character)
-            damage = self._weapon_damage(derived["attack_power"], target["armor"], bonus=5 + openings + stealth_bonus)
-            self._damage_enemy(character, target, damage, extra_text=" The blade lands exactly where the target is weakest.")
-            return
-
-        if action["ability"] == "poisonblade":
-            if not self._roll_hit(derived["accuracy"] + 4, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} nicks only air.")
-                self._add_threat(character, 3)
-                return
-            self._damage_enemy(character, target, self._weapon_damage(derived["attack_power"], target["armor"], bonus=3))
-            if target["hp"] > 0:
-                self._apply_enemy_poison(
-                    target,
-                    turns=2,
-                    damage=4,
-                    message=f"|gVenom spreads through {target['key']} from the poisoned strike!|n",
-                )
-            return
-
-        if action["ability"] == "vanish":
-            state = self._get_participant_state(character)
-            state["stealth_turns"] = max(state.get("stealth_turns", 0), 1)
-            state["feint_turns"] = max(state.get("feint_turns", 0), 1)
-            state["feint_dodge_bonus"] = max(state.get("feint_dodge_bonus", 0), 8)
-            self._save_participant_state(character, state)
-            self.obj.msg_contents(f"{character.key} drops from sight and waits for the line to break.")
-            return
-
-        if action["ability"] == "cheapshot":
-            if not self._roll_hit(derived["accuracy"] + 6, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} never finds soft ground beneath {target['key']}.")
-                self._add_threat(character, 4)
-                return
-            self._damage_enemy(character, target, self._weapon_damage(derived["attack_power"], target["armor"], bonus=4))
-            if target["hp"] > 0:
-                target["bound_turns"] = max(target.get("bound_turns", 0), 1)
-                self._save_enemy(target)
-            return
-
-        if action["ability"] == "shadowstep":
-            if not self._roll_hit(derived["accuracy"] + 12, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} leaves only a blur behind {target['key']}.")
-                self._add_threat(character, 4)
-                return
-            bonus = 5 + self._consume_stealth_bonus(character)
-            self._damage_enemy(character, target, self._weapon_damage(derived["attack_power"], target["armor"], bonus=bonus))
-            state = self._get_participant_state(character)
-            state["guard"] = max(state.get("guard", 0), 3 + level)
-            self._save_participant_state(character, state)
-            return
-
-        if action["ability"] == "eviscerate":
-            if not self._roll_hit(derived["accuracy"] + 4, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} tears through nothing but momentum.")
-                self._add_threat(character, 5)
-                return
-            bonus = 7
-            if target.get("marked_turns", 0) > 0:
-                bonus += 4
-            if target.get("bound_turns", 0) > 0:
-                bonus += 4
-            if target.get("bleed_turns", 0) > 0:
-                bonus += 4
-            if target.get("poison_turns", 0) > 0:
-                bonus += 4
-            bonus += self._consume_stealth_bonus(character)
-            self._damage_enemy(character, target, self._weapon_damage(derived["attack_power"], target["armor"], bonus=bonus))
-            return
-
-        if action["ability"] == "thornlash":
-            if not self._roll_hit(derived["accuracy"] + 3, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} whips through empty air around {target['key']}.")
-                self._add_threat(character, 3)
-                return
-            lash_bonus = 2
-            if target.get("marked_turns", 0) > 0 or target.get("bound_turns", 0) > 0:
-                lash_bonus += 3
-            damage = self._spell_damage(derived["spell_power"], target["armor"], bonus=lash_bonus)
-            self._damage_enemy(character, target, damage, extra_text=" Thorned force drags across the target.")
-            if target["hp"] > 0:
-                target["marked_turns"] = max(target.get("marked_turns", 0), 2)
-                self._save_enemy(target)
-                self.obj.msg_contents(f"{target['key']} is left exposed by the thorn lash.")
-            return
-
-        if action["ability"] == "minormend":
-            amount = 9 + derived["spell_power"] // 3 + random.randint(0, 3)
-            self._heal_character(character, target, amount)
-            cleared = self._clear_one_harmful_effect(target)
-            if cleared:
-                self.obj.msg_contents(f"|gNatural calm eases {target.key}'s {cleared}.|n")
-            return
-
-        if action["ability"] == "entanglingroots":
-            if not self._roll_hit(derived["accuracy"] + 2, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} clutches only empty ground.")
-                self._add_threat(character, 3)
-                return
-            self._damage_enemy(character, target, self._spell_damage(derived["spell_power"], target["armor"], bonus=2))
-            if target["hp"] > 0:
-                target["bound_turns"] = max(target.get("bound_turns", 0), 1)
-                self._save_enemy(target)
-            return
-
-        if action["ability"] == "moonfire":
-            if not self._roll_hit(derived["accuracy"] + 3, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} gutters out before it reaches {target['key']}.")
-                self._add_threat(character, 3)
-                return
-            bonus = 4 + (3 if target.get("marked_turns", 0) > 0 or target.get("bound_turns", 0) > 0 else 0)
-            self._damage_enemy(character, target, self._spell_damage(derived["spell_power"], target["armor"], bonus=bonus))
-            if target["hp"] > 0:
-                target["marked_turns"] = max(target.get("marked_turns", 0), 1)
-                self._save_enemy(target)
-            return
-
-        if action["ability"] == "barkskin":
-            state = self._get_participant_state(target)
-            state["guard"] = max(state.get("guard", 0), 7 + level + max(1, derived.get("spell_power", 0) // 3))
-            self._save_participant_state(target, state)
-            self.obj.msg_contents(f"{character.key} wraps {target.key} in a hard barkskin ward.")
-            return
-
-        if action["ability"] == "livingcurrent":
-            self._heal_character(character, target, self._scaled_heal_amount(derived, 13, variance=4, divisor=3))
-            secondary_targets = [
-                ally
-                for ally in allies
-                if ally.id != target.id
-                and (ally.db.brave_resources or {}).get("hp", 0) < ally.db.brave_derived_stats.get("max_hp", 0)
-            ]
-            if secondary_targets:
-                self._heal_character(
-                    character,
-                    secondary_targets[0],
-                    max(1, self._scaled_heal_amount(derived, 6, variance=2, divisor=4) // 2),
-                )
-            return
-
-        if action["ability"] == "swarm":
-            for enemy in enemies:
-                self._damage_enemy(
-                    character,
-                    enemy,
-                    self._spell_damage(derived["spell_power"], enemy["armor"], bonus=2),
-                    extra_text=" The swarm strips away safe footing.",
-                )
-                if enemy["hp"] > 0:
-                    enemy["marked_turns"] = max(enemy.get("marked_turns", 0), 1)
-                    self._save_enemy(enemy)
-            return
-
-        if action["ability"] == "rejuvenationgrove":
-            for ally in allies:
-                self._heal_character(character, ally, self._scaled_heal_amount(derived, 10, variance=3, divisor=4))
-                cleared = self._clear_one_harmful_effect(ally)
-                if cleared:
-                    self.obj.msg_contents(f"|gThe grove's calm strips the {cleared} from {ally.key}.|n")
-            return
-
-        if action["ability"] == "wrathofthegrove":
-            if not self._roll_hit(derived["accuracy"] + 3, target["dodge"]):
-                self.obj.msg_contents(f"{character.key}'s {ability_name} churns the ground but misses {target['key']}.")
-                self._add_threat(character, 4)
-                return
-            bonus = 7 + (4 if target.get("marked_turns", 0) > 0 or target.get("bound_turns", 0) > 0 else 0)
-            self._damage_enemy(
-                character,
-                target,
-                self._spell_damage(derived["spell_power"], target["armor"], bonus=bonus),
-                extra_text=" The whole grove seems to answer the strike.",
-            )
-            return
+        execute_combat_ability(
+            self,
+            character,
+            action["ability"],
+            ability_name,
+            target,
+            derived,
+            level,
+            allies,
+            enemies,
+        )
 
     def _execute_flee(self, character):
         destination = self._get_flee_destination(character)
@@ -2208,6 +1611,37 @@ class BraveEncounter(Script):
         character.msg(f"|yYou break away from the fight and fall back to {destination.key}.|n")
         if character.location:
             character.msg(character.at_look(character.location))
+
+    def _execute_item(self, character, action):
+        from world.activities import _consume_item_by_template
+
+        template_id = action.get("item")
+        item = ITEM_TEMPLATES.get(template_id, {})
+        use = get_item_use_profile(item, context="combat") or {}
+        target = None
+        if use.get("target") == "enemy":
+            target = self.get_enemy(action.get("target")) if action.get("target") else self._default_enemy_target()
+        elif use.get("target") == "ally":
+            target = self._get_character(action.get("target")) if action.get("target") else character
+            if not target:
+                target = character
+
+        ok, player_message, result = _consume_item_by_template(
+            character,
+            template_id,
+            context="combat",
+            cozy=False,
+            target=target,
+            encounter=self,
+        )
+        if not ok:
+            character.msg(player_message)
+            self.obj.msg_contents(f"{character.key} fumbles for supplies that are no longer there.")
+            return
+
+        if result and result.get("public_message"):
+            self.obj.msg_contents(result["public_message"])
+        self._add_threat(character, 2)
 
     def _execute_player_action(self, character):
         pending = dict(self.db.pending_actions or {})
@@ -2231,11 +1665,23 @@ class BraveEncounter(Script):
 
         if action["kind"] == "flee":
             self._execute_flee(character)
+            return
+
+        if action["kind"] == "item":
+            self._execute_item(character, action)
 
     def _choose_enemy_target(self, enemy=None):
         participants = self.get_active_participants()
         if not participants:
             return None
+
+        visible_participants = [
+            participant
+            for participant in participants
+            if self._get_participant_state(participant).get("stealth_turns", 0) <= 0
+        ]
+        if visible_participants:
+            participants = visible_participants
 
         if enemy and enemy.get("target_strategy") == "lowest_hp":
             return min(
@@ -2421,6 +1867,8 @@ class BraveEncounter(Script):
                 if state["feint_turns"] <= 0:
                     state["feint_accuracy_bonus"] = 0
                     state["feint_dodge_bonus"] = 0
+            if state.get("stealth_turns", 0) > 0:
+                state["stealth_turns"] = max(0, state["stealth_turns"] - 1)
         self.db.participant_states = states
 
         enemies = []
@@ -2506,10 +1954,15 @@ class BraveEncounter(Script):
             self.stop()
             return
 
-        self.obj.msg_contents(f"|xRound {self.db.round}.|n")
         self._apply_participant_effects()
         if not self.get_active_participants():
             self.obj.msg_contents("|rThe party is driven back toward town.|n")
+            self.stop()
+            return
+        self._apply_enemy_effects()
+        if not self.get_active_enemies():
+            rewarded = self._reward_victory()
+            self.obj.msg_contents("|gThe encounter is over. The road is clear for now.|n", exclude=rewarded)
             self.stop()
             return
 

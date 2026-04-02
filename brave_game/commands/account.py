@@ -139,6 +139,44 @@ class CmdBravePlay(default_account.CmdIC):
         super().func()
 
 
+class CmdBraveLogout(COMMAND_DEFAULT_CLASS):
+    """
+    Log out of the current account and return to the login screen.
+
+    Usage:
+      logout
+    """
+
+    key = "logout"
+    aliases = ["log out"]
+    locks = "cmd:pperm(Player) and is_ooc()"
+    help_category = "General"
+    account_caller = True
+
+    def func(self):
+        session = self.session
+        account = self.account
+        if not session or not account:
+            return
+
+        if not _is_web_session(session):
+            session.sessionhandler.disconnect(session, "Good bye! Disconnecting.")
+            return
+
+        session.account = None
+        session.uid = None
+        session.uname = ""
+        session.puid = None
+        session.puppet = None
+        session.cmdset_storage = settings.CMDSET_UNLOGGEDIN
+        session.cmdset.update(init_mode=True)
+        session.sessionhandler.session_portal_partial_sync(
+            {session.sessid: {"logged_in": False, "uid": None}}
+        )
+
+        self.msg(brave_connection={"screen": "menu"}, session=session)
+
+
 class CmdBraveCreate(COMMAND_DEFAULT_CLASS):
     """
     Start or resume character creation.

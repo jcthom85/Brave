@@ -528,6 +528,72 @@ ITEM_TEMPLATES = {
         "restore": {"hp": 22, "mana": 10, "stamina": 20},
         "meal_bonuses": {"armor": 3, "max_hp": 14},
     },
+    "field_bandage": {
+        "name": "Field Bandage",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A clean wrap and tincture packet meant to stop the worst bleeding before it becomes the whole story.",
+        "use": {
+            "verb": "apply",
+            "contexts": ("explore", "combat"),
+            "target": "ally",
+            "effect_type": "restore",
+            "restore": {"hp": 18},
+        },
+    },
+    "focus_tonic": {
+        "name": "Focus Tonic",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A bitter vial that steadies the hands, clears the head, and puts a little fire back in the limbs.",
+        "use": {
+            "verb": "drink",
+            "contexts": ("explore", "combat"),
+            "target": "self",
+            "effect_type": "restore",
+            "restore": {"mana": 14, "stamina": 14},
+        },
+    },
+    "fireflask": {
+        "name": "Fire Flask",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A stoppered glass flask of volatile pitch and ember salts, meant to be thrown from a safe distance and nowhere near your own eyebrows.",
+        "use": {
+            "verb": "throw",
+            "contexts": ("combat",),
+            "target": "enemy",
+            "effect_type": "damage",
+            "damage": {"base": 16, "variance": 4},
+            "extra_text": " Flames burst across the target.",
+        },
+    },
+    "purity_salts": {
+        "name": "Purity Salts",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A sharp-smelling packet of bitter salts and herbs used to break poison, steady the gut, and drive lesser afflictions out through sheer insult.",
+        "use": {
+            "verb": "apply",
+            "contexts": ("combat",),
+            "target": "ally",
+            "effect_type": "cleanse",
+            "restore": {"hp": 8},
+        },
+    },
+    "ward_dust": {
+        "name": "Ward Dust",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A pinch of ash-bright chapel dust that settles over skin and cloth like a quick ward against the next bad hit.",
+        "use": {
+            "verb": "cast",
+            "contexts": ("combat",),
+            "target": "ally",
+            "effect_type": "guard",
+            "guard": 12,
+        },
+    },
     "fractured_circuit": {
         "name": "Fractured Circuit",
         "kind": "loot",
@@ -757,6 +823,14 @@ STARTER_LOADOUTS = {
     },
 }
 
+STARTER_CONSUMABLES = (
+    ("field_bandage", 2),
+    ("focus_tonic", 1),
+    ("fireflask", 1),
+    ("purity_salts", 1),
+    ("ward_dust", 1),
+)
+
 BONUS_LABELS = {
     "strength": "Strength",
     "agility": "Agility",
@@ -777,10 +851,92 @@ BONUS_LABELS = {
 }
 
 
+def _normalize_item_token(value):
+    """Normalize free-text item queries for fuzzy matching."""
+
+    return "".join(char for char in (value or "").lower() if char.isalnum())
+
+
 def get_item(template_id):
     """Return an item template by id."""
 
     return ITEM_TEMPLATES.get(template_id)
+
+
+def get_item_category(item_or_template):
+    """Return the inventory category an item should be grouped under."""
+
+    item = item_or_template if isinstance(item_or_template, dict) else get_item(item_or_template)
+    if not item:
+        return None
+    category = item.get("category")
+    if category:
+        return category
+    if item.get("kind") == "meal":
+        return "consumable"
+    return item.get("kind")
+
+
+def get_item_use_profile(item_or_template, *, context=None):
+    """Return normalized use metadata for a consumable item."""
+
+    item = item_or_template if isinstance(item_or_template, dict) else get_item(item_or_template)
+    if not item:
+        return None
+
+    use = dict(item.get("use") or {})
+    if item.get("kind") == "meal":
+        use.setdefault("verb", "eat")
+        use.setdefault("contexts", ("explore", "combat"))
+        use.setdefault("target", "self")
+        use.setdefault("effect_type", "meal")
+        if item.get("restore"):
+            use.setdefault("restore", dict(item.get("restore", {})))
+        if item.get("meal_bonuses"):
+            use.setdefault("buffs", dict(item.get("meal_bonuses", {})))
+
+    contexts = tuple(use.get("contexts") or ())
+    if context and contexts and context not in contexts:
+        return None
+    if not use:
+        return None
+    use["contexts"] = contexts
+    return use
+
+
+def is_consumable_item(item_or_template, *, context=None):
+    """Whether an item exposes consumable-use metadata."""
+
+    return get_item_use_profile(item_or_template, context=context) is not None
+
+
+def match_inventory_item(character, query, *, context=None, category=None, verb=None):
+    """Find a carried inventory item by template id or fuzzy display name."""
+
+    if not query:
+        return None
+
+    token = _normalize_item_token(query)
+    matches = []
+    for entry in (character.db.brave_inventory or []):
+        template_id = entry.get("template")
+        quantity = int(entry.get("quantity", 0) or 0)
+        item = get_item(template_id)
+        if not item or quantity <= 0:
+            continue
+        if category and get_item_category(item) != category:
+            continue
+        use = get_item_use_profile(item, context=context)
+        if verb and (not use or use.get("verb") != verb):
+            continue
+        if context and not use:
+            continue
+        names = [template_id, item.get("name", "")]
+        if any(token == _normalize_item_token(name) or token in _normalize_item_token(name) for name in names):
+            matches.append(template_id)
+    if not matches:
+        return None
+    return matches[0] if len(matches) == 1 else matches
 
 
 def format_bonus_summary(item_data):

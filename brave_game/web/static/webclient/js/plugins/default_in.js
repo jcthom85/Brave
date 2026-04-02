@@ -31,6 +31,7 @@ let defaultInPlugin = (function () {
         }
     })();
     var inputContext = INPUT_CONTEXT_COMMAND;
+    var lastMobileInputOpenAt = 0;
     var isMobileViewport = function () {
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
     };
@@ -312,6 +313,7 @@ let defaultInPlugin = (function () {
             if (document.body) {
                 var wasOpen = document.body.classList.contains(MOBILE_INPUT_OPEN_CLASS);
                 document.body.classList.add(MOBILE_INPUT_OPEN_CLASS);
+                lastMobileInputOpenAt = Date.now();
                 if (!wasOpen) {
                     window.dispatchEvent(new CustomEvent("brave:mobile-input-state", { detail: { open: true } }));
                 }
@@ -350,6 +352,9 @@ let defaultInPlugin = (function () {
         }
 
         document.body.classList.toggle(MOBILE_INPUT_OPEN_CLASS, !!open);
+        if (open) {
+            lastMobileInputOpenAt = Date.now();
+        }
         window.dispatchEvent(new CustomEvent("brave:mobile-input-state", { detail: { open: !!open } }));
         if (open) {
             decorateInputs();

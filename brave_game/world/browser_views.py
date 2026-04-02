@@ -1,13 +1,23 @@
 """Browser-only main-pane view payloads for Brave's richer command screens."""
 
 from world.arcade import format_arcade_score, get_personal_best, get_reward_definition, has_arcade_reward
+from world.combat_actions import build_combat_action_payload
 from world.data.arcade import ARCADE_GAMES
 from world.data.activities import COOKING_RECIPES, format_ingredient_list
 from world.commerce import format_shop_bonus, get_reserved_entries, get_sellable_entries, get_shop_bonus
-from world.data.character_options import CLASSES, RACES, VERTICAL_SLICE_CLASSES, split_unlocked_abilities, xp_needed_for_next_level
-from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES
+from world.data.character_options import (
+    ABILITY_LIBRARY,
+    CLASSES,
+    PASSIVE_ABILITY_BONUSES,
+    RACES,
+    VERTICAL_SLICE_CLASSES,
+    ability_key,
+    split_unlocked_abilities,
+    xp_needed_for_next_level,
+)
+from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, get_item_category, get_item_use_profile
 from world.data.portals import PORTALS, PORTAL_STATUS_LABELS
-from world.data.quests import QUESTS, STARTING_QUESTS
+from world.data.quests import QUESTS, STARTING_QUESTS, get_quest_region, group_quest_keys_by_region
 from world.data.themes import THEMES, THEME_BY_KEY, normalize_theme_key
 from world.data.world_tones import get_world_tone_key
 from world.chapel import get_active_blessing
@@ -34,9 +44,9 @@ from world.resonance import (
 from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
 
 
-PACK_KIND_ORDER = ("meal", "ingredient", "loot", "equipment")
+PACK_KIND_ORDER = ("consumable", "ingredient", "loot", "equipment")
 PACK_KIND_LABELS = {
-    "meal": ("Meals", "restaurant"),
+    "consumable": ("Consumables", "restaurant"),
     "ingredient": ("Ingredients", "kitchen"),
     "loot": ("Loot And Materials", "category"),
     "equipment": ("Spare Gear", "checkroom"),
@@ -85,7 +95,7 @@ def _action(label, command, icon, *, tone=None, confirm=None, icon_only=False, a
     return action
 
 
-def _item(text, *, icon=None, badge=None, command=None, prefill=None, confirm=None, actions=None, picker=None):
+def _item(text, *, icon=None, badge=None, command=None, prefill=None, confirm=None, actions=None, picker=None, tooltip=None):
     item = {"text": text}
     if icon:
         item["icon"] = icon
@@ -101,6 +111,8 @@ def _item(text, *, icon=None, badge=None, command=None, prefill=None, confirm=No
         item["actions"] = actions
     if picker:
         item["picker"] = picker
+    if tooltip:
+        item["tooltip"] = tooltip
     return item
 
 
@@ -118,6 +130,17 @@ def _meter(label, current, maximum, *, tone="accent"):
         "percent": percent,
         "tone": tone,
     }
+
+
+def _resource_meter_tone(current, maximum):
+    maximum_value = max(1, int(maximum or 0))
+    current_value = max(0, int(current or 0))
+    percent = current_value / maximum_value
+    if percent <= 0.25:
+        return "danger"
+    if percent <= 0.6:
+        return "warn"
+    return "good"
 
 
 def _entry(
@@ -176,13 +199,15 @@ def _picker_option(label, *, command=None, prefill=None, icon=None, meta=None, t
     return option
 
 
-def _picker(title, *, subtitle=None, options=None):
+def _picker(title, *, subtitle=None, options=None, body=None):
     picker = {
         "title": title,
         "options": [option for option in (options or []) if option],
     }
     if subtitle:
         picker["subtitle"] = subtitle
+    if body:
+        picker["body"] = [line for line in body if line]
     return picker
 
 
@@ -216,8 +241,7 @@ def _make_view(
     reactive=None,
 ):
     view_actions = list(actions or [])
-    if back and not any(action.get("command") == "look" for action in view_actions):
-        view_actions.append(_action("Back", "look", "arrow_back", tone="muted"))
+    back_action = _action("Close", "look", "close", tone="muted", aria_label="Close") if back else None
     return {
         "eyebrow": eyebrow,
         "eyebrow_icon": eyebrow_icon,
@@ -225,6 +249,7 @@ def _make_view(
         "title_icon": title_icon,
         "wordmark": wordmark or "",
         "subtitle": subtitle or "",
+        "back_action": back_action,
         "chips": [chip for chip in (chips or []) if chip],
         "sections": sections or [],
         "actions": view_actions,
@@ -252,8 +277,17 @@ def _reactive_from_character(character, *, scene="system", danger=None, boss=Fal
     return _reactive_view(getattr(character, "location", None), scene=scene, danger=danger, boss=boss)
 
 
+def _format_dialogue_line(line):
+    text = str(line or "").strip()
+    if not text:
+        return ""
+    if (text.startswith('"') and text.endswith('"')) or (text.startswith("“") and text.endswith("”")):
+        return text
+    return f'"{text}"'
+
+
 def _build_talk_actions(target):
-    actions = [_action("Back", "look", "arrow_back", tone="muted")]
+    actions = []
     entity_id = getattr(getattr(target, "db", None), "brave_entity_id", None)
 
     if entity_id == "leda_thornwick":
@@ -261,8 +295,66 @@ def _build_talk_actions(target):
     elif entity_id == "torren_ironroot":
         actions.append(_action("Open Forge", "forge", "construction", tone="accent"))
 
-    actions.append(_action("Read Nearby Boards", "read nearby boards", "menu_book"))
     return actions
+
+
+def _sheet_detail_tooltip(title, subtitle=None, lines=None):
+    parts = [title] if title else []
+    if subtitle:
+        parts.append(subtitle)
+    parts.extend(line for line in (lines or []) if line)
+    return "\n".join(parts)
+
+
+def _build_sheet_ability_item(character, ability_name):
+    display_name = format_ability_display(ability_name, character)
+    ability = ABILITY_LIBRARY.get(ability_key(ability_name), {})
+    target_label = {
+        "enemy": "Targets one enemy",
+        "ally": "Targets one ally",
+        "self": "Targets yourself",
+        "none": "No direct target",
+    }.get(ability.get("target"), "Combat ability")
+    subtitle_parts = []
+    if ability.get("cost") and ability.get("resource"):
+        subtitle_parts.append(f"Costs {ability['cost']} {get_resource_label(ability['resource'], character)}")
+    if target_label:
+        subtitle_parts.append(target_label)
+    subtitle = " · ".join(subtitle_parts)
+    body = [
+        {
+            "enemy": "A combat technique aimed at a single foe.",
+            "ally": "A supportive combat technique used on one ally.",
+            "self": "A defensive or empowering combat technique you use on yourself.",
+            "none": "A battlefield technique that does not require a single target.",
+        }.get(ability.get("target"), "A combat technique available to your build."),
+    ]
+    tooltip = _sheet_detail_tooltip(display_name, subtitle, body)
+    return _item(
+        display_name,
+        icon="bolt",
+        picker=_picker(display_name, subtitle=subtitle, body=body),
+        tooltip=tooltip,
+    )
+
+
+def _build_sheet_passive_item(character, passive_name, *, icon_name="stars", summary_line=None, bonus_map=None):
+    display_name = format_ability_display(passive_name, character)
+    body = []
+    if summary_line:
+        body.append(summary_line)
+    else:
+        body.append("A passive trait that is always active.")
+    bonus_text = _format_context_bonus_summary(bonus_map or {}, character)
+    if bonus_text:
+        body.append("Bonuses: " + bonus_text)
+    tooltip = _sheet_detail_tooltip(display_name, "Passive trait", body)
+    return _item(
+        display_name,
+        icon=icon_name,
+        picker=_picker(display_name, subtitle="Passive trait", body=body),
+        tooltip=tooltip,
+    )
 
 
 def build_talk_list_view(character, npcs):
@@ -299,7 +391,7 @@ def build_talk_list_view(character, npcs):
                     variant="dialogue-list",
                 )
             ],
-            actions=[_action("Back", "look", "arrow_back", tone="muted")],
+            back=True,
             reactive=_reactive_from_character(character, scene="dialogue"),
         ),
         "variant": "dialogue-list",
@@ -1037,7 +1129,7 @@ def _inventory_totals(character):
 def _build_mobile_pack_payload(character):
     inventory = list(character.db.brave_inventory or [])
     item_types = 0
-    meals = 0
+    consumables = 0
     ingredients = 0
     preview = []
 
@@ -1049,8 +1141,8 @@ def _build_mobile_pack_payload(character):
         quantity = max(0, int(entry.get("quantity", 0) or 0))
         template = ITEM_TEMPLATES.get(template_id, {})
         kind = template.get("kind")
-        if kind == "meal":
-            meals += quantity
+        if get_item_category(template) == "consumable":
+            consumables += quantity
         elif kind == "ingredient":
             ingredients += quantity
         if len(preview) < 4:
@@ -1060,7 +1152,7 @@ def _build_mobile_pack_payload(character):
     return {
         "silver": character.db.brave_silver or 0,
         "item_types": item_types,
-        "meals": meals,
+        "consumables": consumables,
         "ingredients": ingredients,
         "preview": preview,
         "overflow": max(0, item_types - len(preview)),
@@ -1204,7 +1296,7 @@ def build_account_view(account):
             subtitle="",
             chips=[],
             sections=sections,
-            actions=[],
+            actions=[_action("Logout", "logout", "logout", tone="muted")],
             reactive=_reactive_view(scene="account"),
         ),
         "variant": "account",
@@ -1385,144 +1477,215 @@ def _format_objective_progress(objective):
     return text
 
 
-def _build_tracked_quest_entry(character, tracked_key, nearby_npcs):
-    if not tracked_key:
-        return None
+def _get_journal_mode(character):
+    mode = getattr(getattr(character, "db", None), "brave_journal_tab", "active")
+    return mode if mode in {"active", "completed"} else "active"
 
-    state = (character.db.brave_quests or {}).get(tracked_key, {})
-    if state.get("status") != "active":
-        return None
 
-    definition = QUESTS[tracked_key]
+def _build_journal_quest_entry(character, quest_key, *, tracked_key=None, nearby_npcs=None, detailed=False):
+    state = (character.db.brave_quests or {}).get(quest_key, {})
+    definition = QUESTS[quest_key]
     remaining_objectives = [
         objective for objective in state.get("objectives", []) if not objective.get("completed")
     ]
-    objective_lines = [f"[ ] {_format_objective_progress(objective)}" for objective in remaining_objectives[:4]]
-    completed_count = len(state.get("objectives", [])) - len(remaining_objectives)
-    total_count = max(1, len(state.get("objectives", [])))
-    actions = [_action("Untrack", "quests untrack", "flag", tone="accent")]
-    if definition["giver"] in nearby_npcs:
+    next_objective = remaining_objectives[0] if remaining_objectives else None
+    lines = []
+    actions = []
+    command = None
+    icon = "assignment"
+    meta = definition["giver"]
+
+    if detailed:
+        lines.append(definition["summary"])
+        lines.extend(f"[ ] {_format_objective_progress(objective)}" for objective in remaining_objectives[:4])
+        completed_count = len(state.get("objectives", [])) - len(remaining_objectives)
+        total_count = max(1, len(state.get("objectives", [])))
+        return _entry(
+            definition["title"],
+            meta=f"{get_quest_region(quest_key)} · {definition['giver']}",
+            lines=lines,
+            icon="flag",
+            actions=[
+                _action("Untrack", "quests untrack", "flag", tone="accent"),
+                *(
+                    [_action("Talk", f"talk {definition['giver']}", "forum", tone="muted")]
+                    if definition["giver"] in (nearby_npcs or set())
+                    else []
+                ),
+            ],
+            chips=[_chip(f"{completed_count}/{total_count} steps", "checklist", "accent")],
+        )
+
+    if next_objective:
+        lines.append(f"Next: {_format_objective_progress(next_objective)}")
+    else:
+        lines.append(definition["summary"])
+
+    command = f"quests track {quest_key}"
+    if quest_key == tracked_key:
+        command = "quests untrack"
+        actions.append(_action("Untrack", "quests untrack", "flag", tone="accent"))
+    else:
+        actions.append(_action("Track", command, "flag", tone="accent"))
+
+    if state.get("status") != "completed" and definition["giver"] in (nearby_npcs or set()):
         actions.append(_action("Talk", f"talk {definition['giver']}", "forum", tone="muted"))
 
     return _entry(
         definition["title"],
-        meta="Tracked Quest",
-        lines=[definition["summary"], f"Given by: {definition['giver']}"] + objective_lines,
-        icon="flag",
+        meta=meta,
+        lines=lines,
+        icon=icon,
+        command=command,
         actions=actions,
-        chips=[_chip(f"{completed_count}/{total_count} steps", "checklist", "accent")],
     )
 
 
-def _build_quest_entries(character, tracked_key=None):
-    active = []
-    completed = []
+def _build_journal_region_sections(character, quest_keys, *, tracked_key=None, status="active"):
     nearby_npcs = _local_npc_keys(character)
-    active_index = 0
-    for quest_key in STARTING_QUESTS:
-        state = (character.db.brave_quests or {}).get(quest_key)
-        if not state or state.get("status") == "locked":
-            continue
-
-        definition = QUESTS[quest_key]
-        remaining_objectives = [
-            objective for objective in state.get("objectives", []) if not objective.get("completed")
-        ]
-        next_objective = remaining_objectives[0] if remaining_objectives else None
-        next_step = _format_objective_progress(next_objective) if next_objective else definition["summary"]
-        actions = []
-        command = None
-
-        if state.get("status") == "completed":
-            completed.append(
-                _item(
-                    f"{definition['title']} · {definition['giver']}",
-                    icon="task_alt",
-                )
-            )
+    sections = []
+    filtered_keys = [quest_key for quest_key in quest_keys if not (status == "active" and quest_key == tracked_key)]
+    for region, region_keys in group_quest_keys_by_region(filtered_keys):
+        if status == "completed":
+            items = [
+                _item(QUESTS[quest_key]["title"], icon="task_alt")
+                for quest_key in region_keys
+            ]
+            kind = "list"
         else:
-            active_index += 1
-            command = f"quests track {active_index}"
-            if quest_key == tracked_key:
-                command = "quests untrack"
-                actions.append(_action("Untrack", "quests untrack", "flag", tone="accent"))
-            else:
-                actions.append(_action("Track", command, "flag", tone="accent"))
-
-            if definition["giver"] in nearby_npcs:
-                actions.append(_action("Talk", f"talk {definition['giver']}", "forum", tone="muted"))
-
-            active.append(
-                _item(
-                    f"{definition['title']} · Next: {next_step}",
-                    badge=str(active_index),
-                    command=command,
-                    actions=actions,
+            items = [
+                _build_journal_quest_entry(
+                    character,
+                    quest_key,
+                    tracked_key=tracked_key,
+                    nearby_npcs=nearby_npcs,
                 )
+                for quest_key in region_keys
+            ]
+            kind = "entries"
+
+        sections.append(
+            _section(
+                region,
+                "explore",
+                kind,
+                items=items,
+                variant="active" if status == "active" else "archive",
             )
-    return active, completed
+        )
+    return sections
 
 
 def build_quests_view(character):
     """Return a browser-first main view for the quest journal."""
 
+    journal_mode = _get_journal_mode(character)
     tutorial_entry = _build_tutorial_entry(character)
     tracked_key = get_tracked_quest(character)
     nearby_npcs = _local_npc_keys(character)
-    tracked_entry = _build_tracked_quest_entry(character, tracked_key, nearby_npcs)
-    active_entries, completed_entries = _build_quest_entries(character, tracked_key=tracked_key)
-
-    chips = [
-        _chip(f"{len(active_entries)} active", "assignment", "accent"),
-        _chip(f"{len(completed_entries)} completed", "task_alt", "muted"),
+    tracked_entry = _build_journal_quest_entry(
+        character,
+        tracked_key,
+        tracked_key=tracked_key,
+        nearby_npcs=nearby_npcs,
+        detailed=True,
+    ) if tracked_key else None
+    active_keys = [
+        quest_key
+        for quest_key in STARTING_QUESTS
+        if (character.db.brave_quests or {}).get(quest_key, {}).get("status") == "active"
     ]
-    if tracked_entry:
-        chips.append(_chip("Tracking 1", "flag", "good"))
+    completed_keys = [
+        quest_key
+        for quest_key in STARTING_QUESTS
+        if (character.db.brave_quests or {}).get(quest_key, {}).get("status") == "completed"
+    ]
 
-    focus_items = [entry for entry in (tracked_entry, tutorial_entry) if entry]
-    if not focus_items:
-        focus_items = [
-            _entry(
-                "No tracked quest",
-                meta="Current Focus",
-                lines=["Track an active quest to pin its objectives and quick actions here."],
-                icon="flag",
-            )
-        ]
-
-    sections = [
-        _section(
-            "Current Focus",
-            "flag",
-            "entries",
-            items=focus_items,
-            variant="focus",
-        ),
-        _section(
-            "Active Quests",
+    actions = [
+        _action(
+            "Active",
+            "quests active",
             "assignment",
-            "list",
-            items=active_entries or [_item("No active quests right now.", icon="info")],
-            variant="active",
+            tone="accent" if journal_mode == "active" else "muted",
         ),
-        _section(
-            "Completed Archive",
+        _action(
+            "Completed",
+            "quests completed",
             "task_alt",
-            "list",
-            items=completed_entries or [_item("No completed quests yet.", icon="info")],
-            variant="archive",
+            tone="accent" if journal_mode == "completed" else "muted",
         ),
     ]
+
+    sections = []
+    if journal_mode == "active":
+        if tracked_entry:
+            sections.append(
+                _section(
+                    "",
+                    "flag",
+                    "entries",
+                    items=[tracked_entry],
+                    variant="tracked",
+                    hide_label=True,
+                )
+            )
+        if tutorial_entry:
+            sections.append(
+                _section(
+                    "Tutorial",
+                    "school",
+                    "entries",
+                    items=[tutorial_entry],
+                    variant="tutorial",
+                )
+            )
+        sections.extend(
+            _build_journal_region_sections(
+                character,
+                active_keys,
+                tracked_key=tracked_key,
+                status="active",
+            )
+        )
+        if not sections:
+            sections.append(
+                _section(
+                    "Active Quests",
+                    "assignment",
+                    "entries",
+                    items=[_entry("No active quests right now.", icon="info")],
+                    variant="active",
+                )
+            )
+    else:
+        sections.extend(
+            _build_journal_region_sections(
+                character,
+                completed_keys,
+                status="completed",
+            )
+        )
+        if not sections:
+            sections.append(
+                _section(
+                    "Completed Quests",
+                    "task_alt",
+                    "entries",
+                    items=[_entry("No completed quests yet.", icon="info")],
+                    variant="archive",
+                )
+            )
 
     return {
         **_make_view(
-            "Adventure Log",
+            "",
             "Journal",
-            eyebrow_icon="assignment",
+            eyebrow_icon=None,
             title_icon="menu_book",
-            subtitle="Track one quest in detail, scan the active roster, and keep finished work archived below.",
-            chips=chips,
+            subtitle="",
+            chips=[],
             sections=sections,
+            actions=actions,
             back=True,
             reactive=_reactive_from_character(character, scene="journal"),
         ),
@@ -1827,6 +1990,7 @@ def build_forge_view(character):
                 items=pending_entries or [_entry("No pending orders.", icon="task_alt")],
             ),
         ],
+        back=True,
         reactive=_reactive_from_character(character, scene="service"),
     )
 
@@ -2011,25 +2175,27 @@ def build_talk_view(target, response):
     paragraphs = [line.strip() for line in str(response or "").splitlines() if line.strip()]
     if not paragraphs:
         paragraphs = ["They have nothing to say right now."]
+    dialogue_lines = [_format_dialogue_line(line) for line in paragraphs]
 
     return {
         **_make_view(
-            "Conversation",
+            "",
             target.key,
-            eyebrow_icon="forum",
+            eyebrow_icon=None,
             title_icon="person",
-            subtitle="Focused dialogue. Use the actions below to continue, pivot to a related system, or return to the room.",
-            chips=[_chip("NPC", "forum", "muted")],
+            subtitle="",
             sections=[
                 _section(
-                    "What They Say",
+                    "",
                     "forum",
                     "lines",
-                    lines=paragraphs,
-                    variant="dialogue",
+                    lines=dialogue_lines,
+                    variant="quote",
+                    hide_label=True,
                 )
             ],
             actions=_build_talk_actions(target),
+            back=True,
             reactive=_reactive_view(getattr(target, "location", None), scene="dialogue"),
         ),
         "variant": "dialogue",
@@ -2199,12 +2365,22 @@ def build_combat_view(encounter, character):
     """Return a browser-first sticky combat view with clickable actions."""
 
     from typeclasses.scripts import ABILITY_LIBRARY
-    from world.data.character_options import IMPLEMENTED_ABILITY_KEYS
 
     def format_pending(label):
         if not label:
             return "Basic attack"
         return label[0].upper() + label[1:]
+
+    def combat_action_item(action):
+        return _item(
+            action.get("text", action.get("label", "")),
+            badge=action.get("badge"),
+            command=action.get("command"),
+            prefill=action.get("prefill"),
+            confirm=action.get("confirm"),
+            actions=action.get("actions"),
+            picker=action.get("picker"),
+        )
 
     def build_participant_status_chips(state):
         chips = []
@@ -2220,6 +2396,8 @@ def build_combat_view(encounter, character):
             chips.append(_chip(f"Snared {state['snare_turns']}", "block", "warn"))
         if state.get("feint_turns", 0) > 0:
             chips.append(_chip("Feint Ready", "bolt", "accent"))
+        if state.get("stealth_turns", 0) > 0:
+            chips.append(_chip("Hidden", "visibility_off", "muted"))
         return chips
 
     def build_enemy_status_chips(enemy):
@@ -2232,6 +2410,10 @@ def build_combat_view(encounter, character):
             chips.append(_chip(f"Hidden {enemy['hidden_turns']}", "visibility_off", "muted"))
         if enemy.get("shielded"):
             chips.append(_chip("Warded", "shield", "good"))
+        if enemy.get("bleed_turns", 0) > 0:
+            chips.append(_chip(f"Bleeding {enemy['bleed_turns']}", "water_drop", "danger"))
+        if enemy.get("poison_turns", 0) > 0:
+            chips.append(_chip(f"Poisoned {enemy['poison_turns']}", "warning", "warn"))
         return chips
 
     def hp_meter(current_hp, max_hp):
@@ -2259,111 +2441,46 @@ def build_combat_view(encounter, character):
         participants,
         key=lambda participant: (0 if participant.id == character.id else 1, participant.key.lower()),
     )
+    ally_count = len(ordered_participants)
+    foe_count = len(enemies)
+    ally_label = "Ally" if ally_count == 1 else "Allies"
+    foe_label = "Foe" if foe_count == 1 else "Foes"
+    pending_action = dict(getattr(encounter.db, "pending_actions", {}) or {}).get(str(character.id), {}) or {}
+    selected_target_id = pending_action.get("target")
+    selected_target_kind = None
+    if pending_action.get("kind") == "attack":
+        selected_target_kind = "enemy"
+    elif pending_action.get("kind") == "ability":
+        selected_ability = ABILITY_LIBRARY.get(pending_action.get("ability"))
+        if selected_ability:
+            selected_target_kind = selected_ability.get("target")
+    elif pending_action.get("kind") == "item":
+        selected_item = ITEM_TEMPLATES.get(pending_action.get("item"))
+        selected_use = get_item_use_profile(selected_item, context="combat") or {}
+        selected_target_kind = selected_use.get("target")
 
-    def build_ability_item(ability_name, ability):
-        target_type = ability["target"]
-        resource_key = ability["resource"]
-        resource_name = get_resource_label(resource_key, character)
-        resource_current = (character.db.brave_resources or {}).get(resource_key, 0)
-        can_afford = resource_current >= ability["cost"]
-        display_name = format_ability_display(ability_name, character)
-        short_resource = resource_name[:3].upper()
-        target_badge = {
-            "self": "S",
-            "enemy": "E",
-            "ally": "A",
-            "none": "N",
-        }.get(target_type, "?")
-        text = f"{display_name} · {ability['cost']} {short_resource}"
-        command = None
-        prefill = None
-        picker = None
-
-        if not can_afford:
-            text += f" · NEED {ability['cost'] - resource_current}"
-        elif target_type == "enemy":
-            if not enemies:
-                text += " · NO TARGET"
-            elif len(enemies) == 1:
-                command = f"use {ability_name} = {enemies[0]['id']}"
-            else:
-                picker = _picker(
-                    f"{display_name} Target",
-                    subtitle="Choose an enemy.",
-                    options=[
-                        _picker_option(
-                            enemy["key"],
-                            command=f"use {ability_name} = {enemy['id']}",
-                            icon="warning",
-                            meta=enemy["id"].upper(),
-                            tone="danger",
-                        )
-                        for enemy in enemies
-                    ],
-                )
-                text += " · TARGET"
-        elif target_type == "ally":
-            if not ordered_participants:
-                text += " · NO TARGET"
-            elif len(ordered_participants) == 1:
-                command = f"use {ability_name}"
-            else:
-                picker = _picker(
-                    f"{display_name} Target",
-                    subtitle="Choose an ally.",
-                    options=[
-                        _picker_option(
-                            participant.key,
-                            command=f"use {ability_name}" if participant.id == character.id else f"use {ability_name} = {participant.key}",
-                            icon="person",
-                            meta="You" if participant.id == character.id else "Ally",
-                            tone="accent" if participant.id == character.id else "good",
-                        )
-                        for participant in ordered_participants
-                    ],
-                )
-                text += " · TARGET"
-        elif target_type == "none":
-            command = f"use {ability_name}"
-        else:
-            command = f"use {ability_name}"
-
-        return _item(
-            text,
-            badge=target_badge,
-            command=command,
-            prefill=prefill,
-            picker=picker,
-        )
-
-    unlocked = []
-    for ability_name in character.get_unlocked_abilities():
-        ability_key = resolve_ability_query(character, ability_name)
-        if isinstance(ability_key, list) or not ability_key:
-            continue
-        if ability_key not in IMPLEMENTED_ABILITY_KEYS:
-            continue
-        ability = ABILITY_LIBRARY.get(ability_key)
-        if not ability:
-            continue
-        unlocked.append((ability_key, ability_name, ability))
-
-    ability_items = []
-    for _ability_key, ability_name, ability in unlocked:
-        ability_items.append(build_ability_item(ability_name, ability))
+    combat_actions = build_combat_action_payload(encounter, character)
+    ability_items = [combat_action_item(action) for action in combat_actions.get("abilities", [])]
+    item_entries = [combat_action_item(action) for action in combat_actions.get("items", [])]
 
     party_entries = []
     for participant in ordered_participants:
         participant.ensure_brave_character()
         resources = participant.db.brave_resources or {}
         derived = participant.db.brave_derived_stats or {}
-        primary_resource = "mana" if participant.db.brave_class in {"cleric", "mage", "druid"} else "stamina"
         state = encounter._get_participant_state(participant)
         status_chips = build_participant_status_chips(state)
         pending_text = format_pending(encounter._describe_pending_action(participant))
         lines = []
         if pending_text != "Basic attack":
-            lines.append(f"Queued: {pending_text}")
+            lines.append(f"Next: {pending_text}")
+        meters = [hp_meter(resources.get("hp", 0), derived.get("max_hp", 0))]
+        for resource_key in ("stamina", "mana"):
+            max_value = derived.get(f"max_{resource_key}", 0)
+            if max_value > 0:
+                meters.append(resource_meter(resource_key, resources.get(resource_key, 0), max_value))
+        if selected_target_kind == "ally" and selected_target_id == participant.id:
+            status_chips = list(status_chips) + [_chip("Targeted", "my_location", "accent")]
 
         party_entries.append(
             _entry(
@@ -2372,10 +2489,7 @@ def build_combat_view(encounter, character):
                 lines=lines,
                 icon="person",
                 chips=status_chips,
-                meters=[
-                    hp_meter(resources.get("hp", 0), derived.get("max_hp", 0)),
-                    resource_meter(primary_resource, resources.get(primary_resource, 0), derived.get(f"max_{primary_resource}", 0)),
-                ],
+                meters=meters,
             )
         )
 
@@ -2383,15 +2497,16 @@ def build_combat_view(encounter, character):
     for enemy in enemies:
         status_chips = build_enemy_status_chips(enemy)
         lines = ["Ready basic attack."]
+        if selected_target_kind == "enemy" and selected_target_id == enemy.get("id"):
+            status_chips = list(status_chips) + [_chip("Targeted", "my_location", "accent")]
         enemy_entries.append(
             _entry(
                 enemy["key"],
                 meta=f"Target {enemy['id'].upper()}",
-                lines=lines,
+                lines=[],
                 icon="warning",
                 badge=enemy["id"].upper(),
                 command=f"attack {enemy['id']}",
-                actions=[_action("Attack", f"attack {enemy['id']}", "swords", tone="danger")],
                 chips=status_chips,
                 meters=[hp_meter(enemy["hp"], enemy["max_hp"])],
             )
@@ -2403,16 +2518,18 @@ def build_combat_view(encounter, character):
             encounter_title,
             eyebrow_icon="swords",
             title_icon="warning",
-            subtitle="",
+            subtitle=f"{ally_count} {ally_label} • {foe_count} {foe_label}",
             actions=[_action("Flee", "flee", "logout", tone="danger")],
             sections=[
                 _section("Abilities", "bolt", "list", items=ability_items or [_item("No usable combat abilities.", icon="info")], span="wide", variant="abilities"),
+                _section("Items", "lunch_dining", "list", items=item_entries or [_item("No combat consumables packed.", icon="backpack")], span="wide", variant="items"),
                 _section("Party", "groups", "entries", items=party_entries or [_entry("No active party members.", icon="person_off")], variant="party"),
                 _section("Enemies", "warning", "entries", items=enemy_entries or [_entry("No enemies remain.", icon="task_alt")], variant="targets"),
             ],
             reactive=_reactive_view(encounter.obj, scene="combat", danger="combat"),
         ),
         "variant": "combat",
+        "combat_actions": combat_actions,
         "preserve_rail": True,
         "sticky": True,
     }
@@ -2523,32 +2640,22 @@ def build_sheet_view(character):
 
     race = RACES[character.db.brave_race]
     class_data = CLASSES[character.db.brave_class]
+    level = character.db.brave_level
     primary = character.db.brave_primary_stats or {}
     derived = character.db.brave_derived_stats or {}
     resources = character.db.brave_resources or {}
-    actions, passives, unknown_abilities = split_unlocked_abilities(character.db.brave_class, character.db.brave_level)
-    next_level_xp = xp_needed_for_next_level(character.db.brave_level)
+    actions, passives, unknown_abilities = split_unlocked_abilities(character.db.brave_class, level)
+    next_level_xp = xp_needed_for_next_level(level)
     xp_text = (
         f"{character.db.brave_xp}/{next_level_xp} XP"
         if next_level_xp
         else f"{character.db.brave_xp} XP (cap)"
     )
-
-    chips = [
-        _chip(f"{race['name']} {class_data['name']}", "badge", "muted"),
-        _chip(f"Level {character.db.brave_level}", "star", "accent"),
-        _chip(xp_text, "timeline", "muted"),
-    ]
-    if get_resonance_key(character) != "fantasy":
-        chips.append(_chip(get_resonance_label(character), "travel_explore", "accent"))
+    resonance_key = get_resonance_key(character)
+    resonance_label = get_resonance_label(character)
 
     meal_buff = character.db.brave_meal_buff or {}
-    if meal_buff:
-        chips.append(_chip(meal_buff.get("name", "Meal Buff"), "restaurant", "good"))
-
     blessing = get_active_blessing(character)
-    if blessing:
-        chips.append(_chip(blessing.get("name", "Blessing"), "wb_sunny", "accent"))
 
     combat_pairs = [
         _pair(get_stat_label("attack_power", character), derived.get("attack_power", 0), "swords"),
@@ -2562,96 +2669,141 @@ def build_sheet_view(character):
     if derived.get("threat", 0):
         combat_pairs.append(_pair(get_stat_label("threat", character), derived["threat"], "campaign"))
 
+    status_entry = _entry(
+        character.key,
+        meta=f"{race['name']} {class_data['name']} · Level {level}",
+        lines=[class_data["summary"]],
+        icon="badge",
+        chips=[
+            _chip(xp_text, "timeline", "accent"),
+            *(
+                [_chip(resonance_label, "travel_explore", "accent")]
+                if resonance_key != "fantasy"
+                else []
+            ),
+        ],
+        meters=[
+            _meter(
+                get_resource_label("hp", character),
+                resources.get("hp", 0),
+                derived.get("max_hp", 0),
+                tone=_resource_meter_tone(resources.get("hp", 0), derived.get("max_hp", 0)),
+            ),
+            _meter(
+                get_resource_label("mana", character),
+                resources.get("mana", 0),
+                derived.get("max_mana", 0),
+                tone=_resource_meter_tone(resources.get("mana", 0), derived.get("max_mana", 0)),
+            ),
+            _meter(
+                get_resource_label("stamina", character),
+                resources.get("stamina", 0),
+                derived.get("max_stamina", 0),
+                tone=_resource_meter_tone(resources.get("stamina", 0), derived.get("max_stamina", 0)),
+            ),
+        ],
+    )
+
     sections = [
         _section(
-            "Overview",
-            "assignment_ind",
-            "pairs",
-            items=[
-                _pair("Race", race["name"], "diversity_3"),
-                _pair("Class", class_data["name"], "swords"),
-                _pair("Perk", race["perk"], "star"),
-                _pair("Role", class_data["role"], "military_tech"),
-                _pair("Silver", character.db.brave_silver or 0, "savings"),
-                _pair("Resonance", get_resonance_label(character), "travel_explore"),
-            ],
+            "",
+            "person",
+            "entries",
+            items=[status_entry],
+            hide_label=True,
+            span="wide",
+            variant="status",
         ),
         _section(
-            "Resources",
-            "monitor_heart",
-            "pairs",
-            items=[
-                _pair(
-                    get_resource_label("hp", character),
-                    f"{resources.get('hp', 0)} / {derived.get('max_hp', 0)}",
-                    "favorite",
-                ),
-                _pair(
-                    get_resource_label("mana", character),
-                    f"{resources.get('mana', 0)} / {derived.get('max_mana', 0)}",
-                    "auto_awesome",
-                ),
-                _pair(
-                    get_resource_label("stamina", character),
-                    f"{resources.get('stamina', 0)} / {derived.get('max_stamina', 0)}",
-                    "directions_run",
-                ),
-            ],
-        ),
-        _section(
-            "Primary Stats",
+            "Attributes",
             "bar_chart",
             "pairs",
             items=[
-                _pair(get_stat_label(stat, character), primary.get(stat, 0))
-                for stat in ("strength", "agility", "intellect", "spirit", "vitality")
+                _pair(get_stat_label("strength", character), primary.get("strength", 0), "fitness_center"),
+                _pair(get_stat_label("agility", character), primary.get("agility", 0), "air"),
+                _pair(get_stat_label("intellect", character), primary.get("intellect", 0), "psychology"),
+                _pair(get_stat_label("spirit", character), primary.get("spirit", 0), "auto_awesome"),
+                _pair(get_stat_label("vitality", character), primary.get("vitality", 0), "favorite"),
             ],
+            variant="stats",
         ),
-        _section("Combat", "tune", "pairs", items=combat_pairs),
+        _section("Stats", "tune", "pairs", items=combat_pairs, variant="stats"),
         _section(
-            "Combat Actions",
+            "Abilities",
             "bolt",
             "list",
-            items=[
-                {"text": format_ability_display(ability, character), "icon": "bolt"}
-                for ability in actions
-            ] or [{"text": "No unlocked combat actions yet.", "icon": "info"}],
+            items=[_build_sheet_ability_item(character, ability) for ability in actions]
+            or [_item("No unlocked combat actions yet.", icon="info")],
+            variant="abilities",
         ),
     ]
 
-    if passives:
+    passive_items = [
+        _build_sheet_passive_item(
+            character,
+            race["perk"],
+            icon_name="star",
+            summary_line=race["summary"],
+            bonus_map=race.get("bonuses", {}),
+        )
+    ]
+    passive_items.extend(
+        _build_sheet_passive_item(
+            character,
+            ability,
+            icon_name="stars",
+            bonus_map=PASSIVE_ABILITY_BONUSES.get(ability_key(ability), {}).get("bonuses", {}),
+        )
+        for ability in passives
+    )
+
+    if passive_items:
         sections.append(
             _section(
                 "Passive Traits",
                 "auto_fix_high",
                 "list",
-                items=[
-                    {"text": format_ability_display(ability, character), "icon": "stars"}
-                    for ability in passives
-                ],
+                items=passive_items,
+                variant="abilities",
             )
         )
 
+    effect_entries = []
     if meal_buff:
-        meal_lines = [meal_buff.get("name", "Meal Buff") + (" [Cozy]" if meal_buff.get("cozy") else "")]
+        meal_lines = []
         meal_bonus_text = _format_context_bonus_summary(character.get_active_meal_bonuses(), character)
         if meal_bonus_text:
             meal_lines.append("Bonuses: " + meal_bonus_text)
-        sections.append(_section("Meal Buff", "restaurant", "lines", lines=meal_lines))
+        effect_entries.append(
+            _entry(
+                meal_buff.get("name", "Meal Buff"),
+                meta="Meal Buff",
+                icon="restaurant",
+                lines=meal_lines or ["A prepared meal is currently strengthening you."],
+                chips=[_chip("Cozy", "night_shelter", "good")] if meal_buff.get("cozy") else [],
+            )
+        )
 
     if blessing:
         blessing_lines = [blessing.get("duration", "Until your next encounter ends.")]
         blessing_bonus_text = _format_context_bonus_summary(blessing.get("bonuses", {}), character)
         if blessing_bonus_text:
             blessing_lines.append("Bonuses: " + blessing_bonus_text)
-        sections.append(_section("Blessing", "wb_sunny", "lines", lines=blessing_lines))
+        effect_entries.append(
+            _entry(
+                blessing.get("name", "Blessing"),
+                meta="Blessing",
+                icon="wb_sunny",
+                lines=blessing_lines,
+            )
+        )
 
-    if get_resonance_key(character) != "fantasy":
-        sections.append(
-            _section(
-                "Resonance Note",
-                "travel_explore",
-                "lines",
+    if resonance_key != "fantasy":
+        effect_entries.append(
+            _entry(
+                resonance_label,
+                meta="Resonance",
+                icon="travel_explore",
                 lines=[
                     "This world renames your abilities and resource labels, but your core build remains the same.",
                 ],
@@ -2659,26 +2811,41 @@ def build_sheet_view(character):
         )
 
     if unknown_abilities:
-        sections.append(
-            _section(
+        effect_entries.append(
+            _entry(
                 "Progression Notes",
-                "info",
-                "lines",
-                lines=["Unclassified progression entries: " + ", ".join(unknown_abilities)],
+                meta="Unclassified",
+                icon="info",
+                lines=[", ".join(unknown_abilities)],
             )
         )
 
-    return _make_view(
-        "Character Sheet",
-        character.key,
-        eyebrow_icon="assignment_ind",
-        title_icon="person",
-        subtitle=f"{race['name']} {class_data['name']} · Level {character.db.brave_level} · {class_data['summary']}",
-        chips=chips,
-        sections=sections,
-        back=True,
-        reactive=_reactive_from_character(character, scene="character"),
-    )
+    if effect_entries:
+        sections.append(
+            _section(
+                "Effects",
+                "auto_fix_high",
+                "entries",
+                items=effect_entries,
+                span="wide",
+                variant="effects",
+            )
+        )
+
+    return {
+        **_make_view(
+            "",
+            "Character Sheet",
+            eyebrow_icon=None,
+            title_icon="person",
+            subtitle="",
+            chips=[],
+            sections=sections,
+            back=True,
+            reactive=_reactive_from_character(character, scene="character"),
+        ),
+        "variant": "sheet",
+    }
 
 
 def build_gear_view(character):
@@ -2791,13 +2958,26 @@ def build_pack_view(character):
         value_text = _format_item_value_text(item, quantity)
         if value_text:
             lines.append("Value: " + value_text)
-        if item.get("kind") == "meal":
-            restore_text = _format_restore_summary(item.get("restore", {}), character)
+        if get_item_category(item) == "consumable":
+            use = get_item_use_profile(item) or {}
+            restore_text = _format_restore_summary(use.get("restore", {}), character)
             if restore_text:
                 lines.append("Restore: " + restore_text)
-            buff_text = _format_context_bonus_summary(item.get("meal_bonuses", {}), character)
+            buff_text = _format_context_bonus_summary(use.get("buffs", {}), character)
             if buff_text:
                 lines.append("Buff: " + buff_text)
+            damage_spec = dict(use.get("damage", {}))
+            if damage_spec.get("base"):
+                low = int(damage_spec.get("base", 0) or 0)
+                high = low + max(0, int(damage_spec.get("variance", 0) or 0))
+                lines.append(f"Damage: {low}-{high}" if high > low else f"Damage: {low}")
+            if use.get("effect_type") == "cleanse":
+                lines.append("Effect: Clear 1 harmful effect")
+            if use.get("effect_type") == "guard":
+                lines.append(f"Effect: Guard {int(use.get('guard', 0) or 0)}")
+            contexts = [str(entry).title() for entry in (use.get("contexts") or [])]
+            if contexts:
+                lines.append("Use: " + ", ".join(contexts))
         elif item.get("kind") == "equipment":
             bonus_text = _format_context_bonus_summary(item.get("bonuses", {}), character)
             if bonus_text:
@@ -2809,11 +2989,11 @@ def build_pack_view(character):
             summary=item.get("summary"),
             icon="inventory_2",
         )
-        if item.get("kind") == "meal":
-            command = f"eat {item.get('name', template_id)}"
+        if get_item_category(item) == "consumable":
+            command = f"use {item.get('name', template_id)}"
             formatted["command"] = command
-            formatted["actions"] = [_action("Eat", command, "restaurant", tone="good")]
-        kind = item.get("kind")
+            formatted["actions"] = [_action("Use", command, "restaurant", tone="good")]
+        kind = get_item_category(item)
         if kind in grouped:
             grouped[kind].append(formatted)
         else:

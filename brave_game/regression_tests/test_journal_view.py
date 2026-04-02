@@ -44,10 +44,11 @@ def _section(view, label):
 
 
 class DummyCharacter:
-    def __init__(self, quests=None, tracked=None, tutorial=None):
+    def __init__(self, quests=None, tracked=None, tutorial=None, journal_tab="active"):
         self.db = SimpleNamespace(
             brave_quests=quests or {},
             brave_tracked_quest=tracked,
+            brave_journal_tab=journal_tab,
             brave_tutorial=tutorial,
             brave_tutorial_current_step=None,
         )
@@ -55,12 +56,14 @@ class DummyCharacter:
 
 
 class JournalViewTests(unittest.TestCase):
-    def test_journal_view_groups_focus_active_and_archive(self):
+    def test_journal_view_shows_tracked_then_active_regions(self):
         active_key = STARTING_QUESTS[0]
-        completed_key = STARTING_QUESTS[1]
+        second_active_key = STARTING_QUESTS[2]
+        completed_key = STARTING_QUESTS[6]
         character = DummyCharacter(
             quests={
                 active_key: _quest_state(active_key, "active"),
+                second_active_key: _quest_state(second_active_key, "active"),
                 completed_key: _quest_state(completed_key, "completed"),
             },
             tracked=active_key,
@@ -74,23 +77,50 @@ class JournalViewTests(unittest.TestCase):
         view = build_quests_view(character)
 
         self.assertEqual("journal", view.get("variant"))
-        self.assertEqual("Track one quest in detail, scan the active roster, and keep finished work archived below.", view.get("subtitle"))
+        self.assertEqual("", view.get("eyebrow"))
+        self.assertEqual("", view.get("subtitle"))
+        self.assertEqual([], view.get("chips"))
+        self.assertEqual("Close", view.get("back_action", {}).get("label"))
+        self.assertEqual(["Active", "Completed"], [item.get("label") for item in view.get("actions", [])])
 
-        focus = _section(view, "Current Focus")
-        active = _section(view, "Active Quests")
-        archive = _section(view, "Completed Archive")
+        tracked = view.get("sections", [])[0]
+        tutorial = _section(view, "Tutorial")
+        goblin_road = _section(view, "Goblin Road")
 
-        self.assertEqual("entries", focus.get("kind"))
-        self.assertEqual("list", active.get("kind"))
-        self.assertEqual("list", archive.get("kind"))
+        self.assertEqual("entries", tracked.get("kind"))
+        self.assertEqual("tracked", tracked.get("variant"))
+        self.assertTrue(tracked.get("hide_label"))
+        self.assertEqual(QUESTS[active_key]["title"], tracked.get("items", [])[0].get("title"))
+        self.assertEqual("entries", tutorial.get("kind"))
+        self.assertEqual("entries", goblin_road.get("kind"))
+        self.assertEqual([QUESTS[second_active_key]["title"]], [item.get("title") for item in goblin_road.get("items", [])])
+        self.assertEqual([f"Next: {QUESTS[second_active_key]['objectives'][0]['description']}"], goblin_road.get("items", [])[0].get("lines"))
 
-        focus_titles = [entry.get("title") for entry in focus.get("items", [])]
-        self.assertIn(QUESTS[active_key]["title"], focus_titles)
-        self.assertIn("First Steps In Brambleford", focus_titles)
-        self.assertTrue(any(item.get("text", "").startswith(QUESTS[active_key]["title"]) for item in active.get("items", [])))
-        self.assertTrue(any(item.get("text", "").startswith(QUESTS[completed_key]["title"]) for item in archive.get("items", [])))
+        labels = [section.get("label") for section in view.get("sections", [])]
+        self.assertNotIn("Completed Quests", labels)
 
-    def test_journal_view_keeps_empty_focus_and_archive_sections(self):
+    def test_journal_view_switches_to_completed_regions(self):
+        completed_key = STARTING_QUESTS[1]
+        later_completed_key = STARTING_QUESTS[6]
+        character = DummyCharacter(
+            quests={
+                completed_key: _quest_state(completed_key, "completed"),
+                later_completed_key: _quest_state(later_completed_key, "completed"),
+            },
+            tracked=None,
+            tutorial={"status": "inactive", "step": None, "flags": {}},
+            journal_tab="completed",
+        )
+
+        view = build_quests_view(character)
+
+        self.assertEqual("Close", view.get("back_action", {}).get("label"))
+        self.assertEqual(["Active", "Completed"], [item.get("label") for item in view.get("actions", [])])
+        labels = [section.get("label") for section in view.get("sections", [])]
+        self.assertEqual(["Brambleford", "Junk-Yard Planet"], labels)
+        self.assertEqual("list", view.get("sections", [])[0].get("kind"))
+
+    def test_journal_view_keeps_empty_states(self):
         character = DummyCharacter(
             quests={},
             tracked=None,
@@ -99,13 +129,12 @@ class JournalViewTests(unittest.TestCase):
 
         view = build_quests_view(character)
 
-        focus = _section(view, "Current Focus")
         active = _section(view, "Active Quests")
-        archive = _section(view, "Completed Archive")
+        self.assertEqual("No active quests right now.", active.get("items", [])[0].get("title"))
 
-        self.assertEqual("No tracked quest", focus.get("items", [])[0].get("title"))
-        self.assertEqual("No active quests right now.", active.get("items", [])[0].get("text"))
-        self.assertEqual("No completed quests yet.", archive.get("items", [])[0].get("text"))
+        character.db.brave_journal_tab = "completed"
+        completed = _section(build_quests_view(character), "Completed Quests")
+        self.assertEqual("No completed quests yet.", completed.get("items", [])[0].get("title"))
 
 
 if __name__ == "__main__":

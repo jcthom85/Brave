@@ -82,7 +82,7 @@ class RoomViewTests(unittest.TestCase):
             view.get("mobile_pack", {}).get("silver"),
         )
         self.assertEqual(2, view.get("mobile_pack", {}).get("item_types"))
-        self.assertEqual(2, view.get("mobile_pack", {}).get("meals"))
+        self.assertEqual(2, view.get("mobile_pack", {}).get("consumables"))
         self.assertEqual(3, view.get("mobile_pack", {}).get("ingredients"))
         self.assertEqual(
             [

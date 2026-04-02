@@ -40,7 +40,7 @@ class DummyCharacter:
 
 
 class DummyCombatCharacter:
-    def __init__(self, char_id, key, class_key, abilities, *, stamina=20, mana=20):
+    def __init__(self, char_id, key, class_key, abilities, *, stamina=20, mana=20, inventory=None):
         self.id = char_id
         self.key = key
         self.location = None
@@ -49,6 +49,7 @@ class DummyCombatCharacter:
             brave_level=10,
             brave_resources={"hp": 30, "mana": mana, "stamina": stamina},
             brave_derived_stats={"max_hp": 30, "max_mana": 20, "max_stamina": 20},
+            brave_inventory=list(inventory or []),
         )
         self._abilities = list(abilities)
 
@@ -70,6 +71,9 @@ class DummyEncounterForQueue:
 
     def find_participant(self, _query, default=None):
         return default
+
+    def find_consumable(self, character, query, *, context="combat", verb=None):
+        return BraveEncounter.find_consumable(self, character, query, context=context, verb=verb)
 
     def _refresh_browser_combat_views(self):
         self.refreshed += 1
@@ -204,6 +208,117 @@ class ProgressionSplitTests(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn("always active", message)
 
+    def test_queue_item_accepts_combat_consumable(self):
+        encounter = DummyEncounterForQueue()
+        cleric = DummyCombatCharacter(
+            7,
+            "Dad",
+            "cleric",
+            ["Heal"],
+            inventory=[{"template": "riverlight_chowder", "quantity": 1}],
+        )
+
+        ok, message = BraveEncounter.queue_item(encounter, cleric, "Riverlight Chowder")
+
+        self.assertTrue(ok)
+        self.assertIn("Riverlight Chowder", message)
+        self.assertEqual("item", encounter.db.pending_actions["7"]["kind"])
+        self.assertEqual("riverlight_chowder", encounter.db.pending_actions["7"]["item"])
+        self.assertEqual(1, encounter.refreshed)
+
+    def test_queue_item_accepts_ally_target_consumable(self):
+        encounter = DummyEncounterForQueue()
+        cleric = DummyCombatCharacter(
+            7,
+            "Dad",
+            "cleric",
+            ["Heal"],
+            inventory=[{"template": "purity_salts", "quantity": 1}],
+        )
+        ally = DummyCombatCharacter(
+            8,
+            "Peep",
+            "warrior",
+            ["Strike"],
+            stamina=20,
+            mana=0,
+        )
+        encounter.find_participant = lambda query, default=None: ally if query == "Peep" else default
+
+        ok, message = BraveEncounter.queue_item(encounter, cleric, "Purity Salts", "Peep")
+
+        self.assertTrue(ok)
+        self.assertIn("Peep", message)
+        self.assertEqual("item", encounter.db.pending_actions["7"]["kind"])
+        self.assertEqual("purity_salts", encounter.db.pending_actions["7"]["item"])
+        self.assertEqual(8, encounter.db.pending_actions["7"]["target"])
+
+    def test_queue_item_accepts_guard_consumable(self):
+        encounter = DummyEncounterForQueue()
+        cleric = DummyCombatCharacter(
+            7,
+            "Dad",
+            "cleric",
+            ["Heal"],
+            inventory=[{"template": "ward_dust", "quantity": 1}],
+        )
+        ally = DummyCombatCharacter(
+            8,
+            "Peep",
+            "warrior",
+            ["Strike"],
+            stamina=20,
+            mana=0,
+        )
+        encounter.find_participant = lambda query, default=None: ally if query == "Peep" else default
+
+        ok, message = BraveEncounter.queue_item(encounter, cleric, "Ward Dust", "Peep")
+
+        self.assertTrue(ok)
+        self.assertIn("Peep", message)
+        self.assertEqual("item", encounter.db.pending_actions["7"]["kind"])
+        self.assertEqual("ward_dust", encounter.db.pending_actions["7"]["item"])
+        self.assertEqual(8, encounter.db.pending_actions["7"]["target"])
+
+
+
+class DummyCmdUse:
+    def __init__(self, character, encounter, args):
+        self._character = character
+        self._encounter = encounter
+        self.args = args
+        self.lhs = args
+        self.rhs = None
+        self.last_message = None
+
+    def get_character(self):
+        return self._character
+
+    def get_encounter(self, _character, require=True):
+        return self._encounter
+
+    def msg(self, message):
+        self.last_message = message
+
+    def test_cmd_use_falls_back_to_combat_consumable(self):
+        from commands.brave_combat import CmdUse
+
+        encounter = DummyEncounterForQueue()
+        cleric = DummyCombatCharacter(
+            7,
+            "Dad",
+            "cleric",
+            ["Heal"],
+            inventory=[{"template": "field_bandage", "quantity": 1}],
+        )
+        cmd = DummyCmdUse(cleric, encounter, "Field Bandage")
+
+        CmdUse.func(cmd)
+
+        self.assertIn("Field Bandage", cmd.last_message)
+        self.assertEqual("item", encounter.db.pending_actions["7"]["kind"])
+        self.assertEqual("field_bandage", encounter.db.pending_actions["7"]["item"])
+
     def test_combat_view_renders_none_target_ability_as_direct_command(self):
         warrior = DummyCombatCharacter(7, "Dad", "warrior", ["Strike", "Defend", "Battle Cry"], stamina=20, mana=0)
         encounter = DummyEncounterForView(warrior)
@@ -239,6 +354,27 @@ class ProgressionSplitTests(unittest.TestCase):
         self.assertEqual("N", flame_wave.get("badge"))
         self.assertEqual("use Flame Wave", flame_wave.get("command"))
         self.assertIsNone(flame_wave.get("picker"))
+
+    def test_enemy_targeting_prefers_visible_participants_over_hidden_ones(self):
+        hidden = SimpleNamespace(
+            id=7,
+            key="Dad",
+            db=SimpleNamespace(brave_resources={"hp": 30}),
+        )
+        visible = SimpleNamespace(
+            id=8,
+            key="Peep",
+            db=SimpleNamespace(brave_resources={"hp": 18}),
+        )
+        encounter = SimpleNamespace(
+            db=SimpleNamespace(threat={str(hidden.id): 12, str(visible.id): 3}),
+            get_active_participants=lambda: [hidden, visible],
+            _get_participant_state=lambda participant: {"stealth_turns": 1} if participant.id == hidden.id else {"stealth_turns": 0},
+        )
+
+        target = BraveEncounter._choose_enemy_target(encounter)
+
+        self.assertEqual(visible, target)
 
 
 if __name__ == "__main__":

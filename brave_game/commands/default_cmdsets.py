@@ -19,6 +19,7 @@ from evennia import default_cmds
 from .account import (
     CmdBraveCreate,
     CmdBraveDelete,
+    CmdBraveLogout,
     CmdBraveOOCLook,
     CmdBravePlay,
     CmdBraveTheme,
@@ -26,7 +27,7 @@ from .account import (
 )
 from .brave_arcade import CmdArcade, CmdArcadeSubmit
 from .brave_combat import CmdAttack, CmdEnemies, CmdFight, CmdFlee, CmdUse
-from .brave_explore import CmdCook, CmdEat, CmdFish, CmdMap, CmdMore, CmdReel, CmdRest, CmdTravel
+from .brave_explore import CmdCook, CmdEat, CmdFish, CmdItem, CmdMap, CmdMore, CmdReel, CmdRest, CmdTravel
 from .brave_party import CmdParty
 from .brave_profile import CmdBuild, CmdClass, CmdGear, CmdPack, CmdQuests, CmdRace, CmdSheet
 from .brave_town import CmdForge, CmdPortals, CmdPray, CmdRead, CmdSell, CmdShift, CmdShop, CmdTalk
@@ -65,6 +66,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdReel())
         self.add(CmdCook())
         self.add(CmdEat())
+        self.add(CmdItem())
         self.add(CmdPortals())
         self.add(CmdParty())
         self.add(CmdQuests())
@@ -102,6 +104,7 @@ class AccountCmdSet(default_cmds.AccountCmdSet):
         #
         self.add(CmdBraveOOCLook())
         self.add(CmdBravePlay())
+        self.add(CmdBraveLogout())
         self.add(CmdBraveCreate())
         self.add(CmdBraveDelete())
         self.add(CmdBraveTheme())

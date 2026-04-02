@@ -21,7 +21,7 @@ from world.data.character_options import (
 )
 from world.chapel import get_active_blessing
 from world.data.activities import COZY_BONUS
-from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, STARTER_LOADOUTS
+from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, STARTER_CONSUMABLES, STARTER_LOADOUTS
 from world.party import ensure_party_state
 from world.questing import advance_item_collection, advance_room_visit, ensure_starter_quests
 from world.tutorial import ensure_tutorial_state, handle_room_enter, is_tutorial_active
@@ -110,6 +110,7 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.desc = self.default_description
         ensure_starter_quests(self)
         self.ensure_starter_loadout()
+        self.ensure_starter_consumables()
         self.recalculate_stats()
 
     def recalculate_stats(self, restore=False):
@@ -285,6 +286,15 @@ class Character(ObjectParent, DefaultCharacter):
         equipment.update(STARTER_LOADOUTS.get(class_key, {}))
         self.db.brave_equipment = equipment
         self.db.brave_starter_loadout_class = class_key
+
+    def ensure_starter_consumables(self):
+        """Seed one starter stack of practical consumables."""
+
+        if self.db.brave_starter_consumables_seeded:
+            return
+        for template_id, quantity in STARTER_CONSUMABLES:
+            self.add_item_to_inventory(template_id, quantity)
+        self.db.brave_starter_consumables_seeded = True
 
     def get_equipment_bonuses(self):
         """Return cumulative bonuses from equipped gear."""

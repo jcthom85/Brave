@@ -2,7 +2,7 @@
 
 from evennia.commands.default.muxcommand import MuxCommand
 
-from world.data.items import ITEM_TEMPLATES
+from world.data.items import ITEM_TEMPLATES, get_item_category, get_item_use_profile
 from world.party import get_present_party_members
 from world.data.quests import QUESTS
 from world.resonance import get_resource_label, get_stat_label
@@ -30,9 +30,9 @@ def _format_context_bonus_summary(bonuses, context):
     return ", ".join(parts)
 
 
-PACK_KIND_ORDER = ("meal", "ingredient", "loot", "equipment")
+PACK_KIND_ORDER = ("consumable", "ingredient", "loot", "equipment")
 PACK_KIND_LABELS = {
-    "meal": "Meals",
+    "consumable": "Consumables",
     "ingredient": "Ingredients",
     "loot": "Loot And Materials",
     "equipment": "Spare Gear",
@@ -103,13 +103,22 @@ def _format_inventory_entry(character, template_id, quantity):
         bonus_text = _format_context_bonus_summary(item.get("bonuses", {}), character)
         if bonus_text:
             details.append("Bonuses: " + bonus_text)
-    elif item.get("kind") == "meal":
-        restore_text = _format_restore_summary(item.get("restore", {}), character)
+    elif get_item_category(item) == "consumable":
+        use = get_item_use_profile(item) or {}
+        restore_text = _format_restore_summary(use.get("restore", {}), character)
         if restore_text:
             details.append("Restore: " + restore_text)
-        buff_text = _format_context_bonus_summary(item.get("meal_bonuses", {}), character)
+        buff_text = _format_context_bonus_summary(use.get("buffs", {}), character)
         if buff_text:
             details.append("Buff: " + buff_text)
+        damage = dict(use.get("damage", {}))
+        if damage.get("base"):
+            low = int(damage.get("base", 0) or 0)
+            high = low + max(0, int(damage.get("variance", 0) or 0))
+            details.append(f"Damage: {low}-{high}" if high > low else f"Damage: {low}")
+        contexts = [str(entry).title() for entry in (use.get("contexts") or [])]
+        if contexts:
+            details.append("Use: " + ", ".join(contexts))
 
     return format_entry(title, details=details, summary=item.get("summary"))
 

@@ -1,5 +1,6 @@
 """Fishing and cooking helpers for Brave's Brambleford hub."""
 
+from collections.abc import Mapping
 from random import randint, random, uniform
 from time import time
 
@@ -7,7 +8,12 @@ from evennia.utils import delay
 
 from world.bootstrap import get_entity
 from world.data.activities import COOKING_RECIPES, COZY_BONUS, FISHING_SPOTS, format_ingredient_list
-from world.data.items import ITEM_TEMPLATES, format_bonus_summary
+from world.data.items import (
+    ITEM_TEMPLATES,
+    format_bonus_summary,
+    get_item_use_profile,
+    match_inventory_item,
+)
 from world.screen_text import format_entry, render_screen
 
 
@@ -334,56 +340,145 @@ def cook_recipe(character, query):
     )
 
 
-def _match_meal(character, query):
-    token = "".join(char for char in (query or "").lower() if char.isalnum())
-    matches = []
-    for entry in (character.db.brave_inventory or []):
-        template_id = entry.get("template")
-        template = ITEM_TEMPLATES.get(template_id)
-        if not template or template.get("kind") != "meal":
-            continue
-        names = [template_id, template["name"]]
-        tokens = ["".join(char for char in name.lower() if char.isalnum()) for name in names]
-        if any(token == candidate or token in candidate for candidate in tokens):
-            matches.append(template_id)
-    if not matches:
-        return None
-    return matches[0] if len(matches) == 1 else matches
+def _resolve_consumable_match(character, query, *, context="explore", verb=None):
+    """Resolve a carried consumable item in a specific use context."""
+
+    return match_inventory_item(character, query, context=context, category="consumable", verb=verb)
+
+
+def _consume_item_by_template(character, template_id, *, context="explore", cozy=None, target=None, encounter=None):
+    """Consume an item template and apply its current use profile."""
+
+    item = ITEM_TEMPLATES.get(template_id)
+    use = get_item_use_profile(item, context=context)
+    if not item or not use:
+        return False, "That item can't be used that way right now.", None
+
+    effect_type = use.get("effect_type")
+    restore = dict(use.get("restore", {}))
+    buffs = dict(use.get("buffs", {}))
+    cleanse_result = None
+    guard_amount = 0
+    target_type = use.get("target", "self")
+    if target_type == "enemy":
+        resolved_target = target if isinstance(target, Mapping) else None
+    elif target_type in {"ally", "self"}:
+        resolved_target = target or character
+    else:
+        resolved_target = target
+
+    if cozy is None:
+        cozy = False
+        if effect_type == "meal" and room_supports_activity(character.location, "cooking") and character.db.brave_party_id:
+            from world.party import get_present_party_members
+
+            cozy = len(get_present_party_members(character)) >= 2
+
+    if effect_type == "damage" and (not encounter or not isinstance(resolved_target, Mapping)):
+        return False, "That item can't be used meaningfully here right now.", None
+
+    if effect_type == "cleanse":
+        if not encounter or not hasattr(resolved_target, "db"):
+            return False, "That item needs an ally in combat to be useful.", None
+        cleanse_result = encounter._clear_one_harmful_effect(resolved_target)
+        if not cleanse_result:
+            target_name = getattr(resolved_target, "key", character.key)
+            return False, f"{target_name} has no harmful effect to clear.", None
+
+    if effect_type == "guard":
+        if not encounter or not hasattr(resolved_target, "db"):
+            return False, "That item needs an ally in combat to be useful.", None
+        guard_amount = max(1, int(use.get("guard", 0) or 0))
+
+    if not character.remove_item_from_inventory(template_id, 1):
+        return False, "You can't find that item in your pack anymore.", None
+
+    if effect_type == "meal":
+        character.apply_meal_buff(template_id, cozy=bool(cozy))
+
+    if effect_type in {"meal", "restore", "cleanse"} and restore:
+        target_character = resolved_target if hasattr(resolved_target, "db") else character
+        derived = target_character.db.brave_derived_stats or {}
+        resources = dict(target_character.db.brave_resources or {})
+        for pool in ("hp", "mana", "stamina"):
+            cap = derived.get(f"max_{pool}", 0)
+            resources[pool] = min(cap, resources.get(pool, 0) + restore.get(pool, 0))
+        target_character.db.brave_resources = resources
+
+    if effect_type == "guard":
+        state = encounter._get_participant_state(resolved_target)
+        state["guard"] = max(int(state.get("guard", 0) or 0), guard_amount)
+        encounter._save_participant_state(resolved_target, state)
+
+    if effect_type == "damage":
+        damage_spec = dict(use.get("damage", {}))
+        base = int(damage_spec.get("base", 0) or 0)
+        variance = max(0, int(damage_spec.get("variance", 0) or 0))
+        damage = max(1, base + randint(0, variance))
+        encounter._damage_enemy(character, resolved_target, damage, extra_text=use.get("extra_text", ""))
+
+    verb = use.get("verb", "use")
+    active_bonuses = character.get_active_meal_bonuses() if effect_type == "meal" else buffs
+    bonus_text = format_bonus_summary({"bonuses": active_bonuses})
+    if verb == "eat":
+        player_message = f"You eat the |w{item['name']}|n and feel steadier."
+        public_message = f"{character.key} snatches a moment to eat {item['name']}."
+    elif verb == "drink":
+        player_message = f"You drink the |w{item['name']}|n."
+        public_message = f"{character.key} downs {item['name']}."
+    elif verb == "apply":
+        target_name = getattr(resolved_target, "key", character.key)
+        if resolved_target and getattr(resolved_target, "id", None) != character.id:
+            player_message = f"You apply the |w{item['name']}|n to {target_name}."
+            public_message = f"{character.key} applies {item['name']} to {target_name}."
+        else:
+            player_message = f"You apply the |w{item['name']}|n."
+            public_message = f"{character.key} applies {item['name']}."
+    elif verb == "throw":
+        target_name = resolved_target.get("key", "the target") if isinstance(resolved_target, Mapping) else "the target"
+        player_message = f"You hurl the |w{item['name']}|n at {target_name}."
+        public_message = None
+    elif verb == "cast":
+        target_name = getattr(resolved_target, "key", character.key)
+        if resolved_target and getattr(resolved_target, "id", None) != character.id:
+            player_message = f"You cast the |w{item['name']}|n over {target_name}."
+            public_message = f"{character.key} casts {item['name']} over {target_name}."
+        else:
+            player_message = f"You cast the |w{item['name']}|n over yourself."
+            public_message = f"{character.key} casts {item['name']} over themselves."
+    else:
+        player_message = f"You use the |w{item['name']}|n."
+        public_message = f"{character.key} uses {item['name']}."
+    if bonus_text:
+        player_message += f" Bonus: {bonus_text}."
+    if cleanse_result:
+        player_message += f" It clears {cleanse_result}."
+    if guard_amount:
+        player_message += f" Guard rises by {guard_amount}."
+    if cozy:
+        player_message += " Sharing a warm meal in company leaves you with a lingering |wCozy|n feeling."
+
+    return True, player_message, {
+        "template_id": template_id,
+        "item": item,
+        "use": use,
+        "public_message": public_message,
+    }
+
+
+def use_consumable(character, query, *, context="explore", verb=None):
+    """Consume a carried consumable item by fuzzy name."""
+
+    match = _resolve_consumable_match(character, query, context=context, verb=verb)
+    if isinstance(match, list):
+        return False, "Be more specific. That could mean: " + ", ".join(ITEM_TEMPLATES[key]["name"] for key in match), None
+    if not match:
+        return False, "You do not have a usable consumable matching that.", None
+    return _consume_item_by_template(character, match, context=context)
 
 
 def eat_meal(character, query):
     """Consume a prepared meal and apply its buff."""
 
-    match = _match_meal(character, query)
-    if isinstance(match, list):
-        return False, "Be more specific. That could mean: " + ", ".join(ITEM_TEMPLATES[key]["name"] for key in match)
-    if not match:
-        return False, "You do not have that meal. Use |wpack|n to check your carried food."
-
-    meal = ITEM_TEMPLATES[match]
-    cozy = False
-    if room_supports_activity(character.location, "cooking") and character.db.brave_party_id:
-        from world.party import get_present_party_members
-
-        cozy = len(get_present_party_members(character)) >= 2
-
-    if not character.remove_item_from_inventory(match, 1):
-        return False, "You cannot find that meal in your pack anymore."
-
-    character.apply_meal_buff(match, cozy=cozy)
-
-    restore = meal.get("restore", {})
-    derived = character.db.brave_derived_stats or {}
-    resources = dict(character.db.brave_resources or {})
-    for pool in ("hp", "mana", "stamina"):
-        cap = derived.get(f"max_{pool}", 0)
-        resources[pool] = min(cap, resources.get(pool, 0) + restore.get(pool, 0))
-    character.db.brave_resources = resources
-
-    bonus_text = format_bonus_summary({"bonuses": character.get_active_meal_bonuses()})
-    message = f"You eat the |w{meal['name']}|n and feel steadier."
-    if bonus_text:
-        message += f" Meal bonus: {bonus_text}."
-    if cozy:
-        message += " Sharing a warm meal in company leaves you with a lingering |wCozy|n feeling."
-    return True, message
+    ok, message, _result = use_consumable(character, query, context="explore", verb="eat")
+    return ok, message

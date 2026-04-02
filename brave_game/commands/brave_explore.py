@@ -9,6 +9,7 @@ from world.activities import (
     reel_line,
     room_supports_activity,
     start_fishing,
+    use_consumable,
 )
 from world.browser_panels import build_cook_panel, build_map_panel, build_travel_panel
 from world.browser_views import build_cook_view, build_map_view, build_more_view, build_travel_view
@@ -145,7 +146,51 @@ class CmdEat(BraveCharacterCommand):
             self.msg("Usage: eat <meal>")
             return
 
+        encounter = self.get_encounter(character, require=False)
+        if encounter and encounter.is_participant(character):
+            ok, message = encounter.queue_meal(character, self.args.strip())
+            self.msg(message)
+            return
+
         ok, message = eat_meal(character, self.args.strip())
+        if _refresh_cook_scene(self, character, message, success=ok):
+            return
+        self.msg(message)
+
+
+class CmdItem(BraveCharacterCommand):
+    """
+    Use a consumable item from your pack.
+
+    Usage:
+      item <consumable>
+      item <consumable> = <target>
+
+    Uses a carried consumable outside combat, or queues it during combat.
+    """
+
+    key = "item"
+    aliases = ["consume", "useitem"]
+    help_category = "Brave"
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+        if not self.args:
+            self.msg("Usage: item <consumable> [= target]")
+            return
+
+        item_name = self.lhs.strip() if self.rhs is not None else self.args.strip()
+        target_name = self.rhs.strip() if self.rhs else None
+
+        encounter = self.get_encounter(character, require=False)
+        if encounter and encounter.is_participant(character):
+            ok, message = encounter.queue_item(character, item_name, target_name)
+            self.msg(message)
+            return
+
+        ok, message, _result = use_consumable(character, item_name, context="explore")
         if _refresh_cook_scene(self, character, message, success=ok):
             return
         self.msg(message)

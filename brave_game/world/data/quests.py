@@ -29,6 +29,56 @@ STARTING_QUESTS = [
     "the_hollow_lantern",
 ]
 
+QUEST_REGIONS = {
+    "practice_makes_heroes": "Brambleford",
+    "rats_in_the_kettle": "Brambleford",
+    "roadside_howls": "Goblin Road",
+    "fencebreakers": "Goblin Road",
+    "ruk_the_fence_cutter": "Goblin Road",
+    "bridgework_for_joss": "Junk-Yard Planet",
+    "signal_in_the_scrap": "Junk-Yard Planet",
+    "foreman_coilback": "Junk-Yard Planet",
+    "what_whispers_in_the_wood": "Whispering Woods",
+    "herbs_for_sister_maybelle": "Whispering Woods",
+    "greymaws_trail": "Whispering Woods",
+    "lanterns_at_dusk": "Old Barrow Field",
+    "do_not_disturb_the_dead": "Old Barrow Field",
+    "the_knight_without_rest": "Old Barrow Field",
+    "smoke_on_the_ridge": "Ruined Watchtower",
+    "loose_arrows": "Ruined Watchtower",
+    "captain_varn_blackreed": "Ruined Watchtower",
+    "below_the_fencebreakers": "Goblin Warrens",
+    "gutters_and_hexes": "Goblin Warrens",
+    "the_pot_kings_feast": "Goblin Warrens",
+    "bogwater_rumors": "Blackfen",
+    "lights_in_the_reeds": "Blackfen",
+    "miretooths_claim": "Blackfen",
+    "the_south_light": "Drowned Weir",
+    "locks_under_blackwater": "Drowned Weir",
+    "the_hollow_lantern": "Drowned Weir",
+}
+
+
+def get_quest_region(quest_key):
+    """Return the broad region label for a quest."""
+
+    return QUEST_REGIONS.get(quest_key, "Other Fronts")
+
+
+def group_quest_keys_by_region(quest_keys):
+    """Group quest keys by region while preserving first-seen order."""
+
+    grouped = []
+    buckets = {}
+    for quest_key in quest_keys:
+        region = get_quest_region(quest_key)
+        if region not in buckets:
+            buckets[region] = []
+            grouped.append((region, buckets[region]))
+        buckets[region].append(quest_key)
+    return grouped
+
+
 QUESTS = {
     "practice_makes_heroes": {
         "title": "Practice Makes Heroes",

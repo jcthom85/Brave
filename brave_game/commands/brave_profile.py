@@ -4,8 +4,8 @@ from world.browser_panels import build_build_panel, build_gear_panel, build_pack
 from world.browser_views import build_gear_view, build_pack_view, build_quests_view, build_sheet_view
 from world.chapel import get_active_blessing
 from world.data.character_options import CLASSES, RACES, VERTICAL_SLICE_CLASSES, split_unlocked_abilities, xp_needed_for_next_level
-from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES
-from world.data.quests import QUESTS, STARTING_QUESTS
+from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, get_item_category
+from world.data.quests import STARTING_QUESTS, get_quest_region
 from world.questing import clear_tracked_quest, get_tracked_quest, resolve_active_quest_query, set_tracked_quest
 from world.resonance import (
     format_ability_display,
@@ -30,6 +30,15 @@ from .brave import (
     _stack_blocks,
     _wrap_paragraphs,
 )
+
+
+def _get_journal_mode(character):
+    mode = getattr(getattr(character, "db", None), "brave_journal_tab", "active")
+    return mode if mode in {"active", "completed"} else "active"
+
+
+def _set_journal_mode(character, mode):
+    character.db.brave_journal_tab = "completed" if mode == "completed" else "active"
 
 
 class CmdBuild(BraveCharacterCommand):
@@ -419,7 +428,7 @@ class CmdPack(BraveCharacterCommand):
             template_id = entry["template"]
             item = ITEM_TEMPLATES[template_id]
             block = _format_inventory_entry(character, template_id, entry["quantity"])
-            kind = item.get("kind")
+            kind = get_item_category(item)
             if kind in grouped:
                 grouped[kind].append(block)
             else:
@@ -454,6 +463,8 @@ class CmdQuests(BraveCharacterCommand):
 
     Usage:
       quests
+      quests active
+      quests completed
       quests track <quest>
       quests untrack
 
@@ -465,11 +476,12 @@ class CmdQuests(BraveCharacterCommand):
     help_category = "Brave"
 
     def _render_journal(self, character):
+        journal_mode = _get_journal_mode(character)
         tracked_key = get_tracked_quest(character)
         tutorial_block = _format_tutorial_screen_block(character)
-        active_blocks = []
-        completed_blocks = []
-        active_count = 0
+        active_blocks = {}
+        completed_blocks = {}
+        tracked_block = None
         for quest_key in STARTING_QUESTS:
             state = (character.db.brave_quests or {}).get(quest_key)
             if not state or state.get("status") == "locked":
@@ -477,31 +489,37 @@ class CmdQuests(BraveCharacterCommand):
             block = _format_quest_screen_block(character, quest_key, tracked_key=tracked_key)
             if not block:
                 continue
+            if quest_key == tracked_key and state.get("status") == "active":
+                tracked_block = block
+                continue
+            region = get_quest_region(quest_key)
             if state.get("status") == "completed":
-                completed_blocks.append(block)
+                completed_blocks.setdefault(region, []).append(block)
             else:
-                active_count += 1
-                active_blocks.append(block)
+                active_blocks.setdefault(region, []).append(block)
 
-        if not tutorial_block and not active_blocks and not completed_blocks:
+        if not tutorial_block and not active_blocks and not completed_blocks and not tracked_block:
             self.msg("You do not have any quests yet.")
             return
 
         sections = []
-        if tutorial_block:
-            sections.append(("Tutorial", tutorial_block))
-        sections.append(("Active Quests", _stack_blocks(active_blocks) if active_blocks else ["  No active quests right now."]))
-        if completed_blocks:
-            sections.append(("Completed", _stack_blocks(completed_blocks)))
+        if journal_mode == "active":
+            if tracked_block:
+                sections.append(("Tracked Quest", tracked_block))
+            if tutorial_block:
+                sections.append(("Tutorial", tutorial_block))
+            for region, region_blocks in active_blocks.items():
+                sections.append((region, _stack_blocks(region_blocks)))
+            if not sections:
+                sections.append(("Active Quests", ["  No active quests right now."]))
+        else:
+            for region, region_blocks in completed_blocks.items():
+                sections.append((region, _stack_blocks(region_blocks)))
+            if not sections:
+                sections.append(("Completed Quests", ["  No completed quests yet."]))
 
         screen = render_screen(
-            "Quest Journal",
-            subtitle="Use `quests track <name>` to pin one in exploration. Use `quests untrack` to clear it.",
-            meta=[
-                f"{active_count} active",
-                f"{len(completed_blocks)} completed",
-                f"tracked: {QUESTS[tracked_key]['title']}" if tracked_key else "no tracked quest",
-            ],
+            "Journal",
             sections=sections,
         )
         self.scene_msg(screen, panel=build_quests_panel(character), view=build_quests_view(character))
@@ -527,6 +545,10 @@ class CmdQuests(BraveCharacterCommand):
         clear_tracked_quest(character)
         self._render_journal(character)
 
+    def _switch_mode(self, character, mode):
+        _set_journal_mode(character, mode)
+        self._render_journal(character)
+
     def func(self):
         character = self.get_character()
         if not character:
@@ -535,13 +557,19 @@ class CmdQuests(BraveCharacterCommand):
         if self.args:
             command, _, remainder = self.args.strip().partition(" ")
             token = command.lower()
+            if token in {"active", "current"}:
+                self._switch_mode(character, "active")
+                return
+            if token in {"completed", "archive", "done"}:
+                self._switch_mode(character, "completed")
+                return
             if token in {"track", "pin", "focus"}:
                 self._track(character, remainder.strip())
                 return
             if token in {"untrack", "clear", "unpin"}:
                 self._untrack(character)
                 return
-            self.msg("Usage: quests, quests track <quest name>, quests untrack")
+            self.msg("Usage: quests, quests active, quests completed, quests track <quest name>, quests untrack")
             return
 
         self._render_journal(character)

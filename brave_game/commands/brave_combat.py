@@ -173,13 +173,14 @@ class CmdAttack(BraveCharacterCommand):
 
 class CmdUse(BraveCharacterCommand):
     """
-    Queue a class ability in combat.
+    Queue a class ability or combat consumable in combat.
 
     Usage:
-      use <ability>
-      use <ability> = <target>
+      use <ability or consumable>
+      use <ability or consumable> = <target>
 
-    Queues one of the currently implemented unlocked combat abilities for the next combat round.
+    Queues one of the currently implemented unlocked combat abilities, or a carried
+    combat consumable, for the next combat round.
     """
 
     key = "use"
@@ -198,9 +199,15 @@ class CmdUse(BraveCharacterCommand):
         if not encounter:
             return
 
-        ability_name = self.lhs if self.rhs is not None else self.args
+        action_name = self.lhs if self.rhs is not None else self.args
         target_name = self.rhs.strip() if self.rhs else None
-        ok, message = encounter.queue_ability(character, ability_name.strip(), target_name)
+        action_name = action_name.strip()
+
+        ok, message = encounter.queue_ability(character, action_name, target_name)
+        if not ok:
+            consumable_match = encounter.find_consumable(character, action_name, context="combat")
+            if consumable_match:
+                ok, message = encounter.queue_item(character, action_name, target_name)
         self.msg(message)
 
 

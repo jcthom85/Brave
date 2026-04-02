@@ -4,11 +4,11 @@ from world.commerce import get_reserved_entries, get_sellable_entries, get_shop_
 from world.data.character_options import CLASSES, RACES, xp_needed_for_next_level
 from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES
 from world.data.portals import PORTALS, PORTAL_STATUS_LABELS
-from world.data.quests import QUESTS, STARTING_QUESTS
+from world.data.quests import QUESTS, STARTING_QUESTS, group_quest_keys_by_region
 from world.forging import get_forge_entries
 from world.navigation import format_route_hint, sort_exits
 from world.party import get_follow_target, get_party_leader, get_party_members
-from world.questing import get_active_quests, get_completed_quests
+from world.questing import get_active_quests, get_completed_quests, get_tracked_quest
 from world.resonance import get_resource_label, get_resonance_label, get_stat_label
 from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
 
@@ -124,6 +124,11 @@ def _make_panel(eyebrow, title, *, eyebrow_icon, title_icon, chips=None, section
         "chips": chips or [],
         "sections": sections or [],
     }
+
+
+def _get_journal_mode(character):
+    mode = getattr(getattr(character, "db", None), "brave_journal_tab", "active")
+    return mode if mode in {"active", "completed"} else "active"
 
 
 def _short_direction(exit_obj):
@@ -667,70 +672,80 @@ def build_party_panel(character, mode="status"):
 def build_quests_panel(character):
     """Build the browser-side companion panel for the quest journal."""
 
+    journal_mode = _get_journal_mode(character)
     active_keys = get_active_quests(character)
     completed_keys = get_completed_quests(character)
     quest_log = character.db.brave_quests or {}
+    tracked_key = get_tracked_quest(character)
     tutorial_state = ensure_tutorial_state(character)
 
-    active_items = []
-    for quest_key in active_keys[:4]:
-        definition = QUESTS[quest_key]
-        state = quest_log.get(quest_key, {})
+    view_items = [
+        _item("quests active", icon="assignment", badge="ON" if journal_mode == "active" else None),
+        _item("quests completed", icon="task_alt", badge="ON" if journal_mode == "completed" else None),
+    ]
+    sections = [_section("View", "menu", view_items)]
+
+    if journal_mode == "active" and tracked_key:
+        tracked_definition = QUESTS[tracked_key]
+        tracked_state = quest_log.get(tracked_key, {})
         remaining = [
             objective
-            for objective in state.get("objectives", [])
+            for objective in tracked_state.get("objectives", [])
             if not objective.get("completed")
         ]
+        tracked_lines = [tracked_definition["title"]]
         if remaining:
             objective = remaining[0]
             suffix = ""
             required = objective.get("required", 1)
             if required > 1:
                 suffix = f" ({objective.get('progress', 0)}/{required})"
-            text = f"{definition['title']} · {objective['description']}{suffix}"
-        else:
-            text = definition["title"]
-        active_items.append(_item(text, icon="assignment"))
+            tracked_lines.append(f"Next: {objective['description']}{suffix}")
+        sections.append(_section("Tracked", "flag", [_item(" · ".join(tracked_lines), icon="flag")]))
 
-    if not active_items:
-        active_items = [_item("No active quests", icon="task_alt")]
-
-    sections = [_section("Active", "flag", active_items)]
-    if tutorial_state.get("status") == "active":
+    if journal_mode == "active" and tutorial_state.get("status") == "active":
         step_key = tutorial_state.get("step") or "first_steps"
         step = TUTORIAL_STEPS.get(step_key)
         if step:
-            sections.insert(
-                0,
+            sections.append(
                 _section(
                     "Tutorial",
                     "school",
                     [_item(f"{step['title']} · {step['summary']}", icon="flag")],
                 ),
             )
-    if completed_keys:
+
+    region_source = active_keys if journal_mode == "active" else completed_keys
+    region_items = []
+    for region, region_keys in group_quest_keys_by_region(region_source):
+        label = "quest" if len(region_keys) == 1 else "quests"
+        region_items.append(_item(f"{region} · {len(region_keys)} {label}", icon="explore"))
+    if not region_items:
+        region_items = [_item("No quests in this view.", icon="info")]
+    sections.append(_section("Regions", "explore", region_items))
+
+    if journal_mode == "active" and not active_keys and tutorial_state.get("status") != "active":
         sections.append(
             _section(
-                "Completed",
-                "task_alt",
-                [_item(QUESTS[key]["title"], icon="check_circle") for key in completed_keys[:4]],
+                "Status",
+                "info",
+                [_item("No active quests right now.", icon="task_alt")],
+            )
+        )
+    if journal_mode == "completed" and not completed_keys:
+        sections.append(
+            _section(
+                "Status",
+                "info",
+                [_item("No completed quests yet.", icon="task_alt")],
             )
         )
 
     return _make_panel(
-        "Quest Journal",
-        "Tracked Quests",
-        eyebrow_icon="assignment",
-        title_icon="flag",
-        chips=[
-            _chip(f"{len(active_keys)} active", "flag", "accent"),
-            _chip(f"{len(completed_keys)} done", "check_circle", "good"),
-            *(
-                [_chip("Tutorial active", "school", "warn")]
-                if tutorial_state.get("status") == "active"
-                else []
-            ),
-        ],
+        "",
+        "Journal",
+        eyebrow_icon=None,
+        title_icon="menu_book",
         sections=sections,
     )
 
@@ -740,7 +755,10 @@ def build_combat_panel(encounter):
 
     enemies = encounter.get_active_enemies()
     participants = encounter.get_active_participants()
-    round_number = encounter.db.round or 0
+    ally_count = len(participants)
+    foe_count = len(enemies)
+    ally_label = "ally" if ally_count == 1 else "allies"
+    foe_label = "foe" if foe_count == 1 else "foes"
 
     def hp_tone(current_hp, max_hp):
         ratio = (current_hp / max_hp) if max_hp else 0
@@ -779,9 +797,8 @@ def build_combat_panel(encounter):
         eyebrow_icon=None,
         title_icon="warning",
         chips=[
-            _chip(f"Round {round_number or 0}", "hourglass_top", "accent"),
-            _chip(f"{len(participants)} party", "groups", "muted"),
-            _chip(f"{len(enemies)} enemies", "warning", "danger" if enemies else "good"),
+            _chip(f"{ally_count} {ally_label}", "groups", "muted"),
+            _chip(f"{foe_count} {foe_label}", "warning", "danger" if enemies else "good"),
         ],
         sections=sections,
     )
@@ -791,12 +808,11 @@ def build_talk_panel(target):
     """Build a browser-side companion panel for NPC dialogue."""
 
     return _make_panel(
-        "Conversation",
+        "",
         target.key,
-        eyebrow_icon="forum",
+        eyebrow_icon=None,
         title_icon="person",
-        chips=[_chip("NPC", "forum", "muted")],
-        sections=[_section("Actions", "flag", [_item(f"talk {target.key}", icon="forum"), _item("read nearby boards", icon="menu_book")])],
+        sections=[_section("Actions", "flag", [_item(f"talk {target.key}", icon="forum")])],
     )
 
 

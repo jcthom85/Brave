@@ -41,8 +41,10 @@ let defaultout_plugin = (function () {
     var currentMapText = "";
     var currentArcadeState = null;
     var currentMobileUtilityTab = null;
+    var currentCombatActionTab = "abilities";
     var currentMobileSwipe = null;
     var currentPickerData = null;
+    var currentConnectionScreen = "menu";
     var suppressBrowserClickUntil = 0;
     var ENABLE_ROOM_SWIPE_NAV = false;
 
@@ -181,7 +183,9 @@ let defaultout_plugin = (function () {
         if (target.closest("#mobile-nav-dock, #mobile-utility-sheet, #brave-picker-sheet, .inputwrap, .dialog, .goldenlayout-options-ui, .lm_header")) {
             return false;
         }
-        return !!target.closest(".brave-view--room, .brave-sticky-view, #messagewindow, .content");
+        // Let the room pane scroll normally on mobile. Swipe navigation now runs
+        // only from the explicit swipe surface in the mobile dock.
+        return false;
     };
 
     var renderArcadeSurface = function (section) {
@@ -1571,10 +1575,14 @@ let defaultout_plugin = (function () {
     var renderPickerSheet = function () {
         var host = document.getElementById("brave-picker-sheet");
         var pickerData = currentPickerData;
+        var pickerOptions = pickerData && Array.isArray(pickerData.options) ? pickerData.options : [];
+        var pickerBody = pickerData && Array.isArray(pickerData.body)
+            ? pickerData.body.filter(Boolean)
+            : (pickerData && pickerData.body ? [pickerData.body] : []);
         if (!host) {
             return;
         }
-        if (!pickerData || !Array.isArray(pickerData.options) || !pickerData.options.length) {
+        if (!pickerData || (!pickerOptions.length && !pickerBody.length)) {
             clearPickerSheet();
             return;
         }
@@ -1591,31 +1599,48 @@ let defaultout_plugin = (function () {
             + "<span>Close</span>"
             + "</button>"
             + "</div>"
-            + "<div class='brave-picker-sheet__options'>"
-            + pickerData.options.map(function (option) {
-                var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
-                return (
-                    "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + "'"
-                    + commandAttrs(option, false)
-                    + ">"
-                    + "<span class='brave-picker-sheet__option-icon'>"
-                    + icon(option && option.icon ? option.icon : "arrow_right_alt")
-                    + "</span>"
-                    + "<span class='brave-picker-sheet__option-body'>"
-                    + "<span class='brave-picker-sheet__option-label'>" + escapeHtml(option && option.label ? option.label : "") + "</span>"
-                    + (option && option.meta ? "<span class='brave-picker-sheet__option-meta'>" + escapeHtml(option.meta) + "</span>" : "")
-                    + "</span>"
-                    + "</button>"
-                );
-            }).join("")
-            + "</div>"
+            + (pickerBody.length
+                ? "<div class='brave-picker-sheet__bodycopy'>"
+                    + pickerBody.map(function (line) {
+                        return "<div class='brave-picker-sheet__bodyline'>" + escapeHtml(line) + "</div>";
+                    }).join("")
+                    + "</div>"
+                : "")
+            + (pickerOptions.length
+                ? "<div class='brave-picker-sheet__options'>"
+                    + pickerOptions.map(function (option) {
+                        var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
+                        return (
+                            "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + "'"
+                            + commandAttrs(option, false)
+                            + ">"
+                            + "<span class='brave-picker-sheet__option-icon'>"
+                            + icon(option && option.icon ? option.icon : "arrow_right_alt")
+                            + "</span>"
+                            + "<span class='brave-picker-sheet__option-body'>"
+                            + "<span class='brave-picker-sheet__option-label'>" + escapeHtml(option && option.label ? option.label : "") + "</span>"
+                            + (option && option.meta ? "<span class='brave-picker-sheet__option-meta'>" + escapeHtml(option.meta) + "</span>" : "")
+                            + "</span>"
+                            + "</button>"
+                        );
+                    }).join("")
+                    + "</div>"
+                : "")
             + "</div>";
         host.setAttribute("aria-hidden", "false");
         document.body.classList.add("brave-picker-active");
     };
 
     var openPickerSheet = function (pickerData) {
-        if (!pickerData || !Array.isArray(pickerData.options) || !pickerData.options.length) {
+        var hasOptions = !!(pickerData && Array.isArray(pickerData.options) && pickerData.options.length);
+        var hasBody = !!(
+            pickerData
+            && (
+                (Array.isArray(pickerData.body) && pickerData.body.some(Boolean))
+                || (!!pickerData.body && !Array.isArray(pickerData.body))
+            )
+        );
+        if (!pickerData || (!hasOptions && !hasBody)) {
             return false;
         }
         currentPickerData = pickerData;
@@ -1775,14 +1800,16 @@ let defaultout_plugin = (function () {
     };
 
     var commandAttrs = function (entry, includeRole) {
-        if (!entry || (!entry.command && !entry.prefill && !entry.picker)) {
+        if (!entry || (!entry.command && !entry.prefill && !entry.picker && !entry.connection_screen)) {
             return "";
         }
         var attrs = "";
-        var titleValue = "";
+        var titleValue = entry && entry.tooltip ? entry.tooltip : "";
         if (entry.command) {
             attrs += " data-brave-command='" + escapeHtml(entry.command) + "'";
-            titleValue = entry.command;
+            if (!titleValue) {
+                titleValue = entry.command;
+            }
         }
         if (entry.prefill) {
             attrs += " data-brave-prefill='" + escapeHtml(entry.prefill) + "'";
@@ -1794,6 +1821,12 @@ let defaultout_plugin = (function () {
             attrs += " data-brave-picker='" + escapeHtml(JSON.stringify(entry.picker)) + "'";
             if (!titleValue && entry.label) {
                 titleValue = entry.label;
+            }
+        }
+        if (entry.connection_screen) {
+            attrs += " data-brave-connection-screen='" + escapeHtml(entry.connection_screen) + "'";
+            if (!titleValue && (entry.text || entry.label || entry.title)) {
+                titleValue = entry.text || entry.label || entry.title;
             }
         }
         if (titleValue) {
@@ -1812,6 +1845,9 @@ let defaultout_plugin = (function () {
         if (!entry) {
             return "";
         }
+        if (entry.label) {
+            return entry.label;
+        }
         switch (entry.direction) {
             case "north":
                 return "North";
@@ -1826,7 +1862,7 @@ let defaultout_plugin = (function () {
             case "down":
                 return "Down";
             default:
-                return entry.badge || entry.label || "";
+                return entry.badge || "";
         }
     };
 
@@ -1931,7 +1967,7 @@ let defaultout_plugin = (function () {
     };
 
     var hasBrowserInteraction = function (entry) {
-        return !!(entry && (entry.command || entry.prefill || entry.picker));
+        return !!(entry && (entry.command || entry.prefill || entry.picker || entry.connection_screen));
     };
 
     var getCommandInput = function () {
@@ -2005,11 +2041,112 @@ let defaultout_plugin = (function () {
     };
 
     var buildConnectionViewData = function () {
+        var mode = currentConnectionScreen || "menu";
+        if (mode === "signin") {
+            return {
+                variant: "connection",
+                wordmark: "BRAVE",
+                eyebrow: "Sign In",
+                eyebrow_icon: "login",
+                title: "",
+                title_icon: null,
+                subtitle: "Enter your account username and password.",
+                chips: [],
+                actions: [
+                    { text: "Back", icon: "arrow_back", connection_screen: "menu", tone: "muted" },
+                ],
+                sections: [
+                    {
+                        label: "Sign In",
+                        icon: "login",
+                        kind: "form",
+                        fields: [
+                            {
+                                field_name: "username",
+                                field_label: "Username",
+                                placeholder: "Username",
+                                autocomplete: "username",
+                                autocapitalize: "none",
+                                spellcheck: false,
+                                autofocus: true,
+                            },
+                            {
+                                field_name: "password",
+                                field_label: "Password",
+                                input_type: "password",
+                                placeholder: "Password",
+                                autocomplete: "current-password",
+                                autocapitalize: "none",
+                                spellcheck: false,
+                                enterkeyhint: "go",
+                            },
+                        ],
+                        submit_template: "connect {username} {password}",
+                        submit_label: "Sign In",
+                        submit_icon: "login",
+                    },
+                ],
+                reactive: {
+                    scene: "account",
+                    world_tone: "neutral",
+                },
+            };
+        }
+        if (mode === "create") {
+            return {
+                variant: "connection",
+                wordmark: "BRAVE",
+                eyebrow: "Create Account",
+                eyebrow_icon: "person_add",
+                title: "",
+                title_icon: null,
+                subtitle: "",
+                chips: [],
+                actions: [
+                    { text: "Back", icon: "arrow_back", connection_screen: "menu", tone: "muted" },
+                ],
+                sections: [
+                    {
+                        label: "Create Account",
+                        icon: "person_add",
+                        kind: "form",
+                        fields: [
+                            {
+                                field_name: "username",
+                                field_label: "Username",
+                                placeholder: "Choose a username",
+                                autocomplete: "username",
+                                autocapitalize: "none",
+                                spellcheck: false,
+                                autofocus: true,
+                            },
+                            {
+                                field_name: "password",
+                                field_label: "Password",
+                                input_type: "password",
+                                placeholder: "Choose a password",
+                                autocomplete: "new-password",
+                                autocapitalize: "none",
+                                spellcheck: false,
+                                enterkeyhint: "go",
+                            },
+                        ],
+                        submit_template: "create {username} {password}",
+                        submit_label: "Create Account",
+                        submit_icon: "person_add",
+                    },
+                ],
+                reactive: {
+                    scene: "account",
+                    world_tone: "neutral",
+                },
+            };
+        }
         return {
             variant: "connection",
             wordmark: "BRAVE",
-            eyebrow: "Sign In",
-            eyebrow_icon: "login",
+            eyebrow: "Welcome.",
+            eyebrow_icon: null,
             title: "",
             title_icon: null,
             subtitle: "",
@@ -2017,26 +2154,19 @@ let defaultout_plugin = (function () {
             actions: [],
             sections: [
                 {
-                    label: "",
+                    label: "Account",
                     icon: "login",
-                    kind: "entries",
-                    hide_label: true,
+                    kind: "list",
                     items: [
                         {
-                            title: "Connect To Existing Account",
-                            lines: [
-                                "connect <username> <password>",
-                            ],
-                            icon: "login",
-                            prefill: "connect ",
+                            text: "Sign In",
+                            badge: "IN",
+                            connection_screen: "signin",
                         },
                         {
-                            title: "Create Account",
-                            lines: [
-                                "create <username> <password>",
-                            ],
-                            icon: "person_add",
-                            prefill: "create ",
+                            text: "Create Account",
+                            badge: "NEW",
+                            connection_screen: "create",
                         },
                     ],
                 },
@@ -2117,6 +2247,19 @@ let defaultout_plugin = (function () {
     var renderConnectionView = function () {
         renderMainView(buildConnectionViewData());
         pruneLegacyConnectionBoilerplate();
+    };
+
+    var resetToConnectionView = function (screen) {
+        clearTextOutput();
+        clearSceneRail();
+        clearReactiveState();
+        currentConnectionScreen = screen || "menu";
+        renderConnectionView();
+    };
+
+    var openConnectionScreen = function (screen) {
+        currentConnectionScreen = screen || "menu";
+        renderConnectionView();
     };
 
     var renderInlineActions = function (actions) {
@@ -2267,7 +2410,7 @@ let defaultout_plugin = (function () {
         if (!log.length) {
             log = $(
                 "<div class='brave-combat-log'>"
-                + "<div class='brave-combat-log__head'>Combat Log</div>"
+                + "<div class='brave-combat-log__head'>Battle Feed</div>"
                 + "<div class='brave-combat-log__body' role='log' aria-live='polite' aria-relevant='additions text'></div>"
                 + "</div>"
             );
@@ -2279,7 +2422,7 @@ let defaultout_plugin = (function () {
             logBody = $("<div class='brave-combat-log__body' role='log' aria-live='polite' aria-relevant='additions text'></div>");
             var existingEntries = log.children(".out, .msg, .err");
             if (!log.children(".brave-combat-log__head").length) {
-                log.prepend("<div class='brave-combat-log__head'>Combat Log</div>");
+                log.prepend("<div class='brave-combat-log__head'>Battle Feed</div>");
             }
             log.append(logBody);
             if (existingEntries.length) {
@@ -2493,7 +2636,7 @@ let defaultout_plugin = (function () {
         }
 
         var itemTypes = typeof pack.item_types === "number" ? pack.item_types : 0;
-        var meals = typeof pack.meals === "number" ? pack.meals : 0;
+        var consumables = typeof pack.consumables === "number" ? pack.consumables : (typeof pack.meals === "number" ? pack.meals : 0);
         var ingredients = typeof pack.ingredients === "number" ? pack.ingredients : 0;
         var silver = typeof pack.silver === "number" ? pack.silver : 0;
 
@@ -2509,7 +2652,7 @@ let defaultout_plugin = (function () {
                 label: "Supplies",
                 icon: "lunch_dining",
                 items: [
-                    { text: "Meals", meta: String(meals), icon: "restaurant" },
+                    { text: "Consumables", meta: String(consumables), icon: "restaurant" },
                     { text: "Ingredients", meta: String(ingredients), icon: "nutrition" },
                 ],
             }],
@@ -2663,13 +2806,44 @@ let defaultout_plugin = (function () {
                             + "</span>";
                     }
                     var rowClass = "brave-view__list-item";
-                    if (hasBrowserInteraction(entry)) {
+                    var interactive = hasBrowserInteraction(entry);
+                    if (interactive) {
                         rowClass += " brave-click brave-click--row";
                     }
+                    var hasInlineActions = !!(entry && Array.isArray(entry.actions) && entry.actions.length);
+                    if (interactive && hasInlineActions) {
+                        return (
+                            "<li class='brave-view__list-row'>"
+                            + "<div class='" + rowClass + "'>"
+                            + "<button type='button' class='brave-view__list-primary brave-click brave-click--row'"
+                            + commandAttrs(entry, false)
+                            + ">"
+                            + "<div class='brave-view__list-main'>"
+                            + lead
+                            + "<span class='brave-view__list-text'>" + escapeHtml(entry && entry.text ? entry.text : "") + "</span>"
+                            + "</div>"
+                            + "</button>"
+                            + renderInlineActions(entry && entry.actions)
+                            + "</div>"
+                            + "</li>"
+                        );
+                    }
+                    if (interactive) {
+                        return (
+                            "<li class='brave-view__list-row'>"
+                            + "<button type='button' class='" + rowClass + "'"
+                            + commandAttrs(entry, false)
+                            + ">"
+                            + "<div class='brave-view__list-main'>"
+                            + lead
+                            + "<span class='brave-view__list-text'>" + escapeHtml(entry && entry.text ? entry.text : "") + "</span>"
+                            + "</div>"
+                            + "</button>"
+                            + "</li>"
+                        );
+                    }
                     return (
-                        "<li class='" + rowClass + "'"
-                        + commandAttrs(entry)
-                        + ">"
+                        "<li class='" + rowClass + "'>"
                         + "<div class='brave-view__list-main'>"
                         + lead
                         + "<span class='brave-view__list-text'>" + escapeHtml(entry && entry.text ? entry.text : "") + "</span>"
@@ -2695,52 +2869,67 @@ let defaultout_plugin = (function () {
         };
 
         var renderForm = function (section) {
-            var fieldName = section && section.field_name ? section.field_name : "value";
-            var fieldId = "brave-form-" + escapeHtml(fieldName).replace(/[^a-zA-Z0-9_-]/g, "-");
             var submitMode = section && section.submit_mode ? section.submit_mode : "command";
             var submitLabel = section && section.submit_label ? section.submit_label : "Submit";
             var submitToneClass = section && section.submit_tone ? " brave-view__action--" + escapeHtml(section.submit_tone) : "";
-            var attrs = "";
-            if (section && section.maxlength) {
-                attrs += " maxlength='" + escapeHtml(String(section.maxlength)) + "'";
-            }
-            if (section && section.minlength) {
-                attrs += " minlength='" + escapeHtml(String(section.minlength)) + "'";
-            }
-            if (section && section.placeholder) {
-                attrs += " placeholder='" + escapeHtml(section.placeholder) + "'";
-            }
-            if (section && section.autocomplete) {
-                attrs += " autocomplete='" + escapeHtml(section.autocomplete) + "'";
-            }
-            if (section && section.autocapitalize) {
-                attrs += " autocapitalize='" + escapeHtml(section.autocapitalize) + "'";
-            }
-            if (section && section.enterkeyhint) {
-                attrs += " enterkeyhint='" + escapeHtml(section.enterkeyhint) + "'";
-            }
-            if (section && section.spellcheck === false) {
-                attrs += " spellcheck='false'";
-            }
-            if (section && section.autofocus) {
-                attrs += " data-brave-autofocus='1'";
-            }
+            var fields = Array.isArray(section && section.fields) && section.fields.length
+                ? section.fields
+                : [section || {}];
+
+            var fieldMarkup = fields.map(function (field, index) {
+                var fieldName = field && field.field_name ? field.field_name : (index === 0 ? "value" : "value_" + index);
+                var fieldId = "brave-form-" + escapeHtml(fieldName).replace(/[^a-zA-Z0-9_-]/g, "-") + "-" + index;
+                var inputType = field && field.input_type ? field.input_type : "text";
+                var attrs = "";
+                if (field && field.maxlength) {
+                    attrs += " maxlength='" + escapeHtml(String(field.maxlength)) + "'";
+                }
+                if (field && field.minlength) {
+                    attrs += " minlength='" + escapeHtml(String(field.minlength)) + "'";
+                }
+                if (field && field.placeholder) {
+                    attrs += " placeholder='" + escapeHtml(field.placeholder) + "'";
+                }
+                if (field && field.autocomplete) {
+                    attrs += " autocomplete='" + escapeHtml(field.autocomplete) + "'";
+                }
+                if (field && field.autocapitalize) {
+                    attrs += " autocapitalize='" + escapeHtml(field.autocapitalize) + "'";
+                }
+                if (field && field.enterkeyhint) {
+                    attrs += " enterkeyhint='" + escapeHtml(field.enterkeyhint) + "'";
+                }
+                if (field && field.spellcheck === false) {
+                    attrs += " spellcheck='false'";
+                }
+                if (field && field.autofocus) {
+                    attrs += " data-brave-autofocus='1'";
+                }
+
+                return (
+                    "<div class='brave-view__field'>"
+                    + (field && field.field_label
+                        ? "<label class='brave-view__field-label' for='" + fieldId + "'>" + escapeHtml(field.field_label) + "</label>"
+                        : "")
+                    + "<input class='brave-view__field-input'"
+                    + " type='" + escapeHtml(inputType) + "'"
+                    + " id='" + fieldId + "'"
+                    + " name='" + escapeHtml(fieldName) + "'"
+                    + " value='" + escapeHtml(field && field.value ? field.value : "") + "'"
+                    + attrs
+                    + ">"
+                    + "</div>"
+                );
+            }).join("");
 
             return (
                 "<form class='brave-view__form' data-brave-form='1'"
                 + " data-brave-submit-mode='" + escapeHtml(submitMode) + "'"
                 + (section && section.submit_command ? " data-brave-submit-command='" + escapeHtml(section.submit_command) + "'" : "")
                 + (section && section.submit_prefix ? " data-brave-submit-prefix='" + escapeHtml(section.submit_prefix) + "'" : "")
+                + (section && section.submit_template ? " data-brave-submit-template='" + escapeHtml(section.submit_template) + "'" : "")
                 + ">"
-                + (section && section.field_label
-                    ? "<label class='brave-view__field-label' for='" + fieldId + "'>" + escapeHtml(section.field_label) + "</label>"
-                    : "")
-                + "<input type='text' class='brave-view__field-input'"
-                + " id='" + fieldId + "'"
-                + " name='" + escapeHtml(fieldName) + "'"
-                + " value='" + escapeHtml(section && section.value ? section.value : "") + "'"
-                + attrs
-                + ">"
+                + fieldMarkup
                 + "<button type='submit' class='brave-view__action brave-view__form-submit" + submitToneClass + "'>"
                 + icon(section && section.submit_icon ? section.submit_icon : "arrow_forward", "brave-view__action-icon")
                 + "<span>" + escapeHtml(submitLabel) + "</span>"
@@ -3055,6 +3244,25 @@ let defaultout_plugin = (function () {
             );
         };
 
+        var renderBackAction = function (entry) {
+            if (!entry) {
+                return "";
+            }
+            var toneClass = entry && entry.tone ? " brave-view__action--" + escapeHtml(entry.tone) : "";
+            var aria = entry && (entry.aria_label || entry.label)
+                ? " aria-label='" + escapeHtml(entry.aria_label || entry.label) + "'"
+                : "";
+            return (
+                "<button type='button' class='brave-view__action brave-view__back brave-click" + toneClass + "'"
+                + commandAttrs(entry, false)
+                + aria
+                + ">"
+                + icon(entry && entry.icon ? entry.icon : "arrow_back", "brave-view__action-icon")
+                + "<span>" + escapeHtml(entry && entry.text ? entry.text : entry && entry.label ? entry.label : "Back") + "</span>"
+                + "</button>"
+            );
+        };
+
         var viewMarkup =
             "<div class='brave-view" + variantClass + toneClass + "'>"
             + "<div class='brave-view__hero'>"
@@ -3066,10 +3274,15 @@ let defaultout_plugin = (function () {
                     + "</div>"
                 : "")
             + (viewData.variant === "room" ? "<div class='brave-view__micromap' aria-hidden='true'></div>" : "")
-            + ((viewData.title_icon || viewData.title)
-                ? "<div class='brave-view__title'>"
-                    + (viewData.title_icon ? icon(viewData.title_icon, "brave-view__title-icon") : "")
-                    + (viewData.title ? "<span>" + escapeHtml(viewData.title) + "</span>" : "")
+            + ((viewData.title_icon || viewData.title || viewData.back_action)
+                ? "<div class='brave-view__titlebar'>"
+                    + ((viewData.title_icon || viewData.title)
+                        ? "<div class='brave-view__title'>"
+                            + (viewData.title_icon ? icon(viewData.title_icon, "brave-view__title-icon") : "")
+                            + (viewData.title ? "<span>" + escapeHtml(viewData.title) + "</span>" : "")
+                            + "</div>"
+                        : "")
+                    + renderBackAction(viewData.back_action)
                     + "</div>"
                 : "")
             + (viewData.subtitle ? "<div class='brave-view__subtitle'>" + escapeHtml(viewData.subtitle) + "</div>" : "")
@@ -3085,6 +3298,14 @@ let defaultout_plugin = (function () {
             + (Array.isArray(viewData.sections) ? viewData.sections.map(renderSection).join("") : "")
             + "</div>"
             + "</div>";
+
+        if (
+            stickyView
+            && viewData.variant === "combat"
+            && (!currentViewData || currentViewData.variant !== "combat")
+        ) {
+            clearTextOutput();
+        }
 
         if (stickyView) {
             if (!preserveRail) {
@@ -3139,9 +3360,29 @@ let defaultout_plugin = (function () {
         if (dock) {
             dock.innerHTML = "";
         }
+        if (document.body) {
+            document.body.style.removeProperty("--brave-mobile-dock-clearance");
+        }
         document.body.classList.remove("brave-mobile-nav-active");
         document.body.classList.remove("brave-mobile-command-dock-active");
         clearMobileUtilitySheet();
+    };
+
+    var updateMobileDockClearance = function () {
+        var body = document.body;
+        var dock = document.getElementById("mobile-nav-dock");
+        if (!body || !dock || !dock.innerHTML.trim()) {
+            if (body) {
+                body.style.removeProperty("--brave-mobile-dock-clearance");
+            }
+            return;
+        }
+        var dockHeight = Math.ceil(dock.getBoundingClientRect().height || 0);
+        if (!dockHeight) {
+            body.style.removeProperty("--brave-mobile-dock-clearance");
+            return;
+        }
+        body.style.setProperty("--brave-mobile-dock-clearance", (dockHeight + 20) + "px");
     };
 
     var renderMobileSceneUtility = function () {
@@ -3189,12 +3430,71 @@ let defaultout_plugin = (function () {
             + (navSection ? renderMobileNavPad(navSection) : "")
             + "</div>";
         document.body.classList.add("brave-mobile-nav-active");
+        updateMobileDockClearance();
+    };
+
+    var syncCombatActionTray = function () {
+        var combatView = document.querySelector(".brave-view--combat");
+        if (!combatView || !isMobileViewport()) {
+            return;
+        }
+
+        var sectionsHost = combatView.querySelector(".brave-view__sections");
+        var abilitiesSection = combatView.querySelector(".brave-view__section--abilities");
+        var itemsSection = combatView.querySelector(".brave-view__section--items");
+        if (!sectionsHost || !abilitiesSection || !itemsSection) {
+            return;
+        }
+
+        var tabs = combatView.querySelector(".brave-combat-tray-tabs");
+        if (!tabs) {
+            tabs = document.createElement("div");
+            tabs.className = "brave-combat-tray-tabs";
+            tabs.setAttribute("role", "tablist");
+            tabs.innerHTML =
+                "<button type='button' class='brave-combat-tray-tabs__tab' data-brave-combat-tab='abilities' role='tab'><span class='brave-combat-tray-tabs__label'>Skills</span><span class='brave-combat-tray-tabs__count' data-brave-combat-tab-count='abilities'>0</span></button>"
+                + "<button type='button' class='brave-combat-tray-tabs__tab' data-brave-combat-tab='items' role='tab'><span class='brave-combat-tray-tabs__label'>Kit</span><span class='brave-combat-tray-tabs__count' data-brave-combat-tab-count='items'>0</span></button>";
+            sectionsHost.insertBefore(tabs, abilitiesSection);
+        }
+
+        var abilityCount = abilitiesSection.querySelectorAll(".brave-view__list-item").length;
+        var itemCount = itemsSection.querySelectorAll(".brave-view__list-item").length;
+        var preferredTab = currentCombatActionTab;
+        if (!abilityCount && itemCount) {
+            preferredTab = "items";
+        } else if (!itemCount && abilityCount) {
+            preferredTab = "abilities";
+        }
+        currentCombatActionTab = preferredTab;
+        combatView.setAttribute("data-brave-combat-tab", preferredTab);
+
+        Array.prototype.forEach.call(tabs.querySelectorAll("[data-brave-combat-tab]"), function (button) {
+            var tab = button.getAttribute("data-brave-combat-tab");
+            var active = tab === preferredTab;
+            var countNode = button.querySelector("[data-brave-combat-tab-count]");
+            var count = tab === "abilities" ? abilityCount : itemCount;
+            button.classList.toggle("brave-combat-tray-tabs__tab--active", active);
+            button.setAttribute("aria-selected", active ? "true" : "false");
+            button.setAttribute("tabindex", active ? "0" : "-1");
+            if (countNode) {
+                countNode.textContent = String(count);
+            }
+            if (tab === "abilities") {
+                button.classList.toggle("brave-combat-tray-tabs__tab--empty", !abilityCount);
+                button.disabled = !abilityCount;
+            }
+            if (tab === "items") {
+                button.classList.toggle("brave-combat-tray-tabs__tab--empty", !itemCount);
+                button.disabled = !itemCount;
+            }
+        });
     };
 
     var syncMobileShell = function () {
         renderMobileSceneUtility();
         renderMobileNavDock();
         renderMobileUtilitySheet();
+        syncCombatActionTray();
     };
 
     var sendBrowserCommand = function (command, confirmText) {
@@ -3338,6 +3638,20 @@ let defaultout_plugin = (function () {
                 event.stopPropagation();
                 return;
             }
+            var formSubmitTarget = event.target.closest(".brave-view__form-submit");
+            if (formSubmitTarget) {
+                var submitForm = formSubmitTarget.closest("form[data-brave-form='1']");
+                if (submitForm) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (typeof submitForm.requestSubmit === "function") {
+                        submitForm.requestSubmit();
+                    } else {
+                        submitForm.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+                    }
+                    return;
+                }
+            }
             var pickerCloseTarget = event.target.closest("[data-brave-picker-close]");
             if (pickerCloseTarget) {
                 event.preventDefault();
@@ -3356,12 +3670,27 @@ let defaultout_plugin = (function () {
                 handleMobileUtilityAction(mobileTarget.getAttribute("data-brave-mobile-action"));
                 return;
             }
-            var target = event.target.closest("[data-brave-command], [data-brave-prefill], [data-brave-picker]");
+            var combatTabTarget = event.target.closest("[data-brave-combat-tab]");
+            if (combatTabTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (combatTabTarget.disabled) {
+                    return;
+                }
+                currentCombatActionTab = combatTabTarget.getAttribute("data-brave-combat-tab") || "abilities";
+                syncCombatActionTray();
+                return;
+            }
+            var target = event.target.closest("[data-brave-command], [data-brave-prefill], [data-brave-picker], [data-brave-connection-screen]");
             if (!target) {
                 return;
             }
             event.preventDefault();
             event.stopPropagation();
+            if (target.hasAttribute("data-brave-connection-screen")) {
+                openConnectionScreen(target.getAttribute("data-brave-connection-screen"));
+                return;
+            }
             if (target.hasAttribute("data-brave-picker")) {
                 openPickerFromTarget(target);
                 return;
@@ -3381,30 +3710,65 @@ let defaultout_plugin = (function () {
             }
             event.preventDefault();
             event.stopPropagation();
-            var input = form.querySelector(".brave-view__field-input");
-            var rawValue = input ? String(input.value || "") : "";
-            var value = rawValue.trim();
-            if (!value) {
-                if (input && typeof input.focus === "function") {
-                    input.focus();
+            var mode = form.getAttribute("data-brave-submit-mode") || "command";
+            var command = "";
+            var fields = Array.prototype.slice.call(form.querySelectorAll(".brave-view__field-input"));
+            var firstEmptyField = null;
+            var firstField = fields.length ? fields[0] : null;
+            var formData = {};
+            fields.forEach(function (field) {
+                var fieldName = field.getAttribute("name") || "value";
+                var rawValue = String(field.value || "");
+                var value = rawValue.trim();
+                formData[fieldName] = value;
+                if (!firstEmptyField && !value) {
+                    firstEmptyField = field;
+                }
+            });
+            if (firstEmptyField) {
+                if (typeof firstEmptyField.focus === "function") {
+                    firstEmptyField.focus();
                 }
                 return;
             }
-            var mode = form.getAttribute("data-brave-submit-mode") || "command";
-            var command = "";
+            var singleValue = fields.length === 1 ? (formData[fields[0].getAttribute("name") || "value"] || "") : "";
             if (mode === "raw") {
-                command = value;
+                command = singleValue;
+            } else if (form.hasAttribute("data-brave-submit-template")) {
+                command = form.getAttribute("data-brave-submit-template").replace(/\{([a-zA-Z0-9_-]+)\}/g, function (_match, key) {
+                    return formData[key] || "";
+                }).trim();
             } else if (form.hasAttribute("data-brave-submit-command")) {
-                command = form.getAttribute("data-brave-submit-command") + " " + value;
+                command = form.getAttribute("data-brave-submit-command") + " " + singleValue;
             } else if (form.hasAttribute("data-brave-submit-prefix")) {
-                command = form.getAttribute("data-brave-submit-prefix") + " " + value;
+                command = form.getAttribute("data-brave-submit-prefix") + " " + singleValue;
             } else {
-                command = value;
+                command = singleValue;
+            }
+            if (!command) {
+                if (firstField && typeof firstField.focus === "function") {
+                    firstField.focus();
+                }
+                return;
             }
             sendBrowserCommand(command);
         }, true);
 
         document.addEventListener("pointerdown", function (event) {
+            var directPrefillTarget = event.target.closest(
+                ".brave-view__entry--button[data-brave-prefill], "
+                + ".brave-view__list-item[data-brave-prefill], "
+                + ".brave-view__list-primary[data-brave-prefill], "
+                + ".brave-view__mini-action[data-brave-prefill]"
+            );
+            if (directPrefillTarget && (!event.pointerType || event.pointerType === "touch" || event.pointerType === "pen")) {
+                event.preventDefault();
+                event.stopPropagation();
+                suppressBrowserClickUntil = Date.now() + 320;
+                clearPickerSheet();
+                prefillBrowserInput(directPrefillTarget.getAttribute("data-brave-prefill"));
+                return;
+            }
             var swipeSurface = event.target.closest("[data-brave-swipe-surface]");
             if (swipeSurface && (!event.pointerType || event.pointerType === "touch" || event.pointerType === "pen")) {
                 startMobileSwipe(swipeSurface, event.clientX, event.clientY, event.pointerId, "pointer");
@@ -3463,7 +3827,47 @@ let defaultout_plugin = (function () {
         }, { capture: true, passive: false });
 
         document.addEventListener("pointerup", function (event) {
-            finishMobileSwipe(event.clientX, event.clientY, event.pointerId, event, "pointer");
+            if (finishMobileSwipe(event.clientX, event.clientY, event.pointerId, event, "pointer")) {
+                return;
+            }
+            var directTarget = event.target.closest(
+                ".brave-view__list-primary[data-brave-command], "
+                + ".brave-view__list-primary[data-brave-prefill], "
+                + ".brave-view__list-primary[data-brave-picker], "
+                + ".brave-view__list-primary[data-brave-connection-screen], "
+                + ".brave-view__list-item[data-brave-command], "
+                + ".brave-view__list-item[data-brave-prefill], "
+                + ".brave-view__list-item[data-brave-picker], "
+                + ".brave-view__list-item[data-brave-connection-screen], "
+                + ".brave-view__entry--button[data-brave-command], "
+                + ".brave-view__entry--button[data-brave-prefill], "
+                + ".brave-view__entry--button[data-brave-picker], "
+                + ".brave-view__entry--button[data-brave-connection-screen], "
+                + ".brave-view__mini-action[data-brave-command], "
+                + ".brave-view__mini-action[data-brave-prefill], "
+                + ".brave-view__mini-action[data-brave-picker], "
+                + ".brave-view__mini-action[data-brave-connection-screen]"
+            );
+            if (!directTarget || (event.pointerType && event.pointerType !== "touch" && event.pointerType !== "pen")) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            suppressBrowserClickUntil = Date.now() + 320;
+            if (directTarget.hasAttribute("data-brave-connection-screen")) {
+                openConnectionScreen(directTarget.getAttribute("data-brave-connection-screen"));
+                return;
+            }
+            if (directTarget.hasAttribute("data-brave-picker")) {
+                openPickerFromTarget(directTarget);
+                return;
+            }
+            if (directTarget.hasAttribute("data-brave-prefill")) {
+                clearPickerSheet();
+                prefillBrowserInput(directTarget.getAttribute("data-brave-prefill"));
+                return;
+            }
+            sendBrowserCommand(directTarget.getAttribute("data-brave-command"), directTarget.getAttribute("data-brave-confirm"));
         }, { capture: true, passive: false });
 
         document.addEventListener("pointercancel", function (event) {
@@ -3512,16 +3916,52 @@ let defaultout_plugin = (function () {
             }, { capture: true, passive: false });
 
             document.addEventListener("touchend", function (event) {
-                if (!currentMobileSwipe || currentMobileSwipe.mode !== "touch" || !event.changedTouches || !event.changedTouches.length) {
+                if (currentMobileSwipe && currentMobileSwipe.mode === "touch" && event.changedTouches && event.changedTouches.length) {
+                    for (var i = 0; i < event.changedTouches.length; i += 1) {
+                        if (finishMobileSwipe(event.changedTouches[i].clientX, event.changedTouches[i].clientY, event.changedTouches[i].identifier, event, "touch")) {
+                            return;
+                        }
+                    }
                     cancelMobileSwipe("touch");
+                }
+                var directTarget = event.target.closest(
+                    ".brave-view__list-primary[data-brave-command], "
+                    + ".brave-view__list-primary[data-brave-prefill], "
+                    + ".brave-view__list-primary[data-brave-picker], "
+                    + ".brave-view__list-primary[data-brave-connection-screen], "
+                    + ".brave-view__list-item[data-brave-command], "
+                    + ".brave-view__list-item[data-brave-prefill], "
+                    + ".brave-view__list-item[data-brave-picker], "
+                    + ".brave-view__list-item[data-brave-connection-screen], "
+                    + ".brave-view__entry--button[data-brave-command], "
+                    + ".brave-view__entry--button[data-brave-prefill], "
+                    + ".brave-view__entry--button[data-brave-picker], "
+                    + ".brave-view__entry--button[data-brave-connection-screen], "
+                    + ".brave-view__mini-action[data-brave-command], "
+                    + ".brave-view__mini-action[data-brave-prefill], "
+                    + ".brave-view__mini-action[data-brave-picker], "
+                    + ".brave-view__mini-action[data-brave-connection-screen]"
+                );
+                if (!directTarget) {
                     return;
                 }
-                for (var i = 0; i < event.changedTouches.length; i += 1) {
-                    if (finishMobileSwipe(event.changedTouches[i].clientX, event.changedTouches[i].clientY, event.changedTouches[i].identifier, event, "touch")) {
-                        return;
-                    }
+                event.preventDefault();
+                event.stopPropagation();
+                suppressBrowserClickUntil = Date.now() + 320;
+                if (directTarget.hasAttribute("data-brave-connection-screen")) {
+                    openConnectionScreen(directTarget.getAttribute("data-brave-connection-screen"));
+                    return;
                 }
-                cancelMobileSwipe("touch");
+                if (directTarget.hasAttribute("data-brave-picker")) {
+                    openPickerFromTarget(directTarget);
+                    return;
+                }
+                if (directTarget.hasAttribute("data-brave-prefill")) {
+                    clearPickerSheet();
+                    prefillBrowserInput(directTarget.getAttribute("data-brave-prefill"));
+                    return;
+                }
+                sendBrowserCommand(directTarget.getAttribute("data-brave-command"), directTarget.getAttribute("data-brave-confirm"));
             }, { capture: true, passive: false });
 
             document.addEventListener("touchcancel", function (event) {
@@ -3567,6 +4007,16 @@ let defaultout_plugin = (function () {
                 handleMobileUtilityAction(mobileTarget.getAttribute("data-brave-mobile-action"));
                 return;
             }
+            var combatTabTarget = event.target.closest("[data-brave-combat-tab]");
+            if (combatTabTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!combatTabTarget.disabled) {
+                    currentCombatActionTab = combatTabTarget.getAttribute("data-brave-combat-tab") || "abilities";
+                    syncCombatActionTray();
+                }
+                return;
+            }
             var pickerCloseButton = event.target.closest("[data-brave-picker-close]");
             if (pickerCloseButton) {
                 clearPickerSheet();
@@ -3574,12 +4024,16 @@ let defaultout_plugin = (function () {
                 event.stopPropagation();
                 return;
             }
-            var target = event.target.closest("[data-brave-command][role='button'], [data-brave-prefill][role='button'], [data-brave-picker][role='button']");
+            var target = event.target.closest("[data-brave-command][role='button'], [data-brave-prefill][role='button'], [data-brave-picker][role='button'], [data-brave-connection-screen][role='button']");
             if (!target) {
                 return;
             }
             event.preventDefault();
             event.stopPropagation();
+            if (target.hasAttribute("data-brave-connection-screen")) {
+                openConnectionScreen(target.getAttribute("data-brave-connection-screen"));
+                return;
+            }
             if (target.hasAttribute("data-brave-picker")) {
                 openPickerFromTarget(target);
                 return;
@@ -3649,6 +4103,9 @@ let defaultout_plugin = (function () {
         var appendTarget = mwin;
         var rawText = Array.isArray(args) && typeof args[0] === "string" ? args[0] : "";
         if (Array.isArray(args) && typeof args[0] === "string" && isConnectionScreenText(args[0])) {
+            if (!currentViewData || currentViewData.variant !== "connection") {
+                currentConnectionScreen = "menu";
+            }
             renderConnectionView();
             return true;
         }
@@ -3681,7 +4138,6 @@ let defaultout_plugin = (function () {
         if (
             currentViewData
             && currentViewData.variant === "combat"
-            && document.body.classList.contains("brave-sticky-view-active")
         ) {
             appendTarget = ensureCombatLog() || mwin;
         }
@@ -3774,6 +4230,11 @@ let defaultout_plugin = (function () {
             return true;
         }
 
+        if (cmdname === "brave_connection") {
+            resetToConnectionView(kwargs && typeof kwargs.screen === "string" ? kwargs.screen : "menu");
+            return true;
+        }
+
         if (cmdname === "brave_combat_done") {
             clearStickyView();
             return true;
@@ -3806,6 +4267,7 @@ let defaultout_plugin = (function () {
         clearReactiveState();
         bindBrowserInteractionHandlers();
         ensureConnectionBoilerplateObserver();
+        currentConnectionScreen = "menu";
         renderConnectionView();
         console.log("DefaultOut initialized");
     };

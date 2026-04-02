@@ -15,6 +15,7 @@ chargen_stub.get_next_chargen_step = lambda *args, **kwargs: None
 chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
+from world.browser_panels import build_talk_panel
 from world.browser_views import build_talk_list_view, build_talk_view
 
 
@@ -55,11 +56,22 @@ class TalkViewTests(unittest.TestCase):
 
         self.assertEqual("dialogue", view.get("variant"))
         self.assertTrue(view.get("preserve_rail"))
-        self.assertEqual("NPC", view.get("chips", [])[0].get("label"))
-        section = _section(view, "What They Say")
-        self.assertEqual("dialogue", section.get("variant"))
-        self.assertEqual(["Welcome in.", "Take your time."], section.get("lines"))
-        self.assertEqual(["Back", "Open Shop", "Read Nearby Boards"], [item.get("label") for item in view.get("actions", [])])
+        self.assertEqual("", view.get("eyebrow"))
+        self.assertEqual([], view.get("chips"))
+        self.assertEqual("Close", view.get("back_action", {}).get("label"))
+        section = view.get("sections", [])[0]
+        self.assertTrue(section.get("hide_label"))
+        self.assertEqual("quote", section.get("variant"))
+        self.assertEqual(['"Welcome in."', '"Take your time."'], section.get("lines"))
+        self.assertEqual(["Open Shop"], [item.get("label") for item in view.get("actions", [])])
+
+    def test_talk_panel_drops_dead_board_action_and_npc_chip(self):
+        panel = build_talk_panel(DummyNPC("Leda", entity_id="leda_thornwick"))
+
+        self.assertEqual("", panel.get("eyebrow"))
+        self.assertEqual([], panel.get("chips"))
+        actions = panel.get("sections", [])[0].get("items", [])
+        self.assertEqual(["talk Leda"], [item.get("text") for item in actions])
 
 
 if __name__ == "__main__":
