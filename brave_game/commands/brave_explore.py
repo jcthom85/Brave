@@ -4,12 +4,10 @@ import re
 
 from world.activities import (
     cook_recipe,
-    eat_meal,
     format_recipe_list,
     reel_line,
     room_supports_activity,
     start_fishing,
-    use_consumable,
 )
 from world.browser_panels import build_cook_panel, build_map_panel, build_travel_panel
 from world.browser_views import build_cook_view, build_map_view, build_more_view, build_travel_view
@@ -152,8 +150,10 @@ class CmdEat(BraveCharacterCommand):
             self.msg(message)
             return
 
-        ok, message = eat_meal(character, self.args.strip())
+        ok, message, result = self.use_explore_consumable(character, self.args.strip(), verb="eat")
         if _refresh_cook_scene(self, character, message, success=ok):
+            return
+        if self.deliver_consumable_notice(ok, message, result):
             return
         self.msg(message)
 
@@ -190,8 +190,10 @@ class CmdItem(BraveCharacterCommand):
             self.msg(message)
             return
 
-        ok, message, _result = use_consumable(character, item_name, context="explore")
+        ok, message, result = self.use_explore_consumable(character, item_name, target_name)
         if _refresh_cook_scene(self, character, message, success=ok):
+            return
+        if self.deliver_consumable_notice(ok, message, result):
             return
         self.msg(message)
 

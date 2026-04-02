@@ -173,14 +173,15 @@ class CmdAttack(BraveCharacterCommand):
 
 class CmdUse(BraveCharacterCommand):
     """
-    Queue a class ability or combat consumable in combat.
+    Use a class ability or consumable.
 
     Usage:
       use <ability or consumable>
       use <ability or consumable> = <target>
 
-    Queues one of the currently implemented unlocked combat abilities, or a carried
-    combat consumable, for the next combat round.
+    In combat, queues one of the currently implemented unlocked combat abilities or
+    a carried combat consumable for the next round. Outside combat, uses a carried
+    exploration consumable immediately.
     """
 
     key = "use"
@@ -195,13 +196,17 @@ class CmdUse(BraveCharacterCommand):
             self.msg("Usage: use <ability> [= target]")
             return
 
-        encounter = self.get_encounter(character, require=True)
-        if not encounter:
-            return
-
         action_name = self.lhs if self.rhs is not None else self.args
         target_name = self.rhs.strip() if self.rhs else None
         action_name = action_name.strip()
+
+        encounter = self.get_encounter(character, require=False)
+        if not encounter or not encounter.is_participant(character):
+            ok, message, result = self.use_explore_consumable(character, action_name, target_name)
+            if self.deliver_consumable_notice(ok, message, result):
+                return
+            self.msg(message)
+            return
 
         ok, message = encounter.queue_ability(character, action_name, target_name)
         if not ok:

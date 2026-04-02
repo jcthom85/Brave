@@ -2,7 +2,7 @@
 
 from world.commerce import get_reserved_entries, get_sellable_entries, get_shop_bonus
 from world.data.character_options import CLASSES, RACES, xp_needed_for_next_level
-from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES
+from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, get_item_category
 from world.data.portals import PORTALS, PORTAL_STATUS_LABELS
 from world.data.quests import QUESTS, STARTING_QUESTS, group_quest_keys_by_region
 from world.forging import get_forge_entries
@@ -14,6 +14,19 @@ from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
 
 
 WEB_PROTOCOLS = {"websocket", "ajax/comet", "webclient"}
+
+GEAR_PANEL_ICONS = {
+    "main_hand": "swords",
+    "off_hand": "shield",
+    "head": "face",
+    "chest": "security",
+    "hands": "back_hand",
+    "legs": "accessibility_new",
+    "feet": "hiking",
+    "ring": "diamond",
+    "trinket": "auto_awesome",
+    "snack": "lunch_dining",
+}
 
 CHARGEN_STEP_META = {
     "menunode_welcome": {
@@ -349,85 +362,90 @@ def build_gear_panel(character):
     """Build the browser-side companion panel for equipped gear."""
 
     equipment = character.db.brave_equipment or {}
-    filled = 0
-    equipped_items = []
-    open_items = []
+    slot_items = []
     for slot in EQUIPMENT_SLOTS:
         label = slot.replace("_", " ").title()
         template_id = equipment.get(slot)
-        if template_id:
-            filled += 1
-            item_name = ITEM_TEMPLATES.get(template_id, {}).get("name", template_id)
-            equipped_items.append(_item(f"{label} · {item_name}", icon="checkroom"))
-        else:
-            open_items.append(_item(label, icon="inventory_2"))
-
-    sections = [
-        _section("Equipped", "checkroom", equipped_items[:6] or [_item("Nothing equipped yet", icon="inventory_2")]),
-    ]
-    if open_items:
-        sections.append(_section("Open", "add_box", open_items[:6]))
+        item_name = ITEM_TEMPLATES.get(template_id, {}).get("name", template_id) if template_id else "Empty"
+        slot_items.append(_item(f"{label} · {item_name}", icon=GEAR_PANEL_ICONS.get(slot, "shield")))
 
     return _make_panel(
+        "",
         "Equipment",
-        "Equipped Gear",
-        eyebrow_icon="shield",
-        title_icon="inventory_2",
-        chips=[_chip(f"{filled}/{len(EQUIPMENT_SLOTS)} slots", "checkroom", "accent")],
-        sections=sections,
+        eyebrow_icon=None,
+        title_icon="shield",
+        chips=[],
+        sections=[_section("Slots", "shield", slot_items)],
     )
 
 
 def build_pack_panel(character):
-    """Build the browser-side companion panel for inventory."""
+    """Build the browser-side companion panel for the pack screen."""
 
     inventory = list(character.db.brave_inventory or [])
     inventory.sort(key=lambda entry: ITEM_TEMPLATES.get(entry["template"], {}).get("name", entry["template"]))
     total_pieces = sum(entry.get("quantity", 0) for entry in inventory)
-    meals = []
-    ingredients = []
-    loot = []
-    equipment_items = []
+    grouped = {
+        "consumable": [],
+        "ingredient": [],
+        "loot": [],
+        "equipment": [],
+    }
 
     for entry in inventory:
         item = ITEM_TEMPLATES.get(entry["template"], {})
+        kind = get_item_category(item)
+        if item.get("kind") == "equipment":
+            icon_name = GEAR_PANEL_ICONS.get(item.get("slot"), "shield")
+        elif item.get("kind") == "meal":
+            icon_name = "lunch_dining"
+        elif kind == "consumable":
+            icon_name = "restaurant"
+        elif kind == "ingredient":
+            icon_name = "kitchen"
+        elif kind == "loot":
+            icon_name = "category"
+        else:
+            icon_name = "backpack"
         panel_item = _item(
             item.get("name", entry["template"]),
-            icon="inventory_2",
-            badge=str(entry.get("quantity", 1)),
+            icon=icon_name,
+            badge=str(entry.get("quantity", 1)) if entry.get("quantity", 1) > 1 else None,
+            meta=item.get("slot", "").replace("_", " ").title() if item.get("kind") == "equipment" else None,
         )
-        kind = item.get("kind")
-        if kind == "meal":
-            meals.append(panel_item)
-        elif kind == "ingredient":
-            ingredients.append(panel_item)
-        elif kind == "equipment":
-            equipment_items.append(panel_item)
+        if kind in grouped:
+            grouped[kind].append(panel_item)
         else:
-            loot.append(panel_item)
+            grouped["loot"].append(panel_item)
 
-    sections = []
-    if meals:
-        sections.append(_section("Meals", "restaurant", meals[:4]))
-    if ingredients:
-        sections.append(_section("Ingredients", "kitchen", ingredients[:4]))
-    if loot:
-        sections.append(_section("Loot", "category", loot[:4]))
-    if equipment_items:
-        sections.append(_section("Spare Gear", "checkroom", equipment_items[:4]))
-    if not sections:
-        sections = [_section("Carried", "backpack", [_item("Pack is empty", icon="backpack")])]
+    sections = [
+        _section(
+            "On Hand",
+            "backpack",
+            [
+                _item(f"{character.db.brave_silver or 0} silver", icon="savings"),
+                _item(f"{len(inventory)} item types", icon="category"),
+                _item(f"{total_pieces} pieces", icon="layers"),
+            ],
+        )
+    ]
+    if grouped["consumable"]:
+        sections.append(_section("Consumables", "restaurant", grouped["consumable"][:4]))
+    if grouped["ingredient"]:
+        sections.append(_section("Ingredients", "kitchen", grouped["ingredient"][:4]))
+    if grouped["loot"]:
+        sections.append(_section("Loot And Materials", "category", grouped["loot"][:4]))
+    if grouped["equipment"]:
+        sections.append(_section("Spare Gear", "shield", grouped["equipment"][:4]))
+    if len(sections) == 1:
+        sections.append(_section("Contents", "backpack", [_item("Pack is empty", icon="backpack")]))
 
     return _make_panel(
-        "Inventory",
+        "",
         "Pack",
-        eyebrow_icon="backpack",
-        title_icon="inventory_2",
-        chips=[
-            _chip(f"{character.db.brave_silver or 0} silver", "savings", "accent"),
-            _chip(f"{len(inventory)} item types", "category", "muted"),
-            _chip(f"{total_pieces} pieces", "stack", "muted"),
-        ],
+        eyebrow_icon=None,
+        title_icon="backpack",
+        chips=[],
         sections=sections,
     )
 

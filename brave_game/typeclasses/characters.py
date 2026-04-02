@@ -358,7 +358,31 @@ class Character(ObjectParent, DefaultCharacter):
             if entry.get("template") == template_id
         )
 
-    def add_item_to_inventory(self, template_id, quantity=1):
+    def get_equippable_inventory(self, slot=None):
+        """Return carried equipment entries, optionally filtered to one slot."""
+
+        items = []
+        for entry in (self.db.brave_inventory or []):
+            template_id = entry.get("template")
+            quantity = max(0, int(entry.get("quantity", 0) or 0))
+            template = ITEM_TEMPLATES.get(template_id)
+            if quantity <= 0 or not template or template.get("kind") != "equipment":
+                continue
+            item_slot = template.get("slot")
+            if slot and item_slot != slot:
+                continue
+            items.append(
+                {
+                    "template": template_id,
+                    "name": template.get("name", template_id.replace("_", " ").title()),
+                    "slot": item_slot,
+                    "quantity": quantity,
+                }
+            )
+        items.sort(key=lambda item: (item["name"].lower(), item["template"]))
+        return items
+
+    def add_item_to_inventory(self, template_id, quantity=1, *, count_for_collection=True):
         """Add a stackable loot item to the character inventory."""
 
         if quantity <= 0 or template_id not in ITEM_TEMPLATES:
@@ -369,12 +393,14 @@ class Character(ObjectParent, DefaultCharacter):
             if entry["template"] == template_id:
                 entry["quantity"] += quantity
                 self.db.brave_inventory = inventory
-                advance_item_collection(self)
+                if count_for_collection:
+                    advance_item_collection(self)
                 return
 
         inventory.append({"template": template_id, "quantity": quantity})
         self.db.brave_inventory = inventory
-        advance_item_collection(self)
+        if count_for_collection:
+            advance_item_collection(self)
 
     def remove_item_from_inventory(self, template_id, quantity=1):
         """Remove a stackable item from inventory if enough are present."""
@@ -395,3 +421,59 @@ class Character(ObjectParent, DefaultCharacter):
             advance_item_collection(self)
             return True
         return False
+
+    def equip_inventory_item(self, template_id, slot=None):
+        """Equip one carried item into its matching slot, swapping if needed."""
+
+        self.ensure_brave_character()
+        template = ITEM_TEMPLATES.get(template_id)
+        if not template or template.get("kind") != "equipment":
+            return False, "That item cannot be equipped."
+
+        target_slot = template.get("slot")
+        if target_slot not in EQUIPMENT_SLOTS:
+            return False, "That item does not have a valid equipment slot."
+        if slot and slot != target_slot:
+            return False, f"{template['name']} fits in {target_slot.replace('_', ' ').title()}."
+        if self.get_inventory_quantity(template_id) <= 0:
+            return False, f"You are not carrying {template['name']}."
+
+        equipment = dict(self.db.brave_equipment or {})
+        current_template_id = equipment.get(target_slot)
+        if current_template_id == template_id:
+            return False, f"{template['name']} is already equipped."
+        if not self.remove_item_from_inventory(template_id, 1):
+            return False, f"You are not carrying {template['name']}."
+
+        if current_template_id:
+            self.add_item_to_inventory(current_template_id, 1, count_for_collection=False)
+
+        equipment[target_slot] = template_id
+        self.db.brave_equipment = equipment
+        self.recalculate_stats()
+        return True, {
+            "slot": target_slot,
+            "equipped": template_id,
+            "replaced": current_template_id,
+        }
+
+    def unequip_slot(self, slot):
+        """Move an equipped item back into inventory from one slot."""
+
+        self.ensure_brave_character()
+        if slot not in EQUIPMENT_SLOTS:
+            return False, "That is not a valid equipment slot."
+
+        equipment = dict(self.db.brave_equipment or {})
+        template_id = equipment.get(slot)
+        if not template_id:
+            return False, f"Nothing is equipped in {slot.replace('_', ' ').title()}."
+
+        equipment[slot] = None
+        self.db.brave_equipment = equipment
+        self.add_item_to_inventory(template_id, 1, count_for_collection=False)
+        self.recalculate_stats()
+        return True, {
+            "slot": slot,
+            "unequipped": template_id,
+        }

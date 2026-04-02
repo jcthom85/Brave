@@ -44,6 +44,7 @@ let defaultout_plugin = (function () {
     var currentCombatActionTab = "abilities";
     var currentMobileSwipe = null;
     var currentPickerData = null;
+    var currentNoticeTimer = null;
     var currentConnectionScreen = "menu";
     var suppressBrowserClickUntil = 0;
     var ENABLE_ROOM_SWIPE_NAV = false;
@@ -1572,6 +1573,88 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var clearBrowserNotice = function () {
+        if (currentNoticeTimer) {
+            window.clearTimeout(currentNoticeTimer);
+            currentNoticeTimer = null;
+        }
+        var host = document.getElementById("brave-notice-stack");
+        if (host) {
+            host.innerHTML = "";
+            host.setAttribute("aria-hidden", "true");
+        }
+        if (document.body) {
+            document.body.classList.remove("brave-notice-active");
+        }
+    };
+
+    var getNoticeIcon = function (noticeData) {
+        var tone = noticeData && noticeData.tone ? noticeData.tone : "muted";
+        if (noticeData && noticeData.icon) {
+            return noticeData.icon;
+        }
+        if (tone === "good") {
+            return "check_circle";
+        }
+        if (tone === "danger") {
+            return "error";
+        }
+        if (tone === "warn") {
+            return "warning";
+        }
+        return "info";
+    };
+
+    var renderBrowserNotice = function (noticeData) {
+        var host = document.getElementById("brave-notice-stack");
+        var lines = noticeData && Array.isArray(noticeData.lines)
+            ? noticeData.lines.filter(Boolean)
+            : (noticeData && noticeData.lines ? [noticeData.lines] : []);
+        if (!host || !noticeData || (!noticeData.title && !lines.length)) {
+            clearBrowserNotice();
+            return false;
+        }
+
+        clearBrowserNotice();
+
+        var tone = noticeData.tone ? String(noticeData.tone) : "muted";
+        var duration = noticeData.duration_ms === 0
+            ? 0
+            : Math.max(1800, parseInt(noticeData.duration_ms || (tone === "danger" ? 5600 : 4200), 10) || 0);
+
+        host.innerHTML =
+            "<div class='brave-notice brave-notice--" + escapeHtml(tone) + "' role='status' aria-live='polite' aria-atomic='true'>"
+            + "<div class='brave-notice__head'>"
+            + "<div class='brave-notice__titlebar'>"
+            + "<span class='brave-notice__icon'>"
+            + icon(getNoticeIcon(noticeData))
+            + "</span>"
+            + "<div class='brave-notice__title'>" + escapeHtml(noticeData.title || "Notice") + "</div>"
+            + "</div>"
+            + "<button type='button' class='brave-notice__close brave-view__action brave-view__action--muted brave-view__back' data-brave-notice-close='1' aria-label='Close notice'>"
+            + icon("close", "brave-view__action-icon")
+            + "<span>Close</span>"
+            + "</button>"
+            + "</div>"
+            + (lines.length
+                ? "<div class='brave-notice__body'>"
+                    + lines.map(function (line) {
+                        return "<div class='brave-notice__line'>" + escapeHtml(line) + "</div>";
+                    }).join("")
+                    + "</div>"
+                : "")
+            + "</div>";
+        host.setAttribute("aria-hidden", "false");
+        document.body.classList.add("brave-notice-active");
+
+        if (!noticeData.sticky && duration > 0) {
+            currentNoticeTimer = window.setTimeout(function () {
+                clearBrowserNotice();
+            }, duration);
+        }
+        return true;
+    };
+
     var renderPickerSheet = function () {
         var host = document.getElementById("brave-picker-sheet");
         var pickerData = currentPickerData;
@@ -1589,15 +1672,16 @@ let defaultout_plugin = (function () {
 
         host.innerHTML =
             "<div class='brave-picker-sheet__backdrop' data-brave-picker-close='1'></div>"
-            + "<div class='brave-picker-sheet__panel' role='dialog' aria-modal='true' aria-label='" + escapeHtml(pickerData.title || "Choose") + "'>"
+            + "<div class='brave-picker-sheet__panel' role='dialog' aria-modal='true' aria-label='" + escapeHtml(pickerData.title || "Details") + "'>"
             + "<div class='brave-picker-sheet__head'>"
-            + "<div class='brave-picker-sheet__eyebrow'>Choose</div>"
+            + "<div class='brave-picker-sheet__titlebar'>"
             + "<div class='brave-picker-sheet__title'>" + escapeHtml(pickerData.title || "") + "</div>"
-            + (pickerData.subtitle ? "<div class='brave-picker-sheet__subtitle'>" + escapeHtml(pickerData.subtitle) + "</div>" : "")
-            + "<button type='button' class='brave-picker-sheet__close' data-brave-picker-close='1'>"
-            + icon("close", "brave-picker-sheet__close-icon")
+            + "<button type='button' class='brave-picker-sheet__close brave-view__action brave-view__action--muted brave-view__back' data-brave-picker-close='1'>"
+            + icon("close", "brave-view__action-icon")
             + "<span>Close</span>"
             + "</button>"
+            + "</div>"
+            + (pickerData.subtitle ? "<div class='brave-picker-sheet__subtitle'>" + escapeHtml(pickerData.subtitle) + "</div>" : "")
             + "</div>"
             + (pickerBody.length
                 ? "<div class='brave-picker-sheet__bodycopy'>"
@@ -3191,6 +3275,8 @@ let defaultout_plugin = (function () {
                 body = renderEntries(section.items || []);
             } else if (kind === "list") {
                 body = renderList(section.items || []);
+            } else if (kind === "actions") {
+                body = renderActions(section.items || []);
             } else if (kind === "form") {
                 body = renderForm(section);
             } else if (kind === "arcade") {
@@ -3505,6 +3591,7 @@ let defaultout_plugin = (function () {
             return;
         }
         clearPickerSheet();
+        clearBrowserNotice();
         if (isMobileViewport()) {
             if (currentMobileUtilityTab) {
                 currentMobileUtilityTab = null;
@@ -3657,6 +3744,13 @@ let defaultout_plugin = (function () {
                 event.preventDefault();
                 event.stopPropagation();
                 clearPickerSheet();
+                return;
+            }
+            var noticeCloseTarget = event.target.closest("[data-brave-notice-close]");
+            if (noticeCloseTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                clearBrowserNotice();
                 return;
             }
             var mobileTarget = event.target.closest("[data-brave-mobile-panel], [data-brave-mobile-action]");
@@ -3993,6 +4087,12 @@ let defaultout_plugin = (function () {
                 event.stopPropagation();
                 return;
             }
+            if (event.key === "Escape" && document.body.classList.contains("brave-notice-active")) {
+                clearBrowserNotice();
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             if (event.key !== "Enter" && event.key !== " ") {
                 return;
             }
@@ -4020,6 +4120,13 @@ let defaultout_plugin = (function () {
             var pickerCloseButton = event.target.closest("[data-brave-picker-close]");
             if (pickerCloseButton) {
                 clearPickerSheet();
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            var noticeCloseButton = event.target.closest("[data-brave-notice-close]");
+            if (noticeCloseButton) {
+                clearBrowserNotice();
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -4217,6 +4324,11 @@ let defaultout_plugin = (function () {
             return true;
         }
 
+        if (cmdname === "brave_notice") {
+            renderBrowserNotice(kwargs || {});
+            return true;
+        }
+
         if (cmdname === "brave_clear") {
             clearTextOutput();
             clearSceneRail();
@@ -4263,6 +4375,7 @@ let defaultout_plugin = (function () {
     var init = function () {
         var storedTheme = window.localStorage ? window.localStorage.getItem(THEME_STORAGE_KEY) : null;
         applyTheme(storedTheme || "hearth");
+        clearBrowserNotice();
         clearSceneRail();
         clearReactiveState();
         bindBrowserInteractionHandlers();
@@ -4279,6 +4392,7 @@ let defaultout_plugin = (function () {
 
     var onConnectionClose = function () {
         teardownArcadeMode();
+        clearBrowserNotice();
         clearSceneRail();
         resetAllScrollPositions();
         clearReactiveState();

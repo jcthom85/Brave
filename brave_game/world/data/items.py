@@ -10,6 +10,7 @@ EQUIPMENT_SLOTS = (
     "feet",
     "ring",
     "trinket",
+    "snack",
 )
 
 ITEM_TEMPLATES = {
@@ -383,6 +384,15 @@ ITEM_TEMPLATES = {
         "slot": "chest",
         "summary": "A field robe strengthened with hide, resin, and reed cord, light enough for the marsh and sturdy enough for the argument after.",
         "bonuses": {"armor": 3, "max_hp": 10, "max_mana": 16, "dodge": 3, "spirit": 1},
+    },
+    "trail_mix_satchel": {
+        "name": "Trail Mix Satchel",
+        "kind": "equipment",
+        "slot": "snack",
+        "summary": "A waxed trail pouch packed with nuts, berries, and enough salt to pull you back into the fight.",
+        "granted_ability": "trail_mix",
+        "granted_ability_name": "Trail Mix",
+        "cooldown_turns": 3,
     },
     "wolf_pelt": {
         "name": "Wolf Pelt",

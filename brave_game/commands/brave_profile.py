@@ -41,6 +41,10 @@ def _set_journal_mode(character, mode):
     character.db.brave_journal_tab = "completed" if mode == "completed" else "active"
 
 
+def _normalize_query(value):
+    return str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+
+
 class CmdBuild(BraveCharacterCommand):
     """
     View or plan your starting build.
@@ -349,64 +353,156 @@ class CmdSheet(BraveCharacterCommand):
 
 class CmdGear(BraveCharacterCommand):
     """
-    View your currently equipped gear.
+    View and manage your currently equipped gear.
 
     Usage:
       gear
+      gear equip <slot> <item>
+      gear swap <slot> <item>
+      gear unequip <slot>
 
-    Shows your auto-equipped starter kit and the bonuses it grants.
+    Shows your current kit and lets you equip, swap, or unequip items by slot.
     """
 
     key = "gear"
     aliases = ["equipment", "kit"]
     help_category = "Brave"
 
-    def func(self):
-        character = self.get_character()
-        if not character:
-            return
-
+    def _render_gear(self, character):
         equipment = character.db.brave_equipment or {}
-        filled_slots = [(slot, equipment.get(slot)) for slot in EQUIPMENT_SLOTS if equipment.get(slot)]
-        open_slots = [slot.replace("_", " ").title() for slot in EQUIPMENT_SLOTS if not equipment.get(slot)]
+        slot_blocks = []
+        for slot in EQUIPMENT_SLOTS:
+            template_id = equipment.get(slot)
+            if template_id:
+                slot_blocks.append(_format_equipped_item_entry(character, slot, template_id))
+            else:
+                slot_blocks.append(format_entry(f"{slot.replace('_', ' ').title()} · Empty", summary="Nothing equipped."))
         total_bonus_text = _format_context_bonus_summary(_format_equipment_totals(character), character)
 
         sections = [
             (
-                "Equipped",
-                _stack_blocks(
-                    [
-                        _format_equipped_item_entry(character, slot, template_id)
-                        for slot, template_id in filled_slots
-                    ]
-                )
-                if filled_slots
-                else ["  Nothing equipped yet."],
-            ),
+                "Slots",
+                _stack_blocks(slot_blocks),
+            )
         ]
-        if open_slots:
-            sections.append(("Open Slots", wrap_text(", ".join(open_slots), indent="  ")))
         if total_bonus_text:
             sections.append(("Current Kit Bonus", wrap_text(total_bonus_text, indent="  ")))
 
         screen = render_screen(
-            "Equipped Gear",
-            subtitle="What you are wearing right now.",
-            meta=[f"{len(filled_slots)} / {len(EQUIPMENT_SLOTS)} slots filled"],
+            "Equipment",
             sections=sections,
         )
         self.scene_msg(screen, panel=build_gear_panel(character), view=build_gear_view(character))
         record_command_event(character, "gear")
 
+    def _resolve_slot(self, query):
+        token = _normalize_query(query)
+        for slot in EQUIPMENT_SLOTS:
+            if token in {slot, slot.replace("_", "")}:
+                return slot
+            if token == _normalize_query(slot.replace("_", " ")):
+                return slot
+        return None
+
+    def _resolve_inventory_equipment(self, character, query, slot=None):
+        token = _normalize_query(query)
+        candidates = character.get_equippable_inventory(slot=slot)
+        exact = [
+            entry["template"]
+            for entry in candidates
+            if token in {
+                _normalize_query(entry["template"]),
+                _normalize_query(entry["name"]),
+            }
+        ]
+        if exact:
+            return exact[0]
+
+        partial = [
+            entry["template"]
+            for entry in candidates
+            if token and (
+                token in _normalize_query(entry["template"])
+                or token in _normalize_query(entry["name"])
+            )
+        ]
+        return partial[0] if partial else None
+
+    def _equip(self, character, slot_query, item_query):
+        slot = self._resolve_slot(slot_query)
+        if not slot:
+            self.msg("Usage: gear equip <slot> <item>")
+            return
+
+        template_id = self._resolve_inventory_equipment(character, item_query, slot=slot)
+        if not template_id:
+            self.msg(f"You are not carrying any matching gear for {slot.replace('_', ' ').title()}.")
+            return
+
+        success, result = character.equip_inventory_item(template_id, slot=slot)
+        if not success:
+            self.msg(result)
+            return
+
+        equipped_name = ITEM_TEMPLATES[result["equipped"]]["name"]
+        replaced_id = result.get("replaced")
+        if replaced_id:
+            replaced_name = ITEM_TEMPLATES[replaced_id]["name"]
+            self.msg(f"You swap in |w{equipped_name}|n and stow |w{replaced_name}|n.")
+        else:
+            self.msg(f"You equip |w{equipped_name}|n.")
+        self._render_gear(character)
+
+    def _unequip(self, character, slot_query):
+        slot = self._resolve_slot(slot_query)
+        if not slot:
+            self.msg("Usage: gear unequip <slot>")
+            return
+
+        success, result = character.unequip_slot(slot)
+        if not success:
+            self.msg(result)
+            return
+
+        item_name = ITEM_TEMPLATES[result["unequipped"]]["name"]
+        self.msg(f"You unequip |w{item_name}|n.")
+        self._render_gear(character)
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+
+        if self.args:
+            command, _, remainder = self.args.strip().partition(" ")
+            token = command.lower()
+            if token in {"equip", "swap"}:
+                slot_query, _, item_query = remainder.strip().partition(" ")
+                if not slot_query or not item_query:
+                    self.msg("Usage: gear equip <slot> <item>")
+                    return
+                self._equip(character, slot_query, item_query.strip())
+                return
+            if token in {"unequip", "remove", "clear"}:
+                if not remainder.strip():
+                    self.msg("Usage: gear unequip <slot>")
+                    return
+                self._unequip(character, remainder.strip())
+                return
+            self.msg("Usage: gear, gear equip <slot> <item>, gear unequip <slot>")
+            return
+
+        self._render_gear(character)
+
 
 class CmdPack(BraveCharacterCommand):
     """
-    View your carried loot and coin.
+    View your pack and coin.
 
     Usage:
       pack
 
-    Shows your current silver and any loot recovered from encounters.
+    Shows what you are carrying, while still allowing `inventory` as an alias.
     """
 
     key = "pack"

@@ -1,8 +1,11 @@
 """Brave-specific player commands for the first slice."""
 
+import re
+
 from evennia.commands.default.muxcommand import MuxCommand
 
-from world.data.items import ITEM_TEMPLATES, get_item_category, get_item_use_profile
+from world.activities import match_targetable_consumable_character, use_consumable_template
+from world.data.items import ITEM_TEMPLATES, get_item_category, get_item_use_profile, match_inventory_item
 from world.party import get_present_party_members
 from world.data.quests import QUESTS
 from world.resonance import get_resource_label, get_stat_label
@@ -14,6 +17,16 @@ def _normalize_token(value):
     """Normalize free-text tokens for fuzzy command matching."""
 
     return "".join(char for char in (value or "").lower() if char.isalnum())
+
+
+_EVENNIA_MARKUP_RE = re.compile(r"\|[A-Za-z]")
+
+
+def _strip_evennia_markup(text):
+    """Remove lightweight Evennia color markup for browser notices."""
+
+    clean = str(text or "").replace("||", "|")
+    return _EVENNIA_MARKUP_RE.sub("", clean)
 
 
 def _format_context_bonus_summary(bonuses, context):
@@ -100,9 +113,20 @@ def _format_inventory_entry(character, template_id, quantity):
         details.append(value_text)
 
     if item.get("kind") == "equipment":
+        slot = item.get("slot")
+        if slot:
+            details.append("Slot: " + slot.replace("_", " ").title())
         bonus_text = _format_context_bonus_summary(item.get("bonuses", {}), character)
         if bonus_text:
-            details.append("Bonuses: " + bonus_text)
+            details.append(bonus_text)
+        granted_ability = item.get("granted_ability")
+        if granted_ability:
+            ability_label = item.get("granted_ability_name", granted_ability)
+            cooldown_turns = int(item.get("cooldown_turns", 0) or 0)
+            if cooldown_turns > 0:
+                details.append(f"{ability_label} · {cooldown_turns}-turn cooldown")
+            else:
+                details.append(ability_label)
     elif get_item_category(item) == "consumable":
         use = get_item_use_profile(item) or {}
         restore_text = _format_restore_summary(use.get("restore", {}), character)
@@ -137,7 +161,15 @@ def _format_equipped_item_entry(character, slot, template_id):
     details = []
     bonus_text = _format_context_bonus_summary(item.get("bonuses", {}), character)
     if bonus_text:
-        details.append("Bonuses: " + bonus_text)
+        details.append(bonus_text)
+    granted_ability = item.get("granted_ability")
+    if granted_ability:
+        ability_label = item.get("granted_ability_name", granted_ability)
+        cooldown_turns = int(item.get("cooldown_turns", 0) or 0)
+        if cooldown_turns > 0:
+            details.append(f"{ability_label} · {cooldown_turns}-turn cooldown")
+        else:
+            details.append(ability_label)
 
     return format_entry(f"{label}: {item['name']}", details=details, summary=item.get("summary"))
 
@@ -276,6 +308,28 @@ class BraveCharacterCommand(MuxCommand):
         if view and session:
             self.msg(brave_view=view, session=session)
 
+    def send_browser_notice(self, title, *, lines=None, tone="muted", icon=None, duration_ms=None, sticky=False):
+        """Send a browser-only popup notice for the current session."""
+
+        session = self.get_web_session()
+        notice_lines = [str(line) for line in (lines or []) if str(line or "").strip()]
+        if not session or (not title and not notice_lines):
+            return False
+
+        payload = {
+            "title": title or "Notice",
+            "tone": tone or "muted",
+            "lines": notice_lines,
+        }
+        if icon:
+            payload["icon"] = icon
+        if duration_ms is not None:
+            payload["duration_ms"] = max(0, int(duration_ms))
+        if sticky:
+            payload["sticky"] = True
+        self.msg(brave_notice=payload, session=session)
+        return True
+
     def send_other_sessions(self, text):
         """Send fallback text to any other connected sessions on the same puppet."""
 
@@ -315,6 +369,38 @@ class BraveCharacterCommand(MuxCommand):
             return
 
         self.msg(text)
+
+    def deliver_browser_notice(self, message, *, title=None, tone="muted", icon=None, duration_ms=None, sticky=False):
+        """Show a browser popup on the active web session and text elsewhere."""
+
+        plain_message = _strip_evennia_markup(message)
+        if self.send_browser_notice(
+            title or "Notice",
+            lines=[plain_message],
+            tone=tone,
+            icon=icon,
+            duration_ms=duration_ms,
+            sticky=sticky,
+        ):
+            self.send_other_sessions(message)
+            return True
+        return False
+
+    def deliver_consumable_notice(self, ok, message, result=None):
+        """Show explore-time consumable feedback as a browser popup when possible."""
+
+        item = result.get("item") if result else None
+        title = item.get("name") if item else ("Can't Use Item" if not ok else "Item Used")
+        tone = "good" if ok else "danger"
+        icon = "check_circle" if ok else "error"
+        duration_ms = 4200 if ok else 5600
+        return self.deliver_browser_notice(
+            message,
+            title=title,
+            tone=tone,
+            icon=icon,
+            duration_ms=duration_ms,
+        )
 
     def get_character(self):
         caller = self.caller
@@ -465,3 +551,59 @@ class BraveCharacterCommand(MuxCommand):
         if not matches:
             return None, entries
         return matches[0] if len(matches) == 1 else matches, entries
+
+    def use_explore_consumable(self, character, item_query, target_query=None, *, verb=None):
+        """Use an exploration consumable, optionally targeting someone nearby."""
+
+        match = match_inventory_item(character, item_query, category="consumable", verb=verb)
+        if isinstance(match, list):
+            names = ", ".join(ITEM_TEMPLATES[key]["name"] for key in match)
+            return False, f"Be more specific. That could mean: {names}", None
+        if not match:
+            return False, "You do not have a usable consumable matching that.", None
+
+        item = ITEM_TEMPLATES.get(match, {})
+        use = get_item_use_profile(item, context="explore")
+        if not use:
+            any_use = get_item_use_profile(item) or {}
+            contexts = tuple(any_use.get("contexts") or ())
+            if "combat" in contexts and "explore" not in contexts:
+                return False, f"{item.get('name', 'That item')} can only be used in combat.", None
+            return False, "That item can't be used that way right now.", None
+
+        target_type = use.get("target", "self")
+        target = None
+        if target_type == "enemy":
+            return False, f"{item.get('name', 'That item')} can only be used in combat.", None
+        if target_type == "ally":
+            if target_query:
+                target = match_targetable_consumable_character(character, target_query, include_self=True)
+                if isinstance(target, list):
+                    names = ", ".join(candidate.key for candidate in target)
+                    return False, f"Be more specific. That could mean: {names}", None
+                if not target:
+                    return False, "No one here matches that target.", None
+            else:
+                target = character
+        elif target_type == "self":
+            if target_query:
+                target = match_targetable_consumable_character(character, target_query, include_self=True)
+                if isinstance(target, list):
+                    names = ", ".join(candidate.key for candidate in target)
+                    return False, f"Be more specific. That could mean: {names}", None
+                if not target:
+                    return False, "No one here matches that target.", None
+                if target != character:
+                    return False, f"{item.get('name', 'That item')} can only be used on yourself.", None
+            else:
+                target = character
+        elif target_query:
+            return False, "That item does not need a target.", None
+
+        return use_consumable_template(
+            character,
+            match,
+            context="explore",
+            verb=verb,
+            target=target,
+        )

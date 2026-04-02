@@ -81,9 +81,13 @@ class JournalViewTests(unittest.TestCase):
         self.assertEqual("", view.get("subtitle"))
         self.assertEqual([], view.get("chips"))
         self.assertEqual("Close", view.get("back_action", {}).get("label"))
-        self.assertEqual(["Active", "Completed"], [item.get("label") for item in view.get("actions", [])])
+        self.assertEqual([], view.get("actions", []))
+        switcher = view.get("sections", [])[0]
+        self.assertEqual("actions", switcher.get("kind"))
+        self.assertEqual("switcher", switcher.get("variant"))
+        self.assertEqual(["Active", "Completed"], [item.get("label") for item in switcher.get("items", [])])
 
-        tracked = view.get("sections", [])[0]
+        tracked = view.get("sections", [])[1]
         tutorial = _section(view, "Tutorial")
         goblin_road = _section(view, "Goblin Road")
 
@@ -115,10 +119,11 @@ class JournalViewTests(unittest.TestCase):
         view = build_quests_view(character)
 
         self.assertEqual("Close", view.get("back_action", {}).get("label"))
-        self.assertEqual(["Active", "Completed"], [item.get("label") for item in view.get("actions", [])])
+        self.assertEqual([], view.get("actions", []))
+        self.assertEqual(["Active", "Completed"], [item.get("label") for item in view.get("sections", [])[0].get("items", [])])
         labels = [section.get("label") for section in view.get("sections", [])]
-        self.assertEqual(["Brambleford", "Junk-Yard Planet"], labels)
-        self.assertEqual("list", view.get("sections", [])[0].get("kind"))
+        self.assertEqual(["", "Brambleford", "Junk-Yard Planet"], labels)
+        self.assertEqual("list", view.get("sections", [])[1].get("kind"))
 
     def test_journal_view_keeps_empty_states(self):
         character = DummyCharacter(

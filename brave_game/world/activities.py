@@ -33,6 +33,91 @@ def _count_inventory(character):
     return totals
 
 
+def _normalize_target_token(value):
+    """Normalize free-text target queries for fuzzy matching."""
+
+    return "".join(char for char in str(value or "").lower() if char.isalnum())
+
+
+def _is_targetable_consumable_character(obj):
+    """Return whether a room object can be targeted by explore consumables."""
+
+    if not obj:
+        return False
+    if hasattr(obj, "ensure_brave_character"):
+        return True
+    is_typeclass = getattr(obj, "is_typeclass", None)
+    if callable(is_typeclass):
+        try:
+            return bool(is_typeclass("typeclasses.characters.Character", exact=False))
+        except TypeError:
+            return False
+    return False
+
+
+def get_targetable_consumable_characters(character, include_self=False):
+    """Return nearby Brave characters that can be targeted by explore consumables."""
+
+    candidates = []
+    room = getattr(character, "location", None)
+    if room:
+        for obj in list(getattr(room, "contents", []) or []):
+            if not _is_targetable_consumable_character(obj):
+                continue
+            if obj == character and not include_self:
+                continue
+            if obj not in candidates:
+                candidates.append(obj)
+
+    if include_self and character not in candidates:
+        candidates.insert(0, character)
+
+    def _sort_key(candidate):
+        same_party = (
+            candidate != character
+            and getattr(getattr(candidate, "db", None), "brave_party_id", None)
+            and getattr(getattr(candidate, "db", None), "brave_party_id", None)
+            == getattr(getattr(character, "db", None), "brave_party_id", None)
+        )
+        return (
+            0 if candidate == character else 1,
+            0 if same_party else 1,
+            str(getattr(candidate, "key", "") or "").lower(),
+            getattr(candidate, "id", 0),
+        )
+
+    candidates.sort(key=_sort_key)
+    return candidates
+
+
+def match_targetable_consumable_character(character, query, include_self=False):
+    """Find a nearby Brave character by fuzzy name for explore-time item use."""
+
+    candidates = get_targetable_consumable_characters(character, include_self=include_self)
+    if not query:
+        return None
+
+    query_norm = _normalize_target_token(query)
+    exact = []
+    partial = []
+    for candidate in candidates:
+        names = [getattr(candidate, "key", "")]
+        aliases = getattr(getattr(candidate, "aliases", None), "all", None)
+        if callable(aliases):
+            names.extend(alias for alias in aliases())
+        tokens = [_normalize_target_token(name) for name in names if name]
+        if any(query_norm == token for token in tokens):
+            exact.append(candidate)
+        elif any(query_norm in token for token in tokens):
+            partial.append(candidate)
+
+    if exact:
+        return exact[0] if len(exact) == 1 else exact
+    if partial:
+        return partial[0] if len(partial) == 1 else partial
+    return None
+
+
 def _clear_fishing_state(character):
     if hasattr(character.ndb, "brave_fishing"):
         del character.ndb.brave_fishing
@@ -377,6 +462,16 @@ def _consume_item_by_template(character, template_id, *, context="explore", cozy
     if effect_type == "damage" and (not encounter or not isinstance(resolved_target, Mapping)):
         return False, "That item can't be used meaningfully here right now.", None
 
+    if target_type == "self" and resolved_target != character:
+        return False, "That item can only be used on yourself.", None
+
+    ensure_target = getattr(resolved_target, "ensure_brave_character", None)
+    if callable(ensure_target):
+        ensure_target()
+    if hasattr(resolved_target, "location"):
+        if resolved_target != character and getattr(resolved_target, "location", None) != getattr(character, "location", None):
+            return False, "That target is not here with you.", None
+
     if effect_type == "cleanse":
         if not encounter or not hasattr(resolved_target, "db"):
             return False, "That item needs an ally in combat to be useful.", None
@@ -466,15 +561,53 @@ def _consume_item_by_template(character, template_id, *, context="explore", cozy
     }
 
 
-def use_consumable(character, query, *, context="explore", verb=None):
+def use_consumable_template(character, template_id, *, context="explore", verb=None, target=None, encounter=None):
+    """Consume one carried item by template id in a specific context."""
+
+    item = ITEM_TEMPLATES.get(template_id)
+    if not item:
+        return False, "That item does not exist.", None
+
+    use = get_item_use_profile(item, context=context)
+    if not use:
+        return False, "That item can't be used that way right now.", None
+    if verb and use.get("verb") != verb:
+        return False, "That item can't be used that way right now.", None
+    return _consume_item_by_template(
+        character,
+        template_id,
+        context=context,
+        target=target,
+        encounter=encounter,
+    )
+
+
+def use_consumable(character, query, *, context="explore", verb=None, target=None, encounter=None):
     """Consume a carried consumable item by fuzzy name."""
 
     match = _resolve_consumable_match(character, query, context=context, verb=verb)
     if isinstance(match, list):
         return False, "Be more specific. That could mean: " + ", ".join(ITEM_TEMPLATES[key]["name"] for key in match), None
     if not match:
+        any_match = _resolve_consumable_match(character, query, context=None, verb=verb)
+        if isinstance(any_match, list):
+            return False, "Be more specific. That could mean: " + ", ".join(ITEM_TEMPLATES[key]["name"] for key in any_match), None
+        if any_match:
+            item = ITEM_TEMPLATES.get(any_match, {})
+            any_use = get_item_use_profile(item) or {}
+            contexts = tuple(any_use.get("contexts") or ())
+            if context == "explore" and "combat" in contexts and "explore" not in contexts:
+                return False, f"{item.get('name', 'That item')} can only be used in combat.", None
+            return False, "That item can't be used that way right now.", None
         return False, "You do not have a usable consumable matching that.", None
-    return _consume_item_by_template(character, match, context=context)
+    return use_consumable_template(
+        character,
+        match,
+        context=context,
+        verb=verb,
+        target=target,
+        encounter=encounter,
+    )
 
 
 def eat_meal(character, query):
