@@ -536,7 +536,7 @@ def build_talk_list_view(character, npcs):
     }
 
 
-def _pre_section(label, icon, text, *, span=None, tone=None):
+def _pre_section(label, icon, text, *, span=None, tone=None, hide_label=False):
     section = {
         "label": label,
         "icon": icon,
@@ -547,6 +547,8 @@ def _pre_section(label, icon, text, *, span=None, tone=None):
         section["span"] = span
     if tone:
         section["tone"] = tone
+    if hide_label:
+        section["hide_label"] = True
     return section
 
 
@@ -1139,7 +1141,7 @@ def build_map_view(room, character, *, mode="map"):
             "",
             "Map Unavailable",
             eyebrow_icon=None,
-            title_icon=None,
+            title_icon="map",
             subtitle="",
             chips=[],
             sections=[_section("Status", "info", "lines", lines=["No regional coordinates are configured for this room."])],
@@ -1157,7 +1159,7 @@ def build_map_view(room, character, *, mode="map"):
         legend_items.append({"text": text, "badge": entry["icon"]})
 
     sections = [
-        _pre_section(region_label, "grid_view", snapshot["map_text"], span="mapwide", tone="map"),
+        _pre_section(region_label, "grid_view", snapshot["map_text"], span="mapwide", tone="map", hide_label=True),
         _section("Legend", "category", "list", items=legend_items),
     ]
 
@@ -1183,8 +1185,8 @@ def build_map_view(room, character, *, mode="map"):
         "",
         "Map" if mode == "map" else "Local Map",
         eyebrow_icon=None,
-        title_icon=None,
-        subtitle="",
+        title_icon="map",
+        subtitle=region_label,
         chips=[],
         sections=sections,
         back=True,

@@ -16,7 +16,7 @@ chargen_stub.get_next_chargen_step = lambda *args, **kwargs: None
 chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
-from world.browser_views import WELCOME_PAGES, build_room_view
+from world.browser_views import WELCOME_PAGES, build_map_view, build_room_view
 
 
 def _section(view, label):
@@ -72,6 +72,14 @@ class DummyCharacter:
         )
 
 
+class DummyMapRoom:
+    def __init__(self):
+        self.db = SimpleNamespace(
+            brave_zone="Brambleford",
+            brave_safe=True,
+        )
+
+
 class RoomViewTests(unittest.TestCase):
     def test_room_view_includes_mobile_pack_summary_and_navpad(self):
         view = build_room_view(DummyRoom(), DummyCharacter())
@@ -114,6 +122,34 @@ class RoomViewTests(unittest.TestCase):
         self.assertGreater(len(view.get("guidance", [])), 1)
         self.assertEqual(WELCOME_PAGES, view.get("welcome_pages"))
         self.assertTrue(character.db.brave_welcome_shown)
+
+
+    def test_map_view_uses_map_icon_and_region_subtitle(self):
+        character = DummyCharacter()
+        room = DummyMapRoom()
+
+        with patch(
+            "world.browser_views.build_map_snapshot",
+            return_value={
+                "room": room,
+                "region": "Fallback Region",
+                "map_text": "map-text",
+                "legend": [{"label": "You", "icon": "@"}],
+                "party": [],
+            },
+        ):
+            view = build_map_view(room, character)
+
+        self.assertEqual("map", view.get("variant"))
+        self.assertEqual("Map", view.get("title"))
+        self.assertEqual("map", view.get("title_icon"))
+        self.assertEqual("Brambleford", view.get("subtitle"))
+        self.assertEqual("", view.get("back_action", {}).get("label"))
+
+        map_section = view.get("sections", [])[0]
+        self.assertEqual("pre", map_section.get("kind"))
+        self.assertTrue(map_section.get("hide_label"))
+        self.assertEqual("Brambleford", map_section.get("label"))
 
 
 if __name__ == "__main__":
