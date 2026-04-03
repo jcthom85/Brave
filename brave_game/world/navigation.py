@@ -196,6 +196,7 @@ def build_map_snapshot(room, radius=None, character=None):
 
     party_names_by_room = {}
     party_members = []
+    party_coords = set()
     if character and getattr(character.db, "brave_party_id", None):
         from world.party import get_party_members
 
@@ -204,34 +205,45 @@ def build_map_snapshot(room, radius=None, character=None):
             if not member.location:
                 continue
             party_names_by_room.setdefault(member.location.id, []).append(member.key)
+            if getattr(member.location.db, "brave_map_region", None) == region:
+                party_coords.add(
+                    (
+                        getattr(member.location.db, "brave_map_x", 0),
+                        getattr(member.location.db, "brave_map_y", 0),
+                    )
+                )
+
+    def tile_rows(x, y):
+        candidate = room_by_coord.get((x, y))
+        if not candidate:
+            return ["   ", "   ", "   "]
+
+        north = "|" if _has_connection(room_by_coord, x, y, "north") else " "
+        south = "|" if _has_connection(room_by_coord, x, y, "south") else " "
+        west = "-" if _has_connection(room_by_coord, x, y, "west") else " "
+        east = "-" if _has_connection(room_by_coord, x, y, "east") else " "
+
+        if candidate.id == room.id:
+            center = "@"
+        elif (x, y) in party_coords:
+            center = "P"
+        else:
+            center = str(getattr(candidate.db, "brave_map_icon", "?") or "?")[:1]
+
+        return [
+            f" {north} ",
+            f"{west}{center}{east}",
+            f" {south} ",
+        ]
 
     lines = []
-    node_gap = "-----"
-    node_blank = "     "
-    node_pipe = "  |  "
-
     for y in range(max_y, min_y - 1, -1):
-        node_line = []
+        row_bands = [[], [], []]
         for x in range(min_x, max_x + 1):
-            candidate = room_by_coord.get((x, y))
-            if candidate:
-                icon = "@" if candidate.id == room.id else getattr(candidate.db, "brave_map_icon", "?")
-                node_line.append(f"[ {icon} ]")
-            else:
-                node_line.append(node_blank)
-
-            if x < max_x:
-                node_line.append(node_gap if _has_connection(room_by_coord, x, y, "east") else node_blank)
-        lines.append("".join(node_line).rstrip())
-
-        if y > min_y:
-            connector_line = []
-            for x in range(min_x, max_x + 1):
-                connector_line.append(node_pipe if _has_connection(room_by_coord, x, y, "south") else node_blank)
-                if x < max_x:
-                    connector_line.append(node_blank)
-            if any(segment.strip() for segment in connector_line):
-                lines.append("".join(connector_line).rstrip())
+            tile = tile_rows(x, y)
+            for index in range(3):
+                row_bands[index].append(tile[index])
+        lines.extend("".join(parts).rstrip() for parts in row_bands)
 
     visible_rooms = sorted(
         rooms,
@@ -351,8 +363,8 @@ def render_minimap(room, radius=2, character=None):
 
         north = "|" if _has_connection(room_by_coord, x, y, "north") else " "
         south = "|" if _has_connection(room_by_coord, x, y, "south") else " "
-        east = "-" if _has_connection(room_by_coord, x, y, "east") else " "
         west = "-" if _has_connection(room_by_coord, x, y, "west") else " "
+        east = "-" if _has_connection(room_by_coord, x, y, "east") else " "
 
         if candidate.id == room.id:
             center = "@"

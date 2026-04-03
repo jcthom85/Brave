@@ -1075,7 +1075,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
 
     sections.append(
         _section(
-            "Ways Forward",
+            "",
             "route",
             "navpad",
             items=nav_items,
@@ -1083,6 +1083,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
             vertical_items=vertical_exits,
             extra_items=special_exits,
             variant="routes",
+            hide_label=True,
         )
     )
 
@@ -1135,24 +1136,18 @@ def build_map_view(room, character, *, mode="map"):
     snapshot = build_map_snapshot(room, radius=radius, character=character)
     if not snapshot:
         return _make_view(
-            "Navigation",
+            "",
             "Map Unavailable",
-            eyebrow_icon="explore",
-            title_icon="map",
-            subtitle="No map data is available for this area yet.",
+            eyebrow_icon=None,
+            title_icon=None,
+            subtitle="",
+            chips=[],
             sections=[_section("Status", "info", "lines", lines=["No regional coordinates are configured for this room."])],
             back=True,
         )
 
     region_room = snapshot["room"]
-    world_name = getattr(region_room.db, "brave_world", "Brave") or "Brave"
-    chips = [
-        _chip(region_room.db.brave_zone or snapshot["region"], "location_on", "accent"),
-        _chip(region_room.key, "my_location", "muted"),
-    ]
-    if world_name != "Brave":
-        chips.append(_chip(get_world_label(region_room), "public", "muted"))
-        chips.append(_chip(get_resonance_label(region_room), "travel_explore", "accent"))
+    region_label = region_room.db.brave_zone or snapshot["region"] or "Region"
 
     legend_items = []
     for entry in snapshot["legend"]:
@@ -1161,18 +1156,9 @@ def build_map_view(room, character, *, mode="map"):
             text += f" · {entry['suffix']}"
         legend_items.append({"text": text, "badge": entry["icon"]})
 
-    detail_lines = []
-    exit_summary = format_exit_summary(snapshot["exits"]) if snapshot["exits"] else "No visible exits."
-    detail_lines.append(f"Visible exits: {exit_summary}")
-    if mode == "map":
-        detail_lines.append("This map shows the full connected regional layout from your current area.")
-    else:
-        detail_lines.append("This view is the local map around your current room.")
-
     sections = [
-        _pre_section("Layout", "grid_view", snapshot["map_text"], span="mapwide", tone="map"),
+        _pre_section(region_label, "grid_view", snapshot["map_text"], span="mapwide", tone="map"),
         _section("Legend", "category", "list", items=legend_items),
-        _section("Notes", "tips_and_updates", "lines", lines=detail_lines),
     ]
 
     if snapshot["party"]:
@@ -1193,24 +1179,25 @@ def build_map_view(room, character, *, mode="map"):
             )
         )
 
-    return {
-        **_make_view(
-            "Navigation",
-            "Map" if mode == "map" else "Local Map",
-            eyebrow_icon="explore",
-            title_icon="map",
-            subtitle="A larger navigational chart for the current region, with legend and local route context.",
-            chips=chips,
-            sections=sections,
-            back=True,
-            reactive=_reactive_view(
-                region_room,
-                scene="map",
-                danger="safe" if getattr(region_room.db, "brave_safe", False) else "danger",
-            ),
+    view = _make_view(
+        "",
+        "Map" if mode == "map" else "Local Map",
+        eyebrow_icon=None,
+        title_icon=None,
+        subtitle="",
+        chips=[],
+        sections=sections,
+        back=True,
+        reactive=_reactive_view(
+            region_room,
+            scene="map",
+            danger="safe" if getattr(region_room.db, "brave_safe", False) else "danger",
         ),
-        "variant": "map",
-    }
+    )
+    if view.get("back_action"):
+        view["back_action"]["label"] = ""
+        view["back_action"]["aria_label"] = "Close"
+    return {**view, "variant": "map"}
 
 
 def _format_context_bonus_summary(bonuses, character):
@@ -1266,6 +1253,7 @@ def _inventory_totals(character):
 
 def _build_mobile_pack_payload(character):
     inventory = list(character.db.brave_inventory or [])
+    inventory.sort(key=lambda entry: ITEM_TEMPLATES.get(entry.get("template"), {}).get("name", entry.get("template", "")))
     item_types = 0
     consumables = 0
     ingredients = 0
@@ -1279,20 +1267,40 @@ def _build_mobile_pack_payload(character):
         quantity = max(0, int(entry.get("quantity", 0) or 0))
         template = ITEM_TEMPLATES.get(template_id, {})
         kind = template.get("kind")
-        if get_item_category(template) == "consumable":
+        category = get_item_category(template)
+        if category == "consumable":
             consumables += quantity
         elif kind == "ingredient":
             ingredients += quantity
-        if len(preview) < 4:
-            item_name = template.get("name", template_id.replace("_", " ").title())
-            preview.append({"label": item_name, "quantity": quantity})
+
+        if item_types <= 60:
+            if kind == "equipment":
+                icon_name = "shield"
+            elif kind == "meal":
+                icon_name = "lunch_dining"
+            elif category == "consumable":
+                icon_name = "restaurant"
+            elif category == "ingredient":
+                icon_name = "kitchen"
+            elif category == "loot":
+                icon_name = "category"
+            else:
+                icon_name = "backpack"
+            preview.append(
+                {
+                    "label": template.get("name", template_id.replace("_", " ").title()),
+                    "quantity": quantity,
+                    "icon": icon_name,
+                }
+            )
 
     return {
         "silver": character.db.brave_silver or 0,
         "item_types": item_types,
         "consumables": consumables,
         "ingredients": ingredients,
-        "preview": preview,
+        "preview": [{"label": entry["label"], "quantity": entry["quantity"]} for entry in preview[:4]],
+        "items": preview,
         "overflow": max(0, item_types - len(preview)),
     }
 
@@ -1445,72 +1453,51 @@ def build_theme_view(current_theme_key=None):
     """Build the browser-native theme selection screen."""
 
     current_theme = THEME_BY_KEY.get(normalize_theme_key(current_theme_key))
-    chips = []
-    if current_theme:
-        chips.append(_chip(current_theme["name"], current_theme["icon"], "accent"))
-        chips.append(_chip(current_theme["font_name"], "text_fields", "muted"))
+    current_theme_key = current_theme["key"] if current_theme else normalize_theme_key(current_theme_key)
 
     entries = []
     default_theme_key = "hearth"
     for theme in THEMES:
-        lines = [
-            theme["summary"],
-            f"Typeface: {theme['font_name']}",
-            f"Reading size: {theme['font_scale']}",
-            *theme.get("notes", []),
-        ]
-        actions = []
-        meta = "Available"
+        lines = [theme["summary"]]
         chips_for_entry = []
         if theme["key"] == default_theme_key:
             chips_for_entry.append(_chip("Default", "home", "accent"))
-        if current_theme_key and theme["key"] == current_theme_key:
-            meta = "Current theme"
+        if theme["key"] == current_theme_key:
             chips_for_entry.append(_chip("Current", "check_circle", "good"))
-        chips_for_entry.append(_chip(theme["font_name"], "text_fields", "muted"))
-        actions.append(_action("Use", f"theme {theme['key']}", "palette", tone="accent"))
-        entries.append(
-            _entry(
-                theme["name"],
-                meta=meta,
-                summary=theme["summary"],
-                lines=lines,
-                icon=theme["icon"],
-                command=f"theme {theme['key']}",
-                actions=actions,
-                chips=chips_for_entry,
-            )
+
+        entry = _entry(
+            theme["name"],
+            meta=None,
+            summary="",
+            lines=lines,
+            icon=theme["icon"],
+            command=f"theme {theme['key']}",
+            chips=chips_for_entry,
         )
+        entry["preview"] = {
+            "theme_key": theme["key"],
+            "font_name": theme["font_name"],
+            "summary": theme["summary"],
+            "current": theme["key"] == current_theme_key,
+        }
+        entries.append(entry)
 
-    sections = [
-        _section("Styles", "palette", "entries", items=entries),
-        _section(
-            "How Themes Work",
-            "tune",
-            "list",
-            items=[
-                _item("Themes choose the interface material language: panels, framing, texture, motion, and typography.", icon="style"),
-                _item("The world still supplies live area hue, danger tone, combat tension, and reactive accents.", icon="public"),
-                _item("Each theme bundles its own typeface and reading scale. There is no separate font picker now.", icon="text_fields"),
-                _item("Brave Classic is the canonical default and the theme the game is designed around.", icon="home"),
-            ],
-        ),
-    ]
-
-    actions = [_action("Reset", "theme reset", "restart_alt", tone="muted")]
-
-    return _make_view(
-        "Theme",
+    view = _make_view(
+        "",
         "Themes",
-        eyebrow_icon="palette",
-        title_icon="style",
-        subtitle="Choose the browser presentation lens for Brave. Brave Classic is the intended default; the others are alternate ways to read the same world.",
-        chips=chips,
-        sections=sections,
-        actions=actions,
+        eyebrow_icon=None,
+        title_icon=None,
+        subtitle="",
+        chips=[],
+        sections=[_section("Styles", "palette", "entries", items=entries)],
+        actions=[],
         back=True,
         reactive=_reactive_view(scene="theme"),
     )
+    if view.get("back_action"):
+        view["back_action"]["label"] = ""
+        view["back_action"]["aria_label"] = "Close"
+    return view
 
 
 def build_prayer_view(character, *, blessing=None, applied=False):
@@ -1921,14 +1908,6 @@ def build_party_view(character, mode="status"):
             )
         )
 
-    chips = []
-    if members:
-        chips.append(_chip(f"{len(members)} members", "groups", "accent"))
-    else:
-        chips.append(_chip("Solo", "person", "muted"))
-    if invites:
-        chips.append(_chip(f"{len(invites)} invite{'s' if len(invites) != 1 else ''}", "mail", "warn"))
-
     sections = []
     if not members:
         sections.append(
@@ -1987,17 +1966,21 @@ def build_party_view(character, mode="status"):
         command_items.append(_item("Leave party", icon="logout", command="party leave"))
         sections.append(_section("Actions", "terminal", "list", items=command_items))
 
-    return _make_view(
-        "Family",
+    view = _make_view(
+        "",
         "Party",
-        eyebrow_icon="groups",
-        title_icon="diversity_3",
-        subtitle="Keep the family together and moving as one group.",
-        chips=chips,
+        eyebrow_icon=None,
+        title_icon=None,
+        subtitle="",
+        chips=[],
         sections=sections,
         back=True,
         reactive=_reactive_from_character(character, scene="party"),
     )
+    if view.get("back_action"):
+        view["back_action"]["label"] = ""
+        view["back_action"]["aria_label"] = "Close"
+    return view
 
 
 def build_shop_view(character):
@@ -3061,16 +3044,20 @@ def build_more_view(character):
         ),
     ]
 
-    return _make_view(
-        "Utilities",
-        "More",
-        eyebrow_icon="widgets",
-        title_icon="menu",
-        subtitle="Quick access to character, social, and account utilities.",
+    view = _make_view(
+        "",
+        "MENU",
+        eyebrow_icon=None,
+        title_icon=None,
+        subtitle="",
         sections=sections,
         back=True,
         reactive=_reactive_from_character(character, scene="character"),
     )
+    if view.get("back_action"):
+        view["back_action"]["label"] = ""
+        view["back_action"]["aria_label"] = "Close"
+    return view
 
 
 def _pack_item_icon(item):

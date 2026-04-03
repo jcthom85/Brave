@@ -651,10 +651,9 @@ let defaultInPlugin = (function () {
     };
 
     var onLoggedIn = function () {
-        decorateInputs();
-        decorateSendButton();
+        setInputContext(INPUT_CONTEXT_PLAY);
+        setInputMode(INPUT_MODE_CHAT);
         decorateInputLayoutShells();
-        dispatchInputModeChange();
         primeInput();
     };
 

@@ -65,7 +65,7 @@ let defaultout_plugin = (function () {
         if (inputPlugin && typeof inputPlugin.getInputMode === "function") {
             return inputPlugin.getInputMode();
         }
-        return "command";
+        return "chat";
     };
 
     var syncInputContextForView = function (viewData) {
@@ -1798,6 +1798,26 @@ let defaultout_plugin = (function () {
         panel.classList.add("scene-rail__panel--hidden");
     };
 
+    var renderDesktopToolbar = function () {
+        var toolbar = document.getElementById("toolbar");
+        var show = !!(
+            toolbar
+            && !isMobileViewport()
+            && currentViewData
+            && currentViewData.variant
+            && currentViewData.variant !== "connection"
+            && currentViewData.variant !== "chargen"
+            && currentViewData.variant !== "account"
+        );
+        if (!toolbar) {
+            return;
+        }
+        toolbar.innerHTML = show
+            ? "<div class='brave-toolbar'><button type='button' class='brave-toolbar__button brave-click' data-brave-command='more' title='more'>MENU</button></div>"
+            : "";
+        toolbar.setAttribute("aria-hidden", show ? "false" : "true");
+    };
+
     var renderMap = function (mapText) {
         var overlay = document.getElementById("minimap-overlay");
         var micromaps = document.querySelectorAll(".brave-view__micromap");
@@ -2719,28 +2739,30 @@ let defaultout_plugin = (function () {
             return;
         }
 
-        var itemTypes = typeof pack.item_types === "number" ? pack.item_types : 0;
-        var consumables = typeof pack.consumables === "number" ? pack.consumables : (typeof pack.meals === "number" ? pack.meals : 0);
-        var ingredients = typeof pack.ingredients === "number" ? pack.ingredients : 0;
         var silver = typeof pack.silver === "number" ? pack.silver : 0;
+        var items = Array.isArray(pack.items) ? pack.items.slice(0, 60) : [];
+        var overflow = typeof pack.overflow === "number" ? pack.overflow : 0;
 
-        renderStructuredCard(panel, {
-            eyebrow: "Pack",
-            eyebrow_icon: "backpack",
-            chips: [
-                { label: itemTypes + " kind" + (itemTypes === 1 ? "" : "s"), icon: "category", tone: "muted" },
-                { label: silver + " silver", icon: "toll", tone: "accent" },
-            ],
-            hide_empty_state: true,
-            sections: [{
-                label: "Supplies",
-                icon: "lunch_dining",
-                items: [
-                    { text: "Consumables", meta: String(consumables), icon: "restaurant" },
-                    { text: "Ingredients", meta: String(ingredients), icon: "nutrition" },
-                ],
-            }],
-        });
+        panel.innerHTML =
+            "<div class='scene-pack-panel__head'>"
+            + "<div class='scene-card__eyebrow scene-pack-panel__title'><span class='material-symbols-outlined scene-card__eyebrow-icon scene-pack-panel__title-icon' aria-hidden='true'>backpack</span><span>Pack</span></div>"
+            + "<div class='scene-pack-panel__silver'><span class='scene-pack-panel__silver-label'>Silver</span><span class='scene-pack-panel__silver-value'>" + escapeHtml(String(silver)) + "</span></div>"
+            + "</div>"
+            + (items.length
+                ? "<div class='scene-pack-panel__items'>"
+                    + items.map(function (entry) {
+                        var quantity = typeof entry.quantity === "number" ? entry.quantity : 0;
+                        return (
+                            "<div class='scene-pack-panel__item'>"
+                            + "<span class='scene-pack-panel__item-icon'>" + icon(entry && entry.icon ? entry.icon : "backpack") + "</span>"
+                            + "<span class='scene-pack-panel__item-label'>" + escapeHtml(entry && entry.label ? entry.label : "") + "</span>"
+                            + (quantity > 1 ? "<span class='scene-pack-panel__item-qty'>x" + escapeHtml(String(quantity)) + "</span>" : "")
+                            + "</div>"
+                        );
+                    }).join("")
+                    + (overflow > 0 ? "<div class='scene-pack-panel__overflow'>+" + escapeHtml(String(overflow)) + " more</div>" : "")
+                    + "</div>"
+                : "<div class='scene-pack-panel__empty'>Pack is empty.</div>");
         panel.setAttribute("data-brave-command", "pack");
         panel.setAttribute("title", "pack");
         panel.setAttribute("role", "button");
@@ -3201,6 +3223,22 @@ let defaultout_plugin = (function () {
             return buildMobileRoomUtilityMarkup();
         };
 
+        var renderThemePreview = function (preview) {
+            if (!preview || !preview.theme_key) {
+                return "";
+            }
+            return (
+                "<div class='brave-theme-preview' data-brave-theme-preview='" + escapeHtml(preview.theme_key) + "'>"
+                + "<div class='brave-theme-preview__window'>"
+                + "<div class='brave-theme-preview__eyebrow'>Brambleford</div>"
+                + "<div class='brave-theme-preview__title'>Town Green</div>"
+                + "<div class='brave-theme-preview__line'>Lanterns catch on brass and wet cobbles.</div>"
+                + "<div class='brave-theme-preview__line'>A short look at the interface mood for this theme.</div>"
+                + "</div>"
+                + "</div>"
+            );
+        };
+
         var renderEntries = function (items) {
             return (
                 "<div class='brave-view__entries'>"
@@ -3244,6 +3282,7 @@ let defaultout_plugin = (function () {
                         + "</div>"
                         + "</div>"
                         + renderMeters(entry && entry.meters)
+                        + renderThemePreview(entry && entry.preview)
                         + (entry && Array.isArray(entry.chips) && entry.chips.length
                             ? "<div class='brave-view__entry-chips'>" + entry.chips.map(renderChip).join("") + "</div>"
                             : "")
@@ -3416,6 +3455,7 @@ let defaultout_plugin = (function () {
                 ensureCombatLog();
             }
             renderPackPanel();
+            renderDesktopToolbar();
             syncMobileShell();
             focusViewAutofocusField();
             return;
@@ -3436,6 +3476,7 @@ let defaultout_plugin = (function () {
             renderMap(currentMapText);
         }
         renderPackPanel();
+        renderDesktopToolbar();
         syncMobileShell();
         focusViewAutofocusField();
         resetAllScrollPositions();
@@ -4382,11 +4423,13 @@ let defaultout_plugin = (function () {
         ensureConnectionBoilerplateObserver();
         currentConnectionScreen = "menu";
         renderConnectionView();
+        renderDesktopToolbar();
         console.log("DefaultOut initialized");
     };
 
     var onLoggedIn = function () {
         clearSceneRail();
+        renderDesktopToolbar();
         resetAllScrollPositions();
     };
 
@@ -4394,6 +4437,7 @@ let defaultout_plugin = (function () {
         teardownArcadeMode();
         clearBrowserNotice();
         clearSceneRail();
+        renderDesktopToolbar();
         resetAllScrollPositions();
         clearReactiveState();
     };
