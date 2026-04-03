@@ -71,20 +71,20 @@
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
     }
 
-    function rewriteMobileInputLayout(node) {
+    function rewriteCanonicalInputLayout(node) {
         if (!node || typeof node !== "object") {
             return;
         }
 
         if (node.type === "component" && node.id === "inputComponent") {
-            node.height = 1;
+            node.height = isMobileViewport() ? 1 : 12;
             node.minHeight = 1;
         } else if (node.type === "component" && node.componentName === "Main") {
-            node.height = 99;
+            node.height = isMobileViewport() ? 99 : 88;
         }
 
         if (Array.isArray(node.content)) {
-            node.content.forEach(rewriteMobileInputLayout);
+            node.content.forEach(rewriteCanonicalInputLayout);
         }
     }
 
@@ -92,10 +92,7 @@
         if (!window.goldenlayout_config) {
             return;
         }
-        if (!isMobileViewport()) {
-            return;
-        }
-        rewriteMobileInputLayout(window.goldenlayout_config);
+        rewriteCanonicalInputLayout(window.goldenlayout_config);
     }
 
     function resetToDefaultLayout() {

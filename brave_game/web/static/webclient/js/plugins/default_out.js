@@ -75,10 +75,12 @@ let defaultout_plugin = (function () {
         }
         var nextContext = "play";
         if (
-            !viewData
-            || viewData.variant === "connection"
-            || viewData.variant === "chargen"
-            || (viewData.reactive && viewData.reactive.scene === "account")
+            viewData
+            && (
+                viewData.variant === "connection"
+                || viewData.variant === "chargen"
+                || (viewData.reactive && viewData.reactive.scene === "account")
+            )
         ) {
             nextContext = "command";
         }

@@ -297,6 +297,10 @@ let defaultInPlugin = (function () {
             refreshInputChrome();
             return inputContext;
         }
+        if (inputContext === INPUT_CONTEXT_COMMAND && nextContext === INPUT_CONTEXT_PLAY) {
+            playInputMode = INPUT_MODE_CHAT;
+            persistPlayInputMode();
+        }
         inputContext = nextContext;
         refreshInputChrome();
         return inputContext;
