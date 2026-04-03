@@ -1159,7 +1159,7 @@ def build_map_view(room, character, *, mode="map"):
         legend_items.append({"text": text, "badge": entry["icon"]})
 
     sections = [
-        _pre_section(region_label, "grid_view", snapshot["map_text"], span="mapwide", tone="map", hide_label=True),
+        _pre_section(region_label, "grid_view", snapshot["map_text"], span="mapwide", tone="map"),
         _section("Legend", "category", "list", items=legend_items),
     ]
 
@@ -1186,7 +1186,7 @@ def build_map_view(room, character, *, mode="map"):
         "Map" if mode == "map" else "Local Map",
         eyebrow_icon=None,
         title_icon="map",
-        subtitle=region_label,
+        subtitle="",
         chips=[],
         sections=sections,
         back=True,

@@ -124,7 +124,7 @@ class RoomViewTests(unittest.TestCase):
         self.assertTrue(character.db.brave_welcome_shown)
 
 
-    def test_map_view_uses_map_icon_and_region_subtitle(self):
+    def test_map_view_uses_map_icon_and_region_card_label(self):
         character = DummyCharacter()
         room = DummyMapRoom()
 
@@ -143,12 +143,11 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual("map", view.get("variant"))
         self.assertEqual("Map", view.get("title"))
         self.assertEqual("map", view.get("title_icon"))
-        self.assertEqual("Brambleford", view.get("subtitle"))
+        self.assertEqual("", view.get("subtitle"))
         self.assertEqual("", view.get("back_action", {}).get("label"))
 
         map_section = view.get("sections", [])[0]
         self.assertEqual("pre", map_section.get("kind"))
-        self.assertTrue(map_section.get("hide_label"))
         self.assertEqual("Brambleford", map_section.get("label"))
 
 

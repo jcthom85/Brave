@@ -43,9 +43,11 @@ let defaultout_plugin = (function () {
     var currentMapText = "";
     var currentArcadeState = null;
     var currentMobileUtilityTab = null;
+    var mobileRoomActivityUnreadCount = 0;
     var currentCombatActionTab = "abilities";
     var currentMobileSwipe = null;
     var currentPickerData = null;
+    var currentPickerAnchorRect = null;
     var currentNoticeTimer = null;
     var currentConnectionScreen = "menu";
     var suppressBrowserClickUntil = 0;
@@ -1448,12 +1450,16 @@ let defaultout_plugin = (function () {
         return "<div class='brave-view__mobile-utility'>" + mapMarkup + "<div class='brave-view__mobile-utility-side'>" + questMarkup + statusMarkup + "</div></div>";
     };
 
-    var buildMobileUtilityButton = function (key, label, iconName, active) {
+    var buildMobileUtilityButton = function (key, label, iconName, active, badgeCount) {
         var activeClass = active ? " brave-mobile-tools__button--active" : "";
+        var badgeMarkup = badgeCount > 0
+            ? "<span class='brave-mobile-tools__button-badge' aria-label='" + escapeHtml(String(badgeCount)) + " new activity messages'>" + escapeHtml(String(badgeCount > 9 ? "9+" : badgeCount)) + "</span>"
+            : "";
         return (
             "<button type='button' class='brave-mobile-tools__button" + activeClass + "' data-brave-mobile-panel='" + escapeHtml(key) + "'>"
             + icon(iconName, "brave-mobile-tools__button-icon")
             + "<span>" + escapeHtml(label) + "</span>"
+            + badgeMarkup
             + "</button>"
         );
     };
@@ -1474,6 +1480,7 @@ let defaultout_plugin = (function () {
     var buildMobileDockToolsMarkup = function () {
         return (
             "<div class='brave-mobile-tools'>"
+            + buildMobileUtilityButton("activity", "Activity", "timeline", currentMobileUtilityTab === "activity", mobileRoomActivityUnreadCount)
             + buildMobileUtilityButton("menu", "Menu", "menu", currentMobileUtilityTab === "menu")
             + "</div>"
         );
@@ -1488,6 +1495,9 @@ let defaultout_plugin = (function () {
     };
 
     var getMobileUtilityTabLabel = function (tab) {
+        if (tab === "activity") {
+            return "Activity";
+        }
         if (tab === "menu") {
             return "Menu";
         }
@@ -1511,8 +1521,21 @@ let defaultout_plugin = (function () {
 
     var buildMobileUtilitySheetMarkup = function (tab, roomView) {
         var bodyMarkup = "";
+        var panelClass = "brave-mobile-sheet__panel";
+        var bodyClass = "brave-mobile-sheet__body";
 
-        if (tab === "menu") {
+        if (tab === "activity") {
+            panelClass += " brave-mobile-sheet__panel--activity";
+            bodyClass += " brave-mobile-sheet__body--activity";
+            bodyMarkup =
+                "<div class='brave-mobile-sheet__section brave-mobile-sheet__section--activity'>"
+                + "<div class='brave-mobile-activity-log brave-room-log'>"
+                + "<div class='brave-room-log__body brave-room-log__body--mobile' role='log' aria-live='polite' aria-relevant='additions text'>"
+                + currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("")
+                + "</div>"
+                + "</div>"
+                + "</div>";
+        } else if (tab === "menu") {
             bodyMarkup =
                 "<div class='brave-mobile-sheet__section'>"
                 + "<div class='brave-mobile-sheet__list'>"
@@ -1531,9 +1554,9 @@ let defaultout_plugin = (function () {
         }
 
         return (
-            "<div class='brave-mobile-sheet__panel'>"
+            "<div class='" + panelClass + "'>"
             + buildMobileSheetTabsMarkup()
-            + "<div class='brave-mobile-sheet__body'>"
+            + "<div class='" + bodyClass + "'>"
             + bodyMarkup
             + "</div>"
             + "</div>"
@@ -1564,11 +1587,20 @@ let defaultout_plugin = (function () {
         host.innerHTML = buildMobileUtilitySheetMarkup(currentMobileUtilityTab, roomView);
         host.setAttribute("aria-hidden", "false");
         document.body.classList.add("brave-mobile-sheet-active");
+        if (currentMobileUtilityTab === "activity") {
+            mobileRoomActivityUnreadCount = 0;
+            renderMobileNavDock();
+            var activityBody = host.querySelector(".brave-room-log__body--mobile");
+            if (activityBody) {
+                activityBody.scrollTop = activityBody.scrollHeight;
+            }
+        }
     };
 
     var clearPickerSheet = function () {
         var host = document.getElementById("brave-picker-sheet");
         currentPickerData = null;
+        currentPickerAnchorRect = null;
         if (host) {
             host.innerHTML = "";
             host.setAttribute("aria-hidden", "true");
@@ -1667,6 +1699,12 @@ let defaultout_plugin = (function () {
         var pickerBody = pickerData && Array.isArray(pickerData.body)
             ? pickerData.body.filter(Boolean)
             : (pickerData && pickerData.body ? [pickerData.body] : []);
+        var anchoredMenu = !!(
+            pickerData
+            && pickerData.anchor === "toolbar"
+            && !isMobileViewport()
+            && currentPickerAnchorRect
+        );
         if (!host) {
             return;
         }
@@ -1675,9 +1713,24 @@ let defaultout_plugin = (function () {
             return;
         }
 
+        var panelClass = anchoredMenu
+            ? "brave-picker-sheet__panel brave-picker-sheet__panel--popover"
+            : "brave-picker-sheet__panel";
+        var backdropClass = anchoredMenu
+            ? "brave-picker-sheet__backdrop brave-picker-sheet__backdrop--clear"
+            : "brave-picker-sheet__backdrop";
+        var panelStyle = "";
+        if (anchoredMenu) {
+            var viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+            var viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+            var right = Math.max(12, Math.round(viewportWidth - currentPickerAnchorRect.right));
+            var bottom = Math.max(12, Math.round(viewportHeight - currentPickerAnchorRect.top + 8));
+            panelStyle = " style='right: " + right + "px; bottom: " + bottom + "px;'";
+        }
+
         host.innerHTML =
-            "<div class='brave-picker-sheet__backdrop' data-brave-picker-close='1'></div>"
-            + "<div class='brave-picker-sheet__panel' role='dialog' aria-modal='true' aria-label='" + escapeHtml(pickerData.title || "Details") + "'>"
+            "<div class='" + backdropClass + "' data-brave-picker-close='1'></div>"
+            + "<div class='" + panelClass + "' role='dialog' aria-modal='true' aria-label='" + escapeHtml(pickerData.title || "Details") + "'" + panelStyle + ">"
             + "<div class='brave-picker-sheet__head'>"
             + "<div class='brave-picker-sheet__titlebar'>"
             + "<div class='brave-picker-sheet__title'>" + escapeHtml(pickerData.title || "") + "</div>"
@@ -1733,6 +1786,7 @@ let defaultout_plugin = (function () {
             return false;
         }
         currentPickerData = pickerData;
+        currentPickerAnchorRect = pickerData && pickerData.anchorRect ? pickerData.anchorRect : null;
         renderPickerSheet();
         return true;
     };
@@ -1742,7 +1796,18 @@ let defaultout_plugin = (function () {
             return false;
         }
         try {
-            return openPickerSheet(JSON.parse(target.getAttribute("data-brave-picker")));
+            var pickerData = JSON.parse(target.getAttribute("data-brave-picker"));
+            if (!isMobileViewport() && target.closest("#toolbar")) {
+                var rect = target.getBoundingClientRect();
+                pickerData.anchor = "toolbar";
+                pickerData.anchorRect = {
+                    top: rect.top,
+                    right: rect.right,
+                    bottom: rect.bottom,
+                    left: rect.left,
+                };
+            }
+            return openPickerSheet(pickerData);
         } catch (error) {
             return false;
         }
@@ -1770,6 +1835,9 @@ let defaultout_plugin = (function () {
         }
         closeMobileCommandTray();
         currentMobileUtilityTab = currentMobileUtilityTab === tabKey ? null : tabKey;
+        if (currentMobileUtilityTab === "activity") {
+            mobileRoomActivityUnreadCount = 0;
+        }
         renderMobileUtilitySheet();
         renderMobileNavDock();
     };
@@ -1812,6 +1880,54 @@ let defaultout_plugin = (function () {
         panel.classList.add("scene-rail__panel--hidden");
     };
 
+    var buildDesktopMenuPicker = function () {
+        return {
+            title: "Menu",
+            options: [
+                { label: "Character Sheet", icon: "badge", command: "sheet" },
+                { label: "Equipment", icon: "swords", command: "gear" },
+                { label: "Pack", icon: "backpack", command: "pack" },
+                { label: "Journal", icon: "menu_book", command: "quests" },
+                { label: "Map", icon: "map", command: "map" },
+                { label: "Party", icon: "groups", command: "party" },
+                { label: "Theme", icon: "palette", command: "theme" },
+                { label: "Help", icon: "help", command: "help" },
+                { label: "Quit", icon: "logout", command: "quit", tone: "danger" }
+            ]
+        };
+    };
+
+    var positionDesktopToolbar = function () {
+        var toolbar = document.getElementById("toolbar");
+        if (!toolbar || toolbar.getAttribute("aria-hidden") !== "false" || isMobileViewport()) {
+            return;
+        }
+        var inputWrap = document.querySelector(".inputwrap");
+        if (!inputWrap) {
+            return;
+        }
+        var inputRect = inputWrap.getBoundingClientRect();
+        var toolbarHeight = toolbar.offsetHeight || 40;
+        var top = Math.max(12, Math.round(inputRect.top - toolbarHeight - 10));
+        toolbar.style.top = top + "px";
+        toolbar.style.right = "22px";
+        toolbar.style.bottom = "auto";
+        toolbar.style.left = "auto";
+        if (currentPickerData && currentPickerData.anchor === "toolbar") {
+            var button = toolbar.querySelector(".brave-toolbar__button");
+            if (button) {
+                var rect = button.getBoundingClientRect();
+                currentPickerAnchorRect = {
+                    top: rect.top,
+                    right: rect.right,
+                    bottom: rect.bottom,
+                    left: rect.left,
+                };
+                renderPickerSheet();
+            }
+        }
+    };
+
     var renderDesktopToolbar = function () {
         var toolbar = document.getElementById("toolbar");
         var show = !!(
@@ -1827,9 +1943,22 @@ let defaultout_plugin = (function () {
             return;
         }
         toolbar.innerHTML = show
-            ? "<div class='brave-toolbar'><button type='button' class='brave-toolbar__button brave-click' data-brave-command='more' title='more'>MENU</button></div>"
+            ? "<div class='brave-toolbar'><button type='button' class='brave-toolbar__button brave-click' data-brave-picker='" + escapeHtml(JSON.stringify(buildDesktopMenuPicker())) + "' title='menu'>MENU</button></div>"
             : "";
         toolbar.setAttribute("aria-hidden", show ? "false" : "true");
+        if (!show) {
+            toolbar.style.removeProperty("top");
+            toolbar.style.removeProperty("right");
+            toolbar.style.removeProperty("bottom");
+            toolbar.style.removeProperty("left");
+            return;
+        }
+        positionDesktopToolbar();
+        if (window.requestAnimationFrame) {
+            window.requestAnimationFrame(positionDesktopToolbar);
+        }
+        window.setTimeout(positionDesktopToolbar, 0);
+        window.setTimeout(positionDesktopToolbar, 80);
     };
 
     var renderMap = function (mapText) {
@@ -2552,10 +2681,57 @@ let defaultout_plugin = (function () {
         return $(body);
     };
 
+    var claimRoomActivityEntries = function () {
+        var mwin = $("#messagewindow");
+        var claimedCount = 0;
+        if (!mwin.length) {
+            return claimedCount;
+        }
+
+        var strayEntries = mwin.children(".out, .msg, .err, .sys, .inp");
+        if (!strayEntries.length) {
+            return claimedCount;
+        }
+
+        strayEntries.each(function () {
+            if (shouldLogRoomActivity(this.textContent || "", this.className || "out", null)) {
+                var beforeCount = currentRoomFeedEntries.length;
+                addRoomFeedEntry(this.className || "out", this.innerHTML || "");
+                if (currentRoomFeedEntries.length > beforeCount) {
+                    claimedCount += 1;
+                }
+            }
+        });
+        strayEntries.remove();
+        return claimedCount;
+    };
+
+    var syncMobileRoomActivityLog = function () {
+        var host = document.getElementById("mobile-utility-sheet");
+        if (!host) {
+            return null;
+        }
+        var body = host.querySelector(".brave-room-log__body--mobile");
+        if (!body) {
+            return null;
+        }
+        return syncRoomActivityLog(body);
+    };
+
     var ensureRoomActivityLog = function () {
         var mwin = $("#messagewindow");
         if (!mwin.length) {
             return null;
+        }
+
+        var claimedCount = claimRoomActivityEntries();
+        if (claimedCount && isMobileViewport()) {
+            if (currentMobileUtilityTab === "activity") {
+                mobileRoomActivityUnreadCount = 0;
+            } else {
+                mobileRoomActivityUnreadCount += claimedCount;
+                renderMobileNavDock();
+            }
         }
 
         var sticky = mwin.children(".brave-sticky-view");
@@ -2563,13 +2739,15 @@ let defaultout_plugin = (function () {
         if (!roomView.length) {
             roomView = mwin.children(".brave-view--room").first();
         }
+
+        var mobileBody = syncMobileRoomActivityLog();
         if (!roomView.length) {
-            return null;
+            return mobileBody;
         }
 
         var section = roomView.find(".brave-view__section--activitylog").first();
         if (!section.length) {
-            return null;
+            return mobileBody;
         }
 
         var log = section.children(".brave-room-log");
@@ -2584,22 +2762,22 @@ let defaultout_plugin = (function () {
             log.append(body);
         }
 
-        var strayEntries = mwin.children(".out, .msg, .err, .sys, .inp");
-        if (strayEntries.length) {
-            strayEntries.each(function () {
-                if (shouldLogRoomActivity(this.textContent || "", this.className || "out", null)) {
-                    addRoomFeedEntry(this.className || "out", this.innerHTML || "");
-                }
-            });
-            strayEntries.remove();
-        }
-
-        return syncRoomActivityLog(body.get(0));
+        syncRoomActivityLog(body.get(0));
+        return mobileBody || body;
     };
 
     var pushRoomFeedEntry = function (cls, rawText) {
         addRoomFeedEntry(cls, rawText);
         syncRoomActivityLog();
+        if (isMobileViewport()) {
+            if (currentMobileUtilityTab === "activity") {
+                mobileRoomActivityUnreadCount = 0;
+                renderMobileUtilitySheet();
+            } else {
+                mobileRoomActivityUnreadCount += 1;
+                renderMobileNavDock();
+            }
+        }
     };
 
     var clearRoomActivityLog = function () {
@@ -2780,14 +2958,27 @@ let defaultout_plugin = (function () {
                     + "<div class='scene-card__meter-value'>" + escapeHtml(entry.meter.value || "") + "</div>"
                     + "</div>";
             }
-            return (
-                "<li class='scene-card__item'>"
-                + lead
+            var itemBody =
+                lead
                 + "<span class='scene-card__item-body'>"
                 + "<span class='scene-card__text'>" + escapeHtml(entry && entry.text ? entry.text : "") + "</span>"
                 + (entry && entry.meta ? "<span class='scene-card__item-meta'>" + escapeHtml(entry.meta) + "</span>" : "")
                 + meterMarkup
-                + "</span>"
+                + "</span>";
+            if (hasBrowserInteraction(entry)) {
+                return (
+                    "<li class='scene-card__item scene-card__item--interactive'>"
+                    + "<button type='button' class='scene-card__item-button brave-click'"
+                    + commandAttrs(entry, false)
+                    + ">"
+                    + itemBody
+                    + "</button>"
+                    + "</li>"
+                );
+            }
+            return (
+                "<li class='scene-card__item'>"
+                + itemBody
                 + "</li>"
             );
         };
@@ -2796,12 +2987,15 @@ let defaultout_plugin = (function () {
             if (!Array.isArray(items) || !items.length) {
                 return "";
             }
+            var heading = label
+                ? "<div class='scene-card__label'>"
+                    + icon(iconName, "scene-card__section-icon")
+                    + "<span>" + escapeHtml(label) + "</span>"
+                    + "</div>"
+                : "";
             return (
                 "<section class='scene-card__section'>"
-                + "<div class='scene-card__label'>"
-                + icon(iconName, "scene-card__section-icon")
-                + "<span>" + escapeHtml(label) + "</span>"
-                + "</div>"
+                + heading
                 + "<ul class='scene-card__list'>"
                 + items.map(formatter).join("")
                 + "</ul>"
@@ -2876,11 +3070,11 @@ let defaultout_plugin = (function () {
         return {
             eyebrow: "The Vicinity",
             eyebrow_icon: vicinitySection.icon || "visibility",
-            title: roomView.title || "",
+            title: "",
             hide_empty_state: true,
             sections: [
                 {
-                    label: vicinitySection.label || "The Vicinity",
+                    label: "",
                     icon: vicinitySection.icon || "visibility",
                     items: items.map(function (entry) {
                         return {
@@ -2888,6 +3082,12 @@ let defaultout_plugin = (function () {
                             meta: entry && entry.meta ? entry.meta : "",
                             badge: entry && entry.badge ? entry.badge : "",
                             icon: entry && entry.icon ? entry.icon : "chevron_right",
+                            command: entry && entry.command ? entry.command : "",
+                            prefill: entry && entry.prefill ? entry.prefill : "",
+                            picker: entry && entry.picker ? entry.picker : null,
+                            connection_screen: entry && entry.connection_screen ? entry.connection_screen : "",
+                            tooltip: entry && entry.tooltip ? entry.tooltip : "",
+                            confirm: entry && entry.confirm ? entry.confirm : "",
                         };
                     }),
                 }
@@ -3227,7 +3427,11 @@ let defaultout_plugin = (function () {
 
         var renderPre = function (section) {
             var toneClass = section && section.tone ? " brave-view__pre--" + escapeHtml(section.tone) : "";
-            return "<pre class='brave-view__pre" + toneClass + "'>" + escapeHtml(section && section.text ? section.text : "") + "</pre>";
+            var text = escapeHtml(section && section.text ? section.text : "");
+            if (section && section.tone === "map") {
+                return "<pre class='brave-view__pre" + toneClass + "'><span class='brave-view__pre-inner brave-view__pre-inner--map'>" + text + "</span></pre>";
+            }
+            return "<pre class='brave-view__pre" + toneClass + "'>" + text + "</pre>";
         };
 
         var renderNavPad = function (section, options) {
@@ -3581,7 +3785,7 @@ let defaultout_plugin = (function () {
                     + (viewData.eyebrow ? "<span>" + escapeHtml(viewData.eyebrow) + "</span>" : "")
                     + "</div>"
                 : "")
-            + (isRoomLikeView(viewData) ? "<div class='brave-view__micromap' aria-hidden='true'></div>" : "")
+            + (isRoomLikeView(viewData) ? "<div class='brave-view__micromap brave-click' data-brave-command='map' title='Open map' role='button' tabindex='0' aria-label='Open map'></div>" : "")
             + ((viewData.title_icon || viewData.title || viewData.back_action)
                 ? "<div class='brave-view__titlebar'>"
                     + ((viewData.title_icon || viewData.title)
@@ -4183,7 +4387,11 @@ let defaultout_plugin = (function () {
                 + ".brave-view__mini-action[data-brave-command], "
                 + ".brave-view__mini-action[data-brave-prefill], "
                 + ".brave-view__mini-action[data-brave-picker], "
-                + ".brave-view__mini-action[data-brave-connection-screen]"
+                + ".brave-view__mini-action[data-brave-connection-screen], "
+                + ".scene-card__item-button[data-brave-command], "
+                + ".scene-card__item-button[data-brave-prefill], "
+                + ".scene-card__item-button[data-brave-picker], "
+                + ".scene-card__item-button[data-brave-connection-screen]"
             );
             if (!directTarget || (event.pointerType && event.pointerType !== "touch" && event.pointerType !== "pen")) {
                 return;
@@ -4398,6 +4606,7 @@ let defaultout_plugin = (function () {
 
         window.addEventListener("resize", function () {
             syncMobileShell();
+            positionDesktopToolbar();
             syncArcadeBodyState();
             if (currentArcadeState && currentArcadeState.fitScreen) {
                 currentArcadeState.fitScreen();

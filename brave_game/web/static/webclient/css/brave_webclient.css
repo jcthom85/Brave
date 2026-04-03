@@ -1373,7 +1373,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 42%),
         linear-gradient(180deg, color-mix(in srgb, var(--brave-panel-soft) 88%, transparent), color-mix(in srgb, var(--brave-panel-deep) 92%, transparent));
     color: var(--brave-text-bright);
-    text-align: left;
+    text-align: center;
 }
 
 .brave-picker-sheet__option--danger {
@@ -3539,6 +3539,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--map .brave-view__section--pre {
     position: relative;
     display: flex;
+    flex-direction: column;
     overflow: visible;
     padding: 0;
     border: 0;
@@ -3548,6 +3549,28 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--map .brave-view__section--pre::before {
     display: none;
+}
+
+.brave-view--map .brave-view__section--pre .brave-view__section-label {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    z-index: 2;
+    justify-content: center;
+    gap: 12px;
+    width: calc(100% - 48px);
+    margin: 0;
+    padding: 0 12px;
+    transform: translateX(-50%);
+    color: color-mix(in srgb, var(--brave-accent) 32%, var(--brave-text-soft));
+    font-size: calc(0.94rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: calc(var(--brave-letter-spacing) + 0.16em);
+    pointer-events: none;
+}
+
+.brave-view--map .brave-view__section--pre .brave-view__section-icon {
+    color: color-mix(in srgb, var(--brave-accent) 88%, var(--brave-text-bright));
+    font-size: 1.14rem;
 }
 
 .brave-view--combat .brave-view__sections {
@@ -5436,8 +5459,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     max-width: 100%;
     min-height: 520px;
     margin: 0;
-    padding: 34px 28px;
+    padding: 72px 28px 34px;
     box-sizing: border-box;
+    text-align: center;
     border: 1px solid rgba(var(--brave-accent-rgb), 0.16);
     border-radius: calc(var(--brave-radius-card) - 2px);
     background:
@@ -5453,7 +5477,6 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     font-size: 12px;
     line-height: 1;
     letter-spacing: 0;
-    text-align: left;
     white-space: pre;
     font-variant-ligatures: none;
     font-kerning: none;
@@ -5477,6 +5500,13 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     border-radius: 999px;
     border: 2px solid color-mix(in srgb, var(--brave-world-line) 48%, transparent);
 }
+
+.brave-view__pre-inner--map {
+    display: inline-block;
+    min-width: max-content;
+    text-align: left;
+}
+
 
 .brave-view__entry-line,
 .brave-view__line {
