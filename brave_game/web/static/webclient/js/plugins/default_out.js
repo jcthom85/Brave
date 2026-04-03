@@ -35,9 +35,11 @@ let defaultout_plugin = (function () {
     var suppressNextLookText = false;
     var browserInteractionHandlersBound = false;
     var connectionBoilerplateObserver = null;
+    var roomActivityObserver = null;
     var reactiveTimers = {};
     var currentViewData = null;
     var currentSceneData = null;
+    var currentRoomFeedEntries = [];
     var currentMapText = "";
     var currentArcadeState = null;
     var currentMobileUtilityTab = null;
@@ -116,14 +118,15 @@ let defaultout_plugin = (function () {
         return false;
     };
 
+    var isRoomLikeView = function (viewData) {
+        return !!(viewData && typeof viewData === "object" && (viewData.layout === "explore" || viewData.variant === "room"));
+    };
+
     var getCurrentRoomView = function () {
-        if (!currentViewData || typeof currentViewData !== "object") {
+        if (!isRoomLikeView(currentViewData)) {
             return null;
         }
-        if (currentViewData.layout === "explore" || currentViewData.variant === "room") {
-            return currentViewData;
-        }
-        return null;
+        return currentViewData;
     };
 
     var findSectionByKind = function (viewData, kind) {
@@ -1800,6 +1803,15 @@ let defaultout_plugin = (function () {
         panel.classList.add("scene-rail__panel--hidden");
     };
 
+    var clearVicinityPanel = function () {
+        var panel = document.getElementById("scene-vicinity-panel");
+        if (!panel) {
+            return;
+        }
+        panel.innerHTML = "";
+        panel.classList.add("scene-rail__panel--hidden");
+    };
+
     var renderDesktopToolbar = function () {
         var toolbar = document.getElementById("toolbar");
         var show = !!(
@@ -1821,13 +1833,9 @@ let defaultout_plugin = (function () {
     };
 
     var renderMap = function (mapText) {
-        var overlay = document.getElementById("minimap-overlay");
         var micromaps = document.querySelectorAll(".brave-view__micromap");
         var raw = typeof mapText === "string" ? mapText : "";
         currentMapText = raw.replace(/\n+$/, "");
-        if (overlay) {
-            overlay.textContent = currentMapText;
-        }
         if (micromaps.length) {
             micromaps.forEach(function (micromap) {
                 micromap.textContent = currentMapText;
@@ -1850,31 +1858,31 @@ let defaultout_plugin = (function () {
         var rail = document.getElementById("scene-rail");
         var card = document.getElementById("scene-card");
         var packPanel = document.getElementById("scene-pack-panel");
-        var mapPanel = document.querySelector(".scene-rail__panel--map");
-        var overlay = document.getElementById("minimap-overlay");
+        var vicinityPanel = document.getElementById("scene-vicinity-panel");
         if (!rail) {
             return;
         }
 
         var hasCard = !!(card && card.textContent && card.textContent.trim());
         var hasPack = !!(packPanel && packPanel.textContent && packPanel.textContent.trim());
-        var hasMap = !!(overlay && overlay.textContent && overlay.textContent.trim());
+        var hasVicinity = !!(vicinityPanel && vicinityPanel.textContent && vicinityPanel.textContent.trim());
         if (window.matchMedia && window.matchMedia("(max-width: 1099px)").matches) {
             hasCard = false;
+            hasVicinity = false;
         }
 
-        if (mapPanel) {
-            mapPanel.classList.toggle("scene-rail__panel--hidden", !hasMap);
-        }
         if (packPanel) {
             packPanel.classList.toggle("scene-rail__panel--hidden", !hasPack);
         }
+        if (vicinityPanel) {
+            vicinityPanel.classList.toggle("scene-rail__panel--hidden", !hasVicinity);
+        }
 
-        rail.classList.toggle("scene-rail--map-hidden", !hasMap);
+        rail.classList.toggle("scene-rail--vicinity-hidden", !hasVicinity);
         rail.classList.toggle("scene-rail--pack-hidden", !hasPack);
         rail.classList.toggle("scene-rail--card-hidden", !hasCard);
-        rail.classList.toggle("scene-rail--detail-hidden", !hasCard && !hasPack);
-        rail.classList.toggle("scene-rail--empty", !hasCard && !hasPack && !hasMap);
+        rail.classList.toggle("scene-rail--detail-hidden", !hasCard && !hasPack && !hasVicinity);
+        rail.classList.toggle("scene-rail--empty", !hasCard && !hasPack && !hasVicinity);
     };
 
     var escapeHtml = function (value) {
@@ -2350,6 +2358,26 @@ let defaultout_plugin = (function () {
         });
     };
 
+    var ensureRoomActivityObserver = function () {
+        var mwin = document.getElementById("messagewindow");
+        if (!window.MutationObserver || !mwin) {
+            return;
+        }
+        if (roomActivityObserver) {
+            roomActivityObserver.disconnect();
+        }
+        roomActivityObserver = new MutationObserver(function () {
+            if (!isRoomLikeView(currentViewData)) {
+                return;
+            }
+            ensureRoomActivityLog();
+        });
+        roomActivityObserver.observe(mwin, {
+            childList: true,
+            subtree: false,
+        });
+    };
+
     var renderConnectionView = function () {
         renderMainView(buildConnectionViewData());
         pruneLegacyConnectionBoilerplate();
@@ -2492,6 +2520,93 @@ let defaultout_plugin = (function () {
         setStickyViewMode(false);
     };
 
+    var renderRoomFeedEntryMarkup = function (entry) {
+        if (!entry || !entry.html) {
+            return "";
+        }
+        var cls = entry.cls || "out";
+        return "<div class='" + cls + "'>" + entry.html + "</div>";
+    };
+
+    var addRoomFeedEntry = function (cls, html) {
+        if (typeof html !== "string" || !html.trim()) {
+            return;
+        }
+        var normalizedCls = cls || "out";
+        var lastEntry = currentRoomFeedEntries.length ? currentRoomFeedEntries[currentRoomFeedEntries.length - 1] : null;
+        if (lastEntry && lastEntry.cls === normalizedCls && lastEntry.html === html) {
+            return;
+        }
+        currentRoomFeedEntries.push({ cls: normalizedCls, html: html });
+        if (currentRoomFeedEntries.length > 24) {
+            currentRoomFeedEntries = currentRoomFeedEntries.slice(currentRoomFeedEntries.length - 24);
+        }
+    };
+
+    var syncRoomActivityLog = function (body) {
+        if (!body) {
+            return null;
+        }
+        body.innerHTML = currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("");
+        body.scrollTop = body.scrollHeight;
+        return $(body);
+    };
+
+    var ensureRoomActivityLog = function () {
+        var mwin = $("#messagewindow");
+        if (!mwin.length) {
+            return null;
+        }
+
+        var sticky = mwin.children(".brave-sticky-view");
+        var roomView = sticky.find(".brave-view--room").first();
+        if (!roomView.length) {
+            roomView = mwin.children(".brave-view--room").first();
+        }
+        if (!roomView.length) {
+            return null;
+        }
+
+        var section = roomView.find(".brave-view__section--activitylog").first();
+        if (!section.length) {
+            return null;
+        }
+
+        var log = section.children(".brave-room-log");
+        if (!log.length) {
+            log = $("<div class='brave-room-log'><div class='brave-room-log__body' role='log' aria-live='polite' aria-relevant='additions text'></div></div>");
+            section.append(log);
+        }
+
+        var body = log.children(".brave-room-log__body");
+        if (!body.length) {
+            body = $("<div class='brave-room-log__body' role='log' aria-live='polite' aria-relevant='additions text'></div>");
+            log.append(body);
+        }
+
+        var strayEntries = mwin.children(".out, .msg, .err, .sys, .inp");
+        if (strayEntries.length) {
+            strayEntries.each(function () {
+                if (shouldLogRoomActivity(this.textContent || "", this.className || "out", null)) {
+                    addRoomFeedEntry(this.className || "out", this.innerHTML || "");
+                }
+            });
+            strayEntries.remove();
+        }
+
+        return syncRoomActivityLog(body.get(0));
+    };
+
+    var pushRoomFeedEntry = function (cls, rawText) {
+        addRoomFeedEntry(cls, rawText);
+        syncRoomActivityLog();
+    };
+
+    var clearRoomActivityLog = function () {
+        currentRoomFeedEntries = [];
+        syncRoomActivityLog();
+    };
+
     var ensureCombatLog = function () {
         var mwin = $("#messagewindow");
         if (!mwin.length) {
@@ -2561,13 +2676,10 @@ let defaultout_plugin = (function () {
     };
 
     var clearSceneRail = function () {
-        var overlay = document.getElementById("minimap-overlay");
-        if (overlay) {
-            overlay.textContent = "";
-        }
         currentMapText = "";
         clearMicromap();
         clearPackPanel();
+        clearVicinityPanel();
         clearSceneCard();
         syncSceneRailLayout();
         syncMobileShell();
@@ -2616,20 +2728,27 @@ let defaultout_plugin = (function () {
         window.setTimeout(apply, 80);
     };
 
-    var renderStructuredCard = function (card, panelData) {
-        if (!card) {
+    var resetStructuredPanel = function (panel) {
+        if (!panel) {
+            return;
+        }
+        panel.removeAttribute("data-brave-command");
+        panel.removeAttribute("data-brave-confirm");
+        panel.removeAttribute("title");
+        panel.removeAttribute("role");
+        panel.removeAttribute("tabindex");
+        panel.classList.remove("scene-card--clickable", "brave-click");
+    };
+
+    var renderStructuredPanel = function (panel, panelData) {
+        if (!panel) {
             return;
         }
 
-        card.removeAttribute("data-brave-command");
-        card.removeAttribute("data-brave-confirm");
-        card.removeAttribute("title");
-        card.removeAttribute("role");
-        card.removeAttribute("tabindex");
-        card.classList.remove("scene-card--clickable", "brave-click");
+        resetStructuredPanel(panel);
 
         if (!panelData || typeof panelData !== "object") {
-            clearSceneCard();
+            panel.innerHTML = "";
             return;
         }
 
@@ -2712,7 +2831,7 @@ let defaultout_plugin = (function () {
             );
         }
 
-        card.innerHTML =
+        panel.innerHTML =
             "<div class='scene-card__eyebrow'>"
             + icon(panelData.eyebrow_icon || "label", "scene-card__eyebrow-icon")
             + "<span>" + escapeHtml(panelData.eyebrow || "") + "</span>"
@@ -2725,6 +2844,66 @@ let defaultout_plugin = (function () {
                 : "")
             + (chips.length ? "<div class='scene-card__meta'>" + chips.map(renderChip).join("") + "</div>" : "")
             + renderedSections.join("");
+    };
+
+    var renderStructuredCard = function (card, panelData) {
+        if (!card) {
+            return;
+        }
+        if (!panelData || typeof panelData !== "object") {
+            clearSceneCard();
+            return;
+        }
+        renderStructuredPanel(card, panelData);
+    };
+
+    var buildRoomVicinityPanelData = function (roomView) {
+        if (!isRoomLikeView(roomView) || !Array.isArray(roomView.sections)) {
+            return null;
+        }
+        var vicinitySection = null;
+        for (var i = 0; i < roomView.sections.length; i += 1) {
+            var section = roomView.sections[i];
+            if (section && section.kind === "list" && section.variant === "vicinity") {
+                vicinitySection = section;
+                break;
+            }
+        }
+        if (!vicinitySection) {
+            return null;
+        }
+        var items = Array.isArray(vicinitySection.items) ? vicinitySection.items : [];
+        return {
+            eyebrow: "The Vicinity",
+            eyebrow_icon: vicinitySection.icon || "visibility",
+            title: roomView.title || "",
+            hide_empty_state: true,
+            sections: [
+                {
+                    label: vicinitySection.label || "The Vicinity",
+                    icon: vicinitySection.icon || "visibility",
+                    items: items.map(function (entry) {
+                        return {
+                            text: entry && (entry.text || entry.label) ? (entry.text || entry.label) : "",
+                            meta: entry && entry.meta ? entry.meta : "",
+                            badge: entry && entry.badge ? entry.badge : "",
+                            icon: entry && entry.icon ? entry.icon : "chevron_right",
+                        };
+                    }),
+                }
+            ],
+        };
+    };
+
+    var renderVicinityPanel = function (roomView) {
+        var panel = document.getElementById("scene-vicinity-panel");
+        if (!panel) {
+            return;
+        }
+
+        var panelData = !isMobileViewport() ? buildRoomVicinityPanelData(roomView) : null;
+        renderStructuredPanel(panel, panelData);
+        syncSceneRailLayout();
     };
 
     var renderPackPanel = function () {
@@ -3326,6 +3505,8 @@ let defaultout_plugin = (function () {
                 body = renderNavPad(section);
             } else if (kind === "pre") {
                 body = renderPre(section);
+            } else if (kind === "activitylog") {
+                body = "<div class='brave-room-log'><div class='brave-room-log__body' role='log' aria-live='polite' aria-relevant='additions text'></div></div>";
             } else {
                 body = renderLines(section);
             }
@@ -3400,7 +3581,7 @@ let defaultout_plugin = (function () {
                     + (viewData.eyebrow ? "<span>" + escapeHtml(viewData.eyebrow) + "</span>" : "")
                     + "</div>"
                 : "")
-            + (viewData.variant === "room" ? "<div class='brave-view__micromap' aria-hidden='true'></div>" : "")
+            + (isRoomLikeView(viewData) ? "<div class='brave-view__micromap' aria-hidden='true'></div>" : "")
             + ((viewData.title_icon || viewData.title || viewData.back_action)
                 ? "<div class='brave-view__titlebar'>"
                     + ((viewData.title_icon || viewData.title)
@@ -3422,7 +3603,14 @@ let defaultout_plugin = (function () {
                 : "")
             + "</div>"
             + "<div class='brave-view__sections'>"
-            + (Array.isArray(viewData.sections) ? viewData.sections.map(renderSection).join("") : "")
+            + (Array.isArray(viewData.sections)
+                ? viewData.sections.filter(function (section) {
+                    return !(isRoomLikeView(viewData) && !isMobileViewport() && section && section.kind === "list" && section.variant === "vicinity");
+                }).map(renderSection).join("")
+                : "")
+            + ((isRoomLikeView(viewData) && !isMobileViewport())
+                ? renderSection({ kind: "activitylog", label: "Activity", icon: "forum", variant: "activity" })
+                : "")
             + "</div>"
             + "</div>";
 
@@ -3456,6 +3644,12 @@ let defaultout_plugin = (function () {
             if (viewData.variant === "combat") {
                 ensureCombatLog();
             }
+            if (isRoomLikeView(viewData)) {
+                ensureRoomActivityLog();
+                renderVicinityPanel(viewData);
+            } else {
+                clearVicinityPanel();
+            }
             renderPackPanel();
             renderDesktopToolbar();
             syncMobileShell();
@@ -3474,6 +3668,12 @@ let defaultout_plugin = (function () {
         setBodyState("view", viewData && viewData.variant ? viewData.variant : "");
 
         mwin.html(viewMarkup);
+        if (isRoomLikeView(viewData)) {
+            ensureRoomActivityLog();
+            renderVicinityPanel(viewData);
+        } else {
+            clearVicinityPanel();
+        }
         if (currentMapText) {
             renderMap(currentMapText);
         }
@@ -4245,6 +4445,21 @@ let defaultout_plugin = (function () {
         resetAllScrollPositions();
     };
 
+    var shouldLogRoomActivity = function (rawText, cls, kwargs) {
+        var text = typeof rawText === "string" ? rawText.trim() : "";
+        var cssClass = typeof cls === "string" ? cls : "out";
+        if (!text) {
+            return false;
+        }
+        if (cssClass.indexOf("inp") !== -1) {
+            return false;
+        }
+        if (kwargs && kwargs.type === "look") {
+            return false;
+        }
+        return true;
+    };
+
     //
     // By default add all unclaimed onText messages to the #messagewindow <div> and scroll
     var onText = function (args, kwargs) {
@@ -4280,8 +4495,9 @@ let defaultout_plugin = (function () {
         }
         if (
             ((document.body.classList.contains("brave-mainview-active")
-                && !document.body.classList.contains("brave-sticky-view-active"))
-                || (kwargs && kwargs.type === "look"))
+                && !document.body.classList.contains("brave-sticky-view-active")
+                && !isRoomLikeView(currentViewData))
+                || ((kwargs && kwargs.type === "look") && !isRoomLikeView(currentViewData)))
         ) {
             clearTextOutput();
         }
@@ -4290,6 +4506,15 @@ let defaultout_plugin = (function () {
             && currentViewData.variant === "combat"
         ) {
             appendTarget = ensureCombatLog() || mwin;
+        } else if (
+            currentViewData
+            && isRoomLikeView(currentViewData)
+        ) {
+            if (shouldLogRoomActivity(rawText, cls, kwargs)) {
+                pushRoomFeedEntry(cls, rawText);
+                ensureRoomActivityLog();
+            }
+            return true;
         }
         appendTarget.append("<div class='" + cls + "'>" + rawText + "</div>");
         if (currentViewData && currentViewData.variant === "connection") {
@@ -4423,6 +4648,7 @@ let defaultout_plugin = (function () {
         clearReactiveState();
         bindBrowserInteractionHandlers();
         ensureConnectionBoilerplateObserver();
+        ensureRoomActivityObserver();
         currentConnectionScreen = "menu";
         renderConnectionView();
         renderDesktopToolbar();

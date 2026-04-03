@@ -1478,16 +1478,16 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     position: absolute;
     top: 36px;
     right: var(--brave-rail-offset);
-    width: min(var(--brave-rail-width), calc(100% - 68px));
+    width: min(calc(var(--brave-card-width) + var(--brave-pack-rail-width) + var(--brave-rail-gap)), calc(100% - 68px));
     height: calc(100% - 72px);
     padding-right: max(0px, calc(36px - var(--brave-rail-offset)));
     max-height: calc(100% - 72px);
     display: grid;
-    grid-template-columns: minmax(0, var(--brave-pack-rail-width)) minmax(0, var(--brave-rail-right-width));
-    grid-template-rows: minmax(0, var(--brave-map-size)) minmax(0, 1fr);
+    grid-template-columns: minmax(0, var(--brave-card-width)) minmax(0, var(--brave-pack-rail-width));
+    grid-template-rows: minmax(0, 1fr) minmax(240px, 0.9fr);
     grid-template-areas:
-        "pack map"
-        "pack card";
+        "card pack"
+        "vicinity vicinity";
     gap: var(--brave-rail-gap);
     align-items: stretch;
     justify-content: end;
@@ -1496,42 +1496,49 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     z-index: 5;
 }
 
-.scene-rail--map-hidden {
-    width: min(calc(var(--brave-pack-rail-width) + var(--brave-card-width) + var(--brave-rail-gap)), calc(100% - 68px));
-    grid-template-columns: minmax(0, var(--brave-pack-rail-width)) minmax(0, var(--brave-card-width));
-    grid-template-areas: "pack card";
+.scene-rail--vicinity-hidden {
+    grid-template-rows: auto;
+    grid-template-areas: "card pack";
 }
 
 .scene-rail--detail-hidden {
-    width: min(var(--brave-map-size), calc(100% - 68px));
+    width: min(calc(var(--brave-card-width) + var(--brave-pack-rail-width) + var(--brave-rail-gap)), calc(100% - 68px));
 }
 
 .scene-rail--pack-hidden {
-    width: min(var(--brave-rail-right-width), calc(100% - 68px));
-    grid-template-columns: minmax(0, var(--brave-rail-right-width));
+    width: min(var(--brave-card-width), calc(100% - 68px));
+    grid-template-columns: minmax(0, var(--brave-card-width));
     grid-template-areas:
-        "map"
-        "card";
+        "card"
+        "vicinity";
 }
 
 .scene-rail--card-hidden {
-    grid-template-areas: "pack map";
+    width: min(var(--brave-pack-rail-width), calc(100% - 68px));
+    grid-template-columns: minmax(0, var(--brave-pack-rail-width));
+    grid-template-areas:
+        "pack"
+        "vicinity";
 }
 
 .scene-rail--pack-hidden.scene-rail--card-hidden {
-    grid-template-areas: "map";
+    grid-template-areas: "vicinity";
 }
 
-.scene-rail--pack-hidden.scene-rail--map-hidden {
+.scene-rail--vicinity-hidden.scene-rail--pack-hidden {
     width: min(var(--brave-card-width), calc(100% - 68px));
     grid-template-columns: minmax(0, var(--brave-card-width));
     grid-template-areas: "card";
 }
 
-.scene-rail--map-hidden.scene-rail--card-hidden {
+.scene-rail--vicinity-hidden.scene-rail--card-hidden {
     width: min(var(--brave-pack-rail-width), calc(100% - 68px));
     grid-template-columns: minmax(0, var(--brave-pack-rail-width));
     grid-template-areas: "pack";
+}
+
+.scene-rail--vicinity-hidden.scene-rail--pack-hidden.scene-rail--card-hidden {
+    grid-template-areas: none;
 }
 
 .scene-rail--empty {
@@ -1588,11 +1595,49 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     grid-area: pack;
     width: 100%;
     min-width: 0;
-    align-self: stretch;
-    height: 100%;
     min-height: 0;
+    height: 100%;
     max-height: 100%;
+    align-self: stretch;
     overflow: hidden;
+}
+
+.scene-rail__panel--vicinity {
+    grid-area: vicinity;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.scene-rail__panel--vicinity .scene-card__section {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+.scene-rail__panel--vicinity .scene-card__list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.scene-rail__panel--vicinity .scene-card__list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scene-rail__panel--vicinity .scene-card__list::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--brave-world-line) 18%, transparent);
+    border-radius: 999px;
+}
+
+.scene-rail__panel--vicinity .scene-card__list::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--brave-accent) 42%, var(--brave-world-line));
+    border-radius: 999px;
 }
 
 .scene-rail__panel--hidden {
@@ -1651,11 +1696,12 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .scene-card {
     grid-area: card;
+    height: 100%;
     width: 100%;
     min-width: 0;
     min-height: 0;
-    max-height: calc(100vh - 120px);
-    align-self: start;
+    max-height: 100%;
+    align-self: stretch;
     padding: 16px 18px 18px;
     border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.16));
     border-radius: var(--brave-radius-panel);
@@ -1671,7 +1717,39 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    overflow: visible;
+    overflow: hidden;
+}
+
+.scene-rail .scene-card__section {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.scene-rail .scene-card__section:last-child {
+    flex: 1 1 auto;
+}
+
+.scene-rail .scene-card__list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.scene-rail .scene-card__list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scene-rail .scene-card__list::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--brave-world-line) 18%, transparent);
+    border-radius: 999px;
+}
+
+.scene-rail .scene-card__list::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--brave-accent) 42%, var(--brave-world-line));
+    border-radius: 999px;
 }
 
 .scene-card:empty {
@@ -3336,13 +3414,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--room .brave-view__sections {
     display: grid;
     width: 100%;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
     grid-template-areas:
-        "vicinity"
-        "routes";
-    grid-template-rows: auto auto;
+        "routes activity";
+    grid-template-rows: minmax(220px, 1fr);
     gap: 16px;
-    align-items: start;
+    align-items: stretch;
     align-content: start;
     min-height: 0;
     height: auto;
@@ -3447,7 +3524,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     min-height: 0;
     max-height: none;
     justify-self: stretch;
-    align-self: start;
+    align-self: stretch;
 }
 
 .brave-view--room .brave-view__section--list {
@@ -3467,6 +3544,78 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     width: 100%;
     justify-self: stretch;
     align-self: start;
+}
+
+@media screen and (min-width: 901px) {
+    .brave-view--room .brave-view__section--vicinity {
+        display: none;
+    }
+}
+
+.brave-view--room .brave-view__section--activitylog {
+    grid-area: activity;
+    min-height: 0;
+    width: 100%;
+    justify-self: stretch;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+}
+
+.brave-view--room .brave-view__section--activitylog .brave-view__section-label {
+    margin-bottom: 2px;
+}
+
+.brave-view--room .brave-room-log {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.brave-view--room .brave-room-log__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.brave-view--room .brave-room-log__body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.brave-view--room .brave-room-log__body::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(var(--brave-accent-rgb), 0.24);
+}
+
+.brave-view--room .brave-room-log__body > .out,
+.brave-view--room .brave-room-log__body > .msg,
+.brave-view--room .brave-room-log__body > .err {
+    margin-top: 0;
+    padding: 8px 10px;
+    border: 1px solid var(--brave-room-entry-border);
+    border-radius: var(--brave-radius-card-tight);
+    background:
+        radial-gradient(circle at 0 0, var(--brave-room-entry-right), transparent 50%),
+        radial-gradient(circle at 100% 0, rgba(255, 255, 255, 0.02), transparent 36%),
+        linear-gradient(180deg, var(--brave-room-entry-sheen), transparent 24%),
+        rgba(255, 255, 255, 0.03);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.025),
+        0 8px 18px rgba(0, 0, 0, 0.08);
+    font-size: calc(0.9rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.42;
+}
+
+.brave-view--room .brave-room-log__body > .err {
+    border-color: rgba(213, 138, 118, 0.3);
 }
 
 .brave-view--room .brave-view__section--list .brave-view__list-item {
@@ -5350,6 +5499,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     padding: 0 2px;
     font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.12;
+    text-align: center;
+    justify-self: center;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -6033,6 +6184,14 @@ body[data-brave-scene="explore"] .minimap-overlay {
         0 14px 28px rgba(0, 0, 0, 0.18);
 }
 
+@media screen and (min-width: 1100px) {
+    body[data-brave-scene="explore"] .scene-rail {
+        bottom: 168px;
+        height: auto;
+        max-height: none;
+    }
+}
+
 body[data-brave-scene="combat"] #messagewindow {
     padding-top: 16px;
 }
@@ -6590,6 +6749,8 @@ body.brave-scene-combat-enter .inputwrap {
     background: rgba(216, 163, 90, 0.34);
     background-clip: padding-box;
 }
+
+
 
 
 
@@ -8230,6 +8391,36 @@ body.brave-scene-combat-enter .inputwrap {
     min-height: 0;
     overflow-y: auto;
     padding-right: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
+}
+
+.scene-pack-panel__items::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scene-pack-panel__items::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 42%, transparent), color-mix(in srgb, var(--brave-surface-deep-bottom) 64%, transparent));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brave-world-line) 34%, transparent);
+}
+
+.scene-pack-panel__items::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-soft)), color-mix(in srgb, var(--brave-accent) 44%, var(--brave-world-line)));
+    background-clip: padding-box;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 0 0 1px rgba(var(--brave-accent-rgb), 0.12);
+}
+
+.scene-pack-panel__items::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 84%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 56%, var(--brave-world-line)));
+    background-clip: padding-box;
 }
 
 .scene-pack-panel__item {
