@@ -411,7 +411,69 @@ def render_map(room, radius=None, character=None):
 def render_minimap(room, radius=2, character=None):
     """Render a fixed-size local minimap centered on the current room."""
 
-    snapshot = build_minimap_snapshot(room, radius=radius, character=character)
-    if not snapshot:
+    region = getattr(room.db, "brave_map_region", None)
+    if not region:
         return ""
-    return snapshot.get("map_text", "")
+
+    rooms = get_rooms_in_map_region(region)
+    if not rooms:
+        return ""
+
+    room_by_coord = {
+        (getattr(candidate.db, "brave_map_x", 0), getattr(candidate.db, "brave_map_y", 0)): candidate
+        for candidate in rooms
+    }
+
+    current_x = getattr(room.db, "brave_map_x", 0)
+    current_y = getattr(room.db, "brave_map_y", 0)
+
+    party_coords = set()
+    if character and getattr(character.db, "brave_party_id", None):
+        from world.party import get_party_members
+
+        for member in get_party_members(character):
+            if member.id == character.id or not member.location:
+                continue
+            if getattr(member.location.db, "brave_map_region", None) != region:
+                continue
+            party_coords.add(
+                (
+                    getattr(member.location.db, "brave_map_x", 0),
+                    getattr(member.location.db, "brave_map_y", 0),
+                )
+            )
+
+    def tile_for(x, y):
+        candidate = room_by_coord.get((x, y))
+        if not candidate:
+            return ["   ", "   ", "   "]
+
+        north = "|" if _has_connection(room_by_coord, x, y, "north") else " "
+        south = "|" if _has_connection(room_by_coord, x, y, "south") else " "
+        east = "-" if _has_connection(room_by_coord, x, y, "east") else " "
+        west = "-" if _has_connection(room_by_coord, x, y, "west") else " "
+
+        if candidate.id == room.id:
+            center = "@"
+        elif (x, y) in party_coords:
+            center = "P"
+        else:
+            center = "o"
+
+        return [
+            f" {north} ",
+            f"{west}{center}{east}",
+            f" {south} ",
+        ]
+
+    lines = []
+
+    for y in range(current_y + radius, current_y - radius - 1, -1):
+        tile_rows = [[], [], []]
+        for x in range(current_x - radius, current_x + radius + 1):
+            tile = tile_for(x, y)
+            for index in range(3):
+                tile_rows[index].append(tile[index])
+        lines.extend("".join(row) for row in tile_rows)
+
+    return "\n".join(lines)
