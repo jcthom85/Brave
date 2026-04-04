@@ -1911,7 +1911,7 @@ let defaultout_plugin = (function () {
         }
         var inputRect = inputWrap.getBoundingClientRect();
         var toolbarHeight = toolbar.offsetHeight || 40;
-        var top = Math.max(12, Math.round(inputRect.top - toolbarHeight - 10));
+        var top = Math.max(12, Math.round(inputRect.top - toolbarHeight - 12));
         toolbar.style.top = top + "px";
         toolbar.style.right = "22px";
         toolbar.style.bottom = "auto";
@@ -2781,13 +2781,17 @@ let defaultout_plugin = (function () {
             }
         }
 
+        var mobileBody = syncMobileRoomActivityLog();
+        if (isMobileViewport()) {
+            return mobileBody;
+        }
+
         var sticky = mwin.children(".brave-sticky-view");
         var roomView = sticky.find(".brave-view--room").first();
         if (!roomView.length) {
             roomView = mwin.children(".brave-view--room").first();
         }
 
-        var mobileBody = syncMobileRoomActivityLog();
         if (!roomView.length) {
             return mobileBody;
         }

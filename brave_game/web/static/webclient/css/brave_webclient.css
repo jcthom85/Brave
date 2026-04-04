@@ -12,8 +12,9 @@
     --brave-pack-rail-width: var(--brave-map-size);
     --brave-card-width: 304px;
     --brave-map-size: 304px;
-    --brave-rail-right-width: max(var(--brave-map-size), var(--brave-card-width));
-    --brave-rail-width: calc(var(--brave-pack-rail-width) + var(--brave-rail-right-width) + var(--brave-rail-gap));
+    --brave-rail-column-width: max(var(--brave-pack-rail-width), var(--brave-card-width));
+    --brave-rail-right-width: var(--brave-rail-column-width);
+    --brave-rail-width: calc((var(--brave-rail-column-width) * 2) + var(--brave-rail-gap));
     --brave-rail-offset: 34px;
     --brave-rail-gap: 14px;
     --brave-radius-panel: 24px;
@@ -1554,19 +1555,20 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .scene-rail {
     position: absolute;
-    top: 36px;
+    top: 40px;
     right: var(--brave-rail-offset);
-    width: min(calc(var(--brave-card-width) + var(--brave-pack-rail-width) + var(--brave-rail-gap)), calc(100% - 68px));
-    height: calc(100% - 72px);
+    width: min(calc((var(--brave-rail-column-width) * 2) + var(--brave-rail-gap)), calc(100% - 68px));
+    height: calc(100% - 76px);
     padding-right: max(0px, calc(36px - var(--brave-rail-offset)));
-    max-height: calc(100% - 72px);
+    max-height: calc(100% - 76px);
     display: grid;
-    grid-template-columns: minmax(0, var(--brave-card-width)) minmax(0, var(--brave-pack-rail-width));
-    grid-template-rows: minmax(0, 1fr) minmax(240px, 0.9fr);
+    grid-template-columns: repeat(2, minmax(0, var(--brave-rail-column-width)));
+    grid-template-rows: minmax(0, 1fr) 320px;
     grid-template-areas:
         "card pack"
         "vicinity vicinity";
-    gap: var(--brave-rail-gap);
+    column-gap: var(--brave-rail-gap);
+    row-gap: 6px;
     align-items: stretch;
     justify-content: end;
     align-content: stretch;
@@ -1580,20 +1582,20 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .scene-rail--detail-hidden {
-    width: min(calc(var(--brave-card-width) + var(--brave-pack-rail-width) + var(--brave-rail-gap)), calc(100% - 68px));
+    width: min(calc((var(--brave-rail-column-width) * 2) + var(--brave-rail-gap)), calc(100% - 68px));
 }
 
 .scene-rail--pack-hidden {
-    width: min(var(--brave-card-width), calc(100% - 68px));
-    grid-template-columns: minmax(0, var(--brave-card-width));
+    width: min(var(--brave-rail-column-width), calc(100% - 68px));
+    grid-template-columns: minmax(0, var(--brave-rail-column-width));
     grid-template-areas:
         "card"
         "vicinity";
 }
 
 .scene-rail--card-hidden {
-    width: min(var(--brave-pack-rail-width), calc(100% - 68px));
-    grid-template-columns: minmax(0, var(--brave-pack-rail-width));
+    width: min(var(--brave-rail-column-width), calc(100% - 68px));
+    grid-template-columns: minmax(0, var(--brave-rail-column-width));
     grid-template-areas:
         "pack"
         "vicinity";
@@ -1604,14 +1606,14 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .scene-rail--vicinity-hidden.scene-rail--pack-hidden {
-    width: min(var(--brave-card-width), calc(100% - 68px));
-    grid-template-columns: minmax(0, var(--brave-card-width));
+    width: min(var(--brave-rail-column-width), calc(100% - 68px));
+    grid-template-columns: minmax(0, var(--brave-rail-column-width));
     grid-template-areas: "card";
 }
 
 .scene-rail--vicinity-hidden.scene-rail--card-hidden {
-    width: min(var(--brave-pack-rail-width), calc(100% - 68px));
-    grid-template-columns: minmax(0, var(--brave-pack-rail-width));
+    width: min(var(--brave-rail-column-width), calc(100% - 68px));
+    grid-template-columns: minmax(0, var(--brave-rail-column-width));
     grid-template-areas: "pack";
 }
 
@@ -2314,7 +2316,7 @@ body[data-brave-scene="combat"] #messagewindow > .brave-sticky-view {
 
 @media screen and (max-width: 720px) {
     .brave-view--gear .brave-view__section--slots .brave-view__entry-heading {
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         row-gap: 2px;
     }
 
@@ -7507,8 +7509,8 @@ body.brave-scene-combat-enter .inputwrap {
     .brave-mobile-nav-dock__inner {
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        padding: 6px;
+        gap: 4px;
+        padding: 4px;
         border: 1px solid color-mix(in srgb, var(--brave-world-line) 76%, rgba(var(--brave-accent-rgb), 0.18));
         border-radius: calc(var(--brave-radius-panel) + 2px);
         background:
@@ -7526,7 +7528,7 @@ body.brave-scene-combat-enter .inputwrap {
     .brave-mobile-tools,
     .brave-mobile-sheet__tabs {
         display: grid;
-        gap: 8px;
+        gap: 6px;
         padding: 0;
         border: 0;
         border-radius: 0;
@@ -7542,12 +7544,12 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-mobile-tools {
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .brave-mobile-nav-dock__inner > .brave-mobile-tools {
-        margin: -6px -6px 0;
-        padding: 6px 6px 4px;
+        margin: -4px -4px 0;
+        padding: 4px 4px 3px;
         border-radius: calc(var(--brave-radius-panel) + 2px) calc(var(--brave-radius-panel) + 2px) 0 0;
     }
 
@@ -7567,10 +7569,10 @@ body.brave-scene-combat-enter .inputwrap {
     .brave-mobile-tools__button,
     .brave-mobile-sheet__close {
         justify-content: center;
-        gap: 6px;
+        gap: 5px;
         min-width: 0;
-        min-height: 38px;
-        padding: 8px 8px;
+        min-height: 34px;
+        padding: 6px 8px;
         border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.14));
         border-radius: var(--brave-radius-control);
         background:
