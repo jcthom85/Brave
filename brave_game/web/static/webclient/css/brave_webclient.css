@@ -3104,7 +3104,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    padding-bottom: 48px;
+    padding-bottom: 26px;
     min-height: 0;
 }
 
@@ -3705,8 +3705,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--room .brave-view__section--navpad {
     grid-area: routes;
-    width: min(100%, 348px);
-    max-width: 348px;
+    width: min(100%, 408px);
+    max-width: 408px;
     min-height: 0;
     height: calc(100% - 96px);
     max-height: calc(100% - 96px);
@@ -3736,6 +3736,50 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 @media screen and (min-width: 901px) {
+    .brave-view--room {
+        grid-template-columns: minmax(360px, 408px) minmax(0, 0.88fr);
+        grid-template-areas:
+            "hero hero"
+            "routes activity";
+        grid-template-rows: minmax(300px, 1.14fr) 320px;
+        column-gap: 10px;
+        row-gap: 6px;
+        align-items: stretch;
+    }
+
+    .brave-view--room > .brave-view__hero {
+        grid-area: hero;
+        align-self: stretch;
+        min-width: 0;
+        max-width: none;
+        height: 100%;
+    }
+
+    .brave-view--room > .brave-view__sections {
+        display: contents;
+    }
+
+    .brave-view--room .brave-view__section--navpad {
+        width: 100%;
+        max-width: none;
+        min-height: 0;
+        height: 100%;
+        max-height: none;
+        justify-self: stretch;
+        align-self: stretch;
+    }
+
+    .brave-view--room .brave-view__section--activitylog {
+        width: 100%;
+        margin-left: 0;
+        justify-self: stretch;
+        align-self: stretch;
+        height: 100%;
+        max-height: none;
+        grid-row: auto;
+        grid-column: auto;
+    }
+
     .brave-view--room .brave-view__section--vicinity {
         display: none;
     }
@@ -3746,9 +3790,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     min-height: 0;
     width: 100%;
     justify-self: stretch;
-    align-self: end;
-    height: calc(100% - 88px);
-    max-height: calc(100% - 88px);
+    align-self: stretch;
     display: flex;
     flex-direction: column;
 }
@@ -5786,7 +5828,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view__navgrid {
     display: grid;
     width: 100%;
-    max-width: 300px;
+    max-width: 344px;
     margin: 0 auto;
     grid-template-columns: minmax(0, 1fr) minmax(112px, 0.84fr) minmax(0, 1fr);
     grid-template-areas:
