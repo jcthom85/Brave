@@ -1315,7 +1315,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .brave-picker-sheet__option-meta {
     color: var(--brave-text-dim);
-    font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(0.74rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: calc(var(--brave-letter-spacing) + 0.08em);
     text-transform: uppercase;
 }
@@ -3104,6 +3104,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     position: relative;
     overflow: hidden;
     isolation: isolate;
+    padding-bottom: 48px;
+    min-height: 0;
 }
 
 .brave-view--room.brave-view--tone-safe .brave-view__hero {
@@ -3598,11 +3600,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--room .brave-view__sections {
     display: grid;
     width: 100%;
-    grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+    grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.18fr);
     grid-template-areas:
         "routes activity";
     grid-template-rows: minmax(220px, 1fr);
-    gap: 16px;
+    gap: 8px;
     align-items: stretch;
     align-content: start;
     min-height: 0;
@@ -3703,12 +3705,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--room .brave-view__section--navpad {
     grid-area: routes;
-    width: min(100%, 288px);
-    max-width: 288px;
+    width: min(100%, 348px);
+    max-width: 348px;
     min-height: 0;
-    max-height: none;
+    height: calc(100% - 96px);
+    max-height: calc(100% - 96px);
     justify-self: start;
     align-self: end;
+    justify-content: center;
+    align-items: center;
 }
 
 .brave-view--room .brave-view__section--list {
@@ -3741,7 +3746,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     min-height: 0;
     width: 100%;
     justify-self: stretch;
-    align-self: stretch;
+    align-self: end;
+    height: calc(100% - 88px);
+    max-height: calc(100% - 88px);
     display: flex;
     flex-direction: column;
 }
@@ -5772,11 +5779,16 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     flex-direction: column;
     gap: 8px;
     height: 100%;
+    width: 100%;
+    justify-content: center;
 }
 
 .brave-view__navgrid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(88px, 0.72fr) minmax(0, 1fr);
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    grid-template-columns: minmax(0, 1fr) minmax(112px, 0.84fr) minmax(0, 1fr);
     grid-template-areas:
         ". north ."
         "west center east"
@@ -5786,7 +5798,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view__navslot {
-    height: 60px;
+    height: 76px;
     visibility: hidden;
     pointer-events: none;
     align-self: stretch;
@@ -5809,8 +5821,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 60px;
-    padding: 8px 8px;
+    height: 76px;
+    padding: 11px 10px;
     color: var(--brave-text-bright);
     font-family: inherit;
     text-align: center;
