@@ -7923,9 +7923,12 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     #mobile-nav-dock .brave-view__navpad--mobile {
+        width: calc(100% + 8px);
+        max-width: none;
+        align-self: stretch;
         gap: 6px;
-        margin: 0 -6px -6px;
-        padding: 8px 6px 8px;
+        margin: 0 -4px -4px;
+        padding: 8px 0 8px;
         border: 0;
         border-radius: 0 0 calc(var(--brave-radius-panel) + 2px) calc(var(--brave-radius-panel) + 2px);
         background:
@@ -7937,6 +7940,9 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     #mobile-nav-dock .brave-view__navgrid {
+        width: 100%;
+        max-width: none;
+        margin: 0;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 6px;
     }
