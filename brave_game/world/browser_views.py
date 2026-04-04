@@ -536,7 +536,7 @@ def build_talk_list_view(character, npcs):
     }
 
 
-def _pre_section(label, icon, text, *, span=None, tone=None, hide_label=False):
+def _pre_section(label, icon, text, *, span=None, tone=None, hide_label=False, grid=None):
     section = {
         "label": label,
         "icon": icon,
@@ -549,6 +549,8 @@ def _pre_section(label, icon, text, *, span=None, tone=None, hide_label=False):
         section["tone"] = tone
     if hide_label:
         section["hide_label"] = True
+    if grid:
+        section["grid"] = grid
     return section
 
 
@@ -1156,10 +1158,10 @@ def build_map_view(room, character, *, mode="map"):
         text = entry["label"]
         if entry.get("suffix"):
             text += f" · {entry['suffix']}"
-        legend_items.append({"text": text, "badge": entry["icon"]})
+        legend_items.append({"text": text, "icon": entry.get("symbol") or "place"})
 
     sections = [
-        _pre_section(region_label, "grid_view", snapshot["map_text"], span="mapwide", tone="map"),
+        _pre_section(region_label, "grid_view", snapshot["map_text"], span="mapwide", tone="map", grid=snapshot.get("map_tiles")),
         _section("Legend", "category", "list", items=legend_items),
     ]
 

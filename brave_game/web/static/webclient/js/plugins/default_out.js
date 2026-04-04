@@ -41,6 +41,7 @@ let defaultout_plugin = (function () {
     var currentSceneData = null;
     var currentRoomFeedEntries = [];
     var currentMapText = "";
+    var currentMapGrid = null;
     var currentArcadeState = null;
     var currentMobileUtilityTab = null;
     var mobileRoomActivityUnreadCount = 0;
@@ -1423,9 +1424,11 @@ let defaultout_plugin = (function () {
             "<button type='button' class='brave-view__mobile-map brave-click'"
             + " data-brave-mobile-panel='map' title='Open map'>"
             + "<span class='brave-view__mobile-utility-label'>Micromap</span>"
-            + (currentMapText
-                ? "<pre class='brave-view__mobile-map-pre'>" + escapeHtml(currentMapText) + "</pre>"
-                : "<div class='brave-view__mobile-map-placeholder'>" + icon("explore") + "<span>Open map</span></div>")
+            + (currentMapGrid
+                ? "<div class='brave-view__mobile-map-grid'>" + renderMapGrid(currentMapGrid, "brave-view__map-grid--compact") + "</div>"
+                : (currentMapText
+                    ? "<pre class='brave-view__mobile-map-pre'>" + escapeHtml(currentMapText) + "</pre>"
+                    : "<div class='brave-view__mobile-map-placeholder'>" + icon("explore") + "<span>Open map</span></div>"))
             + "</button>";
         var questMarkup = (
             "<button type='button' class='brave-view__mobile-quest brave-click'"
@@ -1961,14 +1964,56 @@ let defaultout_plugin = (function () {
         window.setTimeout(positionDesktopToolbar, 80);
     };
 
-    var renderMap = function (mapText) {
+    var getMapPayloadState = function (payload) {
+        var raw = "";
+        var grid = null;
+        if (typeof payload === "string") {
+            raw = payload;
+        } else if (payload && typeof payload === "object") {
+            if (typeof payload.map_text === "string") {
+                raw = payload.map_text;
+            } else if (typeof payload.text === "string") {
+                raw = payload.text;
+            }
+            if (payload.map_tiles && typeof payload.map_tiles === "object") {
+                grid = payload.map_tiles;
+            } else if (payload.grid && typeof payload.grid === "object") {
+                grid = payload.grid;
+            }
+        }
+        return {
+            text: raw.replace(/\n+$/, ""),
+            grid: grid,
+        };
+    };
+
+    var renderMicromapMarkup = function (payload, extraClass) {
+        var state = getMapPayloadState(payload);
+        var mapMarkup = state.grid ? renderMapGrid(state.grid, extraClass || "brave-view__map-grid--micro") : "";
+        if (mapMarkup) {
+            return mapMarkup;
+        }
+        if (state.text) {
+            return escapeHtml(state.text);
+        }
+        return "";
+    };
+
+    var renderMap = function (payload) {
         var micromaps = document.querySelectorAll(".brave-view__micromap");
-        var raw = typeof mapText === "string" ? mapText : "";
-        currentMapText = raw.replace(/\n+$/, "");
+        var state = getMapPayloadState(payload);
+        currentMapText = state.text;
+        currentMapGrid = state.grid;
         if (micromaps.length) {
             micromaps.forEach(function (micromap) {
-                micromap.textContent = currentMapText;
-                micromap.setAttribute("aria-hidden", String(!currentMapText.trim()));
+                var mapMarkup = currentMapGrid ? renderMapGrid(currentMapGrid, "brave-view__map-grid--micro") : "";
+                if (mapMarkup) {
+                    micromap.innerHTML = mapMarkup;
+                    micromap.setAttribute("aria-hidden", "false");
+                } else {
+                    micromap.textContent = currentMapText;
+                    micromap.setAttribute("aria-hidden", String(!currentMapText.trim()));
+                }
             });
         }
         syncSceneRailLayout();
@@ -1977,7 +2022,9 @@ let defaultout_plugin = (function () {
 
     var clearMicromap = function () {
         var micromaps = document.querySelectorAll(".brave-view__micromap");
+        currentMapGrid = null;
         micromaps.forEach(function (micromap) {
+            micromap.innerHTML = "";
             micromap.textContent = "";
             micromap.setAttribute("aria-hidden", "true");
         });
@@ -2855,6 +2902,7 @@ let defaultout_plugin = (function () {
 
     var clearSceneRail = function () {
         currentMapText = "";
+        currentMapGrid = null;
         clearMicromap();
         clearPackPanel();
         clearVicinityPanel();
@@ -3425,9 +3473,51 @@ let defaultout_plugin = (function () {
             );
         };
 
+        var renderMapGridCell = function (cell) {
+            var tile = cell && typeof cell === "object" ? cell : {};
+            var kind = tile.kind || "empty";
+            var classes = "brave-view__map-cell brave-view__map-cell--" + escapeHtml(kind);
+            var body = "";
+            var title = tile.title ? " title='" + escapeHtml(tile.title) + "'" : "";
+
+            if (kind === "room") {
+                if (tile.tone) {
+                    classes += " brave-view__map-cell--" + escapeHtml(tile.tone);
+                }
+                body = icon(tile.symbol || "place", "brave-view__map-room-icon");
+            } else if (kind === "connector") {
+                var axis = tile.axis === "vertical" ? "vertical" : "horizontal";
+                classes += " brave-view__map-cell--connector-" + escapeHtml(axis);
+                body = "<span class='brave-view__map-connector brave-view__map-connector--" + escapeHtml(axis) + "'></span>";
+            }
+
+            return "<span class='" + classes + "'" + title + ">" + body + "</span>";
+        };
+
+        var renderMapGrid = function (grid, extraClass) {
+            if (!grid || !Array.isArray(grid.rows) || !grid.rows.length) {
+                return "";
+            }
+            var columns = grid.columns || (Array.isArray(grid.rows[0]) ? grid.rows[0].length : 0);
+            if (!columns) {
+                return "";
+            }
+            var cells = [];
+            grid.rows.forEach(function (row) {
+                (Array.isArray(row) ? row : []).forEach(function (cell) {
+                    cells.push(renderMapGridCell(cell));
+                });
+            });
+            var gridClass = "brave-view__map-grid" + (extraClass ? " " + extraClass : "");
+            return "<div class='" + gridClass + "' style='--brave-map-columns: " + columns + ";'>" + cells.join("") + "</div>";
+        };
+
         var renderPre = function (section) {
             var toneClass = section && section.tone ? " brave-view__pre--" + escapeHtml(section.tone) : "";
             var text = escapeHtml(section && section.text ? section.text : "");
+            if (section && section.tone === "map" && section.grid) {
+                return "<div class='brave-view__pre" + toneClass + " brave-view__pre--mapgrid'>" + renderMapGrid(section.grid) + "</div>";
+            }
             if (section && section.tone === "map") {
                 return "<pre class='brave-view__pre" + toneClass + "'><span class='brave-view__pre-inner brave-view__pre-inner--map'>" + text + "</span></pre>";
             }
@@ -3842,8 +3932,8 @@ let defaultout_plugin = (function () {
             } else {
                 mwin.prepend("<div class='brave-sticky-view'>" + viewMarkup + "</div>");
             }
-            if (currentMapText) {
-                renderMap(currentMapText);
+            if (currentMapGrid || currentMapText) {
+                renderMap(currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText);
             }
             if (viewData.variant === "combat") {
                 ensureCombatLog();
@@ -3878,8 +3968,8 @@ let defaultout_plugin = (function () {
         } else {
             clearVicinityPanel();
         }
-        if (currentMapText) {
-            renderMap(currentMapText);
+        if (currentMapGrid || currentMapText) {
+            renderMap(currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText);
         }
         renderPackPanel();
         renderDesktopToolbar();
@@ -4760,13 +4850,13 @@ let defaultout_plugin = (function () {
     // Handle Brave-specific OOB events before falling back to generic errors.
     var onUnknownCmd = function (cmdname, args, kwargs) {
         if (cmdname === "mapdata") {
-            var mapText = "";
-            if (Array.isArray(args) && typeof args[0] === "string") {
-                mapText = args[0];
-            } else if (kwargs && typeof kwargs.mapdata === "string") {
-                mapText = kwargs.mapdata;
+            var mapPayload = "";
+            if (Array.isArray(args) && args.length) {
+                mapPayload = args[0];
+            } else if (kwargs && Object.prototype.hasOwnProperty.call(kwargs, "mapdata")) {
+                mapPayload = kwargs.mapdata;
             }
-            renderMap(mapText);
+            renderMap(mapPayload);
             return true;
         }
 

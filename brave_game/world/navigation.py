@@ -159,6 +159,38 @@ def _has_connection(room_by_coord, x, y, direction):
     return False
 
 
+def _map_symbol_name(room, *, current=False, party=False):
+    """Return a Material Symbol name for one room marker."""
+
+    if current:
+        return "person_pin_circle"
+    if party:
+        return "groups"
+
+    label = (getattr(room, "key", "") or "").lower()
+    keyword_symbols = [
+        (("inn", "tavern", "lodge"), "bed"),
+        (("outfitters", "shop", "store", "market", "quartermaster"), "storefront"),
+        (("yard", "sparring", "training", "pens"), "swords"),
+        (("gate",), "gate"),
+        (("chapel", "church", "sanctuary"), "church"),
+        (("hall", "mayor", "council"), "account_balance"),
+        (("forge", "smith"), "construction"),
+        (("green", "park", "grove"), "park"),
+        (("farm", "field", "orchard"), "agriculture"),
+        (("river", "dock", "harbor", "bridge", "water"), "water"),
+        (("camp",), "camping"),
+        (("road", "walk", "path", "crossing"), "route"),
+        (("mine", "cave", "tunnel"), "tunnel"),
+        (("tower",), "home_work"),
+        (("post", "station"), "outgoing_mail"),
+    ]
+    for keywords, symbol in keyword_symbols:
+        if any(keyword in label for keyword in keywords):
+            return symbol
+    return "place"
+
+
 def build_map_snapshot(room, radius=None, character=None):
     """Build structured regional-map data for text and browser renderers."""
 
@@ -213,37 +245,70 @@ def build_map_snapshot(room, radius=None, character=None):
                     )
                 )
 
+    def connector_cell(axis):
+        return {"kind": "connector", "axis": axis}
+
+    def empty_cell():
+        return {"kind": "empty"}
+
     def tile_rows(x, y):
         candidate = room_by_coord.get((x, y))
         if not candidate:
-            return ["   ", "   ", "   "]
+            empty_row = [empty_cell(), empty_cell(), empty_cell()]
+            return {
+                "text": ["   ", "   ", "   "],
+                "cells": [list(empty_row), list(empty_row), list(empty_row)],
+            }
 
-        north = "|" if _has_connection(room_by_coord, x, y, "north") else " "
-        south = "|" if _has_connection(room_by_coord, x, y, "south") else " "
-        west = "-" if _has_connection(room_by_coord, x, y, "west") else " "
-        east = "-" if _has_connection(room_by_coord, x, y, "east") else " "
+        north = _has_connection(room_by_coord, x, y, "north")
+        south = _has_connection(room_by_coord, x, y, "south")
+        west = _has_connection(room_by_coord, x, y, "west")
+        east = _has_connection(room_by_coord, x, y, "east")
+        is_current = candidate.id == room.id
+        has_party = (x, y) in party_coords
+        glyph = str(getattr(candidate.db, "brave_map_icon", "?") or "?")[:1]
+        center = glyph
+        symbol = _map_symbol_name(candidate, current=is_current, party=has_party)
+        members_here = party_names_by_room.get(candidate.id, [])
+        tooltip = candidate.key
+        if members_here:
+            tooltip += f" · Party: {', '.join(sorted(members_here))}"
 
-        if candidate.id == room.id:
-            center = "@"
-        elif (x, y) in party_coords:
-            center = "P"
-        else:
-            center = str(getattr(candidate.db, "brave_map_icon", "?") or "?")[:1]
-
-        return [
-            f" {north} ",
-            f"{west}{center}{east}",
-            f" {south} ",
-        ]
+        return {
+            "text": [
+                f" {'|' if north else ' '} ",
+                f"{'-' if west else ' '}{center}{'-' if east else ' '}",
+                f" {'|' if south else ' '} ",
+            ],
+            "cells": [
+                [empty_cell(), connector_cell("vertical") if north else empty_cell(), empty_cell()],
+                [
+                    connector_cell("horizontal") if west else empty_cell(),
+                    {
+                        "kind": "room",
+                        "symbol": symbol,
+                        "glyph": center,
+                        "title": tooltip,
+                        "tone": "current" if is_current else ("party" if has_party else "room"),
+                    },
+                    connector_cell("horizontal") if east else empty_cell(),
+                ],
+                [empty_cell(), connector_cell("vertical") if south else empty_cell(), empty_cell()],
+            ],
+        }
 
     lines = []
+    grid_rows = []
     for y in range(max_y, min_y - 1, -1):
         row_bands = [[], [], []]
+        cell_bands = [[], [], []]
         for x in range(min_x, max_x + 1):
             tile = tile_rows(x, y)
             for index in range(3):
-                row_bands[index].append(tile[index])
+                row_bands[index].append(tile["text"][index])
+                cell_bands[index].extend(tile["cells"][index])
         lines.extend("".join(parts).rstrip() for parts in row_bands)
+        grid_rows.extend(cell_bands)
 
     visible_rooms = sorted(
         rooms,
@@ -255,15 +320,20 @@ def build_map_snapshot(room, radius=None, character=None):
     )
 
     current_party = party_names_by_room.get(room.id, [])
-    legend = [{"icon": "@", "label": "You", "suffix": f"Party: {', '.join(sorted(current_party))}" if current_party else ""}]
+    legend = [{
+        "icon": "@",
+        "symbol": _map_symbol_name(room, current=True),
+        "label": "You",
+        "suffix": f"Party: {', '.join(sorted(current_party))}" if current_party else "",
+    }]
     for candidate in visible_rooms:
         if candidate.id == room.id:
             continue
-        icon = getattr(candidate.db, "brave_map_icon", "?")
         members_here = party_names_by_room.get(candidate.id, [])
         legend.append(
             {
-                "icon": icon,
+                "icon": getattr(candidate.db, "brave_map_icon", "?"),
+                "symbol": _map_symbol_name(candidate, party=bool(members_here)),
                 "label": candidate.key,
                 "suffix": f"Party: {', '.join(sorted(members_here))}" if members_here else "",
             }
@@ -288,9 +358,26 @@ def build_map_snapshot(room, radius=None, character=None):
         "region": region,
         "room": room,
         "map_text": "\n".join(lines),
+        "map_tiles": {
+            "columns": len(grid_rows[0]) if grid_rows else 0,
+            "rows": grid_rows,
+        },
         "legend": legend,
         "exits": current_exits,
         "party": party_status,
+        "radius": radius,
+    }
+
+
+def build_minimap_snapshot(room, radius=2, character=None):
+    """Build a fixed-size local minimap snapshot for browser and text use."""
+
+    snapshot = build_map_snapshot(room, radius=radius, character=character)
+    if not snapshot:
+        return None
+    return {
+        "map_text": snapshot.get("map_text", ""),
+        "map_tiles": snapshot.get("map_tiles") or {"columns": 0, "rows": []},
         "radius": radius,
     }
 
@@ -324,69 +411,7 @@ def render_map(room, radius=None, character=None):
 def render_minimap(room, radius=2, character=None):
     """Render a fixed-size local minimap centered on the current room."""
 
-    region = getattr(room.db, "brave_map_region", None)
-    if not region:
+    snapshot = build_minimap_snapshot(room, radius=radius, character=character)
+    if not snapshot:
         return ""
-
-    rooms = get_rooms_in_map_region(region)
-    if not rooms:
-        return ""
-
-    room_by_coord = {
-        (getattr(candidate.db, "brave_map_x", 0), getattr(candidate.db, "brave_map_y", 0)): candidate
-        for candidate in rooms
-    }
-
-    current_x = getattr(room.db, "brave_map_x", 0)
-    current_y = getattr(room.db, "brave_map_y", 0)
-
-    party_coords = set()
-    if character and getattr(character.db, "brave_party_id", None):
-        from world.party import get_party_members
-
-        for member in get_party_members(character):
-            if member.id == character.id or not member.location:
-                continue
-            if getattr(member.location.db, "brave_map_region", None) != region:
-                continue
-            party_coords.add(
-                (
-                    getattr(member.location.db, "brave_map_x", 0),
-                    getattr(member.location.db, "brave_map_y", 0),
-                )
-            )
-
-    def tile_for(x, y):
-        candidate = room_by_coord.get((x, y))
-        if not candidate:
-            return ["   ", "   ", "   "]
-
-        north = "|" if _has_connection(room_by_coord, x, y, "north") else " "
-        south = "|" if _has_connection(room_by_coord, x, y, "south") else " "
-        west = "-" if _has_connection(room_by_coord, x, y, "west") else " "
-        east = "-" if _has_connection(room_by_coord, x, y, "east") else " "
-
-        if candidate.id == room.id:
-            center = "@"
-        elif (x, y) in party_coords:
-            center = "P"
-        else:
-            center = "o"
-
-        return [
-            f" {north} ",
-            f"{west}{center}{east}",
-            f" {south} ",
-        ]
-
-    lines = []
-
-    for y in range(current_y + radius, current_y - radius - 1, -1):
-        tile_rows = [[], [], []]
-        for x in range(current_x - radius, current_x + radius + 1):
-            tile = tile_for(x, y)
-            for index in range(3):
-                tile_rows[index].append(tile[index])
-        lines.extend("".join(row) for row in tile_rows)
-
-    return "\n".join(lines)
+    return snapshot.get("map_text", "")

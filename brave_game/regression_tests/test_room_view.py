@@ -134,7 +134,8 @@ class RoomViewTests(unittest.TestCase):
                 "room": room,
                 "region": "Fallback Region",
                 "map_text": "map-text",
-                "legend": [{"label": "You", "icon": "@"}],
+                "map_tiles": {"columns": 1, "rows": [[{"kind": "room", "symbol": "place", "tone": "room"}]]},
+                "legend": [{"label": "You", "icon": "@", "symbol": "person_pin_circle"}],
                 "party": [],
             },
         ):
@@ -149,6 +150,7 @@ class RoomViewTests(unittest.TestCase):
         map_section = view.get("sections", [])[0]
         self.assertEqual("pre", map_section.get("kind"))
         self.assertEqual("Brambleford", map_section.get("label"))
+        self.assertEqual(1, map_section.get("grid", {}).get("columns"))
 
 
 if __name__ == "__main__":
