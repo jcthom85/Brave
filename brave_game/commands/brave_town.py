@@ -19,6 +19,7 @@ from world.browser_views import (
     build_talk_view,
 )
 from world.activities import format_recipe_list
+from world.content import get_content_registry
 from world.chapel import apply_dawn_bell_blessing, get_active_blessing, is_chapel_room
 from world.commerce import (
     format_shop_bonus,
@@ -30,10 +31,12 @@ from world.commerce import (
     sell_inventory_item,
 )
 from world.data.items import ITEM_TEMPLATES
-from world.data.portals import PORTALS
 from world.forging import apply_forge_upgrade, get_forge_entries, is_forge_room
 from world.interactions import get_entity_response
 from world.screen_text import format_entry, render_screen, wrap_text
+
+CONTENT = get_content_registry()
+PORTALS = CONTENT.systems.portals
 
 from .brave import (
     BraveCharacterCommand,

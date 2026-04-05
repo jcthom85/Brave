@@ -19,6 +19,7 @@ class CommandRegistrationTests(unittest.TestCase):
     def test_extracted_modules_are_imported(self):
         self.assertIn("brave_arcade", self.imports)
         self.assertIn("brave_combat", self.imports)
+        self.assertIn("brave_creator", self.imports)
         self.assertIn("brave_explore", self.imports)
         self.assertIn("brave_party", self.imports)
         self.assertIn("brave_profile", self.imports)
@@ -26,6 +27,7 @@ class CommandRegistrationTests(unittest.TestCase):
 
         self.assertTrue({"CmdArcade", "CmdArcadeSubmit"} <= self.imports["brave_arcade"])
         self.assertTrue({"CmdAttack", "CmdEnemies", "CmdFight", "CmdFlee", "CmdUse"} <= self.imports["brave_combat"])
+        self.assertIn("CmdContent", self.imports["brave_creator"])
         self.assertTrue({"CmdCook", "CmdEat", "CmdFish", "CmdItem", "CmdMap", "CmdMore", "CmdReel", "CmdRest", "CmdTravel"} <= self.imports["brave_explore"])
         self.assertIn("CmdParty", self.imports["brave_party"])
         self.assertTrue({"CmdBuild", "CmdClass", "CmdGear", "CmdPack", "CmdQuests", "CmdRace", "CmdSheet"} <= self.imports["brave_profile"])
@@ -84,5 +86,6 @@ class CommandRegistrationTests(unittest.TestCase):
             "CmdPray",
             "CmdTalk",
             "CmdRead",
+            "CmdContent",
         }
         self.assertTrue(expected <= add_calls)

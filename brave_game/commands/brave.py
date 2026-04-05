@@ -360,7 +360,6 @@ class BraveCharacterCommand(MuxCommand):
     def scene_msg(self, text, panel=None, view=None):
         """Replace the current scene with a new full-screen output block."""
 
-        self.clear_scene()
         if view and self.get_web_session():
             self.send_browser_view(view)
             if panel and view.get("preserve_rail"):
@@ -368,6 +367,7 @@ class BraveCharacterCommand(MuxCommand):
             self.send_other_sessions(text)
             return
 
+        self.clear_scene()
         self.msg(text)
 
     def deliver_browser_notice(self, message, *, title=None, tone="muted", icon=None, duration_ms=None, sticky=False):

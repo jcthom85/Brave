@@ -45,6 +45,7 @@ class DummyRoom:
             brave_safe=True,
             desc="Warm light, steady conversation, and a clean path to the street.",
         )
+        self.ndb = SimpleNamespace(brave_encounter=None)
         self.exits = [
             DummyExit("north", "Town Green"),
             DummyExit("east", "Kitchen"),
@@ -69,6 +70,16 @@ class DummyCharacter:
             brave_follow_target_id=None,
             brave_tutorial={},
             brave_welcome_shown=False,
+        )
+
+
+class DummyVisibleCharacter:
+    def __init__(self, char_id, key, room):
+        self.id = char_id
+        self.key = key
+        self.location = room
+        self.db = SimpleNamespace(
+            brave_party_id=None,
         )
 
 
@@ -122,6 +133,66 @@ class RoomViewTests(unittest.TestCase):
         self.assertGreater(len(view.get("guidance", [])), 1)
         self.assertEqual(WELCOME_PAGES, view.get("welcome_pages"))
         self.assertTrue(character.db.brave_welcome_shown)
+
+    def test_room_view_renders_compact_grouped_threat_card(self):
+        room = DummyRoom()
+        room.db.brave_safe = False
+
+        view = build_room_view(
+            room,
+            DummyCharacter(),
+            visible_threats=[
+                {
+                    "key": "Red Wyrm Retinue",
+                    "detail": "dragon, soldier, wolf",
+                    "badge": "3",
+                    "marker_icon": "skull",
+                    "command": "fight",
+                    "tooltip": "3 hostiles · deadly threat",
+                }
+            ],
+        )
+
+        vicinity = _section(view, "The Vicinity")
+        threat_item = vicinity.get("items", [])[0]
+
+        self.assertEqual("Red Wyrm Retinue", threat_item.get("text"))
+        self.assertEqual("dragon, soldier, wolf", threat_item.get("detail"))
+        self.assertEqual("3", threat_item.get("badge"))
+        self.assertEqual("skull", threat_item.get("marker_icon"))
+        self.assertEqual("fight", threat_item.get("command"))
+
+    def test_room_view_marks_engaged_threats_and_characters(self):
+        room = DummyRoom()
+        room.db.brave_safe = False
+        room.ndb.brave_encounter = SimpleNamespace(db=SimpleNamespace(participants=[21]))
+        viewer = DummyCharacter()
+        viewer.location = room
+        ally = DummyVisibleCharacter(21, "Peep", room)
+
+        view = build_room_view(
+            room,
+            viewer,
+            visible_threats=[
+                {
+                    "key": "Grave Crow Flight",
+                    "detail": "Engaged · crows",
+                    "badge": "2",
+                    "marker_icon": "swords",
+                    "command": "fight",
+                    "tooltip": "2 hostiles · fight underway",
+                }
+            ],
+            visible_chars=[ally],
+        )
+
+        vicinity = _section(view, "The Vicinity")
+        items = vicinity.get("items", [])
+        self.assertEqual("swords", items[0].get("marker_icon"))
+        self.assertEqual("Engaged · crows", items[0].get("detail"))
+        self.assertEqual("Peep", items[1].get("text"))
+        self.assertEqual("Engaged", items[1].get("detail"))
+        self.assertEqual("swords", items[1].get("marker_icon"))
 
 
     def test_map_view_uses_map_icon_and_region_card_label(self):

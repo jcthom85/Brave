@@ -3,6 +3,7 @@ import sys
 import types
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import django
 
@@ -48,13 +49,14 @@ class DummyCharacter:
 
 
 class DummyEncounter:
-    def __init__(self, room, participants, enemies, *, pending=None, states=None, title="Mire Teeth"):
+    def __init__(self, room, participants, enemies, *, pending=None, states=None, atb_states=None, title="Mire Teeth"):
         self.obj = room
         self.db = SimpleNamespace(round=2, encounter_title=title)
         self._participants = list(participants)
         self._enemies = list(enemies)
         self._pending = dict(pending or {})
         self._states = dict(states or {})
+        self._atb_states = dict(atb_states or {})
 
     def get_active_enemies(self):
         return list(self._enemies)
@@ -78,6 +80,13 @@ class DummyEncounter:
             },
         )
 
+    def _get_actor_atb_state(self, character=None, enemy=None):
+        if character is not None:
+            return self._atb_states.get(f"p:{character.id}", {"phase": "charging", "gauge": 0})
+        if enemy is not None:
+            return self._atb_states.get(f"e:{enemy['id']}", {"phase": "charging", "gauge": 0})
+        return {"phase": "charging", "gauge": 0}
+
 
 def _section(view, label):
     for section in view.get("sections", []):
@@ -98,6 +107,23 @@ def _item(section, prefix):
         if item.get("text", "").startswith(prefix):
             return item
     raise AssertionError(f"Missing item {prefix}")
+
+
+def _action(view, label):
+    for action in view.get("actions", []):
+        if action.get("label") == label:
+            return action
+    raise AssertionError(f"Missing action {label}")
+
+
+def _picker_option(picker, label, *, meta=None):
+    for option in picker.get("options", []):
+        if option.get("label") != label:
+            continue
+        if meta is not None and option.get("meta") != meta:
+            continue
+        return option
+    raise AssertionError(f"Missing picker option {label} / {meta}")
 
 
 class CombatViewTests(unittest.TestCase):
@@ -126,18 +152,19 @@ class CombatViewTests(unittest.TestCase):
             [healer, ally],
             [{"id": "e1", "key": "Bog Wolf", "hp": 11, "max_hp": 16}],
             pending={7: "heal -> Peep"},
+            atb_states={
+                "p:7": {"phase": "ready", "gauge": 100, "ready_gauge": 100},
+                "p:8": {"phase": "charging", "gauge": 45, "ready_gauge": 100},
+                "e:e1": {"phase": "charging", "gauge": 70, "ready_gauge": 100},
+            },
         )
         encounter.db.pending_actions = {"7": {"kind": "ability", "ability": "heal", "target": 8}}
 
         view = build_combat_view(encounter, healer)
-        abilities = _section(view, "Abilities")
+        abilities_action = _action(view, "Abilities")
+        heal_item = _picker_option(abilities_action.get("picker", {}), "Heal", meta="Heal · 10 MP")
+        smite_item = _picker_option(abilities_action.get("picker", {}), "Smite", meta="Smite · 8 MP")
 
-        heal_item = _item(abilities, "Heal")
-        smite_item = _item(abilities, "Smite")
-
-        self.assertEqual("A", heal_item.get("badge"))
-        self.assertIsNone(heal_item.get("prefill"))
-        self.assertIsNone(heal_item.get("command"))
         self.assertEqual("Heal Target", heal_item.get("picker", {}).get("title"))
         self.assertEqual(
             [
@@ -153,27 +180,183 @@ class CombatViewTests(unittest.TestCase):
                 for option in heal_item.get("picker", {}).get("options", [])
             ],
         )
-        self.assertEqual("E", smite_item.get("badge"))
         self.assertEqual("use Smite = e1", smite_item.get("command"))
         self.assertEqual([], view.get("chips", []))
         self.assertEqual("2 Allies • 1 Foe", view.get("subtitle", ""))
-        self.assertEqual("Flee", view.get("actions", [])[0].get("label"))
-        self.assertIsNot(view.get("actions", [])[0].get("icon_only"), True)
-        self.assertEqual("Heal · 10 MP", heal_item.get("text", ""))
-        self.assertIn("8 MP", smite_item.get("text", ""))
+        self.assertEqual(["Abilities", "Items", "Flee"], [action.get("label") for action in view.get("actions", [])])
+        self.assertIsNot(_action(view, "Flee").get("icon_only"), True)
 
         party = _section(view, "Party")
         dad_entry = _entry(party, "Dad")
         peep_entry = _entry(party, "Peep")
         self.assertEqual(
-            [("HP", "20 / 24"), ("STA", "6 / 10"), ("MP", "18 / 20")],
+            [("ATB", "100 / 100"), ("HP", "20 / 24"), ("STA", "6 / 10"), ("MP", "18 / 20")],
             [(meter.get("label"), meter.get("value")) for meter in dad_entry.get("meters", [])],
         )
         self.assertEqual(
-            [("HP", "17 / 26"), ("STA", "9 / 12")],
+            [("ATB", "45 / 100"), ("HP", "17 / 26"), ("STA", "9 / 12")],
             [(meter.get("label"), meter.get("value")) for meter in peep_entry.get("meters", [])],
         )
+        self.assertIn("Ready", [chip.get("label") for chip in dad_entry.get("chips", [])])
         self.assertIn("Targeted", [chip.get("label") for chip in peep_entry.get("chips", [])])
+
+        enemies_section = _section(view, "Enemies")
+        wolf_entry = _entry(enemies_section, "Bog Wolf")
+        self.assertEqual(
+            [("ATB", "70 / 100"), ("HP", "11 / 16")],
+            [(meter.get("label"), meter.get("value")) for meter in wolf_entry.get("meters", [])],
+        )
+        self.assertEqual([], wolf_entry.get("lines", []))
+
+    def test_enemy_windup_surfaces_named_telegraph_in_view(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "p:7": {"phase": "charging", "gauge": 40},
+                "e:e1": {
+                    "phase": "winding",
+                    "ticks_remaining": 1,
+                    "current_action": {"kind": "enemy_attack", "label": "Brush Pounce"},
+                },
+            },
+        )
+
+        view = build_combat_view(encounter, warrior)
+        enemies_section = _section(view, "Enemies")
+        enemy_entry = _entry(enemies_section, "Old Greymaw")
+
+        self.assertIn("Brush Pounce", enemy_entry.get("lines", []))
+        self.assertIn("Winding 1", [chip.get("label") for chip in enemy_entry.get("chips", [])])
+        self.assertEqual(
+            [("ATB", "100 / 100"), ("HP", "28 / 32")],
+            [(meter.get("label"), meter.get("value")) for meter in enemy_entry.get("meters", [])],
+        )
+
+    def test_atb_meter_stays_full_during_windup_and_resets_empty_for_recovery(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "p:7": {
+                    "phase": "recovering",
+                    "ticks_remaining": 1,
+                    "timing": {"recovery_ticks": 2},
+                },
+                "e:e1": {
+                    "phase": "winding",
+                    "ticks_remaining": 1,
+                    "timing": {"windup_ticks": 2},
+                    "current_action": {"kind": "enemy_attack", "label": "Brush Pounce"},
+                },
+            },
+        )
+
+        view = build_combat_view(encounter, warrior)
+        party_section = _section(view, "Party")
+        enemies_section = _section(view, "Enemies")
+        warrior_entry = _entry(party_section, "Dad")
+        enemy_entry = _entry(enemies_section, "Old Greymaw")
+
+        self.assertEqual(
+            [("ATB", "0 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
+            [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
+        )
+        self.assertEqual(
+            [("ATB", "100 / 100"), ("HP", "28 / 32")],
+            [(meter.get("label"), meter.get("value")) for meter in enemy_entry.get("meters", [])],
+        )
+        self.assertIn("Recovering 1", [chip.get("label") for chip in warrior_entry.get("chips", [])])
+
+    def test_atb_meter_projects_live_charge_progress_on_view_refresh(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "p:7": {
+                    "phase": "charging",
+                    "gauge": 0,
+                    "ready_gauge": 400,
+                    "phase_start_gauge": 0,
+                    "phase_started_at_ms": 1_000,
+                    "phase_duration_ms": 4_000,
+                }
+            },
+        )
+
+        with patch("world.browser_views.time.time", return_value=3.0):
+            view = build_combat_view(encounter, warrior)
+
+        party_section = _section(view, "Party")
+        warrior_entry = _entry(party_section, "Dad")
+        self.assertEqual(
+            [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
+            [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
+        )
+
+    def test_duplicate_enemy_names_are_numbered_in_view(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [
+                {"id": "e1", "key": "Grave Crow", "hp": 9, "max_hp": 12, "template_key": "grave_crow"},
+                {"id": "e2", "key": "Grave Crow", "hp": 9, "max_hp": 12, "template_key": "grave_crow"},
+            ],
+        )
+
+        view = build_combat_view(encounter, warrior)
+        enemies_section = _section(view, "Enemies")
+
+        crow_one = _entry(enemies_section, "Grave Crow 1")
+        crow_two = _entry(enemies_section, "Grave Crow 2")
+
+        self.assertEqual("attack e1", crow_one.get("command"))
+        self.assertEqual("attack e2", crow_two.get("command"))
+        self.assertIsNone(crow_one.get("meta"))
+        self.assertIsNone(crow_one.get("badge"))
 
     def test_combat_item_uses_shared_use_command(self):
         room = DummyRoom()
@@ -190,11 +373,10 @@ class CombatViewTests(unittest.TestCase):
         encounter = DummyEncounter(room, [cleric], [{"id": "e1", "key": "Bog Wolf", "hp": 11, "max_hp": 16}])
 
         view = build_combat_view(encounter, cleric)
-        items = _section(view, "Items")
-        bandage = _item(items, "Field Bandage")
+        items_action = _action(view, "Items")
+        bandage = _picker_option(items_action.get("picker", {}), "Field Bandage", meta="Field Bandage · HP+18")
 
         self.assertEqual("use Field Bandage", bandage.get("command"))
-        self.assertEqual("2", bandage.get("badge"))
 
     def test_unaffordable_ability_is_not_clickable(self):
         room = DummyRoom()
@@ -214,13 +396,9 @@ class CombatViewTests(unittest.TestCase):
         )
 
         view = build_combat_view(encounter, healer)
-        abilities = _section(view, "Abilities")
-        heal_item = _item(abilities, "Heal")
-
-        self.assertIsNone(heal_item.get("command"))
-        self.assertIsNone(heal_item.get("prefill"))
-        self.assertIsNone(heal_item.get("picker"))
-        self.assertIn("NEED 6", heal_item.get("text", ""))
+        abilities_action = _action(view, "Abilities")
+        self.assertEqual([], abilities_action.get("picker", {}).get("options", []))
+        self.assertEqual(["No usable combat abilities."], abilities_action.get("picker", {}).get("body", []))
 
     def test_combat_view_surfaces_restored_status_chips(self):
         room = DummyRoom()
@@ -293,6 +471,8 @@ class CombatViewTests(unittest.TestCase):
         lurker = _entry(enemies, "Mud Lurker")
         self.assertNotIn("Targeted", [chip.get("label") for chip in wolf.get("chips", [])])
         self.assertIn("Targeted", [chip.get("label") for chip in lurker.get("chips", [])])
+        self.assertIsNot(wolf.get("selected"), True)
+        self.assertIs(lurker.get("selected"), True)
 
     def test_combat_view_lists_carried_meals_in_items_section(self):
         room = DummyRoom()
@@ -316,17 +496,15 @@ class CombatViewTests(unittest.TestCase):
         )
 
         view = build_combat_view(encounter, cleric)
-        items = _section(view, "Items")
-        plate = _item(items, "Crisped Perch Plate")
-        chowder = _item(items, "Riverlight Chowder")
+        items_action = _action(view, "Items")
+        plate = _picker_option(items_action.get("picker", {}), "Crisped Perch Plate")
+        chowder = _picker_option(items_action.get("picker", {}), "Riverlight Chowder")
 
-        self.assertEqual("2", plate.get("badge"))
         self.assertEqual("use Crisped Perch Plate", plate.get("command"))
-        self.assertIn("HP+14", plate.get("text", ""))
-        self.assertIn("STA+18", plate.get("text", ""))
-        self.assertEqual("1", chowder.get("badge"))
+        self.assertIn("HP+14", plate.get("meta", ""))
+        self.assertIn("STA+18", plate.get("meta", ""))
         self.assertEqual("use Riverlight Chowder", chowder.get("command"))
-        self.assertIn("MP+14", chowder.get("text", ""))
+        self.assertIn("MP+14", chowder.get("meta", ""))
 
     def test_combat_view_lists_enemy_target_consumables(self):
         room = DummyRoom()
@@ -350,13 +528,11 @@ class CombatViewTests(unittest.TestCase):
         )
 
         view = build_combat_view(encounter, rogue)
-        items = _section(view, "Items")
-        fireflask = _item(items, "Fire Flask")
+        items_action = _action(view, "Items")
+        fireflask = _picker_option(items_action.get("picker", {}), "Fire Flask", meta="Fire Flask · DMG 16-20")
 
-        self.assertEqual("1", fireflask.get("badge"))
         self.assertIsNone(fireflask.get("command"))
         self.assertEqual("Fire Flask Target", fireflask.get("picker", {}).get("title"))
-        self.assertIn("DMG 16-20", fireflask.get("text", ""))
 
     def test_combat_view_lists_cleanse_consumables_for_allies(self):
         room = DummyRoom()
@@ -386,13 +562,14 @@ class CombatViewTests(unittest.TestCase):
         )
 
         view = build_combat_view(encounter, cleric)
-        items = _section(view, "Items")
-        salts = _item(items, "Purity Salts")
+        items_action = _action(view, "Items")
+        salts = _picker_option(items_action.get("picker", {}), "Purity Salts")
+        salts_target = _picker_option(items_action.get("picker", {}), "Purity Salts", meta="Target Ally")
 
         self.assertEqual("use Purity Salts", salts.get("command"))
         self.assertIsNone(salts.get("picker"))
-        self.assertEqual("Purity Salts Target", salts.get("actions", [])[0].get("picker", {}).get("title"))
-        self.assertIn("CLEANSE", salts.get("text", ""))
+        self.assertIn("CLEANSE", salts.get("meta", ""))
+        self.assertEqual("Purity Salts Target", salts_target.get("picker", {}).get("title"))
 
     def test_combat_view_lists_guard_consumables_for_allies(self):
         room = DummyRoom()
@@ -422,13 +599,13 @@ class CombatViewTests(unittest.TestCase):
         )
 
         view = build_combat_view(encounter, cleric)
-        items = _section(view, "Items")
-        dust = _item(items, "Ward Dust")
+        items_action = _action(view, "Items")
+        dust = _picker_option(items_action.get("picker", {}), "Ward Dust", meta="Ward Dust · GUARD 12")
+        dust_target = _picker_option(items_action.get("picker", {}), "Ward Dust", meta="Target Ally")
 
         self.assertEqual("use Ward Dust", dust.get("command"))
         self.assertIsNone(dust.get("picker"))
-        self.assertEqual("Ward Dust Target", dust.get("actions", [])[0].get("picker", {}).get("title"))
-        self.assertIn("GUARD 12", dust.get("text", ""))
+        self.assertEqual("Ward Dust Target", dust_target.get("picker", {}).get("title"))
 
 
 if __name__ == "__main__":

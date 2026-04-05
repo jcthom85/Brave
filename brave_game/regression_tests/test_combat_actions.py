@@ -102,6 +102,23 @@ def _item(section, prefix):
     raise AssertionError(f"Missing item {prefix}")
 
 
+def _view_action(view, label):
+    for action in view.get("actions", []):
+        if action.get("label") == label:
+            return action
+    raise AssertionError(f"Missing action {label}")
+
+
+def _picker_option(picker, label, *, meta=None):
+    for option in picker.get("options", []):
+        if option.get("label") != label:
+            continue
+        if meta is not None and option.get("meta") != meta:
+            continue
+        return option
+    raise AssertionError(f"Missing picker option {label} / {meta}")
+
+
 class CombatActionPayloadTests(unittest.TestCase):
     def test_payload_normalizes_multi_target_ability_state(self):
         room = DummyRoom()
@@ -146,6 +163,12 @@ class CombatActionPayloadTests(unittest.TestCase):
         )
         self.assertEqual("enemy", smite.get("target_mode"))
         self.assertEqual("use Smite = e1", smite.get("command"))
+        self.assertIn("timing", heal)
+        self.assertEqual(108, heal.get("timing", {}).get("gauge_cost"))
+        self.assertFalse(heal.get("timing", {}).get("target_locked"))
+        self.assertEqual(1, smite.get("timing", {}).get("windup_ticks"))
+        self.assertIsNone(heal.get("reaction_role"))
+        self.assertIn("Timing:", heal.get("tooltip", ""))
 
     def test_payload_normalizes_ally_target_item_state(self):
         room = DummyRoom()
@@ -179,6 +202,11 @@ class CombatActionPayloadTests(unittest.TestCase):
         self.assertEqual("use Purity Salts", salts.get("command"))
         self.assertEqual("2", salts.get("badge"))
         self.assertEqual("Target Ally", salts.get("actions", [])[0].get("label"))
+        self.assertIn("timing", salts)
+        self.assertEqual(0, salts.get("timing", {}).get("windup_ticks"))
+        self.assertFalse(salts.get("timing", {}).get("target_locked"))
+        self.assertEqual("cleanse", salts.get("reaction_role"))
+        self.assertIn("cleanse tool", salts.get("tooltip", ""))
         self.assertEqual(
             ["use Purity Salts", "use Purity Salts = Peep"],
             [option.get("command") for option in salts.get("actions", [])[0].get("picker", {}).get("options", [])],
@@ -209,16 +237,49 @@ class CombatActionPayloadTests(unittest.TestCase):
 
         view = build_combat_view(encounter, cleric)
         payload = view.get("combat_actions", {})
-        abilities = _section(view, "Abilities")
-        items = _section(view, "Items")
+        abilities = _view_action(view, "Abilities")
+        items = _view_action(view, "Items")
         heal_action = _action(payload.get("abilities", []), "heal")
         bandage_action = _action(payload.get("items", []), "field_bandage")
-        heal_item = _item(abilities, "Heal")
-        bandage_item = _item(items, "Field Bandage")
+        heal_item = _picker_option(abilities.get("picker", {}), "Heal", meta="Heal · 10 MP")
+        bandage_item = _picker_option(items.get("picker", {}), "Field Bandage", meta="Field Bandage · HP+18")
 
-        self.assertEqual(heal_action.get("text"), heal_item.get("text"))
-        self.assertEqual(bandage_action.get("text"), bandage_item.get("text"))
+        self.assertEqual(heal_action.get("text"), heal_item.get("meta"))
+        self.assertEqual(bandage_action.get("text"), bandage_item.get("meta"))
         self.assertEqual(bandage_action.get("command"), bandage_item.get("command"))
+        self.assertEqual(bandage_action.get("tooltip"), bandage_item.get("tooltip"))
+
+    def test_enemy_target_picker_uses_numbered_enemy_names(self):
+        room = DummyRoom()
+        rogue = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "rogue",
+            {"hp": 16, "mana": 0, "stamina": 10},
+            {"max_hp": 20, "max_mana": 0, "max_stamina": 12},
+            ["Cheap Shot"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [rogue],
+            [
+                {"id": "e1", "key": "Grave Crow", "hp": 9, "max_hp": 12, "template_key": "grave_crow"},
+                {"id": "e2", "key": "Grave Crow", "hp": 9, "max_hp": 12, "template_key": "grave_crow"},
+            ],
+        )
+
+        payload = build_combat_action_payload(encounter, rogue)
+        action = _action(payload["abilities"], "cheapshot")
+
+        self.assertEqual(
+            ["Grave Crow 1", "Grave Crow 2"],
+            [option.get("label") for option in action.get("picker", {}).get("options", [])],
+        )
+        self.assertEqual(
+            ["use Cheap Shot = e1", "use Cheap Shot = e2"],
+            [option.get("command") for option in action.get("picker", {}).get("options", [])],
+        )
 
 
 if __name__ == "__main__":

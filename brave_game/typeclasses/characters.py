@@ -8,19 +8,8 @@ creation commands.
 
 """
 
-from world.data.character_options import (
-    CLASSES,
-    MAX_LEVEL,
-    PRIMARY_STATS,
-    RACES,
-    STARTING_CLASS,
-    STARTING_RACE,
-    XP_FOR_LEVEL,
-    get_passive_ability_bonuses,
-    split_unlocked_abilities,
-)
+from world.content import get_content_registry
 from world.chapel import get_active_blessing
-from world.data.activities import COZY_BONUS
 from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, STARTER_CONSUMABLES, STARTER_LOADOUTS
 from world.party import ensure_party_state
 from world.questing import advance_item_collection, advance_room_visit, ensure_starter_quests
@@ -29,6 +18,10 @@ from world.tutorial import ensure_tutorial_state, handle_room_enter, is_tutorial
 from evennia.objects.objects import DefaultCharacter
 
 from .objects import ObjectParent
+
+CONTENT = get_content_registry()
+CHARACTER_CONTENT = CONTENT.characters
+COZY_BONUS = CONTENT.systems.cozy_bonus
 
 
 class Character(ObjectParent, DefaultCharacter):
@@ -80,9 +73,9 @@ class Character(ObjectParent, DefaultCharacter):
         """Initialize Brave-specific state if missing."""
 
         if not self.db.brave_race:
-            self.db.brave_race = STARTING_RACE
+            self.db.brave_race = CHARACTER_CONTENT.starting_race
         if not self.db.brave_class:
-            self.db.brave_class = STARTING_CLASS
+            self.db.brave_class = CHARACTER_CONTENT.starting_class
         if not self.db.brave_level:
             self.db.brave_level = 1
         if self.db.brave_xp is None:
@@ -116,28 +109,28 @@ class Character(ObjectParent, DefaultCharacter):
     def recalculate_stats(self, restore=False):
         """Recalculate primary and derived stats from current race/class/level."""
 
-        race = RACES[self.db.brave_race]
-        class_data = CLASSES[self.db.brave_class]
-        level = max(1, min(self.db.brave_level, MAX_LEVEL))
+        race = CHARACTER_CONTENT.races[self.db.brave_race]
+        class_data = CHARACTER_CONTENT.classes[self.db.brave_class]
+        level = max(1, min(self.db.brave_level, CHARACTER_CONTENT.max_level))
 
         primary = {}
-        for stat in PRIMARY_STATS:
+        for stat in CHARACTER_CONTENT.primary_stats:
             primary[stat] = class_data["base_stats"].get(stat, 0) + race["bonuses"].get(stat, 0)
 
-        passive_bonuses = get_passive_ability_bonuses(self.db.brave_class, level)
-        for stat in PRIMARY_STATS:
+        passive_bonuses = CHARACTER_CONTENT.get_passive_ability_bonuses(self.db.brave_class, level)
+        for stat in CHARACTER_CONTENT.primary_stats:
             primary[stat] += passive_bonuses.get(stat, 0)
 
         equipment_bonuses = self.get_equipment_bonuses()
-        for stat in PRIMARY_STATS:
+        for stat in CHARACTER_CONTENT.primary_stats:
             primary[stat] += equipment_bonuses.get(stat, 0)
 
         meal_bonuses = self.get_active_meal_bonuses()
-        for stat in PRIMARY_STATS:
+        for stat in CHARACTER_CONTENT.primary_stats:
             primary[stat] += meal_bonuses.get(stat, 0)
 
         chapel_bonuses = self.get_active_chapel_bonuses()
-        for stat in PRIMARY_STATS:
+        for stat in CHARACTER_CONTENT.primary_stats:
             primary[stat] += chapel_bonuses.get(stat, 0)
 
         derived = {
@@ -155,21 +148,21 @@ class Character(ObjectParent, DefaultCharacter):
             "healing_power": 0,
         }
         for stat, bonus in passive_bonuses.items():
-            if stat in PRIMARY_STATS:
+            if stat in CHARACTER_CONTENT.primary_stats:
                 continue
             derived[stat] = derived.get(stat, 0) + bonus
         for stat, bonus in equipment_bonuses.items():
-            if stat in PRIMARY_STATS:
+            if stat in CHARACTER_CONTENT.primary_stats:
                 continue
             derived[stat] = derived.get(stat, 0) + bonus
 
         for stat, bonus in meal_bonuses.items():
-            if stat in PRIMARY_STATS:
+            if stat in CHARACTER_CONTENT.primary_stats:
                 continue
             derived[stat] = derived.get(stat, 0) + bonus
 
         for stat, bonus in chapel_bonuses.items():
-            if stat in PRIMARY_STATS:
+            if stat in CHARACTER_CONTENT.primary_stats:
                 continue
             derived[stat] = derived.get(stat, 0) + bonus
 
@@ -199,7 +192,7 @@ class Character(ObjectParent, DefaultCharacter):
         messages = []
         level = self.db.brave_level
 
-        while level < MAX_LEVEL and self.db.brave_xp >= XP_FOR_LEVEL[level + 1]:
+        while level < CHARACTER_CONTENT.max_level and self.db.brave_xp >= CHARACTER_CONTENT.xp_for_level[level + 1]:
             level += 1
             self.db.brave_level = level
             messages.append(f"|gYou are now level |w{level}|n!")
@@ -255,26 +248,26 @@ class Character(ObjectParent, DefaultCharacter):
     def get_unlocked_abilities(self):
         """Return class abilities unlocked at the current level."""
 
-        class_data = CLASSES[self.db.brave_class]
+        class_data = CHARACTER_CONTENT.classes[self.db.brave_class]
         level = self.db.brave_level
         return [ability for unlock_level, ability in class_data["progression"] if unlock_level <= level]
 
     def get_unlocked_combat_abilities(self):
         """Return unlocked combat actions that can be queued with `use`."""
 
-        actions, _passives, _unknown = split_unlocked_abilities(self.db.brave_class, self.db.brave_level)
+        actions, _passives, _unknown = CHARACTER_CONTENT.split_unlocked_abilities(self.db.brave_class, self.db.brave_level)
         return actions
 
     def get_unlocked_passive_abilities(self):
         """Return unlocked passive traits that apply automatically."""
 
-        _actions, passives, _unknown = split_unlocked_abilities(self.db.brave_class, self.db.brave_level)
+        _actions, passives, _unknown = CHARACTER_CONTENT.split_unlocked_abilities(self.db.brave_class, self.db.brave_level)
         return passives
 
     def ensure_starter_loadout(self, force=False):
         """Apply the class starter loadout if it has not been seeded yet."""
 
-        class_key = self.db.brave_class or STARTING_CLASS
+        class_key = self.db.brave_class or CHARACTER_CONTENT.starting_class
         current = self.db.brave_starter_loadout_class
         should_refresh = force or not current
         if current and current != class_key and self.can_customize_build():

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }}</title>
+  <style>
+    :root {
+      --ink: #182028;
+      --accent: #a44f2f;
+      --panel: #fffaf0;
+      --line: #d4c3ab;
+      --muted: #6b6257;
+      --good: #2f6d4c;
+      --bad: #8d3122;
+      --shadow: rgba(24, 32, 40, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(164, 79, 47, 0.14), transparent 32%),
+        linear-gradient(180deg, #efe6d4 0%, #f7f2e8 40%, #eee4d2 100%);
+      min-height: 100vh;
+    }
+    .shell {
+      width: min(1560px, calc(100vw - 32px));
+      margin: 24px auto;
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 20px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 16px 48px var(--shadow);
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(164, 79, 47, 0.12), rgba(228, 199, 178, 0.2));
+    }
+    .panel-head h1, .panel-head h2, .panel-head h3 { margin: 0; font-weight: 700; letter-spacing: 0.02em; }
+    .panel-head p { margin: 8px 0 0; color: var(--muted); line-height: 1.4; }
+    .panel-body { padding: 18px 20px 20px; }
+    .search, .field input, .field select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font: inherit;
+      background: #fff;
+    }
+    .search { margin-bottom: 12px; }
+    .room-list, .selector-list {
+      display: grid;
+      gap: 8px;
+      max-height: 300px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .room-row, .selector-row {
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+    }
+    .room-row:hover, .room-row.active, .selector-row:hover, .selector-row.active {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      background: #fff8f2;
+    }
+    .room-row strong, .room-row span, .selector-row strong, .selector-row span { display: block; }
+    .room-row span, .selector-row span { color: var(--muted); font-size: 0.92rem; margin-top: 4px; }
+    .workspace { display: grid; grid-template-rows: auto auto minmax(360px, auto) minmax(240px, auto); gap: 16px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 0.94rem; }
+    .toolbar, .editor-toolbar { display: flex; flex-wrap: wrap; gap: 10px; }
+    .stack { display: grid; gap: 12px; }
+    .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .field { display: grid; gap: 6px; }
+    .field label { font-size: 0.88rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .field.full { grid-column: 1 / -1; }
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font: inherit;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(164, 79, 47, 0.24);
+    }
+    button.secondary { background: #fff; color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
+    button:disabled { opacity: 0.55; cursor: progress; }
+    textarea, pre {
+      width: 100%;
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fffdfa;
+      font: 0.95rem/1.45 "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+    textarea { min-height: 220px; padding: 16px; resize: vertical; }
+    pre { min-height: 220px; padding: 16px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+    .status {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #fff6e7;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    .status.good { background: #eef8f1; color: var(--good); border-color: rgba(47, 109, 76, 0.24); }
+    .status.bad { background: #fff0ed; color: var(--bad); border-color: rgba(141, 49, 34, 0.24); }
+    .editor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    @media (max-width: 1180px) { .editor-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 980px) { .shell { grid-template-columns: 1fr; } .room-list { max-height: 280px; } .field-grid { grid-template-columns: 1fr; } }
+  
+    .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
+    .validation-notes[hidden] { display:none; }
+    .validation-notes strong { display:block; margin-bottom:8px; }
+    .validation-notes ul { margin:0; padding-left:20px; display:grid; gap:6px; }
+
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel">
+      <div class="panel-head">
+        <h1>World Graph</h1>
+        <p>Browse rooms, then edit the room itself plus its outgoing exits and placed entities from one workspace.</p>
+      </div>
+      <div class="panel-body">
+        <input id="room-search" class="search" type="search" placeholder="Search rooms by id, title, or zone">
+        <div id="room-list" class="room-list"></div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="panel">
+        <div class="panel-head">
+          <h2 id="editor-title">World Editor</h2>
+          <p id="editor-subtitle">Select a room from the left to load its room, exit, and entity payloads.</p>
+        </div>
+        <div class="panel-body">
+          <div class="meta">
+            <span>API root: <strong>{{ api_root }}</strong></span>
+            <span>Reference domain: <strong>{{ reference_domain }}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button id="load-room" class="secondary" type="button">Reload Room Preview</button>
+        <button id="validate-content" class="secondary" type="button">Validate Packs</button>
+        <button id="reload-content" class="secondary" type="button">Reload Registry</button>
+      </div>
+
+      <div id="validation-notes" class="validation-notes" hidden></div>
+
+      <div class="editor-grid">
+        <section class="panel stack">
+          <div class="panel-head">
+            <h3>Room Payload</h3>
+            <p>Author the selected room definition.</p>
+          </div>
+          <div class="panel-body stack">
+            <div class="editor-toolbar">
+              <button id="diff-room" type="button">Dry-Run Room</button>
+              <button id="write-room" type="button">Write Room</button>
+            </div>
+            <textarea id="room-json" spellcheck="false"></textarea>
+          </div>
+        </section>
+
+        <section class="panel stack">
+          <div class="panel-head">
+            <h3>Outgoing Exits</h3>
+            <p>Use structured fields for exit authoring, then sync into the raw JSON payload if needed.</p>
+          </div>
+          <div class="panel-body stack">
+            <div id="exit-list" class="selector-list"></div>
+            <div class="field-grid">
+              <div class="field"><label for="exit-id">Exit Id</label><input id="exit-id" type="text"></div>
+              <div class="field"><label for="exit-key">Exit Key</label><input id="exit-key" type="text"></div>
+              <div class="field"><label for="exit-source">Source Room</label><select id="exit-source"></select></div>
+              <div class="field"><label for="exit-destination">Destination Room</label><select id="exit-destination"></select></div>
+            </div>
+            <div class="editor-toolbar">
+              <button id="sync-exit-form" class="secondary" type="button">Sync Exit Form To JSON</button>
+              <button id="new-exit" class="secondary" type="button">New Exit Draft</button>
+              <button id="diff-exit" type="button">Dry-Run Exit</button>
+              <button id="write-exit" type="button">Write Exit</button>
+            </div>
+            <textarea id="exit-json" spellcheck="false"></textarea>
+          </div>
+        </section>
+
+        <section class="panel stack">
+          <div class="panel-head">
+            <h3>Room Entities</h3>
+            <p>Use the entity form for common fields, then sync the payload before diffing or writing.</p>
+          </div>
+          <div class="panel-body stack">
+            <div id="entity-list" class="selector-list"></div>
+            <div class="field-grid">
+              <div class="field"><label for="entity-id">Entity Id</label><input id="entity-id" type="text"></div>
+              <div class="field"><label for="entity-key">Entity Key</label><input id="entity-key" type="text"></div>
+              <div class="field"><label for="entity-kind">Entity Kind</label><select id="entity-kind"><option value="npc">npc</option><option value="readable">readable</option><option value="interactable">interactable</option><option value="vendor">vendor</option><option value="portal">portal</option></select></div>
+              <div class="field"><label for="entity-location">Entity Location</label><select id="entity-location"></select></div>
+            </div>
+            <div class="editor-toolbar">
+              <button id="sync-entity-form" class="secondary" type="button">Sync Entity Form To JSON</button>
+              <button id="new-entity" class="secondary" type="button">New Entity Draft</button>
+              <button id="diff-entity" type="button">Dry-Run Entity</button>
+              <button id="write-entity" type="button">Write Entity</button>
+            </div>
+            <textarea id="entity-json" spellcheck="false"></textarea>
+          </div>
+        </section>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Preview / Diff Output</h2>
+          <p>Room preview includes exits, entities, and encounter summaries. Exit and entity writes use the same content mutation path as the command/API layer.</p>
+        </div>
+        <div class="panel-body">
+          <div id="status" class="status">Waiting for room selection.</div>
+          <pre id="output"></pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="/static/website/js/creator_common.js"></script>
+  <script>
+    const API_ROOT = "{{ api_root|escapejs }}";
+    const roomList = document.getElementById("room-list");
+    const roomSearch = document.getElementById("room-search");
+    const roomJson = document.getElementById("room-json");
+    const exitList = document.getElementById("exit-list");
+    const exitJson = document.getElementById("exit-json");
+    const entityList = document.getElementById("entity-list");
+    const entityJson = document.getElementById("entity-json");
+    const output = document.getElementById("output");
+    const statusBox = document.getElementById("status");
+    const validationNotes = document.getElementById("validation-notes");
+    const creatorTools = window.BraveCreator.bind(API_ROOT, statusBox, validationNotes);
+    const editorTitle = document.getElementById("editor-title");
+    const editorSubtitle = document.getElementById("editor-subtitle");
+    const loadButton = document.getElementById("load-room");
+    const diffRoomButton = document.getElementById("diff-room");
+    const writeRoomButton = document.getElementById("write-room");
+    const exitIdInput = document.getElementById("exit-id");
+    const exitKeyInput = document.getElementById("exit-key");
+    const exitSourceSelect = document.getElementById("exit-source");
+    const exitDestinationSelect = document.getElementById("exit-destination");
+    const syncExitFormButton = document.getElementById("sync-exit-form");
+    const newExitButton = document.getElementById("new-exit");
+    const diffExitButton = document.getElementById("diff-exit");
+    const writeExitButton = document.getElementById("write-exit");
+    const entityIdInput = document.getElementById("entity-id");
+    const entityKeyInput = document.getElementById("entity-key");
+    const entityKindSelect = document.getElementById("entity-kind");
+    const entityLocationSelect = document.getElementById("entity-location");
+    const syncEntityFormButton = document.getElementById("sync-entity-form");
+    const newEntityButton = document.getElementById("new-entity");
+    const diffEntityButton = document.getElementById("diff-entity");
+    const writeEntityButton = document.getElementById("write-entity");
+    const validateButton = document.getElementById("validate-content");
+    const reloadButton = document.getElementById("reload-content");
+
+    let rooms = [];
+    let selectedRoomId = "";
+    let selectedExitId = "";
+    let selectedEntityId = "";
+    let previewPayload = null;
+
+    function setBusy(isBusy) {
+      for (const button of [loadButton, diffRoomButton, writeRoomButton, syncExitFormButton, newExitButton, diffExitButton, writeExitButton, syncEntityFormButton, newEntityButton, diffEntityButton, writeEntityButton, validateButton, reloadButton]) {
+        button.disabled = isBusy;
+      }
+    }
+
+    function setStatus(message, tone = "") {
+      creatorTools.setStatus(message, tone);
+    }
+
+    function showValidation(messages) {
+      return creatorTools.showValidation(messages);
+    }
+
+    function fillRoomSelect(select, selectedValue = "") {
+      const previous = selectedValue || select.value || "";
+      select.innerHTML = "";
+      for (const room of rooms) {
+        const option = document.createElement("option");
+        option.value = room.id;
+        option.textContent = `${room.label || room.id} (${room.id})`;
+        if (room.id === previous) option.selected = true;
+        select.appendChild(option);
+      }
+    }
+
+    function renderRooms(filter = "") {
+      const token = filter.trim().toLowerCase();
+      const filtered = rooms.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || "").toLowerCase().includes(token)));
+      roomList.innerHTML = "";
+      for (const entry of filtered) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "room-row" + (entry.id === selectedRoomId ? " active" : "");
+        button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id}${entry.meta ? ` · ${entry.meta}` : ""}</span>`;
+        button.addEventListener("click", () => selectRoom(entry.id, entry.label, entry.meta));
+        roomList.appendChild(button);
+      }
+    }
+
+    function renderSelector(container, entries, selectedId, onSelect, labelBuilder) {
+      container.innerHTML = "";
+      for (const entry of entries) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "selector-row" + (entry.id === selectedId ? " active" : "");
+        const label = labelBuilder(entry);
+        button.innerHTML = `<strong>${label.title}</strong><span>${label.meta}</span>`;
+        button.addEventListener("click", () => onSelect(entry.id));
+        container.appendChild(button);
+      }
+      if (!entries.length) {
+        const empty = document.createElement("div");
+        empty.className = "selector-row";
+        empty.innerHTML = `<strong>None</strong><span>No entries for this room yet.</span>`;
+        container.appendChild(empty);
+      }
+    }
+
+    async function apiFetch(path, options = {}) {
+      const response = await fetch(`${API_ROOT}${path}`, {
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+        ...options,
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload.error || `Request failed with ${response.status}`);
+      }
+      return payload;
+    }
+
+    function buildExitDraft() {
+      return { id: `${selectedRoomId || "new_room"}_exit_draft`, key: "north", source: selectedRoomId || "", destination: selectedRoomId || "" };
+    }
+
+    function buildEntityDraft() {
+      return { id: `${selectedRoomId || "new_room"}_entity_draft`, key: "New Entity", kind: "npc", location: selectedRoomId || "" };
+    }
+
+    function populateExitForm(payload) {
+      fillRoomSelect(exitSourceSelect, payload.source || selectedRoomId || "");
+      fillRoomSelect(exitDestinationSelect, payload.destination || selectedRoomId || "");
+      exitIdInput.value = payload.id || "";
+      exitKeyInput.value = payload.key || "";
+      if (payload.source) exitSourceSelect.value = payload.source;
+      if (payload.destination) exitDestinationSelect.value = payload.destination;
+    }
+
+    function populateEntityForm(payload) {
+      fillRoomSelect(entityLocationSelect, payload.location || selectedRoomId || "");
+      entityIdInput.value = payload.id || "";
+      entityKeyInput.value = payload.key || "";
+      entityKindSelect.value = payload.kind || "npc";
+      if (payload.location) entityLocationSelect.value = payload.location;
+    }
+
+    function syncExitFormToJson() {
+      const payload = {
+        id: exitIdInput.value.trim(),
+        key: exitKeyInput.value.trim(),
+        source: exitSourceSelect.value,
+        destination: exitDestinationSelect.value,
+      };
+      const messages = creatorTools.requireFields([
+        { label: "Exit id", value: payload.id },
+        { label: "Exit key", value: payload.key },
+        { label: "Exit source room", value: payload.source },
+        { label: "Exit destination room", value: payload.destination },
+      ]);
+      if (!showValidation(messages)) {
+        setStatus("Exit form is incomplete.", "bad");
+        return null;
+      }
+      exitJson.value = JSON.stringify(payload, null, 2);
+      return payload;
+    }
+
+    function syncEntityFormToJson() {
+      const payload = {
+        id: entityIdInput.value.trim(),
+        key: entityKeyInput.value.trim(),
+        kind: entityKindSelect.value,
+        location: entityLocationSelect.value,
+      };
+      const messages = creatorTools.requireFields([
+        { label: "Entity id", value: payload.id },
+        { label: "Entity key", value: payload.key },
+        { label: "Entity kind", value: payload.kind },
+        { label: "Entity location", value: payload.location },
+      ]);
+      if (!showValidation(messages)) {
+        setStatus("Entity form is incomplete.", "bad");
+        return null;
+      }
+      entityJson.value = JSON.stringify(payload, null, 2);
+      return payload;
+    }
+
+    function renderWorldEditors() {
+      const exits = (previewPayload && previewPayload.exits) || [];
+      const entities = (previewPayload && previewPayload.entities) || [];
+      renderSelector(exitList, exits, selectedExitId, selectExit, (entry) => ({ title: entry.key || entry.id, meta: `${entry.id} -> ${entry.destination || "?"}` }));
+      renderSelector(entityList, entities, selectedEntityId, selectEntity, (entry) => ({ title: entry.key || entry.id, meta: `${entry.id} · ${entry.kind || "entity"}` }));
+      if (!selectedExitId && exits.length) {
+        selectExit(exits[0].id, false);
+      } else if (!exits.length) {
+        const draft = buildExitDraft();
+        exitJson.value = JSON.stringify(draft, null, 2);
+        populateExitForm(draft);
+      }
+      if (!selectedEntityId && entities.length) {
+        selectEntity(entities[0].id, false);
+      } else if (!entities.length) {
+        const draft = buildEntityDraft();
+        entityJson.value = JSON.stringify(draft, null, 2);
+        populateEntityForm(draft);
+      }
+    }
+
+    async function loadRooms() {
+      setBusy(true);
+      setStatus("Loading room references...");
+      try {
+        const payload = await apiFetch("/references/rooms?limit=500");
+        rooms = payload.results || [];
+        fillRoomSelect(exitSourceSelect, selectedRoomId);
+        fillRoomSelect(exitDestinationSelect, selectedRoomId);
+        fillRoomSelect(entityLocationSelect, selectedRoomId);
+        renderRooms(roomSearch.value);
+        setStatus(`Loaded ${rooms.length} rooms.`, "good");
+      } catch (error) {
+        setStatus(error.message, "bad");
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function selectRoom(roomId, label, meta) {
+      selectedRoomId = roomId;
+      selectedExitId = "";
+      selectedEntityId = "";
+      renderRooms(roomSearch.value);
+      editorTitle.textContent = label || roomId;
+      editorSubtitle.textContent = `${roomId}${meta ? ` · ${meta}` : ""}`;
+      await loadPreview();
+    }
+
+    function selectExit(exitId, rerender = true) {
+      selectedExitId = exitId;
+      const entry = ((previewPayload && previewPayload.exits) || []).find((item) => item.id === exitId) || buildExitDraft();
+      exitJson.value = JSON.stringify(entry, null, 2);
+      populateExitForm(entry);
+      if (rerender) renderWorldEditors();
+    }
+
+    function selectEntity(entityId, rerender = true) {
+      selectedEntityId = entityId;
+      const entry = ((previewPayload && previewPayload.entities) || []).find((item) => item.id === entityId) || buildEntityDraft();
+      entityJson.value = JSON.stringify(entry, null, 2);
+      populateEntityForm(entry);
+      if (rerender) renderWorldEditors();
+    }
+
+    async function loadPreview() {
+      if (!selectedRoomId) { setStatus("Choose a room first.", "bad"); return; }
+      setBusy(true);
+      setStatus(`Loading preview for ${selectedRoomId}...`);
+      try {
+        const payload = await apiFetch("/preview", { method: "POST", body: JSON.stringify({ kind: "room", args: [selectedRoomId] }) });
+        previewPayload = payload.preview;
+        roomJson.value = JSON.stringify(payload.preview.room, null, 2);
+        output.textContent = JSON.stringify(payload.preview, null, 2);
+        renderWorldEditors();
+        setStatus(`Loaded world preview for ${selectedRoomId}.`, "good");
+      } catch (error) {
+        setStatus(error.message, "bad");
+        output.textContent = error.stack || error.message;
+      } finally { setBusy(false); }
+    }
+
+    async function mutate(kind, target, payload, write) {
+      const result = await apiFetch("/mutate", { method: "POST", body: JSON.stringify({ kind, target, payload, write }) });
+      output.textContent = result.diff || JSON.stringify(result, null, 2);
+      if (write) {
+        const errors = result.validation_errors || [];
+        if (errors.length) {
+          setStatus(`Write completed with ${errors.length} validation issue(s).`, "bad");
+          output.textContent = `${result.diff || ""}
+
+Validation errors:
+- ${errors.join("
+- ")}`.trim();
+        } else {
+          setStatus(`Wrote ${kind} ${target} and revalidated content.`, "good");
+          await loadPreview();
+          await loadRooms();
+        }
+      } else {
+        setStatus(`Dry-run diff ready for ${kind} ${target}.`, "good");
+      }
+    }
+
+    function parseTextarea(textarea, label) {
+      try {
+        return JSON.parse(textarea.value || "{}");
+      } catch (error) {
+        setStatus(`${label} JSON parse error: ${error.message}`, "bad");
+        throw error;
+      }
+    }
+
+    async function mutateRoom(write) {
+      if (!selectedRoomId) return setStatus("Choose a room first.", "bad");
+      let payload; try { payload = parseTextarea(roomJson, "Room"); } catch { return; }
+      setBusy(true);
+      setStatus(write ? `Writing room ${selectedRoomId}...` : `Generating room diff for ${selectedRoomId}...`);
+      try { await mutate("room", selectedRoomId, payload, write); } catch (error) { setStatus(error.message, "bad"); output.textContent = error.stack || error.message; } finally { setBusy(false); }
+    }
+
+    async function mutateExit(write) {
+      if (!selectedRoomId) return setStatus("Choose a room first.", "bad");
+      const synced = syncExitFormToJson();
+      if (!synced) return;
+      const target = synced.id || selectedExitId;
+      setBusy(true);
+      setStatus(write ? `Writing exit ${target}...` : `Generating exit diff for ${target}...`);
+      try { await mutate("exit", target, synced, write); selectedExitId = target; } catch (error) { setStatus(error.message, "bad"); output.textContent = error.stack || error.message; } finally { setBusy(false); }
+    }
+
+    async function mutateEntity(write) {
+      if (!selectedRoomId) return setStatus("Choose a room first.", "bad");
+      const synced = syncEntityFormToJson();
+      if (!synced) return;
+      const target = synced.id || selectedEntityId;
+      setBusy(true);
+      setStatus(write ? `Writing entity ${target}...` : `Generating entity diff for ${target}...`);
+      try { await mutate("entity", target, synced, write); selectedEntityId = target; } catch (error) { setStatus(error.message, "bad"); output.textContent = error.stack || error.message; } finally { setBusy(false); }
+    }
+
+    async function validateContent() {
+      setBusy(true);
+      setStatus("Validating content packs...");
+      try {
+        const payload = await apiFetch("/validate", { method: "POST", body: "{}" });
+        if (payload.errors.length) {
+          setStatus(`Validation found ${payload.errors.length} issue(s).`, "bad");
+          output.textContent = payload.errors.join("
+");
+        } else {
+          setStatus("Content validation passed.", "good");
+          output.textContent = JSON.stringify(payload, null, 2);
+        }
+      } catch (error) {
+        setStatus(error.message, "bad");
+        output.textContent = error.stack || error.message;
+      } finally { setBusy(false); }
+    }
+
+    async function reloadContent() {
+      setBusy(true);
+      setStatus("Reloading registry from disk...");
+      try {
+        const payload = await apiFetch("/reload", { method: "POST", body: "{}" });
+        setStatus("Content registry reloaded.", "good");
+        output.textContent = JSON.stringify(payload, null, 2);
+        await loadRooms();
+        if (selectedRoomId) await loadPreview();
+      } catch (error) {
+        setStatus(error.message, "bad");
+        output.textContent = error.stack || error.message;
+      } finally { setBusy(false); }
+    }
+
+    roomSearch.addEventListener("input", () => renderRooms(roomSearch.value));
+    loadButton.addEventListener("click", loadPreview);
+    diffRoomButton.addEventListener("click", () => mutateRoom(false));
+    writeRoomButton.addEventListener("click", () => mutateRoom(true));
+    syncExitFormButton.addEventListener("click", () => { if (syncExitFormToJson()) setStatus("Exit form synced to JSON.", "good"); });
+    newExitButton.addEventListener("click", () => { selectedExitId = ""; const draft = buildExitDraft(); populateExitForm(draft); exitJson.value = JSON.stringify(draft, null, 2); renderWorldEditors(); });
+    diffExitButton.addEventListener("click", () => mutateExit(false));
+    writeExitButton.addEventListener("click", () => mutateExit(true));
+    syncEntityFormButton.addEventListener("click", () => { if (syncEntityFormToJson()) setStatus("Entity form synced to JSON.", "good"); });
+    newEntityButton.addEventListener("click", () => { selectedEntityId = ""; const draft = buildEntityDraft(); populateEntityForm(draft); entityJson.value = JSON.stringify(draft, null, 2); renderWorldEditors(); });
+    diffEntityButton.addEventListener("click", () => mutateEntity(false));
+    writeEntityButton.addEventListener("click", () => mutateEntity(true));
+    validateButton.addEventListener("click", validateContent);
+    reloadButton.addEventListener("click", reloadContent);
+
+    loadRooms();
+  </script>
+</body>
+</html>

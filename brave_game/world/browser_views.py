@@ -1,24 +1,14 @@
 """Browser-only main-pane view payloads for Brave's richer command screens."""
 
+import time
+
 from world.arcade import format_arcade_score, get_personal_best, get_reward_definition, has_arcade_reward
 from world.activities import get_targetable_consumable_characters
+from world.combat_atb import render_atb_state
 from world.combat_actions import build_combat_action_payload
+from world.content import get_content_registry
 from world.data.arcade import ARCADE_GAMES
-from world.data.activities import COOKING_RECIPES, format_ingredient_list
 from world.commerce import format_shop_bonus, get_reserved_entries, get_sellable_entries, get_shop_bonus
-from world.data.character_options import (
-    ABILITY_LIBRARY,
-    CLASSES,
-    PASSIVE_ABILITY_BONUSES,
-    RACES,
-    VERTICAL_SLICE_CLASSES,
-    ability_key,
-    split_unlocked_abilities,
-    xp_needed_for_next_level,
-)
-from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, get_item_category, get_item_use_profile
-from world.data.portals import PORTALS, PORTAL_STATUS_LABELS
-from world.data.quests import QUESTS, STARTING_QUESTS, get_quest_region, group_quest_keys_by_region
 from world.data.themes import THEMES, THEME_BY_KEY, normalize_theme_key
 from world.data.world_tones import get_world_tone_key
 from world.chapel import get_active_blessing
@@ -43,6 +33,37 @@ from world.resonance import (
     resolve_ability_query,
 )
 from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
+
+CONTENT = get_content_registry()
+CHARACTER_CONTENT = CONTENT.characters
+ITEM_CONTENT = CONTENT.items
+QUEST_CONTENT = CONTENT.quests
+SYSTEMS_CONTENT = CONTENT.systems
+
+ABILITY_LIBRARY = CHARACTER_CONTENT.ability_library
+CLASSES = CHARACTER_CONTENT.classes
+PASSIVE_ABILITY_BONUSES = CHARACTER_CONTENT.passive_ability_bonuses
+RACES = CHARACTER_CONTENT.races
+VERTICAL_SLICE_CLASSES = CHARACTER_CONTENT.vertical_slice_classes
+ability_key = CHARACTER_CONTENT.ability_key
+split_unlocked_abilities = CHARACTER_CONTENT.split_unlocked_abilities
+xp_needed_for_next_level = CHARACTER_CONTENT.xp_needed_for_next_level
+
+EQUIPMENT_SLOTS = ITEM_CONTENT.equipment_slots
+ITEM_TEMPLATES = ITEM_CONTENT.item_templates
+get_item_category = ITEM_CONTENT.get_item_category
+get_item_use_profile = ITEM_CONTENT.get_item_use_profile
+
+QUESTS = QUEST_CONTENT.quests
+STARTING_QUESTS = QUEST_CONTENT.starting_quests
+get_quest_region = QUEST_CONTENT.get_quest_region
+group_quest_keys_by_region = QUEST_CONTENT.group_quest_keys_by_region
+ENCOUNTER_CONTENT = CONTENT.encounters
+ENEMY_TEMPLATES = ENCOUNTER_CONTENT.enemy_templates
+COOKING_RECIPES = SYSTEMS_CONTENT.cooking_recipes
+format_ingredient_list = SYSTEMS_CONTENT.format_ingredient_list
+PORTALS = SYSTEMS_CONTENT.portals
+PORTAL_STATUS_LABELS = SYSTEMS_CONTENT.portal_status_labels
 
 
 PACK_KIND_ORDER = ("consumable", "ingredient", "loot", "equipment")
@@ -122,7 +143,20 @@ def _action(label, command, icon, *, tone=None, confirm=None, icon_only=False, a
     return action
 
 
-def _item(text, *, icon=None, badge=None, command=None, prefill=None, confirm=None, actions=None, picker=None, tooltip=None):
+def _item(
+    text,
+    *,
+    icon=None,
+    badge=None,
+    command=None,
+    prefill=None,
+    confirm=None,
+    actions=None,
+    picker=None,
+    tooltip=None,
+    detail=None,
+    marker_icon=None,
+):
     item = {"text": text}
     if icon:
         item["icon"] = icon
@@ -140,6 +174,10 @@ def _item(text, *, icon=None, badge=None, command=None, prefill=None, confirm=No
         item["picker"] = picker
     if tooltip:
         item["tooltip"] = tooltip
+    if detail:
+        item["detail"] = detail
+    if marker_icon:
+        item["marker_icon"] = marker_icon
     return item
 
 
@@ -147,16 +185,19 @@ def _pair(label, value, icon=None):
     return {"label": label, "value": str(value), "icon": icon}
 
 
-def _meter(label, current, maximum, *, tone="accent"):
+def _meter(label, current, maximum, *, tone="accent", meta=None):
     current_value = max(0, int(current or 0))
     maximum_value = max(1, int(maximum or 0))
     percent = max(0, min(100, int(round((current_value / maximum_value) * 100))))
-    return {
+    meter = {
         "label": label,
         "value": f"{current_value} / {maximum_value}",
         "percent": percent,
         "tone": tone,
     }
+    if meta:
+        meter["meta"] = dict(meta)
+    return meter
 
 
 def _resource_meter_tone(current, maximum):
@@ -168,6 +209,32 @@ def _resource_meter_tone(current, maximum):
     if percent <= 0.6:
         return "warn"
     return "good"
+
+
+def _enemy_icon(enemy):
+    template = ENEMY_TEMPLATES.get((enemy or {}).get("template_key"), {})
+    tags = {str(tag).lower() for tag in template.get("tags", [])}
+    name = str((enemy or {}).get("key") or template.get("name") or "").lower()
+
+    if "boss" in tags or "dragon" in tags:
+        return "workspace_premium"
+    if {"wolf", "hound", "beast"} & tags or any(token in name for token in ("wolf", "hound")):
+        return "pets"
+    if {"crow", "bat", "bird"} & tags or any(token in name for token in ("crow", "bat")):
+        return "flight"
+    if {"wisp", "shade", "ghost", "spirit"} & tags:
+        return "auto_awesome"
+    if {"undead", "skeleton"} & tags or any(token in name for token in ("skeletal", "skeleton")):
+        return "skull"
+    if {"soldier", "knight", "bandit", "goblin", "raider", "archer"} & tags:
+        return "swords"
+    if {"spider", "insect", "drone", "construct"} & tags or any(token in name for token in ("spider", "drone")):
+        return "pest_control"
+    if {"plant", "briar", "creeper", "mossling"} & tags or any(token in name for token in ("briar", "creeper", "moss")):
+        return "park"
+    if {"slime", "ooze"} & tags or "slime" in name:
+        return "water_drop"
+    return "warning"
 
 
 def _entry(
@@ -186,6 +253,9 @@ def _entry(
     chips=None,
     meters=None,
     tooltip=None,
+    selected=False,
+    combat_state=None,
+    entry_ref=None,
 ):
     entry = {
         "title": title,
@@ -195,6 +265,12 @@ def _entry(
         "icon": icon,
         "badge": badge,
     }
+    if selected:
+        entry["selected"] = True
+    if combat_state:
+        entry["combat_state"] = list(combat_state)
+    if entry_ref:
+        entry["entry_ref"] = str(entry_ref)
     if command:
         entry["command"] = command
     if prefill:
@@ -886,14 +962,15 @@ def _format_room_threat_items(visible_threats):
 
     items = []
     for threat in visible_threats or []:
-        text = str(threat["key"])
-        if threat.get("engaged"):
-            text += " · Engaged"
         items.append(
             _item(
-                text,
-                icon="warning",
+                str(threat["key"]),
+                icon=threat.get("icon", "warning"),
+                badge=threat.get("badge"),
                 command=threat.get("command"),
+                detail=threat.get("detail"),
+                tooltip=threat.get("tooltip"),
+                marker_icon=threat.get("marker_icon"),
             )
         )
     return items
@@ -905,10 +982,20 @@ def _format_room_entity_items(viewer, visible_entities, visible_chars):
     follow_target = get_follow_target(viewer) if viewer and viewer_party_id else None
     party_leader = get_party_leader(viewer) if viewer and viewer_party_id else None
     party_size = len(get_party_members(viewer)) if viewer and viewer_party_id else 0
+    room = getattr(viewer, "location", None)
+    encounter = getattr(getattr(room, "ndb", None), "brave_encounter", None) if room else None
+    engaged_participant_ids = set()
+    if encounter and getattr(encounter, "db", None):
+        engaged_participant_ids = {
+            int(participant_id)
+            for participant_id in (getattr(encounter.db, "participants", None) or [])
+            if participant_id is not None
+        }
 
     for obj in visible_chars or []:
         actions = []
         same_party = bool(viewer_party_id and viewer_party_id == getattr(obj.db, "brave_party_id", None))
+        engaged = bool(getattr(obj, "id", None) in engaged_participant_ids)
         if same_party:
             if follow_target and follow_target.id == obj.id:
                 actions.append(_action("Stay", "party stay", "do_not_disturb_on", tone="muted"))
@@ -932,6 +1019,9 @@ def _format_room_entity_items(viewer, visible_entities, visible_chars):
                 obj.key,
                 icon="person",
                 actions=actions,
+                detail="Engaged" if engaged else None,
+                marker_icon="swords" if engaged else None,
+                tooltip="Already in the current fight." if engaged else None,
             )
         )
 
@@ -2501,10 +2591,29 @@ def build_combat_view(encounter, character):
 
     from typeclasses.scripts import ABILITY_LIBRARY
 
-    def format_pending(label):
-        if not label:
-            return "Basic attack"
-        return label[0].upper() + label[1:]
+    timing_scale = max(1, int(round(1 / max(0.1, float(getattr(encounter, "interval", 1) or 1)))))
+
+    def display_atb_ticks(raw_ticks):
+        raw_ticks = int(raw_ticks or 0)
+        if raw_ticks <= 0:
+            return 0
+        return max(1, (raw_ticks + timing_scale - 1) // timing_scale)
+
+    render_now_ms = int(round(time.time() * 1000))
+    render_tick_ms = max(1, int(round(float(getattr(encounter, "interval", 1) or 1) * 1000)))
+
+    def actor_atb_state(*, participant=None, enemy=None):
+        getter = getattr(encounter, "_get_actor_atb_state", None)
+        if not callable(getter):
+            return {}
+        try:
+            if participant is not None:
+                return render_atb_state(getter(character=participant) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
+            if enemy is not None:
+                return render_atb_state(getter(enemy=enemy) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
+        except Exception:
+            return {}
+        return {}
 
     def combat_action_item(action):
         return _item(
@@ -2515,12 +2624,137 @@ def build_combat_view(encounter, character):
             confirm=action.get("confirm"),
             actions=action.get("actions"),
             picker=action.get("picker"),
+            tooltip=action.get("tooltip"),
         )
+
+    def combat_option_icon(action):
+        target_mode = action.get("target_mode")
+        if target_mode == "enemy":
+            return "warning"
+        if target_mode == "ally":
+            return "person"
+        if target_mode == "self":
+            return "shield"
+        return "bolt" if action.get("kind") == "ability" else "lunch_dining"
+
+    def combat_picker_options(action):
+        options = []
+        if action.get("enabled"):
+            primary = {
+                "label": action.get("label") or action.get("text") or "",
+                "icon": combat_option_icon(action),
+                "meta": action.get("text"),
+                "tone": "accent" if action.get("kind") == "ability" else "good",
+                "tooltip": action.get("tooltip"),
+            }
+            if action.get("picker"):
+                primary["picker"] = action.get("picker")
+            elif action.get("command"):
+                primary["command"] = action.get("command")
+            if primary.get("command") or primary.get("picker"):
+                options.append(primary)
+        for inline_action in action.get("actions", []) or []:
+            picker = inline_action.get("picker")
+            command = inline_action.get("command")
+            if not picker and not command:
+                continue
+            option = {
+                "label": action.get("label") or action.get("text") or "",
+                "icon": inline_action.get("icon") or combat_option_icon(action),
+                "meta": inline_action.get("label"),
+                "tone": inline_action.get("tone") or "muted",
+                "tooltip": action.get("tooltip"),
+            }
+            if picker:
+                option["picker"] = picker
+            if command:
+                option["command"] = command
+            options.append(option)
+        return options
+
+    def build_combat_action_picker(title, icon_name, actions, empty_text):
+        options = []
+        for action in actions:
+            options.extend(combat_picker_options(action))
+        return _action(
+            title,
+            None,
+            icon_name,
+            tone="accent" if options else "muted",
+            picker=_picker(
+                title,
+                subtitle="Choose an action.",
+                options=options,
+                body=[] if options else [empty_text],
+            ),
+        )
+
+    def atb_chip(state, *, label_ready="Ready", ready_tone="accent"):
+        phase = (state or {}).get("phase")
+        if phase == "ready":
+            return _chip(label_ready, "bolt", ready_tone)
+        if phase == "winding":
+            ticks = display_atb_ticks((state or {}).get("ticks_remaining", 0))
+            return _chip(f"Winding {ticks}", "hourglass_top", "danger")
+        if phase == "recovering":
+            ticks = display_atb_ticks((state or {}).get("ticks_remaining", 0))
+            return _chip(f"Recovering {ticks}", "schedule", "muted")
+        if phase == "cooldown":
+            ticks = display_atb_ticks((state or {}).get("ticks_remaining", 0))
+            return _chip(f"Cooldown {ticks}", "timer", "muted")
+        return None
+
+    def atb_meter(state, *, enemy=False):
+        state = dict(state or {})
+        phase = state.get("phase")
+        timing = dict(state.get("timing") or {})
+        gauge = int(state.get("gauge", 0) or 0)
+        ready_gauge = max(1, int(state.get("ready_gauge", 400) or 400))
+        ticks_remaining = int(state.get("ticks_remaining", 0) or 0)
+        phase_started_at_ms = int(state.get("phase_started_at_ms", 0) or 0)
+        phase_duration_ms = int(state.get("phase_duration_ms", 0) or 0)
+        elapsed_ms = max(0, render_now_ms - phase_started_at_ms) if phase_started_at_ms > 0 else 0
+        phase_remaining_ms = max(0, phase_duration_ms - elapsed_ms) if phase_duration_ms > 0 else 0
+
+        value = gauge
+        tone = "accent"
+        if phase in {"ready", "resolving", "winding"}:
+            value = 100
+            tone = "danger" if enemy else "good"
+            if phase == "winding":
+                tone = "danger" if enemy else "warn"
+        elif phase in {"recovering", "cooldown"}:
+            value = 0
+            tone = "muted"
+        else:
+            value = max(0, min(100, int(round((gauge / ready_gauge) * 100))))
+        meter_meta = {
+            "kind": "atb",
+            "hide_value": True,
+            "phase": phase or "charging",
+            "gauge": gauge,
+            "phase_start_gauge": int(state.get("phase_start_gauge", gauge) or 0),
+            "phase_started_at_ms": phase_started_at_ms,
+            "phase_duration_ms": phase_duration_ms,
+            "phase_remaining_ms": phase_remaining_ms,
+            "ready_gauge": ready_gauge,
+            "fill_rate": int(state.get("fill_rate", 100) or 100),
+            "tick_ms": render_tick_ms,
+            "ticks_remaining": ticks_remaining,
+            "windup_ticks": int(timing.get("windup_ticks", 0) or 0),
+            "recovery_ticks": int(timing.get("recovery_ticks", 0) or 0),
+            "cooldown_ticks": int(timing.get("cooldown_ticks", 0) or 0),
+        }
+        return _meter("ATB", value, 100, tone=tone, meta=meter_meta)
 
     def build_participant_status_chips(state):
         chips = []
         if state.get("guard", 0) > 0:
             chips.append(_chip("Guarding", "shield", "good"))
+        if state.get("reaction_redirect_to"):
+            chips.append(_chip("Intercept", "swap_horiz", "good"))
+        elif state.get("reaction_guard", 0) > 0:
+            chips.append(_chip("Answer Ready", "shield", "accent"))
         if state.get("bleed_turns", 0) > 0:
             chips.append(_chip(f"Bleeding {state['bleed_turns']}", "water_drop", "danger"))
         if state.get("poison_turns", 0) > 0:
@@ -2595,8 +2829,6 @@ def build_combat_view(encounter, character):
         selected_target_kind = selected_use.get("target")
 
     combat_actions = build_combat_action_payload(encounter, character)
-    ability_items = [combat_action_item(action) for action in combat_actions.get("abilities", [])]
-    item_entries = [combat_action_item(action) for action in combat_actions.get("items", [])]
 
     party_entries = []
     for participant in ordered_participants:
@@ -2605,45 +2837,83 @@ def build_combat_view(encounter, character):
         derived = participant.db.brave_derived_stats or {}
         state = encounter._get_participant_state(participant)
         status_chips = build_participant_status_chips(state)
-        pending_text = format_pending(encounter._describe_pending_action(participant))
-        lines = []
-        if pending_text != "Basic attack":
-            lines.append(f"Next: {pending_text}")
-        meters = [hp_meter(resources.get("hp", 0), derived.get("max_hp", 0))]
+        atb_state = actor_atb_state(participant=participant)
+        atb_status = atb_chip(atb_state)
+        if atb_status:
+            status_chips = [atb_status] + list(status_chips)
+        combat_state = []
+        phase = (atb_state or {}).get("phase")
+        if phase == "ready":
+            combat_state.append("ready")
+        if state.get("reaction_guard", 0) > 0 or state.get("reaction_redirect_to"):
+            combat_state.append("guarding")
+        meters = [atb_meter(atb_state), hp_meter(resources.get("hp", 0), derived.get("max_hp", 0))]
         for resource_key in ("stamina", "mana"):
             max_value = derived.get(f"max_{resource_key}", 0)
             if max_value > 0:
                 meters.append(resource_meter(resource_key, resources.get(resource_key, 0), max_value))
         if selected_target_kind == "ally" and selected_target_id == participant.id:
-            status_chips = list(status_chips) + [_chip("Targeted", "my_location", "accent")]
+            status_chips = list(status_chips) + [_chip("Targeted", "my_location", "good")]
+            combat_state.append("selected")
 
         party_entries.append(
             _entry(
                 participant.key,
                 meta="You" if participant.id == character.id else None,
-                lines=lines,
                 icon="person",
                 chips=status_chips,
                 meters=meters,
+                selected=bool(selected_target_kind == "ally" and selected_target_id == participant.id),
+                combat_state=combat_state,
+                entry_ref=f"p:{participant.id}",
             )
         )
 
+    enemy_name_totals = {}
+    for enemy in enemies:
+        group_key = str(enemy.get("template_key") or enemy.get("key") or enemy.get("id") or "").strip().lower()
+        enemy_name_totals[group_key] = enemy_name_totals.get(group_key, 0) + 1
+
+    enemy_name_seen = {}
     enemy_entries = []
     for enemy in enemies:
         status_chips = build_enemy_status_chips(enemy)
-        lines = ["Ready basic attack."]
+        atb_state = actor_atb_state(enemy=enemy)
+        atb_status = atb_chip(atb_state, label_ready="Acting", ready_tone="danger")
+        if atb_status:
+            status_chips = [atb_status] + list(status_chips)
+        lines = []
+        active_action = dict((atb_state or {}).get("current_action") or {})
+        if (atb_state or {}).get("phase") == "winding":
+            lines.append(active_action.get("label", "Attack"))
+        combat_state = []
+        phase = (atb_state or {}).get("phase")
+        if phase == "winding":
+            combat_state.append("telegraph")
+        elif phase in {"ready", "resolving"}:
+            combat_state.append("ready")
         if selected_target_kind == "enemy" and selected_target_id == enemy.get("id"):
-            status_chips = list(status_chips) + [_chip("Targeted", "my_location", "accent")]
+            status_chips = list(status_chips) + [_chip("Targeted", "my_location", "danger")]
+            combat_state.append("selected")
+        group_key = str(enemy.get("template_key") or enemy.get("key") or enemy.get("id") or "").strip().lower()
+        enemy_name_seen[group_key] = enemy_name_seen.get(group_key, 0) + 1
+        display_name = str(enemy.get("key") or "Enemy")
+        if enemy_name_totals.get(group_key, 0) > 1:
+            suffix = enemy_name_seen[group_key]
+            last_token = display_name.rsplit(" ", 1)[-1]
+            if not last_token.isdigit():
+                display_name = f"{display_name} {suffix}"
         enemy_entries.append(
             _entry(
-                enemy["key"],
-                meta=f"Target {enemy['id'].upper()}",
-                lines=[],
-                icon="warning",
-                badge=enemy["id"].upper(),
+                display_name,
+                lines=lines,
+                icon=_enemy_icon(enemy),
                 command=f"attack {enemy['id']}",
                 chips=status_chips,
-                meters=[hp_meter(enemy["hp"], enemy["max_hp"])],
+                meters=[atb_meter(atb_state, enemy=True), hp_meter(enemy["hp"], enemy["max_hp"])],
+                selected=bool(selected_target_kind == "enemy" and selected_target_id == enemy.get("id")),
+                combat_state=combat_state,
+                entry_ref=f"e:{enemy['id']}",
             )
         )
 
@@ -2654,10 +2924,12 @@ def build_combat_view(encounter, character):
             eyebrow_icon="swords",
             title_icon="warning",
             subtitle=f"{ally_count} {ally_label} • {foe_count} {foe_label}",
-            actions=[_action("Flee", "flee", "logout", tone="danger")],
+            actions=[
+                build_combat_action_picker("Abilities", "bolt", combat_actions.get("abilities", []), "No usable combat abilities."),
+                build_combat_action_picker("Items", "lunch_dining", combat_actions.get("items", []), "No combat consumables packed."),
+                _action("Flee", "flee", "logout", tone="danger"),
+            ],
             sections=[
-                _section("Abilities", "bolt", "list", items=ability_items or [_item("No usable combat abilities.", icon="info")], span="wide", variant="abilities"),
-                _section("Items", "lunch_dining", "list", items=item_entries or [_item("No combat consumables packed.", icon="backpack")], span="wide", variant="items"),
                 _section("Party", "groups", "entries", items=party_entries or [_entry("No active party members.", icon="person_off")], variant="party"),
                 _section("Enemies", "warning", "entries", items=enemy_entries or [_entry("No enemies remain.", icon="task_alt")], variant="targets"),
             ],
@@ -2665,7 +2937,6 @@ def build_combat_view(encounter, character):
         ),
         "variant": "combat",
         "combat_actions": combat_actions,
-        "preserve_rail": True,
         "sticky": True,
     }
 

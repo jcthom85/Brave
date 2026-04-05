@@ -7,9 +7,13 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
-from world.data.entity_dialogue import STATIC_READ_RESPONSES, TALK_RULES
-from world.data.starting_world import WORLD_OBJECTS
+from world.content import get_content_registry
 from world.interactions import DYNAMIC_READ_HANDLERS, DYNAMIC_TALK_HANDLERS
+
+CONTENT = get_content_registry()
+WORLD_OBJECTS = CONTENT.world.entities
+STATIC_READ_RESPONSES = CONTENT.dialogue.static_read_responses
+TALK_RULES = CONTENT.dialogue.talk_rules
 
 
 def _is_tutorial_object(world_object):

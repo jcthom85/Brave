@@ -1,0 +1,1101 @@
+{
+  "ability_library": {
+    "aimedshot": {
+      "class": "ranger",
+      "cost": 11,
+      "name": "Aimed Shot",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "arcspark": {
+      "class": "mage",
+      "cost": 11,
+      "name": "Arc Spark",
+      "resource": "mana",
+      "target": "enemy"
+    },
+    "avenginglight": {
+      "class": "paladin",
+      "cost": 18,
+      "name": "Avenging Light",
+      "resource": "stamina",
+      "target": "none"
+    },
+    "backstab": {
+      "class": "rogue",
+      "cost": 10,
+      "name": "Backstab",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "barbedarrow": {
+      "class": "ranger",
+      "cost": 10,
+      "name": "Barbed Arrow",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "barkskin": {
+      "class": "druid",
+      "cost": 10,
+      "name": "Barkskin",
+      "resource": "mana",
+      "target": "ally"
+    },
+    "battlecry": {
+      "class": "warrior",
+      "cost": 12,
+      "name": "Battle Cry",
+      "resource": "stamina",
+      "target": "none"
+    },
+    "blessing": {
+      "class": "cleric",
+      "cost": 10,
+      "name": "Blessing",
+      "resource": "mana",
+      "target": "ally"
+    },
+    "brace": {
+      "class": "warrior",
+      "cost": 10,
+      "name": "Brace",
+      "resource": "stamina",
+      "target": "self"
+    },
+    "cheapshot": {
+      "class": "rogue",
+      "cost": 11,
+      "name": "Cheap Shot",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "cleanse": {
+      "class": "cleric",
+      "cost": 10,
+      "name": "Cleanse",
+      "resource": "mana",
+      "target": "ally"
+    },
+    "consecrate": {
+      "class": "paladin",
+      "cost": 13,
+      "name": "Consecrate",
+      "resource": "stamina",
+      "target": "none"
+    },
+    "defend": {
+      "class": "warrior",
+      "cost": 6,
+      "name": "Defend",
+      "resource": "stamina",
+      "target": "self"
+    },
+    "entanglingroots": {
+      "class": "druid",
+      "cost": 10,
+      "name": "Entangling Roots",
+      "resource": "mana",
+      "target": "enemy"
+    },
+    "evasiveroll": {
+      "class": "ranger",
+      "cost": 8,
+      "name": "Evasive Roll",
+      "resource": "stamina",
+      "target": "self"
+    },
+    "eviscerate": {
+      "class": "rogue",
+      "cost": 16,
+      "name": "Eviscerate",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "feint": {
+      "class": "rogue",
+      "cost": 6,
+      "name": "Feint",
+      "resource": "stamina",
+      "target": "self"
+    },
+    "firebolt": {
+      "class": "mage",
+      "cost": 9,
+      "name": "Firebolt",
+      "resource": "mana",
+      "target": "enemy"
+    },
+    "flamewave": {
+      "class": "mage",
+      "cost": 14,
+      "name": "Flame Wave",
+      "resource": "mana",
+      "target": "none"
+    },
+    "frostbind": {
+      "class": "mage",
+      "cost": 10,
+      "name": "Frost Bind",
+      "resource": "mana",
+      "target": "enemy"
+    },
+    "guardianlight": {
+      "class": "cleric",
+      "cost": 18,
+      "name": "Guardian Light",
+      "resource": "mana",
+      "target": "ally"
+    },
+    "guardingaura": {
+      "class": "paladin",
+      "cost": 8,
+      "name": "Guarding Aura",
+      "resource": "stamina",
+      "target": "ally"
+    },
+    "handofmercy": {
+      "class": "paladin",
+      "cost": 11,
+      "name": "Hand of Mercy",
+      "resource": "stamina",
+      "target": "ally"
+    },
+    "heal": {
+      "class": "cleric",
+      "cost": 10,
+      "name": "Heal",
+      "resource": "mana",
+      "target": "ally"
+    },
+    "holystrike": {
+      "class": "paladin",
+      "cost": 8,
+      "name": "Holy Strike",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "icelance": {
+      "class": "mage",
+      "cost": 12,
+      "name": "Ice Lance",
+      "resource": "mana",
+      "target": "enemy"
+    },
+    "intercept": {
+      "class": "warrior",
+      "cost": 11,
+      "name": "Intercept",
+      "resource": "stamina",
+      "target": "ally"
+    },
+    "judgement": {
+      "class": "paladin",
+      "cost": 10,
+      "name": "Judgement",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "laststand": {
+      "class": "warrior",
+      "cost": 16,
+      "name": "Last Stand",
+      "resource": "stamina",
+      "target": "self"
+    },
+    "livingcurrent": {
+      "class": "druid",
+      "cost": 12,
+      "name": "Living Current",
+      "resource": "mana",
+      "target": "ally"
+    },
+    "manashield": {
+      "class": "mage",
+      "cost": 12,
+      "name": "Mana Shield",
+      "resource": "mana",
+      "target": "self"
+    },
+    "markprey": {
+      "class": "ranger",
+      "cost": 6,
+      "name": "Mark Prey",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "meteorsigil": {
+      "class": "mage",
+      "cost": 18,
+      "name": "Meteor Sigil",
+      "resource": "mana",
+      "target": "enemy"
+    },
+    "minormend": {
+      "class": "druid",
+      "cost": 8,
+      "name": "Minor Mend",
+      "resource": "mana",
+      "target": "ally"
+    },
+    "moonfire": {
+      "class": "druid",
+      "cost": 10,
+      "name": "Moonfire",
+      "resource": "mana",
+      "target": "enemy"
+    },
+    "poisonblade": {
+      "class": "rogue",
+      "cost": 9,
+      "name": "Poison Blade",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "quickshot": {
+      "class": "ranger",
+      "cost": 8,
+      "name": "Quick Shot",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "radiantburst": {
+      "class": "cleric",
+      "cost": 15,
+      "name": "Radiant Burst",
+      "resource": "mana",
+      "target": "none"
+    },
+    "rainofarrows": {
+      "class": "ranger",
+      "cost": 16,
+      "name": "Rain of Arrows",
+      "resource": "stamina",
+      "target": "none"
+    },
+    "rebukeevil": {
+      "class": "paladin",
+      "cost": 12,
+      "name": "Rebuke Evil",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "rejuvenationgrove": {
+      "class": "druid",
+      "cost": 16,
+      "name": "Rejuvenation Grove",
+      "resource": "mana",
+      "target": "none"
+    },
+    "renewinglight": {
+      "class": "cleric",
+      "cost": 14,
+      "name": "Renewing Light",
+      "resource": "mana",
+      "target": "ally"
+    },
+    "sanctuary": {
+      "class": "cleric",
+      "cost": 14,
+      "name": "Sanctuary",
+      "resource": "mana",
+      "target": "none"
+    },
+    "shadowstep": {
+      "class": "rogue",
+      "cost": 12,
+      "name": "Shadowstep",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "shieldbash": {
+      "class": "warrior",
+      "cost": 10,
+      "name": "Shield Bash",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "shieldofdawn": {
+      "class": "paladin",
+      "cost": 12,
+      "name": "Shield of Dawn",
+      "resource": "stamina",
+      "target": "ally"
+    },
+    "smite": {
+      "class": "cleric",
+      "cost": 8,
+      "name": "Smite",
+      "resource": "mana",
+      "target": "enemy"
+    },
+    "snaretrap": {
+      "class": "ranger",
+      "cost": 9,
+      "name": "Snare Trap",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "stab": {
+      "class": "rogue",
+      "cost": 7,
+      "name": "Stab",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "staticfield": {
+      "class": "mage",
+      "cost": 13,
+      "name": "Static Field",
+      "resource": "mana",
+      "target": "none"
+    },
+    "strike": {
+      "class": "warrior",
+      "cost": 8,
+      "name": "Strike",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "swarm": {
+      "class": "druid",
+      "cost": 14,
+      "name": "Swarm",
+      "resource": "mana",
+      "target": "none"
+    },
+    "tauntingblow": {
+      "class": "warrior",
+      "cost": 10,
+      "name": "Taunting Blow",
+      "resource": "stamina",
+      "target": "enemy"
+    },
+    "thornlash": {
+      "class": "druid",
+      "cost": 8,
+      "name": "Thorn Lash",
+      "resource": "mana",
+      "target": "enemy"
+    },
+    "vanish": {
+      "class": "rogue",
+      "cost": 10,
+      "name": "Vanish",
+      "resource": "stamina",
+      "target": "self"
+    },
+    "volley": {
+      "class": "ranger",
+      "cost": 13,
+      "name": "Volley",
+      "resource": "stamina",
+      "target": "none"
+    },
+    "wrathofthegrove": {
+      "class": "druid",
+      "cost": 18,
+      "name": "Wrath of the Grove",
+      "resource": "mana",
+      "target": "enemy"
+    }
+  },
+  "classes": {
+    "cleric": {
+      "base_stats": {
+        "agility": 2,
+        "intellect": 3,
+        "spirit": 7,
+        "strength": 2,
+        "vitality": 5
+      },
+      "name": "Cleric",
+      "progression": [
+        [
+          1,
+          "Heal"
+        ],
+        [
+          1,
+          "Smite"
+        ],
+        [
+          2,
+          "Blessing"
+        ],
+        [
+          3,
+          "Serene Soul"
+        ],
+        [
+          4,
+          "Renewing Light"
+        ],
+        [
+          5,
+          "Sanctuary"
+        ],
+        [
+          6,
+          "Purity"
+        ],
+        [
+          7,
+          "Cleanse"
+        ],
+        [
+          8,
+          "Radiant Burst"
+        ],
+        [
+          9,
+          "Graceful Hands"
+        ],
+        [
+          10,
+          "Guardian Light"
+        ]
+      ],
+      "resource": "mana",
+      "role": "Healer",
+      "summary": "Holy support who keeps the party alive and counters the undead."
+    },
+    "druid": {
+      "base_stats": {
+        "agility": 3,
+        "intellect": 5,
+        "spirit": 6,
+        "strength": 2,
+        "vitality": 4
+      },
+      "name": "Druid",
+      "progression": [
+        [
+          1,
+          "Thorn Lash"
+        ],
+        [
+          1,
+          "Minor Mend"
+        ],
+        [
+          2,
+          "Entangling Roots"
+        ],
+        [
+          3,
+          "Wild Grace"
+        ],
+        [
+          4,
+          "Moonfire"
+        ],
+        [
+          5,
+          "Barkskin"
+        ],
+        [
+          6,
+          "Living Current"
+        ],
+        [
+          7,
+          "Swarm"
+        ],
+        [
+          8,
+          "Rejuvenation Grove"
+        ],
+        [
+          9,
+          "Nature's Memory"
+        ],
+        [
+          10,
+          "Wrath of the Grove"
+        ]
+      ],
+      "resource": "mana",
+      "role": "Hybrid Support",
+      "summary": "Nature-bound support blending control, healing, and slow pressure."
+    },
+    "mage": {
+      "base_stats": {
+        "agility": 2,
+        "intellect": 7,
+        "spirit": 5,
+        "strength": 1,
+        "vitality": 3
+      },
+      "name": "Mage",
+      "progression": [
+        [
+          1,
+          "Firebolt"
+        ],
+        [
+          1,
+          "Frost Bind"
+        ],
+        [
+          2,
+          "Arc Spark"
+        ],
+        [
+          3,
+          "Deep Focus"
+        ],
+        [
+          4,
+          "Flame Wave"
+        ],
+        [
+          5,
+          "Mana Shield"
+        ],
+        [
+          6,
+          "Spell Echo"
+        ],
+        [
+          7,
+          "Static Field"
+        ],
+        [
+          8,
+          "Ice Lance"
+        ],
+        [
+          9,
+          "Elemental Attunement"
+        ],
+        [
+          10,
+          "Meteor Sigil"
+        ]
+      ],
+      "resource": "mana",
+      "role": "Magic DPS",
+      "summary": "Elemental caster with burst damage and battlefield control."
+    },
+    "paladin": {
+      "base_stats": {
+        "agility": 2,
+        "intellect": 2,
+        "spirit": 5,
+        "strength": 4,
+        "vitality": 6
+      },
+      "name": "Paladin",
+      "progression": [
+        [
+          1,
+          "Holy Strike"
+        ],
+        [
+          1,
+          "Guarding Aura"
+        ],
+        [
+          2,
+          "Judgement"
+        ],
+        [
+          3,
+          "Steadfast Faith"
+        ],
+        [
+          4,
+          "Hand of Mercy"
+        ],
+        [
+          5,
+          "Consecrate"
+        ],
+        [
+          6,
+          "Blessed Armor"
+        ],
+        [
+          7,
+          "Shield of Dawn"
+        ],
+        [
+          8,
+          "Rebuke Evil"
+        ],
+        [
+          9,
+          "Beacon Soul"
+        ],
+        [
+          10,
+          "Avenging Light"
+        ]
+      ],
+      "resource": "stamina",
+      "role": "Support Tank",
+      "summary": "Holy armored bruiser blending durability, protection, and light support."
+    },
+    "ranger": {
+      "base_stats": {
+        "agility": 6,
+        "intellect": 2,
+        "spirit": 2,
+        "strength": 3,
+        "vitality": 4
+      },
+      "name": "Ranger",
+      "progression": [
+        [
+          1,
+          "Quick Shot"
+        ],
+        [
+          1,
+          "Mark Prey"
+        ],
+        [
+          2,
+          "Aimed Shot"
+        ],
+        [
+          3,
+          "Trailwise"
+        ],
+        [
+          4,
+          "Snare Trap"
+        ],
+        [
+          5,
+          "Volley"
+        ],
+        [
+          6,
+          "Predator's Eye"
+        ],
+        [
+          7,
+          "Evasive Roll"
+        ],
+        [
+          8,
+          "Barbed Arrow"
+        ],
+        [
+          9,
+          "Deadly Rhythm"
+        ],
+        [
+          10,
+          "Rain of Arrows"
+        ]
+      ],
+      "resource": "stamina",
+      "role": "Ranged DPS",
+      "summary": "Mobile ranged hunter with target control and reliable damage."
+    },
+    "rogue": {
+      "base_stats": {
+        "agility": 6,
+        "intellect": 2,
+        "spirit": 2,
+        "strength": 3,
+        "vitality": 4
+      },
+      "name": "Rogue",
+      "progression": [
+        [
+          1,
+          "Stab"
+        ],
+        [
+          1,
+          "Feint"
+        ],
+        [
+          2,
+          "Backstab"
+        ],
+        [
+          3,
+          "Light Feet"
+        ],
+        [
+          4,
+          "Poison Blade"
+        ],
+        [
+          5,
+          "Vanish"
+        ],
+        [
+          6,
+          "Ruthless Timing"
+        ],
+        [
+          7,
+          "Cheap Shot"
+        ],
+        [
+          8,
+          "Shadowstep"
+        ],
+        [
+          9,
+          "Killer's Focus"
+        ],
+        [
+          10,
+          "Eviscerate"
+        ]
+      ],
+      "resource": "stamina",
+      "role": "Burst DPS",
+      "summary": "Opportunist who strikes hard, repositions, and slips out of danger."
+    },
+    "warrior": {
+      "base_stats": {
+        "agility": 2,
+        "intellect": 1,
+        "spirit": 2,
+        "strength": 5,
+        "vitality": 6
+      },
+      "name": "Warrior",
+      "progression": [
+        [
+          1,
+          "Strike"
+        ],
+        [
+          1,
+          "Defend"
+        ],
+        [
+          2,
+          "Shield Bash"
+        ],
+        [
+          3,
+          "Iron Will"
+        ],
+        [
+          4,
+          "Battle Cry"
+        ],
+        [
+          5,
+          "Intercept"
+        ],
+        [
+          6,
+          "Thick Hide"
+        ],
+        [
+          7,
+          "Taunting Blow"
+        ],
+        [
+          8,
+          "Brace"
+        ],
+        [
+          9,
+          "Bulwark"
+        ],
+        [
+          10,
+          "Last Stand"
+        ]
+      ],
+      "resource": "stamina",
+      "role": "Tank",
+      "summary": "Frontline protector who controls enemy attention and absorbs punishment."
+    }
+  },
+  "implemented_ability_keys": [
+    "aimedshot",
+    "arcspark",
+    "avenginglight",
+    "backstab",
+    "barbedarrow",
+    "barkskin",
+    "battlecry",
+    "blessing",
+    "brace",
+    "cheapshot",
+    "cleanse",
+    "consecrate",
+    "defend",
+    "entanglingroots",
+    "evasiveroll",
+    "eviscerate",
+    "feint",
+    "firebolt",
+    "flamewave",
+    "frostbind",
+    "guardianlight",
+    "guardingaura",
+    "handofmercy",
+    "heal",
+    "holystrike",
+    "icelance",
+    "intercept",
+    "judgement",
+    "laststand",
+    "livingcurrent",
+    "manashield",
+    "markprey",
+    "meteorsigil",
+    "minormend",
+    "moonfire",
+    "poisonblade",
+    "quickshot",
+    "radiantburst",
+    "rainofarrows",
+    "rebukeevil",
+    "rejuvenationgrove",
+    "renewinglight",
+    "sanctuary",
+    "shadowstep",
+    "shieldbash",
+    "shieldofdawn",
+    "smite",
+    "snaretrap",
+    "stab",
+    "staticfield",
+    "strike",
+    "swarm",
+    "tauntingblow",
+    "thornlash",
+    "vanish",
+    "volley",
+    "wrathofthegrove"
+  ],
+  "max_level": 10,
+  "passive_ability_bonuses": {
+    "beaconsoul": {
+      "bonuses": {
+        "healing_power": 2,
+        "spell_power": 2,
+        "threat": 1
+      },
+      "name": "Beacon Soul"
+    },
+    "blessedarmor": {
+      "bonuses": {
+        "armor": 3,
+        "threat": 1
+      },
+      "name": "Blessed Armor"
+    },
+    "bulwark": {
+      "bonuses": {
+        "armor": 3,
+        "max_hp": 12,
+        "threat": 2
+      },
+      "name": "Bulwark"
+    },
+    "deadlyrhythm": {
+      "bonuses": {
+        "attack_power": 3,
+        "crit_chance": 2
+      },
+      "name": "Deadly Rhythm"
+    },
+    "deepfocus": {
+      "bonuses": {
+        "max_mana": 14
+      },
+      "name": "Deep Focus"
+    },
+    "elementalattunement": {
+      "bonuses": {
+        "accuracy": 2,
+        "spell_power": 2
+      },
+      "name": "Elemental Attunement"
+    },
+    "gracefulhands": {
+      "bonuses": {
+        "healing_power": 3,
+        "spell_power": 2
+      },
+      "name": "Graceful Hands"
+    },
+    "ironwill": {
+      "bonuses": {
+        "max_hp": 12,
+        "threat": 2
+      },
+      "name": "Iron Will"
+    },
+    "killersfocus": {
+      "bonuses": {
+        "crit_chance": 3,
+        "precision": 3
+      },
+      "name": "Killer's Focus"
+    },
+    "lightfeet": {
+      "bonuses": {
+        "dodge": 3
+      },
+      "name": "Light Feet"
+    },
+    "naturesmemory": {
+      "bonuses": {
+        "healing_power": 2,
+        "max_mana": 10,
+        "spell_power": 2
+      },
+      "name": "Nature's Memory"
+    },
+    "predatorseye": {
+      "bonuses": {
+        "accuracy": 4,
+        "precision": 2
+      },
+      "name": "Predator's Eye"
+    },
+    "purity": {
+      "bonuses": {
+        "armor": 2,
+        "healing_power": 2
+      },
+      "name": "Purity"
+    },
+    "ruthlesstiming": {
+      "bonuses": {
+        "accuracy": 2,
+        "attack_power": 3
+      },
+      "name": "Ruthless Timing"
+    },
+    "serenesoul": {
+      "bonuses": {
+        "max_mana": 12,
+        "spell_power": 2
+      },
+      "name": "Serene Soul"
+    },
+    "spellecho": {
+      "bonuses": {
+        "spell_power": 3
+      },
+      "name": "Spell Echo"
+    },
+    "steadfastfaith": {
+      "bonuses": {
+        "max_hp": 10,
+        "max_mana": 8
+      },
+      "name": "Steadfast Faith"
+    },
+    "thickhide": {
+      "bonuses": {
+        "armor": 3
+      },
+      "name": "Thick Hide"
+    },
+    "trailwise": {
+      "bonuses": {
+        "dodge": 2
+      },
+      "name": "Trailwise"
+    },
+    "wildgrace": {
+      "bonuses": {
+        "accuracy": 2,
+        "dodge": 2
+      },
+      "name": "Wild Grace"
+    }
+  },
+  "primary_stats": [
+    "strength",
+    "agility",
+    "intellect",
+    "spirit",
+    "vitality"
+  ],
+  "races": {
+    "dwarf": {
+      "bonuses": {
+        "spirit": 1,
+        "strength": 1,
+        "vitality": 3
+      },
+      "name": "Dwarf",
+      "perk": "Stoneblood",
+      "summary": "Hardy, disciplined, and stubborn."
+    },
+    "elf": {
+      "bonuses": {
+        "agility": 2,
+        "intellect": 1,
+        "spirit": 1
+      },
+      "name": "Elf",
+      "perk": "Keen Senses",
+      "summary": "Graceful, perceptive, and naturally magical."
+    },
+    "half_orc": {
+      "bonuses": {
+        "strength": 3,
+        "vitality": 2
+      },
+      "name": "Half-Orc",
+      "perk": "Battle Hunger",
+      "summary": "Fierce, intimidating, and strong."
+    },
+    "halfling": {
+      "bonuses": {
+        "agility": 2,
+        "intellect": 1,
+        "vitality": 1
+      },
+      "name": "Halfling",
+      "perk": "Fortune's Step",
+      "summary": "Quick, lucky, and easy to underestimate."
+    },
+    "human": {
+      "bonuses": {
+        "agility": 1,
+        "intellect": 1,
+        "spirit": 1,
+        "strength": 1,
+        "vitality": 1
+      },
+      "name": "Human",
+      "perk": "Resolve",
+      "summary": "Flexible, ambitious, and practical."
+    }
+  },
+  "starting_class": "warrior",
+  "starting_race": "human",
+  "vertical_slice_classes": [
+    "warrior",
+    "cleric",
+    "ranger",
+    "mage",
+    "rogue",
+    "paladin",
+    "druid"
+  ],
+  "xp_for_level": {
+    "1": 0,
+    "2": 50,
+    "3": 125,
+    "4": 225,
+    "5": 350,
+    "6": 500,
+    "7": 675,
+    "8": 875,
+    "9": 1100,
+    "10": 1350
+  }
+}

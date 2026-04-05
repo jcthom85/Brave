@@ -2,9 +2,12 @@
 
 from copy import deepcopy
 
-from world.data.items import ITEM_TEMPLATES
-from world.data.quests import QUESTS, STARTING_QUESTS
+from world.content import get_content_registry
 from world.trophies import unlock_trophy
+
+CONTENT = get_content_registry()
+ITEM_CONTENT = CONTENT.items
+QUEST_CONTENT = CONTENT.quests
 
 
 def _build_initial_objective_state(objective):
@@ -40,7 +43,7 @@ def _format_quest_reward_text(definition):
         template_id = item_reward.get("item")
         if not template_id:
             continue
-        item_name = ITEM_TEMPLATES.get(template_id, {}).get("name", template_id)
+        item_name = ITEM_CONTENT.item_templates.get(template_id, {}).get("name", template_id)
         quantity = item_reward.get("quantity", 1)
         parts.append(item_name + (f" x{quantity}" if quantity > 1 else ""))
     return ", ".join(parts)
@@ -72,7 +75,7 @@ def _build_initial_quest_state(quest_key, definition, quest_log):
 
 
 def _normalize_quest_state(quest_key, quest_state):
-    definition = QUESTS[quest_key]
+    definition = QUEST_CONTENT.quests[quest_key]
     objectives = quest_state.get("objectives", [])
     changed = False
 
@@ -140,7 +143,7 @@ def _complete_quest(character, definition, state, messages):
         if not template_id or quantity <= 0:
             continue
         character.add_item_to_inventory(template_id, quantity)
-        item_name = ITEM_TEMPLATES.get(template_id, {}).get("name", template_id)
+        item_name = ITEM_CONTENT.item_templates.get(template_id, {}).get("name", template_id)
         messages.append(f"You receive |w{item_name}|n" + (f" x{quantity}." if quantity > 1 else "."))
 
     for trophy_key in rewards.get("trophies", []):
@@ -156,9 +159,9 @@ def _complete_quest(character, definition, state, messages):
 
 def _unlock_available_quests(quest_log, messages):
     changed = False
-    for quest_key in STARTING_QUESTS:
+    for quest_key in QUEST_CONTENT.starting_quests:
         state = quest_log.get(quest_key)
-        definition = QUESTS[quest_key]
+        definition = QUEST_CONTENT.quests[quest_key]
         if not state or state.get("status") != "locked":
             continue
         if not _prerequisites_met(quest_log, definition):
@@ -173,7 +176,7 @@ def _unlock_available_quests(quest_log, messages):
 
 def _sync_tracked_quest(character, quest_log, messages):
     changed = False
-    active_keys = [quest_key for quest_key in STARTING_QUESTS if quest_log.get(quest_key, {}).get("status") == "active"]
+    active_keys = [quest_key for quest_key in QUEST_CONTENT.starting_quests if quest_log.get(quest_key, {}).get("status") == "active"]
     tracked = getattr(character.db, "brave_tracked_quest", None)
     suppressed = bool(getattr(character.db, "brave_track_suppressed", False))
 
@@ -191,7 +194,7 @@ def _sync_tracked_quest(character, quest_log, messages):
     if getattr(character.db, "brave_tracked_quest", None) != new_tracked:
         character.db.brave_tracked_quest = new_tracked
         changed = True
-        messages.append(f"|mTracked quest:|n {QUESTS[new_tracked]['title']}")
+        messages.append(f"|mTracked quest:|n {QUEST_CONTENT.quests[new_tracked]['title']}")
 
     return changed
 
@@ -202,7 +205,7 @@ def _sync_collect_item_progress(character, quest_log, messages):
         if state.get("status") != "active":
             continue
 
-        definition = QUESTS.get(quest_key)
+        definition = QUEST_CONTENT.quests.get(quest_key)
         if not definition:
             continue
 
@@ -233,7 +236,7 @@ def _complete_ready_quests(character, quest_log, messages):
             continue
         if not all(objective.get("completed") for objective in state.get("objectives", [])):
             continue
-        definition = QUESTS.get(quest_key)
+        definition = QUEST_CONTENT.quests.get(quest_key)
         if definition:
             changed = _complete_quest(character, definition, state, messages) or changed
     return changed
@@ -242,8 +245,8 @@ def _complete_ready_quests(character, quest_log, messages):
 def _sync_quest_log(character, quest_log, messages):
     changed = False
 
-    for quest_key in STARTING_QUESTS:
-        definition = QUESTS[quest_key]
+    for quest_key in QUEST_CONTENT.starting_quests:
+        definition = QUEST_CONTENT.quests[quest_key]
         if quest_key not in quest_log:
             quest_log[quest_key] = _build_initial_quest_state(quest_key, definition, quest_log)
             changed = True
@@ -286,14 +289,14 @@ def get_active_quests(character):
     """Return active quest keys in stable order."""
 
     quest_log = character.db.brave_quests or {}
-    return [quest_key for quest_key in STARTING_QUESTS if quest_log.get(quest_key, {}).get("status") == "active"]
+    return [quest_key for quest_key in QUEST_CONTENT.starting_quests if quest_log.get(quest_key, {}).get("status") == "active"]
 
 
 def get_completed_quests(character):
     """Return completed quest keys in stable order."""
 
     quest_log = character.db.brave_quests or {}
-    return [quest_key for quest_key in STARTING_QUESTS if quest_log.get(quest_key, {}).get("status") == "completed"]
+    return [quest_key for quest_key in QUEST_CONTENT.starting_quests if quest_log.get(quest_key, {}).get("status") == "completed"]
 
 
 def get_tracked_quest(character):
@@ -339,7 +342,7 @@ def resolve_active_quest_query(character, query):
             return active_keys[index]
 
     title_map = {
-        quest_key: "".join(char for char in QUESTS[quest_key]["title"].lower() if char.isalnum())
+        quest_key: "".join(char for char in QUEST_CONTENT.quests[quest_key]["title"].lower() if char.isalnum())
         for quest_key in active_keys
     }
 
@@ -365,7 +368,7 @@ def get_tracked_quest_payload(character):
     if not quest_key:
         return None
 
-    definition = QUESTS[quest_key]
+    definition = QUEST_CONTENT.quests[quest_key]
     state = (character.db.brave_quests or {}).get(quest_key, {})
     objectives = []
     for objective in state.get("objectives", []):
@@ -390,7 +393,7 @@ def get_tracked_quest_payload(character):
 def format_quest_block(character, quest_key):
     """Format a single quest block for display."""
 
-    definition = QUESTS[quest_key]
+    definition = QUEST_CONTENT.quests[quest_key]
     state = (character.db.brave_quests or {}).get(quest_key)
     if not state or state.get("status") == "locked":
         return None
@@ -431,7 +434,7 @@ def advance_room_visit(character, room):
         if state.get("status") != "active":
             continue
 
-        definition = QUESTS.get(quest_key)
+        definition = QUEST_CONTENT.quests.get(quest_key)
         if not definition:
             continue
 
@@ -473,7 +476,7 @@ def advance_enemy_defeat(character, enemy_tags):
         if state.get("status") != "active":
             continue
 
-        definition = QUESTS.get(quest_key)
+        definition = QUEST_CONTENT.quests.get(quest_key)
         if not definition:
             continue
 

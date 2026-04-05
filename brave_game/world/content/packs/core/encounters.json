@@ -1,0 +1,2258 @@
+{
+  "enemy_temperament_overrides": {
+    "captain_varn_blackreed": "relentless",
+    "forest_wolf": "wary",
+    "grubnak_the_pot_king": "relentless",
+    "hollow_lantern": "relentless",
+    "miretooth": "relentless",
+    "old_greymaw": "relentless",
+    "road_wolf": "wary",
+    "ruk_fence_cutter": "relentless",
+    "sir_edric_restless": "relentless",
+    "thorn_rat": "wary"
+  },
+  "enemy_templates": {
+    "bandit_raider": {
+      "accuracy": 72,
+      "armor": 6,
+      "attack_power": 18,
+      "desc": "A hard-looking tower raider in pieced mail, built to break a line and hold the breach.",
+      "dodge": 6,
+      "loot": [
+        {
+          "chance": 0.85,
+          "item": "bandit_mark"
+        },
+        {
+          "chance": 0.2,
+          "item": "hound_iron_collar"
+        }
+      ],
+      "max_hp": 74,
+      "name": "Bandit Raider",
+      "silver": [
+        6,
+        10
+      ],
+      "tags": [
+        "bandit",
+        "raider",
+        "brute"
+      ],
+      "xp": 50
+    },
+    "bandit_scout": {
+      "accuracy": 78,
+      "armor": 3,
+      "attack_power": 14,
+      "desc": "A lean ridge-runner with a short blade, quick eyes, and no love for fair odds.",
+      "dodge": 11,
+      "loot": [
+        {
+          "chance": 0.7,
+          "item": "bandit_mark"
+        },
+        {
+          "chance": 0.3,
+          "item": "tower_arrowhead"
+        }
+      ],
+      "max_hp": 58,
+      "name": "Bandit Scout",
+      "silver": [
+        5,
+        8
+      ],
+      "tags": [
+        "bandit",
+        "scout",
+        "skirmisher"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 42
+    },
+    "barrow_wisp": {
+      "accuracy": 74,
+      "armor": 2,
+      "attack_kind": "spell",
+      "attack_power": 7,
+      "desc": "A grave-light drifting above the stones, beautiful right up until it starts hating you.",
+      "dodge": 9,
+      "loot": [
+        {
+          "chance": 0.45,
+          "item": "grave_dust"
+        },
+        {
+          "chance": 0.7,
+          "item": "barrow_relic"
+        }
+      ],
+      "max_hp": 40,
+      "name": "Barrow Wisp",
+      "silver": [
+        3,
+        6
+      ],
+      "spell_power": 16,
+      "tags": [
+        "undead",
+        "wisp",
+        "support",
+        "caster"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 36
+    },
+    "bog_creeper": {
+      "accuracy": 74,
+      "armor": 9,
+      "attack_kind": "spell",
+      "attack_power": 18,
+      "desc": "A root-thick marsh horror pulling itself through the reeds with mud, vine, and old water bound into one bad decision.",
+      "dodge": 4,
+      "loot": [
+        {
+          "chance": 0.85,
+          "item": "fen_resin_clot"
+        }
+      ],
+      "max_hp": 104,
+      "name": "Bog Creeper",
+      "silver": [
+        7,
+        11
+      ],
+      "spell_power": 21,
+      "tags": [
+        "plant",
+        "blackfen",
+        "creeper",
+        "brute"
+      ],
+      "xp": 68
+    },
+    "briar_imp": {
+      "accuracy": 75,
+      "armor": 1,
+      "attack_kind": "spell",
+      "attack_power": 6,
+      "desc": "A thorn-limbed little horror with ember eyes and a voice like twigs snapping.",
+      "dodge": 12,
+      "loot": [
+        {
+          "chance": 0.55,
+          "item": "briar_heart"
+        },
+        {
+          "chance": 0.35,
+          "item": "moonleaf_sprig"
+        }
+      ],
+      "max_hp": 31,
+      "name": "Briar Imp",
+      "silver": [
+        3,
+        6
+      ],
+      "special": "curse",
+      "spell_power": 15,
+      "tags": [
+        "imp",
+        "fey",
+        "ranged",
+        "caster"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 30
+    },
+    "captain_varn_blackreed": {
+      "accuracy": 81,
+      "armor": 7,
+      "attack_power": 22,
+      "desc": "A disciplined bandit captain in a rain-dark coat, moving like he expects every fight to become his line if he wants it badly enough.",
+      "dodge": 9,
+      "loot": [
+        {
+          "chance": 1.0,
+          "item": "blackreed_longcoat"
+        },
+        {
+          "chance": 1.0,
+          "item": "bandit_mark",
+          "max": 2,
+          "min": 1
+        }
+      ],
+      "max_hp": 188,
+      "name": "Captain Varn Blackreed",
+      "silver": [
+        18,
+        24
+      ],
+      "special": "blackreed",
+      "tags": [
+        "bandit",
+        "boss",
+        "blackreed",
+        "commander"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 240
+    },
+    "carrion_hound": {
+      "accuracy": 75,
+      "armor": 4,
+      "attack_power": 17,
+      "desc": "A kennel-starved hound bred lean, mean, and far too used to the smell of the dead.",
+      "dodge": 8,
+      "loot": [
+        {
+          "chance": 0.7,
+          "item": "hound_iron_collar"
+        },
+        {
+          "chance": 0.25,
+          "item": "tower_arrowhead"
+        }
+      ],
+      "max_hp": 68,
+      "name": "Carrion Hound",
+      "silver": [
+        4,
+        8
+      ],
+      "tags": [
+        "beast",
+        "hound",
+        "carrion"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 44
+    },
+    "cave_bat_swarm": {
+      "accuracy": 81,
+      "armor": 2,
+      "attack_power": 17,
+      "desc": "A screaming knot of cave bats that has learned the taste of cook smoke, bad meat, and exposed faces.",
+      "dodge": 14,
+      "loot": [
+        {
+          "chance": 0.85,
+          "item": "batwing_bundle"
+        }
+      ],
+      "max_hp": 50,
+      "name": "Cave Bat Swarm",
+      "silver": [
+        4,
+        8
+      ],
+      "tags": [
+        "beast",
+        "bat",
+        "warren",
+        "swarm"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 52
+    },
+    "cave_spider": {
+      "accuracy": 70,
+      "armor": 2,
+      "attack_power": 9,
+      "desc": "A thick-legged spider that has grown too comfortable in the roots and stones.",
+      "dodge": 11,
+      "loot": [
+        {
+          "chance": 0.72,
+          "item": "silk_bundle"
+        },
+        {
+          "chance": 0.2,
+          "item": "moonleaf_sprig"
+        }
+      ],
+      "max_hp": 36,
+      "name": "Cave Spider",
+      "silver": [
+        1,
+        3
+      ],
+      "special": "web",
+      "tags": [
+        "spider",
+        "beast",
+        "web"
+      ],
+      "xp": 26
+    },
+    "drowned_warder": {
+      "accuracy": 78,
+      "armor": 7,
+      "attack_power": 24,
+      "desc": "A drowned lock-keeper shape in old oilskins and iron braces, still carrying out a duty the marsh should have taken from it years ago.",
+      "dodge": 5,
+      "loot": [
+        {
+          "chance": 0.85,
+          "item": "ward_iron_rivet"
+        },
+        {
+          "chance": 0.35,
+          "item": "silt_hook"
+        }
+      ],
+      "max_hp": 114,
+      "name": "Drowned Warder",
+      "silver": [
+        8,
+        12
+      ],
+      "tags": [
+        "undead",
+        "weir",
+        "warder",
+        "brute"
+      ],
+      "xp": 74
+    },
+    "fen_wisp": {
+      "accuracy": 80,
+      "armor": 3,
+      "attack_kind": "spell",
+      "attack_power": 12,
+      "desc": "A pale bog-light drifting just above the waterline, bright enough to follow and wrong enough to regret it immediately.",
+      "dodge": 12,
+      "loot": [
+        {
+          "chance": 0.8,
+          "item": "wispglass_shard"
+        }
+      ],
+      "max_hp": 62,
+      "name": "Fen Wisp",
+      "silver": [
+        8,
+        12
+      ],
+      "spell_power": 24,
+      "tags": [
+        "spirit",
+        "blackfen",
+        "wisp",
+        "caster",
+        "support"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 70
+    },
+    "foreman_coilback": {
+      "accuracy": 76,
+      "armor": 6,
+      "attack_kind": "spell",
+      "attack_power": 18,
+      "desc": "A salvage overseer welded into a crane-rig harness, all piston limbs and command lights gone hostile.",
+      "dodge": 7,
+      "loot": [
+        {
+          "chance": 1.0,
+          "item": "beacon_core"
+        },
+        {
+          "chance": 1.0,
+          "item": "flux_coil",
+          "max": 2,
+          "min": 1
+        },
+        {
+          "chance": 1.0,
+          "item": "anchor_glass_shard"
+        }
+      ],
+      "max_hp": 146,
+      "name": "Foreman Coilback",
+      "silver": [
+        14,
+        18
+      ],
+      "special": "coilback",
+      "spell_power": 19,
+      "tags": [
+        "construct",
+        "tech",
+        "boss",
+        "coilback",
+        "foreman"
+      ],
+      "xp": 160
+    },
+    "forest_wolf": {
+      "accuracy": 72,
+      "armor": 2,
+      "attack_power": 11,
+      "desc": "A heavier woodland wolf with burrs in its coat and an unsettling calm.",
+      "dodge": 10,
+      "loot": [
+        {
+          "chance": 0.8,
+          "item": "wolf_pelt"
+        },
+        {
+          "chance": 0.5,
+          "item": "wolf_fang"
+        }
+      ],
+      "max_hp": 40,
+      "name": "Forest Wolf",
+      "silver": [
+        2,
+        4
+      ],
+      "special": "lunge",
+      "tags": [
+        "wolf",
+        "beast",
+        "forest"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 28
+    },
+    "goblin_brute": {
+      "accuracy": 74,
+      "armor": 7,
+      "attack_power": 21,
+      "desc": "A thick-necked tunnel bully dragging chain, iron, and enough bad temper to make the cave itself feel narrower.",
+      "dodge": 5,
+      "loot": [
+        {
+          "chance": 0.8,
+          "item": "brute_chain_link"
+        },
+        {
+          "chance": 0.5,
+          "item": "goblin_knife"
+        }
+      ],
+      "max_hp": 86,
+      "name": "Goblin Brute",
+      "silver": [
+        7,
+        11
+      ],
+      "tags": [
+        "goblin",
+        "warren",
+        "brute"
+      ],
+      "xp": 58
+    },
+    "goblin_cutter": {
+      "accuracy": 66,
+      "armor": 3,
+      "attack_power": 10,
+      "desc": "A thicker-set goblin raider gripping a nicked blade and stolen work gear.",
+      "dodge": 6,
+      "loot": [
+        {
+          "chance": 0.75,
+          "item": "goblin_knife"
+        },
+        {
+          "chance": 0.6,
+          "item": "bent_fence_nails"
+        },
+        {
+          "chance": 0.25,
+          "item": "road_charm"
+        }
+      ],
+      "max_hp": 34,
+      "name": "Goblin Cutter",
+      "silver": [
+        3,
+        6
+      ],
+      "tags": [
+        "goblin",
+        "raider"
+      ],
+      "xp": 22
+    },
+    "goblin_hexer": {
+      "accuracy": 79,
+      "armor": 3,
+      "attack_kind": "spell",
+      "attack_power": 10,
+      "desc": "A soot-daubed goblin muttering over bone charms and filthy thread, all hungry grin and mean little rituals.",
+      "dodge": 10,
+      "loot": [
+        {
+          "chance": 0.8,
+          "item": "hexbone_charm"
+        },
+        {
+          "chance": 0.35,
+          "item": "goblin_knife"
+        }
+      ],
+      "max_hp": 60,
+      "name": "Goblin Hexer",
+      "silver": [
+        6,
+        10
+      ],
+      "spell_power": 22,
+      "tags": [
+        "goblin",
+        "warren",
+        "hexer",
+        "caster"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 56
+    },
+    "goblin_slinger": {
+      "accuracy": 72,
+      "armor": 1,
+      "attack_power": 8,
+      "desc": "A goblin skirmisher with a leather sling and a pouch full of stolen stones.",
+      "dodge": 8,
+      "loot": [
+        {
+          "chance": 0.35,
+          "item": "goblin_knife"
+        },
+        {
+          "chance": 0.45,
+          "item": "road_charm"
+        }
+      ],
+      "max_hp": 24,
+      "name": "Goblin Slinger",
+      "silver": [
+        2,
+        5
+      ],
+      "tags": [
+        "goblin",
+        "skirmisher",
+        "ranged"
+      ],
+      "xp": 20
+    },
+    "goblin_sneak": {
+      "accuracy": 70,
+      "armor": 1,
+      "attack_power": 7,
+      "desc": "A wiry goblin with quick hands and ugly road-cutting habits.",
+      "dodge": 10,
+      "loot": [
+        {
+          "chance": 0.65,
+          "item": "goblin_knife"
+        },
+        {
+          "chance": 0.35,
+          "item": "road_charm"
+        }
+      ],
+      "max_hp": 26,
+      "name": "Goblin Sneak",
+      "silver": [
+        2,
+        4
+      ],
+      "tags": [
+        "goblin",
+        "skirmisher"
+      ],
+      "xp": 18
+    },
+    "grave_crow": {
+      "accuracy": 78,
+      "armor": 1,
+      "attack_power": 11,
+      "desc": "A black carrion bird with pale eye-fire and a beak too eager for the living.",
+      "dodge": 12,
+      "loot": [
+        {
+          "chance": 0.55,
+          "item": "grave_dust"
+        },
+        {
+          "chance": 0.25,
+          "item": "barrow_relic"
+        }
+      ],
+      "max_hp": 34,
+      "name": "Grave Crow",
+      "silver": [
+        2,
+        4
+      ],
+      "tags": [
+        "undead",
+        "crow",
+        "skirmisher"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 30
+    },
+    "grubnak_the_pot_king": {
+      "accuracy": 80,
+      "armor": 9,
+      "attack_power": 26,
+      "desc": "An oversized goblin tyrant wearing a battered pot lid like a crown and carrying a black iron ladle like a scepter.",
+      "dodge": 6,
+      "loot": [
+        {
+          "chance": 1.0,
+          "item": "potking_ladle"
+        },
+        {
+          "chance": 1.0,
+          "item": "brute_chain_link",
+          "max": 2,
+          "min": 1
+        },
+        {
+          "chance": 1.0,
+          "item": "hexbone_charm"
+        }
+      ],
+      "max_hp": 226,
+      "name": "Grubnak the Pot-King",
+      "silver": [
+        22,
+        28
+      ],
+      "special": "potking",
+      "spell_power": 20,
+      "tags": [
+        "goblin",
+        "warren",
+        "boss",
+        "potking",
+        "brute"
+      ],
+      "xp": 320
+    },
+    "hollow_lantern": {
+      "accuracy": 84,
+      "armor": 10,
+      "attack_kind": "spell",
+      "attack_power": 18,
+      "desc": "A drowned lamp-spirit gathered around an old civic light, all blackwater reflection, white fire, and the certainty that duty outlived mercy.",
+      "dodge": 9,
+      "loot": [
+        {
+          "chance": 1.0,
+          "item": "hollow_lantern_prism"
+        },
+        {
+          "chance": 1.0,
+          "item": "hollow_glass_shard",
+          "max": 2,
+          "min": 1
+        },
+        {
+          "chance": 1.0,
+          "item": "ward_iron_rivet",
+          "max": 2,
+          "min": 1
+        }
+      ],
+      "max_hp": 292,
+      "name": "The Hollow Lantern",
+      "silver": [
+        28,
+        34
+      ],
+      "special": "hollowlantern",
+      "spell_power": 31,
+      "tags": [
+        "spirit",
+        "weir",
+        "boss",
+        "hollowlantern",
+        "caster"
+      ],
+      "xp": 460
+    },
+    "hollow_wisp": {
+      "accuracy": 82,
+      "armor": 3,
+      "attack_kind": "spell",
+      "attack_power": 12,
+      "desc": "A white drowned lamp-glow drifting just above the black water, bright enough to follow and empty enough to regret.",
+      "dodge": 12,
+      "loot": [
+        {
+          "chance": 0.85,
+          "item": "hollow_glass_shard"
+        },
+        {
+          "chance": 0.2,
+          "item": "ward_iron_rivet"
+        }
+      ],
+      "max_hp": 72,
+      "name": "Hollow Wisp",
+      "silver": [
+        8,
+        12
+      ],
+      "spell_power": 27,
+      "tags": [
+        "spirit",
+        "weir",
+        "wisp",
+        "caster",
+        "support"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 76
+    },
+    "mag_clamp_drone": {
+      "accuracy": 73,
+      "armor": 3,
+      "attack_kind": "spell",
+      "attack_power": 9,
+      "desc": "A hovering clamp rig that locks, drags, and tags targets with ugly machine patience.",
+      "dodge": 7,
+      "loot": [
+        {
+          "chance": 0.6,
+          "item": "flux_coil"
+        },
+        {
+          "chance": 0.5,
+          "item": "magnetized_scrap"
+        }
+      ],
+      "max_hp": 46,
+      "name": "Mag-Clamp Drone",
+      "silver": [
+        4,
+        8
+      ],
+      "spell_power": 13,
+      "tags": [
+        "construct",
+        "tech",
+        "support",
+        "clamp"
+      ],
+      "xp": 32
+    },
+    "mire_hound": {
+      "accuracy": 79,
+      "armor": 5,
+      "attack_power": 22,
+      "desc": "A marsh-bred hound with reed-matted hide, yellow eyes, and the sort of patience wet country teaches predators.",
+      "dodge": 8,
+      "loot": [
+        {
+          "chance": 0.8,
+          "item": "mire_hound_hide"
+        },
+        {
+          "chance": 0.25,
+          "item": "fen_resin_clot"
+        }
+      ],
+      "max_hp": 92,
+      "name": "Mire Hound",
+      "silver": [
+        8,
+        12
+      ],
+      "tags": [
+        "beast",
+        "hound",
+        "blackfen",
+        "mire"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 66
+    },
+    "miretooth": {
+      "accuracy": 82,
+      "armor": 9,
+      "attack_power": 29,
+      "desc": "A fen-born apex predator with a scarred muzzle, reed-dark hide, and a gait that makes the marsh itself look like it is stalking with him.",
+      "dodge": 10,
+      "loot": [
+        {
+          "chance": 1.0,
+          "item": "miretooth_fang"
+        },
+        {
+          "chance": 1.0,
+          "item": "mire_hound_hide",
+          "max": 2,
+          "min": 1
+        },
+        {
+          "chance": 1.0,
+          "item": "wispglass_shard"
+        }
+      ],
+      "max_hp": 252,
+      "name": "Miretooth",
+      "silver": [
+        24,
+        30
+      ],
+      "special": "miretooth",
+      "tags": [
+        "beast",
+        "blackfen",
+        "boss",
+        "miretooth",
+        "hound"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 380
+    },
+    "mossling": {
+      "accuracy": 67,
+      "armor": 4,
+      "attack_kind": "spell",
+      "attack_power": 7,
+      "desc": "A squat knot of wet bark and roots that moves with patient, herbal malice.",
+      "dodge": 5,
+      "loot": [
+        {
+          "chance": 0.85,
+          "item": "moonleaf_sprig"
+        },
+        {
+          "chance": 0.2,
+          "item": "briar_heart"
+        }
+      ],
+      "max_hp": 44,
+      "name": "Mossling",
+      "silver": [
+        2,
+        5
+      ],
+      "special": "mend",
+      "spell_power": 12,
+      "tags": [
+        "plant",
+        "support",
+        "moss"
+      ],
+      "xp": 28
+    },
+    "old_greymaw": {
+      "accuracy": 76,
+      "armor": 5,
+      "attack_power": 17,
+      "desc": "A scarred apex wolf with old iron snapped off in one shoulder and too much cunning in its eyes.",
+      "dodge": 12,
+      "loot": [
+        {
+          "chance": 1.0,
+          "item": "greymaw_pelt"
+        },
+        {
+          "chance": 1.0,
+          "item": "wolf_fang",
+          "max": 2,
+          "min": 1
+        }
+      ],
+      "max_hp": 118,
+      "name": "Old Greymaw",
+      "silver": [
+        12,
+        16
+      ],
+      "special": "greymaw",
+      "tags": [
+        "wolf",
+        "beast",
+        "boss",
+        "greymaw"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 130
+    },
+    "relay_tick": {
+      "accuracy": 77,
+      "armor": 2,
+      "attack_kind": "spell",
+      "attack_power": 8,
+      "desc": "A darting relay parasite throwing needle-bright pulses through the scrap fog.",
+      "dodge": 11,
+      "loot": [
+        {
+          "chance": 0.55,
+          "item": "anchor_glass_shard"
+        },
+        {
+          "chance": 0.45,
+          "item": "fractured_circuit"
+        }
+      ],
+      "max_hp": 28,
+      "name": "Relay Tick",
+      "silver": [
+        3,
+        6
+      ],
+      "spell_power": 14,
+      "tags": [
+        "construct",
+        "tech",
+        "signal",
+        "skirmisher"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 24
+    },
+    "restless_shade": {
+      "accuracy": 75,
+      "armor": 2,
+      "attack_kind": "spell",
+      "attack_power": 8,
+      "desc": "A dim human outline full of grief, bad memory, and enough spite to stay dangerous.",
+      "dodge": 10,
+      "loot": [
+        {
+          "chance": 0.65,
+          "item": "grave_dust"
+        },
+        {
+          "chance": 0.5,
+          "item": "barrow_relic"
+        }
+      ],
+      "max_hp": 42,
+      "name": "Restless Shade",
+      "silver": [
+        4,
+        6
+      ],
+      "spell_power": 17,
+      "tags": [
+        "undead",
+        "shade",
+        "caster"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 38
+    },
+    "road_wolf": {
+      "accuracy": 68,
+      "armor": 2,
+      "attack_power": 8,
+      "desc": "A lean wolf made bold by hunger and too many easy roads.",
+      "dodge": 8,
+      "loot": [
+        {
+          "chance": 0.75,
+          "item": "wolf_pelt"
+        },
+        {
+          "chance": 0.45,
+          "item": "wolf_fang"
+        }
+      ],
+      "max_hp": 30,
+      "name": "Road Wolf",
+      "silver": [
+        1,
+        3
+      ],
+      "tags": [
+        "wolf",
+        "beast"
+      ],
+      "xp": 18
+    },
+    "rot_crow": {
+      "accuracy": 84,
+      "armor": 2,
+      "attack_power": 19,
+      "desc": "A long-winged marsh crow with bone-white eyes and a talent for circling anything about to stop moving.",
+      "dodge": 15,
+      "loot": [
+        {
+          "chance": 0.85,
+          "item": "rotcrow_pinion"
+        },
+        {
+          "chance": 0.25,
+          "item": "wispglass_shard"
+        }
+      ],
+      "max_hp": 58,
+      "name": "Rot Crow",
+      "silver": [
+        6,
+        10
+      ],
+      "tags": [
+        "beast",
+        "crow",
+        "blackfen",
+        "skirmisher"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 64
+    },
+    "ruk_fence_cutter": {
+      "accuracy": 72,
+      "armor": 4,
+      "attack_power": 14,
+      "desc": "A broad goblin brute in stolen harness, gripping the jagged axe that gave him his name.",
+      "dodge": 8,
+      "loot": [
+        {
+          "chance": 1.0,
+          "item": "splintered_axe_head"
+        },
+        {
+          "chance": 1.0,
+          "item": "bent_fence_nails",
+          "max": 2,
+          "min": 1
+        }
+      ],
+      "max_hp": 84,
+      "name": "Ruk the Fence-Cutter",
+      "silver": [
+        10,
+        14
+      ],
+      "tags": [
+        "goblin",
+        "boss",
+        "ruk",
+        "raider"
+      ],
+      "xp": 90
+    },
+    "salvage_drone": {
+      "accuracy": 75,
+      "armor": 3,
+      "attack_kind": "spell",
+      "attack_power": 10,
+      "desc": "A hovering work drone whose tool arms now serve nobody gentle.",
+      "dodge": 7,
+      "loot": [
+        {
+          "chance": 0.5,
+          "item": "fractured_circuit"
+        },
+        {
+          "chance": 0.45,
+          "item": "flux_coil"
+        }
+      ],
+      "max_hp": 38,
+      "name": "Salvage Drone",
+      "silver": [
+        4,
+        7
+      ],
+      "spell_power": 12,
+      "tags": [
+        "construct",
+        "tech",
+        "ranged"
+      ],
+      "xp": 28
+    },
+    "scrap_hound": {
+      "accuracy": 70,
+      "armor": 4,
+      "attack_power": 13,
+      "desc": "A four-legged salvage brute stitched from plates, clamps, and bad civic planning.",
+      "dodge": 5,
+      "loot": [
+        {
+          "chance": 0.75,
+          "item": "magnetized_scrap"
+        },
+        {
+          "chance": 0.4,
+          "item": "fractured_circuit"
+        }
+      ],
+      "max_hp": 54,
+      "name": "Scrap Hound",
+      "silver": [
+        4,
+        7
+      ],
+      "tags": [
+        "construct",
+        "tech",
+        "brute",
+        "hound"
+      ],
+      "xp": 34
+    },
+    "scrap_mite": {
+      "accuracy": 72,
+      "armor": 1,
+      "attack_power": 7,
+      "desc": "A palm-sized salvage machine skittering on too many magnetic feet.",
+      "dodge": 9,
+      "loot": [
+        {
+          "chance": 0.7,
+          "item": "fractured_circuit"
+        }
+      ],
+      "max_hp": 24,
+      "name": "Scrap Mite",
+      "silver": [
+        2,
+        4
+      ],
+      "tags": [
+        "construct",
+        "tech",
+        "scrap"
+      ],
+      "xp": 18
+    },
+    "silt_stalker": {
+      "accuracy": 83,
+      "armor": 4,
+      "attack_power": 23,
+      "desc": "A long-limbed marsh hunter slipping through the flooded stonework on claws and bad patience.",
+      "dodge": 13,
+      "loot": [
+        {
+          "chance": 0.8,
+          "item": "silt_hook"
+        },
+        {
+          "chance": 0.25,
+          "item": "hollow_glass_shard"
+        }
+      ],
+      "max_hp": 90,
+      "name": "Silt Stalker",
+      "silver": [
+        7,
+        11
+      ],
+      "tags": [
+        "beast",
+        "weir",
+        "stalker",
+        "skirmisher"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 72
+    },
+    "sir_edric_restless": {
+      "accuracy": 76,
+      "armor": 7,
+      "attack_kind": "spell",
+      "attack_power": 19,
+      "desc": "A long-dead knight risen in dim mail and torn surcoat, still carrying command like a wound that never closed.",
+      "dodge": 7,
+      "loot": [
+        {
+          "chance": 1.0,
+          "item": "edrics_signet"
+        },
+        {
+          "chance": 1.0,
+          "item": "barrow_relic",
+          "max": 2,
+          "min": 1
+        }
+      ],
+      "max_hp": 168,
+      "name": "Sir Edric the Restless",
+      "silver": [
+        14,
+        18
+      ],
+      "special": "edric",
+      "spell_power": 18,
+      "tags": [
+        "undead",
+        "boss",
+        "edric",
+        "knight"
+      ],
+      "xp": 190
+    },
+    "skeletal_soldier": {
+      "accuracy": 69,
+      "armor": 4,
+      "attack_power": 13,
+      "desc": "An old soldier's bones held together by stubborn malice and older oaths.",
+      "dodge": 4,
+      "loot": [
+        {
+          "chance": 0.8,
+          "item": "grave_dust"
+        },
+        {
+          "chance": 0.35,
+          "item": "barrow_relic"
+        }
+      ],
+      "max_hp": 54,
+      "name": "Skeletal Soldier",
+      "silver": [
+        3,
+        5
+      ],
+      "tags": [
+        "undead",
+        "skeleton",
+        "soldier",
+        "brute"
+      ],
+      "xp": 34
+    },
+    "sludge_slime": {
+      "accuracy": 73,
+      "armor": 8,
+      "attack_kind": "spell",
+      "attack_power": 14,
+      "desc": "A crawl of grease-thick cave sludge pulling itself along with bits of bone, ash, and goblin kitchen ruin half dissolved inside it.",
+      "dodge": 4,
+      "loot": [
+        {
+          "chance": 0.8,
+          "item": "sludge_resin"
+        }
+      ],
+      "max_hp": 94,
+      "name": "Sludge Slime",
+      "silver": [
+        5,
+        9
+      ],
+      "spell_power": 20,
+      "tags": [
+        "ooze",
+        "slime",
+        "warren"
+      ],
+      "xp": 54
+    },
+    "thorn_rat": {
+      "accuracy": 74,
+      "armor": 0,
+      "attack_power": 5,
+      "desc": "A large roadside rat with burrs and thorns snarled into its hide.",
+      "dodge": 12,
+      "loot": [
+        {
+          "chance": 0.8,
+          "item": "thorn_rat_tail"
+        }
+      ],
+      "max_hp": 18,
+      "name": "Thorn Rat",
+      "silver": [
+        0,
+        1
+      ],
+      "tags": [
+        "beast",
+        "rat"
+      ],
+      "xp": 12
+    },
+    "tower_archer": {
+      "accuracy": 83,
+      "armor": 3,
+      "attack_power": 17,
+      "desc": "A ridge archer with a tower bow, a cold eye, and a bad habit of aiming where the mail parts.",
+      "dodge": 10,
+      "loot": [
+        {
+          "chance": 0.85,
+          "item": "tower_arrowhead"
+        },
+        {
+          "chance": 0.45,
+          "item": "bandit_mark"
+        }
+      ],
+      "max_hp": 52,
+      "name": "Tower Archer",
+      "silver": [
+        6,
+        10
+      ],
+      "tags": [
+        "bandit",
+        "archer",
+        "ranged"
+      ],
+      "target_strategy": "lowest_hp",
+      "xp": 46
+    }
+  },
+  "room_encounters": {
+    "blackfen_approach_boglight_hollow": [
+      {
+        "enemies": [
+          "fen_wisp",
+          "fen_wisp"
+        ],
+        "intro": "Bog-light gathers in the hollow just long enough to show you how many bad shapes were waiting in it.",
+        "key": "hollow_lights",
+        "title": "Hollow Lights"
+      },
+      {
+        "enemies": [
+          "bog_creeper",
+          "fen_wisp"
+        ],
+        "intro": "A creeper churns up through the black water while a wisp hangs back, bright and hateful over the pool.",
+        "key": "root_and_glass",
+        "title": "Root and Glass"
+      },
+      {
+        "enemies": [
+          "rot_crow",
+          "rot_crow",
+          "fen_wisp"
+        ],
+        "intro": "Rot crows break from the dead trees just as marsh light starts drifting around your ankles.",
+        "key": "hollow_carrion",
+        "title": "Hollow Carrion"
+      }
+    ],
+    "blackfen_approach_carrion_rise": [
+      {
+        "enemies": [
+          "rot_crow",
+          "mire_hound"
+        ],
+        "intro": "The high mudbank gives just enough footing for the local killers to enjoy the angle.",
+        "key": "rise_watch",
+        "title": "Rise Watch"
+      },
+      {
+        "enemies": [
+          "bog_creeper",
+          "rot_crow"
+        ],
+        "intro": "A creeper heaves out of the mud shelf while crows start cutting low over the rise like they want the first claim.",
+        "key": "rise_blight",
+        "title": "Rise Blight"
+      },
+      {
+        "enemies": [
+          "fen_wisp",
+          "mire_hound",
+          "rot_crow"
+        ],
+        "intro": "The rise goes cold, then bright, then violent: marsh light ahead, teeth below, wings behind.",
+        "key": "bad_tide",
+        "title": "Bad Tide"
+      }
+    ],
+    "blackfen_approach_fenreach_track": [
+      {
+        "enemies": [
+          "mire_hound",
+          "rot_crow"
+        ],
+        "intro": "The reeds part low and fast. Whatever owns this trail has already decided you count as movement first and people second.",
+        "key": "reed_hunt",
+        "title": "Reed Hunt"
+      },
+      {
+        "enemies": [
+          "bog_creeper",
+          "fen_wisp"
+        ],
+        "intro": "Mud shifts underfoot as a root mass heaves up through the water while bad fen-light starts drifting in from the side.",
+        "key": "bog_pull",
+        "title": "Bog Pull"
+      },
+      {
+        "enemies": [
+          "mire_hound",
+          "rot_crow"
+        ],
+        "intro": "A marsh hound ranges the track while a second shape circles overhead, already measuring what part of you it wants later.",
+        "key": "wet_line",
+        "title": "Wet Line"
+      }
+    ],
+    "blackfen_approach_miretooths_wallow": [
+      {
+        "enemies": [
+          "miretooth"
+        ],
+        "intro": "At the far black pool, Miretooth rises out of the reeds in one smooth hateful line, as if the whole fen has simply decided on a shape.",
+        "key": "fen_king",
+        "title": "Miretooth"
+      }
+    ],
+    "blackfen_approach_reedflats": [
+      {
+        "enemies": [
+          "mire_hound",
+          "bog_creeper"
+        ],
+        "intro": "The flats come alive all at once: one hound low through the reeds while a creeper drags itself out of the standing water behind it.",
+        "key": "reed_press",
+        "title": "Reed Press"
+      },
+      {
+        "enemies": [
+          "fen_wisp",
+          "rot_crow"
+        ],
+        "intro": "A fen-light glides ahead like a promise and the marsh punishes you for noticing it.",
+        "key": "false_lanterns",
+        "title": "False Lanterns"
+      },
+      {
+        "enemies": [
+          "bog_creeper",
+          "rot_crow"
+        ],
+        "intro": "A creeper blocks the path while rot crows rake across the top of the reeds looking for weakness.",
+        "key": "marsh_line",
+        "title": "Marsh Line"
+      }
+    ],
+    "brambleford_rat_and_kettle_cellar": [
+      {
+        "enemies": [
+          "thorn_rat",
+          "thorn_rat"
+        ],
+        "intro": "Barrels rattle, sacks split, and a pair of thorn rats come boiling out of the dark.",
+        "key": "cellar_scuttle",
+        "title": "Cellar Scuttle"
+      },
+      {
+        "enemies": [
+          "thorn_rat",
+          "thorn_rat",
+          "thorn_rat"
+        ],
+        "intro": "Three cellar rats burst from behind the feed sacks like they own the place.",
+        "key": "grain_raiders",
+        "title": "Grain Raiders"
+      }
+    ],
+    "drowned_weir_blackwater_lamp_house": [
+      {
+        "enemies": [
+          "hollow_lantern"
+        ],
+        "intro": "At the drowned lamp house, the south light folds inward and stands up in the shape that has been wearing it all along.",
+        "key": "the_hollow_lantern",
+        "title": "The Hollow Lantern"
+      }
+    ],
+    "drowned_weir_drowned_causeway": [
+      {
+        "enemies": [
+          "drowned_warder",
+          "silt_stalker"
+        ],
+        "intro": "Black water slaps the stone line and something old answers from the drowned causeway with the confidence of a post that never got relieved.",
+        "key": "floodline_watch",
+        "title": "Floodline Watch"
+      },
+      {
+        "enemies": [
+          "hollow_wisp",
+          "drowned_warder"
+        ],
+        "intro": "The dead lamp posts along the causeway light up one by one, and the things under them start moving as if the signal finally reached them.",
+        "key": "wrong_lanterns",
+        "title": "Wrong Lanterns"
+      },
+      {
+        "enemies": [
+          "silt_stalker",
+          "hollow_wisp"
+        ],
+        "intro": "Silt boils up at the stone edge while a pale marsh light drifts in behind it, already looking for the weakest footing in the party.",
+        "key": "blackwater_pull",
+        "title": "Blackwater Pull"
+      }
+    ],
+    "drowned_weir_lantern_weir": [
+      {
+        "enemies": [
+          "drowned_warder",
+          "drowned_warder"
+        ],
+        "intro": "Old spillway iron starts glowing in sick pulses and the drowned warders beneath it take that as permission rather than warning.",
+        "key": "weir_hold",
+        "title": "Weir Hold"
+      },
+      {
+        "enemies": [
+          "hollow_wisp",
+          "hollow_wisp",
+          "silt_stalker"
+        ],
+        "intro": "Light gathers over the drowned iron ribs just long enough to show you what was waiting in the channels underneath.",
+        "key": "spillway_lights",
+        "title": "Spillway Lights"
+      },
+      {
+        "enemies": [
+          "drowned_warder",
+          "silt_stalker"
+        ],
+        "intro": "One blackwater keeper steps into the path while something quicker circles the flooded stone just out of clean sight.",
+        "key": "keeper_line",
+        "title": "Keeper Line"
+      }
+    ],
+    "drowned_weir_sluice_walk": [
+      {
+        "enemies": [
+          "drowned_warder",
+          "hollow_wisp"
+        ],
+        "intro": "The raised walk turns mean all at once: old warders below, a pale light above, and no room for brave footwork in between.",
+        "key": "sluice_press",
+        "title": "Sluice Press"
+      },
+      {
+        "enemies": [
+          "silt_stalker",
+          "hollow_wisp"
+        ],
+        "intro": "Something fast claws across the iron grating while the drowned light overhead starts leaning toward you like it knows what comes next.",
+        "key": "grating_hunt",
+        "title": "Grating Hunt"
+      },
+      {
+        "enemies": [
+          "drowned_warder",
+          "silt_stalker",
+          "hollow_wisp"
+        ],
+        "intro": "The upper walk belongs to the wrong line now, and it has enough bodies left to enforce that opinion.",
+        "key": "high_walk_claim",
+        "title": "High Walk Claim"
+      }
+    ],
+    "drowned_weir_sunken_lock": [
+      {
+        "enemies": [
+          "drowned_warder",
+          "drowned_warder",
+          "hollow_wisp"
+        ],
+        "intro": "The drowned lock wakes like a held breath finally deciding it has company, and the things guarding it rise with the chain noise.",
+        "key": "lock_blackwater",
+        "title": "Lock Blackwater"
+      },
+      {
+        "enemies": [
+          "silt_stalker",
+          "drowned_warder",
+          "drowned_warder"
+        ],
+        "intro": "A stalker slips through the chained gates while the warders behind it hold the chamber like they expect the town to apologize for coming back.",
+        "key": "chain_line",
+        "title": "Chain Line"
+      },
+      {
+        "enemies": [
+          "silt_stalker",
+          "hollow_wisp",
+          "drowned_warder"
+        ],
+        "intro": "Black water heaves in the chamber and the whole lock answers at once: iron, claws, and that same white drowned light that does not know how to stop.",
+        "key": "lock_surge",
+        "title": "Lock Surge"
+      }
+    ],
+    "goblin_road_fencebreaker_camp": [
+      {
+        "enemies": [
+          "ruk_fence_cutter"
+        ],
+        "intro": "A heavy goblin rises from behind the chopped rails and drags a jagged axe through the dirt.",
+        "key": "ruks_stand",
+        "title": "Ruk the Fence-Cutter"
+      }
+    ],
+    "goblin_road_old_fence_line": [
+      {
+        "enemies": [
+          "goblin_sneak",
+          "goblin_cutter"
+        ],
+        "intro": "Two goblins are still at the fence line, hacking loose boards for spite or firewood.",
+        "key": "fencebreakers",
+        "title": "Fencebreakers"
+      },
+      {
+        "enemies": [
+          "road_wolf",
+          "goblin_cutter"
+        ],
+        "intro": "A goblin raider and a hungry wolf have both decided this stretch of road belongs to them.",
+        "key": "wolf_and_raider",
+        "title": "Mud and Teeth"
+      },
+      {
+        "enemies": [
+          "goblin_slinger",
+          "goblin_cutter"
+        ],
+        "intro": "A goblin slinger peppers the road with stolen stones while a cutter rushes in behind him.",
+        "key": "stone_and_knife",
+        "title": "Stone and Knife"
+      }
+    ],
+    "goblin_road_trailhead": [
+      {
+        "enemies": [
+          "road_wolf"
+        ],
+        "intro": "A road wolf slips from the brush and tests your nerve.",
+        "key": "trailhead_wolf",
+        "title": "A Roadside Wolf"
+      },
+      {
+        "enemies": [
+          "thorn_rat",
+          "thorn_rat"
+        ],
+        "intro": "A pair of thorn rats spill out from a ditch, all teeth and burr-matted fur.",
+        "key": "trailhead_rats",
+        "title": "Thorn Rat Scatter"
+      },
+      {
+        "enemies": [
+          "goblin_sneak"
+        ],
+        "intro": "A goblin darts out from a ditch, knife-first and badly overconfident.",
+        "key": "trailhead_goblin",
+        "title": "Goblin Harrier"
+      }
+    ],
+    "goblin_road_wolf_turn": [
+      {
+        "enemies": [
+          "road_wolf",
+          "road_wolf"
+        ],
+        "intro": "Shapes move in the bend ahead. The wolves are no longer pretending to fear the road.",
+        "key": "wolf_turn_pack",
+        "title": "Wolf Turn Pack"
+      },
+      {
+        "enemies": [
+          "goblin_slinger",
+          "goblin_cutter"
+        ],
+        "intro": "A goblin pair lunges out as you round the bend, one high and one low.",
+        "key": "ambush_turn",
+        "title": "Turn Ambush"
+      }
+    ],
+    "goblin_warrens_bone_midden": [
+      {
+        "enemies": [
+          "cave_bat_swarm",
+          "cave_bat_swarm",
+          "goblin_hexer"
+        ],
+        "intro": "The bone heap collapses in a flutter of wings and filthy laughter as the midden defenders throw themselves at you.",
+        "key": "midden_raze",
+        "title": "Midden Raze"
+      },
+      {
+        "enemies": [
+          "goblin_brute",
+          "goblin_brute"
+        ],
+        "intro": "Chain drags across cracked bone as two goblin brutes stomp up through the midden with room-rattling confidence.",
+        "key": "brute_heap",
+        "title": "Brute Heap"
+      },
+      {
+        "enemies": [
+          "sludge_slime",
+          "goblin_hexer",
+          "cave_bat_swarm"
+        ],
+        "intro": "A slime oozes through the midden while a hexer works a curse line behind it and bats begin to wake overhead.",
+        "key": "sour_heap",
+        "title": "Sour Heap"
+      }
+    ],
+    "goblin_warrens_feast_hall": [
+      {
+        "enemies": [
+          "goblin_brute",
+          "goblin_hexer",
+          "cave_bat_swarm"
+        ],
+        "intro": "The feast hall erupts in noise. One brute shoves forward, a hexer starts chanting, and the ceiling seems far too interested in joining.",
+        "key": "hall_carvers",
+        "title": "Hall Carvers"
+      },
+      {
+        "enemies": [
+          "goblin_brute",
+          "sludge_slime",
+          "goblin_hexer"
+        ],
+        "intro": "Hot stink, slick stone, and a goblin line that thinks it owns the floor. It would prefer not to share.",
+        "key": "grease_line",
+        "title": "Grease Line"
+      },
+      {
+        "enemies": [
+          "goblin_brute",
+          "goblin_brute",
+          "cave_bat_swarm"
+        ],
+        "intro": "The warrens answer all at once: chain, curses, wings, and enough tunnel confidence to make the hall itself feel mean.",
+        "key": "hall_press",
+        "title": "Hall Press"
+      }
+    ],
+    "goblin_warrens_pot_kings_court": [
+      {
+        "enemies": [
+          "grubnak_the_pot_king"
+        ],
+        "intro": "At the far court, Grubnak lurches up from his iron seat, pot lid crown ringing as he slams his ladle across the stones and calls the whole hall to supper.",
+        "key": "potkings_feast",
+        "title": "Grubnak the Pot-King"
+      }
+    ],
+    "goblin_warrens_sinkmouth_cut": [
+      {
+        "enemies": [
+          "goblin_hexer",
+          "goblin_brute"
+        ],
+        "intro": "Torchlight jerks through the cut and a pair of goblin tunnel guards rush to keep the surface where it belongs: above them.",
+        "key": "sinkmouth_watch",
+        "title": "Sinkmouth Watch"
+      },
+      {
+        "enemies": [
+          "cave_bat_swarm",
+          "goblin_brute"
+        ],
+        "intro": "Something shrieks from the ceiling just as tunnel brutes come grinding up through the soot and mud.",
+        "key": "batdrop_cut",
+        "title": "Batdrop Cut"
+      },
+      {
+        "enemies": [
+          "sludge_slime",
+          "goblin_hexer"
+        ],
+        "intro": "A sludge shape peels off the wall while a hexer starts spitting curses from behind it.",
+        "key": "filth_watch",
+        "title": "Filth Watch"
+      }
+    ],
+    "goblin_warrens_sludge_run": [
+      {
+        "enemies": [
+          "sludge_slime",
+          "sludge_slime"
+        ],
+        "intro": "The channel slurps, shifts, and suddenly develops teeth in more places than a channel should.",
+        "key": "runoff_pull",
+        "title": "Runoff Pull"
+      },
+      {
+        "enemies": [
+          "sludge_slime",
+          "cave_bat_swarm"
+        ],
+        "intro": "The runoff stirs underfoot just as cave bats dive low through the steam and greasy torch smoke.",
+        "key": "slop_bats",
+        "title": "Slop Bats"
+      },
+      {
+        "enemies": [
+          "goblin_hexer",
+          "sludge_slime"
+        ],
+        "intro": "A hexer holds the far bank while the sludge between you answers to every ugly word it knows.",
+        "key": "run_hex",
+        "title": "Run Hex"
+      }
+    ],
+    "goblin_warrens_torchgut_tunnel": [
+      {
+        "enemies": [
+          "goblin_brute",
+          "goblin_brute"
+        ],
+        "intro": "The tunnel narrows at exactly the wrong moment and the goblins on the far side mean to keep it that way.",
+        "key": "torchgut_press",
+        "title": "Torchgut Press"
+      },
+      {
+        "enemies": [
+          "goblin_hexer",
+          "cave_bat_swarm"
+        ],
+        "intro": "A hexer spits soot over the torchline while cave bats tear loose from the black stone above it.",
+        "key": "hex_and_fang",
+        "title": "Hex and Fang"
+      },
+      {
+        "enemies": [
+          "goblin_brute",
+          "sludge_slime"
+        ],
+        "intro": "A tunnel brute drives forward while something wet and hungry slides around the torchbend behind it.",
+        "key": "slime_turn",
+        "title": "Slime Turn"
+      }
+    ],
+    "junkyard_planet_anchor_pit": [
+      {
+        "enemies": [
+          "foreman_coilback"
+        ],
+        "intro": "A crane-rig giant unfolds from the pit gantry, lights flaring across its welded spine as the whole yard answers to it.",
+        "key": "foremans_redoubt",
+        "title": "Foreman Coilback"
+      }
+    ],
+    "junkyard_planet_crane_grave": [
+      {
+        "enemies": [
+          "scrap_hound",
+          "salvage_drone"
+        ],
+        "intro": "Dead crane arms creak overhead as a hound and salvage drone break from cover together.",
+        "key": "craneward_pair",
+        "title": "Craneward Pair"
+      },
+      {
+        "enemies": [
+          "mag_clamp_drone",
+          "mag_clamp_drone"
+        ],
+        "intro": "Two clamp rigs sweep through the yard, trying to pin anything that still moves like a person.",
+        "key": "clamp_line",
+        "title": "Clamp Line"
+      },
+      {
+        "enemies": [
+          "relay_tick",
+          "scrap_hound",
+          "salvage_drone"
+        ],
+        "intro": "The crane grave wakes all at once: a relay tick darts between broken cabs while heavier machines advance behind it.",
+        "key": "grave_static",
+        "title": "Grave Static"
+      }
+    ],
+    "junkyard_planet_relay_trench": [
+      {
+        "enemies": [
+          "relay_tick",
+          "relay_tick"
+        ],
+        "intro": "Signal ticks pour from a trench conduit in a burst of white static and angry light.",
+        "key": "relay_swarm",
+        "title": "Relay Swarm"
+      },
+      {
+        "enemies": [
+          "mag_clamp_drone",
+          "relay_tick"
+        ],
+        "intro": "A clamp drone rises over the trench just as a relay tick starts painting targets below.",
+        "key": "trench_hold",
+        "title": "Trench Hold"
+      },
+      {
+        "enemies": [
+          "scrap_hound",
+          "mag_clamp_drone"
+        ],
+        "intro": "A scrap hound prowls the trench lip while a drone tracks movement from above.",
+        "key": "yard_watch",
+        "title": "Yard Watch"
+      }
+    ],
+    "junkyard_planet_scrapway": [
+      {
+        "enemies": [
+          "scrap_mite",
+          "scrap_mite"
+        ],
+        "intro": "The scrap drift splits open and a cluster of skittering machine mites comes alive around you.",
+        "key": "sparking_nest",
+        "title": "Sparking Nest"
+      },
+      {
+        "enemies": [
+          "salvage_drone"
+        ],
+        "intro": "A salvage drone rises from the metal haze, tool arms rotating into something much less civic.",
+        "key": "drone_sweep",
+        "title": "Drone Sweep"
+      },
+      {
+        "enemies": [
+          "salvage_drone",
+          "scrap_mite"
+        ],
+        "intro": "A drone hums awake overhead just as scrap mites surge through the wire drifts below.",
+        "key": "broken_line",
+        "title": "Broken Line"
+      },
+      {
+        "enemies": [
+          "scrap_hound",
+          "scrap_mite"
+        ],
+        "intro": "A plate-plated hound lopes through the salvage smoke while smaller machines wake around its paws.",
+        "key": "hound_and_haze",
+        "title": "Hound and Haze"
+      }
+    ],
+    "old_barrow_field_barrow_circle": [
+      {
+        "enemies": [
+          "skeletal_soldier",
+          "restless_shade",
+          "barrow_wisp"
+        ],
+        "intro": "At the center stones, old burial lights gather around whatever still remembers being posted here.",
+        "key": "circle_guard",
+        "title": "Circle Guard"
+      },
+      {
+        "enemies": [
+          "restless_shade",
+          "restless_shade",
+          "barrow_wisp"
+        ],
+        "intro": "A hush falls over the circle before shades and dead lights roll toward you from three sides.",
+        "key": "mourners_knot",
+        "title": "Mourners' Knot"
+      }
+    ],
+    "old_barrow_field_causeway": [
+      {
+        "enemies": [
+          "skeletal_soldier"
+        ],
+        "intro": "Something clatters under the old stones and a skeletal soldier hauls itself upright in the lantern gloom.",
+        "key": "causeway_rattle",
+        "title": "Causeway Rattle"
+      },
+      {
+        "enemies": [
+          "grave_crow",
+          "skeletal_soldier"
+        ],
+        "intro": "A grave crow dives from a marker post just as bones start knocking together in the ditch below.",
+        "key": "crow_pass",
+        "title": "Crow Pass"
+      }
+    ],
+    "old_barrow_field_marker_row": [
+      {
+        "enemies": [
+          "restless_shade",
+          "grave_crow"
+        ],
+        "intro": "A restless shade unthreads itself from the marker row while a crow wheels low over your shoulder.",
+        "key": "shade_between_stones",
+        "title": "Shade Between Stones"
+      },
+      {
+        "enemies": [
+          "skeletal_soldier",
+          "grave_crow",
+          "barrow_wisp"
+        ],
+        "intro": "The line of old markers wakes all at once: bone, black wings, and a low pale light in the grass.",
+        "key": "old_watch",
+        "title": "Old Watch"
+      }
+    ],
+    "old_barrow_field_sunken_dais": [
+      {
+        "enemies": [
+          "sir_edric_restless"
+        ],
+        "intro": "Armor shifts on the sunken dais. A dead knight lifts his head, draws a ruined blade, and remembers command.",
+        "key": "edrics_vigil",
+        "title": "Sir Edric the Restless"
+      }
+    ],
+    "ruined_watchtower_approach": [
+      {
+        "enemies": [
+          "bandit_scout",
+          "bandit_scout"
+        ],
+        "intro": "Shapes move between the broken stones above the road. Bandits have already measured this approach and decided they like the angle.",
+        "key": "ridge_shadows",
+        "title": "Ridge Shadows"
+      },
+      {
+        "enemies": [
+          "carrion_hound",
+          "bandit_scout"
+        ],
+        "intro": "A kennel hound tears down the slope while a scout cuts in behind it with a knife already out.",
+        "key": "hound_run",
+        "title": "Hound Run"
+      },
+      {
+        "enemies": [
+          "bandit_raider",
+          "bandit_scout"
+        ],
+        "intro": "A raider and lookout break from the shattered watchfire line and try to catch you in the narrow ground below.",
+        "key": "watchfire_raiders",
+        "title": "Watchfire Raiders"
+      }
+    ],
+    "ruined_watchtower_archers_ledge": [
+      {
+        "enemies": [
+          "tower_archer",
+          "tower_archer"
+        ],
+        "intro": "Boot scrape above, bowstring below. The ledge is already occupied and none of them are in a sharing mood.",
+        "key": "ledge_line",
+        "title": "Ledge Line"
+      },
+      {
+        "enemies": [
+          "bandit_scout",
+          "tower_archer"
+        ],
+        "intro": "A scout darts low across the ledge while an archer works the height behind him.",
+        "key": "spotter_pair",
+        "title": "Spotter Pair"
+      },
+      {
+        "enemies": [
+          "carrion_hound",
+          "tower_archer"
+        ],
+        "intro": "A hound comes off the chain just as a bowstring snaps tight from the rocks above.",
+        "key": "kennel_ledge",
+        "title": "Kennel Ledge"
+      }
+    ],
+    "ruined_watchtower_blackreed_roost": [
+      {
+        "enemies": [
+          "captain_varn_blackreed"
+        ],
+        "intro": "At the broken tower crown, Captain Varn Blackreed turns from the parapet and draws steel like he has already counted where each of you will fall.",
+        "key": "blackreeds_line",
+        "title": "Captain Varn Blackreed"
+      }
+    ],
+    "ruined_watchtower_breach_yard": [
+      {
+        "enemies": [
+          "bandit_raider",
+          "bandit_scout"
+        ],
+        "intro": "Bandits pour through the broken outer yard, one holding the front while the other probes for an opening.",
+        "key": "yard_press",
+        "title": "Breach Yard Press"
+      },
+      {
+        "enemies": [
+          "tower_archer",
+          "carrion_hound"
+        ],
+        "intro": "An archer takes the line from broken stone while a hound ranges below, trying to flush you into the shot.",
+        "key": "arrow_and_hide",
+        "title": "Arrow And Hide"
+      },
+      {
+        "enemies": [
+          "tower_archer",
+          "bandit_raider"
+        ],
+        "intro": "The yard wakes all at once: a tower archer barks a range, then raiders close from either side of the breach.",
+        "key": "broken_muster",
+        "title": "Broken Muster"
+      }
+    ],
+    "ruined_watchtower_cracked_stairs": [
+      {
+        "enemies": [
+          "bandit_raider",
+          "tower_archer"
+        ],
+        "intro": "Raiders hammer down the cracked stairs while an archer leans over the turn to rake the climb.",
+        "key": "stairs_hold",
+        "title": "Stairs Hold"
+      },
+      {
+        "enemies": [
+          "bandit_raider",
+          "bandit_raider"
+        ],
+        "intro": "Two hard cases block the stair curve with enough steel and bad intent to make the climb expensive.",
+        "key": "broken_shieldwall",
+        "title": "Broken Shieldwall"
+      },
+      {
+        "enemies": [
+          "carrion_hound",
+          "bandit_raider"
+        ],
+        "intro": "A hound hits first, then the raider behind it tries to use the chaos of the stairs as cover.",
+        "key": "upper_kennel",
+        "title": "Upper Kennel"
+      }
+    ],
+    "tutorial_vermin_pens": [
+      {
+        "enemies": [
+          "thorn_rat"
+        ],
+        "intro": "Straw erupts under the rail and a thorn rat bolts straight at the nearest warm ankle.",
+        "key": "yard_scuttle",
+        "title": "Yard Scuttle"
+      },
+      {
+        "enemies": [
+          "thorn_rat"
+        ],
+        "intro": "A burr-matted rat launches itself out of a feed bin with all the confidence of a creature that has never once paid for grain.",
+        "key": "bin_raider",
+        "title": "Bin Raider"
+      }
+    ],
+    "whispering_woods_briar_glade": [
+      {
+        "enemies": [
+          "briar_imp",
+          "mossling"
+        ],
+        "intro": "The briars stir. One imp laughs, and the moss beneath it rises into a shape with claws.",
+        "key": "glade_guardians",
+        "title": "Glade Guardians"
+      },
+      {
+        "enemies": [
+          "forest_wolf",
+          "briar_imp"
+        ],
+        "intro": "The glade goes quiet except for a low growl somewhere nearby and the crackle of thorn-fire.",
+        "key": "grey_trail",
+        "title": "Grey Trail"
+      },
+      {
+        "enemies": [
+          "cave_spider",
+          "mossling"
+        ],
+        "intro": "Root webs and pale silk overlap here, watched by patient things that know this ground.",
+        "key": "snare_roots",
+        "title": "Snare Roots"
+      }
+    ],
+    "whispering_woods_greymaw_hollow": [
+      {
+        "enemies": [
+          "old_greymaw"
+        ],
+        "intro": "A massive scarred wolf rises from the hollow, vanishes into the brush, and begins to circle.",
+        "key": "greymaws_stand",
+        "title": "Old Greymaw"
+      }
+    ],
+    "whispering_woods_old_stone_path": [
+      {
+        "enemies": [
+          "cave_spider",
+          "cave_spider"
+        ],
+        "intro": "Fresh webbing hangs between the leaning stones, and the spiders behind it are not shy.",
+        "key": "stone_path_spiders",
+        "title": "Stone Path Web"
+      },
+      {
+        "enemies": [
+          "briar_imp",
+          "mossling"
+        ],
+        "intro": "A briar imp capers between the stones while a mossling anchors the glade with wet roots.",
+        "key": "whispering_hex",
+        "title": "Whispering Hex"
+      },
+      {
+        "enemies": [
+          "forest_wolf",
+          "cave_spider"
+        ],
+        "intro": "A forest wolf darts across the path just as a spider drops behind you.",
+        "key": "wolf_on_the_path",
+        "title": "Rootside Pounce"
+      }
+    ],
+    "whispering_woods_trailhead": [
+      {
+        "enemies": [
+          "forest_wolf"
+        ],
+        "intro": "A forest wolf slips between the trunks and comes in low, testing your line.",
+        "key": "woods_wolf",
+        "title": "Silent Prowler"
+      },
+      {
+        "enemies": [
+          "cave_spider",
+          "mossling"
+        ],
+        "intro": "A cave spider descends from the roots while a mossling stirs awake in the damp brush.",
+        "key": "web_and_rot",
+        "title": "Web and Rot"
+      },
+      {
+        "enemies": [
+          "briar_imp",
+          "forest_wolf"
+        ],
+        "intro": "A briar imp crackles somewhere ahead while a forest wolf circles to cut off retreat.",
+        "key": "embers_in_the_brush",
+        "title": "Embers in the Brush"
+      }
+    ]
+  },
+  "temperament_labels": {
+    "aggressive": "Aggressive",
+    "passive": "Passive",
+    "relentless": "Relentless",
+    "territorial": "Territorial",
+    "wary": "Wary"
+  }
+}

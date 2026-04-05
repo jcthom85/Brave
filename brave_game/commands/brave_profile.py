@@ -3,9 +3,9 @@
 from world.browser_panels import build_build_panel, build_gear_panel, build_pack_panel, build_quests_panel, build_sheet_panel
 from world.browser_views import build_gear_view, build_pack_view, build_quests_view, build_sheet_view
 from world.chapel import get_active_blessing
-from world.data.character_options import CLASSES, RACES, VERTICAL_SLICE_CLASSES, split_unlocked_abilities, xp_needed_for_next_level
-from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, get_item_category
-from world.data.quests import STARTING_QUESTS, get_quest_region
+from world.content import get_content_registry
+
+
 from world.questing import clear_tracked_quest, get_tracked_quest, resolve_active_quest_query, set_tracked_quest
 from world.resonance import (
     format_ability_display,
@@ -16,6 +16,11 @@ from world.resonance import (
 )
 from world.screen_text import format_entry, format_pairs, render_screen, wrap_text
 from world.tutorial import record_command_event
+
+CONTENT = get_content_registry()
+CHARACTER_CONTENT = CONTENT.characters
+ITEM_CONTENT = CONTENT.items
+QUEST_CONTENT = CONTENT.quests
 
 from .brave import (
     BraveCharacterCommand,
@@ -64,18 +69,18 @@ class CmdBuild(BraveCharacterCommand):
         if not character:
             return
 
-        race = RACES[character.db.brave_race]
-        class_data = CLASSES[character.db.brave_class]
+        race = CHARACTER_CONTENT.races[character.db.brave_race]
+        class_data = CHARACTER_CONTENT.classes[character.db.brave_class]
         race_blocks = [
             format_entry(f"{race_data['name']} · {race_data['perk']}", summary=race_data["summary"])
-            for race_data in RACES.values()
+            for race_data in CHARACTER_CONTENT.races.values()
         ]
         class_blocks = [
             format_entry(
-                f"{CLASSES[class_key]['name']} · {CLASSES[class_key]['role']}",
-                summary=CLASSES[class_key]["summary"],
+                f"{CHARACTER_CONTENT.classes[class_key]['name']} · {CHARACTER_CONTENT.classes[class_key]['role']}",
+                summary=CHARACTER_CONTENT.classes[class_key]["summary"],
             )
-            for class_key in VERTICAL_SLICE_CLASSES
+            for class_key in CHARACTER_CONTENT.vertical_slice_classes
         ]
 
         screen = render_screen(
@@ -145,14 +150,14 @@ class CmdRace(BraveCharacterCommand):
             return
 
         query = self.args.strip().lower().replace("-", "_").replace(" ", "_")
-        matches = [key for key, data in RACES.items() if query in (key, data["name"].lower().replace(" ", "_"))]
+        matches = [key for key, data in CHARACTER_CONTENT.races.items() if query in (key, data["name"].lower().replace(" ", "_"))]
         if not matches:
             self.msg("Unknown race. Use |wbuild|n to see available races.")
             return
 
         race_key = matches[0]
         character.set_brave_race(race_key)
-        self.msg(f"Your race is now |w{RACES[race_key]['name']}|n.")
+        self.msg(f"Your race is now |w{CHARACTER_CONTENT.races[race_key]['name']}|n.")
 
 
 class CmdClass(BraveCharacterCommand):
@@ -183,17 +188,17 @@ class CmdClass(BraveCharacterCommand):
         query = self.args.strip().lower().replace("-", "_").replace(" ", "_")
         matches = [
             class_key
-            for class_key in VERTICAL_SLICE_CLASSES
-            if query in (class_key, CLASSES[class_key]["name"].lower().replace(" ", "_"))
+            for class_key in CHARACTER_CONTENT.vertical_slice_classes
+            if query in (class_key, CHARACTER_CONTENT.classes[class_key]["name"].lower().replace(" ", "_"))
         ]
         if not matches:
-            choices = ", ".join(CLASSES[class_key]["name"] for class_key in VERTICAL_SLICE_CLASSES)
+            choices = ", ".join(CHARACTER_CONTENT.classes[class_key]["name"] for class_key in CHARACTER_CONTENT.vertical_slice_classes)
             self.msg(f"Playable classes right now are: {choices}")
             return
 
         class_key = matches[0]
         character.set_brave_class(class_key)
-        self.msg(f"Your class is now |w{CLASSES[class_key]['name']}|n. Your starter gear shifts to match.")
+        self.msg(f"Your class is now |w{CHARACTER_CONTENT.classes[class_key]['name']}|n. Your starter gear shifts to match.")
 
 
 class CmdSheet(BraveCharacterCommand):
@@ -215,16 +220,16 @@ class CmdSheet(BraveCharacterCommand):
         if not character:
             return
 
-        race = RACES[character.db.brave_race]
-        class_data = CLASSES[character.db.brave_class]
+        race = CHARACTER_CONTENT.races[character.db.brave_race]
+        class_data = CHARACTER_CONTENT.classes[character.db.brave_class]
         primary = character.db.brave_primary_stats
         derived = character.db.brave_derived_stats
         resources = character.db.brave_resources
-        active_abilities, passive_abilities, unknown_abilities = split_unlocked_abilities(
+        active_abilities, passive_abilities, unknown_abilities = CHARACTER_CONTENT.split_unlocked_abilities(
             character.db.brave_class,
             character.db.brave_level,
         )
-        next_level_xp = xp_needed_for_next_level(character.db.brave_level)
+        next_level_xp = CHARACTER_CONTENT.xp_needed_for_next_level(character.db.brave_level)
         resonance_key = get_resonance_key(character)
         resonance_label = get_resonance_label(character)
 
@@ -371,7 +376,7 @@ class CmdGear(BraveCharacterCommand):
     def _render_gear(self, character):
         equipment = character.db.brave_equipment or {}
         slot_blocks = []
-        for slot in EQUIPMENT_SLOTS:
+        for slot in ITEM_CONTENT.equipment_slots:
             template_id = equipment.get(slot)
             if template_id:
                 slot_blocks.append(_format_equipped_item_entry(character, slot, template_id))
@@ -397,7 +402,7 @@ class CmdGear(BraveCharacterCommand):
 
     def _resolve_slot(self, query):
         token = _normalize_query(query)
-        for slot in EQUIPMENT_SLOTS:
+        for slot in ITEM_CONTENT.equipment_slots:
             if token in {slot, slot.replace("_", "")}:
                 return slot
             if token == _normalize_query(slot.replace("_", " ")):
@@ -444,10 +449,10 @@ class CmdGear(BraveCharacterCommand):
             self.msg(result)
             return
 
-        equipped_name = ITEM_TEMPLATES[result["equipped"]]["name"]
+        equipped_name = ITEM_CONTENT.item_templates[result["equipped"]]["name"]
         replaced_id = result.get("replaced")
         if replaced_id:
-            replaced_name = ITEM_TEMPLATES[replaced_id]["name"]
+            replaced_name = ITEM_CONTENT.item_templates[replaced_id]["name"]
             self.msg(f"You swap in |w{equipped_name}|n and stow |w{replaced_name}|n.")
         else:
             self.msg(f"You equip |w{equipped_name}|n.")
@@ -464,7 +469,7 @@ class CmdGear(BraveCharacterCommand):
             self.msg(result)
             return
 
-        item_name = ITEM_TEMPLATES[result["unequipped"]]["name"]
+        item_name = ITEM_CONTENT.item_templates[result["unequipped"]]["name"]
         self.msg(f"You unequip |w{item_name}|n.")
         self._render_gear(character)
 
@@ -519,12 +524,12 @@ class CmdPack(BraveCharacterCommand):
         grouped = {kind: [] for kind in PACK_KIND_ORDER}
         extras = []
 
-        inventory.sort(key=lambda entry: ITEM_TEMPLATES[entry["template"]]["name"])
+        inventory.sort(key=lambda entry: ITEM_CONTENT.item_templates[entry["template"]]["name"])
         for entry in inventory:
             template_id = entry["template"]
-            item = ITEM_TEMPLATES[template_id]
+            item = ITEM_CONTENT.item_templates[template_id]
             block = _format_inventory_entry(character, template_id, entry["quantity"])
-            kind = get_item_category(item)
+            kind = ITEM_CONTENT.get_item_category(item)
             if kind in grouped:
                 grouped[kind].append(block)
             else:
@@ -578,7 +583,7 @@ class CmdQuests(BraveCharacterCommand):
         active_blocks = {}
         completed_blocks = {}
         tracked_block = None
-        for quest_key in STARTING_QUESTS:
+        for quest_key in QUEST_CONTENT.starting_quests:
             state = (character.db.brave_quests or {}).get(quest_key)
             if not state or state.get("status") == "locked":
                 continue
@@ -588,7 +593,7 @@ class CmdQuests(BraveCharacterCommand):
             if quest_key == tracked_key and state.get("status") == "active":
                 tracked_block = block
                 continue
-            region = get_quest_region(quest_key)
+            region = QUEST_CONTENT.get_quest_region(quest_key)
             if state.get("status") == "completed":
                 completed_blocks.setdefault(region, []).append(block)
             else:

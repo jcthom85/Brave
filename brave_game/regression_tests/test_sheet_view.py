@@ -17,7 +17,11 @@ chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
 from world.browser_views import build_sheet_view
-from world.data.character_options import CLASSES, RACES
+from world.content import get_content_registry
+
+CONTENT = get_content_registry()
+CLASSES = CONTENT.characters.classes
+RACES = CONTENT.characters.races
 from world.resonance import get_resource_label
 
 

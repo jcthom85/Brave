@@ -2,11 +2,16 @@
 
 from world.activities import format_catch_log, format_kitchen_hearth_text, format_pole_rack_text
 from world.commerce import format_shop_bonus, get_sellable_entries, get_shop_bonus
-from world.data.entity_dialogue import STATIC_READ_RESPONSES, TALK_RULES
+from world.content import get_content_registry
 from world.forging import get_forge_entries
 from world.resonance import format_portal_plaque_text
 from world.trophies import format_trophy_case_text
 from world.tutorial import get_tutorial_entity_response
+
+CONTENT = get_content_registry()
+DIALOGUE_CONTENT = CONTENT.dialogue
+TALK_RULES = DIALOGUE_CONTENT.talk_rules
+STATIC_READ_RESPONSES = DIALOGUE_CONTENT.static_read_responses
 
 
 def _quest_state(character, quest_key):

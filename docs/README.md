@@ -20,6 +20,7 @@ Welcome to the documentation for **Brave**, a family-focused, multi-genre MUD (M
 
 ### Systems & Mechanics
 - [**Core Systems**](core_systems.md): The engine's DNA—stats, resonance (genre scaling), and audio triggers.
+- [**Combat Upgrade Plan (2026-04-04)**](combat_upgrade_plan_2026-04-04.md): Dedicated roadmap for the ATB migration, telegraphs, reaction mechanics, combat UI rebuild, and follow-on tuning work.
 - [**Reactive UI & Theming Plan**](reactive_ui_and_theming_plan.md): How style themes, world tone, and reactive browser FX should work together.
 - [**Mobile Webclient Design**](mobile_webclient_design.md): The dedicated phone/tablet layout plan that preserves the current desktop UI.
 - [**Mobile Shell Refactor Plan**](mobile_shell_refactor_plan.md): The current mobile-shell target for exploration, micromap, utility access, and bottom-deck controls.
@@ -42,6 +43,7 @@ Welcome to the documentation for **Brave**, a family-focused, multi-genre MUD (M
 
 ### Project Management
 - [**Implementation Plan**](implementation_plan.md): Recommended build order, milestone plan, and phase-1 definition of done.
+- [**Creator And Combat Overhaul Plan (2026-04-04)**](creator_and_combat_overhaul_plan_2026-04-04.md): Current handoff for completed creator tooling work and the next ATB/combat UX overhaul phases.
 - [**Open Questions**](open_questions.md): Tracking unresolved design and technical decisions.
 - [**Evennia Setup**](evennia_setup.md): Technical instructions for the Evennia engine.
 - [**Evennia Architecture**](evennia_architecture.md): How the game maps to Evennia's technical structures.

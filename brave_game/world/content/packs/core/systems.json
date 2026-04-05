@@ -1,0 +1,487 @@
+{
+  "activities": {
+    "cooking_recipes": {
+      "crisped_perch_plate": {
+        "ingredients": {
+          "bramble_perch": 2
+        },
+        "name": "Crisped Perch Plate",
+        "result": "crisped_perch_plate",
+        "summary": "A simple, filling plate that makes long walks and harder swings feel easier."
+      },
+      "innkeepers_fishpie": {
+        "ingredients": {
+          "lantern_carp": 1,
+          "mudsnout_catfish": 1
+        },
+        "name": "Innkeeper's Fish Pie",
+        "result": "innkeepers_fishpie",
+        "summary": "A sturdy inn pie that leaves you feeling well-patched and harder to rattle."
+      },
+      "riverlight_chowder": {
+        "ingredients": {
+          "lantern_carp": 1,
+          "silver_eel": 1
+        },
+        "name": "Riverlight Chowder",
+        "result": "riverlight_chowder",
+        "summary": "A rich chowder that steadies the nerves and wakes up the mind."
+      },
+      "wharfside_skewers": {
+        "ingredients": {
+          "bramble_perch": 1,
+          "mudsnout_catfish": 1
+        },
+        "name": "Wharfside Skewers",
+        "result": "wharfside_skewers",
+        "summary": "Smoky skewers that reward quick hands and lighter feet."
+      }
+    },
+    "cozy_bonus": {
+      "max_hp": 6,
+      "max_mana": 6,
+      "max_stamina": 6
+    },
+    "fishing_spots": {
+      "brambleford_hobbyists_wharf": {
+        "bite_delay": [
+          3,
+          6
+        ],
+        "cast_text": "You cast a line into the Bramble River and settle in to watch the surface.",
+        "fish": [
+          {
+            "chance": 38,
+            "hook_chance": 0.9,
+            "item": "bramble_perch",
+            "weight": [
+              1.1,
+              3.6
+            ]
+          },
+          {
+            "chance": 26,
+            "hook_chance": 0.82,
+            "item": "lantern_carp",
+            "weight": [
+              2.5,
+              6.8
+            ]
+          },
+          {
+            "chance": 18,
+            "hook_chance": 0.78,
+            "item": "mudsnout_catfish",
+            "weight": [
+              3.2,
+              8.4
+            ]
+          },
+          {
+            "chance": 12,
+            "hook_chance": 0.7,
+            "item": "silver_eel",
+            "weight": [
+              1.8,
+              5.2
+            ]
+          },
+          {
+            "chance": 6,
+            "hook_chance": 0.6,
+            "item": "dawnscale_trout",
+            "weight": [
+              4.4,
+              9.8
+            ]
+          }
+        ],
+        "name": "Hobbyist's Wharf",
+        "reaction_window": 6
+      }
+    }
+  },
+  "commerce": {
+    "outfitters_room_id": "brambleford_outfitters",
+    "shift_outcomes": [
+      {
+        "bonus_pct": 10,
+        "name": "Counter Rhythm",
+        "sales_left": 3,
+        "text": "You spend a while sorting boots by size, straightening cloak pegs, and handing out rope without letting anyone call it an adventure tax. Leda nods once. That counts as praise."
+      },
+      {
+        "bonus_pct": 15,
+        "name": "Sharp Eye",
+        "sales_left": 3,
+        "text": "You help fit a farmer's boy for rain gear, catch a split seam before it becomes an argument, and steer two customers toward sturdier travel kit. Leda's pricing chalk looks friendlier after that."
+      },
+      {
+        "bonus_pct": 20,
+        "name": "Shopkeeper's Eye",
+        "sales_left": 3,
+        "text": "You talk one anxious traveler out of the wrong boots, find the exact strap a scout came in for, and keep the front counter moving without losing track of a single order. Leda decides you can be trusted with margins."
+      }
+    ]
+  },
+  "forging": {
+    "forge_recipes": {
+      "ashwood_bow": {
+        "materials": {
+          "silk_bundle": 1,
+          "wolf_fang": 2
+        },
+        "result": "ironroot_recurve",
+        "silver": 22,
+        "text": "He tightens the stave, resets the grip, and leaves you with a bow that answers quicker to intent."
+      },
+      "bellguard_bastion": {
+        "materials": {
+          "silt_hook": 1,
+          "ward_iron_rivet": 2
+        },
+        "result": "weirward_bulwark",
+        "silver": 34,
+        "text": "He plates the face in old lock iron, resets the grip, and mutters that the bulwark now has the manners of a gate that expects to hold."
+      },
+      "bellkeeper_mail": {
+        "materials": {
+          "grave_dust": 1,
+          "wolf_pelt": 1
+        },
+        "result": "wardens_cuirass",
+        "silver": 22,
+        "text": "He closes weak gaps, resets the shoulder, and leaves the mail looking less ceremonial and much more useful."
+      },
+      "briarpath_raiment": {
+        "materials": {
+          "fen_resin_clot": 2,
+          "mire_hound_hide": 1
+        },
+        "result": "reedwoven_raiment",
+        "silver": 34,
+        "text": "He binds hide and reed cord through the raiment until the whole thing feels ready for wet ground, bad weather, and worse company."
+      },
+      "chapel_blade": {
+        "materials": {
+          "grave_dust": 1,
+          "road_charm": 2
+        },
+        "result": "sunforged_blade",
+        "silver": 22,
+        "text": "Torren trues the edge, sets a cleaner sun-mark into the steel, and hands back a blade that feels steadier than it has any right to."
+      },
+      "cinderwire_staff": {
+        "materials": {
+          "hexbone_charm": 1,
+          "sludge_resin": 2
+        },
+        "result": "slagglass_rod",
+        "silver": 36,
+        "text": "The new rod comes out of the forge hotter, cleaner, and a little too pleased with itself."
+      },
+      "dawnbell_mace": {
+        "materials": {
+          "bandit_mark": 1,
+          "hexbone_charm": 2
+        },
+        "result": "sunwake_maul",
+        "silver": 34,
+        "text": "He breaks down the old head, works in warding brass, and hands back a maul meant for uglier crowns than nails ever were."
+      },
+      "emberglass_staff": {
+        "materials": {
+          "briar_heart": 2,
+          "silk_bundle": 1
+        },
+        "result": "cinderwire_staff",
+        "silver": 24,
+        "text": "Torren rewraps the haft in black wire and resets the glass so the whole staff hums hotter than before."
+      },
+      "field_leathers": {
+        "materials": {
+          "silk_bundle": 1,
+          "wolf_pelt": 2
+        },
+        "result": "brushrunner_leathers",
+        "silver": 22,
+        "text": "Torren reinforces the seams and adds quieter fittings meant for brush, rain, and fast exits."
+      },
+      "grove_talisman": {
+        "materials": {
+          "moonleaf_sprig": 1,
+          "silk_bundle": 1
+        },
+        "result": "wildbloom_talisman",
+        "silver": 20,
+        "text": "The charm comes back brighter, better bound, and much less interested in pretending it was ever decorative."
+      },
+      "gutterfang_pair": {
+        "materials": {
+          "brute_chain_link": 2,
+          "hexbone_charm": 1
+        },
+        "result": "kingshiv_pair",
+        "silver": 34,
+        "text": "Torren binds goblin chain into the spines, evens the pair, and tells you these are the sort of knives ambitious things deserve to meet."
+      },
+      "hedgeweave_robes": {
+        "materials": {
+          "silk_bundle": 2,
+          "wolf_pelt": 1
+        },
+        "result": "lanternlined_robes",
+        "silver": 22,
+        "text": "The robes come back better weighted, better lined, and far less interested in catching on bramble or spark."
+      },
+      "hookknife_pair": {
+        "materials": {
+          "goblin_knife": 2,
+          "wolf_fang": 1
+        },
+        "result": "gutterfang_pair",
+        "silver": 20,
+        "text": "Torren files the hooks meaner, resets the grips, and warns you not to call them pretty just because they finally deserve respect."
+      },
+      "ironroot_longblade": {
+        "materials": {
+          "bandit_mark": 2,
+          "brute_chain_link": 2
+        },
+        "result": "ridgebreaker_blade",
+        "silver": 34,
+        "text": "Tower steel and goblin chain go into the new edge, and the result feels less like a frontier blade than a final answer."
+      },
+      "ironroot_recurve": {
+        "materials": {
+          "batwing_bundle": 2,
+          "tower_arrowhead": 2
+        },
+        "result": "warrenspine_recurve",
+        "silver": 34,
+        "text": "Torren resets the limbs with ridge stock and cave leather until the bow snaps back like it owes you speed."
+      },
+      "lantern_focus": {
+        "materials": {
+          "briar_heart": 1,
+          "road_charm": 1
+        },
+        "result": "ember_lantern_focus",
+        "silver": 20,
+        "text": "The focus returns in a brass lantern cage, tighter to the hand and brighter to the will."
+      },
+      "militia_blade": {
+        "materials": {
+          "goblin_knife": 2,
+          "road_charm": 1
+        },
+        "result": "ironroot_longblade",
+        "silver": 20,
+        "text": "Torren strips the edge down, mutters about wasted iron, and sends the blade back better than it arrived."
+      },
+      "mossweave_wraps": {
+        "materials": {
+          "moonleaf_sprig": 1,
+          "silk_bundle": 2
+        },
+        "result": "briarpath_raiment",
+        "silver": 22,
+        "text": "He reinforces the wraps with silk and thorn cord until they feel ready for weather, roots, and the sort of fast choices a trail demands."
+      },
+      "nightpath_leathers": {
+        "materials": {
+          "silk_bundle": 1,
+          "wolf_pelt": 1
+        },
+        "result": "shadowtrail_leathers",
+        "silver": 22,
+        "text": "He tightens the seams, darkens the fittings, and leaves the leathers quieter than your excuses."
+      },
+      "oakbound_shield": {
+        "materials": {
+          "bent_fence_nails": 3,
+          "wolf_pelt": 1
+        },
+        "result": "nailbound_heater",
+        "silver": 18,
+        "text": "Fresh bands, a tougher face, and a better handgrip later, the shield feels built to answer uglier hits."
+      },
+      "parrying_dagger": {
+        "materials": {
+          "road_charm": 1,
+          "silk_bundle": 1
+        },
+        "result": "smokeglass_dagger",
+        "silver": 16,
+        "text": "The dagger comes back slimmer, darker, and much more interested in ruining someone else's rhythm."
+      },
+      "pilgrim_mace": {
+        "materials": {
+          "grave_dust": 1,
+          "road_charm": 2
+        },
+        "result": "dawnbell_mace",
+        "silver": 22,
+        "text": "A little rebalance, a little prayer-mark, and the mace leaves the forge with a steadier authority."
+      },
+      "roadwarden_mail": {
+        "materials": {
+          "goblin_knife": 1,
+          "wolf_pelt": 2
+        },
+        "result": "rivetmail_coat",
+        "silver": 24,
+        "text": "Torren adds cleaner rings, tougher leather backing, and exactly one lecture about traveling light."
+      },
+      "rootwood_staff": {
+        "materials": {
+          "briar_heart": 1,
+          "moonleaf_sprig": 2
+        },
+        "result": "thorncall_staff",
+        "silver": 24,
+        "text": "Torren hardens the grain with moonleaf resin and thornwood heart until the staff answers faster to intent."
+      },
+      "sun_prayer_icon": {
+        "materials": {
+          "road_charm": 1,
+          "silk_bundle": 1
+        },
+        "result": "bellwarden_icon",
+        "silver": 18,
+        "text": "He braces the icon in clean brass and somehow makes it feel both plainer and more dependable."
+      },
+      "sunforged_blade": {
+        "materials": {
+          "hollow_glass_shard": 1,
+          "ward_iron_rivet": 2
+        },
+        "result": "locklight_blade",
+        "silver": 36,
+        "text": "Drowned-line iron and hollow lensglass go into the new edge, and the result feels made for ending lights that learned the wrong lesson about staying lit."
+      },
+      "thorncall_staff": {
+        "materials": {
+          "fen_resin_clot": 2,
+          "wispglass_shard": 1
+        },
+        "result": "marshsong_staff",
+        "silver": 36,
+        "text": "Fen resin sinks into the staff grain and leaves it humming like dark water learning a tune it should not know."
+      },
+      "trail_knife": {
+        "materials": {
+          "goblin_knife": 1,
+          "wolf_fang": 2
+        },
+        "result": "thornline_knife",
+        "silver": 16,
+        "text": "The knife comes back leaner, meaner, and sharpened past the point where bad decisions ought to stop."
+      },
+      "warded_kite": {
+        "materials": {
+          "barrow_relic": 1,
+          "grave_dust": 1
+        },
+        "result": "bellguard_bastion",
+        "silver": 20,
+        "text": "Fresh iron, cleaner rivets, and one quiet chalk mark later, the shield feels built for uglier nights than the last one."
+      },
+      "wardens_cuirass": {
+        "materials": {
+          "hollow_glass_shard": 1,
+          "ward_iron_rivet": 1
+        },
+        "result": "lamplight_harness",
+        "silver": 34,
+        "text": "Torren works drowned-line salvage through the harness until it looks less like armor and more like a promise to keep standing."
+      },
+      "wayfarer_vestments": {
+        "materials": {
+          "briar_heart": 1,
+          "wolf_pelt": 1
+        },
+        "result": "roadchapel_vestments",
+        "silver": 22,
+        "text": "New clasps, better lining, and a cleaner shoulder cut leave the vestments ready for longer roads."
+      },
+      "wildbloom_talisman": {
+        "materials": {
+          "rotcrow_pinion": 2,
+          "wispglass_shard": 1
+        },
+        "result": "fenlight_talisman",
+        "silver": 34,
+        "text": "The talisman comes back threaded in marsh feather and pale glass, softer in the hand and stronger in the answer."
+      }
+    },
+    "forge_room_id": "brambleford_ironroot_forge"
+  },
+  "portals": {
+    "portal_status_labels": {
+      "dormant": "Dormant",
+      "sealed": "Sealed",
+      "stable": "Stable"
+    },
+    "portals": {
+      "drafting_table": {
+        "entry_room": null,
+        "name": "The Drafting Table",
+        "resonance": "sandbox",
+        "status": "sealed",
+        "summary": "A blank builder's dimension waiting for the family's first custom rooms.",
+        "travel_hint": null
+      },
+      "junkyard_planet": {
+        "entry_room": "junkyard_planet_landing_pad",
+        "name": "Junk-Yard Planet",
+        "resonance": "tech",
+        "status": "stable",
+        "summary": "A scrapyard world of broken rails, humming salvage, and practical tech violence.",
+        "travel_hint": "east"
+      },
+      "training_island": {
+        "entry_room": null,
+        "name": "Training Island",
+        "resonance": "martial",
+        "status": "dormant",
+        "summary": "A fast bright world meant for ki, speed, and martial experiments.",
+        "travel_hint": null
+      }
+    }
+  },
+  "trophies": {
+    "trophies": {
+      "blackreed_battle_standard": {
+        "name": "Blackreed Battle Standard",
+        "placeholder": "A wall hook waits for whatever proof finally comes down from the old watchtower.",
+        "summary": "The rain-dark standard Captain Varn flew over the tower, hung now as proof the ridge does not belong to him anymore.",
+        "world": "Ruined Watchtower"
+      },
+      "hollow_lantern_prism": {
+        "name": "Hollow Lantern Prism",
+        "placeholder": "A black-brass frame waits for whatever finally comes back from the drowned weir beyond Blackfen.",
+        "summary": "The pale prism taken from the wrong south light at the drowned weir, hung now as proof Brambleford's first hard chapter ended with the lamp finally dark.",
+        "world": "Drowned Weir"
+      },
+      "junkyard_beacon_core": {
+        "name": "Beacon Core",
+        "placeholder": "A brass label waits for the first relic from Junk-Yard Planet.",
+        "summary": "The first recovered heart-core from beyond the Nexus, still faintly warm with route light.",
+        "world": "Junk-Yard Planet"
+      },
+      "miretooth_fen_jaw": {
+        "name": "Miretooth's Fen Jaw",
+        "placeholder": "A narrow iron cradle waits for whatever proof finally comes back from the Blackfen edge.",
+        "summary": "The hooked lower jaw of the marsh predator stalking Blackfen, mounted now as proof the bog edge does not answer only to hunger.",
+        "world": "Blackfen Approach"
+      },
+      "potking_battered_lid": {
+        "name": "Pot-King's Battered Lid",
+        "placeholder": "An empty bracket waits for whatever ugly prize finally comes up from the goblin warrens.",
+        "summary": "The dented iron lid Grubnak treated like a crown, hung now as proof the warrens no longer rule the road below.",
+        "world": "Goblin Warrens"
+      }
+    }
+  }
+}

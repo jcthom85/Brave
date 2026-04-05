@@ -4,10 +4,13 @@ import re
 
 from typeclasses.characters import Character
 from world.browser_panels import send_webclient_event
-from world.data.character_options import CLASSES, RACES, VERTICAL_SLICE_CLASSES
+from world.content import get_content_registry
 
 from evennia.utils.evmenu import EvMenu
 from evennia.utils.utils import dedent
+
+CONTENT = get_content_registry()
+CHARACTER_CONTENT = CONTENT.characters
 
 _VALID_NAME = re.compile(r"^[A-Za-z][A-Za-z' -]{1,23}$")
 WEB_PROTOCOLS = {"websocket", "ajax/comet", "webclient"}
@@ -100,8 +103,8 @@ def _push_chargen_view(caller, state, *, error=None):
 
 
 def _summarize_state(state):
-    race_name = RACES.get(state.get("race"), {}).get("name", "-")
-    class_name = CLASSES.get(state.get("class"), {}).get("name", "-")
+    race_name = CHARACTER_CONTENT.races.get(state.get("race"), {}).get("name", "-")
+    class_name = CHARACTER_CONTENT.classes.get(state.get("class"), {}).get("name", "-")
     return "\n".join(
         [
             f"Name: |c{state.get('name') or '-'}|n",
@@ -247,7 +250,7 @@ def menunode_choose_race(caller, raw_string=None, **kwargs):
         """
     )
     options = []
-    for race_key, race_data in RACES.items():
+    for race_key, race_data in CHARACTER_CONTENT.races.items():
         options.append(
             {
                 "key": (race_key, race_data["name"].lower()),
@@ -284,8 +287,8 @@ def menunode_choose_class(caller, raw_string=None, **kwargs):
         """
     )
     options = []
-    for class_key in VERTICAL_SLICE_CLASSES:
-        class_data = CLASSES[class_key]
+    for class_key in CHARACTER_CONTENT.vertical_slice_classes:
+        class_data = CHARACTER_CONTENT.classes[class_key]
         options.append(
             {
                 "key": (class_key, class_data["name"].lower()),
@@ -322,8 +325,8 @@ def menunode_confirm(caller, raw_string=None, error=None, **kwargs):
 
         {_summarize_state(state)}
 
-        Race perk: |c{RACES[state['race']]['perk']}|n
-        Class role: |c{CLASSES[state['class']]['role']}|n
+        Race perk: |c{CHARACTER_CONTENT.races[state['race']]['perk']}|n
+        Class role: |c{CHARACTER_CONTENT.classes[state['class']]['role']}|n
 
         {error or 'Choose whether to create this character or go back and edit it.'}
         """

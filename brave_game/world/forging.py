@@ -1,11 +1,15 @@
 """Equipment upgrade helpers for Ironroot Forge."""
 
+from world.content import get_content_registry
 from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, format_bonus_summary
 
+CONTENT = get_content_registry()
+SYSTEMS_CONTENT = CONTENT.systems
+FORGE_ROOM_ID = SYSTEMS_CONTENT.forge_room_id
+FORGE_RECIPES = SYSTEMS_CONTENT.forge_recipes
 
-FORGE_ROOM_ID = "brambleford_ironroot_forge"
 
-FORGE_RECIPES = {
+_UNUSED_FORGE_RECIPES = {
     "militia_blade": {
         "result": "ironroot_longblade",
         "silver": 20,

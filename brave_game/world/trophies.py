@@ -1,9 +1,13 @@
 """Shared trophy hall helpers for Brave."""
 
 from world.bootstrap import get_entity
+from world.content import get_content_registry
+
+CONTENT = get_content_registry()
+TROPHIES = CONTENT.systems.trophies
 
 
-TROPHIES = {
+_UNUSED_TROPHIES = {
     "junkyard_beacon_core": {
         "name": "Beacon Core",
         "world": "Junk-Yard Planet",

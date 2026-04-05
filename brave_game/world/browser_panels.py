@@ -1,16 +1,36 @@
 """Browser-only companion panel helpers for the Brave webclient."""
 
+import time
+
+from world.combat_atb import render_atb_state
 from world.commerce import get_reserved_entries, get_sellable_entries, get_shop_bonus
-from world.data.character_options import CLASSES, RACES, xp_needed_for_next_level
-from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, get_item_category
-from world.data.portals import PORTALS, PORTAL_STATUS_LABELS
-from world.data.quests import QUESTS, STARTING_QUESTS, group_quest_keys_by_region
+from world.content import get_content_registry
 from world.forging import get_forge_entries
 from world.navigation import format_route_hint, sort_exits
 from world.party import get_follow_target, get_party_leader, get_party_members
 from world.questing import get_active_quests, get_completed_quests, get_tracked_quest
 from world.resonance import get_resource_label, get_resonance_label, get_stat_label
 from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
+
+CONTENT = get_content_registry()
+CHARACTER_CONTENT = CONTENT.characters
+ITEM_CONTENT = CONTENT.items
+QUEST_CONTENT = CONTENT.quests
+SYSTEMS_CONTENT = CONTENT.systems
+
+CLASSES = CHARACTER_CONTENT.classes
+RACES = CHARACTER_CONTENT.races
+xp_needed_for_next_level = CHARACTER_CONTENT.xp_needed_for_next_level
+
+EQUIPMENT_SLOTS = ITEM_CONTENT.equipment_slots
+ITEM_TEMPLATES = ITEM_CONTENT.item_templates
+get_item_category = ITEM_CONTENT.get_item_category
+
+QUESTS = QUEST_CONTENT.quests
+STARTING_QUESTS = QUEST_CONTENT.starting_quests
+group_quest_keys_by_region = QUEST_CONTENT.group_quest_keys_by_region
+PORTALS = SYSTEMS_CONTENT.portals
+PORTAL_STATUS_LABELS = SYSTEMS_CONTENT.portal_status_labels
 
 
 WEB_PROTOCOLS = {"websocket", "ajax/comet", "webclient"}
@@ -777,6 +797,8 @@ def build_combat_panel(encounter):
     foe_count = len(enemies)
     ally_label = "ally" if ally_count == 1 else "allies"
     foe_label = "foe" if foe_count == 1 else "foes"
+    imminent_count = 0
+    opening_count = 0
 
     def hp_tone(current_hp, max_hp):
         ratio = (current_hp / max_hp) if max_hp else 0
@@ -786,11 +808,53 @@ def build_combat_panel(encounter):
             return "warn"
         return "good"
 
+    render_now_ms = int(round(time.time() * 1000))
+    render_tick_ms = max(1, int(round(float(getattr(encounter, "interval", 1) or 1) * 1000)))
+
+    def actor_atb_state(*, participant=None, enemy=None):
+        getter = getattr(encounter, "_get_actor_atb_state", None)
+        if not callable(getter):
+            return {}
+        try:
+            if participant is not None:
+                return render_atb_state(getter(character=participant) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
+            if enemy is not None:
+                return render_atb_state(getter(enemy=enemy) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
+        except Exception:
+            return {}
+        return {}
+
+    def atb_badge(state):
+        phase = (state or {}).get("phase")
+        if phase == "ready":
+            return "READY"
+        if phase == "winding":
+            return f"W{int((state or {}).get('ticks_remaining', 0) or 0)}"
+        if phase == "recovering":
+            return f"R{int((state or {}).get('ticks_remaining', 0) or 0)}"
+        if phase == "cooldown":
+            return f"CD{int((state or {}).get('ticks_remaining', 0) or 0)}"
+        gauge = int((state or {}).get("gauge", 0) or 0)
+        ready = max(1, int((state or {}).get("ready_gauge", 400) or 400))
+        return f"ATB {int(round((gauge / ready) * 100))}%"
+
     sections = [
         _section(
             "Party",
             "groups",
-            [_item(participant.key, icon="person") for participant in participants[:4]]
+            [
+                _item(
+                    participant.key,
+                    icon="person",
+                    badge=atb_badge(actor_atb_state(participant=participant)),
+                    meta=(
+                        "ready"
+                        if (actor_atb_state(participant=participant).get("phase") == "ready")
+                        else None
+                    ),
+                )
+                for participant in participants[:4]
+            ]
             or [_item("No active party members", icon="person_off")],
         ),
         _section(
@@ -800,7 +864,12 @@ def build_combat_panel(encounter):
                 _item(
                     enemy["key"],
                     icon="warning",
-                    badge=enemy["id"].upper(),
+                    badge=atb_badge(actor_atb_state(enemy=enemy)),
+                    meta=(
+                        dict(actor_atb_state(enemy=enemy).get("current_action") or {}).get("label")
+                        if actor_atb_state(enemy=enemy).get("phase") == "winding"
+                        else ("recovering" if actor_atb_state(enemy=enemy).get("phase") in {"recovering", "cooldown"} else None)
+                    ),
                     meter=_meter(enemy["hp"], enemy["max_hp"], hp_tone(enemy["hp"], enemy["max_hp"])),
                 )
                 for enemy in enemies[:5]
@@ -808,6 +877,17 @@ def build_combat_panel(encounter):
             or [_item("No enemies remain", icon="task_alt")],
         ),
     ]
+
+    for participant in participants:
+        phase = (actor_atb_state(participant=participant) or {}).get("phase")
+        if phase == "ready":
+            imminent_count += 1
+    for enemy in enemies:
+        phase = (actor_atb_state(enemy=enemy) or {}).get("phase")
+        if phase in {"winding", "ready"}:
+            imminent_count += 1
+        elif phase in {"recovering", "cooldown"}:
+            opening_count += 1
 
     return _make_panel(
         "",
@@ -817,6 +897,8 @@ def build_combat_panel(encounter):
         chips=[
             _chip(f"{ally_count} {ally_label}", "groups", "muted"),
             _chip(f"{foe_count} {foe_label}", "warning", "danger" if enemies else "good"),
+            _chip(f"{imminent_count} hot", "priority_high", "danger" if imminent_count else "muted"),
+            _chip(f"{opening_count} open", "schedule", "good" if opening_count else "muted"),
         ],
         sections=sections,
     )

@@ -1,6 +1,11 @@
 """Helpers for world resonance, portal listings, and ability skinning."""
 
-from world.data.portals import PORTALS, PORTAL_STATUS_LABELS
+from world.content import get_content_registry
+
+CONTENT = get_content_registry()
+SYSTEMS_CONTENT = CONTENT.systems
+PORTALS = SYSTEMS_CONTENT.portals
+PORTAL_STATUS_LABELS = SYSTEMS_CONTENT.portal_status_labels
 
 
 def _normalize_token(value):

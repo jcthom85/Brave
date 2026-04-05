@@ -2,7 +2,10 @@
 
 from evennia.utils import create, logger, search
 
-from world.data.starting_world import EXITS, ROOMS, WORLD_OBJECTS
+from world.content import get_content_registry
+
+CONTENT = get_content_registry()
+WORLD_CONTENT = CONTENT.world
 
 ROOM_TAG_CATEGORY = "brave_room"
 EXIT_TAG_CATEGORY = "brave_exit"
@@ -123,7 +126,7 @@ def ensure_brave_world():
     """Create or repair the first Brave world slice."""
 
     try:
-        rooms_by_id = {room_data["id"]: _ensure_room(room_data) for room_data in ROOMS}
+        rooms_by_id = {room_data["id"]: _ensure_room(room_data) for room_data in WORLD_CONTENT.rooms}
         start_room = rooms_by_id["brambleford_town_green"]
         for room in rooms_by_id.values():
             if room == start_room:
@@ -131,9 +134,9 @@ def ensure_brave_world():
             elif not room.home:
                 room.home = start_room
             room.save()
-        for exit_data in EXITS:
+        for exit_data in WORLD_CONTENT.exits:
             _ensure_exit(exit_data, rooms_by_id)
-        for entity_data in WORLD_OBJECTS:
+        for entity_data in WORLD_CONTENT.entities:
             _ensure_world_object(entity_data, rooms_by_id)
         return rooms_by_id
     except Exception:

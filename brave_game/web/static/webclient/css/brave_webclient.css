@@ -521,8 +521,12 @@ body[data-brave-world-tone="portal"] {
     word-wrap: normal;
     direction: ltr;
     vertical-align: middle;
+    font-feature-settings: "liga";
+    font-variant-ligatures: contextual common-ligatures discretionary-ligatures;
     -webkit-font-feature-settings: "liga";
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    speak: none;
     font-variation-settings:
         "FILL" 0,
         "wght" 400,
@@ -3588,7 +3592,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__sections {
-    grid-template-columns: minmax(240px, 0.68fr) minmax(0, 1.32fr);
+    grid-template-columns: minmax(184px, 0.54fr) minmax(0, 1.46fr);
     align-items: start;
     gap: 12px;
 }
@@ -3772,6 +3776,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     }
 
     .brave-view--room .brave-view__section--activitylog {
+        display: none;
         width: 100%;
         margin-left: 0;
         justify-self: stretch;
@@ -3783,7 +3788,16 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     }
 
     .brave-view--room .brave-view__section--vicinity {
-        display: none;
+        display: flex;
+        grid-area: activity;
+        width: 100%;
+        margin-left: 0;
+        justify-self: stretch;
+        align-self: stretch;
+        height: 100%;
+        max-height: none;
+        grid-row: auto;
+        grid-column: auto;
     }
 }
 
@@ -3872,6 +3886,10 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--room .brave-view__section--list .brave-view__list-main {
     align-items: center;
+}
+
+.brave-view--room .brave-view__section--list .brave-view__list-copy {
+    gap: 1px;
 }
 
 .brave-view--room .brave-view__section--entities {
@@ -4238,6 +4256,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     height: 100%;
     border-radius: inherit;
     background: linear-gradient(90deg, rgba(var(--brave-accent-rgb), 0.95), rgba(var(--brave-accent-rgb), 0.64));
+    transition: width 260ms linear, filter 160ms ease, opacity 160ms ease, transform 160ms ease;
 }
 
 .brave-view__meter--good .brave-view__meter-fill {
@@ -4308,8 +4327,20 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__actions {
     width: 100%;
-    margin-top: 2px;
-    justify-content: flex-end;
+    margin-top: 4px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.brave-view--combat .brave-view__action {
+    justify-content: center;
+    min-height: 2.65rem;
+    padding: 9px 12px;
+    border-radius: 12px;
+    font-size: calc(0.74rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: calc(var(--brave-letter-spacing) + 0.04em);
+    text-transform: uppercase;
 }
 
 .brave-view--combat .brave-view__action--danger {
@@ -4412,6 +4443,20 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--targets .brave-view__section-icon {
     color: #db8a7b;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entries {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entries {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(208px, 208px));
+    gap: 6px;
+    justify-content: start;
+    align-content: start;
 }
 
 .brave-view--combat .brave-view__section--abilities .brave-view__entries {
@@ -4566,8 +4611,24 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--party .brave-view__entry,
 .brave-view--combat .brave-view__section--targets .brave-view__entry {
-    padding: 14px 14px 12px;
-    gap: 10px;
+    padding: 11px 11px 9px;
+    gap: 6px;
+    transition:
+        transform 150ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease,
+        background 180ms ease,
+        filter 180ms ease;
+}
+
+.brave-view--combat .brave-view__entry--lunge {
+    animation: brave-combat-card-lunge 300ms cubic-bezier(0.2, 0.86, 0.24, 1) 1;
+    will-change: transform;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry {
+    padding: 7px 7px 6px;
+    gap: 4px;
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry {
@@ -4600,17 +4661,238 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry {
+    position: relative;
+    overflow: hidden;
     border-color: rgba(166, 92, 84, 0.22);
     background:
         radial-gradient(circle at 0 0, rgba(166, 92, 84, 0.14), transparent 44%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.032), transparent 28%),
-        rgba(255, 255, 255, 0.028);
+        linear-gradient(180deg, rgba(31, 18, 18, 0.98), rgba(15, 9, 9, 1));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 16px 28px rgba(0, 0, 0, 0.22);
+}
+
+.brave-combat-floater {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 5;
+    pointer-events: none;
+    min-width: 2rem;
+    text-align: center;
+    font-size: calc(1.24rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: calc(var(--brave-letter-spacing) + 0.02em);
+    text-transform: uppercase;
+    color: #fff4ea;
+    -webkit-text-stroke: 1px rgba(29, 12, 10, 0.92);
+    text-shadow:
+        0 1px 0 rgba(24, 9, 8, 0.98),
+        0 0 0 2px rgba(24, 9, 8, 0.78),
+        0 0 10px rgba(24, 10, 9, 0.48),
+        0 8px 22px rgba(0, 0, 0, 0.26);
+    animation: brave-combat-floater-rise 1.2s ease-out forwards;
+}
+
+.brave-combat-floater--damage {
+    color: #ffd7cf;
+}
+
+.brave-combat-floater--element-physical {
+    color: #ffe0d4;
+}
+
+.brave-combat-floater--element-fire {
+    color: #ffbf7e;
+}
+
+.brave-combat-floater--element-frost {
+    color: #bfefff;
+}
+
+.brave-combat-floater--element-lightning {
+    color: #fff0a8;
+}
+
+.brave-combat-floater--element-holy {
+    color: #fff1c8;
+}
+
+.brave-combat-floater--element-nature {
+    color: #c9f5b1;
+}
+
+.brave-combat-floater--element-poison {
+    color: #d8ff88;
+}
+
+.brave-combat-floater--element-shadow {
+    color: #d9d2f3;
+}
+
+.brave-combat-floater--element-bleed {
+    color: #ff9f95;
+}
+
+.brave-combat-floater--heal {
+    color: #dff8df;
+    animation-name: brave-combat-floater-rise-heal;
+}
+
+.brave-combat-floater--guard {
+    color: #d9f0ff;
+    font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    animation-name: brave-combat-floater-rise-guard;
+}
+
+.brave-combat-floater--break {
+    color: #ffe4ab;
+    font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    animation-name: brave-combat-floater-rise-break;
+}
+
+.brave-combat-floater--warn {
+    color: #ffe29f;
+    font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    animation-name: brave-combat-floater-rise-warn;
+}
+
+.brave-view--combat .brave-view__entry--impact-damage {
+    animation: brave-combat-impact-damage 320ms ease-out 1;
+}
+
+.brave-view--combat .brave-view__entry--impact-heal {
+    animation: brave-combat-impact-heal 320ms ease-out 1;
+}
+
+.brave-view--combat .brave-view__entry--impact-guard {
+    animation: brave-combat-impact-guard 320ms ease-out 1;
+}
+
+.brave-view--combat .brave-view__entry--impact-break {
+    animation: brave-combat-impact-break 340ms ease-out 1;
+}
+
+.brave-view--combat .brave-view__entry--defeating {
+    opacity: 0;
+}
+
+.brave-view--combat .brave-view__entry--impact-miss {
+    animation: brave-combat-impact-miss 280ms ease-out 1;
+}
+
+.brave-view--combat .brave-view__entry--impact-element-fire {
+    --brave-impact-rgb: 224, 121, 45;
+}
+
+.brave-view--combat .brave-view__entry--impact-element-frost {
+    --brave-impact-rgb: 104, 196, 224;
+}
+
+.brave-view--combat .brave-view__entry--impact-element-lightning {
+    --brave-impact-rgb: 231, 197, 84;
+}
+
+.brave-view--combat .brave-view__entry--impact-element-holy {
+    --brave-impact-rgb: 232, 204, 124;
+}
+
+.brave-view--combat .brave-view__entry--impact-element-nature {
+    --brave-impact-rgb: 106, 177, 88;
+}
+
+.brave-view--combat .brave-view__entry--impact-element-poison {
+    --brave-impact-rgb: 154, 188, 62;
+}
+
+.brave-view--combat .brave-view__entry--impact-element-shadow {
+    --brave-impact-rgb: 135, 124, 176;
+}
+
+.brave-view--combat .brave-view__entry--impact-element-bleed,
+.brave-view--combat .brave-view__entry--impact-element-physical {
+    --brave-impact-rgb: 199, 55, 44;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry.brave-view__entry--selected {
+    border-color: rgba(231, 157, 132, 0.56);
+    background:
+        radial-gradient(circle at 0 0, rgba(210, 110, 92, 0.22), transparent 44%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 20%),
+        linear-gradient(180deg, rgba(38, 18, 18, 0.98), rgba(16, 9, 9, 1));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 0 1px rgba(231, 157, 132, 0.22),
+        0 22px 34px rgba(0, 0, 0, 0.28);
+    animation: brave-combat-target-pulse 1.1s ease-in-out infinite;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(232, 145, 119, 0.95), rgba(130, 56, 48, 0.28));
+    opacity: 0.95;
+    pointer-events: none;
+}
+
+.brave-view--combat .brave-view__entry[data-combat-state~="telegraph"] {
+    animation: brave-combat-telegraph-pulse 1.15s ease-in-out infinite;
+}
+
+.brave-view--combat .brave-view__entry[data-combat-state~="telegraph"] .brave-view__entry-line:first-child {
+    animation: brave-combat-sigil-flicker 900ms ease-in-out infinite;
+}
+
+.brave-view--combat .brave-view__entry[data-combat-state~="ready"] .brave-view__entry-icon-wrap,
+.brave-view--combat .brave-view__entry[data-combat-state~="ready"] .brave-view__entry-badge {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 0 1px rgba(245, 189, 121, 0.08),
+        0 0 18px rgba(235, 165, 86, 0.12);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry[data-combat-state~="guarding"] {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 0 1px rgba(113, 182, 165, 0.1),
+        0 0 20px rgba(83, 150, 138, 0.12);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry[data-combat-state~="guarding"] .brave-view__meter--good .brave-view__meter-fill {
+    animation: brave-combat-guard-shimmer 1.4s linear infinite;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry.brave-view__entry--selected::before {
+    width: 5px;
+    background: linear-gradient(180deg, rgba(247, 196, 120, 0.98), rgba(213, 110, 87, 0.5));
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry-icon-wrap,
 .brave-view--combat .brave-view__section--targets .brave-view__entry-badge {
     background: rgba(168, 89, 80, 0.16);
     color: #f0b1a3;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-icon-wrap,
+.brave-view--combat .brave-view__section--targets .brave-view__entry-icon-wrap,
+.brave-view--combat .brave-view__section--targets .brave-view__entry-badge {
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    padding: 3px 6px;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry-icon-wrap,
+.brave-view--combat .brave-view__section--targets .brave-view__entry-badge {
+    min-width: 1.1rem;
+    min-height: 1.1rem;
+    padding: 1px 3px;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -4641,43 +4923,44 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: #b2d8d2;
 }
 
-.brave-view--combat .brave-view__section--party .brave-view__entry-line:first-child {
-    color: #eff9f6;
-    font-weight: 600;
-}
-
-.brave-view--combat .brave-view__section--party .brave-view__entry-body {
-    min-height: 1.3em;
-}
-
-.brave-view--combat .brave-view__section--party .brave-view__entry-line {
-    display: -webkit-box;
-    overflow: hidden;
-    color: #d7ece7;
-    font-size: calc(0.64rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-    line-height: 1.3;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-}
-
 .brave-view--combat .brave-view__section--targets .brave-view__entry-badge {
-    min-width: 2.35rem;
-    border-radius: 12px;
+    min-width: 1.8rem;
+    border-radius: 10px;
     font-weight: 700;
     letter-spacing: calc(var(--brave-letter-spacing) + 0.05em);
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry-title {
-    font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(0.7rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     color: #ffe6de;
+    letter-spacing: calc(var(--brave-letter-spacing) + 0.005em);
+    line-height: 1.05;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry.brave-view__entry--selected .brave-view__entry-title {
+    color: #fff1eb;
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry-meta {
     color: #d8a89b;
+    font-size: calc(0.5rem * var(--brave-text-scale) * var(--brave-font-size-scale));
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry-line:first-child {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    min-height: 0.96rem;
+    padding: 0.04rem 0.24rem;
+    border: 1px solid rgba(231, 157, 132, 0.26);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(116, 47, 39, 0.58), rgba(62, 24, 23, 0.82));
     color: #f6cbc2;
+    font-size: calc(0.5rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 700;
+    letter-spacing: calc(var(--brave-letter-spacing) + 0.04em);
+    text-transform: uppercase;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry {
@@ -4686,12 +4969,408 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-body,
 .brave-view--combat .brave-view__section--targets .brave-view__entry-body {
-    gap: 4px;
+    gap: 2px;
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__meters,
 .brave-view--combat .brave-view__section--targets .brave-view__meters {
     padding-top: 2px;
+}
+
+.brave-view--combat .brave-view__meter[data-meter-kind="atb"] {
+    gap: 4px;
+    margin-bottom: 1px;
+}
+
+.brave-view--combat .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-fill {
+    transition-property: width, filter, opacity;
+    transition-duration: 0ms, 160ms, 160ms;
+    transition-timing-function: linear, ease, ease;
+    will-change: width;
+}
+
+.brave-view--combat .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-head {
+    justify-content: flex-start;
+}
+
+.brave-view--combat .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-label {
+    color: color-mix(in srgb, var(--brave-accent) 76%, var(--brave-text-soft));
+    font-size: calc(0.56rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: calc(var(--brave-letter-spacing) + 0.14em);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-body:empty,
+.brave-view--combat .brave-view__section--targets .brave-view__entry-body:empty {
+    display: none;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-title {
+    font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    color: #e8f6f2;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip,
+.brave-view--combat .brave-view__section--targets .brave-view__entry-chips .scene-card__chip {
+    font-size: calc(0.54rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry-chips .scene-card__chip {
+    padding: 0.1rem 0.26rem;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__meters {
+    padding-top: 0;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__meter-label,
+.brave-view--combat .brave-view__section--targets .brave-view__meter-value {
+    font-size: calc(0.5rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__meter-track {
+    height: 6px;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry-chips .scene-card__chip--danger {
+    border-color: rgba(225, 139, 118, 0.34);
+    background: linear-gradient(180deg, rgba(139, 54, 47, 0.88), rgba(86, 28, 26, 0.94));
+    color: #ffe2da;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 0 1px rgba(225, 139, 118, 0.08);
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry.brave-view__entry--selected .scene-card__chip--danger {
+    border-color: rgba(244, 188, 118, 0.42);
+    background: linear-gradient(180deg, rgba(151, 64, 41, 0.9), rgba(94, 31, 23, 0.96));
+    color: #fff0dc;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.09),
+        0 0 0 1px rgba(244, 188, 118, 0.12);
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry-chips .scene-card__chip--warn {
+    border-color: rgba(221, 181, 118, 0.28);
+    background: linear-gradient(180deg, rgba(118, 82, 34, 0.78), rgba(77, 49, 17, 0.92));
+    color: #f7e1b5;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip--good {
+    border-color: rgba(132, 189, 153, 0.28);
+    background: linear-gradient(180deg, rgba(48, 92, 68, 0.74), rgba(24, 57, 40, 0.9));
+    color: #daf4e3;
+}
+
+.brave-view--combat .brave-view__meter-track {
+    height: 8px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__meter-track {
+    background: rgba(86, 122, 117, 0.16);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-track {
+    height: 7px;
+    background: rgba(77, 120, 128, 0.24);
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__meter-track {
+    background: rgba(121, 59, 50, 0.22);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-track {
+    height: 7px;
+    background: rgba(154, 88, 52, 0.26);
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry.brave-view__entry--selected .brave-view__meter-track {
+    background: rgba(143, 75, 56, 0.26);
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__meter--accent .brave-view__meter-fill {
+    background: linear-gradient(90deg, rgba(236, 176, 96, 0.98), rgba(203, 124, 55, 0.92));
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry[data-combat-state~="telegraph"] .brave-view__meter--danger .brave-view__meter-fill,
+.brave-view--combat .brave-view__section--targets .brave-view__entry[data-combat-state~="telegraph"] .brave-view__meter--warn .brave-view__meter-fill,
+.brave-view--combat .brave-view__section--targets .brave-view__entry[data-combat-state~="telegraph"] .brave-view__meter--accent .brave-view__meter-fill {
+    animation: brave-combat-telegraph-bar 820ms ease-in-out infinite;
+}
+
+@keyframes brave-combat-target-pulse {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+@keyframes brave-combat-telegraph-pulse {
+    0%, 100% {
+        transform: translateY(0);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.04),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+    }
+    50% {
+        transform: translateY(-2px);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.06),
+            0 0 0 1px rgba(231, 157, 132, 0.12),
+            0 20px 34px rgba(0, 0, 0, 0.26);
+    }
+}
+
+@keyframes brave-combat-sigil-flicker {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.18); }
+}
+
+@keyframes brave-combat-guard-shimmer {
+    0% { filter: brightness(0.96); }
+    50% { filter: brightness(1.14); }
+    100% { filter: brightness(0.96); }
+}
+
+@keyframes brave-combat-telegraph-bar {
+    0%, 100% { filter: saturate(1) brightness(0.96); }
+    50% { filter: saturate(1.16) brightness(1.14); }
+}
+
+@keyframes brave-combat-floater-rise {
+    0% {
+        opacity: 0;
+        transform: translate(calc(-50% - (var(--brave-floater-drift-x, 0px) * 0.22)), -8%) scale(0.58);
+    }
+    12% {
+        opacity: 1;
+        transform: translate(calc(-50% + (var(--brave-floater-drift-x, 0px) * 0.08)), -18%) scale(var(--brave-floater-pop-scale, 1.16));
+    }
+    28% {
+        opacity: 1;
+        transform: translate(calc(-50% + (var(--brave-floater-drift-x, 0px) * 0.34)), -24%) scale(0.98);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--brave-floater-drift-x, 0px)), calc(-22% - var(--brave-floater-rise-y, 26px))) scale(0.92);
+    }
+}
+
+@keyframes brave-combat-floater-rise-heal {
+    0% {
+        opacity: 0;
+        transform: translate(calc(-50% - (var(--brave-floater-drift-x, 0px) * 0.12)), -10%) scale(0.66);
+    }
+    14% {
+        opacity: 1;
+        transform: translate(calc(-50% + (var(--brave-floater-drift-x, 0px) * 0.04)), -18%) scale(1.04);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + (var(--brave-floater-drift-x, 0px) * 0.58)), calc(-18% - (var(--brave-floater-rise-y, 26px) * 0.84))) scale(0.96);
+    }
+}
+
+@keyframes brave-combat-floater-rise-guard {
+    0% {
+        opacity: 0;
+        transform: translate(calc(-50% - 2px), -8%) scale(0.76);
+    }
+    18% {
+        opacity: 1;
+        transform: translate(calc(-50% + 1px), -16%) scale(1.02);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + 3px), calc(-14% - (var(--brave-floater-rise-y, 26px) * 0.58))) scale(0.92);
+    }
+}
+
+@keyframes brave-combat-floater-rise-break {
+    0% {
+        opacity: 0;
+        transform: translate(calc(-50% - (var(--brave-floater-drift-x, 0px) * 0.18)), -6%) scale(0.64);
+    }
+    10% {
+        opacity: 1;
+        transform: translate(calc(-50% + (var(--brave-floater-drift-x, 0px) * 0.08)), -20%) scale(calc(var(--brave-floater-pop-scale, 1.16) + 0.08));
+    }
+    26% {
+        opacity: 1;
+        transform: translate(calc(-50% + (var(--brave-floater-drift-x, 0px) * 0.28)), -24%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + (var(--brave-floater-drift-x, 0px) * 0.86)), calc(-20% - (var(--brave-floater-rise-y, 26px) * 0.92))) scale(0.88);
+    }
+}
+
+@keyframes brave-combat-floater-rise-warn {
+    0% {
+        opacity: 0;
+        transform: translate(calc(-50% - 7px), -10%) scale(0.7);
+    }
+    16% {
+        opacity: 1;
+        transform: translate(calc(-50% + 8px), -18%) scale(1.02);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + 16px), calc(-14% - (var(--brave-floater-rise-y, 26px) * 0.5))) scale(0.9);
+    }
+}
+
+@keyframes brave-combat-card-lunge {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    38% {
+        transform: translate3d(var(--brave-combat-lunge-x, 0), var(--brave-combat-lunge-y, 0), 0) scale(1.02);
+    }
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes brave-combat-impact-damage {
+    0% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 199, 55, 44), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1);
+    }
+    38% {
+        box-shadow:
+            inset 0 0 0 999px rgba(var(--brave-impact-rgb, 199, 55, 44), 0.18),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1.08);
+    }
+    100% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 199, 55, 44), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1);
+    }
+}
+
+@keyframes brave-combat-impact-heal {
+    0% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 65, 160, 100), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1);
+    }
+    38% {
+        box-shadow:
+            inset 0 0 0 999px rgba(var(--brave-impact-rgb, 65, 160, 100), 0.14),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1.08);
+    }
+    100% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 65, 160, 100), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1);
+    }
+}
+
+@keyframes brave-combat-impact-guard {
+    0% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 70, 134, 181), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+    }
+    38% {
+        box-shadow:
+            inset 0 0 0 999px rgba(var(--brave-impact-rgb, 70, 134, 181), 0.14),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+    }
+    100% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 70, 134, 181), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+    }
+}
+
+@keyframes brave-combat-impact-break {
+    0% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 201, 145, 38), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+    }
+    38% {
+        box-shadow:
+            inset 0 0 0 999px rgba(var(--brave-impact-rgb, 201, 145, 38), 0.16),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+    }
+    100% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 201, 145, 38), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+    }
+}
+
+@keyframes brave-combat-impact-miss {
+    0% {
+        transform: translateX(0);
+        filter: brightness(1);
+    }
+    28% {
+        transform: translateX(-6px);
+        filter: brightness(1.04);
+    }
+    58% {
+        transform: translateX(5px);
+        filter: brightness(0.98);
+    }
+    100% {
+        transform: translateX(0);
+        filter: brightness(1);
+    }
+}
+
+.brave-combat-ghost {
+    border-radius: inherit;
+    overflow: hidden;
+}
+
+.brave-combat-ghost--defeat {
+    animation: brave-combat-defeat-fall 860ms cubic-bezier(0.2, 0.76, 0.24, 1) forwards;
+}
+
+@keyframes brave-combat-defeat-fall {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: saturate(1) brightness(1);
+    }
+    34% {
+        opacity: 0.98;
+        transform: translateY(8px) scale(0.988);
+        filter: saturate(0.8) brightness(0.96);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(38px) scale(0.88);
+        filter: saturate(0.1) brightness(0.66);
+    }
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__meter--warn .brave-view__meter-fill,
+.brave-view--combat .brave-view__section--targets .brave-view__meter--danger .brave-view__meter-fill {
+    box-shadow: 0 0 10px rgba(193, 96, 81, 0.32);
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry.brave-view__entry--selected .brave-view__meter--accent .brave-view__meter-fill,
+.brave-view--combat .brave-view__section--targets .brave-view__entry.brave-view__entry--selected .brave-view__meter--warn .brave-view__meter-fill,
+.brave-view--combat .brave-view__section--targets .brave-view__entry.brave-view__entry--selected .brave-view__meter--danger .brave-view__meter-fill {
+    box-shadow: 0 0 14px rgba(240, 170, 95, 0.3);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry.brave-view__entry--selected {
+    border-color: rgba(142, 199, 166, 0.42);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 0 1px rgba(142, 199, 166, 0.14),
+        0 18px 28px rgba(0, 0, 0, 0.22);
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__mini-action--danger {
@@ -5803,15 +6482,40 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__list-main {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 10px;
     align-items: start;
+}
+
+.brave-view__list-copy {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
 }
 
 .brave-view__list-text {
     color: var(--brave-text-soft);
     font-size: calc(0.88rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.45;
+}
+
+.brave-view__list-detail {
+    color: var(--brave-text-dim);
+    font-size: calc(0.75rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.25;
+    text-transform: none;
+}
+
+.brave-view__list-marker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    color: color-mix(in srgb, var(--brave-danger, #d86f57) 78%, var(--brave-text-bright));
+}
+
+.brave-view__list-marker-icon {
+    font-size: 1rem;
 }
 
 .brave-view--map .brave-view__badge {
@@ -8281,12 +8985,15 @@ body.brave-scene-combat-enter .inputwrap {
     .brave-view--combat .brave-view__actions {
         margin-top: 0;
         margin-left: auto;
-        justify-content: flex-end;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
     }
 
     .brave-view--combat .brave-view__action {
-        padding: 6px 10px;
-        font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        padding: 7px 8px;
+        min-height: 2.3rem;
+        font-size: calc(0.64rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     }
 
     .brave-view--combat .brave-view__sections {
@@ -8327,20 +9034,12 @@ body.brave-scene-combat-enter .inputwrap {
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 22%, transparent 84%, rgba(255, 255, 255, 0.012));
     }
 
-    .brave-view--combat .brave-view__section--party {
+    .brave-view--combat .brave-view__section--targets {
         order: 1;
     }
 
-    .brave-view--combat .brave-view__section--targets {
+    .brave-view--combat .brave-view__section--party {
         order: 2;
-    }
-
-    .brave-view--combat .brave-view__section--abilities {
-        order: 3;
-    }
-
-    .brave-view--combat .brave-view__section--items {
-        order: 4;
     }
 
     .brave-combat-tray-tabs {
@@ -8398,8 +9097,8 @@ body.brave-scene-combat-enter .inputwrap {
     .brave-view--combat .brave-view__section--targets .brave-view__entries {
         display: grid;
         grid-auto-flow: column;
-        grid-auto-columns: minmax(128px, 38vw);
-        gap: 6px;
+        grid-auto-columns: minmax(104px, 29vw);
+        gap: 5px;
         align-items: stretch;
         overflow-x: auto;
         overscroll-behavior-x: contain;
@@ -8418,10 +9117,10 @@ body.brave-scene-combat-enter .inputwrap {
         display: grid;
         grid-template-rows: auto auto auto 1fr;
         align-content: start;
-        gap: 6px;
-        padding: 8px 8px 7px;
-        min-height: 116px;
-        border-radius: 14px;
+        gap: 5px;
+        padding: 7px 7px 6px;
+        min-height: 104px;
+        border-radius: 12px;
         width: auto;
         min-width: 0;
         box-shadow:
@@ -8438,6 +9137,7 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--targets .brave-view__entry {
+        min-height: 104px;
         border-color: rgba(170, 109, 96, 0.24);
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
@@ -8453,14 +9153,21 @@ body.brave-scene-combat-enter .inputwrap {
     .brave-view--combat .brave-view__section--party .brave-view__entry-icon-wrap,
     .brave-view--combat .brave-view__section--targets .brave-view__entry-icon-wrap,
     .brave-view--combat .brave-view__section--targets .brave-view__entry-badge {
-        width: 24px;
-        min-width: 24px;
-        height: 24px;
+        width: 20px;
+        min-width: 20px;
+        height: 20px;
+    }
+
+    .brave-view--combat .brave-view__section--targets .brave-view__entry-icon-wrap,
+    .brave-view--combat .brave-view__section--targets .brave-view__entry-badge {
+        width: 18px;
+        min-width: 18px;
+        height: 18px;
     }
 
     .brave-view--combat .brave-view__entry-title {
         display: -webkit-box;
-        font-size: calc(0.8rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
         line-height: 1.12;
         overflow: hidden;
         -webkit-box-orient: vertical;
@@ -8508,7 +9215,7 @@ body.brave-scene-combat-enter .inputwrap {
         min-height: 1.2em;
     }
 
-    .brave-view--combat .brave-view__section--targets .brave-view__entry-body {
+    .brave-view--combat .brave-view__section--targets .brave-view__entry-body:empty {
         display: none;
     }
 
@@ -8525,7 +9232,7 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__meter-track {
-        height: 5px;
+        height: 6px;
     }
 
     .brave-view--combat .brave-view__section--abilities .brave-view__list,
@@ -9092,4 +9799,3 @@ body.brave-scene-combat-enter .inputwrap {
         display: none !important;
     }
 }
-

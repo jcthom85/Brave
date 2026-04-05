@@ -1,6 +1,11 @@
 """Text helpers for Brave's connection and account title screens."""
 
-from world.data.character_options import CLASSES, RACES
+from world.content import get_content_registry
+
+CONTENT = get_content_registry()
+CHARACTER_CONTENT = CONTENT.characters
+CLASSES = CHARACTER_CONTENT.classes
+RACES = CHARACTER_CONTENT.races
 
 BRAVE_WORDMARK = "|wBRAVE|n"
 

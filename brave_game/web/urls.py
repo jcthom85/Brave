@@ -26,6 +26,8 @@ urlpatterns = [
     path("webclient/", include("web.webclient.urls")),
     # web admin
     path("admin/", include("web.admin.urls")),
+    # creator api
+    path("api/", include("web.api.urls")),
     # add any extra urls here:
     # path("mypath/", include("path.to.my.urls.file")),
 ]

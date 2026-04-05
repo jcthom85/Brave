@@ -11,13 +11,15 @@ django.setup()
 from typeclasses.characters import Character
 from typeclasses.scripts import BraveEncounter
 from world.browser_views import build_combat_view
-from world.data.character_options import (
-    ABILITY_LIBRARY,
-    CLASSES,
-    PASSIVE_ABILITY_BONUSES,
-    ability_key,
-    split_unlocked_abilities,
-)
+from world.content import get_content_registry
+
+CONTENT = get_content_registry()
+CHARACTER_CONTENT = CONTENT.characters
+ABILITY_LIBRARY = CHARACTER_CONTENT.ability_library
+CLASSES = CHARACTER_CONTENT.classes
+PASSIVE_ABILITY_BONUSES = CHARACTER_CONTENT.passive_ability_bonuses
+ability_key = CHARACTER_CONTENT.ability_key
+split_unlocked_abilities = CHARACTER_CONTENT.split_unlocked_abilities
 
 
 class DummyCharacter:
@@ -124,6 +126,23 @@ def _item(section, prefix):
         if item.get("text", "").startswith(prefix):
             return item
     raise AssertionError(f"Missing item {prefix}")
+
+
+def _view_action(view, label):
+    for action in view.get("actions", []):
+        if action.get("label") == label:
+            return action
+    raise AssertionError(f"Missing action {label}")
+
+
+def _picker_option(picker, label, *, meta=None):
+    for option in picker.get("options", []):
+        if option.get("label") != label:
+            continue
+        if meta is not None and option.get("meta") != meta:
+            continue
+        return option
+    raise AssertionError(f"Missing picker option {label} / {meta}")
 
 
 class ProgressionSplitTests(unittest.TestCase):
@@ -324,10 +343,9 @@ class DummyCmdUse:
         encounter = DummyEncounterForView(warrior)
 
         view = build_combat_view(encounter, warrior)
-        abilities = _section(view, "Abilities")
-        battle_cry = _item(abilities, "Battle Cry")
+        abilities = _view_action(view, "Abilities")
+        battle_cry = _picker_option(abilities.get("picker", {}), "Battle Cry", meta="Battle Cry · 8 STA")
 
-        self.assertEqual("N", battle_cry.get("badge"))
         self.assertEqual("use Battle Cry", battle_cry.get("command"))
         self.assertIsNone(battle_cry.get("picker"))
 
@@ -336,10 +354,9 @@ class DummyCmdUse:
         encounter = DummyEncounterForView(ranger)
 
         view = build_combat_view(encounter, ranger)
-        abilities = _section(view, "Abilities")
-        volley = _item(abilities, "Volley")
+        abilities = _view_action(view, "Abilities")
+        volley = _picker_option(abilities.get("picker", {}), "Volley", meta="Volley · 10 STA")
 
-        self.assertEqual("N", volley.get("badge"))
         self.assertEqual("use Volley", volley.get("command"))
         self.assertIsNone(volley.get("picker"))
 
@@ -348,10 +365,9 @@ class DummyCmdUse:
         encounter = DummyEncounterForView(mage)
 
         view = build_combat_view(encounter, mage)
-        abilities = _section(view, "Abilities")
-        flame_wave = _item(abilities, "Flame Wave")
+        abilities = _view_action(view, "Abilities")
+        flame_wave = _picker_option(abilities.get("picker", {}), "Flame Wave", meta="Flame Wave · 14 MP")
 
-        self.assertEqual("N", flame_wave.get("badge"))
         self.assertEqual("use Flame Wave", flame_wave.get("command"))
         self.assertIsNone(flame_wave.get("picker"))
 

@@ -1,7 +1,13 @@
 """Shared combat action payload helpers for browser combat views."""
 
-from world.data.character_options import ABILITY_LIBRARY, IMPLEMENTED_ABILITY_KEYS
+from world.content import get_content_registry
+from world.combat_atb import get_ability_atb_profile, get_item_atb_profile
 from world.data.items import ITEM_TEMPLATES, get_item_use_profile
+
+CONTENT = get_content_registry()
+CHARACTER_CONTENT = CONTENT.characters
+ABILITY_LIBRARY = CHARACTER_CONTENT.ability_library
+IMPLEMENTED_ABILITY_KEYS = CHARACTER_CONTENT.implemented_ability_keys
 from world.resonance import format_ability_display, get_resource_label, get_stat_label, resolve_ability_query
 
 
@@ -10,6 +16,17 @@ TARGET_BADGES = {
     "enemy": "E",
     "ally": "A",
     "none": "N",
+}
+
+REACTION_ABILITY_KEYS = {
+    "interrupt": {"shieldbash", "cheapshot", "frostbind", "entanglingroots"},
+    "guard": {"intercept", "defend", "brace", "guardingaura", "shieldofdawn"},
+    "cleanse": {"cleanse", "renewinglight", "blessing", "livingcurrent"},
+}
+
+REACTION_ITEM_EFFECT_TYPES = {
+    "guard": "guard",
+    "cleanse": "cleanse",
 }
 
 RESOURCE_SHORT_LABELS = {
@@ -30,19 +47,54 @@ def _short_resource_label(resource_key, character):
     return RESOURCE_SHORT_LABELS.get(resource_key, get_resource_label(resource_key, character)[:3].upper())
 
 
+def _enemy_display_options(enemies):
+    totals = {}
+    for enemy in enemies:
+        group_key = str(enemy.get("template_key") or enemy.get("key") or enemy.get("id") or "").strip().lower()
+        totals[group_key] = totals.get(group_key, 0) + 1
+
+    seen = {}
+    options = []
+    for enemy in enemies:
+        group_key = str(enemy.get("template_key") or enemy.get("key") or enemy.get("id") or "").strip().lower()
+        seen[group_key] = seen.get(group_key, 0) + 1
+        label = str(enemy.get("key") or "Enemy")
+        if totals.get(group_key, 0) > 1 and not label.rsplit(" ", 1)[-1].isdigit():
+            label = f"{label} {seen[group_key]}"
+        options.append((label, enemy))
+    return options
+
+
+def _enemy_option_icon(enemy):
+    template_key = str(enemy.get("template_key") or "").lower()
+    name = str(enemy.get("key") or "").lower()
+    if template_key in {"old_greymaw", "miretooth", "hollow_lantern"} or "dragon" in name:
+        return "workspace_premium"
+    if any(token in template_key for token in ("wolf", "hound")) or any(token in name for token in ("wolf", "hound")):
+        return "pets"
+    if any(token in template_key for token in ("crow", "bat")) or any(token in name for token in ("crow", "bat")):
+        return "flight"
+    if any(token in template_key for token in ("shade", "wisp", "ghost")):
+        return "auto_awesome"
+    if any(token in template_key for token in ("skeleton", "skeletal")):
+        return "skull"
+    if any(token in template_key for token in ("soldier", "knight", "bandit", "goblin", "archer")):
+        return "swords"
+    return "warning"
+
+
 def _enemy_picker(title, command_prefix, enemies):
     return {
         "title": title,
         "subtitle": "Choose an enemy.",
         "options": [
             {
-                "label": enemy["key"],
+                "label": label,
                 "command": f"{command_prefix} = {enemy['id']}",
-                "icon": "warning",
-                "meta": enemy["id"].upper(),
+                "icon": _enemy_option_icon(enemy),
                 "tone": "danger",
             }
-            for enemy in enemies
+            for label, enemy in _enemy_display_options(enemies)
         ],
     }
 
@@ -80,6 +132,38 @@ def _finalize_action(action):
     return action
 
 
+def _reaction_role_for_ability(ability_key):
+    normalized = str(ability_key or "").lower()
+    for role, keys in REACTION_ABILITY_KEYS.items():
+        if normalized in keys:
+            return role
+    return None
+
+
+def _reaction_role_for_item(use):
+    effect_type = str((use or {}).get("effect_type", "") or "").lower()
+    return REACTION_ITEM_EFFECT_TYPES.get(effect_type)
+
+
+def _timing_tooltip(timing, *, reaction_role=None):
+    timing = dict(timing or {})
+    parts = [
+        f"ATB {int(timing.get('gauge_cost', 100) or 100)}",
+        f"windup {int(timing.get('windup_ticks', 0) or 0)}",
+        f"recovery {int(timing.get('recovery_ticks', 0) or 0)}",
+    ]
+    cooldown = int(timing.get("cooldown_ticks", 0) or 0)
+    if cooldown > 0:
+        parts.append(f"cooldown {cooldown}")
+    if timing.get("telegraph"):
+        parts.append("telegraphed")
+    if timing.get("interruptible"):
+        parts.append("interruptible")
+    if reaction_role:
+        parts.append(f"{reaction_role} tool")
+    return "Timing: " + " · ".join(parts)
+
+
 def build_combat_ability_actions(encounter, character):
     """Return normalized browser payloads for combat abilities."""
 
@@ -103,6 +187,8 @@ def build_combat_ability_actions(encounter, character):
         command_prefix = f"use {unlocked_name}"
         display_name = format_ability_display(unlocked_name, character)
         text = f"{display_name} · {ability['cost']} {_short_resource_label(resource_key, character)}"
+        timing = get_ability_atb_profile(ability_key, ability)
+        reaction_role = _reaction_role_for_ability(ability_key)
         action = {
             "id": f"ability:{ability_key}",
             "kind": "ability",
@@ -119,6 +205,9 @@ def build_combat_ability_actions(encounter, character):
             "picker": None,
             "actions": None,
             "disabled_reason": None,
+            "timing": timing,
+            "reaction_role": reaction_role,
+            "tooltip": _timing_tooltip(timing, reaction_role=reaction_role),
         }
 
         if resource_current < ability["cost"]:
@@ -195,6 +284,8 @@ def build_combat_item_actions(encounter, character):
 
         target_mode = use.get("target", "self")
         command_prefix = f"use {label}"
+        timing = get_item_atb_profile(template_id, use)
+        reaction_role = _reaction_role_for_item(use)
         action = {
             "id": f"item:{template_id}",
             "kind": "item",
@@ -209,6 +300,9 @@ def build_combat_item_actions(encounter, character):
             "actions": None,
             "disabled_reason": None,
             "effect_type": use.get("effect_type"),
+            "timing": timing,
+            "reaction_role": reaction_role,
+            "tooltip": _timing_tooltip(timing, reaction_role=reaction_role),
         }
 
         if target_mode == "enemy":

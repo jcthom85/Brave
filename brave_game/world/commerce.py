@@ -2,13 +2,17 @@
 
 import random
 
+from world.content import get_content_registry
 from world.data.items import ITEM_TEMPLATES
-from world.data.quests import QUESTS
+
+CONTENT = get_content_registry()
+QUESTS = CONTENT.quests.quests
+SYSTEMS_CONTENT = CONTENT.systems
+OUTFITTERS_ROOM_ID = SYSTEMS_CONTENT.outfitters_room_id
+SHIFT_OUTCOMES = list(SYSTEMS_CONTENT.shift_outcomes)
 
 
-OUTFITTERS_ROOM_ID = "brambleford_outfitters"
-
-SHIFT_OUTCOMES = [
+_UNUSED_SHIFT_OUTCOMES = [
     {
         "name": "Counter Rhythm",
         "bonus_pct": 10,

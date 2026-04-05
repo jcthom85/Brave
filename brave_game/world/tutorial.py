@@ -1,7 +1,10 @@
 """Tutorial state and guided onboarding helpers for Brave."""
 
 from world.bootstrap import get_room
-from world.data.character_options import CLASSES
+from world.content import get_content_registry
+
+CONTENT = get_content_registry()
+CLASSES = CONTENT.characters.classes
 
 
 TUTORIAL_START_ROOM_ID = "tutorial_wayfarers_yard"

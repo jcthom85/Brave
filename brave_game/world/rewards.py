@@ -2,8 +2,11 @@
 
 from random import randint, random
 
-from world.data.encounters import ENEMY_TEMPLATES
+from world.content import get_content_registry
 from world.data.items import ITEM_TEMPLATES
+
+CONTENT = get_content_registry()
+ENEMY_TEMPLATES = CONTENT.encounters.enemy_templates
 
 
 def roll_enemy_rewards(enemy):

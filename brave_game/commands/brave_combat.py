@@ -7,6 +7,16 @@ from world.party import get_present_party_members
 from .brave import BraveCharacterCommand
 
 
+def _refresh_combat_scene(command, encounter, character):
+    """Refresh combat for text sessions without double-pushing browser views."""
+
+    snapshot = encounter.format_combat_snapshot()
+    if command.get_web_session():
+        command.send_other_sessions(snapshot)
+        return
+    command.msg(snapshot)
+
+
 class CmdFight(BraveCharacterCommand):
     """
     Engage the threats in your current area.
@@ -14,7 +24,8 @@ class CmdFight(BraveCharacterCommand):
     Usage:
       fight
 
-    Starts or joins the current room encounter.
+    Starts or joins the current room encounter. If a battle is already underway here,
+    this joins it explicitly instead of auto-pulling you in.
     """
 
     key = "fight"
@@ -95,11 +106,14 @@ class CmdEnemies(BraveCharacterCommand):
             self.msg("No immediate enemies are pressing in here.")
             return
 
-        lines = [
-            f"{threat['key']}: {threat['temperament_label']}, {threat['threat_label'].lower()} threat"
-            for threat in threats
-        ]
-        self.msg("Threats here:\n  " + "\n  ".join(lines) + "\nUse |wattack <name>|n or |wfight|n to engage.")
+        lines = []
+        for threat in threats:
+            detail = threat.get("detail")
+            summary = f"{threat['key']}: {threat['threat_label'].lower()} threat"
+            if detail:
+                summary += f" · {detail}"
+            lines.append(summary)
+        self.msg("Threats here:\n  " + "\n  ".join(lines) + "\nUse |wattack <name>|n to open a fight or |wfight|n to join the current one.")
 
 
 class CmdAttack(BraveCharacterCommand):
@@ -115,6 +129,9 @@ class CmdAttack(BraveCharacterCommand):
 
     key = "attack"
     help_category = "Brave"
+
+    def _refresh_combat_scene(self, encounter, character):
+        _refresh_combat_scene(self, encounter, character)
 
     def func(self):
         from typeclasses.scripts import BraveEncounter
@@ -161,13 +178,7 @@ class CmdAttack(BraveCharacterCommand):
             self.msg(message)
             return
 
-        if started_from_room:
-            self.scene_msg(
-                encounter.format_combat_snapshot(),
-                panel=build_combat_panel(encounter),
-                view=build_combat_view(encounter, character),
-            )
-
+        self._refresh_combat_scene(encounter, character)
         self.msg(message)
 
 
@@ -187,6 +198,9 @@ class CmdUse(BraveCharacterCommand):
     key = "use"
     aliases = ["cast"]
     help_category = "Brave"
+
+    def _refresh_combat_scene(self, encounter, character):
+        _refresh_combat_scene(self, encounter, character)
 
     def func(self):
         character = self.get_character()
@@ -213,6 +227,11 @@ class CmdUse(BraveCharacterCommand):
             consumable_match = encounter.find_consumable(character, action_name, context="combat")
             if consumable_match:
                 ok, message = encounter.queue_item(character, action_name, target_name)
+        if not ok:
+            self.msg(message)
+            return
+
+        self._refresh_combat_scene(encounter, character)
         self.msg(message)
 
 
@@ -230,6 +249,9 @@ class CmdFlee(BraveCharacterCommand):
     aliases = ["retreat", "run"]
     help_category = "Brave"
 
+    def _refresh_combat_scene(self, encounter, character):
+        _refresh_combat_scene(self, encounter, character)
+
     def func(self):
         character = self.get_character()
         if not character:
@@ -240,4 +262,6 @@ class CmdFlee(BraveCharacterCommand):
             return
 
         ok, message = encounter.queue_flee(character)
+        if ok:
+            self._refresh_combat_scene(encounter, character)
         self.msg(message)

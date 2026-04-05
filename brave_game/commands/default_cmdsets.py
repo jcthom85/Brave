@@ -27,6 +27,7 @@ from .account import (
 )
 from .brave_arcade import CmdArcade, CmdArcadeSubmit
 from .brave_combat import CmdAttack, CmdEnemies, CmdFight, CmdFlee, CmdUse
+from .brave_creator import CmdContent
 from .brave_explore import CmdCook, CmdEat, CmdFish, CmdItem, CmdMap, CmdMore, CmdReel, CmdRest, CmdTravel
 from .brave_party import CmdParty
 from .brave_profile import CmdBuild, CmdClass, CmdGear, CmdPack, CmdQuests, CmdRace, CmdSheet
@@ -82,6 +83,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdArcadeSubmit())
         self.add(CmdTalk())
         self.add(CmdRead())
+        self.add(CmdContent())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):

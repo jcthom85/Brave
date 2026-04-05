@@ -7,7 +7,7 @@ from time import time
 from evennia.utils import delay
 
 from world.bootstrap import get_entity
-from world.data.activities import COOKING_RECIPES, COZY_BONUS, FISHING_SPOTS, format_ingredient_list
+from world.content import get_content_registry
 from world.data.items import (
     ITEM_TEMPLATES,
     format_bonus_summary,
@@ -15,6 +15,13 @@ from world.data.items import (
     match_inventory_item,
 )
 from world.screen_text import format_entry, render_screen
+
+CONTENT = get_content_registry()
+SYSTEMS_CONTENT = CONTENT.systems
+COOKING_RECIPES = SYSTEMS_CONTENT.cooking_recipes
+COZY_BONUS = SYSTEMS_CONTENT.cozy_bonus
+FISHING_SPOTS = SYSTEMS_CONTENT.fishing_spots
+format_ingredient_list = SYSTEMS_CONTENT.format_ingredient_list
 
 
 def room_supports_activity(room, activity_name):
@@ -444,6 +451,7 @@ def _consume_item_by_template(character, template_id, *, context="explore", cozy
     buffs = dict(use.get("buffs", {}))
     cleanse_result = None
     guard_amount = 0
+    restore_total = 0
     target_type = use.get("target", "self")
     if target_type == "enemy":
         resolved_target = target if isinstance(target, Mapping) else None
@@ -497,7 +505,9 @@ def _consume_item_by_template(character, template_id, *, context="explore", cozy
         resources = dict(target_character.db.brave_resources or {})
         for pool in ("hp", "mana", "stamina"):
             cap = derived.get(f"max_{pool}", 0)
+            before = resources.get(pool, 0)
             resources[pool] = min(cap, resources.get(pool, 0) + restore.get(pool, 0))
+            restore_total += max(0, resources[pool] - before)
         target_character.db.brave_resources = resources
 
     if effect_type == "guard":
@@ -558,6 +568,9 @@ def _consume_item_by_template(character, template_id, *, context="explore", cozy
         "item": item,
         "use": use,
         "public_message": public_message,
+        "cleanse_result": cleanse_result,
+        "guard_amount": guard_amount,
+        "restore_total": restore_total,
     }
 
 
