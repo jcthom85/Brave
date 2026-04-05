@@ -3438,6 +3438,21 @@ let defaultout_plugin = (function () {
 
     var clearStickyView = function () {
         var mwin = $("#messagewindow");
+        currentAtbAnimationGeneration += 1;
+        if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
+            window.cancelAnimationFrame(currentAtbAnimationFrame);
+            currentAtbAnimationFrame = null;
+        }
+        if (currentAtbResumeTimeout) {
+            window.clearTimeout(currentAtbResumeTimeout);
+            currentAtbResumeTimeout = null;
+        }
+        combatAtbFrozenUntilMs = 0;
+        pendingCombatFxEvents = [];
+        suppressedCombatEntryRefs = {};
+        if (currentViewData && currentViewData.variant === "combat") {
+            currentViewData = null;
+        }
         if (!mwin.length) {
             setStickyViewMode(false);
             return;

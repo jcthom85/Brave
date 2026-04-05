@@ -291,6 +291,37 @@ class BraveEncounter(Script):
     """Simple room-based combat controller for Brave's first vertical slice."""
 
     @classmethod
+    def _prune_inactive_room_encounters(cls, room):
+        """Delete leaked inactive encounter rows and clear stale client combat UI."""
+
+        if not room:
+            return []
+
+        from world.browser_panels import send_webclient_event
+
+        matches = room.scripts.get("brave_encounter")
+        if hasattr(matches, "all"):
+            matches = list(matches.all())
+
+        active = []
+        for encounter in matches or []:
+            if getattr(encounter, "is_active", False):
+                active.append(encounter)
+                continue
+            try:
+                for participant in encounter.get_participants():
+                    if participant:
+                        participant.ndb.brave_encounter = None
+                        send_webclient_event(participant, brave_combat_done={})
+            except Exception:
+                pass
+            try:
+                encounter.delete()
+            except Exception:
+                pass
+        return active
+
+    @classmethod
     def get_for_room(cls, room):
         """Return the active Brave encounter for a room, if any."""
 
@@ -302,10 +333,9 @@ class BraveEncounter(Script):
             return encounter
         room.ndb.brave_encounter = None
 
+        matches = cls._prune_inactive_room_encounters(room)
+
         if not encounter or not encounter.id or not getattr(encounter, "is_active", False):
-            matches = room.scripts.get("brave_encounter")
-            if hasattr(matches, "all"):
-                matches = matches.all()
             for encounter in matches:
                 if not getattr(encounter, "is_active", False):
                     continue
@@ -671,6 +701,13 @@ class BraveEncounter(Script):
         self.start_delay = True
         self.persistent = False
         self.desc = "Brave room encounter"
+
+    def stop(self, **kwargs):
+        """Stop the encounter timer and delete the script row immediately."""
+
+        super().stop(**kwargs)
+        if self.pk:
+            self.delete()
 
     def configure(self, room_id, encounter_data, expected_party_size=1):
         """Populate the encounter from static room data."""
