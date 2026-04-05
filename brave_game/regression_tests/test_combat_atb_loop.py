@@ -331,19 +331,25 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter._refresh_browser_combat_views = lambda: setattr(encounter, "refreshed", encounter.refreshed + 1)
         encounter._set_combat_turn_lock = lambda duration_ms=1200, now_ms=None: None
 
-        BraveEncounter._advance_enemy_atb(encounter, enemy)
+        with patch("typeclasses.scripts.time.time", return_value=1.2):
+            BraveEncounter._advance_enemy_atb(encounter, enemy)
 
         paused_state = encounter.db.atb_states["p:7"]
         self.assertEqual("winding", encounter.db.atb_states["e:e1"]["phase"])
-        self.assertEqual(2_000, paused_state["phase_started_at_ms"])
-        self.assertEqual(2_000, paused_state["phase_duration_ms"])
+        self.assertEqual(220, paused_state["gauge"])
+        self.assertEqual(2_200, paused_state["phase_started_at_ms"])
+        self.assertEqual(1_800, paused_state["phase_duration_ms"])
+        self.assertEqual(220, paused_state["phase_start_gauge"])
 
-        BraveEncounter._advance_enemy_atb(encounter, enemy)
+        with patch("typeclasses.scripts.time.time", return_value=2.0):
+            BraveEncounter._advance_enemy_atb(encounter, enemy)
 
         paused_state = encounter.db.atb_states["p:7"]
         self.assertEqual(["e1"], encounter.resolved)
-        self.assertEqual(3_200, paused_state["phase_started_at_ms"])
-        self.assertEqual(2_000, paused_state["phase_duration_ms"])
+        self.assertEqual(220, paused_state["gauge"])
+        self.assertEqual(3_400, paused_state["phase_started_at_ms"])
+        self.assertEqual(1_800, paused_state["phase_duration_ms"])
+        self.assertEqual(220, paused_state["phase_start_gauge"])
 
     def test_at_repeat_freezes_other_atb_states_while_enemy_action_resolves(self):
         character = DummyCharacter()

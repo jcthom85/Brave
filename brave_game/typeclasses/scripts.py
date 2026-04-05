@@ -1261,6 +1261,7 @@ class BraveEncounter(Script):
             active_key = self._actor_atb_key(enemy=active_enemy)
 
         freezeable_phases = {"charging", "recovering", "cooldown"}
+        tick_ms = BraveEncounter._atb_tick_ms(self)
         now_ms = int(round(time.time() * 1000))
 
         get_active_participants = getattr(self, "get_active_participants", None)
@@ -1273,7 +1274,14 @@ class BraveEncounter(Script):
             if state.get("phase") not in freezeable_phases:
                 continue
             started_at = int(state.get("phase_started_at_ms", now_ms) or now_ms)
-            state["phase_started_at_ms"] = started_at + pause_ms
+            elapsed_ms = max(0, now_ms - started_at)
+            state = advance_atb_state_by_ms(
+                state,
+                elapsed_ms,
+                tick_ms=tick_ms,
+                now_ms=started_at,
+            )
+            state["phase_started_at_ms"] = int(state.get("phase_started_at_ms", now_ms) or now_ms) + pause_ms
             self._save_actor_atb_state(state, character=participant)
 
         get_active_enemies = getattr(self, "get_active_enemies", None)
@@ -1286,7 +1294,14 @@ class BraveEncounter(Script):
             if state.get("phase") not in freezeable_phases:
                 continue
             started_at = int(state.get("phase_started_at_ms", now_ms) or now_ms)
-            state["phase_started_at_ms"] = started_at + pause_ms
+            elapsed_ms = max(0, now_ms - started_at)
+            state = advance_atb_state_by_ms(
+                state,
+                elapsed_ms,
+                tick_ms=tick_ms,
+                now_ms=started_at,
+            )
+            state["phase_started_at_ms"] = int(state.get("phase_started_at_ms", now_ms) or now_ms) + pause_ms
             self._save_actor_atb_state(state, enemy=enemy)
 
     def _player_action_timing(self, action):
