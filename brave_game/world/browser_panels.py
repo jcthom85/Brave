@@ -811,6 +811,16 @@ def build_combat_panel(encounter):
     render_now_ms = int(round(time.time() * 1000))
     render_tick_ms = max(1, int(round(float(getattr(encounter, "interval", 1) or 1) * 1000)))
 
+    def combat_turn_locked():
+        getter = getattr(encounter, "_combat_turn_locked", None)
+        if callable(getter):
+            try:
+                return bool(getter(now_ms=render_now_ms))
+            except Exception:
+                return False
+        lock_until_ms = int(getattr(getattr(encounter, "db", None), "atb_turn_lock_until_ms", 0) or 0)
+        return render_now_ms < lock_until_ms
+
     def raw_actor_atb_state(*, participant=None, enemy=None):
         getter = getattr(encounter, "_get_actor_atb_state", None)
         if not callable(getter):
@@ -825,6 +835,8 @@ def build_combat_panel(encounter):
         return {}
 
     def combat_atb_locked():
+        if combat_turn_locked():
+            return True
         for participant in participants:
             if (raw_actor_atb_state(participant=participant) or {}).get("phase") in {"winding", "resolving"}:
                 return True

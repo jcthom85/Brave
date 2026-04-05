@@ -370,6 +370,44 @@ class CombatViewTests(unittest.TestCase):
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
         )
 
+    def test_atb_meter_freezes_charge_projection_while_turn_lock_is_active(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "p:7": {
+                    "phase": "charging",
+                    "gauge": 0,
+                    "ready_gauge": 400,
+                    "phase_start_gauge": 0,
+                    "phase_started_at_ms": 1_000,
+                    "phase_duration_ms": 4_000,
+                }
+            },
+        )
+        encounter.db.atb_turn_lock_until_ms = 4_000
+
+        with patch("world.browser_views.time.time", return_value=3.0):
+            view = build_combat_view(encounter, warrior)
+
+        party_section = _section(view, "Party")
+        warrior_entry = _entry(party_section, "Dad")
+        self.assertEqual(
+            [("ATB", "0 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
+            [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
+        )
+
     def test_duplicate_enemy_names_are_numbered_in_view(self):
         room = DummyRoom()
         warrior = DummyCharacter(

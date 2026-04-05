@@ -77,6 +77,30 @@ class CombatPanelTests(unittest.TestCase):
         party_items = panel.get("sections", [])[0].get("items", [])
         self.assertEqual(["ATB 50%"], [item.get("badge") for item in party_items])
 
+    def test_combat_panel_freezes_charge_percent_while_turn_lock_is_active(self):
+        encounter = DummyEncounter(
+            [DummyParticipant("Dad")],
+            [],
+            atb_states={
+                "p:Dad": {
+                    "phase": "charging",
+                    "gauge": 0,
+                    "ready_gauge": 400,
+                    "phase_start_gauge": 0,
+                    "phase_started_at_ms": 1_000,
+                    "phase_duration_ms": 4_000,
+                }
+            },
+        )
+        encounter.db = getattr(encounter, "db", None) or type("DB", (), {})()
+        encounter.db.atb_turn_lock_until_ms = 4_000
+
+        with patch("world.browser_panels.time.time", return_value=3.0):
+            panel = build_combat_panel(encounter)
+
+        party_items = panel.get("sections", [])[0].get("items", [])
+        self.assertEqual(["ATB 0%"], [item.get("badge") for item in party_items])
+
 
 if __name__ == "__main__":
     unittest.main()
