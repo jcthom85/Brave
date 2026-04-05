@@ -57,6 +57,8 @@ let defaultout_plugin = (function () {
     var pendingCombatFxEvents = [];
     var currentAtbAnimationFrame = null;
     var combatAtbFrozenUntilMs = 0;
+    var currentCombatFxTimeout = null;
+    var combatFxBusyUntilMs = 0;
     var pendingCombatSwapTimeout = null;
     var suppressedCombatEntryRefs = {};
 
@@ -2745,7 +2747,8 @@ let defaultout_plugin = (function () {
         if (!Array.isArray(events) || !events.length) {
             return;
         }
-        pendingCombatFxEvents = pendingCombatFxEvents.concat(events).slice(-24);
+        pendingCombatFxEvents = pendingCombatFxEvents.concat(events.map(normalizeCombatEvent)).slice(-24);
+        scheduleCombatFxFlush(0);
     };
 
     var dropPendingCombatFxForRef = function (ref) {
@@ -2961,11 +2964,43 @@ let defaultout_plugin = (function () {
         return mapped;
     };
 
+    var playCombatFxEvent = function (event) {
+        var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
+        var attackerNode = (event.lunge && event.source)
+            ? resolveCombatEntryNode(event.source_ref, event.source)
+            : null;
+        if (!targetNode || (event.lunge && event.source && !attackerNode)) {
+            return false;
+        }
+        if (event.text) {
+            spawnCombatFloater(targetNode, event.text, event.tone, event.element);
+        }
+        if (event.impact) {
+            animateCombatImpact(targetNode, event.impact, event.element);
+        }
+        if (event.defeat) {
+            animateCombatDefeat(targetNode);
+        }
+        if (event.lunge && attackerNode) {
+            animateCombatLunge(attackerNode, targetNode);
+        }
+        return true;
+    };
+
+    var scheduleCombatFxFlush = function (delayMs) {
+        if (currentCombatFxTimeout) {
+            return;
+        }
+        currentCombatFxTimeout = window.setTimeout(function () {
+            currentCombatFxTimeout = null;
+            flushPendingCombatFxEvents();
+        }, Math.max(0, delayMs || 0));
+    };
+
     var applyCombatFloatersFromNode = function (node) {
         if (!node) {
             return;
         }
-        var text = node.textContent || "";
         var events = [];
         if (node.dataset && node.dataset.braveFx) {
             try {
@@ -2975,62 +3010,37 @@ let defaultout_plugin = (function () {
             }
         }
         if (!events.length) {
-            events = parseCombatFloaters(text);
-        } else {
-            events = events.map(normalizeCombatEvent);
+            return;
         }
-        var unresolved = [];
-        events.forEach(function (event) {
-            var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
-            var attackerNode = (event.lunge && event.source)
-                ? resolveCombatEntryNode(event.source_ref, event.source)
-                : null;
-            if (targetNode) {
-                spawnCombatFloater(targetNode, event.text, event.tone, event.element);
-                if (event.impact) {
-                    animateCombatImpact(targetNode, event.impact, event.element);
-                }
-                if (event.defeat) {
-                    animateCombatDefeat(targetNode);
-                }
-            }
-            if (event.lunge && event.source && attackerNode && targetNode) {
-                animateCombatLunge(attackerNode, targetNode);
-            }
-            if (!targetNode || (event.lunge && event.source && !attackerNode)) {
-                unresolved.push(event);
-            }
-        });
-        queueCombatFxEvents(unresolved);
+        queueCombatFxEvents(events);
     };
 
     var flushPendingCombatFxEvents = function () {
         if (!pendingCombatFxEvents.length || !currentViewData || currentViewData.variant !== "combat") {
             return;
         }
+        var nowMs = Date.now();
+        if (combatFxBusyUntilMs > nowMs) {
+            scheduleCombatFxFlush(combatFxBusyUntilMs - nowMs);
+            return;
+        }
         var remaining = [];
+        var nextEvent = null;
         pendingCombatFxEvents.forEach(function (event) {
-            var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
-            var attackerNode = (event.lunge && event.source)
-                ? resolveCombatEntryNode(event.source_ref, event.source)
-                : null;
-            if (targetNode) {
-                spawnCombatFloater(targetNode, event.text, event.tone, event.element);
-                if (event.impact) {
-                    animateCombatImpact(targetNode, event.impact, event.element);
-                }
-                if (event.defeat) {
-                    animateCombatDefeat(targetNode);
-                }
-                if (event.lunge && attackerNode) {
-                    animateCombatLunge(attackerNode, targetNode);
-                }
+            if (!nextEvent && playCombatFxEvent(event)) {
+                nextEvent = event;
+                return;
             }
-            if (!targetNode || (event.lunge && event.source && !attackerNode)) {
-                remaining.push(event);
-            }
+            remaining.push(event);
         });
         pendingCombatFxEvents = remaining.slice(-24);
+        if (!nextEvent) {
+            return;
+        }
+        var lockMs = parseFloat(nextEvent.lock_ms || "0") || 0;
+        var delayMs = Math.max(900, Math.min(1800, lockMs || 900));
+        combatFxBusyUntilMs = Date.now() + delayMs;
+        scheduleCombatFxFlush(delayMs);
     };
 
     var handleCombatFxEvent = function (payload) {
@@ -3039,25 +3049,7 @@ let defaultout_plugin = (function () {
         }
         var event = normalizeCombatEvent(payload);
         freezeCombatAtbMeters(Math.max(1200, parseFloat(event.lock_ms || "0") || 0));
-        if (event && event.defeat) {
-            var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
-            if (targetNode) {
-                if (event.text) {
-                    spawnCombatFloater(targetNode, event.text, event.tone, event.element);
-                }
-                if (event.impact) {
-                    animateCombatImpact(targetNode, event.impact, event.element);
-                }
-                animateCombatDefeat(targetNode);
-            } else {
-                queueCombatFxEvents([event]);
-            }
-        } else {
-            queueCombatFxEvents([event]);
-        }
-        window.requestAnimationFrame(function () {
-            flushPendingCombatFxEvents();
-        });
+        queueCombatFxEvents([event]);
     };
 
     var syncAnimatedAtbMeters = function () {
@@ -5500,7 +5492,13 @@ let defaultout_plugin = (function () {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
         }
+        if (currentCombatFxTimeout) {
+            window.clearTimeout(currentCombatFxTimeout);
+            currentCombatFxTimeout = null;
+        }
         pendingCombatFxEvents = [];
+        combatFxBusyUntilMs = 0;
+        combatAtbFrozenUntilMs = 0;
         clearSuppressedCombatEntryRefs();
         setMainViewMode(false);
         setStickyViewMode(false);
