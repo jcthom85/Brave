@@ -381,6 +381,42 @@ class CombatViewTests(unittest.TestCase):
         self.assertEqual("41 / 100", atb_meter.get("value"))
         self.assertAlmostEqual(41.75, atb_meter.get("percent"), places=2)
 
+    def test_atb_meter_repairs_future_charge_start_when_field_is_not_locked(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "p:7": {
+                    "phase": "charging",
+                    "gauge": 100,
+                    "ready_gauge": 400,
+                    "fill_rate": 100,
+                    "phase_start_gauge": 100,
+                    "phase_started_at_ms": 5_000,
+                    "phase_duration_ms": 3_000,
+                }
+            },
+        )
+
+        with patch("world.browser_views.time.time", return_value=4.0):
+            view = build_combat_view(encounter, warrior)
+
+        atb_meter = _entry(_section(view, "Party"), "Dad").get("meters", [])[0]
+        self.assertAlmostEqual(25.0, atb_meter.get("percent"), places=2)
+        self.assertEqual(4_000, atb_meter.get("meta", {}).get("phase_started_at_ms"))
+        self.assertEqual(3_000, atb_meter.get("meta", {}).get("phase_duration_ms"))
+
     def test_atb_meter_freezes_charge_projection_while_action_is_in_progress(self):
         room = DummyRoom()
         warrior = DummyCharacter(

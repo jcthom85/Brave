@@ -2666,9 +2666,29 @@ def build_combat_view(encounter, character):
                 lock_until_ms = max(lock_until_ms, started_at + duration_ms)
         return lock_until_ms
 
+    def repair_visual_charge_state(state):
+        state = dict(state or {})
+        if atb_locked or state.get("phase") != "charging":
+            return state
+        gauge = max(0, int(state.get("gauge", 0) or 0))
+        ready_gauge = max(1, int(state.get("ready_gauge", 400) or 400))
+        started_at = int(state.get("phase_started_at_ms", 0) or 0)
+        duration_ms = int(state.get("phase_duration_ms", 0) or 0)
+        if started_at <= render_now_ms + 50 and duration_ms > 0:
+            return state
+        fill_rate = max(1, int(state.get("fill_rate", 100) or 100))
+        remaining_gauge = max(0, ready_gauge - gauge)
+        repaired_duration_ms = 0
+        if remaining_gauge > 0:
+            repaired_duration_ms = max(1, int(round((remaining_gauge / float(fill_rate)) * render_tick_ms)))
+        state["phase_start_gauge"] = gauge
+        state["phase_started_at_ms"] = render_now_ms
+        state["phase_duration_ms"] = repaired_duration_ms
+        return state
+
     def actor_atb_state(*, participant=None, enemy=None):
         try:
-            state = raw_actor_atb_state(participant=participant, enemy=enemy)
+            state = repair_visual_charge_state(raw_actor_atb_state(participant=participant, enemy=enemy))
             if atb_locked:
                 state["_freeze_projection"] = True
                 return state

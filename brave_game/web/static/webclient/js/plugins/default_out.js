@@ -3149,11 +3149,17 @@ let defaultout_plugin = (function () {
                     }
                     return;
                 }
+                var gauge = Math.max(0, parseFloat(meter.getAttribute("data-atb-gauge") || "0") || 0);
                 var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
-                var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, ready - 1) / ready) * 100));
-                var currentPercent = getCombatAtbChargingPercent(meter, frameNowMs);
                 var phaseStartedAtMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-started-at") || "0") || 0);
                 var phaseDurationMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-duration") || "0") || 0);
+                if (!atbFrozen && phaseStartedAtMs > frameNowMs) {
+                    meter.setAttribute("data-atb-phase-started-at", String(frameNowMs));
+                    meter.setAttribute("data-atb-phase-start-gauge", String(gauge));
+                    phaseStartedAtMs = frameNowMs;
+                }
+                var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, ready - 1) / ready) * 100));
+                var currentPercent = getCombatAtbChargingPercent(meter, frameNowMs);
                 var continuityPercent = parseFloat(meter.getAttribute("data-atb-visual-start") || "");
                 if (!isNaN(continuityPercent)) {
                     currentPercent = Math.max(currentPercent, Math.max(0, Math.min(maxChargingPercent, continuityPercent)));
