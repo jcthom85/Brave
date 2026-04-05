@@ -811,15 +811,34 @@ def build_combat_panel(encounter):
     render_now_ms = int(round(time.time() * 1000))
     render_tick_ms = max(1, int(round(float(getattr(encounter, "interval", 1) or 1) * 1000)))
 
-    def actor_atb_state(*, participant=None, enemy=None):
+    def raw_actor_atb_state(*, participant=None, enemy=None):
         getter = getattr(encounter, "_get_actor_atb_state", None)
         if not callable(getter):
             return {}
         try:
             if participant is not None:
-                return render_atb_state(getter(character=participant) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
+                return dict(getter(character=participant) or {})
             if enemy is not None:
-                return render_atb_state(getter(enemy=enemy) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
+                return dict(getter(enemy=enemy) or {})
+        except Exception:
+            return {}
+        return {}
+
+    def combat_atb_locked():
+        for participant in participants:
+            if (raw_actor_atb_state(participant=participant) or {}).get("phase") in {"winding", "resolving"}:
+                return True
+        for enemy in enemies:
+            if (raw_actor_atb_state(enemy=enemy) or {}).get("phase") in {"winding", "resolving"}:
+                return True
+        return False
+
+    def actor_atb_state(*, participant=None, enemy=None):
+        try:
+            state = raw_actor_atb_state(participant=participant, enemy=enemy)
+            if combat_atb_locked():
+                return state
+            return render_atb_state(state, tick_ms=render_tick_ms, now_ms=render_now_ms)
         except Exception:
             return {}
         return {}

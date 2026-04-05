@@ -2715,27 +2715,32 @@ class BraveEncounter(Script):
     def _tick_all_atb_states(self, participants, enemies):
         """Advance ATB timers for everyone without resolving more than one turn."""
 
+        tick_now_ms = int(round(time.time() * 1000))
         for participant in participants:
             state = tick_atb_state(
                 self._get_actor_atb_state(character=participant),
                 tick_ms=BraveEncounter._atb_tick_ms(self),
+                now_ms=tick_now_ms,
             )
             self._save_actor_atb_state(state, character=participant)
         for enemy in enemies:
             state = tick_atb_state(
                 self._get_actor_atb_state(enemy=enemy),
                 tick_ms=BraveEncounter._atb_tick_ms(self),
+                now_ms=tick_now_ms,
             )
             self._save_actor_atb_state(state, enemy=enemy)
 
-    def _next_atb_actor(self, participants, enemies):
+    def _next_atb_actor(self, participants, enemies, *, phases=None):
         """Return the next actor allowed to take a turn this repeat."""
 
+        phase_order = {"resolving": 0, "winding": 1, "ready": 2}
+        allowed_phases = set(phases or ("ready", "resolving"))
         candidates = []
         for participant in participants:
             state = self._get_actor_atb_state(character=participant)
             phase = state.get("phase")
-            if phase not in {"ready", "resolving"}:
+            if phase not in allowed_phases:
                 continue
             candidates.append(
                 {
@@ -2750,7 +2755,7 @@ class BraveEncounter(Script):
         for enemy in enemies:
             state = self._get_actor_atb_state(enemy=enemy)
             phase = state.get("phase")
-            if phase not in {"ready", "resolving"}:
+            if phase not in allowed_phases:
                 continue
             candidates.append(
                 {
@@ -2768,7 +2773,7 @@ class BraveEncounter(Script):
 
         candidates.sort(
             key=lambda entry: (
-                0 if entry["phase"] == "resolving" else 1,
+                phase_order.get(entry["phase"], 99),
                 entry["started_at"],
                 -entry["fill_rate"],
                 0 if entry["kind"] == "participant" else 1,
@@ -2776,6 +2781,11 @@ class BraveEncounter(Script):
             )
         )
         return candidates[0]
+
+    def _active_atb_actor(self, participants, enemies):
+        """Return the actor whose windup or resolution currently freezes the field."""
+
+        return BraveEncounter._next_atb_actor(self, participants, enemies, phases=("resolving", "winding"))
 
     def _clear_round_states(self):
         states = dict(self.db.participant_states or {})
@@ -2936,8 +2946,31 @@ class BraveEncounter(Script):
 
         active_participants = self.get_active_participants()
         active_enemies = self.get_active_enemies()
-        self._tick_all_atb_states(active_participants, active_enemies)
-        next_actor = self._next_atb_actor(active_participants, active_enemies)
+        active_actor_getter = getattr(self, "_active_atb_actor", None)
+        if not callable(active_actor_getter):
+            active_actor_getter = lambda participants, enemies: BraveEncounter._active_atb_actor(self, participants, enemies)
+        active_actor = active_actor_getter(active_participants, active_enemies)
+        if active_actor:
+            tick_now_ms = int(round(time.time() * 1000))
+            if active_actor["kind"] == "participant":
+                state = tick_atb_state(
+                    self._get_actor_atb_state(character=active_actor["actor"]),
+                    tick_ms=BraveEncounter._atb_tick_ms(self),
+                    now_ms=tick_now_ms,
+                )
+                self._save_actor_atb_state(state, character=active_actor["actor"])
+                self._handle_player_atb_state(active_actor["actor"])
+            else:
+                state = tick_atb_state(
+                    self._get_actor_atb_state(enemy=active_actor["actor"]),
+                    tick_ms=BraveEncounter._atb_tick_ms(self),
+                    now_ms=tick_now_ms,
+                )
+                self._save_actor_atb_state(state, enemy=active_actor["actor"])
+                self._handle_enemy_atb_state(active_actor["actor"])
+        else:
+            self._tick_all_atb_states(active_participants, active_enemies)
+        next_actor = None if active_actor else self._next_atb_actor(active_participants, active_enemies)
         if next_actor:
             if next_actor["kind"] == "participant":
                 self._handle_player_atb_state(next_actor["actor"])
