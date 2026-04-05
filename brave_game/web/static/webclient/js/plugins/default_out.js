@@ -56,6 +56,7 @@ let defaultout_plugin = (function () {
     var ENABLE_ROOM_SWIPE_NAV = false;
     var pendingCombatFxEvents = [];
     var currentAtbAnimationFrame = null;
+    var currentAtbAnimationGeneration = 0;
     var combatAtbFrozenUntilMs = 0;
     var currentCombatFxTimeout = null;
     var combatFxBusyUntilMs = 0;
@@ -2679,6 +2680,7 @@ let defaultout_plugin = (function () {
     };
 
     var freezeCombatAtbMeters = function (durationMs) {
+        currentAtbAnimationGeneration += 1;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
@@ -3057,6 +3059,8 @@ let defaultout_plugin = (function () {
     };
 
     var syncAnimatedAtbMeters = function () {
+        currentAtbAnimationGeneration += 1;
+        var animationGeneration = currentAtbAnimationGeneration;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
@@ -3102,9 +3106,16 @@ let defaultout_plugin = (function () {
             if (!(remainingMs > 0) || currentPercent >= maxChargingPercent) {
                 return;
             }
-            window.requestAnimationFrame(function () {
+            currentAtbAnimationFrame = window.requestAnimationFrame(function () {
+                if (animationGeneration !== currentAtbAnimationGeneration) {
+                    return;
+                }
+                if (combatAtbFrozenUntilMs > Date.now() || combatViewRequestsAtbFreeze(currentViewData)) {
+                    return;
+                }
                 fill.style.transitionDuration = remainingMs + "ms";
                 fill.style.width = maxChargingPercent.toFixed(2) + "%";
+                currentAtbAnimationFrame = null;
             });
         });
     };
@@ -5497,6 +5508,7 @@ let defaultout_plugin = (function () {
 
     var clearTextOutput = function () {
         teardownArcadeMode();
+        currentAtbAnimationGeneration += 1;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
