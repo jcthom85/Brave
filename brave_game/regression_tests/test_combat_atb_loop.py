@@ -165,7 +165,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter = SimpleNamespace(
             interval=1,
             db=SimpleNamespace(
-                round=0,
+                turn_count=0,
                 atb_states={
                     "p:7": {"phase": "charging", "gauge": 300, "ready_gauge": 400, "fill_rate": 100},
                     "e:e1": {"phase": "charging", "gauge": 300, "ready_gauge": 400, "fill_rate": 100},
@@ -188,7 +188,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter.get_active_enemies = lambda: [enemy]
         encounter._apply_participant_effects = lambda: None
         encounter._apply_enemy_effects = lambda: None
-        encounter._clear_round_states = lambda: None
+        encounter._clear_turn_states = lambda: None
         encounter._refresh_browser_combat_views = lambda: setattr(encounter, "refreshed", encounter.refreshed + 1)
         encounter.stop = lambda: None
         encounter._schedule_victory_sequence = lambda _message, *, exclude_rewarded=True: None
@@ -197,7 +197,7 @@ class CombatAtbLoopTests(unittest.TestCase):
 
         BraveEncounter.at_repeat(encounter)
 
-        self.assertEqual(1, encounter.db.round)
+        self.assertEqual(1, encounter.db.turn_count)
         self.assertEqual([("player", character.id, {"kind": "attack", "target": None})], encounter.resolved)
         self.assertEqual("charging", encounter.db.atb_states["p:7"]["phase"])
         self.assertEqual("ready", encounter.db.atb_states["e:e1"]["phase"])
@@ -219,7 +219,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter = SimpleNamespace(
             interval=1,
             db=SimpleNamespace(
-                round=0,
+                turn_count=0,
                 atb_states={
                     "p:7": {"phase": "charging", "gauge": 340, "ready_gauge": 400, "fill_rate": 100},
                     "e:e1": {"phase": "charging", "gauge": 100, "ready_gauge": 400, "fill_rate": 200},
@@ -241,7 +241,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter.get_active_enemies = lambda: [enemy]
         encounter._apply_participant_effects = lambda: None
         encounter._apply_enemy_effects = lambda: None
-        encounter._clear_round_states = lambda: None
+        encounter._clear_turn_states = lambda: None
         encounter._refresh_browser_combat_views = lambda: setattr(encounter, "refreshed", encounter.refreshed + 1)
         encounter.stop = lambda: None
         encounter._schedule_victory_sequence = lambda _message, *, exclude_rewarded=True: None
@@ -261,7 +261,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter = SimpleNamespace(
             interval=1,
             db=SimpleNamespace(
-                round=0,
+                turn_count=0,
                 atb_states={
                     "p:7": {"phase": "charging", "gauge": 300, "ready_gauge": 400, "fill_rate": 100},
                     "e:e1": {"phase": "charging", "gauge": 280, "ready_gauge": 400, "fill_rate": 120},
@@ -284,7 +284,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter.get_active_enemies = lambda: [enemy]
         encounter._apply_participant_effects = lambda: None
         encounter._apply_enemy_effects = lambda: None
-        encounter._clear_round_states = lambda: None
+        encounter._clear_turn_states = lambda: None
         encounter._refresh_browser_combat_views = lambda: setattr(encounter, "refreshed", encounter.refreshed + 1)
         encounter.stop = lambda: None
         encounter._schedule_victory_sequence = lambda _message, *, exclude_rewarded=True: None
@@ -303,7 +303,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter = SimpleNamespace(
             interval=1,
             db=SimpleNamespace(
-                round=0,
+                turn_count=0,
                 atb_states={
                     "p:7": {"phase": "charging", "gauge": 160, "ready_gauge": 400, "fill_rate": 25},
                     "e:e1": {
@@ -331,7 +331,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter.get_active_enemies = lambda: [enemy]
         encounter._apply_participant_effects = lambda: None
         encounter._apply_enemy_effects = lambda: None
-        encounter._clear_round_states = lambda: None
+        encounter._clear_turn_states = lambda: None
         encounter._refresh_browser_combat_views = lambda: None
         encounter.stop = lambda: None
         encounter._schedule_victory_sequence = lambda _message, *, exclude_rewarded=True: None
@@ -350,7 +350,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter = SimpleNamespace(
             interval=1,
             db=SimpleNamespace(
-                round=0,
+                turn_count=0,
                 atb_states={
                     "p:7": {"phase": "ready", "gauge": 400, "ready_gauge": 400, "fill_rate": 100},
                     "e:e1": {"phase": "ready", "gauge": 400, "ready_gauge": 400, "fill_rate": 100},
@@ -375,7 +375,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter.get_active_enemies = lambda: [enemy]
         encounter._apply_participant_effects = lambda: None
         encounter._apply_enemy_effects = lambda: None
-        encounter._clear_round_states = lambda: None
+        encounter._clear_turn_states = lambda: None
         encounter._refresh_browser_combat_views = lambda: setattr(encounter, "refreshed", encounter.refreshed + 1)
         encounter.stop = lambda: None
         encounter._schedule_victory_sequence = lambda _message, *, exclude_rewarded=True: None
@@ -396,7 +396,7 @@ class CombatAtbLoopTests(unittest.TestCase):
             ],
             encounter.resolved,
         )
-        self.assertEqual(2, encounter.db.round)
+        self.assertEqual(2, encounter.db.turn_count)
         self.assertGreater(encounter.db.atb_turn_lock_until_ms, 1000)
 
 

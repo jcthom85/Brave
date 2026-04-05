@@ -687,7 +687,7 @@ class BraveEncounter(Script):
         self.db.participant_contributions = {}
         self.db.atb_states = {}
         self.db.threat = {}
-        self.db.round = 0
+        self.db.turn_count = 0
         self.db.enemies = []
         self.db.enemy_counter = 0
 
@@ -768,6 +768,24 @@ class BraveEncounter(Script):
             participants.append(participant)
         return participants
 
+    def _combat_turn_count(self):
+        """Return the number of resolved combat turns in this encounter."""
+
+        db = getattr(self, "db", None)
+        if db is None:
+            return 0
+        turn_count = getattr(db, "turn_count", None)
+        if turn_count is None:
+            turn_count = getattr(db, "round", 0)
+        return max(0, int(turn_count or 0))
+
+    def _record_combat_turn(self):
+        """Advance the resolved-turn counter once one action actually lands."""
+
+        turn_count = BraveEncounter._combat_turn_count(self) + 1
+        self.db.turn_count = turn_count
+        return turn_count
+
     def _boss_credit_open(self):
         """Return whether boss/quest credit is still open for new joiners."""
 
@@ -787,7 +805,7 @@ class BraveEncounter(Script):
         contribution = dict(contributions.get(key) or {})
         if not contribution:
             contribution = {
-                "joined_round": int(self.db.round or 0),
+                "joined_turn": BraveEncounter._combat_turn_count(self),
                 "meaningful_actions": 0,
                 "damage_done": 0,
                 "healing_done": 0,
@@ -854,14 +872,14 @@ class BraveEncounter(Script):
             + int(contribution.get("hits_taken", 0)) * COMBAT_HITS_TAKEN_WEIGHT
         )
 
-    def _participant_reward_weight(self, character, *, max_round, top_impact):
+    def _participant_reward_weight(self, character, *, max_turn, top_impact):
         """Return weighted contribution used for XP and silver splits."""
 
         contribution = self._get_participant_contribution(character)
-        joined_round = int(contribution.get("joined_round", 0) or 0)
-        total_rounds = max(1, int(max_round or 1))
-        rounds_present = max(1, total_rounds - joined_round)
-        time_weight = max(0.2, min(1.0, rounds_present / float(total_rounds)))
+        joined_turn = int(contribution.get("joined_turn", contribution.get("joined_round", 0)) or 0)
+        total_turns = max(1, int(max_turn or 1))
+        turns_present = max(1, total_turns - joined_turn)
+        time_weight = max(0.2, min(1.0, turns_present / float(total_turns)))
         action_score = min(
             1.0,
             int(contribution.get("meaningful_actions", 0)) / float(COMBAT_ACTION_SCORE_CAP),
@@ -1550,7 +1568,7 @@ class BraveEncounter(Script):
         return True, f"You ready an attack against {target_text}."
 
     def queue_ability(self, character, raw_ability, target_query=None):
-        """Queue an ability for the next combat round."""
+        """Queue an ability for the next combat turn."""
 
         ability_key = resolve_ability_query(character, raw_ability)
         if isinstance(ability_key, list):
@@ -1634,7 +1652,7 @@ class BraveEncounter(Script):
         return True, f"You look for an opening to fall back to {destination.key}."
 
     def queue_item(self, character, query, target_query=None):
-        """Queue a combat-usable consumable for the next round."""
+        """Queue a combat-usable consumable for the next combat turn."""
 
         match = self.find_consumable(character, query, context="combat")
         if isinstance(match, list):
@@ -1832,7 +1850,7 @@ class BraveEncounter(Script):
         return base + derived.get("spell_power", 0) // max(1, divisor) + derived.get("healing_power", 0) + random.randint(0, variance)
 
     def _consume_stealth_bonus(self, character):
-        """Consume a one-round stealth setup for rogue burst abilities."""
+        """Consume a one-turn stealth setup for rogue burst abilities."""
 
         state = self._get_participant_state(character)
         if state.get("stealth_turns", 0) <= 0:
@@ -2481,6 +2499,10 @@ class BraveEncounter(Script):
                 refresher()
             action = dict(state.get("current_action") or {"kind": "attack", "target": None})
             self._resolve_player_action(character, action)
+            recorder = getattr(self, "_record_combat_turn", None)
+            if not callable(recorder):
+                recorder = lambda: BraveEncounter._record_combat_turn(self)
+            recorder()
             state = finish_atb_action(state, tick_ms=tick_ms)
         self._save_actor_atb_state(state, character=character)
         return state
@@ -2772,6 +2794,10 @@ class BraveEncounter(Script):
             if callable(refresher):
                 refresher()
             self._execute_enemy_turn(enemy)
+            recorder = getattr(self, "_record_combat_turn", None)
+            if not callable(recorder):
+                recorder = lambda: BraveEncounter._record_combat_turn(self)
+            recorder()
             state = finish_atb_action(state, tick_ms=tick_ms)
         self._save_actor_atb_state(state, enemy=enemy)
         return state
@@ -2892,7 +2918,7 @@ class BraveEncounter(Script):
 
         return BraveEncounter._next_atb_actor(self, participants, enemies, phases=("resolving", "winding"))
 
-    def _clear_round_states(self):
+    def _clear_turn_states(self):
         states = dict(self.db.participant_states or {})
         for participant_key, state in states.items():
             state["guard"] = 0
@@ -2925,9 +2951,9 @@ class BraveEncounter(Script):
 
         eligible = [participant for participant in participants if self._participant_reward_eligible(participant)]
         top_impact = max((self._participant_impact_score(participant) for participant in eligible), default=0)
-        max_round = max(1, int(self.db.round or 1))
+        max_turn = max(1, BraveEncounter._combat_turn_count(self) or 1)
         weighted_entries = [
-            (participant.id, self._participant_reward_weight(participant, max_round=max_round, top_impact=top_impact))
+            (participant.id, self._participant_reward_weight(participant, max_turn=max_turn, top_impact=top_impact))
             for participant in eligible
         ]
         xp_shares = self._allocate_weighted_pool(xp_total, weighted_entries, minimum=1)
@@ -3038,8 +3064,6 @@ class BraveEncounter(Script):
             self._refresh_browser_combat_views()
             return
 
-        self.db.round += 1
-
         if not active_participants:
             self.obj.msg_contents("|rThe fight breaks wrong, and the danger keeps the road.|n")
             self.stop()
@@ -3115,5 +3139,8 @@ class BraveEncounter(Script):
             self.stop()
             return
 
-        self._clear_round_states()
+        clear_turn_states = getattr(self, "_clear_turn_states", None)
+        if not callable(clear_turn_states):
+            clear_turn_states = lambda: BraveEncounter._clear_turn_states(self)
+        clear_turn_states()
         self._refresh_browser_combat_views()
