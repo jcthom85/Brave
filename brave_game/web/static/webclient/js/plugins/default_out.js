@@ -2707,6 +2707,16 @@ let defaultout_plugin = (function () {
         return Math.max(currentPercent, projectedPercent);
     };
 
+    var getCombatAtbChargeDurationMs = function (meter) {
+        if (!meter) {
+            return 0;
+        }
+        var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400") || 400);
+        var fillRate = Math.max(1, parseFloat(meter.getAttribute("data-atb-fill-rate") || "100") || 100);
+        var tickMs = Math.max(1, parseFloat(meter.getAttribute("data-atb-tick-ms") || "1000") || 1000);
+        return Math.max(1, Math.round((ready / fillRate) * tickMs));
+    };
+
     var freezeCombatAtbMeters = function (durationMs) {
         currentAtbAnimationGeneration += 1;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
@@ -3140,26 +3150,40 @@ let defaultout_plugin = (function () {
                 }
                 var phase = meter.getAttribute("data-atb-phase") || "charging";
                 fill.style.transitionDuration = "0ms";
-                if (phase !== "charging") {
-                    meter.removeAttribute("data-atb-visual-start");
-                    if (phase === "ready" || phase === "resolving" || phase === "winding") {
-                        fill.style.width = "100%";
-                    } else if (phase === "recovering" || phase === "cooldown") {
-                        fill.style.width = "0%";
-                    }
-                    return;
-                }
                 var gauge = Math.max(0, parseFloat(meter.getAttribute("data-atb-gauge") || "0") || 0);
                 var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
                 var phaseStartedAtMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-started-at") || "0") || 0);
                 var phaseDurationMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-duration") || "0") || 0);
-                if (!atbFrozen && phaseStartedAtMs > frameNowMs) {
+                if (phase !== "charging" && phase !== "recovering" && phase !== "cooldown") {
+                    meter.removeAttribute("data-atb-visual-start");
+                    if (phase === "ready" || phase === "resolving" || phase === "winding") {
+                        fill.style.width = "100%";
+                    } else {
+                        fill.style.width = "0%";
+                    }
+                    return;
+                }
+                if (phase === "charging" && !atbFrozen && phaseStartedAtMs > frameNowMs) {
                     meter.setAttribute("data-atb-phase-started-at", String(frameNowMs));
                     meter.setAttribute("data-atb-phase-start-gauge", String(gauge));
                     phaseStartedAtMs = frameNowMs;
                 }
                 var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, ready - 1) / ready) * 100));
-                var currentPercent = getCombatAtbChargingPercent(meter, frameNowMs);
+                var currentPercent = 0;
+                var phaseEndsAtMs = phaseStartedAtMs + phaseDurationMs;
+                if (phase === "charging") {
+                    currentPercent = getCombatAtbChargingPercent(meter, frameNowMs);
+                } else {
+                    currentPercent = 0;
+                    if (!atbFrozen && phaseDurationMs > 0 && phaseEndsAtMs <= frameNowMs) {
+                        var chargeDurationMs = getCombatAtbChargeDurationMs(meter);
+                        var resumedElapsedMs = Math.max(0, frameNowMs - phaseEndsAtMs);
+                        currentPercent = Math.max(
+                            0,
+                            Math.min(maxChargingPercent, (resumedElapsedMs / chargeDurationMs) * maxChargingPercent)
+                        );
+                    }
+                }
                 var continuityPercent = parseFloat(meter.getAttribute("data-atb-visual-start") || "");
                 if (!isNaN(continuityPercent)) {
                     currentPercent = Math.max(currentPercent, Math.max(0, Math.min(maxChargingPercent, continuityPercent)));
@@ -3177,13 +3201,24 @@ let defaultout_plugin = (function () {
                     }
                     return;
                 }
-                if (phaseStartedAtMs > frameNowMs) {
+                if (phase === "charging" && phaseStartedAtMs > frameNowMs) {
                     var startDelayMs = Math.max(0, phaseStartedAtMs - frameNowMs);
                     nextResumeDelayMs = nextResumeDelayMs == null ? startDelayMs : Math.min(nextResumeDelayMs, startDelayMs);
                     return;
                 }
-                var remainingMs = Math.max(0, (phaseStartedAtMs + phaseDurationMs) - frameNowMs);
-                if (remainingMs > 0 && currentPercent < maxChargingPercent) {
+                if (phase === "charging") {
+                    var remainingMs = Math.max(0, phaseEndsAtMs - frameNowMs);
+                    if (remainingMs > 0 && currentPercent < maxChargingPercent) {
+                        hasAnimatingMeters = true;
+                    }
+                    return;
+                }
+                if (phaseDurationMs > 0 && phaseEndsAtMs > frameNowMs) {
+                    var recoveryDelayMs = Math.max(0, phaseEndsAtMs - frameNowMs);
+                    nextResumeDelayMs = nextResumeDelayMs == null ? recoveryDelayMs : Math.min(nextResumeDelayMs, recoveryDelayMs);
+                    return;
+                }
+                if (currentPercent < maxChargingPercent) {
                     hasAnimatingMeters = true;
                 }
             });
