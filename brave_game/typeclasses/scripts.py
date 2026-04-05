@@ -56,7 +56,7 @@ COMBAT_BOSS_CREDIT_RATIO = (2, 3)
 COMBAT_ACTION_SCORE_CAP = 3.0
 COMBAT_UTILITY_WEIGHT = 6
 COMBAT_HITS_TAKEN_WEIGHT = 2
-COMBAT_TURN_LOCK_MS = 450
+COMBAT_TURN_LOCK_MS = 1200
 # The browser defeat fall is 860ms. Leave enough headroom for network/render
 # latency plus a brief beat so players can actually watch the final death.
 COMBAT_FINISH_FX_DELAY = 1.5
@@ -1064,6 +1064,8 @@ class BraveEncounter(Script):
 
         from world.browser_panels import send_webclient_event
 
+        event = dict(event or {})
+        event.setdefault("lock_ms", BraveEncounter._remaining_combat_turn_lock_ms(self))
         for participant in self.get_active_participants():
             if participant and participant.location == self.obj:
                 send_webclient_event(participant, brave_combat_fx=event)
@@ -1154,6 +1156,10 @@ class BraveEncounter(Script):
     def _combat_turn_locked(self, now_ms=None):
         current_ms = int(now_ms if now_ms is not None else round(time.time() * 1000))
         return current_ms < BraveEncounter._combat_turn_lock_until_ms(self)
+
+    def _remaining_combat_turn_lock_ms(self, now_ms=None):
+        current_ms = int(now_ms if now_ms is not None else round(time.time() * 1000))
+        return max(0, BraveEncounter._combat_turn_lock_until_ms(self) - current_ms)
 
     def _set_combat_turn_lock(self, duration_ms=COMBAT_TURN_LOCK_MS, *, now_ms=None):
         current_ms = int(now_ms if now_ms is not None else round(time.time() * 1000))
@@ -2441,21 +2447,18 @@ class BraveEncounter(Script):
 
         tick_ms = BraveEncounter._atb_tick_ms(self)
         state = self._get_actor_atb_state(character=character)
-        resolved = False
         if state.get("phase") == "ready":
             action = self._consume_player_pending_action(character)
             state = start_atb_action(state, action, self._player_action_timing(action), tick_ms=tick_ms)
         if state.get("phase") == "resolving":
-            action = dict(state.get("current_action") or {"kind": "attack", "target": None})
-            self._resolve_player_action(character, action)
-            state = finish_atb_action(state, tick_ms=tick_ms)
-            resolved = True
-        self._save_actor_atb_state(state, character=character)
-        if resolved:
             setter = getattr(self, "_set_combat_turn_lock", None)
             if not callable(setter):
                 setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
             setter()
+            action = dict(state.get("current_action") or {"kind": "attack", "target": None})
+            self._resolve_player_action(character, action)
+            state = finish_atb_action(state, tick_ms=tick_ms)
+        self._save_actor_atb_state(state, character=character)
         return state
 
     def _choose_enemy_target(self, enemy=None):
@@ -2714,7 +2717,6 @@ class BraveEncounter(Script):
 
         tick_ms = BraveEncounter._atb_tick_ms(self)
         state = self._get_actor_atb_state(enemy=enemy)
-        resolved = False
         if state.get("phase") == "ready":
             action = {
                 "kind": "enemy_attack",
@@ -2730,15 +2732,13 @@ class BraveEncounter(Script):
             if state.get("phase") == "winding":
                 self.obj.msg_contents(self._enemy_telegraph_message(enemy))
         if state.get("phase") == "resolving":
-            self._execute_enemy_turn(enemy)
-            state = finish_atb_action(state, tick_ms=tick_ms)
-            resolved = True
-        self._save_actor_atb_state(state, enemy=enemy)
-        if resolved:
             setter = getattr(self, "_set_combat_turn_lock", None)
             if not callable(setter):
                 setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
             setter()
+            self._execute_enemy_turn(enemy)
+            state = finish_atb_action(state, tick_ms=tick_ms)
+        self._save_actor_atb_state(state, enemy=enemy)
         return state
 
     def _tick_all_atb_states(self, participants, enemies):

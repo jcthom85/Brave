@@ -56,6 +56,7 @@ let defaultout_plugin = (function () {
     var ENABLE_ROOM_SWIPE_NAV = false;
     var pendingCombatFxEvents = [];
     var currentAtbAnimationFrame = null;
+    var combatAtbFrozenUntilMs = 0;
     var pendingCombatSwapTimeout = null;
     var suppressedCombatEntryRefs = {};
 
@@ -2675,6 +2676,36 @@ let defaultout_plugin = (function () {
         return Math.max(0, Math.min(100, (gauge / ready) * 100));
     };
 
+    var freezeCombatAtbMeters = function (durationMs) {
+        if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
+            window.cancelAnimationFrame(currentAtbAnimationFrame);
+            currentAtbAnimationFrame = null;
+        }
+        if (!(durationMs > 0)) {
+            return;
+        }
+        combatAtbFrozenUntilMs = Math.max(combatAtbFrozenUntilMs, Date.now() + Math.max(0, durationMs));
+        Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__meter[data-meter-kind='atb']")).forEach(function (meter) {
+            var fill = meter.querySelector(".brave-view__meter-fill");
+            if (!fill) {
+                return;
+            }
+            var phase = meter.getAttribute("data-atb-phase") || "charging";
+            if (phase !== "charging") {
+                return;
+            }
+            var currentPercent = getFillWidthPercent(fill);
+            if (currentPercent == null || isNaN(currentPercent)) {
+                var gauge = parseFloat(meter.getAttribute("data-atb-gauge") || "0");
+                var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
+                currentPercent = Math.max(0, Math.min(100, (gauge / ready) * 100));
+            }
+            fill.style.transitionDuration = "0ms";
+            fill.style.width = currentPercent.toFixed(2) + "%";
+            meter.setAttribute("data-atb-visual-start", currentPercent.toFixed(2));
+        });
+    };
+
     var captureCombatEntrySnapshot = function (node) {
         if (!node || !node.getBoundingClientRect) {
             return null;
@@ -3007,6 +3038,7 @@ let defaultout_plugin = (function () {
             return;
         }
         var event = normalizeCombatEvent(payload);
+        freezeCombatAtbMeters(Math.max(1200, parseFloat(event.lock_ms || "0") || 0));
         if (event && event.defeat) {
             var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
             if (targetNode) {
@@ -3036,6 +3068,10 @@ let defaultout_plugin = (function () {
         if (!currentViewData || currentViewData.variant !== "combat") {
             return;
         }
+        if (combatAtbFrozenUntilMs <= Date.now()) {
+            combatAtbFrozenUntilMs = 0;
+        }
+        var atbFrozen = combatAtbFrozenUntilMs > Date.now();
         var meters = Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__meter[data-meter-kind='atb']"));
         meters.forEach(function (meter) {
             var fill = meter.querySelector(".brave-view__meter-fill");
@@ -3062,6 +3098,10 @@ let defaultout_plugin = (function () {
                 meter.removeAttribute("data-atb-visual-start");
             }
             fill.style.width = currentPercent.toFixed(2) + "%";
+            if (atbFrozen) {
+                meter.setAttribute("data-atb-visual-start", currentPercent.toFixed(2));
+                return;
+            }
             if (!(remainingMs > 0) || currentPercent >= 100) {
                 return;
             }

@@ -1,7 +1,7 @@
 import os
 import unittest
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import django
 
@@ -20,6 +20,20 @@ class DummyAttacker:
 
 
 class CombatFxTests(unittest.TestCase):
+    @patch("world.browser_panels.send_webclient_event")
+    def test_emit_combat_fx_includes_remaining_turn_lock(self, send_event):
+        participant = SimpleNamespace(location="room")
+        encounter = SimpleNamespace(
+            obj="room",
+            db=SimpleNamespace(atb_turn_lock_until_ms=2_200),
+            get_active_participants=lambda: [participant],
+        )
+
+        with patch("typeclasses.scripts.time.time", return_value=2.0):
+            BraveEncounter._emit_combat_fx(encounter, kind="damage", source="Dad", target="Bog Wolf")
+
+        self.assertEqual(200, send_event.call_args.kwargs["brave_combat_fx"]["lock_ms"])
+
     def test_damage_enemy_emits_stable_entry_refs(self):
         events = []
         messages = []
