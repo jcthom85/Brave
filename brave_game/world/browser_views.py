@@ -2760,7 +2760,7 @@ def build_combat_view(encounter, character):
             value = 0
             tone = "muted"
         else:
-            value = max(0, min(100, int(round((gauge / ready_gauge) * 100))))
+            value = max(0, min(99, int((gauge / ready_gauge) * 100)))
         meter_meta = {
             "kind": "atb",
             "hide_value": True,

@@ -3083,10 +3083,11 @@ let defaultout_plugin = (function () {
             var gauge = parseFloat(meter.getAttribute("data-atb-gauge") || "0");
             var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
             var remainingMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-remaining") || "0"));
-            var currentPercent = Math.max(0, Math.min(100, (gauge / ready) * 100));
+            var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, ready - 1) / ready) * 100));
+            var currentPercent = Math.max(0, Math.min(maxChargingPercent, (gauge / ready) * 100));
             var continuityPercent = parseFloat(meter.getAttribute("data-atb-visual-start") || "");
             if (!isNaN(continuityPercent)) {
-                currentPercent = Math.max(currentPercent, Math.max(0, Math.min(100, continuityPercent)));
+                currentPercent = Math.max(currentPercent, Math.max(0, Math.min(maxChargingPercent, continuityPercent)));
                 meter.removeAttribute("data-atb-visual-start");
             }
             fill.style.width = currentPercent.toFixed(2) + "%";
@@ -3094,12 +3095,12 @@ let defaultout_plugin = (function () {
                 meter.setAttribute("data-atb-visual-start", currentPercent.toFixed(2));
                 return;
             }
-            if (!(remainingMs > 0) || currentPercent >= 100) {
+            if (!(remainingMs > 0) || currentPercent >= maxChargingPercent) {
                 return;
             }
             window.requestAnimationFrame(function () {
                 fill.style.transitionDuration = remainingMs + "ms";
-                fill.style.width = "100%";
+                fill.style.width = maxChargingPercent.toFixed(2) + "%";
             });
         });
     };
@@ -3131,8 +3132,9 @@ let defaultout_plugin = (function () {
             }
             var meterGauge = parseFloat(meter.getAttribute("data-atb-gauge") || "0");
             var meterReady = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
-            var serverPercent = Math.max(0, Math.min(100, (meterGauge / meterReady) * 100));
-            var restoredPercent = Math.max(serverPercent, Math.max(0, Math.min(100, snapshot.atbPercent)));
+            var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, meterReady - 1) / meterReady) * 100));
+            var serverPercent = Math.max(0, Math.min(maxChargingPercent, (meterGauge / meterReady) * 100));
+            var restoredPercent = Math.max(serverPercent, Math.max(0, Math.min(maxChargingPercent, snapshot.atbPercent)));
             meter.setAttribute("data-atb-visual-start", restoredPercent.toFixed(2));
             fill.style.transitionDuration = "0ms";
             fill.style.width = restoredPercent.toFixed(2) + "%";

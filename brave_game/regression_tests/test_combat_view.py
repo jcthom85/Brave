@@ -408,6 +408,43 @@ class CombatViewTests(unittest.TestCase):
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
         )
 
+    def test_atb_meter_stays_below_full_for_near_ready_charging_actor(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "e:e1": {
+                    "phase": "charging",
+                    "gauge": 399,
+                    "ready_gauge": 400,
+                    "phase_start_gauge": 399,
+                    "phase_started_at_ms": 1_000,
+                    "phase_duration_ms": 250,
+                }
+            },
+        )
+
+        with patch("world.browser_views.time.time", return_value=2.0):
+            view = build_combat_view(encounter, warrior)
+
+        enemies_section = _section(view, "Enemies")
+        enemy_entry = _entry(enemies_section, "Old Greymaw")
+        self.assertEqual(
+            [("ATB", "99 / 100"), ("HP", "28 / 32")],
+            [(meter.get("label"), meter.get("value")) for meter in enemy_entry.get("meters", [])],
+        )
+
     def test_duplicate_enemy_names_are_numbered_in_view(self):
         room = DummyRoom()
         warrior = DummyCharacter(

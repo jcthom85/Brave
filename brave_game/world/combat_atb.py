@@ -104,12 +104,14 @@ def render_atb_state(state, *, tick_ms=DEFAULT_ATB_TICK_MS, now_ms=None):
         duration_ms = max(0, int(state.get("phase_duration_ms", 0) or 0))
         started_at = int(state.get("phase_started_at_ms", now_ms) or now_ms)
         start_gauge = max(0, min(state["ready_gauge"], int(state.get("phase_start_gauge", state["gauge"]) or 0)))
+        max_charging_gauge = max(0, state["ready_gauge"] - 1)
         if duration_ms <= 0 or now_ms - started_at >= duration_ms:
-            state["gauge"] = state["ready_gauge"]
-            state["ticks_remaining"] = 0
+            state["gauge"] = max_charging_gauge
+            state["ticks_remaining"] = 1 if state["ready_gauge"] > 0 else 0
         else:
             progress = max(0.0, min(1.0, (now_ms - started_at) / float(duration_ms)))
-            state["gauge"] = int(round(start_gauge + ((state["ready_gauge"] - start_gauge) * progress)))
+            projected_gauge = int(round(start_gauge + ((state["ready_gauge"] - start_gauge) * progress)))
+            state["gauge"] = min(max_charging_gauge, projected_gauge)
             remaining_ms = max(0, duration_ms - (now_ms - started_at))
             state["ticks_remaining"] = max(1, int((remaining_ms + max(1, tick_ms) - 1) // max(1, tick_ms)))
         return state

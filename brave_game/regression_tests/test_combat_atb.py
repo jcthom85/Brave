@@ -13,6 +13,7 @@ from world.combat_atb import (
     get_ability_atb_profile,
     get_item_atb_profile,
     normalize_atb_profile,
+    render_atb_state,
     start_atb_action,
     tick_atb_state,
 )
@@ -95,6 +96,24 @@ class CombatAtbTests(unittest.TestCase):
         state = tick_atb_state(state)
         self.assertEqual("charging", state["phase"])
         self.assertEqual(0, state["gauge"])
+
+    def test_render_atb_state_caps_charging_just_below_ready_until_server_marks_ready(self):
+        state = render_atb_state(
+            {
+                "phase": "charging",
+                "gauge": 300,
+                "ready_gauge": 400,
+                "phase_start_gauge": 300,
+                "phase_started_at_ms": 1_000,
+                "phase_duration_ms": 1_000,
+            },
+            tick_ms=250,
+            now_ms=2_500,
+        )
+
+        self.assertEqual("charging", state["phase"])
+        self.assertEqual(399, state["gauge"])
+        self.assertEqual(1, state["ticks_remaining"])
 
 
 if __name__ == "__main__":

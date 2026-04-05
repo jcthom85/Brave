@@ -867,7 +867,7 @@ def build_combat_panel(encounter):
             return f"CD{int((state or {}).get('ticks_remaining', 0) or 0)}"
         gauge = int((state or {}).get("gauge", 0) or 0)
         ready = max(1, int((state or {}).get("ready_gauge", 400) or 400))
-        return f"ATB {int(round((gauge / ready) * 100))}%"
+        return f"ATB {max(0, min(99, int((gauge / ready) * 100)))}%"
 
     sections = [
         _section(

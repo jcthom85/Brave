@@ -101,6 +101,28 @@ class CombatPanelTests(unittest.TestCase):
         party_items = panel.get("sections", [])[0].get("items", [])
         self.assertEqual(["ATB 0%"], [item.get("badge") for item in party_items])
 
+    def test_combat_panel_keeps_near_ready_charge_below_full(self):
+        encounter = DummyEncounter(
+            [DummyParticipant("Dad")],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32}],
+            atb_states={
+                "e:e1": {
+                    "phase": "charging",
+                    "gauge": 399,
+                    "ready_gauge": 400,
+                    "phase_start_gauge": 399,
+                    "phase_started_at_ms": 1_000,
+                    "phase_duration_ms": 250,
+                }
+            },
+        )
+
+        with patch("world.browser_panels.time.time", return_value=2.0):
+            panel = build_combat_panel(encounter)
+
+        enemy_items = panel.get("sections", [])[1].get("items", [])
+        self.assertEqual(["ATB 99%"], [item.get("badge") for item in enemy_items])
+
 
 if __name__ == "__main__":
     unittest.main()
