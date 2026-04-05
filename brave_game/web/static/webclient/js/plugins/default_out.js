@@ -56,6 +56,7 @@ let defaultout_plugin = (function () {
     var ENABLE_ROOM_SWIPE_NAV = false;
     var pendingCombatFxEvents = [];
     var currentAtbAnimationFrame = null;
+    var currentAtbAnimationGeneration = 0;
     var currentAtbResumeTimeout = null;
     var combatAtbFrozenUntilMs = 0;
     var currentCombatFxTimeout = null;
@@ -2707,6 +2708,7 @@ let defaultout_plugin = (function () {
     };
 
     var freezeCombatAtbMeters = function (durationMs) {
+        currentAtbAnimationGeneration += 1;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
@@ -3096,6 +3098,8 @@ let defaultout_plugin = (function () {
     };
 
     var syncAnimatedAtbMeters = function () {
+        currentAtbAnimationGeneration += 1;
+        var animationGeneration = currentAtbAnimationGeneration;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
@@ -3111,86 +3115,95 @@ let defaultout_plugin = (function () {
         if (combatAtbFrozenUntilMs <= nowMs) {
             combatAtbFrozenUntilMs = 0;
         }
-        var frozenUntilMs = Math.max(combatAtbFrozenUntilMs, combatViewAtbFreezeUntilMs(currentViewData));
-        var atbFrozen = frozenUntilMs > nowMs;
-        var meters = Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__meter[data-meter-kind='atb']"));
-        var pendingChargeAnimations = [];
-        var nextResumeDelayMs = null;
-        meters.forEach(function (meter) {
-            var fill = meter.querySelector(".brave-view__meter-fill");
-            if (!fill) {
+        var renderChargeFrame = function () {
+            if (animationGeneration !== currentAtbAnimationGeneration) {
                 return;
             }
-            var phase = meter.getAttribute("data-atb-phase") || "charging";
-            fill.style.transitionDuration = "0ms";
-            if (phase !== "charging") {
-                if (phase === "ready" || phase === "resolving" || phase === "winding") {
-                    fill.style.width = "100%";
-                } else if (phase === "recovering" || phase === "cooldown") {
-                    fill.style.width = "0%";
+            currentAtbAnimationFrame = null;
+            if (!currentViewData || currentViewData.variant !== "combat") {
+                return;
+            }
+            var frameNowMs = Date.now();
+            if (combatAtbFrozenUntilMs <= frameNowMs) {
+                combatAtbFrozenUntilMs = 0;
+            }
+            var frozenUntilMs = Math.max(combatAtbFrozenUntilMs, combatViewAtbFreezeUntilMs(currentViewData));
+            var atbFrozen = frozenUntilMs > frameNowMs;
+            var meters = Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__meter[data-meter-kind='atb']"));
+            var nextResumeDelayMs = null;
+            var hasAnimatingMeters = false;
+
+            meters.forEach(function (meter) {
+                var fill = meter.querySelector(".brave-view__meter-fill");
+                if (!fill) {
+                    return;
                 }
-                return;
-            }
-            var gauge = parseFloat(meter.getAttribute("data-atb-gauge") || "0");
-            var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
-            var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, ready - 1) / ready) * 100));
-            var currentPercent = getCombatAtbChargingPercent(meter, nowMs);
-            var phaseStartedAtMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-started-at") || "0") || 0);
-            var phaseDurationMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-duration") || "0") || 0);
-            var continuityPercent = parseFloat(meter.getAttribute("data-atb-visual-start") || "");
-            if (!isNaN(continuityPercent)) {
-                currentPercent = Math.max(currentPercent, Math.max(0, Math.min(maxChargingPercent, continuityPercent)));
-                meter.removeAttribute("data-atb-visual-start");
-            }
-            fill.style.width = currentPercent.toFixed(2) + "%";
-            if (atbFrozen) {
-                meter.setAttribute("data-atb-visual-start", currentPercent.toFixed(2));
-                var frozenResumeAtMs = Math.max(frozenUntilMs, phaseStartedAtMs || 0);
-                if (frozenResumeAtMs > nowMs) {
-                    var frozenDelayMs = Math.max(0, frozenResumeAtMs - nowMs);
-                    nextResumeDelayMs = nextResumeDelayMs == null ? frozenDelayMs : Math.min(nextResumeDelayMs, frozenDelayMs);
+                var phase = meter.getAttribute("data-atb-phase") || "charging";
+                fill.style.transitionDuration = "0ms";
+                if (phase !== "charging") {
+                    meter.removeAttribute("data-atb-visual-start");
+                    if (phase === "ready" || phase === "resolving" || phase === "winding") {
+                        fill.style.width = "100%";
+                    } else if (phase === "recovering" || phase === "cooldown") {
+                        fill.style.width = "0%";
+                    }
+                    return;
                 }
-                return;
-            }
-            if (phaseStartedAtMs > nowMs) {
-                var startDelayMs = Math.max(0, phaseStartedAtMs - nowMs);
-                nextResumeDelayMs = nextResumeDelayMs == null ? startDelayMs : Math.min(nextResumeDelayMs, startDelayMs);
-                return;
-            }
-            var remainingMs = Math.max(0, (phaseStartedAtMs + phaseDurationMs) - nowMs);
-            if (!(remainingMs > 0) || currentPercent >= maxChargingPercent) {
-                return;
-            }
-            pendingChargeAnimations.push({
-                fill: fill,
-                targetPercent: maxChargingPercent,
-                durationMs: Math.max(80, Math.round(remainingMs)),
+                var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
+                var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, ready - 1) / ready) * 100));
+                var currentPercent = getCombatAtbChargingPercent(meter, frameNowMs);
+                var phaseStartedAtMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-started-at") || "0") || 0);
+                var phaseDurationMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-duration") || "0") || 0);
+                var continuityPercent = parseFloat(meter.getAttribute("data-atb-visual-start") || "");
+                if (!isNaN(continuityPercent)) {
+                    currentPercent = Math.max(currentPercent, Math.max(0, Math.min(maxChargingPercent, continuityPercent)));
+                    if (!atbFrozen && phaseStartedAtMs <= frameNowMs) {
+                        meter.removeAttribute("data-atb-visual-start");
+                    }
+                }
+                fill.style.width = currentPercent.toFixed(2) + "%";
+                if (atbFrozen) {
+                    meter.setAttribute("data-atb-visual-start", currentPercent.toFixed(2));
+                    var frozenResumeAtMs = Math.max(frozenUntilMs, phaseStartedAtMs || 0);
+                    if (frozenResumeAtMs > frameNowMs) {
+                        var frozenDelayMs = Math.max(0, frozenResumeAtMs - frameNowMs);
+                        nextResumeDelayMs = nextResumeDelayMs == null ? frozenDelayMs : Math.min(nextResumeDelayMs, frozenDelayMs);
+                    }
+                    return;
+                }
+                if (phaseStartedAtMs > frameNowMs) {
+                    var startDelayMs = Math.max(0, phaseStartedAtMs - frameNowMs);
+                    nextResumeDelayMs = nextResumeDelayMs == null ? startDelayMs : Math.min(nextResumeDelayMs, startDelayMs);
+                    return;
+                }
+                var remainingMs = Math.max(0, (phaseStartedAtMs + phaseDurationMs) - frameNowMs);
+                if (remainingMs > 0 && currentPercent < maxChargingPercent) {
+                    hasAnimatingMeters = true;
+                }
             });
-        });
-        if (!pendingChargeAnimations.length || atbFrozen) {
+
+            if (hasAnimatingMeters && !atbFrozen) {
+                if (window.requestAnimationFrame) {
+                    currentAtbAnimationFrame = window.requestAnimationFrame(renderChargeFrame);
+                    return;
+                }
+                currentAtbResumeTimeout = window.setTimeout(function () {
+                    currentAtbResumeTimeout = null;
+                    renderChargeFrame();
+                }, 16);
+                return;
+            }
             if (nextResumeDelayMs != null) {
                 currentAtbResumeTimeout = window.setTimeout(function () {
+                    if (animationGeneration !== currentAtbAnimationGeneration) {
+                        return;
+                    }
                     currentAtbResumeTimeout = null;
                     syncAnimatedAtbMeters();
                 }, Math.max(16, Math.round(nextResumeDelayMs)));
             }
-            return;
-        }
-        var applyChargeAnimations = function () {
-            currentAtbAnimationFrame = null;
-            pendingChargeAnimations.forEach(function (animation) {
-                if (!animation || !animation.fill || !animation.fill.isConnected) {
-                    return;
-                }
-                animation.fill.style.transitionDuration = animation.durationMs + "ms";
-                animation.fill.style.width = animation.targetPercent.toFixed(2) + "%";
-            });
         };
-        if (window.requestAnimationFrame) {
-            currentAtbAnimationFrame = window.requestAnimationFrame(applyChargeAnimations);
-            return;
-        }
-        applyChargeAnimations();
+        renderChargeFrame();
     };
 
     var restoreCombatAtbContinuity = function (previousSnapshots) {
@@ -5580,6 +5593,7 @@ let defaultout_plugin = (function () {
 
     var clearTextOutput = function () {
         teardownArcadeMode();
+        currentAtbAnimationGeneration += 1;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
