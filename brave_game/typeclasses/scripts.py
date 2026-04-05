@@ -1089,7 +1089,9 @@ class BraveEncounter(Script):
 
         event = dict(event or {})
         event.setdefault("lock_ms", BraveEncounter._remaining_combat_turn_lock_ms(self))
-        for participant in self.get_active_participants():
+        get_active_participants = getattr(self, "get_active_participants", None)
+        participants = list(get_active_participants()) if callable(get_active_participants) else []
+        for participant in participants:
             if participant and participant.location == self.obj:
                 send_webclient_event(participant, brave_combat_fx=event)
 
@@ -1244,6 +1246,48 @@ class BraveEncounter(Script):
         states = dict(self.db.atb_states or {})
         states.pop(self._actor_atb_key(character=character, enemy=enemy), None)
         self.db.atb_states = states
+
+    def _pause_non_active_atb_states(self, duration_ms, *, active_character=None, active_enemy=None):
+        """Shift paused actors forward in time so frozen bars resume cleanly."""
+
+        pause_ms = max(0, int(duration_ms or 0))
+        if pause_ms <= 0:
+            return
+
+        active_key = None
+        if active_character is not None:
+            active_key = self._actor_atb_key(character=active_character)
+        elif active_enemy is not None:
+            active_key = self._actor_atb_key(enemy=active_enemy)
+
+        freezeable_phases = {"charging", "recovering", "cooldown"}
+        now_ms = int(round(time.time() * 1000))
+
+        get_active_participants = getattr(self, "get_active_participants", None)
+        participants = list(get_active_participants()) if callable(get_active_participants) else []
+        for participant in participants:
+            actor_key = self._actor_atb_key(character=participant)
+            if actor_key == active_key:
+                continue
+            state = dict(self._get_actor_atb_state(character=participant) or {})
+            if state.get("phase") not in freezeable_phases:
+                continue
+            started_at = int(state.get("phase_started_at_ms", now_ms) or now_ms)
+            state["phase_started_at_ms"] = started_at + pause_ms
+            self._save_actor_atb_state(state, character=participant)
+
+        get_active_enemies = getattr(self, "get_active_enemies", None)
+        enemies = list(get_active_enemies()) if callable(get_active_enemies) else []
+        for enemy in enemies:
+            actor_key = self._actor_atb_key(enemy=enemy)
+            if actor_key == active_key:
+                continue
+            state = dict(self._get_actor_atb_state(enemy=enemy) or {})
+            if state.get("phase") not in freezeable_phases:
+                continue
+            started_at = int(state.get("phase_started_at_ms", now_ms) or now_ms)
+            state["phase_started_at_ms"] = started_at + pause_ms
+            self._save_actor_atb_state(state, enemy=enemy)
 
     def _player_action_timing(self, action):
         kind = (action or {}).get("kind")
@@ -2486,6 +2530,14 @@ class BraveEncounter(Script):
             action = self._consume_player_pending_action(character)
             state = start_atb_action(state, action, self._player_action_timing(action), tick_ms=tick_ms)
             if state.get("phase") == "winding":
+                pauser = getattr(self, "_pause_non_active_atb_states", None)
+                if not callable(pauser):
+                    pauser = lambda duration_ms, **kwargs: BraveEncounter._pause_non_active_atb_states(
+                        self,
+                        duration_ms,
+                        **kwargs,
+                    )
+                pauser(state.get("phase_duration_ms", 0), active_character=character)
                 self._save_actor_atb_state(state, character=character)
                 if callable(refresher):
                     refresher()
@@ -2494,6 +2546,14 @@ class BraveEncounter(Script):
             if not callable(setter):
                 setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
             setter()
+            pauser = getattr(self, "_pause_non_active_atb_states", None)
+            if not callable(pauser):
+                pauser = lambda duration_ms, **kwargs: BraveEncounter._pause_non_active_atb_states(
+                    self,
+                    duration_ms,
+                    **kwargs,
+                )
+            pauser(COMBAT_TURN_LOCK_MS, active_character=character)
             self._save_actor_atb_state(state, character=character)
             if callable(refresher):
                 refresher()
@@ -2777,11 +2837,27 @@ class BraveEncounter(Script):
                 tick_ms=tick_ms,
             )
             if state.get("phase") == "winding" and dict(state.get("timing") or {}).get("telegraph"):
+                pauser = getattr(self, "_pause_non_active_atb_states", None)
+                if not callable(pauser):
+                    pauser = lambda duration_ms, **kwargs: BraveEncounter._pause_non_active_atb_states(
+                        self,
+                        duration_ms,
+                        **kwargs,
+                    )
+                pauser(state.get("phase_duration_ms", 0), active_enemy=enemy)
                 self._save_actor_atb_state(state, enemy=enemy)
                 if callable(refresher):
                     refresher()
                 self.obj.msg_contents(self._enemy_telegraph_message(enemy))
             elif state.get("phase") == "winding":
+                pauser = getattr(self, "_pause_non_active_atb_states", None)
+                if not callable(pauser):
+                    pauser = lambda duration_ms, **kwargs: BraveEncounter._pause_non_active_atb_states(
+                        self,
+                        duration_ms,
+                        **kwargs,
+                    )
+                pauser(state.get("phase_duration_ms", 0), active_enemy=enemy)
                 self._save_actor_atb_state(state, enemy=enemy)
                 if callable(refresher):
                     refresher()
@@ -2790,6 +2866,14 @@ class BraveEncounter(Script):
             if not callable(setter):
                 setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
             setter()
+            pauser = getattr(self, "_pause_non_active_atb_states", None)
+            if not callable(pauser):
+                pauser = lambda duration_ms, **kwargs: BraveEncounter._pause_non_active_atb_states(
+                    self,
+                    duration_ms,
+                    **kwargs,
+                )
+            pauser(COMBAT_TURN_LOCK_MS, active_enemy=enemy)
             self._save_actor_atb_state(state, enemy=enemy)
             if callable(refresher):
                 refresher()

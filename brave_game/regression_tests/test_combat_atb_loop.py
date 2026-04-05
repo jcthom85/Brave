@@ -297,6 +297,54 @@ class CombatAtbLoopTests(unittest.TestCase):
         self.assertEqual("charging", encounter.db.atb_states["e:e1"]["phase"])
         self.assertEqual("ready", encounter.db.atb_states["p:7"]["phase"])
 
+    def test_enemy_action_pause_shifts_other_actor_charge_timing(self):
+        character = DummyCharacter()
+        enemy = {"id": "e1", "template_key": "old_greymaw", "key": "Old Greymaw"}
+        encounter = SimpleNamespace(
+            interval=1,
+            db=SimpleNamespace(
+                atb_states={
+                    "p:7": {
+                        "phase": "charging",
+                        "gauge": 200,
+                        "ready_gauge": 400,
+                        "fill_rate": 100,
+                        "phase_start_gauge": 200,
+                        "phase_started_at_ms": 1_000,
+                        "phase_duration_ms": 2_000,
+                    },
+                    "e:e1": {"phase": "ready", "gauge": 400, "ready_gauge": 400, "fill_rate": 100},
+                }
+            ),
+            refreshed=0,
+            resolved=[],
+            obj=SimpleNamespace(msg_contents=lambda _text: None),
+        )
+
+        self._bind_common_helpers(encounter)
+        encounter.get_active_participants = lambda: [character]
+        encounter.get_active_enemies = lambda: [enemy]
+        encounter._enemy_action_timing = lambda actor: BraveEncounter._enemy_action_timing(encounter, actor)
+        encounter._enemy_action_label = lambda actor: BraveEncounter._enemy_action_label(encounter, actor)
+        encounter._enemy_telegraph_message = lambda actor: BraveEncounter._enemy_telegraph_message(encounter, actor)
+        encounter._execute_enemy_turn = lambda actor: encounter.resolved.append(actor["id"])
+        encounter._refresh_browser_combat_views = lambda: setattr(encounter, "refreshed", encounter.refreshed + 1)
+        encounter._set_combat_turn_lock = lambda duration_ms=1200, now_ms=None: None
+
+        BraveEncounter._advance_enemy_atb(encounter, enemy)
+
+        paused_state = encounter.db.atb_states["p:7"]
+        self.assertEqual("winding", encounter.db.atb_states["e:e1"]["phase"])
+        self.assertEqual(2_000, paused_state["phase_started_at_ms"])
+        self.assertEqual(2_000, paused_state["phase_duration_ms"])
+
+        BraveEncounter._advance_enemy_atb(encounter, enemy)
+
+        paused_state = encounter.db.atb_states["p:7"]
+        self.assertEqual(["e1"], encounter.resolved)
+        self.assertEqual(3_200, paused_state["phase_started_at_ms"])
+        self.assertEqual(2_000, paused_state["phase_duration_ms"])
+
     def test_at_repeat_freezes_other_atb_states_while_enemy_action_resolves(self):
         character = DummyCharacter()
         enemy = {"id": "e1", "template_key": "old_greymaw", "key": "Old Greymaw"}
