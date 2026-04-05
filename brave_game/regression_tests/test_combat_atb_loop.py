@@ -255,6 +255,50 @@ class CombatAtbLoopTests(unittest.TestCase):
         self.assertEqual(220, encounter.db.atb_states["e:e1"]["gauge"])
         self.assertEqual("charging", encounter.db.atb_states["e:e1"]["phase"])
 
+    def test_at_repeat_skips_full_refresh_on_idle_charge_only_tick(self):
+        character = DummyCharacter()
+        enemy = {"id": "e1", "template_key": "bog_creeper", "key": "Bog Creeper"}
+        encounter = SimpleNamespace(
+            interval=1,
+            db=SimpleNamespace(
+                turn_count=0,
+                atb_states={
+                    "p:7": {"phase": "charging", "gauge": 0, "ready_gauge": 400, "fill_rate": 100},
+                    "e:e1": {"phase": "charging", "gauge": 0, "ready_gauge": 400, "fill_rate": 100},
+                },
+                pending_actions={str(character.id): {"kind": "attack", "target": None}},
+            ),
+            resolved=[],
+            refreshed=0,
+            cleared_turn_states=0,
+            obj=SimpleNamespace(msg_contents=lambda _text: None),
+        )
+
+        self._bind_loop_helpers(encounter)
+        encounter._consume_player_pending_action = lambda actor: BraveEncounter._consume_player_pending_action(encounter, actor)
+        encounter._player_action_timing = lambda action: BraveEncounter._player_action_timing(encounter, action)
+        encounter._enemy_action_timing = lambda actor: BraveEncounter._enemy_action_timing(encounter, actor)
+        encounter._enemy_action_label = lambda actor: BraveEncounter._enemy_action_label(encounter, actor)
+        encounter._enemy_telegraph_message = lambda actor: BraveEncounter._enemy_telegraph_message(encounter, actor)
+        encounter.get_active_participants = lambda: [character]
+        encounter.get_active_enemies = lambda: [enemy]
+        encounter._apply_participant_effects = lambda: None
+        encounter._apply_enemy_effects = lambda: None
+        encounter._clear_turn_states = lambda: setattr(encounter, "cleared_turn_states", encounter.cleared_turn_states + 1)
+        encounter._refresh_browser_combat_views = lambda: setattr(encounter, "refreshed", encounter.refreshed + 1)
+        encounter.stop = lambda: None
+        encounter._schedule_victory_sequence = lambda _message, *, exclude_rewarded=True: None
+        encounter._resolve_player_action = lambda actor, action: encounter.resolved.append(("player", actor.id, dict(action)))
+        encounter._execute_enemy_turn = lambda actor: encounter.resolved.append(("enemy", actor["id"]))
+
+        BraveEncounter.at_repeat(encounter)
+
+        self.assertEqual([], encounter.resolved)
+        self.assertEqual(0, encounter.refreshed)
+        self.assertEqual(0, encounter.cleared_turn_states)
+        self.assertEqual(100, encounter.db.atb_states["p:7"]["gauge"])
+        self.assertEqual(100, encounter.db.atb_states["e:e1"]["gauge"])
+
     def test_at_repeat_breaks_exact_ready_ties_by_fill_rate(self):
         character = DummyCharacter()
         enemy = {"id": "e1", "template_key": "bog_creeper", "key": "Bog Creeper"}

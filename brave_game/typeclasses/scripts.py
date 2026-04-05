@@ -3160,7 +3160,6 @@ class BraveEncounter(Script):
         if not callable(turn_locked):
             turn_locked = lambda **kwargs: BraveEncounter._combat_turn_locked(self, **kwargs)
         if turn_locked(now_ms=now_ms):
-            self._refresh_browser_combat_views()
             return
 
         if not active_participants:
@@ -3187,6 +3186,7 @@ class BraveEncounter(Script):
         if not callable(active_actor_getter):
             active_actor_getter = lambda participants, enemies: BraveEncounter._active_atb_actor(self, participants, enemies)
         active_actor = active_actor_getter(active_participants, active_enemies)
+        actor_activity = bool(active_actor)
         next_actor_getter = getattr(self, "_next_atb_actor", None)
         if not callable(next_actor_getter):
             next_actor_getter = lambda participants, enemies: BraveEncounter._next_atb_actor(self, participants, enemies)
@@ -3222,6 +3222,7 @@ class BraveEncounter(Script):
                 next_actor = next_actor_getter(active_participants, active_enemies)
         next_actor = None if active_actor else next_actor
         if next_actor:
+            actor_activity = True
             if next_actor["kind"] == "participant":
                 self._handle_player_atb_state(next_actor["actor"])
             else:
@@ -3236,6 +3237,9 @@ class BraveEncounter(Script):
         if not self.get_active_participants():
             self.obj.msg_contents("|rThe party is driven back toward town.|n")
             self.stop()
+            return
+
+        if not actor_activity:
             return
 
         clear_turn_states = getattr(self, "_clear_turn_states", None)
