@@ -2415,6 +2415,17 @@ class BraveEncounter(Script):
     def _advance_player_atb(self, character):
         tick_ms = BraveEncounter._atb_tick_ms(self)
         state = tick_atb_state(self._get_actor_atb_state(character=character), tick_ms=tick_ms)
+        self._save_actor_atb_state(state, character=character)
+        handler = getattr(self, "_handle_player_atb_state", None)
+        if not callable(handler):
+            handler = lambda actor: BraveEncounter._handle_player_atb_state(self, actor)
+        return handler(character)
+
+    def _handle_player_atb_state(self, character):
+        """Consume one player's ready or resolving ATB state."""
+
+        tick_ms = BraveEncounter._atb_tick_ms(self)
+        state = self._get_actor_atb_state(character=character)
         if state.get("phase") == "ready":
             action = self._consume_player_pending_action(character)
             state = start_atb_action(state, action, self._player_action_timing(action), tick_ms=tick_ms)
@@ -2423,6 +2434,7 @@ class BraveEncounter(Script):
             self._resolve_player_action(character, action)
             state = finish_atb_action(state, tick_ms=tick_ms)
         self._save_actor_atb_state(state, character=character)
+        return state
 
     def _choose_enemy_target(self, enemy=None):
         participants = self.get_active_participants()
@@ -2669,6 +2681,17 @@ class BraveEncounter(Script):
     def _advance_enemy_atb(self, enemy):
         tick_ms = BraveEncounter._atb_tick_ms(self)
         state = tick_atb_state(self._get_actor_atb_state(enemy=enemy), tick_ms=tick_ms)
+        self._save_actor_atb_state(state, enemy=enemy)
+        handler = getattr(self, "_handle_enemy_atb_state", None)
+        if not callable(handler):
+            handler = lambda actor: BraveEncounter._handle_enemy_atb_state(self, actor)
+        return handler(enemy)
+
+    def _handle_enemy_atb_state(self, enemy):
+        """Consume one enemy's ready or resolving ATB state."""
+
+        tick_ms = BraveEncounter._atb_tick_ms(self)
+        state = self._get_actor_atb_state(enemy=enemy)
         if state.get("phase") == "ready":
             action = {
                 "kind": "enemy_attack",
@@ -2687,6 +2710,72 @@ class BraveEncounter(Script):
             self._execute_enemy_turn(enemy)
             state = finish_atb_action(state, tick_ms=tick_ms)
         self._save_actor_atb_state(state, enemy=enemy)
+        return state
+
+    def _tick_all_atb_states(self, participants, enemies):
+        """Advance ATB timers for everyone without resolving more than one turn."""
+
+        for participant in participants:
+            state = tick_atb_state(
+                self._get_actor_atb_state(character=participant),
+                tick_ms=BraveEncounter._atb_tick_ms(self),
+            )
+            self._save_actor_atb_state(state, character=participant)
+        for enemy in enemies:
+            state = tick_atb_state(
+                self._get_actor_atb_state(enemy=enemy),
+                tick_ms=BraveEncounter._atb_tick_ms(self),
+            )
+            self._save_actor_atb_state(state, enemy=enemy)
+
+    def _next_atb_actor(self, participants, enemies):
+        """Return the next actor allowed to take a turn this repeat."""
+
+        candidates = []
+        for participant in participants:
+            state = self._get_actor_atb_state(character=participant)
+            phase = state.get("phase")
+            if phase not in {"ready", "resolving"}:
+                continue
+            candidates.append(
+                {
+                    "kind": "participant",
+                    "actor": participant,
+                    "phase": phase,
+                    "started_at": int(state.get("phase_started_at_ms", 0) or 0),
+                    "fill_rate": int(state.get("fill_rate", 0) or 0),
+                    "sort_id": f"p:{participant.id}",
+                }
+            )
+        for enemy in enemies:
+            state = self._get_actor_atb_state(enemy=enemy)
+            phase = state.get("phase")
+            if phase not in {"ready", "resolving"}:
+                continue
+            candidates.append(
+                {
+                    "kind": "enemy",
+                    "actor": enemy,
+                    "phase": phase,
+                    "started_at": int(state.get("phase_started_at_ms", 0) or 0),
+                    "fill_rate": int(state.get("fill_rate", 0) or 0),
+                    "sort_id": f"e:{enemy['id']}",
+                }
+            )
+
+        if not candidates:
+            return None
+
+        candidates.sort(
+            key=lambda entry: (
+                0 if entry["phase"] == "resolving" else 1,
+                entry["started_at"],
+                -entry["fill_rate"],
+                0 if entry["kind"] == "participant" else 1,
+                entry["sort_id"],
+            )
+        )
+        return candidates[0]
 
     def _clear_round_states(self):
         states = dict(self.db.participant_states or {})
@@ -2846,8 +2935,14 @@ class BraveEncounter(Script):
             return
 
         active_participants = self.get_active_participants()
-        for participant in active_participants:
-            self._advance_player_atb(participant)
+        active_enemies = self.get_active_enemies()
+        self._tick_all_atb_states(active_participants, active_enemies)
+        next_actor = self._next_atb_actor(active_participants, active_enemies)
+        if next_actor:
+            if next_actor["kind"] == "participant":
+                self._handle_player_atb_state(next_actor["actor"])
+            else:
+                self._handle_enemy_atb_state(next_actor["actor"])
         if not self.get_active_participants():
             self.obj.msg_contents("The fight ends with the road still dangerous.")
             self.stop()
@@ -2855,9 +2950,6 @@ class BraveEncounter(Script):
         if not self.get_active_enemies():
             self._schedule_victory_sequence("|gThe encounter is over. The road is clear for now.|n")
             return
-
-        for enemy in self.get_active_enemies():
-            self._advance_enemy_atb(enemy)
         if not self.get_active_participants():
             self.obj.msg_contents("|rThe party is driven back toward town.|n")
             self.stop()
