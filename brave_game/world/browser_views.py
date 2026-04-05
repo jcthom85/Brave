@@ -1169,7 +1169,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
 
     sections.append(
         _section(
-            "",
+            "Ways Forward",
             "route",
             "navpad",
             items=nav_items,

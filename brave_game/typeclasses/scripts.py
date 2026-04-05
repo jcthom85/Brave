@@ -985,7 +985,7 @@ class BraveEncounter(Script):
                 ticks_remaining=max(1, int(ticks or 1)),
                 current_action=None,
                 timing=None,
-                tick_ms=self._atb_tick_ms(),
+                tick_ms=BraveEncounter._atb_tick_ms(self),
             ),
             enemy=enemy,
         )
@@ -1019,7 +1019,7 @@ class BraveEncounter(Script):
             return False
         self._set_enemy_recovery_state(enemy, ticks=1)
         self.obj.msg_contents(
-            f"|g{character.key}'s {tool_label} breaks {enemy['key']}'s {reaction['label']}.|n"
+            f"|g{character.key}'s {tool_label} interrupts {enemy['key']}'s {reaction['label']}.|n"
         )
         self._record_participant_contribution(character, meaningful=True, utility=2)
         return True
@@ -1074,7 +1074,10 @@ class BraveEncounter(Script):
         target_name = target.get("key") if isinstance(target, dict) else getattr(target, "key", None)
         if not source_name or not target_name:
             return
-        self._emit_combat_fx(
+        emitter = getattr(self, "_emit_combat_fx", None)
+        if not callable(emitter):
+            emitter = lambda **event: BraveEncounter._emit_combat_fx(self, **event)
+        emitter(
             kind="miss",
             source=source_name,
             target=target_name,
@@ -1092,7 +1095,10 @@ class BraveEncounter(Script):
         target_name = target.get("key") if isinstance(target, dict) else getattr(target, "key", None)
         if not target_name:
             return
-        self._emit_combat_fx(
+        emitter = getattr(self, "_emit_combat_fx", None)
+        if not callable(emitter):
+            emitter = lambda **event: BraveEncounter._emit_combat_fx(self, **event)
+        emitter(
             kind="defeat",
             target=target_name,
             target_ref=_combat_entry_ref(target),
@@ -1176,7 +1182,7 @@ class BraveEncounter(Script):
         if key not in states:
             states[key] = create_atb_state(
                 fill_rate=self._default_atb_fill_rate(character=character, enemy=enemy),
-                tick_ms=self._atb_tick_ms(),
+                tick_ms=BraveEncounter._atb_tick_ms(self),
             )
             self.db.atb_states = states
         return states[key]
@@ -1184,7 +1190,7 @@ class BraveEncounter(Script):
     def _save_actor_atb_state(self, state, *, character=None, enemy=None):
         states = dict(self.db.atb_states or {})
         key = self._actor_atb_key(character=character, enemy=enemy)
-        states[key] = create_atb_state(**dict(state or {}), tick_ms=self._atb_tick_ms())
+        states[key] = create_atb_state(**dict(state or {}), tick_ms=BraveEncounter._atb_tick_ms(self))
         self.db.atb_states = states
 
     def _clear_actor_atb_state(self, *, character=None, enemy=None):
@@ -2407,7 +2413,7 @@ class BraveEncounter(Script):
             self._execute_item(character, action)
 
     def _advance_player_atb(self, character):
-        tick_ms = self._atb_tick_ms()
+        tick_ms = BraveEncounter._atb_tick_ms(self)
         state = tick_atb_state(self._get_actor_atb_state(character=character), tick_ms=tick_ms)
         if state.get("phase") == "ready":
             action = self._consume_player_pending_action(character)
@@ -2581,14 +2587,14 @@ class BraveEncounter(Script):
         if telegraphed:
             if redirected_by:
                 self.obj.msg_contents(
-                    f"|y{redirected_by.key} cuts in front of {enemy['key']}'s {action_label}, pulling it off {original_target.key}.|n"
+                    f"|y{redirected_by.key} cuts in front of {enemy['key']}'s {action_label}, dragging it off {original_target.key}.|n"
                 )
-            elif reaction_prevented > 0:
+            if reaction_prevented > 0:
                 source_name = reaction_source.key if reaction_source else target.key
                 self.obj.msg_contents(
-                    f"|y{source_name}'s {reaction_label} takes the edge off {enemy['key']}'s {action_label}.|n"
+                    f"|y{source_name}'s {reaction_label} blunts {enemy['key']}'s {action_label}.|n"
                 )
-            else:
+            elif not redirected_by:
                 self.obj.msg_contents(f"|r{enemy['key']}'s {action_label} lands clean.|n")
         resources = dict(target.db.brave_resources or {})
         resources["hp"] = max(0, resources["hp"] - damage)
@@ -2597,7 +2603,10 @@ class BraveEncounter(Script):
             self._record_participant_contribution(reaction_source or target, mitigation=reaction_prevented, utility=1)
         self._record_participant_contribution(target, hits_taken=damage)
         self.obj.msg_contents(hit_text.format(damage=damage))
-        self._emit_combat_fx(
+        emitter = getattr(self, "_emit_combat_fx", None)
+        if not callable(emitter):
+            emitter = lambda **event: BraveEncounter._emit_combat_fx(self, **event)
+        emitter(
             kind="damage",
             source=enemy["key"],
             target=target.key,
@@ -2658,7 +2667,7 @@ class BraveEncounter(Script):
             self._defeat_character(target)
 
     def _advance_enemy_atb(self, enemy):
-        tick_ms = self._atb_tick_ms()
+        tick_ms = BraveEncounter._atb_tick_ms(self)
         state = tick_atb_state(self._get_actor_atb_state(enemy=enemy), tick_ms=tick_ms)
         if state.get("phase") == "ready":
             action = {

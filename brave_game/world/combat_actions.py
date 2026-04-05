@@ -118,7 +118,9 @@ def _ally_picker(title, command_prefix, ordered_participants, character):
 
 def _finalize_action(action):
     has_inline_picker = any(entry.get("picker") for entry in (action.get("actions") or []))
-    action["enabled"] = bool(action.get("command") or action.get("picker") or action.get("actions"))
+    action["enabled"] = not action.get("disabled_reason") and bool(
+        action.get("command") or action.get("picker") or action.get("actions")
+    )
     if (action.get("picker") or has_inline_picker) and action.get("command"):
         action["selection_mode"] = "command+picker"
     elif action.get("picker"):
@@ -210,12 +212,6 @@ def build_combat_ability_actions(encounter, character):
             "tooltip": _timing_tooltip(timing, reaction_role=reaction_role),
         }
 
-        if resource_current < ability["cost"]:
-            action["text"] += f" · NEED {ability['cost'] - resource_current}"
-            action["disabled_reason"] = "Insufficient resources."
-            ability_actions.append(_finalize_action(action))
-            continue
-
         if target_mode == "enemy":
             if not enemies:
                 action["text"] += " · NO FOE"
@@ -234,6 +230,11 @@ def build_combat_ability_actions(encounter, character):
                 action["picker"] = _ally_picker(f"{display_name} Target", command_prefix, ordered_participants, character)
         else:
             action["command"] = command_prefix
+
+        if resource_current < ability["cost"]:
+            action["text"] += f" · NEED {ability['cost'] - resource_current}"
+            if not action.get("disabled_reason"):
+                action["disabled_reason"] = "Insufficient resources."
 
         ability_actions.append(_finalize_action(action))
 
