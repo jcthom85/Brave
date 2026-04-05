@@ -345,6 +345,41 @@ class CombatViewTests(unittest.TestCase):
                 "ready_gauge": atb_meter.get("meta", {}).get("ready_gauge"),
             },
         )
+        self.assertAlmostEqual(50.0, atb_meter.get("percent"), places=2)
+
+    def test_atb_meter_preserves_fractional_charge_percent(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "p:7": {
+                    "phase": "charging",
+                    "gauge": 167,
+                    "ready_gauge": 400,
+                    "phase_start_gauge": 167,
+                    "phase_started_at_ms": 1_000,
+                    "phase_duration_ms": 2_330,
+                }
+            },
+        )
+
+        with patch("world.browser_views.time.time", return_value=1.0):
+            view = build_combat_view(encounter, warrior)
+
+        atb_meter = _entry(_section(view, "Party"), "Dad").get("meters", [])[0]
+        self.assertEqual("41 / 100", atb_meter.get("value"))
+        self.assertAlmostEqual(41.75, atb_meter.get("percent"), places=2)
 
     def test_atb_meter_freezes_charge_projection_while_action_is_in_progress(self):
         room = DummyRoom()

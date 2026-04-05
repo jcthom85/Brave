@@ -185,14 +185,21 @@ def _pair(label, value, icon=None):
     return {"label": label, "value": str(value), "icon": icon}
 
 
-def _meter(label, current, maximum, *, tone="accent", meta=None):
+def _meter(label, current, maximum, *, tone="accent", meta=None, percent=None):
     current_value = max(0, int(current or 0))
     maximum_value = max(1, int(maximum or 0))
-    percent = max(0, min(100, int(round((current_value / maximum_value) * 100))))
+    if percent is None:
+        percent_value = max(0, min(100, int(round((current_value / maximum_value) * 100))))
+    else:
+        try:
+            percent_value = float(percent)
+        except (TypeError, ValueError):
+            percent_value = max(0, min(100, int(round((current_value / maximum_value) * 100))))
+        percent_value = max(0.0, min(100.0, percent_value))
     meter = {
         "label": label,
         "value": f"{current_value} / {maximum_value}",
-        "percent": percent,
+        "percent": percent_value,
         "tone": tone,
     }
     if meta:
@@ -2774,16 +2781,20 @@ def build_combat_view(encounter, character):
 
         value = gauge
         tone = "accent"
+        max_charging_percent = max(0.0, min(100.0, (max(0, ready_gauge - 1) / float(ready_gauge)) * 100.0))
+        percent = max(0.0, min(max_charging_percent, (float(gauge) / float(ready_gauge)) * 100.0))
         if phase in {"ready", "resolving", "winding"}:
             value = 100
+            percent = 100.0
             tone = "danger" if enemy else "good"
             if phase == "winding":
                 tone = "danger" if enemy else "warn"
         elif phase in {"recovering", "cooldown"}:
             value = 0
+            percent = 0.0
             tone = "muted"
         else:
-            value = max(0, min(99, int((gauge / ready_gauge) * 100)))
+            value = max(0, min(99, int(percent)))
         meter_meta = {
             "kind": "atb",
             "hide_value": True,
@@ -2801,7 +2812,7 @@ def build_combat_view(encounter, character):
             "recovery_ticks": int(timing.get("recovery_ticks", 0) or 0),
             "cooldown_ticks": int(timing.get("cooldown_ticks", 0) or 0),
         }
-        return _meter("ATB", value, 100, tone=tone, meta=meter_meta)
+        return _meter("ATB", value, 100, tone=tone, meta=meter_meta, percent=percent)
 
     def build_participant_status_chips(state):
         chips = []
