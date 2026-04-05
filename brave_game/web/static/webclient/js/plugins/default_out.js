@@ -56,7 +56,6 @@ let defaultout_plugin = (function () {
     var ENABLE_ROOM_SWIPE_NAV = false;
     var pendingCombatFxEvents = [];
     var currentAtbAnimationFrame = null;
-    var currentAtbAnimationGeneration = 0;
     var combatAtbFrozenUntilMs = 0;
     var currentCombatFxTimeout = null;
     var combatFxBusyUntilMs = 0;
@@ -2680,7 +2679,6 @@ let defaultout_plugin = (function () {
     };
 
     var freezeCombatAtbMeters = function (durationMs) {
-        currentAtbAnimationGeneration += 1;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
@@ -3059,8 +3057,6 @@ let defaultout_plugin = (function () {
     };
 
     var syncAnimatedAtbMeters = function () {
-        currentAtbAnimationGeneration += 1;
-        var animationGeneration = currentAtbAnimationGeneration;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
@@ -3090,7 +3086,6 @@ let defaultout_plugin = (function () {
             }
             var gauge = parseFloat(meter.getAttribute("data-atb-gauge") || "0");
             var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
-            var remainingMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-remaining") || "0"));
             var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, ready - 1) / ready) * 100));
             var currentPercent = Math.max(0, Math.min(maxChargingPercent, (gauge / ready) * 100));
             var continuityPercent = parseFloat(meter.getAttribute("data-atb-visual-start") || "");
@@ -3103,20 +3098,6 @@ let defaultout_plugin = (function () {
                 meter.setAttribute("data-atb-visual-start", currentPercent.toFixed(2));
                 return;
             }
-            if (!(remainingMs > 0) || currentPercent >= maxChargingPercent) {
-                return;
-            }
-            currentAtbAnimationFrame = window.requestAnimationFrame(function () {
-                if (animationGeneration !== currentAtbAnimationGeneration) {
-                    return;
-                }
-                if (combatAtbFrozenUntilMs > Date.now() || combatViewRequestsAtbFreeze(currentViewData)) {
-                    return;
-                }
-                fill.style.transitionDuration = remainingMs + "ms";
-                fill.style.width = maxChargingPercent.toFixed(2) + "%";
-                currentAtbAnimationFrame = null;
-            });
         });
     };
 
@@ -5508,7 +5489,6 @@ let defaultout_plugin = (function () {
 
     var clearTextOutput = function () {
         teardownArcadeMode();
-        currentAtbAnimationGeneration += 1;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
