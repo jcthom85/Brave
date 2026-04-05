@@ -3069,6 +3069,7 @@ let defaultout_plugin = (function () {
         }
         var atbFrozen = combatAtbFrozenUntilMs > Date.now() || combatViewRequestsAtbFreeze(currentViewData);
         var meters = Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__meter[data-meter-kind='atb']"));
+        var pendingChargeAnimations = [];
         meters.forEach(function (meter) {
             var fill = meter.querySelector(".brave-view__meter-fill");
             if (!fill) {
@@ -3098,7 +3099,39 @@ let defaultout_plugin = (function () {
                 meter.setAttribute("data-atb-visual-start", currentPercent.toFixed(2));
                 return;
             }
+            var remainingMs = Math.max(
+                0,
+                parseFloat(meter.getAttribute("data-atb-phase-remaining") || "0")
+                || parseFloat(meter.getAttribute("data-atb-phase-duration") || "0")
+                || 0
+            );
+            if (!(remainingMs > 0) || currentPercent >= maxChargingPercent) {
+                return;
+            }
+            pendingChargeAnimations.push({
+                fill: fill,
+                targetPercent: maxChargingPercent,
+                durationMs: Math.max(80, Math.round(remainingMs)),
+            });
         });
+        if (!pendingChargeAnimations.length || atbFrozen) {
+            return;
+        }
+        var applyChargeAnimations = function () {
+            currentAtbAnimationFrame = null;
+            pendingChargeAnimations.forEach(function (animation) {
+                if (!animation || !animation.fill || !animation.fill.isConnected) {
+                    return;
+                }
+                animation.fill.style.transitionDuration = animation.durationMs + "ms";
+                animation.fill.style.width = animation.targetPercent.toFixed(2) + "%";
+            });
+        };
+        if (window.requestAnimationFrame) {
+            currentAtbAnimationFrame = window.requestAnimationFrame(applyChargeAnimations);
+            return;
+        }
+        applyChargeAnimations();
     };
 
     var restoreCombatAtbContinuity = function (previousSnapshots) {

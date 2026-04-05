@@ -326,6 +326,25 @@ class CombatViewTests(unittest.TestCase):
             [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
         )
+        atb_meter = warrior_entry.get("meters", [])[0]
+        self.assertEqual(
+            {
+                "phase": "charging",
+                "gauge": 200,
+                "phase_start_gauge": 0,
+                "phase_duration_ms": 4000,
+                "phase_remaining_ms": 2000,
+                "ready_gauge": 400,
+            },
+            {
+                "phase": atb_meter.get("meta", {}).get("phase"),
+                "gauge": atb_meter.get("meta", {}).get("gauge"),
+                "phase_start_gauge": atb_meter.get("meta", {}).get("phase_start_gauge"),
+                "phase_duration_ms": atb_meter.get("meta", {}).get("phase_duration_ms"),
+                "phase_remaining_ms": atb_meter.get("meta", {}).get("phase_remaining_ms"),
+                "ready_gauge": atb_meter.get("meta", {}).get("ready_gauge"),
+            },
+        )
 
     def test_atb_meter_freezes_charge_projection_while_action_is_in_progress(self):
         room = DummyRoom()
