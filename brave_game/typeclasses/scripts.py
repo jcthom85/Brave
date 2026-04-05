@@ -58,7 +58,7 @@ COMBAT_UTILITY_WEIGHT = 6
 COMBAT_HITS_TAKEN_WEIGHT = 2
 # The browser defeat fall is 860ms. Leave enough headroom for network/render
 # latency plus a brief beat so players can actually watch the final death.
-COMBAT_FINISH_FX_DELAY = 1.5
+COMBAT_FINISH_FX_DELAY = 1.0
 
 
 def _normalize_token(value):
@@ -2777,11 +2777,11 @@ class BraveEncounter(Script):
 
         if getattr(getattr(self, "ndb", None), "brave_victory_pending", False):
             return
-        if hasattr(self, "ndb"):
-            self.ndb.brave_victory_pending = True
         # Push one last combat-state refresh with the defeated enemy removed so
         # the browser can play the same removal animation used for non-final kills.
         self._refresh_browser_combat_views()
+        if hasattr(self, "ndb"):
+            self.ndb.brave_victory_pending = True
         delay(
             COMBAT_FINISH_FX_DELAY,
             self._finish_victory_sequence,

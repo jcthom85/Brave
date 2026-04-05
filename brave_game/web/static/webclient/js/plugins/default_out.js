@@ -2624,10 +2624,22 @@ let defaultout_plugin = (function () {
             return;
         }
         suppressedCombatEntryRefs[ref] = true;
+        var styleId = "brave-suppress-" + ref.replace(/[^a-zA-Z0-9-]/g, "-");
+        if (!document.getElementById(styleId)) {
+            var style = document.createElement("style");
+            style.id = styleId;
+            style.textContent = ".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "'] { display: none !important; }";
+            document.head.appendChild(style);
+        }
     };
 
     var clearSuppressedCombatEntryRefs = function () {
         suppressedCombatEntryRefs = {};
+        Array.prototype.slice.call(document.head.querySelectorAll("style[id^='brave-suppress-']")).forEach(function (style) {
+            if (style && style.parentNode) {
+                style.parentNode.removeChild(style);
+            }
+        });
     };
 
     var applySuppressedCombatEntries = function () {
@@ -2838,9 +2850,10 @@ let defaultout_plugin = (function () {
         ghost.style.pointerEvents = "none";
         ghost.style.zIndex = "999";
         document.body.appendChild(ghost);
+        if (snapshot.ref) {
+            suppressCombatEntryRef(snapshot.ref);
+        }
         if (nodeOrSnapshot.nodeType) {
-            var suppressedRef = getCombatEntryRef(nodeOrSnapshot);
-            suppressCombatEntryRef(suppressedRef);
             if (nodeOrSnapshot.parentNode) {
                 nodeOrSnapshot.parentNode.removeChild(nodeOrSnapshot);
             }
