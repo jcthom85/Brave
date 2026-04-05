@@ -2624,30 +2624,23 @@ let defaultout_plugin = (function () {
             return;
         }
         suppressedCombatEntryRefs[ref] = true;
-        var styleId = "brave-suppress-" + ref.replace(/[^a-zA-Z0-9-]/g, "-");
-        if (!document.getElementById(styleId)) {
-            var style = document.createElement("style");
-            style.id = styleId;
-            style.textContent = ".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "'] { display: none !important; }";
-            document.head.appendChild(style);
-        }
+    };
+
+    var isCombatEntryRefSuppressed = function (ref) {
+        return !!(ref && suppressedCombatEntryRefs[ref]);
     };
 
     var clearSuppressedCombatEntryRefs = function () {
         suppressedCombatEntryRefs = {};
-        Array.prototype.slice.call(document.head.querySelectorAll("style[id^='brave-suppress-']")).forEach(function (style) {
-            if (style && style.parentNode) {
-                style.parentNode.removeChild(style);
-            }
-        });
     };
 
     var applySuppressedCombatEntries = function () {
         Object.keys(suppressedCombatEntryRefs).forEach(function (ref) {
-            var node = document.querySelector(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']");
-            if (node && node.parentNode) {
-                node.parentNode.removeChild(node);
-            }
+            Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']")).forEach(function (node) {
+                if (node && node.parentNode) {
+                    node.parentNode.removeChild(node);
+                }
+            });
         });
     };
 
@@ -2724,6 +2717,15 @@ let defaultout_plugin = (function () {
         pendingCombatFxEvents = pendingCombatFxEvents.concat(events).slice(-24);
     };
 
+    var dropPendingCombatFxForRef = function (ref) {
+        if (!ref || !pendingCombatFxEvents.length) {
+            return;
+        }
+        pendingCombatFxEvents = pendingCombatFxEvents.filter(function (event) {
+            return event && event.target_ref !== ref;
+        });
+    };
+
     var getCombatEntryTitle = function (node) {
         var titleNode = node ? node.querySelector(".brave-view__entry-title") : null;
         return titleNode ? titleNode.textContent || "" : "";
@@ -2745,6 +2747,17 @@ let defaultout_plugin = (function () {
                 || normalizeCombatName(getCombatEntryTitle(node)).indexOf(normalized) >= 0;
         });
         return contains.length ? contains[0] : null;
+    };
+
+    var findCombatEntryByRef = function (ref) {
+        if (!ref) {
+            return null;
+        }
+        return document.querySelector(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']");
+    };
+
+    var resolveCombatEntryNode = function (ref, name) {
+        return findCombatEntryByRef(ref) || findCombatEntryByName(name);
     };
 
     var spawnCombatFloater = function (node, text, tone, element) {
@@ -2828,6 +2841,9 @@ let defaultout_plugin = (function () {
         if (!nodeOrSnapshot) {
             return;
         }
+        if (nodeOrSnapshot.nodeType && nodeOrSnapshot.classList.contains("brave-view__entry--defeating")) {
+            return;
+        }
         var snapshot = nodeOrSnapshot.nodeType ? captureCombatEntrySnapshot(nodeOrSnapshot) : nodeOrSnapshot;
         if (!snapshot || !snapshot.rect) {
             return;
@@ -2850,17 +2866,18 @@ let defaultout_plugin = (function () {
         ghost.style.pointerEvents = "none";
         ghost.style.zIndex = "999";
         document.body.appendChild(ghost);
-        if (snapshot.ref) {
-            suppressCombatEntryRef(snapshot.ref);
-        }
         if (nodeOrSnapshot.nodeType) {
-            if (nodeOrSnapshot.parentNode) {
-                nodeOrSnapshot.parentNode.removeChild(nodeOrSnapshot);
-            }
+            var suppressedRef = getCombatEntryRef(nodeOrSnapshot);
+            suppressCombatEntryRef(suppressedRef);
+            dropPendingCombatFxForRef(suppressedRef);
+            nodeOrSnapshot.classList.add("brave-view__entry--defeating");
         }
         window.setTimeout(function () {
             if (ghost && ghost.parentNode) {
                 ghost.parentNode.removeChild(ghost);
+            }
+            if (nodeOrSnapshot.nodeType && nodeOrSnapshot.parentNode) {
+                nodeOrSnapshot.parentNode.removeChild(nodeOrSnapshot);
             }
         }, 900);
     };
@@ -2933,7 +2950,10 @@ let defaultout_plugin = (function () {
         }
         var unresolved = [];
         events.forEach(function (event) {
-            var targetNode = findCombatEntryByName(event.target);
+            var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
+            var attackerNode = (event.lunge && event.source)
+                ? resolveCombatEntryNode(event.source_ref, event.source)
+                : null;
             if (targetNode) {
                 spawnCombatFloater(targetNode, event.text, event.tone, event.element);
                 if (event.impact) {
@@ -2943,12 +2963,10 @@ let defaultout_plugin = (function () {
                     animateCombatDefeat(targetNode);
                 }
             }
-            if (event.lunge && event.source) {
-                var attackerNode = findCombatEntryByName(event.source);
-                if (attackerNode && targetNode) {
-                    animateCombatLunge(attackerNode, targetNode);
-                }
-            } else {
+            if (event.lunge && event.source && attackerNode && targetNode) {
+                animateCombatLunge(attackerNode, targetNode);
+            }
+            if (!targetNode || (event.lunge && event.source && !attackerNode)) {
                 unresolved.push(event);
             }
         });
@@ -2961,8 +2979,10 @@ let defaultout_plugin = (function () {
         }
         var remaining = [];
         pendingCombatFxEvents.forEach(function (event) {
-            var targetNode = findCombatEntryByName(event.target);
-            var attackerNode = event.source ? findCombatEntryByName(event.source) : null;
+            var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
+            var attackerNode = (event.lunge && event.source)
+                ? resolveCombatEntryNode(event.source_ref, event.source)
+                : null;
             if (targetNode) {
                 spawnCombatFloater(targetNode, event.text, event.tone, event.element);
                 if (event.impact) {
@@ -2974,7 +2994,8 @@ let defaultout_plugin = (function () {
                 if (event.lunge && attackerNode) {
                     animateCombatLunge(attackerNode, targetNode);
                 }
-            } else {
+            }
+            if (!targetNode || (event.lunge && event.source && !attackerNode)) {
                 remaining.push(event);
             }
         });
@@ -2987,7 +3008,7 @@ let defaultout_plugin = (function () {
         }
         var event = normalizeCombatEvent(payload);
         if (event && event.defeat) {
-            var targetNode = findCombatEntryByName(event.target);
+            var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
             if (targetNode) {
                 if (event.text) {
                     spawnCombatFloater(targetNode, event.text, event.tone, event.element);
@@ -2996,9 +3017,12 @@ let defaultout_plugin = (function () {
                     animateCombatImpact(targetNode, event.impact, event.element);
                 }
                 animateCombatDefeat(targetNode);
+            } else {
+                queueCombatFxEvents([event]);
             }
+        } else {
+            queueCombatFxEvents([event]);
         }
-        queueCombatFxEvents([event]);
         window.requestAnimationFrame(function () {
             flushPendingCombatFxEvents();
         });
@@ -4616,7 +4640,7 @@ let defaultout_plugin = (function () {
             if (shouldDelayCombatSwap) {
                 previousCombatSnapshots.forEach(function (snapshot) {
                     var ref = snapshot && snapshot.ref;
-                    if (!ref || nextCombatRefs[ref]) {
+                    if (!ref || nextCombatRefs[ref] || isCombatEntryRefSuppressed(ref)) {
                         return;
                     }
                     var liveNode = document.querySelector(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']");
@@ -5436,6 +5460,7 @@ let defaultout_plugin = (function () {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
         }
+        pendingCombatFxEvents = [];
         clearSuppressedCombatEntryRefs();
         setMainViewMode(false);
         setStickyViewMode(false);

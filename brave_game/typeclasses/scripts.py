@@ -58,7 +58,7 @@ COMBAT_UTILITY_WEIGHT = 6
 COMBAT_HITS_TAKEN_WEIGHT = 2
 # The browser defeat fall is 860ms. Leave enough headroom for network/render
 # latency plus a brief beat so players can actually watch the final death.
-COMBAT_FINISH_FX_DELAY = 1.0
+COMBAT_FINISH_FX_DELAY = 1.5
 
 
 def _normalize_token(value):
@@ -90,6 +90,16 @@ def _combat_target_name(target, default=""):
     if isinstance(target, Mapping):
         return target.get("key", default) or default
     return getattr(target, "key", default) or default
+
+
+def _combat_entry_ref(target):
+    """Return the browser combat entry ref for a participant or enemy."""
+
+    if isinstance(target, Mapping):
+        target_id = target.get("id")
+        return f"e:{target_id}" if target_id else None
+    target_id = getattr(target, "id", None)
+    return f"p:{target_id}" if target_id is not None else None
 
 
 def _combat_fx_marker(**fields):
@@ -1068,6 +1078,8 @@ class BraveEncounter(Script):
             kind="miss",
             source=source_name,
             target=target_name,
+            source_ref=_combat_entry_ref(source),
+            target_ref=_combat_entry_ref(target),
             text=text,
             tone="warn",
             impact="miss",
@@ -1083,6 +1095,7 @@ class BraveEncounter(Script):
         self._emit_combat_fx(
             kind="defeat",
             target=target_name,
+            target_ref=_combat_entry_ref(target),
             text=text,
             tone="break",
             impact="break",
@@ -1802,6 +1815,8 @@ class BraveEncounter(Script):
             kind="damage",
             source=attacker.key,
             target=enemy["key"],
+            source_ref=_combat_entry_ref(attacker),
+            target_ref=_combat_entry_ref(enemy),
             amount=damage,
             text=str(damage),
             tone="damage",
@@ -1829,6 +1844,8 @@ class BraveEncounter(Script):
             kind="heal",
             source=source.key,
             target=target.key,
+            source_ref=_combat_entry_ref(source),
+            target_ref=_combat_entry_ref(target),
             amount=healed,
             text=str(healed),
             tone="heal",
@@ -1931,6 +1948,7 @@ class BraveEncounter(Script):
                 self._emit_combat_fx(
                     kind="damage",
                     target=participant.key,
+                    target_ref=_combat_entry_ref(participant),
                     amount=damage,
                     text=str(damage),
                     tone="damage",
@@ -1955,6 +1973,7 @@ class BraveEncounter(Script):
                 self._emit_combat_fx(
                     kind="damage",
                     target=participant.key,
+                    target_ref=_combat_entry_ref(participant),
                     amount=damage,
                     text=str(damage),
                     tone="damage",
@@ -2012,6 +2031,7 @@ class BraveEncounter(Script):
                 self._emit_combat_fx(
                     kind="damage",
                     target=enemy["key"],
+                    target_ref=_combat_entry_ref(enemy),
                     amount=damage,
                     text=str(damage),
                     tone="damage",
@@ -2023,6 +2043,7 @@ class BraveEncounter(Script):
             if changed:
                 self._save_enemy(enemy)
                 if enemy["hp"] <= 0:
+                    self._emit_defeat_fx(enemy)
                     self.obj.msg_contents(f"{enemy['key']} falls.")
                     self._award_enemy_defeat_credit(enemy)
 
@@ -2580,6 +2601,8 @@ class BraveEncounter(Script):
             kind="damage",
             source=enemy["key"],
             target=target.key,
+            source_ref=_combat_entry_ref(enemy),
+            target_ref=_combat_entry_ref(target),
             amount=damage,
             text=str(damage),
             tone="damage",
@@ -2777,11 +2800,11 @@ class BraveEncounter(Script):
 
         if getattr(getattr(self, "ndb", None), "brave_victory_pending", False):
             return
+        if hasattr(self, "ndb"):
+            self.ndb.brave_victory_pending = True
         # Push one last combat-state refresh with the defeated enemy removed so
         # the browser can play the same removal animation used for non-final kills.
         self._refresh_browser_combat_views()
-        if hasattr(self, "ndb"):
-            self.ndb.brave_victory_pending = True
         delay(
             COMBAT_FINISH_FX_DELAY,
             self._finish_victory_sequence,

@@ -4777,6 +4777,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__entry--defeating {
     opacity: 0;
+    pointer-events: none;
 }
 
 .brave-view--combat .brave-view__entry--impact-miss {
