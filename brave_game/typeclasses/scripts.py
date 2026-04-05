@@ -2447,6 +2447,9 @@ class BraveEncounter(Script):
 
         tick_ms = BraveEncounter._atb_tick_ms(self)
         refresher = getattr(self, "_refresh_browser_combat_views", None)
+        remaining_lock = getattr(self, "_remaining_combat_turn_lock_ms", None)
+        if not callable(remaining_lock):
+            remaining_lock = lambda **kwargs: BraveEncounter._remaining_combat_turn_lock_ms(self, **kwargs)
         state = self._get_actor_atb_state(character=character)
         if state.get("phase") == "ready":
             action = self._consume_player_pending_action(character)
@@ -2456,15 +2459,26 @@ class BraveEncounter(Script):
                 if callable(refresher):
                     refresher()
         if state.get("phase") == "resolving":
-            setter = getattr(self, "_set_combat_turn_lock", None)
-            if not callable(setter):
-                setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
-            setter()
-            self._save_actor_atb_state(state, character=character)
-            if callable(refresher):
-                refresher()
             action = dict(state.get("current_action") or {"kind": "attack", "target": None})
-            self._resolve_player_action(character, action)
+            if not action.get("executed"):
+                setter = getattr(self, "_set_combat_turn_lock", None)
+                if not callable(setter):
+                    setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
+                setter()
+                action["executed"] = True
+                state["current_action"] = action
+                lock_ms = max(0, int(remaining_lock() or 0))
+                if lock_ms > 0:
+                    self._save_actor_atb_state(state, character=character)
+                    if callable(refresher):
+                        refresher()
+                self._resolve_player_action(
+                    character,
+                    {key: value for key, value in action.items() if key != "executed"},
+                )
+                if lock_ms > 0:
+                    self._save_actor_atb_state(state, character=character)
+                    return state
             state = finish_atb_action(state, tick_ms=tick_ms)
         self._save_actor_atb_state(state, character=character)
         return state
@@ -2725,6 +2739,9 @@ class BraveEncounter(Script):
 
         tick_ms = BraveEncounter._atb_tick_ms(self)
         refresher = getattr(self, "_refresh_browser_combat_views", None)
+        remaining_lock = getattr(self, "_remaining_combat_turn_lock_ms", None)
+        if not callable(remaining_lock):
+            remaining_lock = lambda **kwargs: BraveEncounter._remaining_combat_turn_lock_ms(self, **kwargs)
         state = self._get_actor_atb_state(enemy=enemy)
         if state.get("phase") == "ready":
             action = {
@@ -2744,14 +2761,23 @@ class BraveEncounter(Script):
                     refresher()
                 self.obj.msg_contents(self._enemy_telegraph_message(enemy))
         if state.get("phase") == "resolving":
-            setter = getattr(self, "_set_combat_turn_lock", None)
-            if not callable(setter):
-                setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
-            setter()
-            self._save_actor_atb_state(state, enemy=enemy)
-            if callable(refresher):
-                refresher()
-            self._execute_enemy_turn(enemy)
+            action = dict(state.get("current_action") or {})
+            if not action.get("executed"):
+                setter = getattr(self, "_set_combat_turn_lock", None)
+                if not callable(setter):
+                    setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
+                setter()
+                action["executed"] = True
+                state["current_action"] = action
+                lock_ms = max(0, int(remaining_lock() or 0))
+                if lock_ms > 0:
+                    self._save_actor_atb_state(state, enemy=enemy)
+                    if callable(refresher):
+                        refresher()
+                self._execute_enemy_turn(enemy)
+                if lock_ms > 0:
+                    self._save_actor_atb_state(state, enemy=enemy)
+                    return state
             state = finish_atb_action(state, tick_ms=tick_ms)
         self._save_actor_atb_state(state, enemy=enemy)
         return state
@@ -3003,6 +3029,7 @@ class BraveEncounter(Script):
         if not callable(active_actor_getter):
             active_actor_getter = lambda participants, enemies: BraveEncounter._active_atb_actor(self, participants, enemies)
         active_actor = active_actor_getter(active_participants, active_enemies)
+        next_actor = None
         if active_actor:
             tick_now_ms = int(round(time.time() * 1000))
             if active_actor["kind"] == "participant":
@@ -3021,9 +3048,16 @@ class BraveEncounter(Script):
                 )
                 self._save_actor_atb_state(state, enemy=active_actor["actor"])
                 self._handle_enemy_atb_state(active_actor["actor"])
+            active_participants = self.get_active_participants()
+            active_enemies = self.get_active_enemies()
+            still_active_actor = active_actor_getter(active_participants, active_enemies)
+            if not still_active_actor:
+                post_now_ms = int(round(time.time() * 1000))
+                if not turn_locked(now_ms=post_now_ms):
+                    next_actor = self._next_atb_actor(active_participants, active_enemies)
         else:
             self._tick_all_atb_states(active_participants, active_enemies)
-        next_actor = None if active_actor else self._next_atb_actor(active_participants, active_enemies)
+            next_actor = self._next_atb_actor(active_participants, active_enemies)
         if next_actor:
             if next_actor["kind"] == "participant":
                 self._handle_player_atb_state(next_actor["actor"])
