@@ -2636,6 +2636,29 @@ def build_combat_view(encounter, character):
                 return True
         return False
 
+    def combat_atb_lock_until_ms():
+        if combat_turn_locked():
+            return int(getattr(getattr(encounter, "db", None), "atb_turn_lock_until_ms", 0) or 0)
+
+        lock_until_ms = 0
+        for participant in participants:
+            state = raw_actor_atb_state(participant=participant)
+            if (state or {}).get("phase") not in {"winding", "resolving"}:
+                continue
+            started_at = int((state or {}).get("phase_started_at_ms", 0) or 0)
+            duration_ms = int((state or {}).get("phase_duration_ms", 0) or 0)
+            if duration_ms > 0:
+                lock_until_ms = max(lock_until_ms, started_at + duration_ms)
+        for enemy in enemies:
+            state = raw_actor_atb_state(enemy=enemy)
+            if (state or {}).get("phase") not in {"winding", "resolving"}:
+                continue
+            started_at = int((state or {}).get("phase_started_at_ms", 0) or 0)
+            duration_ms = int((state or {}).get("phase_duration_ms", 0) or 0)
+            if duration_ms > 0:
+                lock_until_ms = max(lock_until_ms, started_at + duration_ms)
+        return lock_until_ms
+
     def actor_atb_state(*, participant=None, enemy=None):
         try:
             state = raw_actor_atb_state(participant=participant, enemy=enemy)
@@ -2747,7 +2770,7 @@ def build_combat_view(encounter, character):
         phase_started_at_ms = int(state.get("phase_started_at_ms", 0) or 0)
         phase_duration_ms = int(state.get("phase_duration_ms", 0) or 0)
         elapsed_ms = 0 if freeze_projection else (max(0, render_now_ms - phase_started_at_ms) if phase_started_at_ms > 0 else 0)
-        phase_remaining_ms = 0 if freeze_projection else (max(0, phase_duration_ms - elapsed_ms) if phase_duration_ms > 0 else 0)
+        phase_remaining_ms = phase_duration_ms if freeze_projection else (max(0, phase_duration_ms - elapsed_ms) if phase_duration_ms > 0 else 0)
 
         value = gauge
         tone = "accent"
@@ -2768,7 +2791,7 @@ def build_combat_view(encounter, character):
             "gauge": gauge,
             "phase_start_gauge": int(state.get("phase_start_gauge", gauge) or 0),
             "phase_started_at_ms": phase_started_at_ms,
-            "phase_duration_ms": 0 if freeze_projection else phase_duration_ms,
+            "phase_duration_ms": phase_duration_ms,
             "phase_remaining_ms": phase_remaining_ms,
             "ready_gauge": ready_gauge,
             "fill_rate": int(state.get("fill_rate", 100) or 100),
@@ -2971,6 +2994,7 @@ def build_combat_view(encounter, character):
         ),
         "variant": "combat",
         "atb_locked": atb_locked,
+        "atb_lock_until_ms": combat_atb_lock_until_ms(),
         "combat_actions": combat_actions,
         "sticky": True,
     }

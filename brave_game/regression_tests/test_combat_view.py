@@ -373,6 +373,8 @@ class CombatViewTests(unittest.TestCase):
                 "e:e1": {
                     "phase": "winding",
                     "ticks_remaining": 1,
+                    "phase_started_at_ms": 2_500,
+                    "phase_duration_ms": 1_000,
                     "timing": {"windup_ticks": 1},
                     "current_action": {"kind": "enemy_attack", "label": "Brush Pounce"},
                 },
@@ -389,6 +391,19 @@ class CombatViewTests(unittest.TestCase):
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
         )
         self.assertTrue(view.get("atb_locked"))
+        self.assertEqual(3_500, view.get("atb_lock_until_ms"))
+        self.assertEqual(
+            {
+                "phase_duration_ms": 4_000,
+                "phase_remaining_ms": 4_000,
+                "phase_started_at_ms": 1_000,
+            },
+            {
+                "phase_duration_ms": warrior_entry.get("meters", [])[0].get("meta", {}).get("phase_duration_ms"),
+                "phase_remaining_ms": warrior_entry.get("meters", [])[0].get("meta", {}).get("phase_remaining_ms"),
+                "phase_started_at_ms": warrior_entry.get("meters", [])[0].get("meta", {}).get("phase_started_at_ms"),
+            },
+        )
 
     def test_atb_meter_freezes_charge_projection_while_turn_lock_is_active(self):
         room = DummyRoom()
@@ -428,6 +443,7 @@ class CombatViewTests(unittest.TestCase):
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
         )
         self.assertTrue(view.get("atb_locked"))
+        self.assertEqual(4_000, view.get("atb_lock_until_ms"))
 
     def test_atb_meter_stays_below_full_for_near_ready_charging_actor(self):
         room = DummyRoom()
