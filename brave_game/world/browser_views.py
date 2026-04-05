@@ -2639,7 +2639,7 @@ def build_combat_view(encounter, character):
     def actor_atb_state(*, participant=None, enemy=None):
         try:
             state = raw_actor_atb_state(participant=participant, enemy=enemy)
-            if combat_atb_locked():
+            if atb_locked:
                 state["_freeze_projection"] = True
                 return state
             return render_atb_state(state, tick_ms=render_tick_ms, now_ms=render_now_ms)
@@ -2837,6 +2837,7 @@ def build_combat_view(encounter, character):
 
     enemies = encounter.get_active_enemies()
     participants = encounter.get_active_participants()
+    atb_locked = combat_atb_locked()
     encounter_title = (getattr(encounter.db, "encounter_title", "") or "").strip() or "Combat"
 
     ordered_participants = sorted(
@@ -2969,6 +2970,7 @@ def build_combat_view(encounter, character):
             reactive=_reactive_view(encounter.obj, scene="combat", danger="combat"),
         ),
         "variant": "combat",
+        "atb_locked": atb_locked,
         "combat_actions": combat_actions,
         "sticky": True,
     }

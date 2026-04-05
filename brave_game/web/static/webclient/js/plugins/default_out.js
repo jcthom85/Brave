@@ -2708,6 +2708,10 @@ let defaultout_plugin = (function () {
         });
     };
 
+    var combatViewRequestsAtbFreeze = function (viewData) {
+        return !!(viewData && viewData.variant === "combat" && viewData.atb_locked);
+    };
+
     var captureCombatEntrySnapshot = function (node) {
         if (!node || !node.getBoundingClientRect) {
             return null;
@@ -3063,7 +3067,7 @@ let defaultout_plugin = (function () {
         if (combatAtbFrozenUntilMs <= Date.now()) {
             combatAtbFrozenUntilMs = 0;
         }
-        var atbFrozen = combatAtbFrozenUntilMs > Date.now();
+        var atbFrozen = combatAtbFrozenUntilMs > Date.now() || combatViewRequestsAtbFreeze(currentViewData);
         var meters = Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__meter[data-meter-kind='atb']"));
         meters.forEach(function (meter) {
             var fill = meter.querySelector(".brave-view__meter-fill");
@@ -3107,6 +3111,9 @@ let defaultout_plugin = (function () {
 
     var restoreCombatAtbContinuity = function (previousSnapshots) {
         if (!Array.isArray(previousSnapshots) || !previousSnapshots.length) {
+            return;
+        }
+        if (combatViewRequestsAtbFreeze(currentViewData)) {
             return;
         }
         previousSnapshots.forEach(function (snapshot) {

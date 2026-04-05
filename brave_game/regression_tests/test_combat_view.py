@@ -369,6 +369,7 @@ class CombatViewTests(unittest.TestCase):
             [("ATB", "0 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
         )
+        self.assertTrue(view.get("atb_locked"))
 
     def test_atb_meter_freezes_charge_projection_while_turn_lock_is_active(self):
         room = DummyRoom()
@@ -407,6 +408,7 @@ class CombatViewTests(unittest.TestCase):
             [("ATB", "0 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
         )
+        self.assertTrue(view.get("atb_locked"))
 
     def test_atb_meter_stays_below_full_for_near_ready_charging_actor(self):
         room = DummyRoom()

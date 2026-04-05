@@ -25,6 +25,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter = SimpleNamespace(
             db=SimpleNamespace(atb_states={}, pending_actions={str(character.id): {"kind": "attack", "target": None}}),
             resolved=[],
+            refreshed=0,
         )
 
         encounter._actor_atb_key = lambda character=None, enemy=None: BraveEncounter._actor_atb_key(encounter, character=character, enemy=enemy)
@@ -34,10 +35,12 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter._consume_player_pending_action = lambda character: BraveEncounter._consume_player_pending_action(encounter, character)
         encounter._player_action_timing = lambda action: BraveEncounter._player_action_timing(encounter, action)
         encounter._resolve_player_action = lambda character, action: encounter.resolved.append((character.id, dict(action)))
+        encounter._refresh_browser_combat_views = lambda: setattr(encounter, "refreshed", encounter.refreshed + 1)
 
         BraveEncounter._advance_player_atb(encounter, character)
 
         self.assertEqual([(character.id, {"kind": "attack", "target": None})], encounter.resolved)
+        self.assertEqual(1, encounter.refreshed)
         state = encounter.db.atb_states["p:7"]
         self.assertEqual("recovering", state["phase"])
         self.assertEqual(1, state["ticks_remaining"])
@@ -48,6 +51,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter = SimpleNamespace(
             db=SimpleNamespace(atb_states={}),
             resolved=[],
+            refreshed=0,
         )
 
         encounter._actor_atb_key = lambda character=None, enemy=None: BraveEncounter._actor_atb_key(encounter, character=character, enemy=enemy)
@@ -59,10 +63,12 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter._enemy_telegraph_message = lambda enemy: BraveEncounter._enemy_telegraph_message(encounter, enemy)
         encounter.obj = SimpleNamespace(msg_contents=lambda _text: None)
         encounter._execute_enemy_turn = lambda enemy: encounter.resolved.append(enemy["id"])
+        encounter._refresh_browser_combat_views = lambda: setattr(encounter, "refreshed", encounter.refreshed + 1)
 
         BraveEncounter._advance_enemy_atb(encounter, enemy)
 
         self.assertEqual(["e1"], encounter.resolved)
+        self.assertEqual(1, encounter.refreshed)
         state = encounter.db.atb_states["e:e1"]
         self.assertEqual("recovering", state["phase"])
         self.assertEqual(1, state["ticks_remaining"])
@@ -73,6 +79,7 @@ class CombatAtbLoopTests(unittest.TestCase):
             db=SimpleNamespace(atb_states={}),
             resolved=[],
             messages=[],
+            refreshed=0,
             obj=SimpleNamespace(msg_contents=lambda text: encounter.messages.append(text)),
         )
 
@@ -84,10 +91,12 @@ class CombatAtbLoopTests(unittest.TestCase):
         encounter._enemy_action_label = lambda enemy: BraveEncounter._enemy_action_label(encounter, enemy)
         encounter._enemy_telegraph_message = lambda enemy: BraveEncounter._enemy_telegraph_message(encounter, enemy)
         encounter._execute_enemy_turn = lambda enemy: encounter.resolved.append(enemy["id"])
+        encounter._refresh_browser_combat_views = lambda: setattr(encounter, "refreshed", encounter.refreshed + 1)
 
         BraveEncounter._advance_enemy_atb(encounter, enemy)
 
         self.assertEqual([], encounter.resolved)
+        self.assertEqual(1, encounter.refreshed)
         state = encounter.db.atb_states["e:e1"]
         self.assertEqual("winding", state["phase"])
         self.assertEqual("Brush Pounce", state["current_action"]["label"])
@@ -165,7 +174,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         self.assertEqual([("player", character.id, {"kind": "attack", "target": None})], encounter.resolved)
         self.assertEqual("recovering", encounter.db.atb_states["p:7"]["phase"])
         self.assertEqual("ready", encounter.db.atb_states["e:e1"]["phase"])
-        self.assertEqual(1, encounter.refreshed)
+        self.assertEqual(2, encounter.refreshed)
 
         BraveEncounter.at_repeat(encounter)
 
@@ -177,7 +186,7 @@ class CombatAtbLoopTests(unittest.TestCase):
             encounter.resolved,
         )
         self.assertEqual("recovering", encounter.db.atb_states["e:e1"]["phase"])
-        self.assertEqual(2, encounter.refreshed)
+        self.assertEqual(4, encounter.refreshed)
 
     def test_at_repeat_freezes_other_atb_states_while_enemy_action_resolves(self):
         character = DummyCharacter()
@@ -446,7 +455,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         )
         self.assertEqual(2, encounter.db.round)
         self.assertGreater(encounter.db.atb_turn_lock_until_ms, 1000)
-        self.assertEqual(3, encounter.refreshed)
+        self.assertEqual(5, encounter.refreshed)
 
 
 if __name__ == "__main__":

@@ -2446,15 +2446,23 @@ class BraveEncounter(Script):
         """Consume one player's ready or resolving ATB state."""
 
         tick_ms = BraveEncounter._atb_tick_ms(self)
+        refresher = getattr(self, "_refresh_browser_combat_views", None)
         state = self._get_actor_atb_state(character=character)
         if state.get("phase") == "ready":
             action = self._consume_player_pending_action(character)
             state = start_atb_action(state, action, self._player_action_timing(action), tick_ms=tick_ms)
+            if state.get("phase") == "winding":
+                self._save_actor_atb_state(state, character=character)
+                if callable(refresher):
+                    refresher()
         if state.get("phase") == "resolving":
             setter = getattr(self, "_set_combat_turn_lock", None)
             if not callable(setter):
                 setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
             setter()
+            self._save_actor_atb_state(state, character=character)
+            if callable(refresher):
+                refresher()
             action = dict(state.get("current_action") or {"kind": "attack", "target": None})
             self._resolve_player_action(character, action)
             state = finish_atb_action(state, tick_ms=tick_ms)
@@ -2716,6 +2724,7 @@ class BraveEncounter(Script):
         """Consume one enemy's ready or resolving ATB state."""
 
         tick_ms = BraveEncounter._atb_tick_ms(self)
+        refresher = getattr(self, "_refresh_browser_combat_views", None)
         state = self._get_actor_atb_state(enemy=enemy)
         if state.get("phase") == "ready":
             action = {
@@ -2730,12 +2739,18 @@ class BraveEncounter(Script):
                 tick_ms=tick_ms,
             )
             if state.get("phase") == "winding":
+                self._save_actor_atb_state(state, enemy=enemy)
+                if callable(refresher):
+                    refresher()
                 self.obj.msg_contents(self._enemy_telegraph_message(enemy))
         if state.get("phase") == "resolving":
             setter = getattr(self, "_set_combat_turn_lock", None)
             if not callable(setter):
                 setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
             setter()
+            self._save_actor_atb_state(state, enemy=enemy)
+            if callable(refresher):
+                refresher()
             self._execute_enemy_turn(enemy)
             state = finish_atb_action(state, tick_ms=tick_ms)
         self._save_actor_atb_state(state, enemy=enemy)
