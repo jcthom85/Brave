@@ -2905,21 +2905,28 @@ class BraveEncounter(Script):
         """Advance ATB timers for everyone without resolving more than one turn."""
 
         tick_ms = BraveEncounter._atb_tick_ms(self)
-        tick_now_ms = int(round(time.time() * 1000))
         for participant in participants:
+            raw_state = self._get_actor_atb_state(character=participant)
+            state_start_ms = int((raw_state or {}).get("phase_started_at_ms", 0) or 0)
+            if state_start_ms <= 0:
+                state_start_ms = int(round(time.time() * 1000)) - tick_ms
             state = advance_atb_state_by_ms(
-                self._get_actor_atb_state(character=participant),
+                raw_state,
                 tick_ms,
                 tick_ms=tick_ms,
-                now_ms=tick_now_ms,
+                now_ms=state_start_ms,
             )
             self._save_actor_atb_state(state, character=participant)
         for enemy in enemies:
+            raw_state = self._get_actor_atb_state(enemy=enemy)
+            state_start_ms = int((raw_state or {}).get("phase_started_at_ms", 0) or 0)
+            if state_start_ms <= 0:
+                state_start_ms = int(round(time.time() * 1000)) - tick_ms
             state = advance_atb_state_by_ms(
-                self._get_actor_atb_state(enemy=enemy),
+                raw_state,
                 tick_ms,
                 tick_ms=tick_ms,
-                now_ms=tick_now_ms,
+                now_ms=state_start_ms,
             )
             self._save_actor_atb_state(state, enemy=enemy)
 
@@ -2942,21 +2949,28 @@ class BraveEncounter(Script):
             return 0
 
         advance_ms = min(tick_ms, earliest_ready_ms)
-        tick_now_ms = int(round(time.time() * 1000))
         for participant in participants:
+            raw_state = self._get_actor_atb_state(character=participant)
+            state_start_ms = int((raw_state or {}).get("phase_started_at_ms", 0) or 0)
+            if state_start_ms <= 0:
+                state_start_ms = int(round(time.time() * 1000)) - advance_ms
             state = advance_atb_state_by_ms(
-                self._get_actor_atb_state(character=participant),
+                raw_state,
                 advance_ms,
                 tick_ms=tick_ms,
-                now_ms=tick_now_ms,
+                now_ms=state_start_ms,
             )
             self._save_actor_atb_state(state, character=participant)
         for enemy in enemies:
+            raw_state = self._get_actor_atb_state(enemy=enemy)
+            state_start_ms = int((raw_state or {}).get("phase_started_at_ms", 0) or 0)
+            if state_start_ms <= 0:
+                state_start_ms = int(round(time.time() * 1000)) - advance_ms
             state = advance_atb_state_by_ms(
-                self._get_actor_atb_state(enemy=enemy),
+                raw_state,
                 advance_ms,
                 tick_ms=tick_ms,
-                now_ms=tick_now_ms,
+                now_ms=state_start_ms,
             )
             self._save_actor_atb_state(state, enemy=enemy)
         return advance_ms

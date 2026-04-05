@@ -299,6 +299,37 @@ class CombatAtbLoopTests(unittest.TestCase):
         self.assertEqual(100, encounter.db.atb_states["p:7"]["gauge"])
         self.assertEqual(100, encounter.db.atb_states["e:e1"]["gauge"])
 
+    def test_advance_idle_atb_states_keeps_phase_timestamps_continuous(self):
+        character = DummyCharacter()
+        encounter = SimpleNamespace(
+            interval=1,
+            db=SimpleNamespace(
+                atb_states={
+                    "p:7": {
+                        "phase": "charging",
+                        "gauge": 0,
+                        "ready_gauge": 400,
+                        "fill_rate": 100,
+                        "phase_start_gauge": 0,
+                        "phase_started_at_ms": 1_000,
+                        "phase_duration_ms": 4_000,
+                    }
+                }
+            ),
+        )
+
+        self._bind_common_helpers(encounter)
+
+        advanced_ms = BraveEncounter._advance_idle_atb_states(encounter, [character], [])
+
+        state = encounter.db.atb_states["p:7"]
+        self.assertEqual(1_000, advanced_ms)
+        self.assertEqual("charging", state["phase"])
+        self.assertEqual(100, state["gauge"])
+        self.assertEqual(100, state["phase_start_gauge"])
+        self.assertEqual(2_000, state["phase_started_at_ms"])
+        self.assertEqual(3_000, state["phase_duration_ms"])
+
     def test_at_repeat_breaks_exact_ready_ties_by_fill_rate(self):
         character = DummyCharacter()
         enemy = {"id": "e1", "template_key": "bog_creeper", "key": "Bog Creeper"}
