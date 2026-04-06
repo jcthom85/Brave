@@ -797,7 +797,6 @@ def build_combat_panel(encounter):
     foe_count = len(enemies)
     ally_label = "ally" if ally_count == 1 else "allies"
     foe_label = "foe" if foe_count == 1 else "foes"
-    imminent_count = 0
     opening_count = 0
 
     def hp_tone(current_hp, max_hp):
@@ -810,16 +809,6 @@ def build_combat_panel(encounter):
 
     render_now_ms = int(round(time.time() * 1000))
     render_tick_ms = max(1, int(round(float(getattr(encounter, "interval", 1) or 1) * 1000)))
-
-    def combat_turn_locked():
-        getter = getattr(encounter, "_combat_turn_locked", None)
-        if callable(getter):
-            try:
-                return bool(getter(now_ms=render_now_ms))
-            except Exception:
-                return False
-        lock_until_ms = int(getattr(getattr(encounter, "db", None), "atb_turn_lock_until_ms", 0) or 0)
-        return render_now_ms < lock_until_ms
 
     def raw_actor_atb_state(*, participant=None, enemy=None):
         getter = getattr(encounter, "_get_actor_atb_state", None)
@@ -834,26 +823,65 @@ def build_combat_panel(encounter):
             return {}
         return {}
 
-    def combat_atb_locked():
-        if combat_turn_locked():
-            return True
-        for participant in participants:
-            if (raw_actor_atb_state(participant=participant) or {}).get("phase") in {"winding", "resolving"}:
-                return True
-        for enemy in enemies:
-            if (raw_actor_atb_state(enemy=enemy) or {}).get("phase") in {"winding", "resolving"}:
-                return True
-        return False
-
     def actor_atb_state(*, participant=None, enemy=None):
         try:
             state = raw_actor_atb_state(participant=participant, enemy=enemy)
-            if combat_atb_locked():
-                return state
             return render_atb_state(state, tick_ms=render_tick_ms, now_ms=render_now_ms)
         except Exception:
             return {}
         return {}
+
+    def combat_queue_entries():
+        getter = getattr(encounter, "_atb_queue_entries", None)
+        if callable(getter):
+            try:
+                return list(getter(participants, enemies) or [])
+            except Exception:
+                return []
+
+        phase_order = {"resolving": 0, "winding": 1, "ready": 2}
+        queue = []
+        for participant in participants:
+            state = raw_actor_atb_state(participant=participant)
+            phase = (state or {}).get("phase")
+            if phase not in phase_order:
+                continue
+            queue.append(
+                {
+                    "kind": "participant",
+                    "actor": participant,
+                    "phase": phase,
+                    "started_at": int((state or {}).get("phase_started_at_ms", 0) or 0),
+                    "fill_rate": int((state or {}).get("fill_rate", 0) or 0),
+                    "sort_id": f"p:{participant.key}",
+                }
+            )
+        for enemy in enemies:
+            state = raw_actor_atb_state(enemy=enemy)
+            phase = (state or {}).get("phase")
+            if phase not in phase_order:
+                continue
+            queue.append(
+                {
+                    "kind": "enemy",
+                    "actor": enemy,
+                    "phase": phase,
+                    "started_at": int((state or {}).get("phase_started_at_ms", 0) or 0),
+                    "fill_rate": int((state or {}).get("fill_rate", 0) or 0),
+                    "sort_id": f"e:{enemy['id']}",
+                }
+            )
+
+        queue.sort(
+            key=lambda entry: (
+                phase_order.get(entry["phase"], 99),
+                entry["started_at"],
+                -entry["fill_rate"],
+                0 if entry["kind"] == "participant" else 1,
+                entry["sort_id"],
+            )
+        )
+        return queue
 
     def atb_badge(state):
         phase = (state or {}).get("phase")
@@ -909,15 +937,14 @@ def build_combat_panel(encounter):
         ),
     ]
 
+    queued_count = len(combat_queue_entries())
     for participant in participants:
         phase = (actor_atb_state(participant=participant) or {}).get("phase")
-        if phase == "ready":
-            imminent_count += 1
+        if phase in {"recovering", "cooldown"}:
+            opening_count += 1
     for enemy in enemies:
         phase = (actor_atb_state(enemy=enemy) or {}).get("phase")
-        if phase in {"winding", "ready"}:
-            imminent_count += 1
-        elif phase in {"recovering", "cooldown"}:
+        if phase in {"recovering", "cooldown"}:
             opening_count += 1
 
     return _make_panel(
@@ -928,7 +955,7 @@ def build_combat_panel(encounter):
         chips=[
             _chip(f"{ally_count} {ally_label}", "groups", "muted"),
             _chip(f"{foe_count} {foe_label}", "warning", "danger" if enemies else "good"),
-            _chip(f"{imminent_count} hot", "priority_high", "danger" if imminent_count else "muted"),
+            _chip(f"{queued_count} queued", "schedule", "accent" if queued_count else "muted"),
             _chip(f"{opening_count} open", "schedule", "good" if opening_count else "muted"),
         ],
         sections=sections,

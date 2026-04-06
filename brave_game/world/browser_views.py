@@ -2609,16 +2609,6 @@ def build_combat_view(encounter, character):
     render_now_ms = int(round(time.time() * 1000))
     render_tick_ms = max(1, int(round(float(getattr(encounter, "interval", 1) or 1) * 1000)))
 
-    def combat_turn_locked():
-        getter = getattr(encounter, "_combat_turn_locked", None)
-        if callable(getter):
-            try:
-                return bool(getter(now_ms=render_now_ms))
-            except Exception:
-                return False
-        lock_until_ms = int(getattr(getattr(encounter, "db", None), "atb_turn_lock_until_ms", 0) or 0)
-        return render_now_ms < lock_until_ms
-
     def raw_actor_atb_state(*, participant=None, enemy=None):
         getter = getattr(encounter, "_get_actor_atb_state", None)
         if not callable(getter):
@@ -2633,42 +2623,14 @@ def build_combat_view(encounter, character):
         return {}
 
     def combat_atb_locked():
-        if combat_turn_locked():
-            return True
-        for participant in participants:
-            if (raw_actor_atb_state(participant=participant) or {}).get("phase") in {"winding", "resolving"}:
-                return True
-        for enemy in enemies:
-            if (raw_actor_atb_state(enemy=enemy) or {}).get("phase") in {"winding", "resolving"}:
-                return True
         return False
 
     def combat_atb_lock_until_ms():
-        if combat_turn_locked():
-            return int(getattr(getattr(encounter, "db", None), "atb_turn_lock_until_ms", 0) or 0)
-
-        lock_until_ms = 0
-        for participant in participants:
-            state = raw_actor_atb_state(participant=participant)
-            if (state or {}).get("phase") not in {"winding", "resolving"}:
-                continue
-            started_at = int((state or {}).get("phase_started_at_ms", 0) or 0)
-            duration_ms = int((state or {}).get("phase_duration_ms", 0) or 0)
-            if duration_ms > 0:
-                lock_until_ms = max(lock_until_ms, started_at + duration_ms)
-        for enemy in enemies:
-            state = raw_actor_atb_state(enemy=enemy)
-            if (state or {}).get("phase") not in {"winding", "resolving"}:
-                continue
-            started_at = int((state or {}).get("phase_started_at_ms", 0) or 0)
-            duration_ms = int((state or {}).get("phase_duration_ms", 0) or 0)
-            if duration_ms > 0:
-                lock_until_ms = max(lock_until_ms, started_at + duration_ms)
-        return lock_until_ms
+        return 0
 
     def repair_visual_charge_state(state):
         state = dict(state or {})
-        if atb_locked or state.get("phase") != "charging":
+        if state.get("phase") != "charging":
             return state
         gauge = max(0, int(state.get("gauge", 0) or 0))
         ready_gauge = max(1, int(state.get("ready_gauge", 400) or 400))
@@ -2689,9 +2651,6 @@ def build_combat_view(encounter, character):
     def actor_atb_state(*, participant=None, enemy=None):
         try:
             state = repair_visual_charge_state(raw_actor_atb_state(participant=participant, enemy=enemy))
-            if atb_locked:
-                state["_freeze_projection"] = True
-                return state
             return render_atb_state(state, tick_ms=render_tick_ms, now_ms=render_now_ms)
         except Exception:
             return {}
@@ -2790,14 +2749,13 @@ def build_combat_view(encounter, character):
         state = dict(state or {})
         phase = state.get("phase")
         timing = dict(state.get("timing") or {})
-        freeze_projection = bool(state.get("_freeze_projection"))
         gauge = int(state.get("gauge", 0) or 0)
         ready_gauge = max(1, int(state.get("ready_gauge", 400) or 400))
         ticks_remaining = int(state.get("ticks_remaining", 0) or 0)
         phase_started_at_ms = int(state.get("phase_started_at_ms", 0) or 0)
         phase_duration_ms = int(state.get("phase_duration_ms", 0) or 0)
-        elapsed_ms = 0 if freeze_projection else (max(0, render_now_ms - phase_started_at_ms) if phase_started_at_ms > 0 else 0)
-        phase_remaining_ms = phase_duration_ms if freeze_projection else (max(0, phase_duration_ms - elapsed_ms) if phase_duration_ms > 0 else 0)
+        elapsed_ms = max(0, render_now_ms - phase_started_at_ms) if phase_started_at_ms > 0 else 0
+        phase_remaining_ms = max(0, phase_duration_ms - elapsed_ms) if phase_duration_ms > 0 else 0
 
         value = gauge
         tone = "accent"
@@ -2967,7 +2925,7 @@ def build_combat_view(encounter, character):
     for enemy in enemies:
         status_chips = build_enemy_status_chips(enemy)
         atb_state = actor_atb_state(enemy=enemy)
-        atb_status = atb_chip(atb_state, label_ready="Acting", ready_tone="danger")
+        atb_status = atb_chip(atb_state, label_ready="Ready", ready_tone="danger")
         if atb_status:
             status_chips = [atb_status] + list(status_chips)
         lines = []

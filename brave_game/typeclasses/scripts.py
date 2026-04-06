@@ -2582,30 +2582,10 @@ class BraveEncounter(Script):
             action = self._consume_player_pending_action(character)
             state = start_atb_action(state, action, self._player_action_timing(action), tick_ms=tick_ms)
             if state.get("phase") == "winding":
-                pauser = getattr(self, "_pause_non_active_atb_states", None)
-                if not callable(pauser):
-                    pauser = lambda duration_ms, **kwargs: BraveEncounter._pause_non_active_atb_states(
-                        self,
-                        duration_ms,
-                        **kwargs,
-                    )
-                pauser(state.get("phase_duration_ms", 0), active_character=character)
                 self._save_actor_atb_state(state, character=character)
                 if callable(refresher):
                     refresher()
         if state.get("phase") == "resolving":
-            setter = getattr(self, "_set_combat_turn_lock", None)
-            if not callable(setter):
-                setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
-            setter()
-            pauser = getattr(self, "_pause_non_active_atb_states", None)
-            if not callable(pauser):
-                pauser = lambda duration_ms, **kwargs: BraveEncounter._pause_non_active_atb_states(
-                    self,
-                    duration_ms,
-                    **kwargs,
-                )
-            pauser(COMBAT_TURN_LOCK_MS, active_character=character)
             self._save_actor_atb_state(state, character=character)
             if callable(refresher):
                 refresher()
@@ -2889,43 +2869,15 @@ class BraveEncounter(Script):
                 tick_ms=tick_ms,
             )
             if state.get("phase") == "winding" and dict(state.get("timing") or {}).get("telegraph"):
-                pauser = getattr(self, "_pause_non_active_atb_states", None)
-                if not callable(pauser):
-                    pauser = lambda duration_ms, **kwargs: BraveEncounter._pause_non_active_atb_states(
-                        self,
-                        duration_ms,
-                        **kwargs,
-                    )
-                pauser(state.get("phase_duration_ms", 0), active_enemy=enemy)
                 self._save_actor_atb_state(state, enemy=enemy)
                 if callable(refresher):
                     refresher()
                 self.obj.msg_contents(self._enemy_telegraph_message(enemy))
             elif state.get("phase") == "winding":
-                pauser = getattr(self, "_pause_non_active_atb_states", None)
-                if not callable(pauser):
-                    pauser = lambda duration_ms, **kwargs: BraveEncounter._pause_non_active_atb_states(
-                        self,
-                        duration_ms,
-                        **kwargs,
-                    )
-                pauser(state.get("phase_duration_ms", 0), active_enemy=enemy)
                 self._save_actor_atb_state(state, enemy=enemy)
                 if callable(refresher):
                     refresher()
         if state.get("phase") == "resolving":
-            setter = getattr(self, "_set_combat_turn_lock", None)
-            if not callable(setter):
-                setter = lambda *args, **kwargs: BraveEncounter._set_combat_turn_lock(self, *args, **kwargs)
-            setter()
-            pauser = getattr(self, "_pause_non_active_atb_states", None)
-            if not callable(pauser):
-                pauser = lambda duration_ms, **kwargs: BraveEncounter._pause_non_active_atb_states(
-                    self,
-                    duration_ms,
-                    **kwargs,
-                )
-            pauser(COMBAT_TURN_LOCK_MS, active_enemy=enemy)
             self._save_actor_atb_state(state, enemy=enemy)
             if callable(refresher):
                 refresher()
@@ -3062,6 +3014,55 @@ class BraveEncounter(Script):
             )
         )
         return candidates[0]
+
+    def _atb_queue_entries(self, participants, enemies):
+        """Return the visible ATB queue in current action order."""
+
+        phase_order = {"resolving": 0, "winding": 1, "ready": 2}
+        queue = []
+        for participant in participants:
+            state = self._get_actor_atb_state(character=participant)
+            phase = state.get("phase")
+            if phase not in phase_order:
+                continue
+            queue.append(
+                {
+                    "kind": "participant",
+                    "actor": participant,
+                    "phase": phase,
+                    "started_at": int(state.get("phase_started_at_ms", 0) or 0),
+                    "fill_rate": int(state.get("fill_rate", 0) or 0),
+                    "sort_id": f"p:{participant.id}",
+                    "state": state,
+                }
+            )
+        for enemy in enemies:
+            state = self._get_actor_atb_state(enemy=enemy)
+            phase = state.get("phase")
+            if phase not in phase_order:
+                continue
+            queue.append(
+                {
+                    "kind": "enemy",
+                    "actor": enemy,
+                    "phase": phase,
+                    "started_at": int(state.get("phase_started_at_ms", 0) or 0),
+                    "fill_rate": int(state.get("fill_rate", 0) or 0),
+                    "sort_id": f"e:{enemy['id']}",
+                    "state": state,
+                }
+            )
+
+        queue.sort(
+            key=lambda entry: (
+                phase_order.get(entry["phase"], 99),
+                entry["started_at"],
+                -entry["fill_rate"],
+                0 if entry["kind"] == "participant" else 1,
+                entry["sort_id"],
+            )
+        )
+        return queue
 
     def _active_atb_actor(self, participants, enemies):
         """Return the actor whose windup or resolution currently freezes the field."""
@@ -3206,13 +3207,6 @@ class BraveEncounter(Script):
         active_participants = self.get_active_participants()
         active_enemies = self.get_active_enemies()
 
-        now_ms = int(round(time.time() * 1000))
-        turn_locked = getattr(self, "_combat_turn_locked", None)
-        if not callable(turn_locked):
-            turn_locked = lambda **kwargs: BraveEncounter._combat_turn_locked(self, **kwargs)
-        if turn_locked(now_ms=now_ms):
-            return
-
         if not active_participants:
             self.obj.msg_contents("|rThe fight breaks wrong, and the danger keeps the road.|n")
             self.stop()
@@ -3233,6 +3227,14 @@ class BraveEncounter(Script):
 
         active_participants = self.get_active_participants()
         active_enemies = self.get_active_enemies()
+        tick_all_states = getattr(self, "_tick_all_atb_states", None)
+        if not callable(tick_all_states):
+            tick_all_states = lambda participants, enemies: BraveEncounter._tick_all_atb_states(
+                self,
+                participants,
+                enemies,
+            )
+        tick_all_states(active_participants, active_enemies)
         active_actor_getter = getattr(self, "_active_atb_actor", None)
         if not callable(active_actor_getter):
             active_actor_getter = lambda participants, enemies: BraveEncounter._active_atb_actor(self, participants, enemies)
@@ -3240,37 +3242,27 @@ class BraveEncounter(Script):
         actor_activity = bool(active_actor)
         next_actor_getter = getattr(self, "_next_atb_actor", None)
         if not callable(next_actor_getter):
-            next_actor_getter = lambda participants, enemies: BraveEncounter._next_atb_actor(self, participants, enemies)
+            next_actor_getter = lambda participants, enemies, **kwargs: BraveEncounter._next_atb_actor(
+                self,
+                participants,
+                enemies,
+                **kwargs,
+            )
         if active_actor:
-            tick_now_ms = int(round(time.time() * 1000))
             if active_actor["kind"] == "participant":
-                state = tick_atb_state(
-                    self._get_actor_atb_state(character=active_actor["actor"]),
-                    tick_ms=BraveEncounter._atb_tick_ms(self),
-                    now_ms=tick_now_ms,
-                )
-                self._save_actor_atb_state(state, character=active_actor["actor"])
                 self._handle_player_atb_state(active_actor["actor"])
             else:
-                state = tick_atb_state(
-                    self._get_actor_atb_state(enemy=active_actor["actor"]),
-                    tick_ms=BraveEncounter._atb_tick_ms(self),
-                    now_ms=tick_now_ms,
-                )
-                self._save_actor_atb_state(state, enemy=active_actor["actor"])
                 self._handle_enemy_atb_state(active_actor["actor"])
         else:
-            next_actor = next_actor_getter(active_participants, active_enemies)
-            if not next_actor:
-                advance_idle_states = getattr(self, "_advance_idle_atb_states", None)
-                if not callable(advance_idle_states):
-                    advance_idle_states = lambda participants, enemies: BraveEncounter._advance_idle_atb_states(
-                        self,
-                        participants,
-                        enemies,
-                    )
-                advance_idle_states(active_participants, active_enemies)
-                next_actor = next_actor_getter(active_participants, active_enemies)
+            try:
+                next_actor = next_actor_getter(active_participants, active_enemies, phases=("ready",))
+            except TypeError:
+                next_actor = BraveEncounter._next_atb_actor(
+                    self,
+                    active_participants,
+                    active_enemies,
+                    phases=("ready",),
+                )
         next_actor = None if active_actor else next_actor
         if next_actor:
             actor_activity = True
@@ -3290,11 +3282,9 @@ class BraveEncounter(Script):
             self.stop()
             return
 
-        if not actor_activity:
-            return
-
         clear_turn_states = getattr(self, "_clear_turn_states", None)
         if not callable(clear_turn_states):
             clear_turn_states = lambda: BraveEncounter._clear_turn_states(self)
-        clear_turn_states()
+        if actor_activity:
+            clear_turn_states()
         self._refresh_browser_combat_views()

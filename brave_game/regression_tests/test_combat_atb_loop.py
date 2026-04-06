@@ -213,7 +213,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         )
         self.assertEqual("charging", encounter.db.atb_states["e:e1"]["phase"])
 
-    def test_at_repeat_stops_other_gauges_when_first_actor_becomes_ready(self):
+    def test_at_repeat_keeps_other_gauges_charging_when_first_actor_becomes_ready(self):
         character = DummyCharacter()
         enemy = {"id": "e1", "template_key": "bog_creeper", "key": "Bog Creeper"}
         encounter = SimpleNamespace(
@@ -252,10 +252,11 @@ class CombatAtbLoopTests(unittest.TestCase):
 
         self.assertEqual([], encounter.resolved)
         self.assertEqual("winding", encounter.db.atb_states["p:7"]["phase"])
-        self.assertEqual(220, encounter.db.atb_states["e:e1"]["gauge"])
+        self.assertEqual(300, encounter.db.atb_states["e:e1"]["gauge"])
         self.assertEqual("charging", encounter.db.atb_states["e:e1"]["phase"])
+        self.assertGreaterEqual(encounter.refreshed, 1)
 
-    def test_at_repeat_skips_full_refresh_on_idle_charge_only_tick(self):
+    def test_at_repeat_refreshes_view_on_idle_charge_only_tick(self):
         character = DummyCharacter()
         enemy = {"id": "e1", "template_key": "bog_creeper", "key": "Bog Creeper"}
         encounter = SimpleNamespace(
@@ -294,7 +295,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         BraveEncounter.at_repeat(encounter)
 
         self.assertEqual([], encounter.resolved)
-        self.assertEqual(0, encounter.refreshed)
+        self.assertEqual(1, encounter.refreshed)
         self.assertEqual(0, encounter.cleared_turn_states)
         self.assertEqual(100, encounter.db.atb_states["p:7"]["gauge"])
         self.assertEqual(100, encounter.db.atb_states["e:e1"]["gauge"])
@@ -372,7 +373,7 @@ class CombatAtbLoopTests(unittest.TestCase):
         self.assertEqual("charging", encounter.db.atb_states["e:e1"]["phase"])
         self.assertEqual("ready", encounter.db.atb_states["p:7"]["phase"])
 
-    def test_enemy_action_pause_shifts_other_actor_charge_timing(self):
+    def test_enemy_windup_and_resolution_do_not_pause_other_actor_charge_state(self):
         character = DummyCharacter()
         enemy = {"id": "e1", "template_key": "old_greymaw", "key": "Old Greymaw"}
         encounter = SimpleNamespace(
@@ -411,22 +412,22 @@ class CombatAtbLoopTests(unittest.TestCase):
 
         paused_state = encounter.db.atb_states["p:7"]
         self.assertEqual("winding", encounter.db.atb_states["e:e1"]["phase"])
-        self.assertEqual(220, paused_state["gauge"])
-        self.assertEqual(2_200, paused_state["phase_started_at_ms"])
-        self.assertEqual(1_800, paused_state["phase_duration_ms"])
-        self.assertEqual(220, paused_state["phase_start_gauge"])
+        self.assertEqual(200, paused_state["gauge"])
+        self.assertEqual(1_000, paused_state["phase_started_at_ms"])
+        self.assertEqual(2_000, paused_state["phase_duration_ms"])
+        self.assertEqual(200, paused_state["phase_start_gauge"])
 
         with patch("typeclasses.scripts.time.time", return_value=2.0):
             BraveEncounter._advance_enemy_atb(encounter, enemy)
 
         paused_state = encounter.db.atb_states["p:7"]
         self.assertEqual(["e1"], encounter.resolved)
-        self.assertEqual(220, paused_state["gauge"])
-        self.assertEqual(3_400, paused_state["phase_started_at_ms"])
-        self.assertEqual(1_800, paused_state["phase_duration_ms"])
-        self.assertEqual(220, paused_state["phase_start_gauge"])
+        self.assertEqual(200, paused_state["gauge"])
+        self.assertEqual(1_000, paused_state["phase_started_at_ms"])
+        self.assertEqual(2_000, paused_state["phase_duration_ms"])
+        self.assertEqual(200, paused_state["phase_start_gauge"])
 
-    def test_at_repeat_freezes_other_atb_states_while_enemy_action_resolves(self):
+    def test_at_repeat_keeps_other_atb_states_advancing_while_enemy_action_resolves(self):
         character = DummyCharacter()
         enemy = {"id": "e1", "template_key": "old_greymaw", "key": "Old Greymaw"}
         encounter = SimpleNamespace(
@@ -469,11 +470,11 @@ class CombatAtbLoopTests(unittest.TestCase):
         BraveEncounter.at_repeat(encounter)
 
         self.assertEqual([("enemy", "e1")], encounter.resolved)
-        self.assertEqual(160, encounter.db.atb_states["p:7"]["gauge"])
+        self.assertEqual(185, encounter.db.atb_states["p:7"]["gauge"])
         self.assertEqual("charging", encounter.db.atb_states["p:7"]["phase"])
         self.assertEqual("recovering", encounter.db.atb_states["e:e1"]["phase"])
 
-    def test_at_repeat_waits_for_turn_lock_before_next_ready_actor(self):
+    def test_at_repeat_moves_to_next_ready_actor_without_waiting_for_turn_lock(self):
         character = DummyCharacter()
         enemy = {"id": "e1", "template_key": "bog_creeper", "key": "Bog Creeper"}
         encounter = SimpleNamespace(
@@ -526,7 +527,7 @@ class CombatAtbLoopTests(unittest.TestCase):
             encounter.resolved,
         )
         self.assertEqual(2, encounter.db.turn_count)
-        self.assertGreater(encounter.db.atb_turn_lock_until_ms, 1000)
+        self.assertEqual(0, encounter.db.atb_turn_lock_until_ms)
 
 
 if __name__ == "__main__":

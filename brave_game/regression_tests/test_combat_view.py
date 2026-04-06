@@ -417,7 +417,7 @@ class CombatViewTests(unittest.TestCase):
         self.assertEqual(4_000, atb_meter.get("meta", {}).get("phase_started_at_ms"))
         self.assertEqual(3_000, atb_meter.get("meta", {}).get("phase_duration_ms"))
 
-    def test_atb_meter_freezes_charge_projection_while_action_is_in_progress(self):
+    def test_atb_meter_keeps_charge_projection_live_while_action_is_in_progress(self):
         room = DummyRoom()
         warrior = DummyCharacter(
             7,
@@ -458,15 +458,15 @@ class CombatViewTests(unittest.TestCase):
         party_section = _section(view, "Party")
         warrior_entry = _entry(party_section, "Dad")
         self.assertEqual(
-            [("ATB", "0 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
+            [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
         )
-        self.assertTrue(view.get("atb_locked"))
-        self.assertEqual(3_500, view.get("atb_lock_until_ms"))
+        self.assertFalse(view.get("atb_locked"))
+        self.assertEqual(0, view.get("atb_lock_until_ms"))
         self.assertEqual(
             {
                 "phase_duration_ms": 4_000,
-                "phase_remaining_ms": 4_000,
+                "phase_remaining_ms": 2_000,
                 "phase_started_at_ms": 1_000,
             },
             {
@@ -475,8 +475,9 @@ class CombatViewTests(unittest.TestCase):
                 "phase_started_at_ms": warrior_entry.get("meters", [])[0].get("meta", {}).get("phase_started_at_ms"),
             },
         )
+        self.assertFalse(any(section.get("label") == "Up Next" for section in view.get("sections", [])))
 
-    def test_atb_meter_freezes_charge_projection_while_turn_lock_is_active(self):
+    def test_atb_meter_ignores_turn_lock_and_keeps_charge_projection_live(self):
         room = DummyRoom()
         warrior = DummyCharacter(
             7,
@@ -510,11 +511,11 @@ class CombatViewTests(unittest.TestCase):
         party_section = _section(view, "Party")
         warrior_entry = _entry(party_section, "Dad")
         self.assertEqual(
-            [("ATB", "0 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
+            [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
         )
-        self.assertTrue(view.get("atb_locked"))
-        self.assertEqual(4_000, view.get("atb_lock_until_ms"))
+        self.assertFalse(view.get("atb_locked"))
+        self.assertEqual(0, view.get("atb_lock_until_ms"))
 
     def test_atb_meter_stays_below_full_for_near_ready_charging_actor(self):
         room = DummyRoom()

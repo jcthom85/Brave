@@ -49,11 +49,12 @@ class CombatPanelTests(unittest.TestCase):
         party_items = panel.get("sections", [])[0].get("items", [])
         enemy_items = panel.get("sections", [])[1].get("items", [])
 
-        self.assertEqual(["2 allies", "1 foe", "2 hot", "0 open"], chip_labels)
+        self.assertEqual(["2 allies", "1 foe", "2 queued", "0 open"], chip_labels)
         self.assertFalse(any("round" in label.lower() for label in chip_labels))
         self.assertEqual(["READY", "ATB 11%"], [item.get("badge") for item in party_items])
         self.assertEqual("ready", party_items[0].get("meta"))
         self.assertEqual("W1", enemy_items[0].get("badge"))
+        self.assertEqual(2, len(panel.get("sections", [])))
 
     def test_combat_panel_projects_live_charge_percent(self):
         encounter = DummyEncounter(
@@ -77,7 +78,7 @@ class CombatPanelTests(unittest.TestCase):
         party_items = panel.get("sections", [])[0].get("items", [])
         self.assertEqual(["ATB 50%"], [item.get("badge") for item in party_items])
 
-    def test_combat_panel_freezes_charge_percent_while_turn_lock_is_active(self):
+    def test_combat_panel_keeps_charge_percent_live_while_turn_lock_is_active(self):
         encounter = DummyEncounter(
             [DummyParticipant("Dad")],
             [],
@@ -99,7 +100,7 @@ class CombatPanelTests(unittest.TestCase):
             panel = build_combat_panel(encounter)
 
         party_items = panel.get("sections", [])[0].get("items", [])
-        self.assertEqual(["ATB 0%"], [item.get("badge") for item in party_items])
+        self.assertEqual(["ATB 50%"], [item.get("badge") for item in party_items])
 
     def test_combat_panel_keeps_near_ready_charge_below_full(self):
         encounter = DummyEncounter(
