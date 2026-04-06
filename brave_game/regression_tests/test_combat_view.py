@@ -584,6 +584,8 @@ class CombatViewTests(unittest.TestCase):
         self.assertEqual("attack e2", crow_two.get("command"))
         self.assertEqual("e:e1", crow_one.get("entry_ref"))
         self.assertEqual("e:e2", crow_two.get("entry_ref"))
+        self.assertEqual("flight", crow_one.get("background_icon"))
+        self.assertIsNone(crow_one.get("icon"))
         self.assertIsNone(crow_one.get("meta"))
         self.assertIsNone(crow_one.get("badge"))
 

@@ -83,6 +83,57 @@ class CombatFxTests(unittest.TestCase):
             events[0],
         )
 
+    def test_heal_enemy_emits_structured_heal_fx(self):
+        events = []
+        messages = []
+        source_enemy = {"id": "e1", "key": "Barrow Wisp", "hp": 12, "max_hp": 12}
+        target_enemy = {"id": "e2", "key": "Bog Wolf", "hp": 5, "max_hp": 16}
+        encounter = SimpleNamespace(
+            _save_enemy=lambda current_enemy: None,
+            _emit_combat_fx=lambda **event: events.append(event),
+            obj=SimpleNamespace(msg_contents=lambda message, **kwargs: messages.append(message)),
+        )
+
+        healed = BraveEncounter._heal_enemy(encounter, source_enemy, target_enemy, 6)
+
+        self.assertTrue(healed)
+        self.assertEqual(11, target_enemy["hp"])
+        self.assertEqual("Barrow Wisp", events[0]["source"])
+        self.assertEqual("Bog Wolf", events[0]["target"])
+        self.assertEqual("e:e1", events[0]["source_ref"])
+        self.assertEqual("e:e2", events[0]["target_ref"])
+        self.assertEqual("heal", events[0]["kind"])
+        self.assertTrue(any("mends Bog Wolf for 6 HP" in message for message in messages))
+
+    def test_enemy_bleed_tick_emits_structured_damage_fx(self):
+        enemy = {
+            "id": "e4",
+            "key": "Mire Hound",
+            "hp": 10,
+            "max_hp": 18,
+            "bleed_turns": 1,
+            "bleed_damage": 3,
+            "poison_turns": 0,
+            "poison_damage": 0,
+        }
+        events = []
+        encounter = SimpleNamespace(
+            get_active_enemies=lambda: [enemy],
+            _save_enemy=lambda current_enemy: None,
+            _emit_combat_fx=lambda **event: events.append(event),
+            _emit_defeat_fx=Mock(),
+            _award_enemy_defeat_credit=Mock(),
+            obj=SimpleNamespace(msg_contents=lambda message, **kwargs: None),
+        )
+
+        BraveEncounter._apply_enemy_effects(encounter)
+
+        self.assertEqual(7, enemy["hp"])
+        self.assertEqual(1, len(events))
+        self.assertEqual("damage", events[0]["kind"])
+        self.assertEqual("e:e4", events[0]["target_ref"])
+        self.assertEqual("bleed", events[0]["element"])
+
     def test_enemy_dot_kill_uses_defeat_fx_path(self):
         enemy = {
             "id": "e3",

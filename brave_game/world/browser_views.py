@@ -251,6 +251,7 @@ def _entry(
     lines=None,
     summary=None,
     icon=None,
+    background_icon=None,
     badge=None,
     command=None,
     prefill=None,
@@ -272,6 +273,8 @@ def _entry(
         "icon": icon,
         "badge": badge,
     }
+    if background_icon:
+        entry["background_icon"] = background_icon
     if selected:
         entry["selected"] = True
     if combat_state:
@@ -2953,7 +2956,7 @@ def build_combat_view(encounter, character):
             _entry(
                 display_name,
                 lines=lines,
-                icon=_enemy_icon(enemy),
+                background_icon=_enemy_icon(enemy),
                 command=f"attack {enemy['id']}",
                 chips=status_chips,
                 meters=[atb_meter(atb_state, enemy=True), hp_meter(enemy["hp"], enemy["max_hp"])],

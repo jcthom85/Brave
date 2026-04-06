@@ -2018,6 +2018,18 @@ class BraveEncounter(Script):
             return False
         self._save_enemy(target_enemy)
         self.obj.msg_contents(f"{source_enemy['key']} mends {target_enemy['key']} for {healed} HP.")
+        self._emit_combat_fx(
+            kind="heal",
+            source=source_enemy["key"],
+            target=target_enemy["key"],
+            source_ref=_combat_entry_ref(source_enemy),
+            target_ref=_combat_entry_ref(target_enemy),
+            amount=healed,
+            text=str(healed),
+            tone="heal",
+            impact="heal",
+            element="healing",
+        )
         return True
 
     def _apply_bleed(self, target, turns, damage):
@@ -2176,6 +2188,16 @@ class BraveEncounter(Script):
                 if enemy["bleed_turns"] <= 0:
                     enemy["bleed_damage"] = 0
                 self.obj.msg_contents(f"|r{enemy['key']} bleeds for {damage} damage.|n")
+                self._emit_combat_fx(
+                    kind="damage",
+                    target=enemy["key"],
+                    target_ref=_combat_entry_ref(enemy),
+                    amount=damage,
+                    text=str(damage),
+                    tone="damage",
+                    impact="damage",
+                    element="bleed",
+                )
                 changed = True
 
             if enemy["hp"] > 0 and enemy.get("poison_turns", 0) > 0:
