@@ -4693,10 +4693,10 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry-ornament {
-    right: -8px;
+    left: 50%;
     top: 50%;
-    transform: translateY(-50%);
-    font-size: 5.4rem;
+    transform: translate(-50%, -50%);
+    font-size: 6.2rem;
     line-height: 1;
     color: rgba(240, 177, 163, 0.14);
     text-shadow: 0 0 22px rgba(194, 109, 96, 0.12);
@@ -9261,8 +9261,9 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--targets .brave-view__entry-ornament {
-        right: -6px;
-        font-size: 4.3rem;
+        left: 50%;
+        font-size: 4.9rem;
+        transform: translate(-50%, -50%);
         color: rgba(240, 177, 163, 0.12);
     }
 
