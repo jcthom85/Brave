@@ -4285,6 +4285,20 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     background: linear-gradient(90deg, rgba(213, 138, 118, 0.98), rgba(174, 82, 74, 0.92));
 }
 
+.brave-view__entry-spacer {
+    flex: 1 1 auto;
+}
+
+.brave-view__entry-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.brave-view__entry-footer:empty {
+    display: none;
+}
+
 .brave-view__entry-chips {
     display: flex;
     flex-wrap: wrap;
@@ -4627,6 +4641,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--combat .brave-view__section--targets .brave-view__entry {
     padding: 11px 11px 9px;
     gap: 6px;
+    display: flex;
+    flex-direction: column;
     transition:
         transform 150ms ease,
         box-shadow 180ms ease,
@@ -4686,7 +4702,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--combat .brave-view__section--targets .brave-view__entry {
     position: relative;
     overflow: hidden;
-    min-height: 180px;
+    height: 192px;
+    min-height: 192px;
+    max-height: 192px;
     border-color: rgba(166, 92, 84, 0.22);
     background:
         radial-gradient(circle at 0 0, rgba(166, 92, 84, 0.14), transparent 44%),
@@ -4697,11 +4715,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         0 16px 28px rgba(0, 0, 0, 0.22);
 }
 
-.brave-view--combat .brave-view__section--party .brave-view__entry,
+.brave-view--combat .brave-view__section--party .brave-view__entry {
+    position: relative;
+    min-height: 204px;
+}
+
 .brave-view--chargen .brave-view__entry {
     position: relative;
     overflow: hidden;
-    min-height: 180px;
+    min-height: 240px;
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-ornament {
@@ -5044,9 +5066,30 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     gap: 2px;
 }
 
+.brave-view--combat .brave-view__entry-spacer {
+    min-height: 0;
+}
+
+.brave-view--combat .brave-view__entry-footer {
+    justify-content: flex-end;
+    margin-top: auto;
+}
+
+.brave-view--combat .brave-view__entry-footer:empty {
+    display: flex;
+}
+
 .brave-view--combat .brave-view__section--party .brave-view__meters,
 .brave-view--combat .brave-view__section--targets .brave-view__meters {
     padding-top: 2px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__meters {
+    gap: 5px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__meter {
+    gap: 2px;
 }
 
 .brave-view--combat .brave-view__meter[data-meter-kind="atb"] {
@@ -5076,9 +5119,27 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: none;
 }
 
+.brave-view--combat .brave-view__section--targets .brave-view__entry-footer {
+    flex: 0 0 2.75rem;
+    min-height: 2.75rem;
+    max-height: 2.75rem;
+}
+
 .brave-view--combat .brave-view__section--party .brave-view__entry-title {
     font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     color: #e8f6f2;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry {
+    padding-bottom: 2.9rem;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-footer {
+    position: absolute;
+    left: 11px;
+    right: 11px;
+    bottom: 9px;
+    min-height: 2.2rem;
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip,
@@ -5138,11 +5199,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__meter-track {
+    height: 6px;
     background: rgba(86, 122, 117, 0.16);
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-track {
-    height: 7px;
+    height: 6px;
     background: rgba(77, 120, 128, 0.24);
 }
 
@@ -9186,9 +9248,8 @@ body.brave-scene-combat-enter .inputwrap {
 
     .brave-view--combat .brave-view__section--party .brave-view__entry,
     .brave-view--combat .brave-view__section--targets .brave-view__entry {
-        display: grid;
-        grid-template-rows: auto auto auto 1fr;
-        align-content: start;
+        display: flex;
+        flex-direction: column;
         gap: 5px;
         padding: 7px 7px 6px;
         min-height: 104px;
@@ -9202,6 +9263,7 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry {
+        min-height: 122px;
         border-color: rgba(116, 149, 146, 0.24);
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
@@ -9209,7 +9271,9 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--targets .brave-view__entry {
-        min-height: 104px;
+        height: 112px;
+        min-height: 112px;
+        max-height: 112px;
         border-color: rgba(170, 109, 96, 0.24);
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
@@ -9289,6 +9353,23 @@ body.brave-scene-combat-enter .inputwrap {
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-body {
         min-height: 1.2em;
+    }
+
+    .brave-view--combat .brave-view__section--targets .brave-view__entry-footer {
+        flex-basis: 1.9rem;
+        min-height: 1.9rem;
+        max-height: 1.9rem;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry {
+        padding-bottom: 2.35rem;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry-footer {
+        left: 7px;
+        right: 7px;
+        bottom: 6px;
+        min-height: 1.7rem;
     }
 
     .brave-view--combat .brave-view__section--targets .brave-view__entry-body:empty {

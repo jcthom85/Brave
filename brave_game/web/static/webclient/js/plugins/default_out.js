@@ -4716,6 +4716,20 @@ let defaultout_plugin = (function () {
                         rowClass += " brave-view__entry--ornamented";
                     }
                     var headClass = "brave-view__entry-head" + (lead ? "" : " brave-view__entry-head--iconless");
+                    var footerMarkup =
+                        "<div class='brave-view__entry-footer'>"
+                        + (entry && Array.isArray(entry.chips) && entry.chips.length
+                            ? "<div class='brave-view__entry-chips'>" + entry.chips.map(renderChip).join("") + "</div>"
+                            : "")
+                        + (lines.length
+                            ? "<div class='brave-view__entry-body'>"
+                                + lines.map(function (line) {
+                                    return "<div class='brave-view__entry-line'>" + escapeHtml(line) + "</div>";
+                                }).join("")
+                                + "</div>"
+                            : "")
+                        + renderInlineActions(entry && entry.actions)
+                        + "</div>";
                     return (
                         "<" + tagName + " class='" + rowClass + "'"
                         + extraAttrs
@@ -4733,17 +4747,8 @@ let defaultout_plugin = (function () {
                         + "</div>"
                         + renderMeters(entry && entry.meters)
                         + renderThemePreview(entry && entry.preview)
-                        + (entry && Array.isArray(entry.chips) && entry.chips.length
-                            ? "<div class='brave-view__entry-chips'>" + entry.chips.map(renderChip).join("") + "</div>"
-                            : "")
-                        + (lines.length
-                            ? "<div class='brave-view__entry-body'>"
-                                + lines.map(function (line) {
-                                    return "<div class='brave-view__entry-line'>" + escapeHtml(line) + "</div>";
-                                }).join("")
-                                + "</div>"
-                            : "")
-                        + renderInlineActions(entry && entry.actions)
+                        + "<div class='brave-view__entry-spacer'></div>"
+                        + footerMarkup
                         + "</" + tagName + ">"
                     );
                 }).join("")
