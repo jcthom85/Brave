@@ -72,7 +72,6 @@ HELP_ENTRY_DICTS = [
             - Use `shop`, `sell`, and `shift` at Brambleford Outfitters for the first town trade loop
             - Use `forge` at Ironroot Forge to turn field loot and silver into better gear
             - Use `pray` at the Chapel of the Dawn Bell for a modest one-encounter blessing
-            - Use `portals` at the Nexus Gate to inspect the first guest-world bridge
             - Use `party` to form a family group before tougher fights
             - Use `party where` to find one another and `party follow` to stay together
             - Use `quests` to track your starter objectives
@@ -98,7 +97,6 @@ HELP_ENTRY_DICTS = [
             Use `pray` at the Chapel of the Dawn Bell when you want a modest one-run blessing before a harder push.
             Use `cook` in the inn to see simple fish recipes, then `eat <meal>` to carry a buff into the field.
             Use `n` to reach the Training Yard, then `e` to reach the Great Observatory and `e` again for the Nexus Gate.
-            At the ring, use `portals` and then `e` to enter the first guest world.
             Use `party` to review members or invite allies standing in the same room.
             Use `party where` to get route hints to your family and `party follow` when you want someone to lead.
             Use `shop` to review prices, `sell` to trade pack items, and `shift` to improve your next few sales.

@@ -170,6 +170,8 @@ def _execute_ranger_ability(encounter, character, ability_key, ability_name, tar
             encounter._weapon_damage(derived["attack_power"], target["armor"], bonus=damage_bonus),
             damage_type="physical",
         )
+        if target["hp"] > 0:
+            encounter._try_interrupt_enemy_action(character, target, ability_name)
         return
 
     if ability_key == "snaretrap":
@@ -262,8 +264,10 @@ def _execute_cleric_ability(encounter, character, ability_key, ability_name, tar
     if ability_key == "blessing":
         encounter._heal_character(character, target, encounter._scaled_heal_amount(derived, 6, variance=2, divisor=4), heal_type="holy")
         state = encounter._get_participant_state(target)
-        state["guard"] = max(state.get("guard", 0), 4 + level + derived.get("healing_power", 0))
+        guard_value = 4 + level + derived.get("healing_power", 0)
+        state["guard"] = max(state.get("guard", 0), guard_value)
         encounter._save_participant_state(target, state)
+        encounter._apply_reaction_guard(character, target, amount=guard_value, label="Blessing")
         encounter.obj.msg_contents(f"{character.key} wraps {target.key} in a brief blessing of shelter.")
         encounter._record_participant_contribution(character, meaningful=True, mitigation=state["guard"], utility=1)
         return
@@ -552,11 +556,13 @@ def _execute_rogue_ability(encounter, character, ability_key, ability_name, targ
 
     if ability_key == "feint":
         state = encounter._get_participant_state(character)
-        state["guard"] = max(state.get("guard", 0), 4 + character.db.brave_level)
+        guard_value = 4 + character.db.brave_level
+        state["guard"] = max(state.get("guard", 0), guard_value)
         state["feint_turns"] = 2
         state["feint_accuracy_bonus"] = 6
         state["feint_dodge_bonus"] = 10
         encounter._save_participant_state(character, state)
+        encounter._apply_reaction_guard(character, character, amount=guard_value, label="Feint")
         encounter.obj.msg_contents(f"{character.key} slips into a false opening, ready to punish the first bad reaction.")
         encounter._record_participant_contribution(character, meaningful=True, mitigation=state["guard"], utility=1)
         return

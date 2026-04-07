@@ -29,8 +29,6 @@ get_item_category = ITEM_CONTENT.get_item_category
 QUESTS = QUEST_CONTENT.quests
 STARTING_QUESTS = QUEST_CONTENT.starting_quests
 group_quest_keys_by_region = QUEST_CONTENT.group_quest_keys_by_region
-PORTALS = SYSTEMS_CONTENT.portals
-PORTAL_STATUS_LABELS = SYSTEMS_CONTENT.portal_status_labels
 
 
 WEB_PROTOCOLS = {"websocket", "ajax/comet", "webclient"}
@@ -543,29 +541,6 @@ def build_forge_panel(character):
             _chip(f"{ready_count} ready", "task_alt", "good" if ready_count else "muted"),
         ],
         sections=[_section("Orders", "construction", items)],
-    )
-
-
-def build_portals_panel():
-    """Build the browser-side companion panel for the current portal list."""
-
-    chips = [_chip(f"{len(PORTALS)} gates", "travel_explore", "accent")]
-    items = []
-    for portal in PORTALS.values():
-        items.append(
-            _item(
-                f"{portal['name']} · {PORTAL_STATUS_LABELS.get(portal['status'], portal['status'].title())}",
-                icon="public",
-            )
-        )
-
-    return _make_panel(
-        "Portal Network",
-        "Nexus Gates",
-        eyebrow_icon="travel_explore",
-        title_icon="public",
-        chips=chips,
-        sections=[_section("Current Gates", "travel_explore", items[:6])],
     )
 
 

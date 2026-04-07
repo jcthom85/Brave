@@ -117,6 +117,11 @@ class Character(ObjectParent, DefaultCharacter):
         for stat in CHARACTER_CONTENT.primary_stats:
             primary[stat] = class_data["base_stats"].get(stat, 0) + race["bonuses"].get(stat, 0)
 
+        race_trait_bonuses = race.get("trait_bonuses", {})
+        for stat, bonus in race_trait_bonuses.items():
+            if stat in CHARACTER_CONTENT.primary_stats:
+                primary[stat] += bonus
+
         passive_bonuses = CHARACTER_CONTENT.get_passive_ability_bonuses(self.db.brave_class, level)
         for stat in CHARACTER_CONTENT.primary_stats:
             primary[stat] += passive_bonuses.get(stat, 0)
@@ -162,6 +167,11 @@ class Character(ObjectParent, DefaultCharacter):
             derived[stat] = derived.get(stat, 0) + bonus
 
         for stat, bonus in chapel_bonuses.items():
+            if stat in CHARACTER_CONTENT.primary_stats:
+                continue
+            derived[stat] = derived.get(stat, 0) + bonus
+
+        for stat, bonus in race_trait_bonuses.items():
             if stat in CHARACTER_CONTENT.primary_stats:
                 continue
             derived[stat] = derived.get(stat, 0) + bonus

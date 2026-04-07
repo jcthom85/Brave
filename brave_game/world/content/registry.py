@@ -299,8 +299,6 @@ class SystemsContentRegistry:
     shift_outcomes: tuple
     forge_room_id: str
     forge_recipes: dict
-    portals: dict
-    portal_status_labels: dict
     trophies: dict
 
     def format_ingredient_list(self, ingredients, item_lookup):
@@ -309,12 +307,6 @@ class SystemsContentRegistry:
             item_name = item_lookup[template_id]["name"]
             parts.append(f"{item_name} x{quantity}")
         return ", ".join(parts)
-
-    def get_portal(self, portal_key):
-        return self.portals.get(portal_key)
-
-    def get_portal_status_label(self, status_key):
-        return self.portal_status_labels.get(status_key, str(status_key or "").title())
 
 
 @dataclass(frozen=True)
@@ -414,7 +406,6 @@ def _build_systems_registry():
     activities = dict(payload.get("activities", {}))
     commerce = dict(payload.get("commerce", {}))
     forging = dict(payload.get("forging", {}))
-    portals = dict(payload.get("portals", {}))
     trophies = dict(payload.get("trophies", {}))
     return SystemsContentRegistry(
         source_path=str(SYSTEMS_PACK_PATH),
@@ -425,8 +416,6 @@ def _build_systems_registry():
         shift_outcomes=tuple(commerce.get("shift_outcomes", [])),
         forge_room_id=str(forging.get("forge_room_id", "")),
         forge_recipes=dict(forging.get("forge_recipes", {})),
-        portals=dict(portals.get("portals", {})),
-        portal_status_labels=dict(portals.get("portal_status_labels", {})),
         trophies=dict(trophies.get("trophies", {})),
     )
 

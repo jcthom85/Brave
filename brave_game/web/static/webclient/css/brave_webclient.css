@@ -4176,6 +4176,10 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     min-height: 1.35em;
 }
 
+.brave-view__entry-head--iconless {
+    padding-left: 0.2rem;
+}
+
 .brave-view__entry-ornament {
     position: absolute;
     pointer-events: none;
@@ -4690,6 +4694,35 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         0 16px 28px rgba(0, 0, 0, 0.22);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry,
+.brave-view--chargen .brave-view__entry {
+    position: relative;
+    overflow: hidden;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-ornament {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 6.2rem;
+    line-height: 1;
+    color: rgba(113, 182, 165, 0.12);
+    text-shadow: 0 0 22px rgba(113, 182, 165, 0.08);
+    font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 48;
+    z-index: 0;
+}
+
+.brave-view--chargen .brave-view__entry-ornament {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 6.2rem;
+    line-height: 1;
+    color: rgba(139, 74, 41, 0.08);
+    font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 48;
+    z-index: 0;
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry-ornament {

@@ -62,8 +62,6 @@ ENCOUNTER_CONTENT = CONTENT.encounters
 ENEMY_TEMPLATES = ENCOUNTER_CONTENT.enemy_templates
 COOKING_RECIPES = SYSTEMS_CONTENT.cooking_recipes
 format_ingredient_list = SYSTEMS_CONTENT.format_ingredient_list
-PORTALS = SYSTEMS_CONTENT.portals
-PORTAL_STATUS_LABELS = SYSTEMS_CONTENT.portal_status_labels
 
 
 PACK_KIND_ORDER = ("consumable", "ingredient", "loot", "equipment")
@@ -242,6 +240,21 @@ def _enemy_icon(enemy):
     if {"slime", "ooze"} & tags or "slime" in name:
         return "water_drop"
     return "warning"
+
+
+def _class_icon(actor):
+    """Return the Material Symbol icon for a character's class."""
+    try:
+        # For player characters in combat
+        if hasattr(actor, "db"):
+            class_key = getattr(actor.db, "brave_class", None)
+            return CLASSES.get(class_key, {}).get("icon", "person")
+        # For class data dicts in chargen
+        if isinstance(actor, dict):
+            return actor.get("icon", "swords")
+    except Exception:
+        pass
+    return "person"
 
 
 def _entry(
@@ -865,7 +878,8 @@ def build_chargen_view(account, state, *, error=None):
                     class_data["name"],
                     meta=class_data["role"],
                     lines=[class_data["summary"]],
-                    icon="swords",
+                    icon=class_data.get("icon", "swords"),
+                    background_icon=_class_icon(class_data),
                     command=class_key,
                     chips=[_chip("Current", "check_circle", "good")] if state.get("class") == class_key else [],
                 )
@@ -2321,50 +2335,6 @@ def build_cook_view(character, *, status_message=None, status_tone="muted"):
     )
 
 
-def build_portals_view(character):
-    """Return a browser-first main view for current Nexus gates."""
-
-    sections = []
-    for status_key, section_title in (("stable", "Stable"), ("dormant", "Dormant"), ("sealed", "Sealed")):
-        items = []
-        for portal in PORTALS.values():
-            if portal["status"] != status_key:
-                continue
-            lines = [f"Resonance: {portal['resonance'].replace('_', ' ').title()}"]
-            if portal.get("travel_hint"):
-                lines.append(f"Entry route: {portal['travel_hint']}")
-            command = None
-            actions = []
-            if portal["status"] == "stable" and portal.get("travel_hint"):
-                command = _movement_command(portal["travel_hint"], f"travel {portal['travel_hint']}")
-                actions.append(_action("Travel", command, "travel_explore", tone="accent"))
-            items.append(
-                _entry(
-                    portal["name"],
-                    meta=PORTAL_STATUS_LABELS.get(portal["status"], portal["status"].title()),
-                    lines=lines,
-                    summary=portal["summary"],
-                    icon="travel_explore",
-                    command=command,
-                    actions=actions,
-                )
-            )
-        sections.append(_section(section_title, "travel_explore", "entries", items=items or [_entry("None at the moment.", icon="info")]))
-
-    stable_count = sum(1 for portal in PORTALS.values() if portal["status"] == "stable")
-    return _make_view(
-        "Nexus",
-        "Gates",
-        eyebrow_icon="travel_explore",
-        title_icon="public",
-        subtitle="The ring lists what Brambleford can currently reach and what still refuses to answer.",
-        chips=[_chip(f"{stable_count} stable", "travel_explore", "accent" if stable_count else "muted")],
-        sections=sections,
-        back=True,
-        reactive=_reactive_from_character(character, scene="service"),
-    )
-
-
 def build_travel_view(character):
     """Return a browser-first main view for travel fallback."""
 
@@ -2910,6 +2880,7 @@ def build_combat_view(encounter, character):
                 participant.key,
                 meta="You" if participant.id == character.id else None,
                 icon="person",
+                background_icon=_class_icon(participant),
                 chips=status_chips,
                 meters=meters,
                 selected=bool(selected_target_kind == "ally" and selected_target_id == participant.id),

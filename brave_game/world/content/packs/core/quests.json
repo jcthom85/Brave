@@ -77,7 +77,9 @@
       "title": "Bogwater Rumors"
     },
     "bridgework_for_joss": {
+      "branch_choice": true,
       "giver": "Joss Veller",
+      "next_step": "Speak with Joss Veller at the observatory, then take the stable gate east to Junk-Yard Landing.",
       "objectives": [
         {
           "description": "Reach the Relay Trench beyond the first salvage drifts.",
@@ -154,6 +156,7 @@
       "title": "Do Not Disturb the Dead"
     },
     "fencebreakers": {
+      "completion_reaction": "The cutters are thinning and the camp beyond Wolf Turn is clearly the heart of the problem now.",
       "giver": "Mira Fenleaf",
       "next_step": "Push through to Fencebreaker Camp and bring down Ruk the Fence-Cutter.",
       "objectives": [
@@ -167,6 +170,7 @@
       "prerequisites": [
         "roadside_howls"
       ],
+      "reward_tip": "You should have enough silver by now to care about shop, sell, and your first forge options before Ruk.",
       "rewards": {
         "silver": 12,
         "xp": 80
@@ -407,6 +411,7 @@
       "title": "Miretooth's Claim"
     },
     "practice_makes_heroes": {
+      "completion_reaction": "Captain Harl sends you out of the yard with a real reward and the expectation that you can handle Brambleford on your own now.",
       "giver": "Captain Harl Rowan",
       "next_step": "Go south to Town Green, then west to the inn and speak with Uncle Pib Underbough.",
       "objectives": [
@@ -421,9 +426,11 @@
         "xp": 40
       },
       "summary": "Report to the training yard and get your bearings before leaving town.",
-      "title": "Practice Makes Heroes"
+      "title": "Practice Makes Heroes",
+      "reward_tip": "This is your first clean payout. Use the silver on food, a reset, or a small gear upgrade before you leave town."
     },
     "rats_in_the_kettle": {
+      "completion_reaction": "The cellar is fit for flour again, and the inn starts treating you like a real problem-solver instead of a fresh arrival.",
       "giver": "Uncle Pib Underbough",
       "next_step": "Go east to the East Gate and speak with Mira Fenleaf about the road.",
       "objectives": [
@@ -442,6 +449,7 @@
       "prerequisites": [
         "practice_makes_heroes"
       ],
+      "reward_tip": "Keep Uncle Pib's fish pie for the road, then check your pack and rest before you head for the East Gate.",
       "rewards": {
         "items": [
           {
@@ -456,6 +464,7 @@
       "title": "Rats in the Kettle"
     },
     "roadside_howls": {
+      "completion_reaction": "You have seen enough of Goblin Road to feel the town walls fall behind you.",
       "giver": "Mira Fenleaf",
       "next_step": "Thin the goblin cutters still working along Goblin Road.",
       "objectives": [
@@ -478,6 +487,7 @@
       "prerequisites": [
         "rats_in_the_kettle"
       ],
+      "reward_tip": "The road is paying in real silver now. If your pack is filling up, sell the junk before the next longer push.",
       "rewards": {
         "items": [
           {
@@ -492,6 +502,8 @@
       "title": "Roadside Howls"
     },
     "ruk_the_fence_cutter": {
+      "chapter_complete": "First Hour Chapter",
+      "chapter_reaction": "Mira, Sister Maybelle, Joss, and the Trophy Hall all have something new waiting back in Brambleford.",
       "giver": "Mira Fenleaf",
       "next_step": "After Ruk falls, check in with Mira, Sister Maybelle, or Joss to choose the next branch.",
       "objectives": [
@@ -511,10 +523,14 @@
       ],
       "rewards": {
         "silver": 18,
+        "trophies": [
+          "ruk_fencecleaver_head"
+        ],
         "xp": 120
       },
       "summary": "Track down the goblin brute leading the fence raiders and break his hold on Goblin Road.",
-      "title": "Ruk the Fence-Cutter"
+      "title": "Ruk the Fence-Cutter",
+      "reward_tip": "Spend the silver and sort your pack before leaving the road behind. The next branch is longer and less forgiving."
     },
     "signal_in_the_scrap": {
       "giver": "Joss Veller",
@@ -671,7 +687,9 @@
       "title": "The South Light"
     },
     "what_whispers_in_the_wood": {
+      "branch_choice": true,
       "giver": "Sister Maybelle",
+      "next_step": "Speak with Sister Maybelle or Mira, then head south from the gate into Whispering Woods.",
       "objectives": [
         {
           "description": "Enter Whispering Woods by the old trail.",

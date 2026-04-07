@@ -230,20 +230,6 @@ def preview_forge_recipe(source_template_id, registry=None):
     }
 
 
-def preview_portal(portal_key, registry=None):
-    registry = registry or get_content_registry()
-    portal = registry.systems.get_portal(portal_key)
-    if not portal:
-        return None
-    entry_room_id = portal.get("entry_room")
-    entry_room = registry.world.get_room(entry_room_id) if entry_room_id else None
-    return {
-        "portal": portal,
-        "status_label": registry.systems.get_portal_status_label(portal.get("status")),
-        "entry_room_name": entry_room.get("key") if entry_room else None,
-    }
-
-
 def preview_dialogue(entity_id, registry=None):
     registry = registry or get_content_registry()
     entity = registry.world.get_entity(entity_id)

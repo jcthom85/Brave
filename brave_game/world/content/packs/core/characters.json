@@ -403,12 +403,13 @@
   "classes": {
     "cleric": {
       "base_stats": {
-        "agility": 2,
-        "intellect": 3,
-        "spirit": 7,
         "strength": 2,
-        "vitality": 5
+        "agility": 2,
+        "intellect": 4,
+        "spirit": 8,
+        "vitality": 4
       },
+      "icon": "healing",
       "name": "Cleric",
       "progression": [
         [
@@ -462,12 +463,13 @@
     },
     "druid": {
       "base_stats": {
-        "agility": 3,
-        "intellect": 5,
-        "spirit": 6,
         "strength": 2,
+        "agility": 4,
+        "intellect": 6,
+        "spirit": 7,
         "vitality": 4
       },
+      "icon": "park",
       "name": "Druid",
       "progression": [
         [
@@ -489,6 +491,10 @@
         [
           4,
           "Moonfire"
+        ],
+        [
+          5,
+          "Verdant Guard"
         ],
         [
           5,
@@ -527,6 +533,7 @@
         "strength": 1,
         "vitality": 3
       },
+      "icon": "auto_awesome",
       "name": "Mage",
       "progression": [
         [
@@ -580,12 +587,13 @@
     },
     "paladin": {
       "base_stats": {
+        "strength": 4,
         "agility": 2,
         "intellect": 2,
-        "spirit": 5,
-        "strength": 4,
-        "vitality": 6
+        "spirit": 6,
+        "vitality": 7
       },
+      "icon": "shield",
       "name": "Paladin",
       "progression": [
         [
@@ -639,12 +647,13 @@
     },
     "ranger": {
       "base_stats": {
-        "agility": 6,
+        "strength": 3,
+        "agility": 7,
         "intellect": 2,
         "spirit": 2,
-        "strength": 3,
         "vitality": 4
       },
+      "icon": "my_location",
       "name": "Ranger",
       "progression": [
         [
@@ -698,12 +707,13 @@
     },
     "rogue": {
       "base_stats": {
+        "strength": 3,
         "agility": 6,
         "intellect": 2,
         "spirit": 2,
-        "strength": 3,
-        "vitality": 4
+        "vitality": 3
       },
+      "icon": "visibility_off",
       "name": "Rogue",
       "progression": [
         [
@@ -763,6 +773,7 @@
         "strength": 5,
         "vitality": 6
       },
+      "icon": "swords",
       "name": "Warrior",
       "progression": [
         [
@@ -1013,6 +1024,14 @@
         "dodge": 2
       },
       "name": "Wild Grace"
+    },
+    "verdantguard": {
+      "name": "Verdant Guard",
+      "bonuses": {
+        "max_hp": 8,
+        "armor": 2,
+        "healing_power": 1
+      }
     }
   },
   "primary_stats": [
@@ -1031,7 +1050,11 @@
       },
       "name": "Dwarf",
       "perk": "Stoneblood",
-      "summary": "Hardy, disciplined, and stubborn."
+      "summary": "Hardy, disciplined, and stubborn.",
+      "trait_bonuses": {
+        "armor": 1,
+        "max_hp": 2
+      }
     },
     "elf": {
       "bonuses": {
@@ -1041,7 +1064,12 @@
       },
       "name": "Elf",
       "perk": "Keen Senses",
-      "summary": "Graceful, perceptive, and naturally magical."
+      "summary": "Graceful, perceptive, and naturally magical.",
+      "trait_bonuses": {
+        "accuracy": 2,
+        "precision": 1,
+        "dodge": 1
+      }
     },
     "half_orc": {
       "bonuses": {
@@ -1050,7 +1078,12 @@
       },
       "name": "Half-Orc",
       "perk": "Battle Hunger",
-      "summary": "Fierce, intimidating, and strong."
+      "summary": "Fierce, intimidating, and strong.",
+      "trait_bonuses": {
+        "attack_power": 1,
+        "max_stamina": 1,
+        "threat": 1
+      }
     },
     "halfling": {
       "bonuses": {
@@ -1060,7 +1093,12 @@
       },
       "name": "Halfling",
       "perk": "Fortune's Step",
-      "summary": "Quick, lucky, and easy to underestimate."
+      "summary": "Quick, lucky, and easy to underestimate.",
+      "trait_bonuses": {
+        "accuracy": 1,
+        "crit_chance": 1,
+        "dodge": 1
+      }
     },
     "human": {
       "bonuses": {
@@ -1072,7 +1110,8 @@
       },
       "name": "Human",
       "perk": "Resolve",
-      "summary": "Flexible, ambitious, and practical."
+      "summary": "Flexible, ambitious, and practical.",
+      "trait_bonuses": {}
     }
   },
   "starting_class": "warrior",

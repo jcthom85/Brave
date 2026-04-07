@@ -270,15 +270,11 @@ TALK_RULES = {
             completed="foreman_coilback",
         ),
         _rule(
-            "Every gate needs an anchor or you stop calling it travel and start calling it loss. The ring below is holding one stable bridge for now. Use `portals` to review the lineup, then go `east` when you're ready to test your nerve somewhere stranger.",
-            room_id="brambleford_nexus_gate",
-        ),
-        _rule(
-            "Different sky, same bones. The world here skins your instincts as tech. `sheet` will show the local names, and the return gate will always answer while I keep the bridge lit.",
+            "Different sky, same bones. The world here skins your instincts as tech. `sheet` will show the local names, and the return path will always answer while I keep the bridge lit.",
             resonance="tech",
         ),
         _rule(
-            "Most folk think I light lamps. True enough. They just forget a gate is another sort of lamp if you know what to feed it. The observatory's the town's portal center, whether the mayor likes the phrase or not."
+            "Most folk think I light lamps. True enough. They just forget a gate is another sort of lamp if you know what to feed it. The observatory's the town's center, whether the mayor likes the phrase or not."
         ),
     ],
     "mayor_elric_thorne": [

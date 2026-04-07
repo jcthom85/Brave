@@ -19,14 +19,20 @@ TARGET_BADGES = {
 }
 
 REACTION_ABILITY_KEYS = {
-    "interrupt": {"shieldbash", "cheapshot", "frostbind", "entanglingroots"},
-    "guard": {"intercept", "defend", "brace", "guardingaura", "shieldofdawn"},
-    "cleanse": {"cleanse", "renewinglight", "blessing", "livingcurrent"},
+    "interrupt": {"aimedshot", "shieldbash", "cheapshot", "frostbind", "entanglingroots"},
+    "guard": {"blessing", "defend", "feint", "intercept", "brace", "guardingaura", "shieldofdawn"},
+    "cleanse": {"cleanse", "renewinglight", "livingcurrent"},
 }
 
 REACTION_ITEM_EFFECT_TYPES = {
     "guard": "guard",
     "cleanse": "cleanse",
+}
+
+REACTION_ROLE_LABELS = {
+    "interrupt": "INTERRUPT",
+    "guard": "GUARD",
+    "cleanse": "CLEANSE",
 }
 
 RESOURCE_SHORT_LABELS = {
@@ -211,6 +217,8 @@ def build_combat_ability_actions(encounter, character):
             "reaction_role": reaction_role,
             "tooltip": _timing_tooltip(timing, reaction_role=reaction_role),
         }
+        if reaction_role:
+            action["text"] += f" · {REACTION_ROLE_LABELS.get(reaction_role, reaction_role.upper())}"
 
         if target_mode == "enemy":
             if not enemies:
@@ -305,6 +313,8 @@ def build_combat_item_actions(encounter, character):
             "reaction_role": reaction_role,
             "tooltip": _timing_tooltip(timing, reaction_role=reaction_role),
         }
+        if reaction_role:
+            action["text"] += f" · {REACTION_ROLE_LABELS.get(reaction_role, reaction_role.upper())}"
 
         if target_mode == "enemy":
             if not enemies:

@@ -213,14 +213,6 @@ def _validate_systems_content(registry, errors):
             if item_id not in items.item_templates:
                 errors.append(f"Forge recipe {source_id} references unknown material: {item_id}")
 
-    for portal_key, portal in systems.portals.items():
-        status = portal.get("status")
-        if status not in systems.portal_status_labels:
-            errors.append(f"Portal {portal_key} uses unknown status: {status}")
-        entry_room = portal.get("entry_room")
-        if entry_room and entry_room not in room_ids:
-            errors.append(f"Portal {portal_key} references unknown entry room: {entry_room}")
-
     for trophy_key, trophy in systems.trophies.items():
         if not trophy.get("name"):
             errors.append(f"Trophy {trophy_key} is missing a name")
