@@ -85,7 +85,6 @@ class ContentValidationTests(unittest.TestCase):
             outfitters_room_id="missing_room",
             forge_room_id="missing_room",
             forge_recipes={**registry.systems.forge_recipes, "missing_source": {"result": "missing_item", "materials": {"missing_item": 1}}},
-            portals={**registry.systems.portals, "broken_portal": {"status": "unknown", "entry_room": "missing_room"}},
             trophies={**registry.systems.trophies, "broken_trophy": {"summary": "Missing fields."}},
         )
         broken_registry = replace(registry, items=broken_items, quests=broken_quests, world=broken_world, encounters=broken_encounters, dialogue=broken_dialogue, systems=broken_systems)
@@ -116,7 +115,5 @@ class ContentValidationTests(unittest.TestCase):
         self.assertTrue(any("Commerce references unknown outfitters room" in error for error in errors))
         self.assertTrue(any("Forging references unknown forge room" in error for error in errors))
         self.assertTrue(any("Forge recipe references unknown source item" in error for error in errors))
-        self.assertTrue(any("Portal broken_portal uses unknown status" in error for error in errors))
-        self.assertTrue(any("Portal broken_portal references unknown entry room" in error for error in errors))
         self.assertTrue(any("Trophy broken_trophy is missing a name" in error for error in errors))
         self.assertTrue(any("Trophy broken_trophy is missing a placeholder" in error for error in errors))

@@ -11,7 +11,6 @@ from world.content import (
     preview_enemy,
     preview_forge_recipe,
     preview_item,
-    preview_portal,
     preview_quest,
     preview_race,
     preview_readable,
@@ -74,10 +73,6 @@ def preview_content(kind, args, registry=None):
         if len(tokens) != 1:
             raise ValueError("Usage: content preview forge <source_template_id>")
         return preview_forge_recipe(tokens[0], registry=registry)
-    if normalized == "portal":
-        if len(tokens) != 1:
-            raise ValueError("Usage: content preview portal <portal_key>")
-        return preview_portal(tokens[0], registry=registry)
     if normalized == "dialogue":
         if len(tokens) != 1:
             raise ValueError("Usage: content preview dialogue <entity_id>")
@@ -187,13 +182,6 @@ def mutate_content(kind, target, raw_payload, *, write=False, editor=None, stage
             raise ValueError("Encounter-table payload must be a JSON list.")
         return editor.upsert_room_encounters(key, payload, write=write, stage=stage, author=author)
 
-    if normalized == "portal":
-        if not key:
-            raise ValueError("Portal updates require a portal key.")
-        if not isinstance(payload, dict):
-            raise ValueError("Portal payload must be a JSON object.")
-        return editor.upsert_portal(key, payload, write=write, stage=stage, author=author)
-
     if normalized == "forge":
         if not key:
             raise ValueError("Forge updates require a source template id.")
@@ -254,10 +242,6 @@ def remove_content(kind, target, *, write=False, editor=None, stage="live", auth
         if not key:
             raise ValueError("Encounter-table removal requires a room id.")
         return editor.delete_room_encounters(key, write=write, stage=stage, author=author)
-    if normalized == "portal":
-        if not key:
-            raise ValueError("Portal removal requires a portal key.")
-        return editor.delete_portal(key, write=write, stage=stage, author=author)
     if normalized == "forge":
         if not key:
             raise ValueError("Forge removal requires a source template id.")
@@ -357,7 +341,7 @@ class CmdContent(BraveCharacterCommand):
 
     def _handle_preview(self, tokens):
         if not tokens:
-            raise ValueError("Usage: content preview <room|quest|class|race|character-config|item|encounter|forge|portal|dialogue|readable|encounters|enemy> ...")
+            raise ValueError("Usage: content preview <room|quest|class|race|character-config|item|encounter|forge|dialogue|readable|encounters|enemy> ...")
         kind = tokens[0]
         payload = preview_content(kind, tokens[1:])
         if payload is None:

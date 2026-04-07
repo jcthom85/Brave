@@ -56,8 +56,32 @@ let defaultout_plugin = (function () {
     var ENABLE_ROOM_SWIPE_NAV = false;
     var pendingCombatFxEvents = [];
     var currentAtbAnimationFrame = null;
+    var currentAtbAnimationGeneration = 0;
+    var currentAtbResumeTimeout = null;
+    var combatAtbFrozenUntilMs = 0;
+    var currentCombatFxTimeout = null;
+    var combatFxBusyUntilMs = 0;
     var pendingCombatSwapTimeout = null;
     var suppressedCombatEntryRefs = {};
+    var combatLogBodyNode = null;
+    var combatLogScrollHandler = null;
+    var currentCombatLogScrollFrame = null;
+    var combatLogAutoscrollPinned = true;
+    var COMBAT_LOG_AUTOSCROLL_THRESHOLD_PX = 24;
+
+    var normalizeCombatActionTab = function (tab) {
+        return tab === "items" ? "items" : "abilities";
+    };
+
+    var shouldPreservePickerForViewSwap = function (nextViewData) {
+        return !!(
+            currentPickerData
+            && currentViewData
+            && currentViewData.variant === "combat"
+            && nextViewData
+            && nextViewData.variant === "combat"
+        );
+    };
 
     var isMobileViewport = function () {
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
@@ -1870,7 +1894,33 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var ensureSceneRailHost = function () {
+        var mwin = document.getElementById("messagewindow");
+        if (!mwin) {
+            return null;
+        }
+        var rail = document.getElementById("scene-rail");
+        if (rail && rail.parentNode === mwin) {
+            return rail;
+        }
+        if (rail && rail.parentNode) {
+            rail.parentNode.removeChild(rail);
+        }
+
+        rail = document.createElement("div");
+        rail.id = "scene-rail";
+        rail.className = "scene-rail";
+        rail.setAttribute("aria-hidden", "true");
+        rail.innerHTML =
+            "<section id='scene-pack-panel' class='scene-rail__panel scene-rail__panel--pack scene-rail__panel--hidden scene-rail__panel--clickable brave-click' aria-label='Pack' data-brave-command='pack' title='pack' role='button' tabindex='0'></section>"
+            + "<section id='scene-vicinity-panel' class='scene-rail__panel scene-rail__panel--vicinity scene-rail__panel--hidden' aria-label='The Vicinity'></section>"
+            + "<div id='scene-card' class='scene-card'></div>";
+        mwin.appendChild(rail);
+        return rail;
+    };
+
     var clearPackPanel = function () {
+        ensureSceneRailHost();
         var panel = document.getElementById("scene-pack-panel");
         if (!panel) {
             return;
@@ -1880,6 +1930,7 @@ let defaultout_plugin = (function () {
     };
 
     var clearVicinityPanel = function () {
+        ensureSceneRailHost();
         var panel = document.getElementById("scene-vicinity-panel");
         if (!panel) {
             return;
@@ -1938,15 +1989,7 @@ let defaultout_plugin = (function () {
 
     var renderDesktopToolbar = function () {
         var toolbar = document.getElementById("toolbar");
-        var show = !!(
-            toolbar
-            && !isMobileViewport()
-            && currentViewData
-            && currentViewData.variant
-            && currentViewData.variant !== "connection"
-            && currentViewData.variant !== "chargen"
-            && currentViewData.variant !== "account"
-        );
+        var show = false;
         if (!toolbar) {
             return;
         }
@@ -2035,8 +2078,19 @@ let defaultout_plugin = (function () {
         });
     };
 
+    var syncSceneRailBounds = function (rail) {
+        if (!rail) {
+            return;
+        }
+        rail.style.removeProperty("top");
+        rail.style.removeProperty("right");
+        rail.style.removeProperty("bottom");
+        rail.style.removeProperty("max-height");
+        rail.style.removeProperty("height");
+    };
+
     var syncSceneRailLayout = function () {
-        var rail = document.getElementById("scene-rail");
+        var rail = ensureSceneRailHost();
         var card = document.getElementById("scene-card");
         var packPanel = document.getElementById("scene-pack-panel");
         var vicinityPanel = document.getElementById("scene-vicinity-panel");
@@ -2064,6 +2118,7 @@ let defaultout_plugin = (function () {
         rail.classList.toggle("scene-rail--card-hidden", !hasCard);
         rail.classList.toggle("scene-rail--detail-hidden", !hasCard && !hasPack && !hasVicinity);
         rail.classList.toggle("scene-rail--empty", !hasCard && !hasPack && !hasVicinity);
+        syncSceneRailBounds(rail);
     };
 
     var escapeHtml = function (value) {
@@ -2559,6 +2614,79 @@ let defaultout_plugin = (function () {
         });
     };
 
+    var isCombatLogNearBottom = function (node) {
+        if (!node) {
+            return true;
+        }
+        var remaining = Math.max(0, node.scrollHeight - node.clientHeight - node.scrollTop);
+        return remaining <= COMBAT_LOG_AUTOSCROLL_THRESHOLD_PX;
+    };
+
+    var shouldAutoScrollCombatLog = function (node) {
+        return !!node && (combatLogAutoscrollPinned || isCombatLogNearBottom(node));
+    };
+
+    var resetCombatLogAutoscroll = function () {
+        if (currentCombatLogScrollFrame && window.cancelAnimationFrame) {
+            window.cancelAnimationFrame(currentCombatLogScrollFrame);
+        }
+        currentCombatLogScrollFrame = null;
+        if (combatLogBodyNode && combatLogScrollHandler) {
+            combatLogBodyNode.removeEventListener("scroll", combatLogScrollHandler);
+        }
+        combatLogBodyNode = null;
+        combatLogScrollHandler = null;
+        combatLogAutoscrollPinned = true;
+    };
+
+    var bindCombatLogAutoscroll = function (logBody) {
+        var node = logBody && logBody.jquery ? logBody.get(0) : logBody;
+        if (!node) {
+            return null;
+        }
+        if (combatLogBodyNode === node) {
+            return node;
+        }
+        if (currentCombatLogScrollFrame && window.cancelAnimationFrame) {
+            window.cancelAnimationFrame(currentCombatLogScrollFrame);
+        }
+        currentCombatLogScrollFrame = null;
+        if (combatLogBodyNode && combatLogScrollHandler) {
+            combatLogBodyNode.removeEventListener("scroll", combatLogScrollHandler);
+        }
+        combatLogBodyNode = node;
+        combatLogScrollHandler = function () {
+            combatLogAutoscrollPinned = isCombatLogNearBottom(node);
+        };
+        combatLogBodyNode.addEventListener("scroll", combatLogScrollHandler, { passive: true });
+        return node;
+    };
+
+    var scrollCombatLogToBottom = function (node, force) {
+        if (!node) {
+            return false;
+        }
+        if (!force && !shouldAutoScrollCombatLog(node)) {
+            return false;
+        }
+        node.scrollTop = node.scrollHeight;
+        combatLogAutoscrollPinned = true;
+        if (currentCombatLogScrollFrame && window.cancelAnimationFrame) {
+            window.cancelAnimationFrame(currentCombatLogScrollFrame);
+        }
+        if (window.requestAnimationFrame) {
+            currentCombatLogScrollFrame = window.requestAnimationFrame(function () {
+                currentCombatLogScrollFrame = null;
+                if (combatLogBodyNode !== node) {
+                    return;
+                }
+                node.scrollTop = node.scrollHeight;
+                combatLogAutoscrollPinned = true;
+            });
+        }
+        return true;
+    };
+
     var claimCombatLogEntries = function () {
         var mwin = $("#messagewindow");
         var claimedCount = 0;
@@ -2570,16 +2698,21 @@ let defaultout_plugin = (function () {
         if (!logBody || !logBody.length) {
             return claimedCount;
         }
+        var logNode = bindCombatLogAutoscroll(logBody);
 
         var strayEntries = mwin.children(".out, .msg, .err, .sys, .inp");
         if (!strayEntries.length) {
             return claimedCount;
         }
 
+        var shouldStick = shouldAutoScrollCombatLog(logNode);
         logBody.append(strayEntries);
         strayEntries.each(function () {
             applyCombatFloatersFromNode(this);
         });
+        if (shouldStick) {
+            scrollCombatLogToBottom(logNode, true);
+        }
         claimedCount = strayEntries.length;
         return claimedCount;
     };
@@ -2624,30 +2757,23 @@ let defaultout_plugin = (function () {
             return;
         }
         suppressedCombatEntryRefs[ref] = true;
-        var styleId = "brave-suppress-" + ref.replace(/[^a-zA-Z0-9-]/g, "-");
-        if (!document.getElementById(styleId)) {
-            var style = document.createElement("style");
-            style.id = styleId;
-            style.textContent = ".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "'] { display: none !important; }";
-            document.head.appendChild(style);
-        }
+    };
+
+    var isCombatEntryRefSuppressed = function (ref) {
+        return !!(ref && suppressedCombatEntryRefs[ref]);
     };
 
     var clearSuppressedCombatEntryRefs = function () {
         suppressedCombatEntryRefs = {};
-        Array.prototype.slice.call(document.head.querySelectorAll("style[id^='brave-suppress-']")).forEach(function (style) {
-            if (style && style.parentNode) {
-                style.parentNode.removeChild(style);
-            }
-        });
     };
 
     var applySuppressedCombatEntries = function () {
         Object.keys(suppressedCombatEntryRefs).forEach(function (ref) {
-            var node = document.querySelector(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']");
-            if (node && node.parentNode) {
-                node.parentNode.removeChild(node);
-            }
+            Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']")).forEach(function (node) {
+                if (node && node.parentNode) {
+                    node.parentNode.removeChild(node);
+                }
+            });
         });
     };
 
@@ -2680,6 +2806,65 @@ let defaultout_plugin = (function () {
         var gauge = parseFloat(meter.getAttribute("data-atb-gauge") || "0");
         var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
         return Math.max(0, Math.min(100, (gauge / ready) * 100));
+    };
+
+    var getCombatAtbChargingPercent = function (meter, nowMs) {
+        if (!meter) {
+            return 0;
+        }
+        var gauge = Math.max(0, parseFloat(meter.getAttribute("data-atb-gauge") || "0") || 0);
+        var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400") || 400);
+        var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, ready - 1) / ready) * 100));
+        var currentPercent = Math.max(0, Math.min(maxChargingPercent, (gauge / ready) * 100));
+        var phaseStartedAtMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-visual-started-at") || meter.getAttribute("data-atb-phase-started-at") || "0") || 0);
+        var phaseDurationMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-visual-duration") || meter.getAttribute("data-atb-phase-duration") || "0") || 0);
+        var phaseStartGauge = parseFloat(meter.getAttribute("data-atb-visual-start-gauge") || meter.getAttribute("data-atb-phase-start-gauge") || "");
+        if (isNaN(phaseStartGauge)) {
+            phaseStartGauge = gauge;
+        }
+        var visualTargetGauge = parseFloat(meter.getAttribute("data-atb-visual-target-gauge") || "");
+        var targetGauge = Math.max(0, ready - 1);
+        if (!isNaN(visualTargetGauge)) {
+            targetGauge = Math.max(phaseStartGauge, Math.min(Math.max(0, ready - 1), visualTargetGauge));
+        }
+        if (!(phaseStartedAtMs > 0) || !(phaseDurationMs > 0)) {
+            return currentPercent;
+        }
+        if (nowMs <= phaseStartedAtMs) {
+            return Math.max(0, Math.min(maxChargingPercent, (phaseStartGauge / ready) * 100));
+        }
+        var progress = Math.max(0, Math.min(1, (nowMs - phaseStartedAtMs) / phaseDurationMs));
+        var projectedGauge = phaseStartGauge + ((targetGauge - phaseStartGauge) * progress);
+        var projectedPercent = Math.max(0, Math.min(maxChargingPercent, (projectedGauge / ready) * 100));
+        if (!isNaN(visualTargetGauge)) {
+            return projectedPercent;
+        }
+        return Math.max(currentPercent, projectedPercent);
+    };
+
+    var getCombatAtbChargeDurationMs = function (meter) {
+        if (!meter) {
+            return 0;
+        }
+        var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400") || 400);
+        var fillRate = Math.max(1, parseFloat(meter.getAttribute("data-atb-fill-rate") || "100") || 100);
+        var tickMs = Math.max(1, parseFloat(meter.getAttribute("data-atb-tick-ms") || "1000") || 1000);
+        return Math.max(1, Math.round((ready / fillRate) * tickMs));
+    };
+
+    var freezeCombatAtbMeters = function (durationMs) {
+        return;
+    };
+
+    var combatViewAtbFreezeUntilMs = function (viewData) {
+        if (!(viewData && viewData.variant === "combat")) {
+            return 0;
+        }
+        return Math.max(0, parseFloat(viewData.atb_lock_until_ms || "0") || 0);
+    };
+
+    var combatViewRequestsAtbFreeze = function (viewData) {
+        return false;
     };
 
     var captureCombatEntrySnapshot = function (node) {
@@ -2721,7 +2906,41 @@ let defaultout_plugin = (function () {
         if (!Array.isArray(events) || !events.length) {
             return;
         }
-        pendingCombatFxEvents = pendingCombatFxEvents.concat(events).slice(-24);
+        pendingCombatFxEvents = pendingCombatFxEvents.concat(events.map(normalizeCombatEvent)).slice(-24);
+        scheduleCombatFxFlush(0);
+    };
+
+    var hasPendingCombatDefeatRef = function (ref) {
+        if (!ref || !pendingCombatFxEvents.length) {
+            return false;
+        }
+        return pendingCombatFxEvents.some(function (event) {
+            return !!(event && event.defeat && event.target_ref === ref);
+        });
+    };
+
+    var assignPendingCombatDefeatSnapshot = function (ref, snapshot) {
+        if (!ref || !snapshot || !pendingCombatFxEvents.length) {
+            return false;
+        }
+        var assigned = false;
+        pendingCombatFxEvents.forEach(function (event) {
+            if (assigned || !(event && event.defeat && event.target_ref === ref) || event.defeat_snapshot) {
+                return;
+            }
+            event.defeat_snapshot = snapshot;
+            assigned = true;
+        });
+        return assigned;
+    };
+
+    var dropPendingCombatFxForRef = function (ref) {
+        if (!ref || !pendingCombatFxEvents.length) {
+            return;
+        }
+        pendingCombatFxEvents = pendingCombatFxEvents.filter(function (event) {
+            return event && event.target_ref !== ref;
+        });
     };
 
     var getCombatEntryTitle = function (node) {
@@ -2745,6 +2964,17 @@ let defaultout_plugin = (function () {
                 || normalizeCombatName(getCombatEntryTitle(node)).indexOf(normalized) >= 0;
         });
         return contains.length ? contains[0] : null;
+    };
+
+    var findCombatEntryByRef = function (ref) {
+        if (!ref) {
+            return null;
+        }
+        return document.querySelector(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']");
+    };
+
+    var resolveCombatEntryNode = function (ref, name) {
+        return findCombatEntryByRef(ref) || findCombatEntryByName(name);
     };
 
     var spawnCombatFloater = function (node, text, tone, element) {
@@ -2828,6 +3058,9 @@ let defaultout_plugin = (function () {
         if (!nodeOrSnapshot) {
             return;
         }
+        if (nodeOrSnapshot.nodeType && nodeOrSnapshot.classList.contains("brave-view__entry--defeating")) {
+            return;
+        }
         var snapshot = nodeOrSnapshot.nodeType ? captureCombatEntrySnapshot(nodeOrSnapshot) : nodeOrSnapshot;
         if (!snapshot || !snapshot.rect) {
             return;
@@ -2850,17 +3083,18 @@ let defaultout_plugin = (function () {
         ghost.style.pointerEvents = "none";
         ghost.style.zIndex = "999";
         document.body.appendChild(ghost);
-        if (snapshot.ref) {
-            suppressCombatEntryRef(snapshot.ref);
-        }
         if (nodeOrSnapshot.nodeType) {
-            if (nodeOrSnapshot.parentNode) {
-                nodeOrSnapshot.parentNode.removeChild(nodeOrSnapshot);
-            }
+            var suppressedRef = getCombatEntryRef(nodeOrSnapshot);
+            suppressCombatEntryRef(suppressedRef);
+            dropPendingCombatFxForRef(suppressedRef);
+            nodeOrSnapshot.classList.add("brave-view__entry--defeating");
         }
         window.setTimeout(function () {
             if (ghost && ghost.parentNode) {
                 ghost.parentNode.removeChild(ghost);
+            }
+            if (nodeOrSnapshot.nodeType && nodeOrSnapshot.parentNode) {
+                nodeOrSnapshot.parentNode.removeChild(nodeOrSnapshot);
             }
         }, 900);
     };
@@ -2913,11 +3147,63 @@ let defaultout_plugin = (function () {
         return mapped;
     };
 
+    var playCombatFxEvent = function (event) {
+        var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
+        var defeatSnapshot = event && event.defeat ? (event.defeat_snapshot || null) : null;
+        var attackerNode = (event.lunge && event.source)
+            ? resolveCombatEntryNode(event.source_ref, event.source)
+            : null;
+        if ((!targetNode && !defeatSnapshot) || (event.lunge && event.source && !attackerNode)) {
+            return false;
+        }
+        if (event.text && targetNode) {
+            spawnCombatFloater(targetNode, event.text, event.tone, event.element);
+        }
+        if (event.impact && targetNode) {
+            animateCombatImpact(targetNode, event.impact, event.element);
+        }
+        if (event.defeat) {
+            animateCombatDefeat(targetNode || defeatSnapshot);
+        }
+        if (event.lunge && attackerNode) {
+            animateCombatLunge(attackerNode, targetNode);
+        }
+        return true;
+    };
+
+    var combatFxEventDelayMs = function (event) {
+        if (!event || typeof event !== "object") {
+            return 240;
+        }
+        if (event.defeat) {
+            return 560;
+        }
+        if (event.lunge) {
+            return 320;
+        }
+        if (event.kind === "miss" || event.impact === "miss") {
+            return 260;
+        }
+        if (event.kind === "heal" || event.tone === "heal" || event.impact === "heal") {
+            return 220;
+        }
+        return 240;
+    };
+
+    var scheduleCombatFxFlush = function (delayMs) {
+        if (currentCombatFxTimeout) {
+            return;
+        }
+        currentCombatFxTimeout = window.setTimeout(function () {
+            currentCombatFxTimeout = null;
+            flushPendingCombatFxEvents();
+        }, Math.max(0, delayMs || 0));
+    };
+
     var applyCombatFloatersFromNode = function (node) {
         if (!node) {
             return;
         }
-        var text = node.textContent || "";
         var events = [];
         if (node.dataset && node.dataset.braveFx) {
             try {
@@ -2927,58 +3213,36 @@ let defaultout_plugin = (function () {
             }
         }
         if (!events.length) {
-            events = parseCombatFloaters(text);
-        } else {
-            events = events.map(normalizeCombatEvent);
+            return;
         }
-        var unresolved = [];
-        events.forEach(function (event) {
-            var targetNode = findCombatEntryByName(event.target);
-            if (targetNode) {
-                spawnCombatFloater(targetNode, event.text, event.tone, event.element);
-                if (event.impact) {
-                    animateCombatImpact(targetNode, event.impact, event.element);
-                }
-                if (event.defeat) {
-                    animateCombatDefeat(targetNode);
-                }
-            }
-            if (event.lunge && event.source) {
-                var attackerNode = findCombatEntryByName(event.source);
-                if (attackerNode && targetNode) {
-                    animateCombatLunge(attackerNode, targetNode);
-                }
-            } else {
-                unresolved.push(event);
-            }
-        });
-        queueCombatFxEvents(unresolved);
+        queueCombatFxEvents(events);
     };
 
     var flushPendingCombatFxEvents = function () {
         if (!pendingCombatFxEvents.length || !currentViewData || currentViewData.variant !== "combat") {
             return;
         }
+        var nowMs = Date.now();
+        if (combatFxBusyUntilMs > nowMs) {
+            scheduleCombatFxFlush(combatFxBusyUntilMs - nowMs);
+            return;
+        }
         var remaining = [];
+        var nextEvent = null;
         pendingCombatFxEvents.forEach(function (event) {
-            var targetNode = findCombatEntryByName(event.target);
-            var attackerNode = event.source ? findCombatEntryByName(event.source) : null;
-            if (targetNode) {
-                spawnCombatFloater(targetNode, event.text, event.tone, event.element);
-                if (event.impact) {
-                    animateCombatImpact(targetNode, event.impact, event.element);
-                }
-                if (event.defeat) {
-                    animateCombatDefeat(targetNode);
-                }
-                if (event.lunge && attackerNode) {
-                    animateCombatLunge(attackerNode, targetNode);
-                }
-            } else {
-                remaining.push(event);
+            if (!nextEvent && playCombatFxEvent(event)) {
+                nextEvent = event;
+                return;
             }
+            remaining.push(event);
         });
         pendingCombatFxEvents = remaining.slice(-24);
+        if (!nextEvent) {
+            return;
+        }
+        var delayMs = combatFxEventDelayMs(nextEvent);
+        combatFxBusyUntilMs = Date.now() + delayMs;
+        scheduleCombatFxFlush(delayMs);
     };
 
     var handleCombatFxEvent = function (payload) {
@@ -2986,66 +3250,151 @@ let defaultout_plugin = (function () {
             return;
         }
         var event = normalizeCombatEvent(payload);
-        if (event && event.defeat) {
-            var targetNode = findCombatEntryByName(event.target);
-            if (targetNode) {
-                if (event.text) {
-                    spawnCombatFloater(targetNode, event.text, event.tone, event.element);
+        if (event.defeat && !event.defeat_snapshot) {
+            var defeatNode = resolveCombatEntryNode(event.target_ref, event.target);
+            if (defeatNode) {
+                var defeatSnapshot = captureCombatEntrySnapshot(defeatNode);
+                if (defeatSnapshot) {
+                    event.defeat_snapshot = defeatSnapshot;
                 }
-                if (event.impact) {
-                    animateCombatImpact(targetNode, event.impact, event.element);
-                }
-                animateCombatDefeat(targetNode);
             }
         }
         queueCombatFxEvents([event]);
-        window.requestAnimationFrame(function () {
-            flushPendingCombatFxEvents();
-        });
     };
 
     var syncAnimatedAtbMeters = function () {
+        currentAtbAnimationGeneration += 1;
+        var animationGeneration = currentAtbAnimationGeneration;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
         }
+        if (currentAtbResumeTimeout) {
+            window.clearTimeout(currentAtbResumeTimeout);
+            currentAtbResumeTimeout = null;
+        }
         if (!currentViewData || currentViewData.variant !== "combat") {
             return;
         }
+        var clearMeterVisualState = function (meter) {
+            meter.removeAttribute("data-atb-visual-started-at");
+            meter.removeAttribute("data-atb-visual-duration");
+            meter.removeAttribute("data-atb-visual-start-gauge");
+            meter.removeAttribute("data-atb-visual-target-gauge");
+            meter.removeAttribute("data-atb-visual-catchup");
+        };
         var meters = Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__meter[data-meter-kind='atb']"));
+        var syncStartedAtMs = Date.now();
+
         meters.forEach(function (meter) {
             var fill = meter.querySelector(".brave-view__meter-fill");
             if (!fill) {
                 return;
             }
             var phase = meter.getAttribute("data-atb-phase") || "charging";
+            var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400") || 400);
+            var gauge = Math.max(0, parseFloat(meter.getAttribute("data-atb-gauge") || "0") || 0);
+            var phaseRemainingMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-remaining") || "0") || 0);
+            var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, ready - 1) / ready) * 100));
+            var serverPercent = Math.max(0, Math.min(maxChargingPercent, (gauge / ready) * 100));
+
             fill.style.transitionDuration = "0ms";
-            if (phase !== "charging") {
-                if (phase === "ready" || phase === "resolving" || phase === "winding") {
-                    fill.style.width = "100%";
-                } else if (phase === "recovering" || phase === "cooldown") {
-                    fill.style.width = "0%";
-                }
-                return;
-            }
-            var gauge = parseFloat(meter.getAttribute("data-atb-gauge") || "0");
-            var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
-            var remainingMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-remaining") || "0"));
-            var currentPercent = Math.max(0, Math.min(100, (gauge / ready) * 100));
-            var continuityPercent = parseFloat(meter.getAttribute("data-atb-visual-start") || "");
-            if (!isNaN(continuityPercent)) {
-                currentPercent = Math.max(currentPercent, Math.max(0, Math.min(100, continuityPercent)));
-                meter.removeAttribute("data-atb-visual-start");
-            }
-            fill.style.width = currentPercent.toFixed(2) + "%";
-            if (!(remainingMs > 0) || currentPercent >= 100) {
-                return;
-            }
-            window.requestAnimationFrame(function () {
-                fill.style.transitionDuration = remainingMs + "ms";
+
+            if (phase === "ready" || phase === "winding" || phase === "resolving") {
+                clearMeterVisualState(meter);
+                meter.setAttribute("data-atb-visual-start", "100.00");
                 fill.style.width = "100%";
-            });
+                return;
+            }
+
+            if (phase !== "charging") {
+                clearMeterVisualState(meter);
+                meter.setAttribute("data-atb-visual-start", "0.00");
+                fill.style.width = "0%";
+                return;
+            }
+
+            var continuityPercent = parseFloat(meter.getAttribute("data-atb-visual-start") || "");
+            if (isNaN(continuityPercent)) {
+                continuityPercent = serverPercent;
+            }
+            continuityPercent = Math.max(serverPercent, Math.min(maxChargingPercent, continuityPercent));
+            meter.setAttribute("data-atb-visual-start", continuityPercent.toFixed(2));
+            if (continuityPercent >= maxChargingPercent || !(phaseRemainingMs > 0)) {
+                clearMeterVisualState(meter);
+                fill.style.width = continuityPercent.toFixed(2) + "%";
+                return;
+            }
+
+            var serverDistance = Math.max(0.01, maxChargingPercent - serverPercent);
+            var startDistance = Math.max(0, maxChargingPercent - continuityPercent);
+            var visualDurationMs = Math.max(16, Math.round(phaseRemainingMs * (startDistance / serverDistance)));
+            meter.setAttribute("data-atb-visual-started-at", String(syncStartedAtMs));
+            meter.setAttribute("data-atb-visual-duration", String(visualDurationMs));
+            meter.setAttribute("data-atb-visual-start-gauge", String((continuityPercent / 100) * ready));
+            meter.removeAttribute("data-atb-visual-target-gauge");
+            meter.removeAttribute("data-atb-visual-catchup");
+            fill.style.width = continuityPercent.toFixed(2) + "%";
         });
+
+        var renderChargeFrame = function () {
+            if (animationGeneration !== currentAtbAnimationGeneration) {
+                return;
+            }
+            currentAtbAnimationFrame = null;
+            if (!currentViewData || currentViewData.variant !== "combat") {
+                return;
+            }
+            var frameNowMs = Date.now();
+            var hasAnimatingMeters = false;
+
+            meters.forEach(function (meter) {
+                var fill = meter.querySelector(".brave-view__meter-fill");
+                if (!fill) {
+                    return;
+                }
+                var phase = meter.getAttribute("data-atb-phase") || "charging";
+                fill.style.transitionDuration = "0ms";
+                var ready = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
+                var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, ready - 1) / ready) * 100));
+
+                if (phase === "ready" || phase === "winding" || phase === "resolving") {
+                    meter.setAttribute("data-atb-visual-start", "100.00");
+                    fill.style.width = "100%";
+                    return;
+                }
+
+                if (phase !== "charging") {
+                    meter.setAttribute("data-atb-visual-start", "0.00");
+                    fill.style.width = "0%";
+                    return;
+                }
+
+                var currentPercent = getCombatAtbChargingPercent(meter, frameNowMs);
+                currentPercent = Math.max(0, Math.min(maxChargingPercent, currentPercent));
+                meter.setAttribute("data-atb-visual-start", currentPercent.toFixed(2));
+                fill.style.width = currentPercent.toFixed(2) + "%";
+
+                var visualStartedAtMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-visual-started-at") || "0") || 0);
+                var visualDurationMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-visual-duration") || "0") || 0);
+                if (visualStartedAtMs > 0 && visualDurationMs > 0 && frameNowMs < (visualStartedAtMs + visualDurationMs) && currentPercent < maxChargingPercent) {
+                    hasAnimatingMeters = true;
+                }
+            });
+
+            if (hasAnimatingMeters) {
+                if (window.requestAnimationFrame) {
+                    currentAtbAnimationFrame = window.requestAnimationFrame(renderChargeFrame);
+                    return;
+                }
+                currentAtbResumeTimeout = window.setTimeout(function () {
+                    currentAtbResumeTimeout = null;
+                    renderChargeFrame();
+                }, 16);
+                return;
+            }
+        };
+        renderChargeFrame();
     };
 
     var restoreCombatAtbContinuity = function (previousSnapshots) {
@@ -3066,18 +3415,21 @@ let defaultout_plugin = (function () {
             if (phase !== "charging") {
                 return;
             }
-            if (snapshot.atbPhase !== "charging") {
+            if (snapshot.atbPhase !== "charging" && !(snapshot.atbPercent != null && snapshot.atbPercent <= 0.5)) {
                 return;
             }
-            var currentPhaseStartedAt = meter.getAttribute("data-atb-phase-started-at") || "";
-            if (!snapshot.atbPhaseStartedAt || snapshot.atbPhaseStartedAt !== currentPhaseStartedAt) {
-                return;
-            }
-            var meterGauge = parseFloat(meter.getAttribute("data-atb-gauge") || "0");
             var meterReady = Math.max(1, parseFloat(meter.getAttribute("data-atb-ready") || "400"));
-            var serverPercent = Math.max(0, Math.min(100, (meterGauge / meterReady) * 100));
-            var restoredPercent = Math.max(serverPercent, Math.max(0, Math.min(100, snapshot.atbPercent)));
+            var maxChargingPercent = Math.max(0, Math.min(100, (Math.max(0, meterReady - 1) / meterReady) * 100));
+            var gauge = Math.max(0, parseFloat(meter.getAttribute("data-atb-gauge") || "0") || 0);
+            var serverMinPercent = Math.max(0, Math.min(maxChargingPercent, (gauge / meterReady) * 100));
+            var snapshotPercent = Math.max(0, Math.min(maxChargingPercent, snapshot.atbPercent));
+            var restoredPercent = Math.max(serverMinPercent, snapshotPercent);
             meter.setAttribute("data-atb-visual-start", restoredPercent.toFixed(2));
+            meter.removeAttribute("data-atb-visual-started-at");
+            meter.removeAttribute("data-atb-visual-duration");
+            meter.removeAttribute("data-atb-visual-start-gauge");
+            meter.removeAttribute("data-atb-visual-target-gauge");
+            meter.removeAttribute("data-atb-visual-catchup");
             fill.style.transitionDuration = "0ms";
             fill.style.width = restoredPercent.toFixed(2) + "%";
         });
@@ -3236,6 +3588,22 @@ let defaultout_plugin = (function () {
 
     var clearStickyView = function () {
         var mwin = $("#messagewindow");
+        currentAtbAnimationGeneration += 1;
+        if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
+            window.cancelAnimationFrame(currentAtbAnimationFrame);
+            currentAtbAnimationFrame = null;
+        }
+        if (currentAtbResumeTimeout) {
+            window.clearTimeout(currentAtbResumeTimeout);
+            currentAtbResumeTimeout = null;
+        }
+        combatAtbFrozenUntilMs = 0;
+        pendingCombatFxEvents = [];
+        suppressedCombatEntryRefs = {};
+        resetCombatLogAutoscroll();
+        if (currentViewData && currentViewData.variant === "combat") {
+            currentViewData = null;
+        }
         if (!mwin.length) {
             setStickyViewMode(false);
             return;
@@ -3444,10 +3812,17 @@ let defaultout_plugin = (function () {
                 logBody.append(existingEntries);
             }
         }
+        var logNode = bindCombatLogAutoscroll(logBody);
 
         var strayEntries = mwin.children(".out, .msg, .err");
         if (strayEntries.length) {
+            var shouldStick = shouldAutoScrollCombatLog(logNode);
             logBody.append(strayEntries);
+            if (shouldStick) {
+                scrollCombatLogToBottom(logNode, true);
+            }
+        } else if (combatLogAutoscrollPinned) {
+            scrollCombatLogToBottom(logNode, true);
         }
 
         return logBody;
@@ -3733,6 +4108,7 @@ let defaultout_plugin = (function () {
     };
 
     var renderVicinityPanel = function (roomView) {
+        ensureSceneRailHost();
         var panel = document.getElementById("scene-vicinity-panel");
         if (!panel) {
             return;
@@ -3750,6 +4126,7 @@ let defaultout_plugin = (function () {
     };
 
     var renderPackPanel = function () {
+        ensureSceneRailHost();
         var panel = document.getElementById("scene-pack-panel");
         if (!panel) {
             return;
@@ -3796,6 +4173,7 @@ let defaultout_plugin = (function () {
     };
 
     var renderPanelCard = function (panelData) {
+        ensureSceneRailHost();
         var card = document.getElementById("scene-card");
         if (!card) {
             return;
@@ -3868,7 +4246,10 @@ let defaultout_plugin = (function () {
             return;
         }
         syncInputContextForView(viewData);
-        clearPickerSheet();
+        var preservePickerAcrossViewSwap = shouldPreservePickerForViewSwap(viewData);
+        if (!preservePickerAcrossViewSwap) {
+            clearPickerSheet();
+        }
 
         var preserveRail = !!(viewData.layout === "explore" || viewData.preserve_rail);
         var stickyView = !!viewData.sticky;
@@ -4345,9 +4726,10 @@ let defaultout_plugin = (function () {
                 "<div class='brave-view__entries'>"
                 + (items || []).map(function (entry) {
                     var lead = "";
+                    var backgroundIcon = entry && entry.background_icon ? entry.background_icon : "";
                     if (entry && entry.badge) {
                         lead = "<span class='brave-view__entry-badge'>" + escapeHtml(entry.badge) + "</span>";
-                    } else {
+                    } else if (!backgroundIcon) {
                         lead = "<span class='brave-view__entry-icon-wrap'>"
                             + icon(entry && entry.icon ? entry.icon : "inventory_2", "brave-view__entry-icon")
                             + "</span>";
@@ -4381,22 +4763,13 @@ let defaultout_plugin = (function () {
                     if (useButtonRoot) {
                         rowClass += " brave-view__entry--button";
                     }
-                    return (
-                        "<" + tagName + " class='" + rowClass + "'"
-                        + extraAttrs
-                        + combatStateAttr
-                        + combatRefAttr
-                        + commandAttrs(entry)
-                        + ">"
-                        + "<div class='brave-view__entry-head'>"
-                        + lead
-                        + "<div class='brave-view__entry-heading'>"
-                        + "<div class='brave-view__entry-title'>" + escapeHtml(entry && entry.title ? entry.title : "") + "</div>"
-                        + (entry && entry.meta ? "<div class='brave-view__entry-meta'>" + escapeHtml(entry.meta) + "</div>" : "")
-                        + "</div>"
-                        + "</div>"
-                        + renderMeters(entry && entry.meters)
-                        + renderThemePreview(entry && entry.preview)
+                    if (backgroundIcon) {
+                        rowClass += " brave-view__entry--ornamented";
+                    }
+                    var headClass = "brave-view__entry-head" + (lead ? "" : " brave-view__entry-head--iconless");
+                    var metaToneClass = entry && entry.meta_tone ? " brave-view__entry-meta--" + escapeHtml(entry.meta_tone) : "";
+                    var footerMarkup =
+                        "<div class='brave-view__entry-footer'>"
                         + (entry && Array.isArray(entry.chips) && entry.chips.length
                             ? "<div class='brave-view__entry-chips'>" + entry.chips.map(renderChip).join("") + "</div>"
                             : "")
@@ -4408,6 +4781,31 @@ let defaultout_plugin = (function () {
                                 + "</div>"
                             : "")
                         + renderInlineActions(entry && entry.actions)
+                        + "</div>";
+                    return (
+                        "<" + tagName + " class='" + rowClass + "'"
+                        + extraAttrs
+                        + combatStateAttr
+                        + combatRefAttr
+                        + commandAttrs(entry)
+                        + ">"
+                        + (backgroundIcon ? icon(backgroundIcon, "brave-view__entry-ornament") : "")
+                        + "<div class='" + headClass + "'>"
+                        + lead
+                        + "<div class='brave-view__entry-heading'>"
+                        + "<div class='brave-view__entry-title'>" + escapeHtml(entry && entry.title ? entry.title : "") + "</div>"
+                        + (entry && entry.meta
+                            ? "<div class='brave-view__entry-meta" + metaToneClass + "'>"
+                                + (entry && entry.meta_icon ? icon(entry.meta_icon, "brave-view__entry-meta-icon") : "")
+                                + "<span>" + escapeHtml(entry.meta) + "</span>"
+                                + "</div>"
+                            : "")
+                        + "</div>"
+                        + "</div>"
+                        + renderMeters(entry && entry.meters)
+                        + renderThemePreview(entry && entry.preview)
+                        + "<div class='brave-view__entry-spacer'></div>"
+                        + footerMarkup
                         + "</" + tagName + ">"
                     );
                 }).join("")
@@ -4559,11 +4957,29 @@ let defaultout_plugin = (function () {
             var previousCombatSnapshots = [];
             var nextCombatRefs = {};
             var shouldDelayCombatSwap = false;
+            var previousCombatActionTab = currentCombatActionTab;
             if (viewData.variant === "combat" && currentViewData && currentViewData.variant === "combat") {
+                var liveCombatView = document.querySelector(".brave-view--combat");
+                if (liveCombatView) {
+                    previousCombatActionTab = normalizeCombatActionTab(
+                        liveCombatView.getAttribute("data-brave-combat-tab") || currentCombatActionTab
+                    );
+                }
                 previousCombatSnapshots = getCombatEntryNodes().map(captureCombatEntrySnapshot).filter(Boolean);
                 nextCombatRefs = collectCombatEntryRefsFromMarkup(viewMarkup);
+                previousCombatSnapshots.forEach(function (snapshot) {
+                    var ref = snapshot && snapshot.ref;
+                    if (!ref || nextCombatRefs[ref] || isCombatEntryRefSuppressed(ref)) {
+                        return;
+                    }
+                    assignPendingCombatDefeatSnapshot(ref, snapshot);
+                });
                 shouldDelayCombatSwap = previousCombatSnapshots.some(function (snapshot) {
-                    return snapshot && snapshot.ref && !nextCombatRefs[snapshot.ref];
+                    return snapshot
+                        && snapshot.ref
+                        && !nextCombatRefs[snapshot.ref]
+                        && !isCombatEntryRefSuppressed(snapshot.ref)
+                        && !hasPendingCombatDefeatRef(snapshot.ref);
                 });
             }
             if (!preserveRail) {
@@ -4575,6 +4991,9 @@ let defaultout_plugin = (function () {
 
             var applyStickyMarkup = function () {
                 currentViewData = viewData;
+                if (viewData.variant === "combat") {
+                    currentCombatActionTab = normalizeCombatActionTab(previousCombatActionTab);
+                }
                 setBodyState("view", viewData && viewData.variant ? viewData.variant : "");
 
                 var stickyContainer = mwin.children(".brave-sticky-view");
@@ -4600,8 +5019,14 @@ let defaultout_plugin = (function () {
                     clearVicinityPanel();
                 }
                 renderPackPanel();
+                if (currentSceneData) {
+                    renderSceneCard(currentSceneData);
+                }
                 renderDesktopToolbar();
                 syncMobileShell();
+                if (preservePickerAcrossViewSwap && currentPickerData) {
+                    renderPickerSheet();
+                }
                 if (viewData.variant === "combat") {
                     applySuppressedCombatEntries();
                 } else {
@@ -4616,7 +5041,7 @@ let defaultout_plugin = (function () {
             if (shouldDelayCombatSwap) {
                 previousCombatSnapshots.forEach(function (snapshot) {
                     var ref = snapshot && snapshot.ref;
-                    if (!ref || nextCombatRefs[ref]) {
+                    if (!ref || nextCombatRefs[ref] || isCombatEntryRefSuppressed(ref) || hasPendingCombatDefeatRef(ref)) {
                         return;
                     }
                     var liveNode = document.querySelector(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']");
@@ -4645,6 +5070,7 @@ let defaultout_plugin = (function () {
             setMainViewMode(!preserveRail);
             setStickyViewMode(false);
             suppressNextLookText = !!(viewData.variant === "room" || viewData.layout === "explore");
+            resetCombatLogAutoscroll();
             currentViewData = viewData;
             setBodyState("view", viewData && viewData.variant ? viewData.variant : "");
 
@@ -4660,8 +5086,14 @@ let defaultout_plugin = (function () {
                 renderMap(currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText);
             }
             renderPackPanel();
+            if (currentSceneData) {
+                renderSceneCard(currentSceneData);
+            }
             renderDesktopToolbar();
             syncMobileShell();
+            if (preservePickerAcrossViewSwap && currentPickerData) {
+                renderPickerSheet();
+            }
             if (viewData.variant === "combat") {
                 applySuppressedCombatEntries();
             } else {
@@ -4782,10 +5214,12 @@ let defaultout_plugin = (function () {
 
         var abilityCount = abilitiesSection.querySelectorAll(".brave-view__list-item").length;
         var itemCount = itemsSection.querySelectorAll(".brave-view__list-item").length;
-        var preferredTab = currentCombatActionTab;
-        if (!abilityCount && itemCount) {
+        var preferredTab = normalizeCombatActionTab(
+            combatView.getAttribute("data-brave-combat-tab") || currentCombatActionTab
+        );
+        if (preferredTab === "abilities" && !abilityCount && itemCount) {
             preferredTab = "items";
-        } else if (!itemCount && abilityCount) {
+        } else if (preferredTab === "items" && !itemCount && abilityCount) {
             preferredTab = "abilities";
         }
         currentCombatActionTab = preferredTab;
@@ -5397,6 +5831,7 @@ let defaultout_plugin = (function () {
         window.addEventListener("resize", function () {
             syncMobileShell();
             positionDesktopToolbar();
+            syncSceneRailLayout();
             syncArcadeBodyState();
             if (currentArcadeState && currentArcadeState.fitScreen) {
                 currentArcadeState.fitScreen();
@@ -5432,11 +5867,24 @@ let defaultout_plugin = (function () {
 
     var clearTextOutput = function () {
         teardownArcadeMode();
+        currentAtbAnimationGeneration += 1;
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
         }
+        if (currentAtbResumeTimeout) {
+            window.clearTimeout(currentAtbResumeTimeout);
+            currentAtbResumeTimeout = null;
+        }
+        if (currentCombatFxTimeout) {
+            window.clearTimeout(currentCombatFxTimeout);
+            currentCombatFxTimeout = null;
+        }
+        pendingCombatFxEvents = [];
+        combatFxBusyUntilMs = 0;
+        combatAtbFrozenUntilMs = 0;
         clearSuppressedCombatEntryRefs();
+        resetCombatLogAutoscroll();
         setMainViewMode(false);
         setStickyViewMode(false);
         suppressNextLookText = false;
@@ -5506,12 +5954,16 @@ let defaultout_plugin = (function () {
             clearTextOutput();
         }
         var combatFx = null;
+        var combatLogNode = null;
+        var shouldStickCombatLog = false;
         if (
             currentViewData
             && currentViewData.variant === "combat"
         ) {
             combatFx = extractCombatFxMarkers(rawText);
             appendTarget = ensureCombatLog() || mwin;
+            combatLogNode = appendTarget.length ? appendTarget.get(0) : null;
+            shouldStickCombatLog = shouldAutoScrollCombatLog(combatLogNode);
         } else if (
             currentViewData
             && isRoomLikeView(currentViewData)
@@ -5536,7 +5988,13 @@ let defaultout_plugin = (function () {
             pruneLegacyConnectionBoilerplate();
         }
         if (appendTarget.length && appendTarget[0] !== mwin[0]) {
-            appendTarget.scrollTop(appendTarget[0].scrollHeight);
+            if (combatLogNode) {
+                if (shouldStickCombatLog) {
+                    scrollCombatLogToBottom(combatLogNode, true);
+                }
+            } else {
+                appendTarget.scrollTop(appendTarget[0].scrollHeight);
+            }
             return true;
         }
         var scrollHeight = mwin.parent().parent().prop("scrollHeight");

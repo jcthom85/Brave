@@ -5,6 +5,7 @@ import re
 from typeclasses.characters import Character
 from world.browser_panels import send_webclient_event
 from world.content import get_content_registry
+from world.resonance import get_stat_label
 
 from evennia.utils.evmenu import EvMenu
 from evennia.utils.utils import dedent
@@ -14,6 +15,18 @@ CHARACTER_CONTENT = CONTENT.characters
 
 _VALID_NAME = re.compile(r"^[A-Za-z][A-Za-z' -]{1,23}$")
 WEB_PROTOCOLS = {"websocket", "ajax/comet", "webclient"}
+
+
+PRIMARY_STAT_ORDER = ("strength", "agility", "intellect", "spirit", "vitality")
+
+
+def _format_bonus_line(bonuses):
+    parts = []
+    for stat in PRIMARY_STAT_ORDER:
+        amount = int((bonuses or {}).get(stat) or 0)
+        if amount:
+            parts.append(f"+{amount} {get_stat_label(stat)}")
+    return ", ".join(parts)
 
 
 def _is_web_session(session):
@@ -251,10 +264,14 @@ def menunode_choose_race(caller, raw_string=None, **kwargs):
     )
     options = []
     for race_key, race_data in CHARACTER_CONTENT.races.items():
+        trait_line = _format_bonus_line(race_data.get("trait_bonuses", {}))
+        desc = f"{race_data['name']}  |  {race_data['summary']}  |  Perk: {race_data['perk']}"
+        if trait_line:
+            desc += f"  |  Traits: {trait_line}"
         options.append(
             {
                 "key": (race_key, race_data["name"].lower()),
-                "desc": f"{race_data['name']}  |  {race_data['summary']}  |  Perk: {race_data['perk']}",
+                "desc": desc,
                 "goto": (_set_race, {"race_key": race_key}),
             }
         )
@@ -289,10 +306,15 @@ def menunode_choose_class(caller, raw_string=None, **kwargs):
     options = []
     for class_key in CHARACTER_CONTENT.vertical_slice_classes:
         class_data = CHARACTER_CONTENT.classes[class_key]
+        opening = ", ".join(ability for level, ability in class_data["progression"] if level == 1)
+        followup = next((ability for level, ability in class_data["progression"] if level > 1), None)
+        desc = f"{class_data['name']}  |  {class_data['role']}  |  {class_data['summary']}  |  Starts with: {opening}"
+        if followup:
+            desc += f"  |  First unlock: {followup}"
         options.append(
             {
                 "key": (class_key, class_data["name"].lower()),
-                "desc": f"{class_data['name']}  |  {class_data['role']}  |  {class_data['summary']}",
+                "desc": desc,
                 "goto": (_set_class, {"class_key": class_key}),
             }
         )

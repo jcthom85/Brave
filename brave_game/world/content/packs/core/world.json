@@ -354,7 +354,7 @@
         "brass plaque",
         "gates"
       ],
-      "desc": "A polished brass plaque is riveted into the gate dais, each portal name engraved beside a thin glass strip that glows or stays dark depending on the gate's condition.",
+      "desc": "A polished brass plaque is riveted into the gate dais, its old engravings worn but still catching the lantern light.",
       "id": "nexus_gate_plaque",
       "key": "nexus gate plaque",
       "kind": "readable",
@@ -2571,14 +2571,13 @@
       "zone": "Brambleford"
     },
     {
-      "desc": "A circular chamber of old stone and newer fittings surrounds a standing ring of pale light. Brass plaques, humming anchor lines, and a floor inlaid with star charts make the place feel half observatory, half impossible harbor.",
+      "desc": "The observatory's lower chamber opens into a wide, circular dais. The gate ring is quiet, its polished brass surface reflecting only the lantern light from the stairs above.",
       "id": "brambleford_nexus_gate",
       "key": "Nexus Gate",
       "map_icon": "N",
       "map_region": "nexus_network",
       "map_x": 0,
       "map_y": 0,
-      "portal_hub": true,
       "safe": true,
       "zone": "The Nexus"
     },

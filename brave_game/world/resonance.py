@@ -4,8 +4,6 @@ from world.content import get_content_registry
 
 CONTENT = get_content_registry()
 SYSTEMS_CONTENT = CONTENT.systems
-PORTALS = SYSTEMS_CONTENT.portals
-PORTAL_STATUS_LABELS = SYSTEMS_CONTENT.portal_status_labels
 
 
 def _normalize_token(value):
@@ -261,37 +259,3 @@ def resolve_ability_query(character, raw_ability):
     if len(partial) > 1:
         return list(partial)
     return None
-
-
-def format_portal_list():
-    """Return a readable summary of current Nexus gates."""
-
-    lines = ["|wNexus Gates|n"]
-    for portal_key, portal in PORTALS.items():
-        status_label = PORTAL_STATUS_LABELS.get(portal["status"], portal["status"].title())
-        resonance_label = RESONANCE_PROFILES.get(portal["resonance"], RESONANCE_PROFILES["fantasy"])[
-            "label"
-        ]
-        lines.append(f"  {portal['name']} [{status_label}] - {resonance_label}")
-        lines.append(f"    {portal['summary']}")
-        if portal.get("travel_hint"):
-            lines.append(f"    Enter via: {portal['travel_hint']}")
-    return "\n".join(lines)
-
-
-def format_portal_plaque_text():
-    """Return the readable plaque text for the Nexus Gate."""
-
-    lines = [
-        "A brass plate is set into the ring dais, each gate name etched beside a narrow groove of colored glass.",
-        "",
-        "Stable gates answer the ring. Dormant gates need more work. Sealed gates are not yet safe to bridge.",
-        "",
-    ]
-    for portal in PORTALS.values():
-        status_label = PORTAL_STATUS_LABELS.get(portal["status"], portal["status"].title())
-        resonance_label = RESONANCE_PROFILES.get(portal["resonance"], RESONANCE_PROFILES["fantasy"])[
-            "label"
-        ]
-        lines.append(f"- {portal['name']}: {status_label} / {resonance_label}")
-    return "\n".join(lines)

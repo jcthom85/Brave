@@ -417,39 +417,6 @@
     },
     "forge_room_id": "brambleford_ironroot_forge"
   },
-  "portals": {
-    "portal_status_labels": {
-      "dormant": "Dormant",
-      "sealed": "Sealed",
-      "stable": "Stable"
-    },
-    "portals": {
-      "drafting_table": {
-        "entry_room": null,
-        "name": "The Drafting Table",
-        "resonance": "sandbox",
-        "status": "sealed",
-        "summary": "A blank builder's dimension waiting for the family's first custom rooms.",
-        "travel_hint": null
-      },
-      "junkyard_planet": {
-        "entry_room": "junkyard_planet_landing_pad",
-        "name": "Junk-Yard Planet",
-        "resonance": "tech",
-        "status": "stable",
-        "summary": "A scrapyard world of broken rails, humming salvage, and practical tech violence.",
-        "travel_hint": "east"
-      },
-      "training_island": {
-        "entry_room": null,
-        "name": "Training Island",
-        "resonance": "martial",
-        "status": "dormant",
-        "summary": "A fast bright world meant for ki, speed, and martial experiments.",
-        "travel_hint": null
-      }
-    }
-  },
   "trophies": {
     "trophies": {
       "blackreed_battle_standard": {

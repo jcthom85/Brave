@@ -46,10 +46,10 @@ class CombatRewardTests(unittest.TestCase):
         encounter._record_participant_contribution = lambda character, **kwargs: BraveEncounter._record_participant_contribution(encounter, character, **kwargs)
         encounter._participant_reward_eligible = lambda character: BraveEncounter._participant_reward_eligible(encounter, character)
         encounter._participant_impact_score = lambda character: BraveEncounter._participant_impact_score(encounter, character)
-        encounter._participant_reward_weight = lambda character, max_round, top_impact: BraveEncounter._participant_reward_weight(
+        encounter._participant_reward_weight = lambda character, max_turn, top_impact: BraveEncounter._participant_reward_weight(
             encounter,
             character,
-            max_round=max_round,
+            max_turn=max_turn,
             top_impact=top_impact,
         )
         encounter._allocate_weighted_pool = lambda total, weighted_entries, minimum=0: BraveEncounter._allocate_weighted_pool(
@@ -86,11 +86,11 @@ class CombatRewardTests(unittest.TestCase):
         idle = DummyRewardCharacter(3, "Idle")
         encounter = SimpleNamespace(
             db=SimpleNamespace(
-                round=4,
+                turn_count=4,
                 enemies=[{"template_key": "old_greymaw", "xp": 120, "tags": ["boss"]}],
                 participant_contributions={
                     "1": {
-                        "joined_round": 0,
+                        "joined_turn": 0,
                         "meaningful_actions": 3,
                         "damage_done": 60,
                         "healing_done": 0,
@@ -100,7 +100,7 @@ class CombatRewardTests(unittest.TestCase):
                         "boss_credit_eligible": True,
                     },
                     "2": {
-                        "joined_round": 2,
+                        "joined_turn": 2,
                         "meaningful_actions": 1,
                         "damage_done": 12,
                         "healing_done": 0,
@@ -110,7 +110,7 @@ class CombatRewardTests(unittest.TestCase):
                         "boss_credit_eligible": True,
                     },
                     "3": {
-                        "joined_round": 2,
+                        "joined_turn": 2,
                         "meaningful_actions": 0,
                         "damage_done": 0,
                         "healing_done": 0,
@@ -158,7 +158,7 @@ class CombatRewardTests(unittest.TestCase):
             db=SimpleNamespace(
                 participant_contributions={
                     "1": {
-                        "joined_round": 0,
+                        "joined_turn": 0,
                         "meaningful_actions": 1,
                         "damage_done": 0,
                         "healing_done": 0,
@@ -168,7 +168,7 @@ class CombatRewardTests(unittest.TestCase):
                         "boss_credit_eligible": True,
                     },
                     "2": {
-                        "joined_round": 2,
+                        "joined_turn": 2,
                         "meaningful_actions": 1,
                         "damage_done": 0,
                         "healing_done": 0,
@@ -178,7 +178,7 @@ class CombatRewardTests(unittest.TestCase):
                         "boss_credit_eligible": False,
                     },
                     "3": {
-                        "joined_round": 0,
+                        "joined_turn": 0,
                         "meaningful_actions": 0,
                         "damage_done": 0,
                         "healing_done": 0,
@@ -209,7 +209,7 @@ class CombatRewardTests(unittest.TestCase):
         stop_mock = Mock()
         refresh_mock = Mock()
         encounter = SimpleNamespace(
-            db=SimpleNamespace(round=0),
+            db=SimpleNamespace(turn_count=0),
             ndb=SimpleNamespace(brave_victory_pending=False),
             obj=SimpleNamespace(msg_contents=lambda _message, **_kwargs: None),
             get_active_participants=lambda: [winner],
@@ -231,7 +231,7 @@ class CombatRewardTests(unittest.TestCase):
 
         BraveEncounter.at_repeat(encounter)
 
-        self.assertEqual(1, encounter.db.round)
+        self.assertEqual(0, encounter.db.turn_count)
         reward_mock.assert_not_called()
         stop_mock.assert_not_called()
         refresh_mock.assert_called_once_with()

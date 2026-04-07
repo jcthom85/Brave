@@ -29,8 +29,6 @@ get_item_category = ITEM_CONTENT.get_item_category
 QUESTS = QUEST_CONTENT.quests
 STARTING_QUESTS = QUEST_CONTENT.starting_quests
 group_quest_keys_by_region = QUEST_CONTENT.group_quest_keys_by_region
-PORTALS = SYSTEMS_CONTENT.portals
-PORTAL_STATUS_LABELS = SYSTEMS_CONTENT.portal_status_labels
 
 
 WEB_PROTOCOLS = {"websocket", "ajax/comet", "webclient"}
@@ -546,29 +544,6 @@ def build_forge_panel(character):
     )
 
 
-def build_portals_panel():
-    """Build the browser-side companion panel for the current portal list."""
-
-    chips = [_chip(f"{len(PORTALS)} gates", "travel_explore", "accent")]
-    items = []
-    for portal in PORTALS.values():
-        items.append(
-            _item(
-                f"{portal['name']} · {PORTAL_STATUS_LABELS.get(portal['status'], portal['status'].title())}",
-                icon="public",
-            )
-        )
-
-    return _make_panel(
-        "Portal Network",
-        "Nexus Gates",
-        eyebrow_icon="travel_explore",
-        title_icon="public",
-        chips=chips,
-        sections=[_section("Current Gates", "travel_explore", items[:6])],
-    )
-
-
 def build_travel_panel(character):
     """Build the browser-side companion panel for route browsing."""
 
@@ -797,7 +772,6 @@ def build_combat_panel(encounter):
     foe_count = len(enemies)
     ally_label = "ally" if ally_count == 1 else "allies"
     foe_label = "foe" if foe_count == 1 else "foes"
-    imminent_count = 0
     opening_count = 0
 
     def hp_tone(current_hp, max_hp):
@@ -811,18 +785,78 @@ def build_combat_panel(encounter):
     render_now_ms = int(round(time.time() * 1000))
     render_tick_ms = max(1, int(round(float(getattr(encounter, "interval", 1) or 1) * 1000)))
 
-    def actor_atb_state(*, participant=None, enemy=None):
+    def raw_actor_atb_state(*, participant=None, enemy=None):
         getter = getattr(encounter, "_get_actor_atb_state", None)
         if not callable(getter):
             return {}
         try:
             if participant is not None:
-                return render_atb_state(getter(character=participant) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
+                return dict(getter(character=participant) or {})
             if enemy is not None:
-                return render_atb_state(getter(enemy=enemy) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
+                return dict(getter(enemy=enemy) or {})
         except Exception:
             return {}
         return {}
+
+    def actor_atb_state(*, participant=None, enemy=None):
+        try:
+            state = raw_actor_atb_state(participant=participant, enemy=enemy)
+            return render_atb_state(state, tick_ms=render_tick_ms, now_ms=render_now_ms)
+        except Exception:
+            return {}
+        return {}
+
+    def combat_queue_entries():
+        getter = getattr(encounter, "_atb_queue_entries", None)
+        if callable(getter):
+            try:
+                return list(getter(participants, enemies) or [])
+            except Exception:
+                return []
+
+        phase_order = {"resolving": 0, "winding": 1, "ready": 2}
+        queue = []
+        for participant in participants:
+            state = raw_actor_atb_state(participant=participant)
+            phase = (state or {}).get("phase")
+            if phase not in phase_order:
+                continue
+            queue.append(
+                {
+                    "kind": "participant",
+                    "actor": participant,
+                    "phase": phase,
+                    "started_at": int((state or {}).get("phase_started_at_ms", 0) or 0),
+                    "fill_rate": int((state or {}).get("fill_rate", 0) or 0),
+                    "sort_id": f"p:{participant.key}",
+                }
+            )
+        for enemy in enemies:
+            state = raw_actor_atb_state(enemy=enemy)
+            phase = (state or {}).get("phase")
+            if phase not in phase_order:
+                continue
+            queue.append(
+                {
+                    "kind": "enemy",
+                    "actor": enemy,
+                    "phase": phase,
+                    "started_at": int((state or {}).get("phase_started_at_ms", 0) or 0),
+                    "fill_rate": int((state or {}).get("fill_rate", 0) or 0),
+                    "sort_id": f"e:{enemy['id']}",
+                }
+            )
+
+        queue.sort(
+            key=lambda entry: (
+                phase_order.get(entry["phase"], 99),
+                entry["started_at"],
+                -entry["fill_rate"],
+                0 if entry["kind"] == "participant" else 1,
+                entry["sort_id"],
+            )
+        )
+        return queue
 
     def atb_badge(state):
         phase = (state or {}).get("phase")
@@ -836,7 +870,7 @@ def build_combat_panel(encounter):
             return f"CD{int((state or {}).get('ticks_remaining', 0) or 0)}"
         gauge = int((state or {}).get("gauge", 0) or 0)
         ready = max(1, int((state or {}).get("ready_gauge", 400) or 400))
-        return f"ATB {int(round((gauge / ready) * 100))}%"
+        return f"ATB {max(0, min(99, int((gauge / ready) * 100)))}%"
 
     sections = [
         _section(
@@ -878,15 +912,14 @@ def build_combat_panel(encounter):
         ),
     ]
 
+    queued_count = len(combat_queue_entries())
     for participant in participants:
         phase = (actor_atb_state(participant=participant) or {}).get("phase")
-        if phase == "ready":
-            imminent_count += 1
+        if phase in {"recovering", "cooldown"}:
+            opening_count += 1
     for enemy in enemies:
         phase = (actor_atb_state(enemy=enemy) or {}).get("phase")
-        if phase in {"winding", "ready"}:
-            imminent_count += 1
-        elif phase in {"recovering", "cooldown"}:
+        if phase in {"recovering", "cooldown"}:
             opening_count += 1
 
     return _make_panel(
@@ -897,7 +930,7 @@ def build_combat_panel(encounter):
         chips=[
             _chip(f"{ally_count} {ally_label}", "groups", "muted"),
             _chip(f"{foe_count} {foe_label}", "warning", "danger" if enemies else "good"),
-            _chip(f"{imminent_count} hot", "priority_high", "danger" if imminent_count else "muted"),
+            _chip(f"{queued_count} queued", "schedule", "accent" if queued_count else "muted"),
             _chip(f"{opening_count} open", "schedule", "good" if opening_count else "muted"),
         ],
         sections=sections,

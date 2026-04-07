@@ -4,7 +4,6 @@ from world.activities import format_catch_log, format_kitchen_hearth_text, forma
 from world.commerce import format_shop_bonus, get_sellable_entries, get_shop_bonus
 from world.content import get_content_registry
 from world.forging import get_forge_entries
-from world.resonance import format_portal_plaque_text
 from world.trophies import format_trophy_case_text
 from world.tutorial import get_tutorial_entity_response
 
@@ -215,7 +214,6 @@ DYNAMIC_READ_HANDLERS = {
     "great_catch_log": lambda _character: format_catch_log(),
     "kitchen_hearth": format_kitchen_hearth_text,
     "loaner_pole_rack": lambda _character: format_pole_rack_text(),
-    "nexus_gate_plaque": lambda _character: format_portal_plaque_text(),
     "trophy_vitrine": lambda _character: format_trophy_case_text(),
 }
 

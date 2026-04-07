@@ -89,9 +89,13 @@ class DummyEncounter:
 
 
 def _section(view, label):
-    for section in view.get("sections", []):
-        if section.get("label") == label:
-            return section
+    labels = [label]
+    if label == "Party":
+        labels = ["Party", "You"]
+    for expected in labels:
+        for section in view.get("sections", []):
+            if section.get("label") == expected:
+                return section
     raise AssertionError(f"Missing section {label}")
 
 
@@ -100,6 +104,15 @@ def _entry(section, title):
         if entry.get("title") == title:
             return entry
     raise AssertionError(f"Missing entry {title}")
+
+
+def _combat_entry(view, title):
+    for label in ("You", "Allies", "Party", "Enemies"):
+        try:
+            return _entry(_section(view, label), title)
+        except AssertionError:
+            continue
+    raise AssertionError(f"Missing combat entry {title}")
 
 
 def _item(section, prefix):
@@ -187,8 +200,8 @@ class CombatViewTests(unittest.TestCase):
         self.assertIsNot(_action(view, "Flee").get("icon_only"), True)
 
         party = _section(view, "Party")
-        dad_entry = _entry(party, "Dad")
-        peep_entry = _entry(party, "Peep")
+        dad_entry = _combat_entry(view, "Dad")
+        peep_entry = _combat_entry(view, "Peep")
         self.assertEqual(
             [("ATB", "100 / 100"), ("HP", "20 / 24"), ("STA", "6 / 10"), ("MP", "18 / 20")],
             [(meter.get("label"), meter.get("value")) for meter in dad_entry.get("meters", [])],
@@ -277,7 +290,7 @@ class CombatViewTests(unittest.TestCase):
         view = build_combat_view(encounter, warrior)
         party_section = _section(view, "Party")
         enemies_section = _section(view, "Enemies")
-        warrior_entry = _entry(party_section, "Dad")
+        warrior_entry = _combat_entry(view, "Dad")
         enemy_entry = _entry(enemies_section, "Old Greymaw")
 
         self.assertEqual(
@@ -321,10 +334,237 @@ class CombatViewTests(unittest.TestCase):
             view = build_combat_view(encounter, warrior)
 
         party_section = _section(view, "Party")
-        warrior_entry = _entry(party_section, "Dad")
+        warrior_entry = _combat_entry(view, "Dad")
         self.assertEqual(
             [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
+        )
+        atb_meter = warrior_entry.get("meters", [])[0]
+        self.assertEqual(
+            {
+                "phase": "charging",
+                "gauge": 200,
+                "phase_start_gauge": 0,
+                "phase_duration_ms": 4000,
+                "phase_remaining_ms": 2000,
+                "ready_gauge": 400,
+            },
+            {
+                "phase": atb_meter.get("meta", {}).get("phase"),
+                "gauge": atb_meter.get("meta", {}).get("gauge"),
+                "phase_start_gauge": atb_meter.get("meta", {}).get("phase_start_gauge"),
+                "phase_duration_ms": atb_meter.get("meta", {}).get("phase_duration_ms"),
+                "phase_remaining_ms": atb_meter.get("meta", {}).get("phase_remaining_ms"),
+                "ready_gauge": atb_meter.get("meta", {}).get("ready_gauge"),
+            },
+        )
+        self.assertAlmostEqual(50.0, atb_meter.get("percent"), places=2)
+
+    def test_atb_meter_preserves_fractional_charge_percent(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "p:7": {
+                    "phase": "charging",
+                    "gauge": 167,
+                    "ready_gauge": 400,
+                    "phase_start_gauge": 167,
+                    "phase_started_at_ms": 1_000,
+                    "phase_duration_ms": 2_330,
+                }
+            },
+        )
+
+        with patch("world.browser_views.time.time", return_value=1.0):
+            view = build_combat_view(encounter, warrior)
+
+        atb_meter = _combat_entry(view, "Dad").get("meters", [])[0]
+        self.assertEqual("41 / 100", atb_meter.get("value"))
+        self.assertAlmostEqual(41.75, atb_meter.get("percent"), places=2)
+
+    def test_atb_meter_repairs_future_charge_start_when_field_is_not_locked(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "p:7": {
+                    "phase": "charging",
+                    "gauge": 100,
+                    "ready_gauge": 400,
+                    "fill_rate": 100,
+                    "phase_start_gauge": 100,
+                    "phase_started_at_ms": 5_000,
+                    "phase_duration_ms": 3_000,
+                }
+            },
+        )
+
+        with patch("world.browser_views.time.time", return_value=4.0):
+            view = build_combat_view(encounter, warrior)
+
+        atb_meter = _combat_entry(view, "Dad").get("meters", [])[0]
+        self.assertAlmostEqual(25.0, atb_meter.get("percent"), places=2)
+        self.assertEqual(4_000, atb_meter.get("meta", {}).get("phase_started_at_ms"))
+        self.assertEqual(3_000, atb_meter.get("meta", {}).get("phase_duration_ms"))
+
+    def test_atb_meter_keeps_charge_projection_live_while_action_is_in_progress(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "p:7": {
+                    "phase": "charging",
+                    "gauge": 0,
+                    "ready_gauge": 400,
+                    "phase_start_gauge": 0,
+                    "phase_started_at_ms": 1_000,
+                    "phase_duration_ms": 4_000,
+                },
+                "e:e1": {
+                    "phase": "winding",
+                    "ticks_remaining": 1,
+                    "phase_started_at_ms": 2_500,
+                    "phase_duration_ms": 1_000,
+                    "timing": {"windup_ticks": 1},
+                    "current_action": {"kind": "enemy_attack", "label": "Brush Pounce"},
+                },
+            },
+        )
+
+        with patch("world.browser_views.time.time", return_value=3.0):
+            view = build_combat_view(encounter, warrior)
+
+        party_section = _section(view, "Party")
+        warrior_entry = _combat_entry(view, "Dad")
+        self.assertEqual(
+            [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
+            [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
+        )
+        self.assertFalse(view.get("atb_locked"))
+        self.assertEqual(0, view.get("atb_lock_until_ms"))
+        self.assertEqual(
+            {
+                "phase_duration_ms": 4_000,
+                "phase_remaining_ms": 2_000,
+                "phase_started_at_ms": 1_000,
+            },
+            {
+                "phase_duration_ms": warrior_entry.get("meters", [])[0].get("meta", {}).get("phase_duration_ms"),
+                "phase_remaining_ms": warrior_entry.get("meters", [])[0].get("meta", {}).get("phase_remaining_ms"),
+                "phase_started_at_ms": warrior_entry.get("meters", [])[0].get("meta", {}).get("phase_started_at_ms"),
+            },
+        )
+        self.assertFalse(any(section.get("label") == "Up Next" for section in view.get("sections", [])))
+
+    def test_atb_meter_ignores_turn_lock_and_keeps_charge_projection_live(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "p:7": {
+                    "phase": "charging",
+                    "gauge": 0,
+                    "ready_gauge": 400,
+                    "phase_start_gauge": 0,
+                    "phase_started_at_ms": 1_000,
+                    "phase_duration_ms": 4_000,
+                }
+            },
+        )
+        encounter.db.atb_turn_lock_until_ms = 4_000
+
+        with patch("world.browser_views.time.time", return_value=3.0):
+            view = build_combat_view(encounter, warrior)
+
+        party_section = _section(view, "Party")
+        warrior_entry = _combat_entry(view, "Dad")
+        self.assertEqual(
+            [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
+            [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
+        )
+        self.assertFalse(view.get("atb_locked"))
+        self.assertEqual(0, view.get("atb_lock_until_ms"))
+
+    def test_atb_meter_stays_below_full_for_near_ready_charging_actor(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "e:e1": {
+                    "phase": "charging",
+                    "gauge": 399,
+                    "ready_gauge": 400,
+                    "phase_start_gauge": 399,
+                    "phase_started_at_ms": 1_000,
+                    "phase_duration_ms": 250,
+                }
+            },
+        )
+
+        with patch("world.browser_views.time.time", return_value=2.0):
+            view = build_combat_view(encounter, warrior)
+
+        enemies_section = _section(view, "Enemies")
+        enemy_entry = _entry(enemies_section, "Old Greymaw")
+        self.assertEqual(
+            [("ATB", "99 / 100"), ("HP", "28 / 32")],
+            [(meter.get("label"), meter.get("value")) for meter in enemy_entry.get("meters", [])],
         )
 
     def test_duplicate_enemy_names_are_numbered_in_view(self):
@@ -355,6 +595,10 @@ class CombatViewTests(unittest.TestCase):
 
         self.assertEqual("attack e1", crow_one.get("command"))
         self.assertEqual("attack e2", crow_two.get("command"))
+        self.assertEqual("e:e1", crow_one.get("entry_ref"))
+        self.assertEqual("e:e2", crow_two.get("entry_ref"))
+        self.assertEqual("flight", crow_one.get("background_icon"))
+        self.assertIsNone(crow_one.get("icon"))
         self.assertIsNone(crow_one.get("meta"))
         self.assertIsNone(crow_one.get("badge"))
 
@@ -438,7 +682,7 @@ class CombatViewTests(unittest.TestCase):
         view = build_combat_view(encounter, rogue)
         party = _section(view, "Party")
         enemies = _section(view, "Enemies")
-        rogue_entry = _entry(party, "Dad")
+        rogue_entry = _combat_entry(view, "Dad")
         enemy_entry = _entry(enemies, "Bog Wolf")
 
         self.assertIn("Hidden", [chip.get("label") for chip in rogue_entry.get("chips", [])])
@@ -600,7 +844,7 @@ class CombatViewTests(unittest.TestCase):
 
         view = build_combat_view(encounter, cleric)
         items_action = _action(view, "Items")
-        dust = _picker_option(items_action.get("picker", {}), "Ward Dust", meta="Ward Dust · GUARD 12")
+        dust = _picker_option(items_action.get("picker", {}), "Ward Dust", meta="Ward Dust · GUARD 12 · GUARD")
         dust_target = _picker_option(items_action.get("picker", {}), "Ward Dust", meta="Target Ally")
 
         self.assertEqual("use Ward Dust", dust.get("command"))

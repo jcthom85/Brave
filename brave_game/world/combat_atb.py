@@ -12,7 +12,7 @@ import time
 
 
 DEFAULT_ATB_PROFILE = {
-    "gauge_cost": 400,
+    "gauge_cost": 100,
     "windup_ticks": 1,
     "recovery_ticks": 1,
     "cooldown_ticks": 0,
@@ -23,6 +23,7 @@ DEFAULT_ATB_PROFILE = {
 
 ATB_TIMING_SCALE = 1
 DEFAULT_ATB_TICK_MS = 1000
+DEFAULT_ATB_READY_GAUGE = 400
 
 
 def _clamped_tick(value, *, default=0):
@@ -51,7 +52,7 @@ def create_atb_state(
     ticks_remaining=0,
     current_action=None,
     timing=None,
-    ready_gauge=400,
+    ready_gauge=DEFAULT_ATB_READY_GAUGE,
     phase_started_at_ms=None,
     phase_duration_ms=None,
     phase_start_gauge=None,
@@ -61,7 +62,7 @@ def create_atb_state(
 
     fill_rate = max(1, _clamped_tick(fill_rate, default=100))
     gauge = max(0, _clamped_tick(gauge))
-    ready_gauge = max(1, _clamped_tick(ready_gauge, default=400))
+    ready_gauge = max(1, _clamped_tick(ready_gauge, default=DEFAULT_ATB_READY_GAUGE))
     phase = phase or "charging"
     started_at = _clamped_tick(phase_started_at_ms, default=_now_ms())
     start_gauge = max(0, min(ready_gauge, _clamped_tick(phase_start_gauge, default=gauge)))
@@ -94,6 +95,7 @@ def render_atb_state(state, *, tick_ms=DEFAULT_ATB_TICK_MS, now_ms=None):
 
     now_ms = _clamped_tick(now_ms, default=_now_ms())
     normalized = dict(state or {})
+    normalized.setdefault("ready_gauge", DEFAULT_ATB_READY_GAUGE)
     if normalized.get("phase_started_at_ms") is None:
         normalized["phase_started_at_ms"] = now_ms
     state = create_atb_state(**normalized, tick_ms=tick_ms)
@@ -103,12 +105,14 @@ def render_atb_state(state, *, tick_ms=DEFAULT_ATB_TICK_MS, now_ms=None):
         duration_ms = max(0, int(state.get("phase_duration_ms", 0) or 0))
         started_at = int(state.get("phase_started_at_ms", now_ms) or now_ms)
         start_gauge = max(0, min(state["ready_gauge"], int(state.get("phase_start_gauge", state["gauge"]) or 0)))
+        max_charging_gauge = max(0, state["ready_gauge"] - 1)
         if duration_ms <= 0 or now_ms - started_at >= duration_ms:
-            state["gauge"] = state["ready_gauge"]
-            state["ticks_remaining"] = 0
+            state["gauge"] = max_charging_gauge
+            state["ticks_remaining"] = 1 if state["ready_gauge"] > 0 else 0
         else:
             progress = max(0.0, min(1.0, (now_ms - started_at) / float(duration_ms)))
-            state["gauge"] = int(round(start_gauge + ((state["ready_gauge"] - start_gauge) * progress)))
+            projected_gauge = int(round(start_gauge + ((state["ready_gauge"] - start_gauge) * progress)))
+            state["gauge"] = min(max_charging_gauge, projected_gauge)
             remaining_ms = max(0, duration_ms - (now_ms - started_at))
             state["ticks_remaining"] = max(1, int((remaining_ms + max(1, tick_ms) - 1) // max(1, tick_ms)))
         return state
@@ -154,6 +158,122 @@ def normalize_atb_profile(raw_profile=None, *, base_profile=None):
     return profile
 
 
+def _phase_duration_ms(state, tick_ms):
+    duration_ms = max(0, int(state.get("phase_duration_ms", 0) or 0))
+    if duration_ms > 0:
+        return duration_ms
+    phase = state.get("phase")
+    if phase in {"winding", "recovering", "cooldown"}:
+        return max(0, int(state.get("ticks_remaining", 0) or 0) * max(1, tick_ms))
+    return 0
+
+
+def atb_state_ms_until_ready(state, *, tick_ms=DEFAULT_ATB_TICK_MS):
+    """Return the time until an actor reaches ready in the current state."""
+
+    state = create_atb_state(**dict(state or {}), tick_ms=tick_ms)
+    phase = state["phase"]
+    if phase in {"ready", "resolving", "winding"}:
+        return 0
+    if phase == "charging":
+        return _charging_duration_ms(
+            int(state.get("gauge", 0) or 0),
+            int(state.get("ready_gauge", DEFAULT_ATB_READY_GAUGE) or DEFAULT_ATB_READY_GAUGE),
+            int(state.get("fill_rate", 1) or 1),
+            tick_ms,
+        )
+    if phase in {"recovering", "cooldown"}:
+        return _phase_duration_ms(state, tick_ms) + _charging_duration_ms(
+            0,
+            int(state.get("ready_gauge", DEFAULT_ATB_READY_GAUGE) or DEFAULT_ATB_READY_GAUGE),
+            int(state.get("fill_rate", 1) or 1),
+            tick_ms,
+        )
+    return 0
+
+
+def advance_atb_state_by_ms(state, elapsed_ms, *, tick_ms=DEFAULT_ATB_TICK_MS, now_ms=None):
+    """Advance an ATB state by elapsed milliseconds without overshooting readiness."""
+
+    state = create_atb_state(**dict(state or {}), tick_ms=tick_ms)
+    remaining_ms = max(0, _clamped_tick(elapsed_ms))
+    current_ms = _clamped_tick(now_ms, default=_now_ms())
+
+    while remaining_ms > 0:
+        phase = state["phase"]
+        if phase in {"ready", "resolving"}:
+            break
+
+        if phase == "charging":
+            fill_rate = max(1, int(state.get("fill_rate", 1) or 1))
+            gauge = max(0, int(state.get("gauge", 0) or 0))
+            ready_gauge = max(1, int(state.get("ready_gauge", DEFAULT_ATB_READY_GAUGE) or DEFAULT_ATB_READY_GAUGE))
+            ms_to_ready = _charging_duration_ms(gauge, ready_gauge, fill_rate, tick_ms)
+            if ms_to_ready <= 0 or remaining_ms >= ms_to_ready:
+                current_ms += max(0, ms_to_ready)
+                remaining_ms = max(0, remaining_ms - max(0, ms_to_ready))
+                state["gauge"] = ready_gauge
+                state["phase"] = "ready"
+                state["ticks_remaining"] = 0
+                state["phase_started_at_ms"] = current_ms
+                state["phase_duration_ms"] = 0
+                state["phase_start_gauge"] = ready_gauge
+                break
+
+            progress = (fill_rate * remaining_ms) / float(max(1, tick_ms))
+            next_gauge = min(ready_gauge - 1, gauge + int(progress))
+            current_ms += remaining_ms
+            remaining_ms = 0
+            remaining = max(0, ready_gauge - next_gauge)
+            state["gauge"] = next_gauge
+            state["ticks_remaining"] = max(1, (remaining + fill_rate - 1) // fill_rate)
+            state["phase_started_at_ms"] = current_ms
+            state["phase_duration_ms"] = _charging_duration_ms(next_gauge, ready_gauge, fill_rate, tick_ms)
+            state["phase_start_gauge"] = next_gauge
+            break
+
+        if phase in {"winding", "recovering", "cooldown"}:
+            phase_duration_ms = _phase_duration_ms(state, tick_ms)
+            if remaining_ms < phase_duration_ms:
+                phase_duration_ms = max(0, phase_duration_ms - remaining_ms)
+                current_ms += remaining_ms
+                remaining_ms = 0
+                state["phase_started_at_ms"] = current_ms
+                state["phase_duration_ms"] = phase_duration_ms
+                state["ticks_remaining"] = max(1, (phase_duration_ms + max(1, tick_ms) - 1) // max(1, tick_ms))
+                if phase in {"recovering", "cooldown"}:
+                    state["gauge"] = 0
+                break
+
+            current_ms += phase_duration_ms
+            remaining_ms = max(0, remaining_ms - phase_duration_ms)
+            if phase == "winding":
+                state["phase"] = "resolving"
+                state["ticks_remaining"] = 0
+                state["phase_started_at_ms"] = current_ms
+                state["phase_duration_ms"] = 0
+                break
+
+            state["phase"] = "charging"
+            state["gauge"] = 0
+            state["current_action"] = None
+            state["timing"] = None
+            state["ticks_remaining"] = 0
+            state["phase_start_gauge"] = 0
+            state["phase_started_at_ms"] = current_ms
+            state["phase_duration_ms"] = _charging_duration_ms(
+                0,
+                int(state.get("ready_gauge", DEFAULT_ATB_READY_GAUGE) or DEFAULT_ATB_READY_GAUGE),
+                int(state.get("fill_rate", 1) or 1),
+                tick_ms,
+            )
+            continue
+
+        break
+
+    return state
+
+
 def tick_atb_state(state, *, tick_ms=DEFAULT_ATB_TICK_MS, now_ms=None):
     """Advance one actor ATB state by one encounter tick."""
 
@@ -162,10 +282,9 @@ def tick_atb_state(state, *, tick_ms=DEFAULT_ATB_TICK_MS, now_ms=None):
     now_ms = _clamped_tick(now_ms, default=_now_ms())
 
     if phase == "charging":
-        duration_ms = max(0, int(state.get("phase_duration_ms", 0) or 0))
-        started_at = int(state.get("phase_started_at_ms", now_ms) or now_ms)
-        start_gauge = max(0, min(state["ready_gauge"], int(state.get("phase_start_gauge", state["gauge"]) or 0)))
-        if duration_ms <= 0 or now_ms - started_at >= duration_ms:
+        fill_rate = max(1, int(state.get("fill_rate", 1) or 1))
+        next_gauge = min(state["ready_gauge"], int(state.get("gauge", 0) or 0) + fill_rate)
+        if next_gauge >= state["ready_gauge"]:
             state["gauge"] = state["ready_gauge"]
             state["phase"] = "ready"
             state["ticks_remaining"] = 0
@@ -173,16 +292,21 @@ def tick_atb_state(state, *, tick_ms=DEFAULT_ATB_TICK_MS, now_ms=None):
             state["phase_duration_ms"] = 0
             state["phase_start_gauge"] = state["ready_gauge"]
         else:
-            progress = max(0.0, min(1.0, (now_ms - started_at) / float(duration_ms)))
-            state["gauge"] = int(round(start_gauge + ((state["ready_gauge"] - start_gauge) * progress)))
-            remaining_ms = max(0, duration_ms - (now_ms - started_at))
-            state["ticks_remaining"] = max(1, int((remaining_ms + max(1, tick_ms) - 1) // max(1, tick_ms)))
+            remaining = max(0, state["ready_gauge"] - next_gauge)
+            state["gauge"] = next_gauge
+            state["ticks_remaining"] = max(1, (remaining + fill_rate - 1) // fill_rate)
+            state["phase_started_at_ms"] = now_ms
+            state["phase_duration_ms"] = _charging_duration_ms(next_gauge, state["ready_gauge"], fill_rate, tick_ms)
+            state["phase_start_gauge"] = next_gauge
         return state
 
     if phase in {"winding", "recovering", "cooldown"}:
-        duration_ms = max(0, int(state.get("phase_duration_ms", 0) or 0))
-        started_at = int(state.get("phase_started_at_ms", now_ms) or now_ms)
-        if duration_ms <= 0 or now_ms - started_at >= duration_ms:
+        remaining = max(0, int(state.get("ticks_remaining", 0) or 0))
+        if remaining > 1:
+            state["ticks_remaining"] = remaining - 1
+            state["phase_started_at_ms"] = now_ms
+            state["phase_duration_ms"] = max(1, state["ticks_remaining"] * max(1, tick_ms))
+        else:
             if phase == "winding":
                 state["phase"] = "resolving"
                 state["ticks_remaining"] = 0
@@ -197,9 +321,6 @@ def tick_atb_state(state, *, tick_ms=DEFAULT_ATB_TICK_MS, now_ms=None):
                 state["phase_start_gauge"] = 0
                 state["phase_started_at_ms"] = now_ms
                 state["phase_duration_ms"] = _charging_duration_ms(0, state["ready_gauge"], state["fill_rate"], tick_ms)
-        else:
-            remaining_ms = max(0, duration_ms - (now_ms - started_at))
-            state["ticks_remaining"] = max(1, int((remaining_ms + max(1, tick_ms) - 1) // max(1, tick_ms)))
         return state
 
     return state
@@ -266,7 +387,7 @@ def _default_ability_atb_profile(ability):
     resource = (ability or {}).get("resource", "")
 
     profile = dict(DEFAULT_ATB_PROFILE)
-    profile["gauge_cost"] = 400 + max(0, cost - 8) * 16
+    profile["gauge_cost"] = 100 + max(0, cost - 8) * 4
     profile["recovery_ticks"] = 1 if cost < 12 else 2
 
     if target == "self":
@@ -316,7 +437,7 @@ def _default_item_atb_profile(use_profile):
     damage_spec = dict(use_profile.get("damage", {}) or {})
 
     profile = dict(DEFAULT_ATB_PROFILE)
-    profile["gauge_cost"] = 368
+    profile["gauge_cost"] = 92
     profile["cooldown_ticks"] = _clamped_tick(use_profile.get("cooldown_turns"))
 
     if target in {"self", "ally"}:

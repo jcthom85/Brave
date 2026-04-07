@@ -3,7 +3,6 @@
 from world.browser_panels import (
     build_cook_panel,
     build_forge_panel,
-    build_portals_panel,
     build_read_panel,
     build_shop_panel,
     build_talk_panel,
@@ -11,7 +10,6 @@ from world.browser_panels import (
 from world.browser_views import (
     build_cook_view,
     build_forge_view,
-    build_portals_view,
     build_prayer_view,
     build_read_view,
     build_shop_view,
@@ -36,7 +34,6 @@ from world.interactions import get_entity_response
 from world.screen_text import format_entry, render_screen, wrap_text
 
 CONTENT = get_content_registry()
-PORTALS = CONTENT.systems.portals
 
 from .brave import (
     BraveCharacterCommand,
@@ -335,53 +332,6 @@ class CmdForge(BraveCharacterCommand):
             f"Torren hands over your new |w{result['item_name']}|n{bonus_suffix}. The order cost |w{result['silver_cost']}|n silver."
         )
         self.msg("\n".join(lines))
-
-
-class CmdPortals(BraveCharacterCommand):
-    """
-    Review the current Nexus gates.
-
-    Usage:
-      portals
-
-    Lists the current portal lineup while standing at the Nexus Gate.
-    """
-
-    key = "portals"
-    aliases = ["gates", "portal list"]
-    help_category = "Brave"
-
-    def func(self):
-        character = self.get_character()
-        if not character:
-            return
-        if not character.location or not character.location.db.brave_portal_hub:
-            self.msg("You need to be at the Nexus Gate before the portal routes make any sense.")
-            return
-
-        sections = []
-        for status_key, section_title in (
-            ("stable", "Stable Gates"),
-            ("dormant", "Dormant Gates"),
-            ("sealed", "Sealed Gates"),
-        ):
-            blocks = []
-            for portal in PORTALS.values():
-                if portal["status"] != status_key:
-                    continue
-                details = [f"Resonance: {portal['resonance'].replace('_', ' ').title()}"]
-                if portal.get("travel_hint"):
-                    details.append(f"Entry route: {portal['travel_hint']}")
-                blocks.append(format_entry(portal["name"], details=details, summary=portal["summary"]))
-            sections.append((section_title, _stack_blocks(blocks) if blocks else ["  None at the moment."]))
-
-        screen = render_screen(
-            "Nexus Gates",
-            subtitle="The ring lists what Brambleford can currently reach and what still refuses to answer.",
-            meta=[f"{len(PORTALS)} total gates"],
-            sections=sections,
-        )
-        self.scene_msg(screen, panel=build_portals_panel(), view=build_portals_view(character))
 
 
 class CmdPray(BraveCharacterCommand):
