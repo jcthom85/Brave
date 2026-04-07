@@ -1006,6 +1006,7 @@ body::-webkit-scrollbar,
     height: calc(100% - 28px);
     margin: 12px 16px 16px;
     padding: 18px 20px 22px;
+    position: relative;
     border: 1px solid color-mix(in srgb, var(--brave-world-line) 72%, var(--brave-border));
     border-radius: var(--brave-radius-panel);
     background:
@@ -1608,10 +1609,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     max-height: calc(100% - 76px);
     display: grid;
     grid-template-columns: repeat(2, minmax(0, var(--brave-rail-column-width)));
-    grid-template-rows: minmax(0, 1fr) 320px;
+    grid-template-rows: minmax(0, 1fr) minmax(220px, 0.82fr);
     grid-template-areas:
         "card pack"
-        "vicinity vicinity";
+        ". vicinity";
     column-gap: var(--brave-rail-gap);
     row-gap: 6px;
     align-items: stretch;
@@ -7620,10 +7621,27 @@ body[data-brave-scene="explore"] .minimap-overlay {
 }
 
 @media screen and (min-width: 1100px) {
+    body[data-brave-scene="explore"] {
+        --brave-rail-column-width: clamp(248px, 19vw, 304px);
+        --brave-rail-width: calc((var(--brave-rail-column-width) * 2) + var(--brave-rail-gap));
+    }
+
     body[data-brave-scene="explore"] .scene-rail {
-        bottom: 168px;
+        top: 18px;
+        right: 20px;
+        bottom: 22px;
         height: auto;
         max-height: none;
+        padding-right: 0;
+        grid-template-rows: minmax(0, 1fr) minmax(220px, 0.82fr);
+        align-content: stretch;
+        align-items: stretch;
+    }
+
+    body[data-brave-scene="explore"] .scene-rail__panel--vicinity {
+        width: 100%;
+        justify-self: stretch;
+        align-self: stretch;
     }
 }
 

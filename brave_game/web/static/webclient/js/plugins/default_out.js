@@ -69,6 +69,20 @@ let defaultout_plugin = (function () {
     var combatLogAutoscrollPinned = true;
     var COMBAT_LOG_AUTOSCROLL_THRESHOLD_PX = 24;
 
+    var normalizeCombatActionTab = function (tab) {
+        return tab === "items" ? "items" : "abilities";
+    };
+
+    var shouldPreservePickerForViewSwap = function (nextViewData) {
+        return !!(
+            currentPickerData
+            && currentViewData
+            && currentViewData.variant === "combat"
+            && nextViewData
+            && nextViewData.variant === "combat"
+        );
+    };
+
     var isMobileViewport = function () {
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
     };
@@ -1880,7 +1894,33 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var ensureSceneRailHost = function () {
+        var mwin = document.getElementById("messagewindow");
+        if (!mwin) {
+            return null;
+        }
+        var rail = document.getElementById("scene-rail");
+        if (rail && rail.parentNode === mwin) {
+            return rail;
+        }
+        if (rail && rail.parentNode) {
+            rail.parentNode.removeChild(rail);
+        }
+
+        rail = document.createElement("div");
+        rail.id = "scene-rail";
+        rail.className = "scene-rail";
+        rail.setAttribute("aria-hidden", "true");
+        rail.innerHTML =
+            "<section id='scene-pack-panel' class='scene-rail__panel scene-rail__panel--pack scene-rail__panel--hidden scene-rail__panel--clickable brave-click' aria-label='Pack' data-brave-command='pack' title='pack' role='button' tabindex='0'></section>"
+            + "<section id='scene-vicinity-panel' class='scene-rail__panel scene-rail__panel--vicinity scene-rail__panel--hidden' aria-label='The Vicinity'></section>"
+            + "<div id='scene-card' class='scene-card'></div>";
+        mwin.appendChild(rail);
+        return rail;
+    };
+
     var clearPackPanel = function () {
+        ensureSceneRailHost();
         var panel = document.getElementById("scene-pack-panel");
         if (!panel) {
             return;
@@ -1890,6 +1930,7 @@ let defaultout_plugin = (function () {
     };
 
     var clearVicinityPanel = function () {
+        ensureSceneRailHost();
         var panel = document.getElementById("scene-vicinity-panel");
         if (!panel) {
             return;
@@ -1948,15 +1989,7 @@ let defaultout_plugin = (function () {
 
     var renderDesktopToolbar = function () {
         var toolbar = document.getElementById("toolbar");
-        var show = !!(
-            toolbar
-            && !isMobileViewport()
-            && currentViewData
-            && currentViewData.variant
-            && currentViewData.variant !== "connection"
-            && currentViewData.variant !== "chargen"
-            && currentViewData.variant !== "account"
-        );
+        var show = false;
         if (!toolbar) {
             return;
         }
@@ -2045,8 +2078,19 @@ let defaultout_plugin = (function () {
         });
     };
 
+    var syncSceneRailBounds = function (rail) {
+        if (!rail) {
+            return;
+        }
+        rail.style.removeProperty("top");
+        rail.style.removeProperty("right");
+        rail.style.removeProperty("bottom");
+        rail.style.removeProperty("max-height");
+        rail.style.removeProperty("height");
+    };
+
     var syncSceneRailLayout = function () {
-        var rail = document.getElementById("scene-rail");
+        var rail = ensureSceneRailHost();
         var card = document.getElementById("scene-card");
         var packPanel = document.getElementById("scene-pack-panel");
         var vicinityPanel = document.getElementById("scene-vicinity-panel");
@@ -2074,6 +2118,7 @@ let defaultout_plugin = (function () {
         rail.classList.toggle("scene-rail--card-hidden", !hasCard);
         rail.classList.toggle("scene-rail--detail-hidden", !hasCard && !hasPack && !hasVicinity);
         rail.classList.toggle("scene-rail--empty", !hasCard && !hasPack && !hasVicinity);
+        syncSceneRailBounds(rail);
     };
 
     var escapeHtml = function (value) {
@@ -4063,6 +4108,7 @@ let defaultout_plugin = (function () {
     };
 
     var renderVicinityPanel = function (roomView) {
+        ensureSceneRailHost();
         var panel = document.getElementById("scene-vicinity-panel");
         if (!panel) {
             return;
@@ -4080,6 +4126,7 @@ let defaultout_plugin = (function () {
     };
 
     var renderPackPanel = function () {
+        ensureSceneRailHost();
         var panel = document.getElementById("scene-pack-panel");
         if (!panel) {
             return;
@@ -4126,6 +4173,7 @@ let defaultout_plugin = (function () {
     };
 
     var renderPanelCard = function (panelData) {
+        ensureSceneRailHost();
         var card = document.getElementById("scene-card");
         if (!card) {
             return;
@@ -4198,7 +4246,10 @@ let defaultout_plugin = (function () {
             return;
         }
         syncInputContextForView(viewData);
-        clearPickerSheet();
+        var preservePickerAcrossViewSwap = shouldPreservePickerForViewSwap(viewData);
+        if (!preservePickerAcrossViewSwap) {
+            clearPickerSheet();
+        }
 
         var preserveRail = !!(viewData.layout === "explore" || viewData.preserve_rail);
         var stickyView = !!viewData.sticky;
@@ -4906,7 +4957,14 @@ let defaultout_plugin = (function () {
             var previousCombatSnapshots = [];
             var nextCombatRefs = {};
             var shouldDelayCombatSwap = false;
+            var previousCombatActionTab = currentCombatActionTab;
             if (viewData.variant === "combat" && currentViewData && currentViewData.variant === "combat") {
+                var liveCombatView = document.querySelector(".brave-view--combat");
+                if (liveCombatView) {
+                    previousCombatActionTab = normalizeCombatActionTab(
+                        liveCombatView.getAttribute("data-brave-combat-tab") || currentCombatActionTab
+                    );
+                }
                 previousCombatSnapshots = getCombatEntryNodes().map(captureCombatEntrySnapshot).filter(Boolean);
                 nextCombatRefs = collectCombatEntryRefsFromMarkup(viewMarkup);
                 previousCombatSnapshots.forEach(function (snapshot) {
@@ -4933,6 +4991,9 @@ let defaultout_plugin = (function () {
 
             var applyStickyMarkup = function () {
                 currentViewData = viewData;
+                if (viewData.variant === "combat") {
+                    currentCombatActionTab = normalizeCombatActionTab(previousCombatActionTab);
+                }
                 setBodyState("view", viewData && viewData.variant ? viewData.variant : "");
 
                 var stickyContainer = mwin.children(".brave-sticky-view");
@@ -4958,8 +5019,14 @@ let defaultout_plugin = (function () {
                     clearVicinityPanel();
                 }
                 renderPackPanel();
+                if (currentSceneData) {
+                    renderSceneCard(currentSceneData);
+                }
                 renderDesktopToolbar();
                 syncMobileShell();
+                if (preservePickerAcrossViewSwap && currentPickerData) {
+                    renderPickerSheet();
+                }
                 if (viewData.variant === "combat") {
                     applySuppressedCombatEntries();
                 } else {
@@ -5019,8 +5086,14 @@ let defaultout_plugin = (function () {
                 renderMap(currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText);
             }
             renderPackPanel();
+            if (currentSceneData) {
+                renderSceneCard(currentSceneData);
+            }
             renderDesktopToolbar();
             syncMobileShell();
+            if (preservePickerAcrossViewSwap && currentPickerData) {
+                renderPickerSheet();
+            }
             if (viewData.variant === "combat") {
                 applySuppressedCombatEntries();
             } else {
@@ -5141,10 +5214,12 @@ let defaultout_plugin = (function () {
 
         var abilityCount = abilitiesSection.querySelectorAll(".brave-view__list-item").length;
         var itemCount = itemsSection.querySelectorAll(".brave-view__list-item").length;
-        var preferredTab = currentCombatActionTab;
-        if (!abilityCount && itemCount) {
+        var preferredTab = normalizeCombatActionTab(
+            combatView.getAttribute("data-brave-combat-tab") || currentCombatActionTab
+        );
+        if (preferredTab === "abilities" && !abilityCount && itemCount) {
             preferredTab = "items";
-        } else if (!itemCount && abilityCount) {
+        } else if (preferredTab === "items" && !itemCount && abilityCount) {
             preferredTab = "abilities";
         }
         currentCombatActionTab = preferredTab;
@@ -5756,6 +5831,7 @@ let defaultout_plugin = (function () {
         window.addEventListener("resize", function () {
             syncMobileShell();
             positionDesktopToolbar();
+            syncSceneRailLayout();
             syncArcadeBodyState();
             if (currentArcadeState && currentArcadeState.fitScreen) {
                 currentArcadeState.fitScreen();
