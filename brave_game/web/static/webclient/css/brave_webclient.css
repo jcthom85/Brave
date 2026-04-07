@@ -4382,12 +4382,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     padding: 18px 20px 16px;
     position: relative;
     overflow: hidden;
-    border-color: rgba(178, 118, 100, 0.22);
+    border-color: color-mix(in srgb, var(--brave-combat-party-border) 78%, transparent);
     background:
-        radial-gradient(circle at 8% 0, rgba(150, 87, 69, 0.22), transparent 34%),
-        radial-gradient(circle at 90% 0, rgba(69, 108, 125, 0.18), transparent 38%),
+        radial-gradient(circle at 8% 0, var(--brave-combat-hero-tint-left), transparent 34%),
+        radial-gradient(circle at 90% 0, var(--brave-combat-hero-tint-right), transparent 38%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
-        linear-gradient(180deg, rgba(17, 22, 30, 0.98), rgba(9, 11, 16, 1));
+        linear-gradient(180deg, var(--brave-combat-hero-top), var(--brave-combat-hero-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.05),
         0 22px 40px rgba(0, 0, 0, 0.34);
@@ -4423,11 +4423,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
     padding: 8px;
-    border: 1px solid rgba(152, 101, 74, 0.22);
+    border: 1px solid var(--brave-combat-command-border);
     border-radius: calc(var(--brave-radius-card) - 2px);
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
-        linear-gradient(180deg, rgba(42, 29, 22, 0.94), rgba(18, 13, 11, 0.98));
+        linear-gradient(180deg, var(--brave-combat-command-top), var(--brave-combat-command-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         inset 0 0 0 1px rgba(255, 255, 255, 0.015);
@@ -4437,16 +4437,16 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     justify-content: center;
     min-height: 2.85rem;
     padding: 9px 12px;
-    border: 1px solid rgba(167, 117, 88, 0.3);
+    border: 1px solid var(--brave-combat-command-button-border);
     border-radius: 10px;
     background:
         linear-gradient(180deg, rgba(234, 190, 145, 0.08), rgba(255, 255, 255, 0.02) 28%, transparent 28%),
-        linear-gradient(180deg, rgba(65, 42, 30, 0.96), rgba(27, 18, 14, 1));
+        linear-gradient(180deg, var(--brave-combat-command-button-top), var(--brave-combat-command-button-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 245, 230, 0.08),
         inset 0 -1px 0 rgba(0, 0, 0, 0.34),
         0 8px 14px rgba(0, 0, 0, 0.16);
-    color: #efd9c6;
+    color: var(--brave-combat-command-text);
     font-size: calc(0.74rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: calc(var(--brave-letter-spacing) + 0.04em);
     text-transform: uppercase;
@@ -4458,15 +4458,19 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__action-icon {
-    color: #dea06f;
+    color: var(--brave-combat-command-icon);
 }
 
 .brave-view--combat .brave-view__action:hover,
 .brave-view--combat .brave-view__action:focus-visible {
-    border-color: rgba(212, 154, 112, 0.42);
+    border-color: color-mix(in srgb, var(--brave-combat-command-button-border) 80%, var(--brave-combat-semantic-warn));
     background:
         linear-gradient(180deg, rgba(244, 201, 148, 0.12), rgba(255, 255, 255, 0.03) 28%, transparent 28%),
-        linear-gradient(180deg, rgba(79, 50, 34, 0.98), rgba(31, 20, 15, 1));
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--brave-combat-command-button-top) 82%, var(--brave-combat-semantic-warn)),
+            color-mix(in srgb, var(--brave-combat-command-button-bottom) 88%, rgba(16, 12, 10, 1))
+        );
     box-shadow:
         inset 0 1px 0 rgba(255, 245, 230, 0.1),
         inset 0 -1px 0 rgba(0, 0, 0, 0.34),
@@ -4475,9 +4479,18 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__action--danger {
     background:
-        linear-gradient(180deg, rgba(179, 102, 87, 0.18), rgba(255, 255, 255, 0.02) 24%, transparent 24%),
-        linear-gradient(180deg, rgba(87, 35, 30, 0.96), rgba(39, 15, 14, 1));
-    border-color: rgba(168, 92, 78, 0.36);
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--brave-combat-semantic-danger) 18%, rgba(255, 255, 255, 0.02)),
+            rgba(255, 255, 255, 0.02) 24%,
+            transparent 24%
+        ),
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--brave-combat-command-button-top) 74%, var(--brave-combat-semantic-danger)),
+            color-mix(in srgb, var(--brave-combat-command-button-bottom) 78%, rgba(25, 10, 10, 1))
+        );
+    border-color: color-mix(in srgb, var(--brave-combat-semantic-danger) 42%, var(--brave-combat-command-button-border));
     color: #ffd8ca;
 }
 
@@ -4491,12 +4504,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--combat .brave-view__hero {
     padding: 14px 16px 14px;
     gap: 8px;
-    border-color: rgba(169, 106, 92, 0.24);
+    border-color: color-mix(in srgb, var(--brave-combat-party-border) 72%, transparent);
     background:
-        radial-gradient(circle at 0 0, rgba(159, 90, 76, 0.14), transparent 42%),
-        radial-gradient(circle at 100% 0, rgba(122, 82, 58, 0.08), transparent 38%),
+        radial-gradient(circle at 0 0, var(--brave-combat-hero-tint-left), transparent 42%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-hero-tint-right), transparent 38%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 20%),
-        linear-gradient(180deg, rgba(24, 17, 15, 0.985), rgba(11, 9, 10, 1));
+        linear-gradient(180deg, var(--brave-combat-hero-top), var(--brave-combat-hero-bottom));
 }
 
 .brave-view--combat .brave-view__section {
@@ -4545,12 +4558,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--party {
     grid-area: hero;
-    border-color: rgba(92, 141, 135, 0.24);
+    border-color: var(--brave-combat-party-border);
     background:
-        radial-gradient(circle at 0 0, rgba(84, 144, 131, 0.12), transparent 38%),
-        radial-gradient(circle at 100% 0, rgba(145, 116, 82, 0.12), transparent 42%),
+        radial-gradient(circle at 0 0, var(--brave-combat-party-tint-left), transparent 38%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-party-tint-right), transparent 42%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.026), transparent 22%),
-        linear-gradient(180deg, rgba(18, 22, 22, 0.98), rgba(9, 11, 12, 1));
+        linear-gradient(180deg, var(--brave-combat-party-top), var(--brave-combat-party-bottom));
 }
 
 .brave-view--combat .brave-view__section--party::before {
@@ -4563,12 +4576,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--allies {
     grid-area: allies;
-    border-color: rgba(126, 114, 88, 0.24);
+    border-color: var(--brave-combat-allies-border);
     background:
-        radial-gradient(circle at 0 0, rgba(120, 158, 132, 0.12), transparent 40%),
-        radial-gradient(circle at 100% 0, rgba(151, 108, 77, 0.14), transparent 42%),
+        radial-gradient(circle at 0 0, var(--brave-combat-allies-tint-left), transparent 40%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-allies-tint-right), transparent 42%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.024), transparent 24%),
-        linear-gradient(180deg, rgba(25, 21, 18, 0.98), rgba(12, 10, 10, 1));
+        linear-gradient(180deg, var(--brave-combat-allies-top), var(--brave-combat-allies-bottom));
 }
 
 .brave-view--combat .brave-view__section--allies::before {
@@ -4581,12 +4594,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--targets {
     grid-area: enemies;
-    border-color: rgba(166, 92, 84, 0.26);
+    border-color: var(--brave-combat-enemy-border);
     background:
-        radial-gradient(circle at 0 0, rgba(152, 74, 63, 0.18), transparent 40%),
-        radial-gradient(circle at 100% 0, rgba(106, 70, 43, 0.12), transparent 40%),
+        radial-gradient(circle at 0 0, var(--brave-combat-enemy-tint-left), transparent 40%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-enemy-tint-right), transparent 40%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.026), transparent 22%),
-        linear-gradient(180deg, rgba(26, 16, 16, 0.98), rgba(13, 8, 8, 1));
+        linear-gradient(180deg, var(--brave-combat-enemy-top), var(--brave-combat-enemy-bottom));
 }
 
 .brave-view--combat .brave-view__section--targets::before {
@@ -4801,31 +4814,31 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry {
-    border-color: rgba(92, 141, 135, 0.2);
+    border-color: color-mix(in srgb, var(--brave-combat-party-border) 82%, transparent);
     background:
-        radial-gradient(circle at 0 0, rgba(92, 141, 135, 0.12), transparent 44%),
+        radial-gradient(circle at 0 0, var(--brave-combat-party-tint-left), transparent 44%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.032), transparent 28%),
-        rgba(255, 255, 255, 0.028);
+        linear-gradient(180deg, var(--brave-combat-party-top), var(--brave-combat-party-bottom));
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-icon-wrap {
-    background: rgba(102, 166, 151, 0.14);
-    color: #a8dfd2;
+    background: color-mix(in srgb, var(--brave-combat-semantic-party) 14%, transparent);
+    color: var(--brave-combat-semantic-party);
 }
 
 .brave-view--combat .brave-view__section--allies .brave-view__entry {
     position: relative;
     min-height: 148px;
-    border-color: rgba(151, 122, 85, 0.22);
+    border-color: color-mix(in srgb, var(--brave-combat-allies-border) 82%, transparent);
     background:
-        radial-gradient(circle at 0 0, rgba(117, 157, 128, 0.1), transparent 46%),
+        radial-gradient(circle at 0 0, var(--brave-combat-allies-tint-left), transparent 46%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 24%),
-        linear-gradient(180deg, rgba(31, 26, 22, 0.98), rgba(15, 12, 11, 1));
+        linear-gradient(180deg, var(--brave-combat-allies-top), var(--brave-combat-allies-bottom));
 }
 
 .brave-view--combat .brave-view__section--allies .brave-view__entry-icon-wrap {
-    background: rgba(177, 145, 99, 0.14);
-    color: #edd0a8;
+    background: color-mix(in srgb, var(--brave-combat-semantic-joined) 14%, transparent);
+    color: var(--brave-combat-semantic-joined);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -4850,11 +4863,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     height: 192px;
     min-height: 192px;
     max-height: 192px;
-    border-color: rgba(166, 92, 84, 0.22);
+    border-color: color-mix(in srgb, var(--brave-combat-enemy-border) 78%, transparent);
     background:
-        radial-gradient(circle at 0 0, rgba(166, 92, 84, 0.14), transparent 44%),
+        radial-gradient(circle at 0 0, var(--brave-combat-enemy-tint-left), transparent 44%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.032), transparent 28%),
-        linear-gradient(180deg, rgba(31, 18, 18, 0.98), rgba(15, 9, 9, 1));
+        linear-gradient(180deg, var(--brave-combat-enemy-top), var(--brave-combat-enemy-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         0 16px 28px rgba(0, 0, 0, 0.22);
@@ -7543,13 +7556,13 @@ body[data-brave-theme="atlas"] .brave-view__entry {
 body[data-brave-scene="combat"] .content,
 body[data-brave-scene="combat"] #messagewindow,
 body[data-brave-scene="combat"] .inputwrap {
-    border-color: rgba(169, 106, 92, 0.3);
+    border-color: color-mix(in srgb, var(--brave-combat-command-border) 88%, transparent);
     background:
-        radial-gradient(circle at 12% 0, rgba(159, 90, 76, 0.12), transparent 22%),
-        radial-gradient(circle at 86% 8%, rgba(76, 111, 130, 0.1), transparent 24%),
+        radial-gradient(circle at 12% 0, var(--brave-combat-hero-tint-left), transparent 22%),
+        radial-gradient(circle at 86% 8%, var(--brave-combat-hero-tint-right), transparent 24%),
         radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.28), transparent 34%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 18%),
-        linear-gradient(180deg, rgba(17, 21, 29, 0.98), rgba(9, 11, 16, 1));
+        linear-gradient(180deg, var(--brave-combat-shell-top), var(--brave-combat-shell-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         inset 0 0 0 1px rgba(255, 255, 255, 0.015),
@@ -7628,13 +7641,13 @@ body[data-brave-scene="combat"] .brave-combat-log {
     flex-direction: column;
     gap: 8px;
     padding: 12px 12px 10px;
-    border: 1px solid rgba(155, 103, 76, 0.24);
+    border: 1px solid var(--brave-combat-feed-border);
     border-radius: var(--brave-radius-card);
     background:
-        radial-gradient(circle at 0 0, rgba(159, 90, 76, 0.12), transparent 42%),
-        radial-gradient(circle at 100% 0, rgba(126, 84, 58, 0.08), transparent 38%),
+        radial-gradient(circle at 0 0, var(--brave-combat-hero-tint-left), transparent 42%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-hero-tint-right), transparent 38%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 22%),
-        linear-gradient(180deg, rgba(26, 18, 15, 0.98), rgba(11, 9, 10, 1));
+        linear-gradient(180deg, var(--brave-combat-feed-top), var(--brave-combat-feed-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         inset 0 0 0 1px rgba(255, 255, 255, 0.015),
@@ -7642,7 +7655,7 @@ body[data-brave-scene="combat"] .brave-combat-log {
 }
 
 body[data-brave-scene="combat"] .brave-combat-log__head {
-    color: #e2c4a6;
+    color: var(--brave-combat-command-text);
     font-size: calc(0.62rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     font-weight: 700;
     letter-spacing: calc(var(--brave-letter-spacing) + 0.12em);
@@ -7651,17 +7664,17 @@ body[data-brave-scene="combat"] .brave-combat-log__head {
     align-items: center;
     gap: 8px;
     padding-bottom: 4px;
-    border-bottom: 1px solid rgba(191, 139, 102, 0.14);
+    border-bottom: 1px solid color-mix(in srgb, var(--brave-combat-feed-border) 74%, transparent);
 }
 
 body[data-brave-scene="combat"] .brave-combat-log__head::before {
     content: "◦";
     width: auto;
     height: auto;
-    color: #e09a6e;
+    color: var(--brave-combat-command-icon);
     font-size: 1rem;
     line-height: 1;
-    text-shadow: 0 0 10px rgba(224, 154, 110, 0.22);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--brave-combat-command-icon) 24%, transparent);
 }
 
 body[data-brave-scene="combat"] .brave-combat-log__body {
@@ -7690,22 +7703,22 @@ body[data-brave-scene="combat"] .brave-combat-log__body > .msg,
 body[data-brave-scene="combat"] .brave-combat-log__body > .err {
     margin-top: 0;
     padding: 9px 11px;
-    border: 1px solid rgba(151, 109, 83, 0.18);
+    border: 1px solid var(--brave-combat-feed-item-border);
     border-radius: 12px;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 26%),
-        radial-gradient(circle at 0 0, rgba(162, 104, 77, 0.09), transparent 52%),
-        linear-gradient(180deg, rgba(34, 24, 20, 0.96), rgba(18, 13, 12, 1));
+        radial-gradient(circle at 0 0, var(--brave-combat-hero-tint-left), transparent 52%),
+        linear-gradient(180deg, var(--brave-combat-feed-item-top), var(--brave-combat-feed-item-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         0 12px 24px rgba(0, 0, 0, 0.18);
-    color: #ecd8ca;
+    color: var(--brave-combat-command-text);
     font-size: calc(0.92rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.45;
 }
 
 body[data-brave-scene="combat"] .brave-combat-log__body > .err {
-    border-color: rgba(213, 138, 118, 0.34);
+    border-color: color-mix(in srgb, var(--brave-combat-semantic-danger) 38%, var(--brave-combat-feed-item-border));
 }
 
 body[data-brave-scene="combat"] .scene-rail__panel,
@@ -7723,10 +7736,10 @@ body[data-brave-scene="combat"] .brave-view__entry {
 body[data-brave-scene="combat"] .scene-rail__panel,
 body[data-brave-scene="combat"] .scene-card {
     background:
-        radial-gradient(circle at 0 0, rgba(159, 90, 76, 0.1), transparent 40%),
-        radial-gradient(circle at 100% 0, rgba(76, 111, 130, 0.08), transparent 38%),
+        radial-gradient(circle at 0 0, var(--brave-combat-hero-tint-left), transparent 40%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-hero-tint-right), transparent 38%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 22%),
-        linear-gradient(180deg, rgba(17, 21, 29, 0.98), rgba(9, 11, 16, 1));
+        linear-gradient(180deg, var(--brave-combat-shell-top), var(--brave-combat-shell-bottom));
 }
 
 body[data-brave-danger="danger"] {
@@ -9199,14 +9212,14 @@ body.brave-scene-combat-enter .inputwrap {
         content: "";
         position: absolute;
         inset: 12px;
-        border: 1px solid rgba(169, 106, 92, 0.3);
+        border: 1px solid color-mix(in srgb, var(--brave-combat-command-border) 88%, transparent);
         border-radius: var(--brave-radius-panel);
         background:
-            radial-gradient(circle at 12% 0, rgba(159, 90, 76, 0.12), transparent 22%),
-            radial-gradient(circle at 86% 8%, rgba(76, 111, 130, 0.1), transparent 24%),
+            radial-gradient(circle at 12% 0, var(--brave-combat-hero-tint-left), transparent 22%),
+            radial-gradient(circle at 86% 8%, var(--brave-combat-hero-tint-right), transparent 24%),
             radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.28), transparent 34%),
             linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 18%),
-            linear-gradient(180deg, rgba(17, 21, 29, 0.98), rgba(9, 11, 16, 1));
+            linear-gradient(180deg, var(--brave-combat-shell-top), var(--brave-combat-shell-bottom));
         box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.04),
             inset 0 0 0 1px rgba(255, 255, 255, 0.015),
@@ -9248,7 +9261,7 @@ body.brave-scene-combat-enter .inputwrap {
         border-bottom-right-radius: 26px;
         overflow: hidden;
         background:
-            linear-gradient(180deg, rgba(6, 9, 7, 0.985), rgba(6, 9, 7, 0.978) 72%, rgba(6, 9, 7, 0.962));
+            linear-gradient(180deg, var(--brave-combat-shell-top), var(--brave-combat-shell-bottom) 72%, var(--brave-combat-shell-bottom));
     }
 
     body[data-brave-scene="combat"] #messagewindow > .brave-sticky-view > .brave-view--combat {
@@ -9325,7 +9338,7 @@ body.brave-scene-combat-enter .inputwrap {
     .brave-view--combat .brave-view__section--targets {
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.026), transparent 22%),
-            linear-gradient(180deg, rgba(17, 21, 29, 0.98), rgba(9, 11, 16, 1));
+            linear-gradient(180deg, var(--brave-combat-shell-top), var(--brave-combat-shell-bottom));
     }
 
     .brave-view--combat .brave-view__section--party::before,
@@ -9355,11 +9368,11 @@ body.brave-scene-combat-enter .inputwrap {
 
     .brave-combat-tray-tabs__tab {
         appearance: none;
-        border: 1px solid rgba(154, 120, 103, 0.24);
+        border: 1px solid color-mix(in srgb, var(--brave-combat-command-border) 82%, transparent);
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 30%),
-            linear-gradient(180deg, rgba(19, 23, 31, 0.98), rgba(10, 13, 18, 1));
-        color: rgba(225, 212, 201, 0.82);
+            linear-gradient(180deg, var(--brave-combat-command-top), var(--brave-combat-command-bottom));
+        color: color-mix(in srgb, var(--brave-combat-command-text) 84%, transparent);
         border-radius: 12px;
         padding: 8px 10px;
         font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
