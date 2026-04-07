@@ -4686,6 +4686,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--combat .brave-view__section--targets .brave-view__entry {
     position: relative;
     overflow: hidden;
+    min-height: 120px;
     border-color: rgba(166, 92, 84, 0.22);
     background:
         radial-gradient(circle at 0 0, rgba(166, 92, 84, 0.14), transparent 44%),
@@ -4700,6 +4701,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--chargen .brave-view__entry {
     position: relative;
     overflow: hidden;
+    min-height: 120px;
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-ornament {
