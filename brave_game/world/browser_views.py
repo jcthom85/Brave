@@ -261,6 +261,8 @@ def _entry(
     title,
     *,
     meta=None,
+    meta_icon=None,
+    meta_tone=None,
     lines=None,
     summary=None,
     icon=None,
@@ -286,6 +288,10 @@ def _entry(
         "icon": icon,
         "badge": badge,
     }
+    if meta_icon:
+        entry["meta_icon"] = meta_icon
+    if meta_tone:
+        entry["meta_tone"] = meta_tone
     if background_icon:
         entry["background_icon"] = background_icon
     if selected:
@@ -2849,7 +2855,9 @@ def build_combat_view(encounter, character):
 
     combat_actions = build_combat_action_payload(encounter, character)
 
-    party_entries = []
+    hero_entries = []
+    ally_entries = []
+    viewer_party_id = getattr(getattr(character, "db", None), "brave_party_id", None)
     for participant in ordered_participants:
         participant.ensure_brave_character()
         resources = participant.db.brave_resources or {}
@@ -2875,19 +2883,41 @@ def build_combat_view(encounter, character):
             status_chips = list(status_chips) + [_chip("Targeted", "my_location", "good")]
             combat_state.append("selected")
 
-        party_entries.append(
-            _entry(
-                participant.key,
-                meta="You" if participant.id == character.id else None,
-                icon="person",
-                background_icon=_class_icon(participant),
-                chips=status_chips,
-                meters=meters,
-                selected=bool(selected_target_kind == "ally" and selected_target_id == participant.id),
-                combat_state=combat_state,
-                entry_ref=f"p:{participant.id}",
-            )
+        is_you = participant.id == character.id
+        same_party = bool(
+            viewer_party_id
+            and viewer_party_id == getattr(getattr(participant, "db", None), "brave_party_id", None)
         )
+        if is_you:
+            meta = "You"
+            meta_icon = "person"
+            meta_tone = "accent"
+        elif same_party:
+            meta = "Party"
+            meta_icon = "groups"
+            meta_tone = "good"
+        else:
+            meta = "Joined"
+            meta_icon = "person_add"
+            meta_tone = "muted"
+
+        entry = _entry(
+            participant.key,
+            meta=meta,
+            meta_icon=meta_icon,
+            meta_tone=meta_tone,
+            icon="person",
+            background_icon=_class_icon(participant),
+            chips=status_chips,
+            meters=meters,
+            selected=bool(selected_target_kind == "ally" and selected_target_id == participant.id),
+            combat_state=combat_state,
+            entry_ref=f"p:{participant.id}",
+        )
+        if is_you:
+            hero_entries.append(entry)
+        else:
+            ally_entries.append(entry)
 
     enemy_name_totals = {}
     for enemy in enemies:
@@ -2937,6 +2967,15 @@ def build_combat_view(encounter, character):
             )
         )
 
+    sections = [
+        _section("You", "person", "entries", items=hero_entries or [_entry("You are not currently fighting.", icon="person_off")], variant="party"),
+    ]
+    if ally_entries:
+        sections.append(_section("Allies", "groups", "entries", items=ally_entries, variant="allies"))
+    sections.append(
+        _section("Enemies", "warning", "entries", items=enemy_entries or [_entry("No enemies remain.", icon="task_alt")], variant="targets")
+    )
+
     return {
         **_make_view(
             "Combat",
@@ -2949,10 +2988,7 @@ def build_combat_view(encounter, character):
                 build_combat_action_picker("Items", "lunch_dining", combat_actions.get("items", []), "No combat consumables packed."),
                 _action("Flee", "flee", "logout", tone="danger"),
             ],
-            sections=[
-                _section("Party", "groups", "entries", items=party_entries or [_entry("No active party members.", icon="person_off")], variant="party"),
-                _section("Enemies", "warning", "entries", items=enemy_entries or [_entry("No enemies remain.", icon="task_alt")], variant="targets"),
-            ],
+            sections=sections,
             reactive=_reactive_view(encounter.obj, scene="combat", danger="combat"),
         ),
         "variant": "combat",

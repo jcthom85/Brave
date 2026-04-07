@@ -89,9 +89,13 @@ class DummyEncounter:
 
 
 def _section(view, label):
-    for section in view.get("sections", []):
-        if section.get("label") == label:
-            return section
+    labels = [label]
+    if label == "Party":
+        labels = ["Party", "You"]
+    for expected in labels:
+        for section in view.get("sections", []):
+            if section.get("label") == expected:
+                return section
     raise AssertionError(f"Missing section {label}")
 
 
@@ -100,6 +104,15 @@ def _entry(section, title):
         if entry.get("title") == title:
             return entry
     raise AssertionError(f"Missing entry {title}")
+
+
+def _combat_entry(view, title):
+    for label in ("You", "Allies", "Party", "Enemies"):
+        try:
+            return _entry(_section(view, label), title)
+        except AssertionError:
+            continue
+    raise AssertionError(f"Missing combat entry {title}")
 
 
 def _item(section, prefix):
@@ -187,8 +200,8 @@ class CombatViewTests(unittest.TestCase):
         self.assertIsNot(_action(view, "Flee").get("icon_only"), True)
 
         party = _section(view, "Party")
-        dad_entry = _entry(party, "Dad")
-        peep_entry = _entry(party, "Peep")
+        dad_entry = _combat_entry(view, "Dad")
+        peep_entry = _combat_entry(view, "Peep")
         self.assertEqual(
             [("ATB", "100 / 100"), ("HP", "20 / 24"), ("STA", "6 / 10"), ("MP", "18 / 20")],
             [(meter.get("label"), meter.get("value")) for meter in dad_entry.get("meters", [])],
@@ -277,7 +290,7 @@ class CombatViewTests(unittest.TestCase):
         view = build_combat_view(encounter, warrior)
         party_section = _section(view, "Party")
         enemies_section = _section(view, "Enemies")
-        warrior_entry = _entry(party_section, "Dad")
+        warrior_entry = _combat_entry(view, "Dad")
         enemy_entry = _entry(enemies_section, "Old Greymaw")
 
         self.assertEqual(
@@ -321,7 +334,7 @@ class CombatViewTests(unittest.TestCase):
             view = build_combat_view(encounter, warrior)
 
         party_section = _section(view, "Party")
-        warrior_entry = _entry(party_section, "Dad")
+        warrior_entry = _combat_entry(view, "Dad")
         self.assertEqual(
             [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
@@ -377,7 +390,7 @@ class CombatViewTests(unittest.TestCase):
         with patch("world.browser_views.time.time", return_value=1.0):
             view = build_combat_view(encounter, warrior)
 
-        atb_meter = _entry(_section(view, "Party"), "Dad").get("meters", [])[0]
+        atb_meter = _combat_entry(view, "Dad").get("meters", [])[0]
         self.assertEqual("41 / 100", atb_meter.get("value"))
         self.assertAlmostEqual(41.75, atb_meter.get("percent"), places=2)
 
@@ -412,7 +425,7 @@ class CombatViewTests(unittest.TestCase):
         with patch("world.browser_views.time.time", return_value=4.0):
             view = build_combat_view(encounter, warrior)
 
-        atb_meter = _entry(_section(view, "Party"), "Dad").get("meters", [])[0]
+        atb_meter = _combat_entry(view, "Dad").get("meters", [])[0]
         self.assertAlmostEqual(25.0, atb_meter.get("percent"), places=2)
         self.assertEqual(4_000, atb_meter.get("meta", {}).get("phase_started_at_ms"))
         self.assertEqual(3_000, atb_meter.get("meta", {}).get("phase_duration_ms"))
@@ -456,7 +469,7 @@ class CombatViewTests(unittest.TestCase):
             view = build_combat_view(encounter, warrior)
 
         party_section = _section(view, "Party")
-        warrior_entry = _entry(party_section, "Dad")
+        warrior_entry = _combat_entry(view, "Dad")
         self.assertEqual(
             [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
@@ -509,7 +522,7 @@ class CombatViewTests(unittest.TestCase):
             view = build_combat_view(encounter, warrior)
 
         party_section = _section(view, "Party")
-        warrior_entry = _entry(party_section, "Dad")
+        warrior_entry = _combat_entry(view, "Dad")
         self.assertEqual(
             [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
@@ -669,7 +682,7 @@ class CombatViewTests(unittest.TestCase):
         view = build_combat_view(encounter, rogue)
         party = _section(view, "Party")
         enemies = _section(view, "Enemies")
-        rogue_entry = _entry(party, "Dad")
+        rogue_entry = _combat_entry(view, "Dad")
         enemy_entry = _entry(enemies, "Bog Wolf")
 
         self.assertIn("Hidden", [chip.get("label") for chip in rogue_entry.get("chips", [])])
@@ -831,7 +844,7 @@ class CombatViewTests(unittest.TestCase):
 
         view = build_combat_view(encounter, cleric)
         items_action = _action(view, "Items")
-        dust = _picker_option(items_action.get("picker", {}), "Ward Dust", meta="Ward Dust · GUARD 12")
+        dust = _picker_option(items_action.get("picker", {}), "Ward Dust", meta="Ward Dust · GUARD 12 · GUARD")
         dust_target = _picker_option(items_action.get("picker", {}), "Ward Dust", meta="Target Ally")
 
         self.assertEqual("use Ward Dust", dust.get("command"))

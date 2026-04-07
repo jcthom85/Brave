@@ -4716,6 +4716,7 @@ let defaultout_plugin = (function () {
                         rowClass += " brave-view__entry--ornamented";
                     }
                     var headClass = "brave-view__entry-head" + (lead ? "" : " brave-view__entry-head--iconless");
+                    var metaToneClass = entry && entry.meta_tone ? " brave-view__entry-meta--" + escapeHtml(entry.meta_tone) : "";
                     var footerMarkup =
                         "<div class='brave-view__entry-footer'>"
                         + (entry && Array.isArray(entry.chips) && entry.chips.length
@@ -4742,7 +4743,12 @@ let defaultout_plugin = (function () {
                         + lead
                         + "<div class='brave-view__entry-heading'>"
                         + "<div class='brave-view__entry-title'>" + escapeHtml(entry && entry.title ? entry.title : "") + "</div>"
-                        + (entry && entry.meta ? "<div class='brave-view__entry-meta'>" + escapeHtml(entry.meta) + "</div>" : "")
+                        + (entry && entry.meta
+                            ? "<div class='brave-view__entry-meta" + metaToneClass + "'>"
+                                + (entry && entry.meta_icon ? icon(entry.meta_icon, "brave-view__entry-meta-icon") : "")
+                                + "<span>" + escapeHtml(entry.meta) + "</span>"
+                                + "</div>"
+                            : "")
                         + "</div>"
                         + "</div>"
                         + renderMeters(entry && entry.meters)
