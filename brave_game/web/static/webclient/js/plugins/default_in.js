@@ -31,6 +31,7 @@ let defaultInPlugin = (function () {
         }
     })();
     var inputContext = INPUT_CONTEXT_COMMAND;
+    var isLoggedIn = false;
     var lastMobileInputOpenAt = 0;
     var isMobileViewport = function () {
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
@@ -245,7 +246,7 @@ let defaultInPlugin = (function () {
         if (button.is("input")) {
             button.val("send");
         } else {
-            button.empty().append("<span class='material-symbols-outlined' aria-hidden='true'>send</span>");
+            button.empty().append("<i class='ra ra-forward' aria-hidden='true'></i>");
         }
     };
 
@@ -294,19 +295,40 @@ let defaultInPlugin = (function () {
     var setInputContext = function (context) {
         var nextContext = context === INPUT_CONTEXT_PLAY ? INPUT_CONTEXT_PLAY : INPUT_CONTEXT_COMMAND;
         if (inputContext === nextContext) {
+            if (nextContext === INPUT_CONTEXT_PLAY) {
+                isLoggedIn = true;
+                playInputMode = INPUT_MODE_CHAT;
+                persistPlayInputMode();
+                if (isMobileViewport()) {
+                    setMobileInputOpen(true, { focus: false, moveCaret: false });
+                }
+            }
             refreshInputChrome();
             return inputContext;
         }
         if (inputContext === INPUT_CONTEXT_COMMAND && nextContext === INPUT_CONTEXT_PLAY) {
+            isLoggedIn = true;
             playInputMode = INPUT_MODE_CHAT;
             persistPlayInputMode();
         }
+        if (nextContext === INPUT_CONTEXT_COMMAND) {
+            if (document.body) {
+                document.body.classList.remove(MOBILE_INPUT_OPEN_CLASS);
+            }
+            window.dispatchEvent(new CustomEvent("brave:mobile-input-state", { detail: { open: false } }));
+        }
         inputContext = nextContext;
         refreshInputChrome();
+        if (nextContext === INPUT_CONTEXT_PLAY && isMobileViewport()) {
+            setMobileInputOpen(true, { focus: false, moveCaret: false });
+        }
         return inputContext;
     };
 
     var focusInput = function (options) {
+        if (inputContext === INPUT_CONTEXT_COMMAND) {
+            return $();
+        }
         options = options || {};
         if (!focusOnKeydown && !options.force) {
             return $();
@@ -383,6 +405,9 @@ let defaultInPlugin = (function () {
     };
 
     var primeInput = function () {
+        if (inputContext === INPUT_CONTEXT_COMMAND) {
+            return $();
+        }
         if (isMobileViewport()) {
             decorateInputs();
             decorateInputLayoutShells();
@@ -647,6 +672,7 @@ let defaultInPlugin = (function () {
         decorateInputLayoutShells();
         installFocusBindings();
         installObserver();
+        syncInputModeBodyState();
         dispatchInputModeChange();
 
         setTimeout(function () {
@@ -655,10 +681,17 @@ let defaultInPlugin = (function () {
     };
 
     var onLoggedIn = function () {
+        isLoggedIn = true;
         setInputContext(INPUT_CONTEXT_PLAY);
         setInputMode(INPUT_MODE_CHAT);
         decorateInputLayoutShells();
         primeInput();
+    };
+
+    var onConnectionClose = function () {
+        isLoggedIn = false;
+        setInputContext(INPUT_CONTEXT_COMMAND);
+        setReadyState(false);
     };
 
     return {
@@ -677,6 +710,7 @@ let defaultInPlugin = (function () {
         getInputContext: function () {
             return inputContext;
         },
+        onConnectionClose: onConnectionClose,
         openMobileInput: function () {
             return setMobileInputOpen(true, { focus: true });
         },

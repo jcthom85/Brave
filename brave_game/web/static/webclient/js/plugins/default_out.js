@@ -83,16 +83,14 @@ let defaultout_plugin = (function () {
         if (!inputPlugin || typeof inputPlugin.setInputContext !== "function") {
             return;
         }
-        var nextContext = "play";
+        var nextContext = "command";
         if (
             viewData
-            && (
-                viewData.variant === "connection"
-                || viewData.variant === "chargen"
-                || (viewData.reactive && viewData.reactive.scene === "account")
-            )
+            && viewData.variant !== "connection"
+            && viewData.variant !== "chargen"
+            && !(viewData.reactive && viewData.reactive.scene === "account")
         ) {
-            nextContext = "command";
+            nextContext = "play";
         }
         inputPlugin.setInputContext(nextContext);
     };
@@ -1943,6 +1941,7 @@ let defaultout_plugin = (function () {
             && !isMobileViewport()
             && currentViewData
             && currentViewData.variant
+            && !isRoomLikeView(currentViewData)
             && currentViewData.variant !== "connection"
             && currentViewData.variant !== "chargen"
             && currentViewData.variant !== "account"
@@ -2075,12 +2074,123 @@ let defaultout_plugin = (function () {
             .replace(/'/g, "&#39;");
     };
 
+    var ICON_MAP = {
+        // People & Social
+        "person": "player",
+        "person_add": "player-lift",
+        "person_off": "player-despair",
+        "groups": "double-team",
+        "diversity_3": "all-for-one",
+        "person_pin": "player",
+        "assignment_ind": "scroll-unfurled",
+        "forum": "speech-bubbles",
+
+        // Actions & UI
+        "play_arrow": "forward",
+        "delete": "demolish",
+        "palette": "kaleidoscope",
+        "tune": "gears",
+        "check_circle": "on-target",
+        "radio_button_unchecked": "circle-of-circles",
+        "task_alt": "on-target",
+        "checklist": "on-target",
+        "remove_circle": "health-decrease",
+        "block": "cancel",
+        "chevron_right": "forward",
+        "arrow_right_alt": "forward",
+        "arrow_forward": "forward",
+        "arrow_back": "reverse",
+        "settings": "gears",
+        "save": "save",
+        "near_me": "on-target",
+        "alt_route": "divert",
+        "location_searching": "targeted",
+        "flag": "castle-flag",
+        "assignment": "scroll-unfurled",
+        "info": "help",
+        "help": "help",
+        "search": "searching",
+        "close": "cancel",
+        "menu": "hamburger",
+        "more_vert": "dots-vertical",
+        "more_horiz": "dots-horizontal",
+        "login": "key",
+        "logout": "unplugged",
+        "schedule": "hourglass",
+        "edit_note": "quill-ink",
+        "star_outline": "trophy",
+        "school": "book",
+        "straighten": "arrow-cluster",
+        "north_east": "forward",
+        "military_tech": "trophy",
+
+        // Combat & Adventure
+        "swords": "crossed-swords",
+        "shield": "shield",
+        "favorite": "hearts",
+        "directions_run": "player-dodge",
+        "directions_walk": "walking-boot",
+        "backpack": "ammo-bag",
+        "inventory_2": "mine-wagon",
+        "category": "cubes",
+        "layers": "doubled",
+        "lock": "key",
+        "key": "key",
+        "bolt": "lightning-bolt",
+        "auto_awesome": "aura",
+        "warning": "uncertainty",
+        "sports_esports": "gamepad",
+        "videogame_asset": "gamepad-cross",
+        "construction": "anvil",
+        "build": "wrench",
+        "do_not_disturb_on": "cancel",
+        "group": "double-team",
+        "groups": "double-team",
+        "visibility": "eyeball",
+        "visibility_off": "cloak-and-dagger",
+        "power_off": "unplugged",
+
+        // Nature & Elements
+        "forest": "pine-tree",
+        "air": "fizzing-flask",
+        "local_fire_department": "fire",
+        "public": "ocean-emblem",
+        "eco": "sprout",
+        "water": "water-drop",
+        "wb_sunny": "sun",
+
+        // Objects & Places
+        "savings": "gold-bar",
+        "sell": "gold-bar",
+        "storefront": "wooden-sign",
+        "church": "capitol",
+        "restaurant": "knife-fork",
+        "soup_kitchen": "knife-fork",
+        "lunch_dining": "meat",
+        "label": "wooden-sign",
+        "menu_book": "book",
+        "article": "scroll-unfurled",
+        "quill": "quill-ink",
+        "spellcheck": "quill-ink",
+        "badge": "scroll-unfurled",
+        "home": "guarded-tower",
+        "home_pin": "guarded-tower",
+        "place": "guarded-tower",
+
+        // Navigation
+        "travel_explore": "compass",
+        "explore": "compass",
+        "route": "trail",
+        "map": "scroll-unfurled",
+    };
+
     var icon = function (name, extraClass) {
-        var classes = "material-symbols-outlined";
+        var raName = ICON_MAP[name] || name.replace(/_/g, "-");
+        var classes = "ra ra-" + raName;
         if (extraClass) {
             classes += " " + extraClass;
         }
-        return "<span class='" + classes + "' aria-hidden='true'>" + escapeHtml(name) + "</span>";
+        return "<i class='" + classes + "' aria-hidden='true'></i>";
     };
 
     var normalizeThemeKey = function (themeKey) {
@@ -3718,7 +3828,7 @@ let defaultout_plugin = (function () {
         }
         panel.innerHTML =
             "<div class='scene-card__eyebrow scene-pack-panel__title'>"
-            + "<span class='material-symbols-outlined scene-card__eyebrow-icon scene-pack-panel__title-icon' aria-hidden='true'>forum</span>"
+            + icon("forum", "scene-card__eyebrow-icon scene-pack-panel__title-icon")
             + "<span>Activity</span>"
             + "</div>"
             + "<div class='brave-room-log brave-room-log--rail'>"
@@ -3769,7 +3879,7 @@ let defaultout_plugin = (function () {
 
         panel.innerHTML =
             "<div class='scene-pack-panel__head'>"
-            + "<div class='scene-card__eyebrow scene-pack-panel__title'><span class='material-symbols-outlined scene-card__eyebrow-icon scene-pack-panel__title-icon' aria-hidden='true'>backpack</span><span>Pack</span></div>"
+            + "<div class='scene-card__eyebrow scene-pack-panel__title'>" + icon("backpack", "scene-card__eyebrow-icon scene-pack-panel__title-icon") + "<span>Pack</span></div>"
             + "<div class='scene-pack-panel__silver'><span class='scene-pack-panel__silver-label'>Silver</span><span class='scene-pack-panel__silver-value'>" + escapeHtml(String(silver)) + "</span></div>"
             + "</div>"
             + (items.length
@@ -4345,9 +4455,10 @@ let defaultout_plugin = (function () {
                 "<div class='brave-view__entries'>"
                 + (items || []).map(function (entry) {
                     var lead = "";
+                    var backgroundIcon = entry && entry.background_icon ? entry.background_icon : "";
                     if (entry && entry.badge) {
                         lead = "<span class='brave-view__entry-badge'>" + escapeHtml(entry.badge) + "</span>";
-                    } else {
+                    } else if (!backgroundIcon) {
                         lead = "<span class='brave-view__entry-icon-wrap'>"
                             + icon(entry && entry.icon ? entry.icon : "inventory_2", "brave-view__entry-icon")
                             + "</span>";
@@ -4360,6 +4471,9 @@ let defaultout_plugin = (function () {
                         lines.push(entry.summary);
                     }
                     var rowClass = "brave-view__entry";
+                    if (backgroundIcon) {
+                        rowClass += " brave-view__entry--ornamented";
+                    }
                     if (hasBrowserInteraction(entry)) {
                         rowClass += " brave-click brave-click--row";
                     }
@@ -4388,6 +4502,7 @@ let defaultout_plugin = (function () {
                         + combatRefAttr
                         + commandAttrs(entry)
                         + ">"
+                        + (backgroundIcon ? icon(backgroundIcon, "brave-view__entry-ornament") : "")
                         + "<div class='brave-view__entry-head'>"
                         + lead
                         + "<div class='brave-view__entry-heading'>"
@@ -4498,8 +4613,22 @@ let defaultout_plugin = (function () {
                 + commandAttrs(entry, false)
                 + aria
                 + ">"
-                + icon(entry && entry.icon ? entry.icon : "arrow_back", "brave-view__action-icon")
+                + icon(entry && entry.icon ? entry.icon : "arrow_back", "brave-view__action-icon brave-view__action-icon--back")
                 + "<span>" + escapeHtml(entry && entry.text ? entry.text : entry && entry.label ? entry.label : "Back") + "</span>"
+                + "</button>"
+            );
+        };
+
+        var renderDesktopMenuAction = function () {
+            if (isMobileViewport() || !isRoomLikeView(viewData)) {
+                return "";
+            }
+            return (
+                "<button type='button' class='brave-view__menu-button brave-click'"
+                + " data-brave-picker='" + escapeHtml(JSON.stringify(buildDesktopMenuPicker())) + "'"
+                + " aria-label='Open menu'"
+                + " title='menu'>"
+                + "<span>MENU</span>"
                 + "</button>"
             );
         };
@@ -4508,10 +4637,15 @@ let defaultout_plugin = (function () {
             "<div class='brave-view" + variantClass + toneClass + "'>"
             + "<div class='brave-view__hero'>"
             + (viewData.wordmark ? "<div class='brave-view__wordmark' aria-label='" + escapeHtml(viewData.wordmark) + "'><span class='brave-view__wordmark-text'>" + escapeHtml(viewData.wordmark) + "</span></div>" : "")
-            + ((viewData.eyebrow_icon || viewData.eyebrow)
-                ? "<div class='brave-view__eyebrow'>"
-                    + (viewData.eyebrow_icon ? icon(viewData.eyebrow_icon, "brave-view__eyebrow-icon") : "")
-                    + (viewData.eyebrow ? "<span>" + escapeHtml(viewData.eyebrow) + "</span>" : "")
+            + (((viewData.eyebrow_icon || viewData.eyebrow) || (!isMobileViewport() && isRoomLikeView(viewData)))
+                ? "<div class='brave-view__hero-topbar'>"
+                    + ((viewData.eyebrow_icon || viewData.eyebrow)
+                        ? "<div class='brave-view__eyebrow'>"
+                            + (viewData.eyebrow_icon ? icon(viewData.eyebrow_icon, "brave-view__eyebrow-icon") : "")
+                            + (viewData.eyebrow ? "<span>" + escapeHtml(viewData.eyebrow) + "</span>" : "")
+                            + "</div>"
+                        : "")
+                    + renderDesktopMenuAction()
                     + "</div>"
                 : "")
             + (isRoomLikeView(viewData) ? "<div class='brave-view__micromap brave-click' data-brave-command='map' title='Open map' role='button' tabindex='0' aria-label='Open map'></div>" : "")
@@ -4950,6 +5084,55 @@ let defaultout_plugin = (function () {
         return Math.max(Math.abs(x - currentMobileSwipe.x), Math.abs(y - currentMobileSwipe.y)) >= 10;
     };
 
+    var submitBrowserForm = function (form) {
+        if (!form) {
+            return false;
+        }
+        var mode = form.getAttribute("data-brave-submit-mode") || "command";
+        var command = "";
+        var fields = Array.prototype.slice.call(form.querySelectorAll(".brave-view__field-input"));
+        var firstEmptyField = null;
+        var firstField = fields.length ? fields[0] : null;
+        var formData = {};
+        fields.forEach(function (field) {
+            var fieldName = field.getAttribute("name") || "value";
+            var rawValue = String(field.value || "");
+            var value = rawValue.trim();
+            formData[fieldName] = value;
+            if (!firstEmptyField && !value) {
+                firstEmptyField = field;
+            }
+        });
+        if (firstEmptyField) {
+            if (typeof firstEmptyField.focus === "function") {
+                firstEmptyField.focus();
+            }
+            return false;
+        }
+        var singleValue = fields.length === 1 ? (formData[fields[0].getAttribute("name") || "value"] || "") : "";
+        if (mode === "raw") {
+            command = singleValue;
+        } else if (form.hasAttribute("data-brave-submit-template")) {
+            command = form.getAttribute("data-brave-submit-template").replace(/\{([a-zA-Z0-9_-]+)\}/g, function (_match, key) {
+                return formData[key] || "";
+            }).trim();
+        } else if (form.hasAttribute("data-brave-submit-command")) {
+            command = form.getAttribute("data-brave-submit-command") + " " + singleValue;
+        } else if (form.hasAttribute("data-brave-submit-prefix")) {
+            command = form.getAttribute("data-brave-submit-prefix") + " " + singleValue;
+        } else {
+            command = singleValue;
+        }
+        if (!command) {
+            if (firstField && typeof firstField.focus === "function") {
+                firstField.focus();
+            }
+            return false;
+        }
+        sendBrowserCommand(command);
+        return true;
+    };
+
     var bindBrowserInteractionHandlers = function () {
         if (browserInteractionHandlersBound) {
             return;
@@ -4968,11 +5151,7 @@ let defaultout_plugin = (function () {
                 if (submitForm) {
                     event.preventDefault();
                     event.stopPropagation();
-                    if (typeof submitForm.requestSubmit === "function") {
-                        submitForm.requestSubmit();
-                    } else {
-                        submitForm.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
-                    }
+                    submitBrowserForm(submitForm);
                     return;
                 }
             }
@@ -5041,48 +5220,7 @@ let defaultout_plugin = (function () {
             }
             event.preventDefault();
             event.stopPropagation();
-            var mode = form.getAttribute("data-brave-submit-mode") || "command";
-            var command = "";
-            var fields = Array.prototype.slice.call(form.querySelectorAll(".brave-view__field-input"));
-            var firstEmptyField = null;
-            var firstField = fields.length ? fields[0] : null;
-            var formData = {};
-            fields.forEach(function (field) {
-                var fieldName = field.getAttribute("name") || "value";
-                var rawValue = String(field.value || "");
-                var value = rawValue.trim();
-                formData[fieldName] = value;
-                if (!firstEmptyField && !value) {
-                    firstEmptyField = field;
-                }
-            });
-            if (firstEmptyField) {
-                if (typeof firstEmptyField.focus === "function") {
-                    firstEmptyField.focus();
-                }
-                return;
-            }
-            var singleValue = fields.length === 1 ? (formData[fields[0].getAttribute("name") || "value"] || "") : "";
-            if (mode === "raw") {
-                command = singleValue;
-            } else if (form.hasAttribute("data-brave-submit-template")) {
-                command = form.getAttribute("data-brave-submit-template").replace(/\{([a-zA-Z0-9_-]+)\}/g, function (_match, key) {
-                    return formData[key] || "";
-                }).trim();
-            } else if (form.hasAttribute("data-brave-submit-command")) {
-                command = form.getAttribute("data-brave-submit-command") + " " + singleValue;
-            } else if (form.hasAttribute("data-brave-submit-prefix")) {
-                command = form.getAttribute("data-brave-submit-prefix") + " " + singleValue;
-            } else {
-                command = singleValue;
-            }
-            if (!command) {
-                if (firstField && typeof firstField.focus === "function") {
-                    firstField.focus();
-                }
-                return;
-            }
-            sendBrowserCommand(command);
+            submitBrowserForm(form);
         }, true);
 
         document.addEventListener("pointerdown", function (event) {
@@ -5371,6 +5509,16 @@ let defaultout_plugin = (function () {
                 event.preventDefault();
                 event.stopPropagation();
                 return;
+            }
+            var formField = event.target.closest(".brave-view__field-input");
+            if (formField && event.key === "Enter") {
+                var activeForm = formField.closest("[data-brave-form='1']");
+                if (activeForm) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    submitBrowserForm(activeForm);
+                    return;
+                }
             }
             var target = event.target.closest("[data-brave-command][role='button'], [data-brave-prefill][role='button'], [data-brave-picker][role='button'], [data-brave-connection-screen][role='button']");
             if (!target) {
