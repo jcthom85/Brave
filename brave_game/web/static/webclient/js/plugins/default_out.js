@@ -3247,6 +3247,11 @@ let defaultout_plugin = (function () {
             return null;
         }
         var meter = getCombatAtbMeter(node);
+        var rawHtml = node.outerHTML || "";
+        var cleanHtml = rawHtml
+            .replace(/brave-lunge-suppressed/g, "")
+            .replace(/visibility:\s*hidden;?/g, "");
+            
         return {
             ref: getCombatEntryRef(node),
             rect: {
@@ -3255,7 +3260,7 @@ let defaultout_plugin = (function () {
                 width: rect.width,
                 height: rect.height,
             },
-            html: node.outerHTML,
+            html: cleanHtml,
             atbPercent: getCombatAtbFillPercent(node),
             atbPhase: meter ? (meter.getAttribute("data-atb-phase") || "charging") : "",
             atbPhaseStartedAt: meter ? (meter.getAttribute("data-atb-phase-started-at") || "") : "",
@@ -3586,12 +3591,14 @@ let defaultout_plugin = (function () {
 
     var applyHiddenCombatEntries = function () {
         Object.keys(hiddenCombatEntryRefs).forEach(function (ref) {
-            Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']")).forEach(function (node) {
-                if (node) {
-                    node.style.visibility = "hidden";
-                    node.classList.add("brave-lunge-suppressed");
-                }
-            });
+            if (hiddenCombatEntryRefs[ref] > 0) {
+                Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']")).forEach(function (node) {
+                    if (node) {
+                        node.style.visibility = "hidden";
+                        node.classList.add("brave-lunge-suppressed");
+                    }
+                });
+            }
         });
     };
 
@@ -3600,13 +3607,16 @@ let defaultout_plugin = (function () {
             return;
         }
         var ref = node.getAttribute("data-entry-ref");
-        if (ref) {
-            delete hiddenCombatEntryRefs[ref];
+        if (ref && hiddenCombatEntryRefs[ref]) {
+            hiddenCombatEntryRefs[ref] -= 1;
+            if (hiddenCombatEntryRefs[ref] <= 0) {
+                delete hiddenCombatEntryRefs[ref];
+            }
         }
     };
 
     var animateCombatLunge = function (attackerNode, targetNode) {
-        if (!attackerNode || !targetNode) {
+        if (!attackerNode) {
             return;
         }
 
@@ -3621,9 +3631,19 @@ let defaultout_plugin = (function () {
             return;
         }
 
-        var targetRect = targetNode.getBoundingClientRect();
-        var ghostRect = ghost.getBoundingClientRect();
+        var targetRect = targetNode ? targetNode.getBoundingClientRect() : null;
+        if (!targetRect || (!targetRect.width && !targetRect.height)) {
+            var fallbackTarget = document.querySelector(".brave-view--combat .brave-view__section--targets");
+            targetRect = fallbackTarget ? fallbackTarget.getBoundingClientRect() : null;
+        }
 
+        if (!targetRect) {
+            var container = ghost.parentNode;
+            if (container && container.parentNode) container.parentNode.removeChild(container);
+            return;
+        }
+
+        var ghostRect = ghost.getBoundingClientRect();
         var ghostCenterX = ghostRect.left + (ghostRect.width / 2);
         var ghostCenterY = ghostRect.top + (ghostRect.height / 2);
         var targetCenterX = targetRect.left + (targetRect.width / 2);
@@ -3647,7 +3667,7 @@ let defaultout_plugin = (function () {
         attackerNode.style.visibility = "hidden";
         attackerNode.classList.add("brave-lunge-suppressed");
         if (attackerRef) {
-            hiddenCombatEntryRefs[attackerRef] = true;
+            hiddenCombatEntryRefs[attackerRef] = (hiddenCombatEntryRefs[attackerRef] || 0) + 1;
         }
 
         ghost.style.setProperty("--brave-combat-lunge-x", (unitX * lungeDistance).toFixed(2) + "px");
@@ -3666,11 +3686,16 @@ let defaultout_plugin = (function () {
             }
             
             if (attackerRef) {
-                delete hiddenCombatEntryRefs[attackerRef];
+                if (hiddenCombatEntryRefs[attackerRef]) {
+                    hiddenCombatEntryRefs[attackerRef] -= 1;
+                }
+                if (!hiddenCombatEntryRefs[attackerRef]) {
+                    delete hiddenCombatEntryRefs[attackerRef];
+                }
             }
             
             var liveNode = resolveCombatEntryNode(attackerRef);
-            if (liveNode) {
+            if (liveNode && !hiddenCombatEntryRefs[attackerRef]) {
                 liveNode.style.visibility = "";
                 liveNode.classList.remove("brave-lunge-suppressed");
             }
