@@ -3582,17 +3582,27 @@ let defaultout_plugin = (function () {
         }, 360);
     };
 
+    var hiddenCombatEntryRefs = {};
+
+    var applyHiddenCombatEntries = function () {
+        Object.keys(hiddenCombatEntryRefs).forEach(function (ref) {
+            Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']")).forEach(function (node) {
+                if (node) {
+                    node.style.visibility = "hidden";
+                    node.classList.add("brave-lunge-suppressed");
+                }
+            });
+        });
+    };
+
     var clearCombatLungeState = function (node) {
         if (!node) {
             return;
         }
-        if (node._braveCombatLungeTimeout) {
-            window.clearTimeout(node._braveCombatLungeTimeout);
-            node._braveCombatLungeTimeout = null;
+        var ref = node.getAttribute("data-entry-ref");
+        if (ref) {
+            delete hiddenCombatEntryRefs[ref];
         }
-        node.classList.remove("brave-view__entry--lunge");
-        node.style.removeProperty("--brave-combat-lunge-x");
-        node.style.removeProperty("--brave-combat-lunge-y");
     };
 
     var animateCombatLunge = function (attackerNode, targetNode) {
@@ -3600,40 +3610,71 @@ let defaultout_plugin = (function () {
             return;
         }
 
-        var attackerRect = attackerNode.getBoundingClientRect();
-        var targetRect = targetNode.getBoundingClientRect();
-        if (!attackerRect.width || !attackerRect.height || !targetRect.width || !targetRect.height) {
+        var attackerRef = attackerNode.dataset.entryRef || "";
+        var snapshot = captureCombatEntrySnapshot(attackerNode);
+        if (!snapshot) {
             return;
         }
 
-        var attackerCenterX = attackerRect.left + (attackerRect.width / 2);
-        var attackerCenterY = attackerRect.top + (attackerRect.height / 2);
+        var ghost = createCombatGhostFromSnapshot(snapshot);
+        if (!ghost) {
+            return;
+        }
+
+        var targetRect = targetNode.getBoundingClientRect();
+        var ghostRect = ghost.getBoundingClientRect();
+
+        var ghostCenterX = ghostRect.left + (ghostRect.width / 2);
+        var ghostCenterY = ghostRect.top + (ghostRect.height / 2);
         var targetCenterX = targetRect.left + (targetRect.width / 2);
         var targetCenterY = targetRect.top + (targetRect.height / 2);
 
-        var dx = targetCenterX - attackerCenterX;
-        var dy = targetCenterY - attackerCenterY;
+        var dx = targetCenterX - ghostCenterX;
+        var dy = targetCenterY - ghostCenterY;
         var magnitude = Math.sqrt((dx * dx) + (dy * dy));
 
         if (!magnitude) {
+            var container = ghost.parentNode;
+            if (container && container.parentNode) container.parentNode.removeChild(container);
             return;
         }
 
-        // Move the live card itself instead of hiding it and swapping in a ghost.
-        // That keeps the attacker visible through the whole motion and avoids the
-        // vanish/reappear artifact when combat view updates are happening rapidly.
         var lungeDistance = Math.min(60, Math.max(20, magnitude * 0.18));
         var unitX = dx / magnitude;
         var unitY = dy / magnitude;
 
-        clearCombatLungeState(attackerNode);
-        attackerNode.style.setProperty("--brave-combat-lunge-x", (unitX * lungeDistance).toFixed(2) + "px");
-        attackerNode.style.setProperty("--brave-combat-lunge-y", (unitY * lungeDistance).toFixed(2) + "px");
-        void attackerNode.offsetWidth;
-        attackerNode.classList.add("brave-view__entry--lunge");
-        attackerNode._braveCombatLungeTimeout = window.setTimeout(function () {
-            clearCombatLungeState(attackerNode);
-        }, COMBAT_LUNGE_DURATION_MS + 40);
+        // Hide the real node but keep it in the DOM to preserve layout
+        attackerNode.style.visibility = "hidden";
+        attackerNode.classList.add("brave-lunge-suppressed");
+        if (attackerRef) {
+            hiddenCombatEntryRefs[attackerRef] = true;
+        }
+
+        ghost.style.setProperty("--brave-combat-lunge-x", (unitX * lungeDistance).toFixed(2) + "px");
+        ghost.style.setProperty("--brave-combat-lunge-y", (unitY * lungeDistance).toFixed(2) + "px");
+        void ghost.offsetWidth;
+        ghost.classList.add("brave-view__entry--lunge");
+
+        window.setTimeout(function () {
+            var container = ghost.parentNode;
+            if (container && container.classList.contains("brave-combat-ghost-container")) {
+                if (container.parentNode) {
+                    container.parentNode.removeChild(container);
+                }
+            } else if (ghost.parentNode) {
+                ghost.parentNode.removeChild(ghost);
+            }
+            
+            if (attackerRef) {
+                delete hiddenCombatEntryRefs[attackerRef];
+            }
+            
+            var liveNode = resolveCombatEntryNode(attackerRef);
+            if (liveNode) {
+                liveNode.style.visibility = "";
+                liveNode.classList.remove("brave-lunge-suppressed");
+            }
+        }, COMBAT_LUNGE_DURATION_MS);
     };
 
     var animateCombatDefeat = function (nodeOrSnapshot) {
@@ -5704,6 +5745,7 @@ let defaultout_plugin = (function () {
                 }
                 if (viewData.variant === "combat" && previousCombatSnapshots.length) {
                     restoreCombatAtbContinuity(previousCombatSnapshots);
+                    applyHiddenCombatEntries();
                 }
                 withSceneRailLayoutBatch(function () {
                     if (currentMapGrid || currentMapText) {
