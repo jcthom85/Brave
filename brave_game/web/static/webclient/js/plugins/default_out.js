@@ -3359,6 +3359,9 @@ let defaultout_plugin = (function () {
 
         var ghost = document.createElement("div");
         ghost.className = "brave-combat-ghost";
+        if (snapshot.ref) {
+            ghost.setAttribute("data-entry-ref", snapshot.ref);
+        }
         ghost.innerHTML = snapshot.html;
         
         ghost.style.position = "fixed";
@@ -3633,7 +3636,11 @@ let defaultout_plugin = (function () {
 
         var targetRect = targetNode ? targetNode.getBoundingClientRect() : null;
         if (!targetRect || (!targetRect.width && !targetRect.height)) {
-            var fallbackTarget = document.querySelector(".brave-view--combat .brave-view__section--targets");
+            var fallbackSelector = ".brave-view--combat .brave-view__section--targets";
+            if (attackerNode.closest && attackerNode.closest(".brave-view__section--targets")) {
+                fallbackSelector = ".brave-view--combat .brave-view__section--party";
+            }
+            var fallbackTarget = document.querySelector(fallbackSelector);
             targetRect = fallbackTarget ? fallbackTarget.getBoundingClientRect() : null;
         }
 
