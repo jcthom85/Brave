@@ -1,0 +1,62 @@
+{% extends "website/base.html" %}
+
+{% block titleblock %}Login{% endblock %}
+
+{% block body %}
+{% load addclass %}
+<div class="brave-auth">
+  <div class="brave-auth__shell">
+    <section class="brave-auth__hero">
+      <p class="brave-auth__eyebrow">BRAVE</p>
+      <h1>Welcome back.</h1>
+      <p>Sign in to continue your account, reopen an existing character, or resume a saved draft.</p>
+      <ul class="brave-auth__features">
+        <li>Character creation starts after login.</li>
+        <li>Resume unfinished drafts from the title screen.</li>
+        <li>Keep your browser theme and webclient session in sync.</li>
+      </ul>
+    </section>
+
+    <section class="brave-auth__card">
+      {% include 'website/messages.html' %}
+      {% if user.is_authenticated %}
+        <div class="alert alert-info" role="alert">You are already logged in.</div>
+      {% else %}
+        {% if form.is_bound and form.non_field_errors %}
+          <div class="alert alert-danger" role="alert">Your username and password are incorrect. Please try again.</div>
+        {% endif %}
+
+        <div class="brave-auth__split">
+          <div class="brave-auth__panel">
+            <h2>Sign In</h2>
+            <form method="post" action=".">
+              {% csrf_token %}
+              <div class="brave-auth__field">
+                <label for="id_username">Username</label>
+                {{ form.username | addclass:"form-control" }}
+              </div>
+              <div class="brave-auth__field">
+                <label for="id_password">Password</label>
+                {{ form.password | addclass:"form-control" }}
+              </div>
+              <input type="hidden" name="next" value="{{ next }}" />
+              <div class="brave-auth__actions">
+                <button class="brave-auth__button brave-auth__button--primary brave-auth__button--full" type="submit">Sign In</button>
+                <a class="brave-auth__button brave-auth__button--secondary brave-auth__button--full" href="{% url 'register' %}">Create Account</a>
+              </div>
+            </form>
+          </div>
+
+          <div class="brave-auth__panel">
+            <h2>Need Help?</h2>
+            <p class="brave-auth__note">If you are stuck, use the title screen or reset your password from the links below.</p>
+            <div class="brave-auth__actions" style="grid-template-columns: 1fr;">
+              <a class="brave-auth__button brave-auth__button--ghost brave-auth__button--full" href="{% url 'password_reset' %}">Forgot Password?</a>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

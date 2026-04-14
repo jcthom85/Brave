@@ -1,0 +1,3025 @@
+{
+  "entities": [
+    {
+      "aliases": [
+        "board",
+        "notice board",
+        "notices"
+      ],
+      "desc": "Pinned notices mention goblin-cut fences, missing flour, and wolves too bold for comfort. The notes are practical rather than dramatic, which somehow makes them more convincing.",
+      "id": "town_notice_board",
+      "key": "town notice board",
+      "kind": "readable",
+      "location": "brambleford_town_green"
+    },
+    {
+      "aliases": [
+        "captain",
+        "harl",
+        "rowan"
+      ],
+      "desc": "The old militia captain watches everything with the calm patience of a man who has seen too many panicked recruits and intends to keep you alive through sheer refusal.",
+      "id": "captain_harl_rowan",
+      "key": "Captain Harl Rowan",
+      "kind": "npc",
+      "location": "brambleford_training_yard"
+    },
+    {
+      "aliases": [
+        "tamsin",
+        "sergeant",
+        "vale"
+      ],
+      "desc": "Sergeant Tamsin stands like someone who has spent years turning frightened travelers into steadier versions of themselves. Her voice looks ready to be blunt, but not unkind.",
+      "id": "sergeant_tamsin_vale",
+      "key": "Sergeant Tamsin Vale",
+      "kind": "npc",
+      "location": "tutorial_wayfarers_yard"
+    },
+    {
+      "aliases": [
+        "nella",
+        "quartermaster",
+        "cobb"
+      ],
+      "desc": "Nella looks like a woman who could judge a traveler's preparedness from twenty paces and improve it from ten. Her hands never stop finding straps to straighten or bundles to square.",
+      "id": "quartermaster_nella_cobb",
+      "key": "Quartermaster Nella Cobb",
+      "kind": "npc",
+      "location": "tutorial_quartermaster_shed"
+    },
+    {
+      "aliases": [
+        "board",
+        "supply board",
+        "chalk board",
+        "chalkboard"
+      ],
+      "desc": "A square slate board hangs beside the crate stacks, its lettering neat enough to suggest that sloppy people are corrected here as quickly as sloppy packs.",
+      "id": "tutorial_supply_board",
+      "key": "supply board",
+      "kind": "readable",
+      "location": "tutorial_quartermaster_shed"
+    },
+    {
+      "aliases": [
+        "peep",
+        "courier",
+        "marrow"
+      ],
+      "desc": "Peep has chalk on one sleeve, route twine around one wrist, and the sort of quick expression that suggests he is always halfway through three errands at once.",
+      "id": "courier_peep_marrow",
+      "key": "Courier Peep Marrow",
+      "kind": "npc",
+      "location": "tutorial_family_post"
+    },
+    {
+      "aliases": [
+        "sign",
+        "post sign",
+        "family sign"
+      ],
+      "desc": "A weatherproof sign hangs beside the route pegs, written in the thick practical strokes of someone tired of people getting separated in avoidable ways.",
+      "id": "family_post_sign",
+      "key": "family post sign",
+      "kind": "readable",
+      "location": "tutorial_family_post"
+    },
+    {
+      "aliases": [
+        "brask",
+        "ringhand"
+      ],
+      "desc": "Brask leans on the rail like a man who has watched enough bad first fights to know exactly when to bark and when to let a lesson land on its own.",
+      "id": "ringhand_brask",
+      "key": "Ringhand Brask",
+      "kind": "npc",
+      "location": "tutorial_sparring_ring"
+    },
+    {
+      "aliases": [
+        "mayor",
+        "elric",
+        "thorne"
+      ],
+      "desc": "Mayor Elric looks like a man held together by lists, weather reports, and a refusal to waste words. He carries the town's worry with practiced economy.",
+      "id": "mayor_elric_thorne",
+      "key": "Mayor Elric Thorne",
+      "kind": "npc",
+      "location": "brambleford_mayors_hall"
+    },
+    {
+      "aliases": [
+        "alden",
+        "brother",
+        "acolyte"
+      ],
+      "desc": "Brother Alden has the look of an earnest assistant cleric who keeps doing brave things only after he has finished being nervous about them.",
+      "id": "brother_alden",
+      "key": "Brother Alden",
+      "kind": "npc",
+      "location": "brambleford_chapel_dawn_bell"
+    },
+    {
+      "aliases": [
+        "uncle pib",
+        "pib",
+        "innkeeper"
+      ],
+      "desc": "Uncle Pib moves between kettles and tables with practiced ease. He looks like the sort of man who could solve a crisis with a ladle, a joke, or both.",
+      "id": "uncle_pib_underbough",
+      "key": "Uncle Pib Underbough",
+      "kind": "npc",
+      "location": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
+        "leda",
+        "thornwick",
+        "outfitter",
+        "shopkeeper"
+      ],
+      "desc": "Leda has measuring cord around one wrist, chalk on one sleeve, and the sharp practical eyes of someone who can tell whether a pair of boots will fail before the road does.",
+      "id": "leda_thornwick",
+      "key": "Leda Thornwick",
+      "kind": "npc",
+      "location": "brambleford_outfitters"
+    },
+    {
+      "aliases": [
+        "catch log",
+        "log",
+        "ledger",
+        "record book"
+      ],
+      "desc": "A stout ledger sits open on a little stand near the hearth, its pages full of proud fish weights, terrible handwriting, and at least one sketch of a trout wearing a crown.",
+      "id": "great_catch_log",
+      "key": "Great Catch Log",
+      "kind": "readable",
+      "location": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
+        "hearth",
+        "firepot",
+        "cookfire",
+        "stove"
+      ],
+      "desc": "A broad iron hearth glows behind the common room, fitted with blackened pans and an old firepot Uncle Pib swears can rescue almost any meal from bad judgment.",
+      "id": "kitchen_hearth",
+      "key": "kitchen hearth",
+      "kind": "readable",
+      "location": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
+        "cabinet",
+        "arcade cabinet",
+        "arcade",
+        "machine",
+        "flashing cabinet",
+        "game cabinet"
+      ],
+      "arcade_games": [
+        "maze_runner"
+      ],
+      "arcade_price": 1,
+      "arcade_rewards": {
+        "maze_runner": {
+          "item": "lantern_pixel_pin",
+          "threshold": 2000
+        }
+      },
+      "desc": "A humming black-glass cabinet squats near the inn wall, all bright dots, sharp corners, and a speaker that crackles like a tiny storm. A painted card reads MAZE RUNNER. Beneath it, somebody has added in grease pencil: Beat 2,000 and Joss owes you a proper prize.",
+      "display_name": "Joss's Flashing Cabinet",
+      "id": "lantern_rest_arcade_cabinet",
+      "key": "Joss's Flashing Cabinet",
+      "kind": "arcade",
+      "location": "brambleford_lantern_rest_inn",
+      "typeclass": "typeclasses.objects.ArcadeCabinet"
+    },
+    {
+      "aliases": [
+        "chalkboard",
+        "price board",
+        "sale board",
+        "board"
+      ],
+      "desc": "A chalkboard near the counter lists current trade notes, repair promises, and a large underlined reminder that muddy boots cost extra if they are set on the display rugs.",
+      "id": "outfitters_chalkboard",
+      "key": "outfitters chalkboard",
+      "kind": "readable",
+      "location": "brambleford_outfitters"
+    },
+    {
+      "aliases": [
+        "slate",
+        "warning slate",
+        "chalk slate"
+      ],
+      "desc": "A slate has been nailed to a post beside the stair, listing inventory losses, rude sketches of rats, and a fresh line from Uncle Pib promising soup to anyone who clears the place out.",
+      "id": "cellar_warning_slate",
+      "key": "cellar warning slate",
+      "kind": "readable",
+      "location": "brambleford_rat_and_kettle_cellar"
+    },
+    {
+      "aliases": [
+        "maybelle",
+        "sister",
+        "healer"
+      ],
+      "desc": "Sister Maybelle keeps a satchel of herbs, bandages, and dried roots within easy reach. She looks soft-spoken until someone mentions preventable injury.",
+      "id": "sister_maybelle",
+      "key": "Sister Maybelle",
+      "kind": "npc",
+      "location": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
+        "mira",
+        "fenleaf",
+        "hunter"
+      ],
+      "desc": "Mira studies the road with a hunter's stillness. She has the look of someone who notices every broken branch and trusts almost none of them.",
+      "id": "mira_fenleaf",
+      "key": "Mira Fenleaf",
+      "kind": "npc",
+      "location": "brambleford_east_gate"
+    },
+    {
+      "aliases": [
+        "pole rack",
+        "poles",
+        "rack",
+        "rods"
+      ],
+      "desc": "A simple rack holds town-owned poles, patched line, and a note reminding everyone that lost hooks still count as debt even when the river clearly started it.",
+      "id": "loaner_pole_rack",
+      "key": "loaner pole rack",
+      "kind": "readable",
+      "location": "brambleford_hobbyists_wharf"
+    },
+    {
+      "aliases": [
+        "torren",
+        "ironroot",
+        "smith",
+        "blacksmith"
+      ],
+      "desc": "Torren is a broad-shouldered dwarf with soot in his beard, forearms like split oak, and the calm expression of a man who has already decided whether your gear deserves saving.",
+      "id": "torren_ironroot",
+      "key": "Torren Ironroot",
+      "kind": "npc",
+      "location": "brambleford_ironroot_forge"
+    },
+    {
+      "aliases": [
+        "order board",
+        "forge board",
+        "orders",
+        "board"
+      ],
+      "desc": "A broad slate board hangs beside the workbench, listing nail orders, hinge repairs, and a smaller section marked 'field kit improvements' in blocky chalk.",
+      "id": "forge_order_board",
+      "key": "forge order board",
+      "kind": "readable",
+      "location": "brambleford_ironroot_forge"
+    },
+    {
+      "aliases": [
+        "joss",
+        "veller",
+        "lamplighter"
+      ],
+      "desc": "Joss wears a lamplighter's coat patched with brass tabs, soot marks, and tools that definitely do not belong on an ordinary ladder. He watches the telescope and the lower chamber with the look of someone quietly keeping two kinds of town lit at once.",
+      "id": "joss_veller",
+      "key": "Joss Veller",
+      "kind": "npc",
+      "location": "brambleford_great_observatory"
+    },
+    {
+      "aliases": [
+        "lens",
+        "telescope",
+        "great lens"
+      ],
+      "desc": "The observatory's great lens turns with an almost living smoothness. Constellations are etched along its brass rings beside stranger marks that look more like routes than stars.",
+      "id": "star_lens",
+      "key": "star lens",
+      "kind": "readable",
+      "location": "brambleford_great_observatory"
+    },
+    {
+      "aliases": [
+        "ledger",
+        "civic ledger",
+        "petition book"
+      ],
+      "desc": "A wide ledger lies open to a page of fence repairs, flour shortages, dim lantern reports, and a fresh line underlined twice: BARROW LIGHTS FAILING AFTER DUSK.",
+      "id": "mayors_ledger",
+      "key": "mayor's ledger",
+      "kind": "readable",
+      "location": "brambleford_mayors_hall"
+    },
+    {
+      "aliases": [
+        "bell",
+        "chapel bell",
+        "brass bell"
+      ],
+      "desc": "The bell hangs above the little altar in a brass frame polished by careful hands. Its tone is meant to greet the morning, though right now it feels more like a promise against the dark.",
+      "id": "dawn_bell",
+      "key": "dawn bell",
+      "kind": "readable",
+      "location": "brambleford_chapel_dawn_bell"
+    },
+    {
+      "aliases": [
+        "vitrine",
+        "trophies",
+        "trophy case",
+        "display"
+      ],
+      "desc": "Glass-fronted cases and labeled plinths wait for proof that Brambleford's little family can come back from strange places carrying stranger victories.",
+      "id": "trophy_vitrine",
+      "key": "family trophy vitrine",
+      "kind": "readable",
+      "location": "brambleford_trophy_hall"
+    },
+    {
+      "aliases": [
+        "plaque",
+        "gate plaque",
+        "brass plaque",
+        "gates"
+      ],
+      "desc": "A polished brass plaque is riveted into the gate dais, each portal name engraved beside a thin glass strip that glows or stays dark depending on the gate's condition.",
+      "id": "nexus_gate_plaque",
+      "key": "nexus gate plaque",
+      "kind": "readable",
+      "location": "brambleford_nexus_gate"
+    },
+    {
+      "aliases": [
+        "beacon",
+        "signal",
+        "tower"
+      ],
+      "desc": "A waist-high beacon blinks in clipped pulses through the scrap haze, anchoring the return gate to something on this world that still remembers how to answer.",
+      "id": "salvage_beacon",
+      "key": "salvage beacon",
+      "kind": "readable",
+      "location": "junkyard_planet_landing_pad"
+    },
+    {
+      "aliases": [
+        "mast",
+        "relay mast",
+        "route mast"
+      ],
+      "desc": "A metal mast rises from the trench with route glass still threaded through its ribs. Static ticks across it like rain on wire.",
+      "id": "relay_route_mast",
+      "key": "relay route mast",
+      "kind": "readable",
+      "location": "junkyard_planet_relay_trench"
+    },
+    {
+      "aliases": [
+        "gantry",
+        "crane gantry",
+        "crane"
+      ],
+      "desc": "The gantry lies folded across the yard, cab glass burst outward and old work orders sealed under layers of rust dust and magnet grit.",
+      "id": "crane_gantry",
+      "key": "collapsed crane gantry",
+      "kind": "readable",
+      "location": "junkyard_planet_crane_grave"
+    },
+    {
+      "aliases": [
+        "marker stone",
+        "marker",
+        "stone"
+      ],
+      "desc": "A lichen-streaked stone lists half-legible names beneath a carved sunburst. The oldest letters have been scratched at from the inside rather than worn away from weather.",
+      "id": "barrow_marker_stone",
+      "key": "weathered marker stone",
+      "kind": "readable",
+      "location": "old_barrow_field_marker_row"
+    },
+    {
+      "aliases": [
+        "slab",
+        "knight slab",
+        "edric",
+        "sir edric"
+      ],
+      "desc": "The carved slab shows a knight at prayer beneath a rising sun, though the stone around the hands is worn smooth as if someone has gripped it many times after burial.",
+      "id": "edrics_slab",
+      "key": "Edric's slab",
+      "kind": "readable",
+      "location": "old_barrow_field_sunken_dais"
+    },
+    {
+      "aliases": [
+        "warning post",
+        "post",
+        "stake"
+      ],
+      "desc": "An old militia warning post leans beside the climb, the original carving half-cut away by newer knife marks and weather.",
+      "id": "watchtower_warning_post",
+      "key": "watchtower warning post",
+      "kind": "readable",
+      "location": "ruined_watchtower_approach"
+    },
+    {
+      "aliases": [
+        "brazier",
+        "signal fire",
+        "watchfire"
+      ],
+      "desc": "A broad iron brazier sits in the broken yard with fresh soot in it and a rack of damp kindling stacked close at hand.",
+      "id": "signal_brazier",
+      "key": "signal brazier",
+      "kind": "readable",
+      "location": "ruined_watchtower_breach_yard"
+    },
+    {
+      "aliases": [
+        "standard",
+        "banner",
+        "flag",
+        "blackreed banner"
+      ],
+      "desc": "A dark standard whips from an iron hook at the tower crown, its cloth patched but carefully kept so the symbol still reads at distance.",
+      "id": "blackreed_standard",
+      "key": "Blackreed standard",
+      "kind": "readable",
+      "location": "ruined_watchtower_blackreed_roost"
+    },
+    {
+      "aliases": [
+        "slate",
+        "map",
+        "scratch map",
+        "scratch-map"
+      ],
+      "desc": "A broken roofing slate has been scratched over with goblin route marks, stew counts, and a crude crown symbol deeper in the hill.",
+      "id": "sinkmouth_scratch_map",
+      "key": "scratch-map slate",
+      "kind": "readable",
+      "location": "goblin_warrens_sinkmouth_cut"
+    },
+    {
+      "aliases": [
+        "totem",
+        "bone totem",
+        "idol"
+      ],
+      "desc": "Ribs, jawbones, and bent cutlery have been wired into a hanging goblin totem with a pot lid nailed where a face ought to be.",
+      "id": "midden_bone_totem",
+      "key": "midden bone totem",
+      "kind": "readable",
+      "location": "goblin_warrens_bone_midden"
+    },
+    {
+      "aliases": [
+        "cauldron",
+        "pot",
+        "stew pot",
+        "blackiron cauldron"
+      ],
+      "desc": "A blackened cauldron bubbles over a trench fire, full of something too thick to slosh cleanly and too busy to welcome questions.",
+      "id": "feast_hall_cauldron",
+      "key": "blackiron cauldron",
+      "kind": "readable",
+      "location": "goblin_warrens_feast_hall"
+    },
+    {
+      "aliases": [
+        "throne",
+        "lid throne",
+        "seat",
+        "crown seat"
+      ],
+      "desc": "The court seat is a rough-backed stone chair plated in bent lid metal, split shields, and enough grease-dark polish to suggest regular use by something proud and disgusting.",
+      "id": "potking_lid_throne",
+      "key": "lid-throne",
+      "kind": "readable",
+      "location": "goblin_warrens_pot_kings_court"
+    },
+    {
+      "aliases": [
+        "waypost",
+        "post",
+        "fen post",
+        "trail post"
+      ],
+      "desc": "A half-sunk road post leans over the wet track, its old route marks mostly hidden beneath reed scratches and a newer charcoal warning.",
+      "id": "fenreach_waypost",
+      "key": "fenreach waypost",
+      "kind": "readable",
+      "location": "blackfen_approach_fenreach_track"
+    },
+    {
+      "aliases": [
+        "lantern",
+        "bog lantern",
+        "fen lantern"
+      ],
+      "desc": "A drowned lantern cage hangs from a bent willow root above the hollow, green glass panes clouded from the inside as if the light went bad before it went out.",
+      "id": "boglight_lantern",
+      "key": "boglight lantern",
+      "kind": "readable",
+      "location": "blackfen_approach_boglight_hollow"
+    },
+    {
+      "aliases": [
+        "stakes",
+        "stake circle",
+        "circle"
+      ],
+      "desc": "Old watch stakes and bird bones have been driven into the mudbank in a rough circle, less a defense than a record of how many times the marsh has already ignored warnings.",
+      "id": "carrion_stake_circle",
+      "key": "carrion stake circle",
+      "kind": "readable",
+      "location": "blackfen_approach_carrion_rise"
+    },
+    {
+      "aliases": [
+        "skull",
+        "marsh skull",
+        "shed skull"
+      ],
+      "desc": "A half-sunk skull lies near the black pool, too broad through the jaw to belong to any hound Brambleford would call normal.",
+      "id": "miretooth_shed_skull",
+      "key": "shed marsh skull",
+      "kind": "readable",
+      "location": "blackfen_approach_miretooths_wallow"
+    },
+    {
+      "aliases": [
+        "marker",
+        "survey marker",
+        "stake"
+      ],
+      "desc": "A stone survey marker leans out of the black water with old civic cuts still visible beneath layers of silt and marsh rot.",
+      "id": "drowned_survey_marker",
+      "key": "drowned survey marker",
+      "kind": "readable",
+      "location": "drowned_weir_drowned_causeway"
+    },
+    {
+      "aliases": [
+        "plaque",
+        "weir plaque",
+        "keepers plaque",
+        "keeper's plaque"
+      ],
+      "desc": "A brass plaque hangs crooked on the drowned ironwork, greened by bad water and lit from below by a line of light that should not still be in service.",
+      "id": "weir_keepers_plaque",
+      "key": "weir-keeper's plaque",
+      "kind": "readable",
+      "location": "drowned_weir_lantern_weir"
+    },
+    {
+      "aliases": [
+        "chain",
+        "lock chain",
+        "gate chain"
+      ],
+      "desc": "A gate chain the thickness of a forearm runs from the drowned lock wall into black water below, drawn tight enough to hum when the wrong light pulses through the chamber.",
+      "id": "sunken_lock_chain",
+      "key": "sunken lock chain",
+      "kind": "readable",
+      "location": "drowned_weir_sunken_lock"
+    },
+    {
+      "aliases": [
+        "lens",
+        "lens frame",
+        "lamp lens",
+        "frame"
+      ],
+      "desc": "A broken lamp lens frame stands around the cold white heart of the room, its brass ribs warped as if the light inside learned to lean back.",
+      "id": "blackwater_lens_frame",
+      "key": "blackwater lens frame",
+      "kind": "readable",
+      "location": "drowned_weir_blackwater_lamp_house"
+    },
+    {
+      "aliases": [
+        "block",
+        "chopping block",
+        "ruks block"
+      ],
+      "desc": "A hacked-up stump serves as a work block for ruined fence rails. Deep blade scores suggest whoever uses it values force over craft.",
+      "id": "ruks_chopping_block",
+      "key": "Ruk's chopping block",
+      "kind": "readable",
+      "location": "goblin_road_fencebreaker_camp"
+    },
+    {
+      "aliases": [
+        "wardstone",
+        "stone",
+        "waystone"
+      ],
+      "desc": "A weathered standing stone has been ringed with old wax and newer chalk marks. Someone has been trying to keep the woods civil with whatever protection they still remember.",
+      "id": "woods_wardstone",
+      "key": "old wardstone",
+      "kind": "readable",
+      "location": "whispering_woods_trailhead"
+    },
+    {
+      "aliases": [
+        "post",
+        "warning",
+        "warning post",
+        "stake"
+      ],
+      "desc": "A split cedar post has been driven into the earth beside the stones. Knife-scored marks and a strip of grey fur hang from it as a warning to anyone pressing deeper.",
+      "id": "hunters_warning_post",
+      "key": "hunter's warning post",
+      "kind": "readable",
+      "location": "whispering_woods_old_stone_path"
+    }
+  ],
+  "exits": [
+    {
+      "aliases": [
+        "w",
+        "inn",
+        "lantern rest",
+        "lantern rest inn"
+      ],
+      "destination": "brambleford_lantern_rest_inn",
+      "direction": "west",
+      "id": "town_green_to_inn",
+      "key": "west",
+      "label": "Lantern Rest Inn",
+      "source": "brambleford_town_green"
+    },
+    {
+      "aliases": [
+        "e",
+        "green",
+        "town green"
+      ],
+      "destination": "brambleford_town_green",
+      "direction": "east",
+      "id": "inn_to_town_green",
+      "key": "east",
+      "label": "Town Green",
+      "source": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
+        "w",
+        "outfitters",
+        "shop",
+        "brambleford outfitters"
+      ],
+      "destination": "brambleford_outfitters",
+      "direction": "west",
+      "id": "inn_to_outfitters",
+      "key": "west",
+      "label": "Brambleford Outfitters",
+      "source": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
+        "d",
+        "cellar",
+        "basement",
+        "rat and kettle cellar"
+      ],
+      "destination": "brambleford_rat_and_kettle_cellar",
+      "direction": "down",
+      "id": "inn_to_cellar",
+      "key": "down",
+      "label": "Rat and Kettle Cellar",
+      "source": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
+        "n",
+        "hall",
+        "mayor",
+        "mayor's hall",
+        "mayors hall"
+      ],
+      "destination": "brambleford_mayors_hall",
+      "direction": "north",
+      "id": "inn_to_mayors_hall",
+      "key": "north",
+      "label": "Mayor's Hall",
+      "source": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
+        "e",
+        "inn",
+        "lantern rest",
+        "lantern rest inn"
+      ],
+      "destination": "brambleford_lantern_rest_inn",
+      "direction": "east",
+      "id": "outfitters_to_inn",
+      "key": "east",
+      "label": "Lantern Rest Inn",
+      "source": "brambleford_outfitters"
+    },
+    {
+      "aliases": [
+        "n",
+        "chapel",
+        "dawn bell",
+        "chapel of the dawn bell"
+      ],
+      "destination": "brambleford_chapel_dawn_bell",
+      "direction": "north",
+      "id": "outfitters_to_chapel",
+      "key": "north",
+      "label": "Chapel of the Dawn Bell",
+      "source": "brambleford_outfitters"
+    },
+    {
+      "aliases": [
+        "s",
+        "inn",
+        "lantern rest",
+        "lantern rest inn"
+      ],
+      "destination": "brambleford_lantern_rest_inn",
+      "direction": "south",
+      "id": "mayors_hall_to_inn",
+      "key": "south",
+      "label": "Lantern Rest Inn",
+      "source": "brambleford_mayors_hall"
+    },
+    {
+      "aliases": [
+        "u",
+        "inn",
+        "lantern rest",
+        "lantern rest inn"
+      ],
+      "destination": "brambleford_lantern_rest_inn",
+      "direction": "up",
+      "id": "cellar_to_inn",
+      "key": "up",
+      "label": "Lantern Rest Inn",
+      "source": "brambleford_rat_and_kettle_cellar"
+    },
+    {
+      "aliases": [
+        "n",
+        "yard",
+        "training yard"
+      ],
+      "destination": "brambleford_training_yard",
+      "direction": "north",
+      "id": "town_green_to_training_yard",
+      "key": "north",
+      "label": "Training Yard",
+      "source": "brambleford_town_green"
+    },
+    {
+      "aliases": [
+        "n",
+        "gate walk",
+        "annex",
+        "tutorial yard",
+        "wayfarers yard",
+        "wayfarer's yard"
+      ],
+      "destination": "tutorial_gate_walk",
+      "direction": "north",
+      "id": "training_yard_to_gate_walk",
+      "key": "north",
+      "label": "Gate Walk",
+      "source": "brambleford_training_yard"
+    },
+    {
+      "aliases": [
+        "s",
+        "yard",
+        "training yard",
+        "town"
+      ],
+      "destination": "brambleford_training_yard",
+      "direction": "south",
+      "id": "gate_walk_to_training_yard",
+      "key": "south",
+      "label": "Training Yard",
+      "source": "tutorial_gate_walk"
+    },
+    {
+      "aliases": [
+        "n",
+        "yard",
+        "wayfarers yard",
+        "wayfarer's yard"
+      ],
+      "destination": "tutorial_wayfarers_yard",
+      "direction": "north",
+      "id": "gate_walk_to_wayfarers_yard",
+      "key": "north",
+      "label": "Wayfarer's Yard",
+      "source": "tutorial_gate_walk"
+    },
+    {
+      "aliases": [
+        "s",
+        "gate",
+        "gate walk",
+        "training yard"
+      ],
+      "destination": "tutorial_gate_walk",
+      "direction": "south",
+      "id": "wayfarers_yard_to_gate_walk",
+      "key": "south",
+      "label": "Gate Walk",
+      "source": "tutorial_wayfarers_yard"
+    },
+    {
+      "aliases": [
+        "e",
+        "shed",
+        "quartermaster",
+        "quartermaster shed"
+      ],
+      "destination": "tutorial_quartermaster_shed",
+      "direction": "east",
+      "id": "wayfarers_yard_to_quartermaster_shed",
+      "key": "east",
+      "label": "Quartermaster Shed",
+      "source": "tutorial_wayfarers_yard"
+    },
+    {
+      "aliases": [
+        "w",
+        "yard",
+        "wayfarers yard",
+        "wayfarer's yard"
+      ],
+      "destination": "tutorial_wayfarers_yard",
+      "direction": "west",
+      "id": "quartermaster_shed_to_wayfarers_yard",
+      "key": "west",
+      "label": "Wayfarer's Yard",
+      "source": "tutorial_quartermaster_shed"
+    },
+    {
+      "aliases": [
+        "n",
+        "family post",
+        "post"
+      ],
+      "destination": "tutorial_family_post",
+      "direction": "north",
+      "id": "wayfarers_yard_to_family_post",
+      "key": "north",
+      "label": "Family Post",
+      "source": "tutorial_wayfarers_yard"
+    },
+    {
+      "aliases": [
+        "s",
+        "yard",
+        "wayfarers yard",
+        "wayfarer's yard"
+      ],
+      "destination": "tutorial_wayfarers_yard",
+      "direction": "south",
+      "id": "family_post_to_wayfarers_yard",
+      "key": "south",
+      "label": "Wayfarer's Yard",
+      "source": "tutorial_family_post"
+    },
+    {
+      "aliases": [
+        "w",
+        "ring",
+        "sparring ring"
+      ],
+      "destination": "tutorial_sparring_ring",
+      "direction": "west",
+      "id": "wayfarers_yard_to_sparring_ring",
+      "key": "west",
+      "label": "Sparring Ring",
+      "source": "tutorial_wayfarers_yard"
+    },
+    {
+      "aliases": [
+        "e",
+        "yard",
+        "wayfarers yard",
+        "wayfarer's yard"
+      ],
+      "destination": "tutorial_wayfarers_yard",
+      "direction": "east",
+      "id": "sparring_ring_to_wayfarers_yard",
+      "key": "east",
+      "label": "Wayfarer's Yard",
+      "source": "tutorial_sparring_ring"
+    },
+    {
+      "aliases": [
+        "s",
+        "pens",
+        "vermin",
+        "vermin pens"
+      ],
+      "destination": "tutorial_vermin_pens",
+      "direction": "south",
+      "id": "sparring_ring_to_vermin_pens",
+      "key": "south",
+      "label": "Vermin Pens",
+      "source": "tutorial_sparring_ring"
+    },
+    {
+      "aliases": [
+        "n",
+        "ring",
+        "sparring ring"
+      ],
+      "destination": "tutorial_sparring_ring",
+      "direction": "north",
+      "id": "vermin_pens_to_sparring_ring",
+      "key": "north",
+      "label": "Sparring Ring",
+      "source": "tutorial_vermin_pens"
+    },
+    {
+      "aliases": [
+        "w",
+        "hall",
+        "mayor",
+        "mayor's hall",
+        "mayors hall"
+      ],
+      "destination": "brambleford_mayors_hall",
+      "direction": "west",
+      "id": "training_yard_to_mayors_hall",
+      "key": "west",
+      "label": "Mayor's Hall",
+      "source": "brambleford_training_yard"
+    },
+    {
+      "aliases": [
+        "e",
+        "yard",
+        "training yard"
+      ],
+      "destination": "brambleford_training_yard",
+      "direction": "east",
+      "id": "mayors_hall_to_training_yard",
+      "key": "east",
+      "label": "Training Yard",
+      "source": "brambleford_mayors_hall"
+    },
+    {
+      "aliases": [
+        "w",
+        "chapel",
+        "dawn bell",
+        "chapel of the dawn bell"
+      ],
+      "destination": "brambleford_chapel_dawn_bell",
+      "direction": "west",
+      "id": "mayors_hall_to_chapel",
+      "key": "west",
+      "label": "Chapel of the Dawn Bell",
+      "source": "brambleford_mayors_hall"
+    },
+    {
+      "aliases": [
+        "e",
+        "hall",
+        "mayor",
+        "mayor's hall",
+        "mayors hall"
+      ],
+      "destination": "brambleford_mayors_hall",
+      "direction": "east",
+      "id": "chapel_to_mayors_hall",
+      "key": "east",
+      "label": "Mayor's Hall",
+      "source": "brambleford_chapel_dawn_bell"
+    },
+    {
+      "aliases": [
+        "s",
+        "outfitters",
+        "shop",
+        "brambleford outfitters"
+      ],
+      "destination": "brambleford_outfitters",
+      "direction": "south",
+      "id": "chapel_to_outfitters",
+      "key": "south",
+      "label": "Brambleford Outfitters",
+      "source": "brambleford_chapel_dawn_bell"
+    },
+    {
+      "aliases": [
+        "s",
+        "green",
+        "town green"
+      ],
+      "destination": "brambleford_town_green",
+      "direction": "south",
+      "id": "training_yard_to_town_green",
+      "key": "south",
+      "label": "Town Green",
+      "source": "brambleford_training_yard"
+    },
+    {
+      "aliases": [
+        "e",
+        "gate",
+        "east gate"
+      ],
+      "destination": "brambleford_east_gate",
+      "direction": "east",
+      "id": "town_green_to_east_gate",
+      "key": "east",
+      "label": "East Gate",
+      "source": "brambleford_town_green"
+    },
+    {
+      "aliases": [
+        "s",
+        "wharf",
+        "dock",
+        "hobbyist's wharf",
+        "hobbyists wharf"
+      ],
+      "destination": "brambleford_hobbyists_wharf",
+      "direction": "south",
+      "id": "town_green_to_wharf",
+      "key": "south",
+      "label": "Hobbyist's Wharf",
+      "source": "brambleford_town_green"
+    },
+    {
+      "aliases": [
+        "e",
+        "observatory",
+        "hill",
+        "great observatory",
+        "nexus hill"
+      ],
+      "destination": "brambleford_great_observatory",
+      "direction": "east",
+      "id": "town_green_to_observatory",
+      "key": "east",
+      "label": "Great Observatory",
+      "source": "brambleford_training_yard"
+    },
+    {
+      "aliases": [
+        "w",
+        "green",
+        "town green"
+      ],
+      "destination": "brambleford_town_green",
+      "direction": "west",
+      "id": "east_gate_to_town_green",
+      "key": "west",
+      "label": "Town Green",
+      "source": "brambleford_east_gate"
+    },
+    {
+      "aliases": [
+        "w",
+        "yard",
+        "training yard",
+        "downhill"
+      ],
+      "destination": "brambleford_training_yard",
+      "direction": "west",
+      "id": "observatory_to_town_green",
+      "key": "west",
+      "label": "Training Yard",
+      "source": "brambleford_great_observatory"
+    },
+    {
+      "aliases": [
+        "e",
+        "nexus",
+        "gate",
+        "ring",
+        "nexus gate"
+      ],
+      "destination": "brambleford_nexus_gate",
+      "direction": "east",
+      "id": "observatory_to_nexus_gate",
+      "key": "east",
+      "label": "Nexus Gate",
+      "source": "brambleford_great_observatory"
+    },
+    {
+      "aliases": [
+        "n",
+        "hall",
+        "trophy hall",
+        "gallery"
+      ],
+      "destination": "brambleford_trophy_hall",
+      "direction": "north",
+      "id": "observatory_to_trophy_hall",
+      "key": "north",
+      "label": "Trophy Hall",
+      "source": "brambleford_great_observatory"
+    },
+    {
+      "aliases": [
+        "s",
+        "observatory",
+        "great observatory",
+        "stairs"
+      ],
+      "destination": "brambleford_great_observatory",
+      "direction": "south",
+      "id": "trophy_hall_to_observatory",
+      "key": "south",
+      "label": "Great Observatory",
+      "source": "brambleford_trophy_hall"
+    },
+    {
+      "aliases": [
+        "w",
+        "observatory",
+        "stairs",
+        "great observatory"
+      ],
+      "destination": "brambleford_great_observatory",
+      "direction": "west",
+      "id": "nexus_gate_to_observatory",
+      "key": "west",
+      "label": "Great Observatory",
+      "source": "brambleford_nexus_gate"
+    },
+    {
+      "aliases": [
+        "e",
+        "junkyard",
+        "planet",
+        "junk-yard planet",
+        "junk yard planet",
+        "test gate"
+      ],
+      "destination": "junkyard_planet_landing_pad",
+      "direction": "east",
+      "id": "nexus_gate_to_junkyard",
+      "key": "east",
+      "label": "Junk-Yard Planet",
+      "source": "brambleford_nexus_gate"
+    },
+    {
+      "aliases": [
+        "w",
+        "return",
+        "anchor",
+        "gate",
+        "home",
+        "nexus",
+        "nexus gate"
+      ],
+      "destination": "brambleford_nexus_gate",
+      "direction": "west",
+      "id": "junkyard_to_nexus_gate",
+      "key": "west",
+      "label": "Nexus Gate",
+      "source": "junkyard_planet_landing_pad"
+    },
+    {
+      "aliases": [
+        "e",
+        "scrapway",
+        "verge",
+        "out"
+      ],
+      "destination": "junkyard_planet_scrapway",
+      "direction": "east",
+      "id": "landing_to_scrapway",
+      "key": "east",
+      "label": "Scrapway Verge",
+      "source": "junkyard_planet_landing_pad"
+    },
+    {
+      "aliases": [
+        "w",
+        "landing",
+        "return",
+        "back",
+        "junk-yard landing",
+        "junk yard landing"
+      ],
+      "destination": "junkyard_planet_landing_pad",
+      "direction": "west",
+      "id": "scrapway_to_landing",
+      "key": "west",
+      "label": "Junk-Yard Landing",
+      "source": "junkyard_planet_scrapway"
+    },
+    {
+      "aliases": [
+        "n",
+        "relay",
+        "trench",
+        "relay trench"
+      ],
+      "destination": "junkyard_planet_relay_trench",
+      "direction": "north",
+      "id": "scrapway_to_relay_trench",
+      "key": "north",
+      "label": "Relay Trench",
+      "source": "junkyard_planet_scrapway"
+    },
+    {
+      "aliases": [
+        "s",
+        "scrapway",
+        "verge"
+      ],
+      "destination": "junkyard_planet_scrapway",
+      "direction": "south",
+      "id": "relay_trench_to_scrapway",
+      "key": "south",
+      "label": "Scrapway Verge",
+      "source": "junkyard_planet_relay_trench"
+    },
+    {
+      "aliases": [
+        "e",
+        "crane",
+        "grave",
+        "crane grave"
+      ],
+      "destination": "junkyard_planet_crane_grave",
+      "direction": "east",
+      "id": "scrapway_to_crane_grave",
+      "key": "east",
+      "label": "Crane Grave",
+      "source": "junkyard_planet_scrapway"
+    },
+    {
+      "aliases": [
+        "w",
+        "scrapway",
+        "verge"
+      ],
+      "destination": "junkyard_planet_scrapway",
+      "direction": "west",
+      "id": "crane_grave_to_scrapway",
+      "key": "west",
+      "label": "Scrapway Verge",
+      "source": "junkyard_planet_crane_grave"
+    },
+    {
+      "aliases": [
+        "e",
+        "anchor",
+        "pit",
+        "anchor pit"
+      ],
+      "destination": "junkyard_planet_anchor_pit",
+      "direction": "east",
+      "id": "relay_trench_to_anchor_pit",
+      "key": "east",
+      "label": "Anchor Pit",
+      "source": "junkyard_planet_relay_trench"
+    },
+    {
+      "aliases": [
+        "w",
+        "relay",
+        "trench",
+        "relay trench"
+      ],
+      "destination": "junkyard_planet_relay_trench",
+      "direction": "west",
+      "id": "anchor_pit_to_relay_trench",
+      "key": "west",
+      "label": "Relay Trench",
+      "source": "junkyard_planet_anchor_pit"
+    },
+    {
+      "aliases": [
+        "n",
+        "anchor",
+        "pit",
+        "anchor pit"
+      ],
+      "destination": "junkyard_planet_anchor_pit",
+      "direction": "north",
+      "id": "crane_grave_to_anchor_pit",
+      "key": "north",
+      "label": "Anchor Pit",
+      "source": "junkyard_planet_crane_grave"
+    },
+    {
+      "aliases": [
+        "s",
+        "crane",
+        "grave",
+        "crane grave"
+      ],
+      "destination": "junkyard_planet_crane_grave",
+      "direction": "south",
+      "id": "anchor_pit_to_crane_grave",
+      "key": "south",
+      "label": "Crane Grave",
+      "source": "junkyard_planet_anchor_pit"
+    },
+    {
+      "aliases": [
+        "n",
+        "green",
+        "town green"
+      ],
+      "destination": "brambleford_town_green",
+      "direction": "north",
+      "id": "wharf_to_town_green",
+      "key": "north",
+      "label": "Town Green",
+      "source": "brambleford_hobbyists_wharf"
+    },
+    {
+      "aliases": [
+        "s",
+        "forge",
+        "smithy",
+        "ironroot forge"
+      ],
+      "destination": "brambleford_ironroot_forge",
+      "direction": "south",
+      "id": "wharf_to_forge",
+      "key": "south",
+      "label": "Ironroot Forge",
+      "source": "brambleford_hobbyists_wharf"
+    },
+    {
+      "aliases": [
+        "n",
+        "wharf",
+        "dock",
+        "hobbyist's wharf",
+        "hobbyists wharf"
+      ],
+      "destination": "brambleford_hobbyists_wharf",
+      "direction": "north",
+      "id": "forge_to_wharf",
+      "key": "north",
+      "label": "Hobbyist's Wharf",
+      "source": "brambleford_ironroot_forge"
+    },
+    {
+      "aliases": [
+        "e",
+        "road",
+        "trailhead",
+        "goblin road",
+        "out"
+      ],
+      "destination": "goblin_road_trailhead",
+      "direction": "east",
+      "id": "east_gate_to_trailhead",
+      "key": "east",
+      "label": "Goblin Road Trailhead",
+      "source": "brambleford_east_gate"
+    },
+    {
+      "aliases": [
+        "s",
+        "woods",
+        "trail",
+        "whispering woods",
+        "whispering woods trail"
+      ],
+      "destination": "whispering_woods_trailhead",
+      "direction": "south",
+      "id": "east_gate_to_whispering_woods",
+      "key": "south",
+      "label": "Whispering Woods Trail",
+      "source": "brambleford_east_gate"
+    },
+    {
+      "aliases": [
+        "w",
+        "gate",
+        "town",
+        "east gate"
+      ],
+      "destination": "brambleford_east_gate",
+      "direction": "west",
+      "id": "trailhead_to_east_gate",
+      "key": "west",
+      "label": "East Gate",
+      "source": "goblin_road_trailhead"
+    },
+    {
+      "aliases": [
+        "n",
+        "gate",
+        "town",
+        "east gate"
+      ],
+      "destination": "brambleford_east_gate",
+      "direction": "north",
+      "id": "whispering_woods_to_east_gate",
+      "key": "north",
+      "label": "East Gate",
+      "source": "whispering_woods_trailhead"
+    },
+    {
+      "aliases": [
+        "n",
+        "fence",
+        "old fence line"
+      ],
+      "destination": "goblin_road_old_fence_line",
+      "direction": "north",
+      "id": "trailhead_to_old_fence_line",
+      "key": "north",
+      "label": "Old Fence Line",
+      "source": "goblin_road_trailhead"
+    },
+    {
+      "aliases": [
+        "s",
+        "trailhead",
+        "goblin road",
+        "goblin road trailhead"
+      ],
+      "destination": "goblin_road_trailhead",
+      "direction": "south",
+      "id": "old_fence_line_to_trailhead",
+      "key": "south",
+      "label": "Goblin Road Trailhead",
+      "source": "goblin_road_old_fence_line"
+    },
+    {
+      "aliases": [
+        "e",
+        "turn",
+        "wolf turn"
+      ],
+      "destination": "goblin_road_wolf_turn",
+      "direction": "east",
+      "id": "old_fence_line_to_wolf_turn",
+      "key": "east",
+      "label": "Wolf Turn",
+      "source": "goblin_road_old_fence_line"
+    },
+    {
+      "aliases": [
+        "w",
+        "fence",
+        "old fence line"
+      ],
+      "destination": "goblin_road_old_fence_line",
+      "direction": "west",
+      "id": "wolf_turn_to_old_fence_line",
+      "key": "west",
+      "label": "Old Fence Line",
+      "source": "goblin_road_wolf_turn"
+    },
+    {
+      "aliases": [
+        "e",
+        "camp",
+        "fencebreaker camp"
+      ],
+      "destination": "goblin_road_fencebreaker_camp",
+      "direction": "east",
+      "id": "wolf_turn_to_fencebreaker_camp",
+      "key": "east",
+      "label": "Fencebreaker Camp",
+      "source": "goblin_road_wolf_turn"
+    },
+    {
+      "aliases": [
+        "w",
+        "turn",
+        "wolf turn"
+      ],
+      "destination": "goblin_road_wolf_turn",
+      "direction": "west",
+      "id": "fencebreaker_camp_to_wolf_turn",
+      "key": "west",
+      "label": "Wolf Turn",
+      "source": "goblin_road_fencebreaker_camp"
+    },
+    {
+      "aliases": [
+        "n",
+        "watchtower",
+        "tower",
+        "ruined watchtower",
+        "approach"
+      ],
+      "destination": "ruined_watchtower_approach",
+      "direction": "north",
+      "id": "fencebreaker_camp_to_watchtower",
+      "key": "north",
+      "label": "Watchtower Approach",
+      "source": "goblin_road_fencebreaker_camp"
+    },
+    {
+      "aliases": [
+        "s",
+        "camp",
+        "fencebreaker camp",
+        "goblin road"
+      ],
+      "destination": "goblin_road_fencebreaker_camp",
+      "direction": "south",
+      "id": "watchtower_to_fencebreaker_camp",
+      "key": "south",
+      "label": "Fencebreaker Camp",
+      "source": "ruined_watchtower_approach"
+    },
+    {
+      "aliases": [
+        "s",
+        "blackfen",
+        "fen",
+        "track",
+        "fenreach track"
+      ],
+      "destination": "blackfen_approach_fenreach_track",
+      "direction": "south",
+      "id": "fencebreaker_camp_to_blackfen",
+      "key": "south",
+      "label": "Fenreach Track",
+      "source": "goblin_road_fencebreaker_camp"
+    },
+    {
+      "aliases": [
+        "n",
+        "camp",
+        "fencebreaker camp",
+        "road"
+      ],
+      "destination": "goblin_road_fencebreaker_camp",
+      "direction": "north",
+      "id": "blackfen_to_fencebreaker_camp",
+      "key": "north",
+      "label": "Fencebreaker Camp",
+      "source": "blackfen_approach_fenreach_track"
+    },
+    {
+      "aliases": [
+        "n",
+        "yard",
+        "breach",
+        "breach yard"
+      ],
+      "destination": "ruined_watchtower_breach_yard",
+      "direction": "north",
+      "id": "watchtower_approach_to_breach_yard",
+      "key": "north",
+      "label": "Breach Yard",
+      "source": "ruined_watchtower_approach"
+    },
+    {
+      "aliases": [
+        "s",
+        "approach",
+        "watchtower approach"
+      ],
+      "destination": "ruined_watchtower_approach",
+      "direction": "south",
+      "id": "breach_yard_to_watchtower_approach",
+      "key": "south",
+      "label": "Watchtower Approach",
+      "source": "ruined_watchtower_breach_yard"
+    },
+    {
+      "aliases": [
+        "w",
+        "ledge",
+        "archers ledge",
+        "archer ledge"
+      ],
+      "destination": "ruined_watchtower_archers_ledge",
+      "direction": "west",
+      "id": "breach_yard_to_archers_ledge",
+      "key": "west",
+      "label": "Archer's Ledge",
+      "source": "ruined_watchtower_breach_yard"
+    },
+    {
+      "aliases": [
+        "e",
+        "yard",
+        "breach",
+        "breach yard"
+      ],
+      "destination": "ruined_watchtower_breach_yard",
+      "direction": "east",
+      "id": "archers_ledge_to_breach_yard",
+      "key": "east",
+      "label": "Breach Yard",
+      "source": "ruined_watchtower_archers_ledge"
+    },
+    {
+      "aliases": [
+        "e",
+        "stairs",
+        "tower stairs",
+        "cracked tower stairs"
+      ],
+      "destination": "ruined_watchtower_cracked_stairs",
+      "direction": "east",
+      "id": "breach_yard_to_cracked_stairs",
+      "key": "east",
+      "label": "Cracked Tower Stairs",
+      "source": "ruined_watchtower_breach_yard"
+    },
+    {
+      "aliases": [
+        "w",
+        "yard",
+        "breach",
+        "breach yard"
+      ],
+      "destination": "ruined_watchtower_breach_yard",
+      "direction": "west",
+      "id": "cracked_stairs_to_breach_yard",
+      "key": "west",
+      "label": "Breach Yard",
+      "source": "ruined_watchtower_cracked_stairs"
+    },
+    {
+      "aliases": [
+        "n",
+        "roost",
+        "blackreed",
+        "blackreeds roost",
+        "top"
+      ],
+      "destination": "ruined_watchtower_blackreed_roost",
+      "direction": "north",
+      "id": "cracked_stairs_to_blackreed_roost",
+      "key": "north",
+      "label": "Blackreed's Roost",
+      "source": "ruined_watchtower_cracked_stairs"
+    },
+    {
+      "aliases": [
+        "s",
+        "stairs",
+        "tower stairs",
+        "cracked tower stairs"
+      ],
+      "destination": "ruined_watchtower_cracked_stairs",
+      "direction": "south",
+      "id": "blackreed_roost_to_cracked_stairs",
+      "key": "south",
+      "label": "Cracked Tower Stairs",
+      "source": "ruined_watchtower_blackreed_roost"
+    },
+    {
+      "aliases": [
+        "e",
+        "sinkmouth",
+        "cut",
+        "goblin warrens",
+        "warrens"
+      ],
+      "destination": "goblin_warrens_sinkmouth_cut",
+      "direction": "east",
+      "id": "fencebreaker_camp_to_sinkmouth_cut",
+      "key": "east",
+      "label": "Sinkmouth Cut",
+      "source": "goblin_road_fencebreaker_camp"
+    },
+    {
+      "aliases": [
+        "w",
+        "camp",
+        "fencebreaker camp",
+        "road"
+      ],
+      "destination": "goblin_road_fencebreaker_camp",
+      "direction": "west",
+      "id": "sinkmouth_cut_to_fencebreaker_camp",
+      "key": "west",
+      "label": "Fencebreaker Camp",
+      "source": "goblin_warrens_sinkmouth_cut"
+    },
+    {
+      "aliases": [
+        "e",
+        "tunnel",
+        "torchgut",
+        "torchgut tunnel"
+      ],
+      "destination": "goblin_warrens_torchgut_tunnel",
+      "direction": "east",
+      "id": "sinkmouth_cut_to_torchgut_tunnel",
+      "key": "east",
+      "label": "Torchgut Tunnel",
+      "source": "goblin_warrens_sinkmouth_cut"
+    },
+    {
+      "aliases": [
+        "w",
+        "sinkmouth",
+        "cut",
+        "sinkmouth cut"
+      ],
+      "destination": "goblin_warrens_sinkmouth_cut",
+      "direction": "west",
+      "id": "torchgut_tunnel_to_sinkmouth_cut",
+      "key": "west",
+      "label": "Sinkmouth Cut",
+      "source": "goblin_warrens_torchgut_tunnel"
+    },
+    {
+      "aliases": [
+        "e",
+        "midden",
+        "bone midden"
+      ],
+      "destination": "goblin_warrens_bone_midden",
+      "direction": "east",
+      "id": "torchgut_tunnel_to_bone_midden",
+      "key": "east",
+      "label": "Bone Midden",
+      "source": "goblin_warrens_torchgut_tunnel"
+    },
+    {
+      "aliases": [
+        "w",
+        "tunnel",
+        "torchgut",
+        "torchgut tunnel"
+      ],
+      "destination": "goblin_warrens_torchgut_tunnel",
+      "direction": "west",
+      "id": "bone_midden_to_torchgut_tunnel",
+      "key": "west",
+      "label": "Torchgut Tunnel",
+      "source": "goblin_warrens_bone_midden"
+    },
+    {
+      "aliases": [
+        "s",
+        "sludge",
+        "run",
+        "sludge run"
+      ],
+      "destination": "goblin_warrens_sludge_run",
+      "direction": "south",
+      "id": "torchgut_tunnel_to_sludge_run",
+      "key": "south",
+      "label": "Sludge Run",
+      "source": "goblin_warrens_torchgut_tunnel"
+    },
+    {
+      "aliases": [
+        "n",
+        "tunnel",
+        "torchgut",
+        "torchgut tunnel"
+      ],
+      "destination": "goblin_warrens_torchgut_tunnel",
+      "direction": "north",
+      "id": "sludge_run_to_torchgut_tunnel",
+      "key": "north",
+      "label": "Torchgut Tunnel",
+      "source": "goblin_warrens_sludge_run"
+    },
+    {
+      "aliases": [
+        "e",
+        "hall",
+        "feast hall",
+        "feast"
+      ],
+      "destination": "goblin_warrens_feast_hall",
+      "direction": "east",
+      "id": "sludge_run_to_feast_hall",
+      "key": "east",
+      "label": "Feast Hall",
+      "source": "goblin_warrens_sludge_run"
+    },
+    {
+      "aliases": [
+        "w",
+        "sludge",
+        "run",
+        "sludge run"
+      ],
+      "destination": "goblin_warrens_sludge_run",
+      "direction": "west",
+      "id": "feast_hall_to_sludge_run",
+      "key": "west",
+      "label": "Sludge Run",
+      "source": "goblin_warrens_feast_hall"
+    },
+    {
+      "aliases": [
+        "s",
+        "hall",
+        "feast hall",
+        "feast"
+      ],
+      "destination": "goblin_warrens_feast_hall",
+      "direction": "south",
+      "id": "bone_midden_to_feast_hall",
+      "key": "south",
+      "label": "Feast Hall",
+      "source": "goblin_warrens_bone_midden"
+    },
+    {
+      "aliases": [
+        "n",
+        "midden",
+        "bone midden"
+      ],
+      "destination": "goblin_warrens_bone_midden",
+      "direction": "north",
+      "id": "feast_hall_to_bone_midden",
+      "key": "north",
+      "label": "Bone Midden",
+      "source": "goblin_warrens_feast_hall"
+    },
+    {
+      "aliases": [
+        "e",
+        "court",
+        "pot king",
+        "pot kings court",
+        "throne"
+      ],
+      "destination": "goblin_warrens_pot_kings_court",
+      "direction": "east",
+      "id": "feast_hall_to_pot_kings_court",
+      "key": "east",
+      "label": "Pot-King's Court",
+      "source": "goblin_warrens_feast_hall"
+    },
+    {
+      "aliases": [
+        "w",
+        "hall",
+        "feast hall",
+        "feast"
+      ],
+      "destination": "goblin_warrens_feast_hall",
+      "direction": "west",
+      "id": "pot_kings_court_to_feast_hall",
+      "key": "west",
+      "label": "Feast Hall",
+      "source": "goblin_warrens_pot_kings_court"
+    },
+    {
+      "aliases": [
+        "e",
+        "reedflats",
+        "reeds",
+        "flats"
+      ],
+      "destination": "blackfen_approach_reedflats",
+      "direction": "east",
+      "id": "fenreach_track_to_reedflats",
+      "key": "east",
+      "label": "Reedflats",
+      "source": "blackfen_approach_fenreach_track"
+    },
+    {
+      "aliases": [
+        "w",
+        "track",
+        "fenreach",
+        "fenreach track"
+      ],
+      "destination": "blackfen_approach_fenreach_track",
+      "direction": "west",
+      "id": "reedflats_to_fenreach_track",
+      "key": "west",
+      "label": "Fenreach Track",
+      "source": "blackfen_approach_reedflats"
+    },
+    {
+      "aliases": [
+        "n",
+        "boglight",
+        "hollow",
+        "boglight hollow"
+      ],
+      "destination": "blackfen_approach_boglight_hollow",
+      "direction": "north",
+      "id": "reedflats_to_boglight_hollow",
+      "key": "north",
+      "label": "Boglight Hollow",
+      "source": "blackfen_approach_reedflats"
+    },
+    {
+      "aliases": [
+        "s",
+        "reedflats",
+        "reeds",
+        "flats"
+      ],
+      "destination": "blackfen_approach_reedflats",
+      "direction": "south",
+      "id": "boglight_hollow_to_reedflats",
+      "key": "south",
+      "label": "Reedflats",
+      "source": "blackfen_approach_boglight_hollow"
+    },
+    {
+      "aliases": [
+        "e",
+        "rise",
+        "carrion rise"
+      ],
+      "destination": "blackfen_approach_carrion_rise",
+      "direction": "east",
+      "id": "reedflats_to_carrion_rise",
+      "key": "east",
+      "label": "Carrion Rise",
+      "source": "blackfen_approach_reedflats"
+    },
+    {
+      "aliases": [
+        "w",
+        "reedflats",
+        "reeds",
+        "flats"
+      ],
+      "destination": "blackfen_approach_reedflats",
+      "direction": "west",
+      "id": "carrion_rise_to_reedflats",
+      "key": "west",
+      "label": "Reedflats",
+      "source": "blackfen_approach_carrion_rise"
+    },
+    {
+      "aliases": [
+        "e",
+        "wallow",
+        "miretooth",
+        "miretooths wallow"
+      ],
+      "destination": "blackfen_approach_miretooths_wallow",
+      "direction": "east",
+      "id": "boglight_hollow_to_miretooths_wallow",
+      "key": "east",
+      "label": "Miretooth's Wallow",
+      "source": "blackfen_approach_boglight_hollow"
+    },
+    {
+      "aliases": [
+        "w",
+        "boglight",
+        "hollow",
+        "boglight hollow"
+      ],
+      "destination": "blackfen_approach_boglight_hollow",
+      "direction": "west",
+      "id": "miretooths_wallow_to_boglight_hollow",
+      "key": "west",
+      "label": "Boglight Hollow",
+      "source": "blackfen_approach_miretooths_wallow"
+    },
+    {
+      "aliases": [
+        "n",
+        "wallow",
+        "miretooth",
+        "miretooths wallow"
+      ],
+      "destination": "blackfen_approach_miretooths_wallow",
+      "direction": "north",
+      "id": "carrion_rise_to_miretooths_wallow",
+      "key": "north",
+      "label": "Miretooth's Wallow",
+      "source": "blackfen_approach_carrion_rise"
+    },
+    {
+      "aliases": [
+        "s",
+        "rise",
+        "carrion rise"
+      ],
+      "destination": "blackfen_approach_carrion_rise",
+      "direction": "south",
+      "id": "miretooths_wallow_to_carrion_rise",
+      "key": "south",
+      "label": "Carrion Rise",
+      "source": "blackfen_approach_miretooths_wallow"
+    },
+    {
+      "aliases": [
+        "e",
+        "causeway",
+        "drowned causeway",
+        "drowned weir",
+        "weir"
+      ],
+      "destination": "drowned_weir_drowned_causeway",
+      "direction": "east",
+      "id": "miretooths_wallow_to_drowned_causeway",
+      "key": "east",
+      "label": "Drowned Causeway",
+      "source": "blackfen_approach_miretooths_wallow"
+    },
+    {
+      "aliases": [
+        "w",
+        "wallow",
+        "miretooth",
+        "miretooths wallow",
+        "blackfen"
+      ],
+      "destination": "blackfen_approach_miretooths_wallow",
+      "direction": "west",
+      "id": "drowned_causeway_to_miretooths_wallow",
+      "key": "west",
+      "label": "Miretooth's Wallow",
+      "source": "drowned_weir_drowned_causeway"
+    },
+    {
+      "aliases": [
+        "e",
+        "weir",
+        "lantern weir",
+        "spillway"
+      ],
+      "destination": "drowned_weir_lantern_weir",
+      "direction": "east",
+      "id": "drowned_causeway_to_lantern_weir",
+      "key": "east",
+      "label": "Lantern Weir",
+      "source": "drowned_weir_drowned_causeway"
+    },
+    {
+      "aliases": [
+        "w",
+        "causeway",
+        "drowned causeway"
+      ],
+      "destination": "drowned_weir_drowned_causeway",
+      "direction": "west",
+      "id": "lantern_weir_to_drowned_causeway",
+      "key": "west",
+      "label": "Drowned Causeway",
+      "source": "drowned_weir_lantern_weir"
+    },
+    {
+      "aliases": [
+        "n",
+        "sluice",
+        "walk",
+        "sluice walk"
+      ],
+      "destination": "drowned_weir_sluice_walk",
+      "direction": "north",
+      "id": "lantern_weir_to_sluice_walk",
+      "key": "north",
+      "label": "Sluice Walk",
+      "source": "drowned_weir_lantern_weir"
+    },
+    {
+      "aliases": [
+        "s",
+        "weir",
+        "lantern weir"
+      ],
+      "destination": "drowned_weir_lantern_weir",
+      "direction": "south",
+      "id": "sluice_walk_to_lantern_weir",
+      "key": "south",
+      "label": "Lantern Weir",
+      "source": "drowned_weir_sluice_walk"
+    },
+    {
+      "aliases": [
+        "e",
+        "lock",
+        "sunken lock"
+      ],
+      "destination": "drowned_weir_sunken_lock",
+      "direction": "east",
+      "id": "lantern_weir_to_sunken_lock",
+      "key": "east",
+      "label": "Sunken Lock",
+      "source": "drowned_weir_lantern_weir"
+    },
+    {
+      "aliases": [
+        "w",
+        "weir",
+        "lantern weir"
+      ],
+      "destination": "drowned_weir_lantern_weir",
+      "direction": "west",
+      "id": "sunken_lock_to_lantern_weir",
+      "key": "west",
+      "label": "Lantern Weir",
+      "source": "drowned_weir_sunken_lock"
+    },
+    {
+      "aliases": [
+        "e",
+        "lamp house",
+        "lamp",
+        "blackwater lamp house"
+      ],
+      "destination": "drowned_weir_blackwater_lamp_house",
+      "direction": "east",
+      "id": "sluice_walk_to_blackwater_lamp_house",
+      "key": "east",
+      "label": "Blackwater Lamp House",
+      "source": "drowned_weir_sluice_walk"
+    },
+    {
+      "aliases": [
+        "w",
+        "sluice",
+        "walk",
+        "sluice walk"
+      ],
+      "destination": "drowned_weir_sluice_walk",
+      "direction": "west",
+      "id": "blackwater_lamp_house_to_sluice_walk",
+      "key": "west",
+      "label": "Sluice Walk",
+      "source": "drowned_weir_blackwater_lamp_house"
+    },
+    {
+      "aliases": [
+        "n",
+        "lamp house",
+        "lamp",
+        "blackwater lamp house"
+      ],
+      "destination": "drowned_weir_blackwater_lamp_house",
+      "direction": "north",
+      "id": "sunken_lock_to_blackwater_lamp_house",
+      "key": "north",
+      "label": "Blackwater Lamp House",
+      "source": "drowned_weir_sunken_lock"
+    },
+    {
+      "aliases": [
+        "s",
+        "lock",
+        "sunken lock"
+      ],
+      "destination": "drowned_weir_sunken_lock",
+      "direction": "south",
+      "id": "blackwater_lamp_house_to_sunken_lock",
+      "key": "south",
+      "label": "Sunken Lock",
+      "source": "drowned_weir_blackwater_lamp_house"
+    },
+    {
+      "aliases": [
+        "e",
+        "path",
+        "old stone path"
+      ],
+      "destination": "whispering_woods_old_stone_path",
+      "direction": "east",
+      "id": "woods_trail_to_old_stone_path",
+      "key": "east",
+      "label": "Old Stone Path",
+      "source": "whispering_woods_trailhead"
+    },
+    {
+      "aliases": [
+        "w",
+        "trail",
+        "whispering woods trail",
+        "whispering woods"
+      ],
+      "destination": "whispering_woods_trailhead",
+      "direction": "west",
+      "id": "old_stone_path_to_woods_trail",
+      "key": "west",
+      "label": "Whispering Woods Trail",
+      "source": "whispering_woods_old_stone_path"
+    },
+    {
+      "aliases": [
+        "s",
+        "glade",
+        "briar glade"
+      ],
+      "destination": "whispering_woods_briar_glade",
+      "direction": "south",
+      "id": "old_stone_path_to_briar_glade",
+      "key": "south",
+      "label": "Briar Glade",
+      "source": "whispering_woods_old_stone_path"
+    },
+    {
+      "aliases": [
+        "e",
+        "barrow",
+        "causeway",
+        "old barrow",
+        "old barrow causeway"
+      ],
+      "destination": "old_barrow_field_causeway",
+      "direction": "east",
+      "id": "old_stone_path_to_old_barrow",
+      "key": "east",
+      "label": "Old Barrow Causeway",
+      "source": "whispering_woods_old_stone_path"
+    },
+    {
+      "aliases": [
+        "w",
+        "path",
+        "woods",
+        "old stone path",
+        "whispering woods"
+      ],
+      "destination": "whispering_woods_old_stone_path",
+      "direction": "west",
+      "id": "old_barrow_to_old_stone_path",
+      "key": "west",
+      "label": "Old Stone Path",
+      "source": "old_barrow_field_causeway"
+    },
+    {
+      "aliases": [
+        "e",
+        "markers",
+        "marker row"
+      ],
+      "destination": "old_barrow_field_marker_row",
+      "direction": "east",
+      "id": "old_barrow_causeway_to_marker_row",
+      "key": "east",
+      "label": "Marker Row",
+      "source": "old_barrow_field_causeway"
+    },
+    {
+      "aliases": [
+        "w",
+        "causeway",
+        "old barrow causeway",
+        "old barrow"
+      ],
+      "destination": "old_barrow_field_causeway",
+      "direction": "west",
+      "id": "marker_row_to_old_barrow_causeway",
+      "key": "west",
+      "label": "Old Barrow Causeway",
+      "source": "old_barrow_field_marker_row"
+    },
+    {
+      "aliases": [
+        "n",
+        "circle",
+        "barrow circle"
+      ],
+      "destination": "old_barrow_field_barrow_circle",
+      "direction": "north",
+      "id": "marker_row_to_barrow_circle",
+      "key": "north",
+      "label": "Barrow Circle",
+      "source": "old_barrow_field_marker_row"
+    },
+    {
+      "aliases": [
+        "s",
+        "markers",
+        "marker row"
+      ],
+      "destination": "old_barrow_field_marker_row",
+      "direction": "south",
+      "id": "barrow_circle_to_marker_row",
+      "key": "south",
+      "label": "Marker Row",
+      "source": "old_barrow_field_barrow_circle"
+    },
+    {
+      "aliases": [
+        "e",
+        "dais",
+        "sunken dais"
+      ],
+      "destination": "old_barrow_field_sunken_dais",
+      "direction": "east",
+      "id": "barrow_circle_to_sunken_dais",
+      "key": "east",
+      "label": "Sunken Dais",
+      "source": "old_barrow_field_barrow_circle"
+    },
+    {
+      "aliases": [
+        "w",
+        "circle",
+        "barrow circle"
+      ],
+      "destination": "old_barrow_field_barrow_circle",
+      "direction": "west",
+      "id": "sunken_dais_to_barrow_circle",
+      "key": "west",
+      "label": "Barrow Circle",
+      "source": "old_barrow_field_sunken_dais"
+    },
+    {
+      "aliases": [
+        "n",
+        "path",
+        "old stone path"
+      ],
+      "destination": "whispering_woods_old_stone_path",
+      "direction": "north",
+      "id": "briar_glade_to_old_stone_path",
+      "key": "north",
+      "label": "Old Stone Path",
+      "source": "whispering_woods_briar_glade"
+    },
+    {
+      "aliases": [
+        "e",
+        "hollow",
+        "den",
+        "greymaw's hollow",
+        "greymaws hollow"
+      ],
+      "destination": "whispering_woods_greymaw_hollow",
+      "direction": "east",
+      "id": "briar_glade_to_greymaw_hollow",
+      "key": "east",
+      "label": "Greymaw's Hollow",
+      "source": "whispering_woods_briar_glade"
+    },
+    {
+      "aliases": [
+        "w",
+        "glade",
+        "briar glade"
+      ],
+      "destination": "whispering_woods_briar_glade",
+      "direction": "west",
+      "id": "greymaw_hollow_to_briar_glade",
+      "key": "west",
+      "label": "Briar Glade",
+      "source": "whispering_woods_greymaw_hollow"
+    }
+  ],
+  "rooms": [
+    {
+      "desc": "Lantern posts ring the green like quiet guardians, their brasswork polished by many practical hands. The square is compact but lively: muddy boots, gossip, and the reassuring clatter of a frontier town trying very hard to look unbothered.",
+      "id": "brambleford_town_green",
+      "key": "Brambleford Town Green",
+      "map_icon": "G",
+      "map_region": "brambleford",
+      "map_x": 0,
+      "map_y": 0,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "activities": [
+        "cooking"
+      ],
+      "desc": "The inn smells of stew, woodsmoke, and fresh bread. Lanternlight warms the beams, and every table seems to carry either a rumor or a complaint about wolves.",
+      "id": "brambleford_lantern_rest_inn",
+      "key": "The Lantern Rest Inn",
+      "map_icon": "I",
+      "map_region": "brambleford",
+      "map_x": -1,
+      "map_y": 0,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "desc": "Shelves of boots, rain cloaks, rope, patched travel bags, and sensible trail goods line the walls in neat practical ranks. Nothing in the room is fancy, but everything looks like it was chosen by someone who expects bad weather, muddy children, and the occasional goblin.",
+      "id": "brambleford_outfitters",
+      "key": "Brambleford Outfitters",
+      "map_icon": "U",
+      "map_region": "brambleford",
+      "map_x": -2,
+      "map_y": 0,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "desc": "Worn posts, chopped practice dummies, and chalked sparring rings fill the yard. This is where Brambleford tries to turn willing hands into something closer to heroes.",
+      "id": "brambleford_training_yard",
+      "key": "Training Yard",
+      "map_icon": "Y",
+      "map_region": "brambleford",
+      "map_x": 0,
+      "map_y": 1,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "desc": "A short fenced walk climbs north away from the main yard, marked by battered signposts and a practice gate that looks built for instruction more than defense. Brambleford is close enough to feel safe, but the little annex beyond it is clearly where the town squares away new hands before turning them loose.",
+      "id": "tutorial_gate_walk",
+      "key": "Gate Walk",
+      "map_icon": "G",
+      "map_region": "wayfarers_yard",
+      "map_x": 0,
+      "map_y": -1,
+      "safe": true,
+      "zone": "Wayfarer's Yard"
+    },
+    {
+      "desc": "A compact fenced yard sits just above the main training grounds, laid out with deliberate simplicity: a central post, clear lanes, and enough room to make mistakes without wandering into real danger. The whole place feels built to teach a traveler how to settle their nerves before the road starts asking harder questions.",
+      "id": "tutorial_wayfarers_yard",
+      "key": "Wayfarer's Yard",
+      "map_icon": "W",
+      "map_region": "wayfarers_yard",
+      "map_x": 0,
+      "map_y": 0,
+      "safe": true,
+      "zone": "Wayfarer's Yard"
+    },
+    {
+      "desc": "Peg racks, folded blankets, oilcloth bundles, and labeled crates line the little shed wall to wall. Nothing here is ornate, but everything has a place, and the place of every item looks chosen by someone who expects weather, mud, and avoidable mistakes.",
+      "id": "tutorial_quartermaster_shed",
+      "key": "Quartermaster Shed",
+      "map_icon": "Q",
+      "map_region": "wayfarers_yard",
+      "map_x": 1,
+      "map_y": 0,
+      "safe": true,
+      "zone": "Wayfarer's Yard"
+    },
+    {
+      "desc": "A little dispatch post overlooks the yard with chalk slates, route pegs, and a bench meant for regrouping rather than lingering. Whoever set it up understood that people travel better when somebody has bothered to think about how they find each other again.",
+      "id": "tutorial_family_post",
+      "key": "Family Post",
+      "map_icon": "P",
+      "map_region": "wayfarers_yard",
+      "map_x": 0,
+      "map_y": 1,
+      "safe": true,
+      "zone": "Wayfarer's Yard"
+    },
+    {
+      "desc": "A chalked ring, nicked practice posts, and a weapons rail mark out the sparring ground. The place feels less like a stage for heroics and more like somewhere sensible adults teach people not to panic the first time teeth or steel point the wrong way.",
+      "id": "tutorial_sparring_ring",
+      "key": "Sparring Ring",
+      "map_icon": "S",
+      "map_region": "wayfarers_yard",
+      "map_x": -1,
+      "map_y": 0,
+      "safe": true,
+      "zone": "Wayfarer's Yard"
+    },
+    {
+      "desc": "Low timber pens and rough feed bins crowd the edge of the annex, the sort of place Brambleford uses to keep troublesome yard vermin from turning into a bigger nuisance. The smell is sharp, the straw is restless, and the lesson is obvious: even small trouble still bites.",
+      "id": "tutorial_vermin_pens",
+      "key": "Vermin Pens",
+      "map_icon": "V",
+      "map_region": "wayfarers_yard",
+      "map_x": -1,
+      "map_y": -1,
+      "safe": false,
+      "zone": "Wayfarer's Yard"
+    },
+    {
+      "desc": "A practical stone hall with weather notices, petition ledgers, and a long table scarred by years of local argument. Nothing here is elegant, but everything feels used by people trying to keep the town upright.",
+      "id": "brambleford_mayors_hall",
+      "key": "Mayor's Hall",
+      "map_icon": "M",
+      "map_region": "brambleford",
+      "map_x": -1,
+      "map_y": 1,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "desc": "Soft lampglass, pale stone, and a brass bell frame give the little chapel a steadier kind of warmth than the inn. Prayer ribbons stir in the draft, and someone has kept every lantern trimmed as if the town's courage depends on it.",
+      "id": "brambleford_chapel_dawn_bell",
+      "key": "Chapel of the Dawn Bell",
+      "map_icon": "C",
+      "map_region": "brambleford",
+      "map_x": -2,
+      "map_y": 1,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "desc": "The eastern gate looks sturdy enough, but the road beyond it tells a less comforting story. Wagon ruts cut through the mud, and the sentries keep glancing toward the hills.",
+      "id": "brambleford_east_gate",
+      "key": "East Gate",
+      "map_icon": "E",
+      "map_region": "brambleford",
+      "map_x": 1,
+      "map_y": 0,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "activities": [
+        "fishing"
+      ],
+      "desc": "A weathered little dock juts into the Bramble River beside a rack of loaner poles, bait tins, and a bench rubbed smooth by patient elbows. The water is slow here, brown-green in the shallows and silver where the current catches lanternlight.",
+      "id": "brambleford_hobbyists_wharf",
+      "key": "Hobbyist's Wharf",
+      "map_icon": "W",
+      "map_region": "brambleford",
+      "map_x": 0,
+      "map_y": -1,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "desc": "A broad smithy yard opens around a coal-hot forge, a quench trough, and workbenches scarred by years of practical repair. Fresh nails, bent hinges, spearheads, and half-finished buckles hang from pegs above a clean anvil block that looks capable of judging your gear on sight.",
+      "id": "brambleford_ironroot_forge",
+      "key": "Ironroot Forge",
+      "map_icon": "F",
+      "map_region": "brambleford",
+      "map_x": 0,
+      "map_y": -2,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "desc": "The observatory crowns Brambleford's highest rise, all brass braces, stone arches, and lantern glass polished brighter than the road probably deserves. A great telescope points upward through the open dome while a lower chamber hums with stranger work below.",
+      "id": "brambleford_great_observatory",
+      "key": "Great Observatory",
+      "map_icon": "O",
+      "map_region": "brambleford",
+      "map_x": 1,
+      "map_y": 1,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "desc": "Wooden cases, brass plaques, and open wall-hooks fill the hall above the observatory steps. Some shelves still wait empty, but the room has been built with the confidence of people who fully intend to bring strange things home.",
+      "id": "brambleford_trophy_hall",
+      "key": "Trophy Hall",
+      "map_icon": "H",
+      "map_region": "brambleford",
+      "map_x": 1,
+      "map_y": 2,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "desc": "A circular chamber of old stone and newer fittings surrounds a standing ring of pale light. Brass plaques, humming anchor lines, and a floor inlaid with star charts make the place feel half observatory, half impossible harbor.",
+      "id": "brambleford_nexus_gate",
+      "key": "Nexus Gate",
+      "map_icon": "N",
+      "map_region": "nexus_network",
+      "map_x": 0,
+      "map_y": 0,
+      "portal_hub": true,
+      "safe": true,
+      "zone": "The Nexus"
+    },
+    {
+      "desc": "The inn cellar is all stone, old barrel racks, and corners that seem designed specifically for unpleasant scratching noises. Flour dust, spilled grain, and chewed crate corners make it clear the rats have been treating it as a festival ground.",
+      "id": "brambleford_rat_and_kettle_cellar",
+      "key": "Rat and Kettle Cellar",
+      "map_icon": "C",
+      "map_region": "rat_and_kettle_cellar",
+      "map_x": 0,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Brambleford"
+    },
+    {
+      "desc": "The return side of the gate opens onto a steel platform sunk into an ocean of salvage. Broken railcars, dish arrays, and hull plates lie under a copper sky while distant towers blink with cold practical light.",
+      "id": "junkyard_planet_landing_pad",
+      "key": "Junk-Yard Landing",
+      "map_icon": "L",
+      "map_region": "junkyard_planet",
+      "map_x": 0,
+      "map_y": 0,
+      "resonance": "tech",
+      "safe": true,
+      "world": "Junk-Yard Planet",
+      "zone": "Junk-Yard Planet"
+    },
+    {
+      "desc": "A narrow path winds between knee-high drifts of stripped wire, cracked panels, and humming scrap. Motion flickers under the debris whenever the wind pushes hard enough to wake whatever still powers this place.",
+      "id": "junkyard_planet_scrapway",
+      "key": "Scrapway Verge",
+      "map_icon": "S",
+      "map_region": "junkyard_planet",
+      "map_x": 1,
+      "map_y": 0,
+      "resonance": "tech",
+      "safe": false,
+      "world": "Junk-Yard Planet",
+      "zone": "Junk-Yard Planet"
+    },
+    {
+      "desc": "A cut trench runs between salvage berms and humming cable towers, every surface striped with old hazard paint and newer scorch marks. White pulses flicker along the route glass underfoot like the ground is still trying to remember its orders.",
+      "id": "junkyard_planet_relay_trench",
+      "key": "Relay Trench",
+      "map_icon": "R",
+      "map_region": "junkyard_planet",
+      "map_x": 1,
+      "map_y": 1,
+      "resonance": "tech",
+      "safe": false,
+      "world": "Junk-Yard Planet",
+      "zone": "Junk-Yard Planet"
+    },
+    {
+      "desc": "Collapsed yard cranes lean over the salvage field like dead metal herons. Cab glass crunches underfoot, and half-severed hook-lines sway whenever the wind crosses the pit.",
+      "id": "junkyard_planet_crane_grave",
+      "key": "Crane Grave",
+      "map_icon": "C",
+      "map_region": "junkyard_planet",
+      "map_x": 2,
+      "map_y": 0,
+      "resonance": "tech",
+      "safe": false,
+      "world": "Junk-Yard Planet",
+      "zone": "Junk-Yard Planet"
+    },
+    {
+      "desc": "A broad salvage pit drops away beneath gantries and broken cranes arranged around a central beacon socket. The machinery here still obeys something, and whatever that something is has no interest in visitors.",
+      "id": "junkyard_planet_anchor_pit",
+      "key": "Anchor Pit",
+      "map_icon": "A",
+      "map_region": "junkyard_planet",
+      "map_x": 2,
+      "map_y": 1,
+      "resonance": "tech",
+      "safe": false,
+      "world": "Junk-Yard Planet",
+      "zone": "Junk-Yard Planet"
+    },
+    {
+      "desc": "The road here is still close enough to town that you can imagine help arriving quickly. Broken fence rails and muddy pawprints argue otherwise.",
+      "id": "goblin_road_trailhead",
+      "key": "Goblin Road Trailhead",
+      "map_icon": "T",
+      "map_region": "goblin_road",
+      "map_x": 0,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Goblin Road"
+    },
+    {
+      "desc": "A long stretch of smashed fence marks the edge of several hard-worked fields. Someone has dragged off planks, and something small has left knife-nicked cuts in the posts.",
+      "id": "goblin_road_old_fence_line",
+      "key": "Old Fence Line",
+      "map_icon": "F",
+      "map_region": "goblin_road",
+      "map_x": 0,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Goblin Road"
+    },
+    {
+      "desc": "The road bends sharply around a thorny rise, and the wind seems to carry every sound twice. Prints crisscross the mud here: boot heels, claws, and the narrow mess of goblin feet.",
+      "id": "goblin_road_wolf_turn",
+      "key": "Wolf Turn",
+      "map_icon": "W",
+      "map_region": "goblin_road",
+      "map_x": 1,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Goblin Road"
+    },
+    {
+      "desc": "Broken wagon frames and stolen fence rails have been stacked into a nasty little camp. Chopped boards litter the mud, and a chopping block near the fire bears far too many fresh cuts.",
+      "id": "goblin_road_fencebreaker_camp",
+      "key": "Fencebreaker Camp",
+      "map_icon": "C",
+      "map_region": "goblin_road",
+      "map_x": 2,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Goblin Road"
+    },
+    {
+      "desc": "The path into the woods narrows beneath old branches and older silence. The air is cooler here, and every leaf-rustle seems to carry one word too many to be only wind.",
+      "id": "whispering_woods_trailhead",
+      "key": "Whispering Woods Trail",
+      "map_icon": "T",
+      "map_region": "whispering_woods",
+      "map_x": 0,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Whispering Woods"
+    },
+    {
+      "desc": "Broken standing stones lean beside the path like tired sentries. Moss has swallowed the carvings on most of them, but the woods still feel arranged rather than wild.",
+      "id": "whispering_woods_old_stone_path",
+      "key": "Old Stone Path",
+      "map_icon": "S",
+      "map_region": "whispering_woods",
+      "map_x": 1,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Whispering Woods"
+    },
+    {
+      "desc": "A low glade opens under tangled branches where pale herbs grow between thorny roots. The soil is dark, damp, and disturbed in places where something large keeps circling through.",
+      "id": "whispering_woods_briar_glade",
+      "key": "Briar Glade",
+      "map_icon": "B",
+      "map_region": "whispering_woods",
+      "map_x": 1,
+      "map_y": -1,
+      "safe": false,
+      "zone": "Whispering Woods"
+    },
+    {
+      "desc": "A shallow hollow lies beneath a split oak and a ring of claw-scarred stones. Bones, old fur, and torn brush mark it as a place claimed by a beast that no longer fears torches or men.",
+      "id": "whispering_woods_greymaw_hollow",
+      "key": "Greymaw's Hollow",
+      "map_icon": "G",
+      "map_region": "whispering_woods",
+      "map_x": 2,
+      "map_y": -1,
+      "safe": false,
+      "zone": "Whispering Woods"
+    },
+    {
+      "desc": "A stone causeway runs between low burial mounds and leaning lantern posts gone half dark. The air feels colder here than the rest of the woods, and every step sounds like it might be waking something.",
+      "id": "old_barrow_field_causeway",
+      "key": "Old Barrow Causeway",
+      "map_icon": "C",
+      "map_region": "old_barrow_field",
+      "map_x": 0,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Old Barrow Field"
+    },
+    {
+      "desc": "Weathered grave markers stand shoulder to shoulder in a long uneven row, their names eaten thin by time. Crows perch where mourners once stood, and pale grit drifts over the inscriptions like breath.",
+      "id": "old_barrow_field_marker_row",
+      "key": "Marker Row",
+      "map_icon": "M",
+      "map_region": "old_barrow_field",
+      "map_x": 1,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Old Barrow Field"
+    },
+    {
+      "desc": "Standing stones ring an old burial center packed with broken offerings, guttered lamps, and a hush that feels observed. The ground inside the circle is trampled by feet that should not still exist.",
+      "id": "old_barrow_field_barrow_circle",
+      "key": "Barrow Circle",
+      "map_icon": "B",
+      "map_region": "old_barrow_field",
+      "map_x": 1,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Old Barrow Field"
+    },
+    {
+      "desc": "A broad stone platform has sunk into the earth at the oldest point of the field, its steps split and its carved borders full of rainwater and grave grass. A knight's slab lies at the center beneath the dark outline of a once-holy banner.",
+      "id": "old_barrow_field_sunken_dais",
+      "key": "Sunken Dais",
+      "map_icon": "D",
+      "map_region": "old_barrow_field",
+      "map_x": 2,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Old Barrow Field"
+    },
+    {
+      "desc": "The old border road climbs into broken stone and thorn brush beneath the shadow of a ruined tower. Smoke stains the upper rock, bootprints cut through the mud, and the ground has the measured, watchful look of a place people kill from on purpose.",
+      "id": "ruined_watchtower_approach",
+      "key": "Watchtower Approach",
+      "map_icon": "A",
+      "map_region": "ruined_watchtower",
+      "map_x": 0,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Ruined Watchtower"
+    },
+    {
+      "desc": "The tower's outer yard has been half-collapsed into a jagged basin of fallen stone, broken kennels, and old cart iron. A breach in the wall has become the main entrance, which tells you everything you need to know about the current management.",
+      "id": "ruined_watchtower_breach_yard",
+      "key": "Breach Yard",
+      "map_icon": "Y",
+      "map_region": "ruined_watchtower",
+      "map_x": 0,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Ruined Watchtower"
+    },
+    {
+      "desc": "A narrow ledge of old firing stone overlooks the climb below. Arrow gouges, loose shafts, and kicked rock chips mark it as the sort of place where people stay alive by making sure someone else doesn't.",
+      "id": "ruined_watchtower_archers_ledge",
+      "key": "Archer's Ledge",
+      "map_icon": "L",
+      "map_region": "ruined_watchtower",
+      "map_x": -1,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Ruined Watchtower"
+    },
+    {
+      "desc": "A broken stair curls up along the surviving tower wall, its landings patched with scavenged planks and bad confidence. Every turn is tight enough for defenders and miserable enough for anyone climbing into them.",
+      "id": "ruined_watchtower_cracked_stairs",
+      "key": "Cracked Tower Stairs",
+      "map_icon": "S",
+      "map_region": "ruined_watchtower",
+      "map_x": 1,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Ruined Watchtower"
+    },
+    {
+      "desc": "The broken crown of the watchtower has been turned into a command perch of rain-dark canvas, scavenged crates, and a clear killing view over the ridge roads below. Whoever holds this height gets to decide who travels the east country in peace.",
+      "id": "ruined_watchtower_blackreed_roost",
+      "key": "Blackreed's Roost",
+      "map_icon": "R",
+      "map_region": "ruined_watchtower",
+      "map_x": 1,
+      "map_y": 2,
+      "safe": false,
+      "zone": "Ruined Watchtower"
+    },
+    {
+      "desc": "East of the old camp, the ground has slumped into a soot-dark cut where broken fencing, goblin rope ladders, and churned mud spill into the hill. Smoke breathes up from below with the smell of wet iron, bad stew, and a population that has stopped pretending it belongs on the road.",
+      "id": "goblin_warrens_sinkmouth_cut",
+      "key": "Sinkmouth Cut",
+      "map_icon": "S",
+      "map_region": "goblin_warrens",
+      "map_x": 0,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Goblin Warrens"
+    },
+    {
+      "desc": "A low-bellied tunnel twists through greasy stone under smoky torch cages. The walls sweat, the floor grits underfoot, and every sound seems to travel ahead of you as if the warrens are passing word along faster than feet ought to.",
+      "id": "goblin_warrens_torchgut_tunnel",
+      "key": "Torchgut Tunnel",
+      "map_icon": "T",
+      "map_region": "goblin_warrens",
+      "map_x": 1,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Goblin Warrens"
+    },
+    {
+      "desc": "The tunnel opens into a refuse chamber stacked with cracked bone, gnawed cart boards, and stripped mail rings. Bats cling to the ceiling ribs while old feast fires smolder under a stink strong enough to feel like a warning all by itself.",
+      "id": "goblin_warrens_bone_midden",
+      "key": "Bone Midden",
+      "map_icon": "B",
+      "map_region": "goblin_warrens",
+      "map_x": 2,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Goblin Warrens"
+    },
+    {
+      "desc": "A runoff trench cuts through the lower warrens, carrying black kitchen grease, cave seep, and things that should have stayed politely dead in barrels. Boards bridge the worst of it, but most of them look chosen by goblins for confidence rather than quality.",
+      "id": "goblin_warrens_sludge_run",
+      "key": "Sludge Run",
+      "map_icon": "L",
+      "map_region": "goblin_warrens",
+      "map_x": 1,
+      "map_y": -1,
+      "safe": false,
+      "zone": "Goblin Warrens"
+    },
+    {
+      "desc": "A broad cave hall has been claimed with stolen tables, hacked banners, splintered casks, and enough greasy torchlight to make everything shine in all the wrong places. Noise carries badly here, like the room remembers too many ugly celebrations and is always ready for one more.",
+      "id": "goblin_warrens_feast_hall",
+      "key": "Feast Hall",
+      "map_icon": "F",
+      "map_region": "goblin_warrens",
+      "map_x": 2,
+      "map_y": -1,
+      "safe": false,
+      "zone": "Goblin Warrens"
+    },
+    {
+      "desc": "The deepest court is half throne room, half cookfire pit, built around an iron slab table and a raised stone seat crusted with soot. Pot lids, split shields, and bent utensils hang like trophies, and the whole chamber feels arranged by someone who thinks hunger is a kind of law.",
+      "id": "goblin_warrens_pot_kings_court",
+      "key": "Pot-King's Court",
+      "map_icon": "P",
+      "map_region": "goblin_warrens",
+      "map_x": 3,
+      "map_y": -1,
+      "safe": false,
+      "zone": "Goblin Warrens"
+    },
+    {
+      "desc": "South of the old camp the road gives up and becomes a half-drowned track through reeds, black puddles, and wind that smells like old water. Nothing in Blackfen looks fully settled, which somehow makes it feel even more claimed.",
+      "id": "blackfen_approach_fenreach_track",
+      "key": "Fenreach Track",
+      "map_icon": "T",
+      "map_region": "blackfen_approach",
+      "map_x": 0,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Blackfen Approach"
+    },
+    {
+      "desc": "Broad flats of knee-high reeds spread across standing water and slick mud shelves, broken only by a few miserable boards and the occasional dead stump. The wind moves through the grass like something large trying not to sound like feet.",
+      "id": "blackfen_approach_reedflats",
+      "key": "Reedflats",
+      "map_icon": "R",
+      "map_region": "blackfen_approach",
+      "map_x": 1,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Blackfen Approach"
+    },
+    {
+      "desc": "A low basin of dark water and half-sunk root arches catches the wind and holds the light badly. Pale fen-lamps gather over the hollow as if the marsh is trying to invent stars somewhere nobody asked for them.",
+      "id": "blackfen_approach_boglight_hollow",
+      "key": "Boglight Hollow",
+      "map_icon": "B",
+      "map_region": "blackfen_approach",
+      "map_x": 1,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Blackfen Approach"
+    },
+    {
+      "desc": "A narrow rise of firmer mud shoulders up above the marsh pools, marked by picked-clean bones, black feathers, and a few broken stakes from some older attempt to claim the ground. From here the fen looks less like weather and more like intent.",
+      "id": "blackfen_approach_carrion_rise",
+      "key": "Carrion Rise",
+      "map_icon": "C",
+      "map_region": "blackfen_approach",
+      "map_x": 2,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Blackfen Approach"
+    },
+    {
+      "desc": "A black-water wallow opens between drowned roots and reed berms, churned by something heavy enough to leave trenches where a smaller beast would leave prints. The marsh goes strangely still here, like it expects one name to matter more than the wind.",
+      "id": "blackfen_approach_miretooths_wallow",
+      "key": "Miretooth's Wallow",
+      "map_icon": "M",
+      "map_region": "blackfen_approach",
+      "map_x": 2,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Blackfen Approach"
+    },
+    {
+      "desc": "A half-sunk causeway of old survey stone pushes east out of the marsh edge, its coping blocks slick with black water and hung with drowned reed rope. The farther stretch is lined by dead lamp posts whose glass should be dark, but one pale line of wrong light still finds a way through them.",
+      "id": "drowned_weir_drowned_causeway",
+      "key": "Drowned Causeway",
+      "map_icon": "C",
+      "map_region": "drowned_weir",
+      "map_x": 0,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Drowned Weir"
+    },
+    {
+      "desc": "Stone spillways and drowned lamp braces divide the marsh water into dark channels that no longer answer the river cleanly. Green-white light crawls along the ironwork in slow pulses, as if the old weir is still trying to perform a duty everyone else forgot to dismiss.",
+      "id": "drowned_weir_lantern_weir",
+      "key": "Lantern Weir",
+      "map_icon": "W",
+      "map_region": "drowned_weir",
+      "map_x": 1,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Drowned Weir"
+    },
+    {
+      "desc": "A raised walk of iron grating and split planks runs above the drowned control channels, each step echoing through black water and old machinery below. The lamp line overhead burns too steadily for a ruin, and the sound under it is not quite current and not quite breathing.",
+      "id": "drowned_weir_sluice_walk",
+      "key": "Sluice Walk",
+      "map_icon": "S",
+      "map_region": "drowned_weir",
+      "map_x": 1,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Drowned Weir"
+    },
+    {
+      "desc": "The far lock chamber has collapsed into a black basin of chained gates, warped bollards, and water held too still between stone jaws. Whatever keeps the old works alive is strongest here, where the lock should have failed decades ago and somehow never quite did.",
+      "id": "drowned_weir_sunken_lock",
+      "key": "Sunken Lock",
+      "map_icon": "L",
+      "map_region": "drowned_weir",
+      "map_x": 2,
+      "map_y": 0,
+      "safe": false,
+      "zone": "Drowned Weir"
+    },
+    {
+      "desc": "A drowned lamp tower leans over the marsh on old stone feet, its lower floor flooded and its upper chamber lit by a cold lantern that no hand should still be trimming. Broken lens brass, wet wick frames, and black water reflections turn the whole room into the inside of a light that learned the wrong lesson from being left alone.",
+      "id": "drowned_weir_blackwater_lamp_house",
+      "key": "Blackwater Lamp House",
+      "map_icon": "H",
+      "map_region": "drowned_weir",
+      "map_x": 2,
+      "map_y": 1,
+      "safe": false,
+      "zone": "Drowned Weir"
+    }
+  ]
+}

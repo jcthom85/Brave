@@ -70,7 +70,7 @@ Bad triggers:
 
 ### Rule 3: The World Owns Color
 
-`Brambleford`, `Old Barrow`, `Junk-Yard Planet`, and `Drowned Weir` should each feel different even if the player keeps the same chosen theme.
+`Brambleford`, `Old Barrow`, `Drowned Weir`, and the `Great Observatory` should each feel different even if the player keeps the same chosen theme.
 
 Themes change the lens.
 The world changes the mood.
@@ -251,15 +251,10 @@ Each profile should define:
 - drowned teal
 - lantern gold
 
-#### `Nexus Gate`
+#### `Great Observatory`
 - astral blue
 - brass energy
 - faint resonance shimmer
-
-#### `Junk-Yard Planet`
-- sodium orange
-- industrial cyan
-- scrapyard grit and glitch
 
 ## State Tone System
 

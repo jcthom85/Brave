@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }}</title>
+  <style>
+    :root { --ink:#1d2430; --accent:#8b4a29; --panel:#fff9f0; --line:#d9c8ac; --muted:#6b6157; --good:#2f6d4c; --bad:#8d3122; --shadow:rgba(29,36,48,0.12); }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:radial-gradient(circle at top left, rgba(139,74,41,.14), transparent 28%),linear-gradient(180deg,#f3eadb 0%,#f9f3e8 44%,#efe2cf 100%); min-height:100vh; }
+    .shell { width:min(1680px,calc(100vw - 32px)); margin:24px auto; display:grid; grid-template-columns:320px minmax(0,1fr); gap:20px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
+    .panel-head { padding:18px 20px; border-bottom:1px solid var(--line); background:linear-gradient(135deg, rgba(139,74,41,.12), rgba(217,200,172,.22)); }
+    .panel-head h1,.panel-head h2,.panel-head h3 { margin:0; font-weight:700; letter-spacing:.02em; }
+    .panel-head p { margin:8px 0 0; color:var(--muted); line-height:1.4; }
+    .panel-body { padding:18px 20px 20px; }
+    .search,.field input,.field select,textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:10px 12px; font:inherit; background:#fff; }
+    .search { margin-bottom:12px; }
+    .selector-list { display:grid; gap:8px; max-height:260px; overflow:auto; padding-right:4px; }
+    .selector-row { width:100%; text-align:left; border:1px solid var(--line); background:#fff; border-radius:12px; padding:12px; cursor:pointer; transition:transform 120ms ease,border-color 120ms ease,background 120ms ease; }
+    .selector-row:hover,.selector-row.active { transform:translateY(-1px); border-color:var(--accent); background:#fff8f2; }
+    .selector-row strong,.selector-row span { display:block; }
+    .selector-row span { color:var(--muted); font-size:.92rem; margin-top:4px; }
+    .workspace { display:grid; grid-template-rows:auto auto minmax(500px,auto) minmax(240px,auto); gap:16px; }
+    .toolbar,.editor-toolbar,.chips { display:flex; flex-wrap:wrap; gap:10px; }
+    .meta { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.94rem; }
+    .editor-grid { display:grid; grid-template-columns:1.1fr .9fr .9fr; gap:16px; }
+    .stack { display:grid; gap:12px; }
+    .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .field { display:grid; gap:6px; }
+    .field.full { grid-column:1/-1; }
+    .field label { font-size:.88rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+    button { border:0; border-radius:999px; padding:10px 16px; font:inherit; cursor:pointer; background:var(--accent); color:#fff; box-shadow:0 10px 24px rgba(139,74,41,.24); }
+    button.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none; }
+    button:disabled { opacity:.55; cursor:progress; }
+    .chip { border:1px solid var(--line); border-radius:999px; padding:8px 12px; background:#fff; font-size:.92rem; }
+    textarea,pre { width:100%; margin:0; border:1px solid var(--line); border-radius:14px; background:#fffdfa; font:.95rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
+    textarea { min-height:180px; padding:16px; resize:vertical; }
+    pre { min-height:220px; padding:16px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+    .status { padding:12px 14px; border-radius:12px; background:#fff6e7; color:var(--ink); border:1px solid var(--line); }
+    .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
+    .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
+    @media (max-width:1280px) { .editor-grid { grid-template-columns:1fr; } }
+    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .selector-list { max-height:220px; } .field-grid { grid-template-columns:1fr; } }
+  
+    .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
+    .validation-notes[hidden] { display:none; }
+    .validation-notes strong { display:block; margin-bottom:8px; }
+    .validation-notes ul { margin:0; padding-left:20px; display:grid; gap:6px; }
+
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel">
+      <div class="panel-head"><h1>Character Content</h1><p>Browse classes and races, then edit progression data and global character-config values through the live content registry.</p></div>
+      <div class="panel-body stack">
+        <input id="class-search" class="search" type="search" placeholder="Search classes">
+        <div id="class-list" class="selector-list"></div>
+        <input id="race-search" class="search" type="search" placeholder="Search races">
+        <div id="race-list" class="selector-list"></div>
+      </div>
+    </section>
+    <section class="workspace">
+      <div class="panel"><div class="panel-head"><h2 id="editor-title">Character Editor</h2><p id="editor-subtitle">Select a class or race to load authored character-domain content.</p></div><div class="panel-body"><div class="meta"><span>API root: <strong>{{ api_root }}</strong></span><span>Reference domain: <strong>{{ reference_domain }}</strong></span></div></div></div>
+      <div class="toolbar"><button id="load-content" class="secondary" type="button">Reload Character Previews</button><button id="new-class" class="secondary" type="button">New Class Draft</button><button id="new-race" class="secondary" type="button">New Race Draft</button><button id="validate-content" class="secondary" type="button">Validate Packs</button><button id="reload-content" class="secondary" type="button">Reload Registry</button></div>
+      <div class="editor-grid">
+        <section class="panel"><div class="panel-head"><h3>Class / Progression</h3><p>Edit a class definition including base stats and the progression list.</p></div><div class="panel-body stack">
+          <div class="field-grid">
+            <div class="field"><label for="class-id">Class Key</label><input id="class-id" type="text"></div>
+            <div class="field"><label for="class-name">Class Name</label><input id="class-name" type="text"></div>
+            <div class="field"><label for="class-role">Role</label><input id="class-role" type="text"></div>
+            <div class="field"><label for="class-resource">Resource</label><input id="class-resource" type="text"></div>
+            <div class="field full"><label for="class-summary">Summary</label><textarea id="class-summary" spellcheck="false"></textarea></div>
+            <div class="field full"><label for="class-base-stats">Base Stats JSON</label><textarea id="class-base-stats" spellcheck="false"></textarea></div>
+            <div class="field full"><label for="class-progression">Progression JSON</label><textarea id="class-progression" spellcheck="false"></textarea></div>
+          </div>
+          <div class="editor-toolbar"><button id="sync-class-form" class="secondary" type="button">Sync Class Form To JSON</button><button id="diff-class" type="button">Dry-Run Class</button><button id="write-class" type="button">Write Class</button></div>
+          <textarea id="class-json" spellcheck="false"></textarea>
+          <div class="chips"><div id="class-chip" class="chip">Class: -</div></div>
+        </div></section>
+        <section class="panel"><div class="panel-head"><h3>Race</h3><p>Edit race bonuses, perk, and summary against the authored race catalog.</p></div><div class="panel-body stack">
+          <div class="field-grid">
+            <div class="field"><label for="race-id">Race Key</label><input id="race-id" type="text"></div>
+            <div class="field"><label for="race-name">Race Name</label><input id="race-name" type="text"></div>
+            <div class="field"><label for="race-perk">Perk</label><input id="race-perk" type="text"></div>
+            <div class="field full"><label for="race-summary">Summary</label><textarea id="race-summary" spellcheck="false"></textarea></div>
+            <div class="field full"><label for="race-bonuses">Bonuses JSON</label><textarea id="race-bonuses" spellcheck="false"></textarea></div>
+          </div>
+          <div class="editor-toolbar"><button id="sync-race-form" class="secondary" type="button">Sync Race Form To JSON</button><button id="diff-race" type="button">Dry-Run Race</button><button id="write-race" type="button">Write Race</button></div>
+          <textarea id="race-json" spellcheck="false"></textarea>
+          <div class="chips"><div id="race-chip" class="chip">Race: -</div></div>
+        </div></section>
+        <section class="panel"><div class="panel-head"><h3>Character Config</h3><p>Edit global character-domain config like defaults, XP thresholds, and content-library metadata.</p></div><div class="panel-body stack">
+          <div class="field-grid">
+            <div class="field"><label for="starting-race">Starting Race</label><input id="starting-race" type="text"></div>
+            <div class="field"><label for="starting-class">Starting Class</label><input id="starting-class" type="text"></div>
+            <div class="field"><label for="max-level">Max Level</label><input id="max-level" type="number" min="1" value="10"></div>
+            <div class="field full"><label for="primary-stats">Primary Stats JSON</label><textarea id="primary-stats" spellcheck="false"></textarea></div>
+            <div class="field full"><label for="vertical-slice-classes">Vertical Slice Classes JSON</label><textarea id="vertical-slice-classes" spellcheck="false"></textarea></div>
+            <div class="field full"><label for="xp-for-level">XP For Level JSON</label><textarea id="xp-for-level" spellcheck="false"></textarea></div>
+          </div>
+          <div class="editor-toolbar"><button id="sync-config-form" class="secondary" type="button">Sync Config Form To JSON</button><button id="diff-config" type="button">Dry-Run Config</button><button id="write-config" type="button">Write Config</button></div>
+          <textarea id="config-json" spellcheck="false"></textarea>
+          <div class="chips"><div id="config-chip" class="chip">Config: live</div></div>
+        </div></section>
+      </div>
+      <div class="panel"><div class="panel-head"><h2>Preview / Diff Output</h2><p>Class previews resolve progression entries into actions and passives. Config previews show defaults and the XP ladder from the live registry.</p></div><div class="panel-body"><div id="status" class="status">Waiting for class or race selection.</div><pre id="output"></pre></div></div>
+    </section>
+  </div>
+  <script src="/static/website/js/creator_common.js"></script>
+  <script>
+    const API_ROOT = "{{ api_root|escapejs }}";
+    const classSearch = document.getElementById('class-search');
+    const classList = document.getElementById('class-list');
+    const raceSearch = document.getElementById('race-search');
+    const raceList = document.getElementById('race-list');
+    const output = document.getElementById('output');
+    const statusBox = document.getElementById('status');
+    const validationNotes = document.getElementById('validation-notes');
+    const creatorTools = window.BraveCreator.bind(API_ROOT, statusBox, validationNotes);
+    const editorTitle = document.getElementById('editor-title');
+    const editorSubtitle = document.getElementById('editor-subtitle');
+    const loadContentButton = document.getElementById('load-content');
+    const newClassButton = document.getElementById('new-class');
+    const newRaceButton = document.getElementById('new-race');
+    const validateButton = document.getElementById('validate-content');
+    const reloadButton = document.getElementById('reload-content');
+    const classId = document.getElementById('class-id'); const className = document.getElementById('class-name'); const classRole = document.getElementById('class-role'); const classResource = document.getElementById('class-resource'); const classSummary = document.getElementById('class-summary'); const classBaseStats = document.getElementById('class-base-stats'); const classProgression = document.getElementById('class-progression'); const classJson = document.getElementById('class-json'); const classChip = document.getElementById('class-chip');
+    const raceId = document.getElementById('race-id'); const raceName = document.getElementById('race-name'); const racePerk = document.getElementById('race-perk'); const raceSummary = document.getElementById('race-summary'); const raceBonuses = document.getElementById('race-bonuses'); const raceJson = document.getElementById('race-json'); const raceChip = document.getElementById('race-chip');
+    const startingRace = document.getElementById('starting-race'); const startingClass = document.getElementById('starting-class'); const maxLevel = document.getElementById('max-level'); const primaryStats = document.getElementById('primary-stats'); const verticalSliceClasses = document.getElementById('vertical-slice-classes'); const xpForLevel = document.getElementById('xp-for-level'); const configJson = document.getElementById('config-json');
+    const syncClassButton = document.getElementById('sync-class-form'); const diffClassButton = document.getElementById('diff-class'); const writeClassButton = document.getElementById('write-class'); const syncRaceButton = document.getElementById('sync-race-form'); const diffRaceButton = document.getElementById('diff-race'); const writeRaceButton = document.getElementById('write-race'); const syncConfigButton = document.getElementById('sync-config-form'); const diffConfigButton = document.getElementById('diff-config'); const writeConfigButton = document.getElementById('write-config');
+
+    let classes = []; let races = []; let selectedClass = null; let selectedRace = null;
+    function setBusy(isBusy) { for (const button of [loadContentButton,newClassButton,newRaceButton,validateButton,reloadButton,syncClassButton,diffClassButton,writeClassButton,syncRaceButton,diffRaceButton,writeRaceButton,syncConfigButton,diffConfigButton,writeConfigButton]) button.disabled = isBusy; }
+    function setStatus(message, tone='') { creatorTools.setStatus(message, tone); }
+    function showValidation(messages) { return creatorTools.showValidation(messages); }
+    async function apiFetch(path, options={}) { const response = await fetch(`${API_ROOT}${path}`, { credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options }); const payload = await response.json().catch(() => ({})); if (!response.ok || payload.ok === false) throw new Error(payload.error || `Request failed with ${response.status}`); return payload; }
+    function renderList(container, entries, selectedId, filter, onSelect){ const token = filter.trim().toLowerCase(); const filtered = entries.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || '').toLowerCase().includes(token))); container.innerHTML = ''; for (const entry of filtered) { const button = document.createElement('button'); button.type = 'button'; button.className = 'selector-row' + (entry.id === selectedId ? ' active' : ''); button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id}${entry.meta ? ` · ${entry.meta}` : ''}</span>`; button.addEventListener('click', () => onSelect(entry)); container.appendChild(button); } }
+    function parseJson(textarea, fallback) { const raw = textarea.value.trim(); if (!raw) return fallback; try { return JSON.parse(raw); } catch (error) { throw new Error(`${textarea.id} JSON parse error: ${error.message}`); } }
+    function classDraft(){ return { name:'New Class', role:'Role', resource:'stamina', summary:'', base_stats:{ strength:1, agility:1, intellect:1, spirit:1, vitality:1 }, progression:[[1,'Strike']] }; }
+    function raceDraft(){ return { name:'New Race', perk:'Perk', summary:'', bonuses:{ strength:1 } }; }
+    function populateClassForm(classKey, payload){ classId.value = classKey || ''; className.value = payload.name || ''; classRole.value = payload.role || ''; classResource.value = payload.resource || ''; classSummary.value = payload.summary || ''; classBaseStats.value = JSON.stringify(payload.base_stats || {}, null, 2); classProgression.value = JSON.stringify(payload.progression || [], null, 2); classJson.value = JSON.stringify(payload, null, 2); classChip.textContent = `Class: ${classKey || '-'}`; }
+    function populateRaceForm(raceKey, payload){ raceId.value = raceKey || ''; raceName.value = payload.name || ''; racePerk.value = payload.perk || ''; raceSummary.value = payload.summary || ''; raceBonuses.value = JSON.stringify(payload.bonuses || {}, null, 2); raceJson.value = JSON.stringify(payload, null, 2); raceChip.textContent = `Race: ${raceKey || '-'}`; }
+    function populateConfigForm(payload){ startingRace.value = payload.starting_race || ''; startingClass.value = payload.starting_class || ''; maxLevel.value = payload.max_level || 10; primaryStats.value = JSON.stringify(payload.primary_stats || [], null, 2); verticalSliceClasses.value = JSON.stringify(payload.vertical_slice_classes || [], null, 2); xpForLevel.value = JSON.stringify(payload.xp_for_level || {}, null, 2); configJson.value = JSON.stringify({ starting_race: payload.starting_race, starting_class: payload.starting_class, max_level: payload.max_level, primary_stats: payload.primary_stats, vertical_slice_classes: payload.vertical_slice_classes, xp_for_level: payload.xp_for_level }, null, 2); }
+    function syncClassFormToJson(){ const key = classId.value.trim(); const messages = creatorTools.requireFields([{ label: 'Class key', value: key }, { label: 'Class name', value: className.value.trim() }]); if (!showValidation(messages)) { setStatus('Class form is incomplete.', 'bad'); return null; } let baseStats, progression; try { baseStats = parseJson(classBaseStats, {}); progression = parseJson(classProgression, []); } catch (error) { showValidation([error.message]); setStatus(error.message, 'bad'); return null; } const payload = { name: className.value.trim() || key, role: classRole.value.trim() || '', resource: classResource.value.trim() || '', summary: classSummary.value.trim() || '', base_stats: baseStats, progression: progression }; creatorTools.clearValidation(); classJson.value = JSON.stringify(payload, null, 2); classChip.textContent = `Class: ${key}`; return payload; }
+    function syncRaceFormToJson(){ const key = raceId.value.trim(); const messages = creatorTools.requireFields([{ label: 'Race key', value: key }, { label: 'Race name', value: raceName.value.trim() }]); if (!showValidation(messages)) { setStatus('Race form is incomplete.', 'bad'); return null; } let bonuses; try { bonuses = parseJson(raceBonuses, {}); } catch (error) { showValidation([error.message]); setStatus(error.message, 'bad'); return null; } const payload = { name: raceName.value.trim() || key, perk: racePerk.value.trim() || '', summary: raceSummary.value.trim() || '', bonuses: bonuses }; creatorTools.clearValidation(); raceJson.value = JSON.stringify(payload, null, 2); raceChip.textContent = `Race: ${key}`; return payload; }
+    function syncConfigFormToJson(){ const messages = creatorTools.requireFields([{ label: 'Starting race', value: startingRace.value.trim() }, { label: 'Starting class', value: startingClass.value.trim() }]); if (!showValidation(messages)) { setStatus('Character config is incomplete.', 'bad'); return null; } let primary, vertical, xp; try { primary = parseJson(primaryStats, []); vertical = parseJson(verticalSliceClasses, []); xp = parseJson(xpForLevel, {}); } catch (error) { showValidation([error.message]); setStatus(error.message, 'bad'); return null; } const payload = { starting_race: startingRace.value.trim() || '', starting_class: startingClass.value.trim() || '', max_level: Number(maxLevel.value || 10), primary_stats: primary, vertical_slice_classes: vertical, xp_for_level: xp }; creatorTools.clearValidation(); configJson.value = JSON.stringify(payload, null, 2); return payload; }
+    async function loadReferences(){ [classes, races] = await Promise.all([ creatorTools.fetchReferences('classes'), creatorTools.fetchReferences('races') ]); renderList(classList, classes, selectedClass && selectedClass.id, classSearch.value, selectClass); renderList(raceList, races, selectedRace && selectedRace.id, raceSearch.value, selectRace); }
+    async function loadConfigPreview(){ const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'character-config', args:[] }) }); populateConfigForm(payload.preview); return payload.preview; }
+    async function selectClass(entry){ selectedClass = entry; renderList(classList, classes, entry.id, classSearch.value, selectClass); editorTitle.textContent = entry.label || entry.id; editorSubtitle.textContent = `${entry.id}${entry.meta ? ` · ${entry.meta}` : ''}`; await loadClassPreview(entry.id); }
+    async function selectRace(entry){ selectedRace = entry; renderList(raceList, races, entry.id, raceSearch.value, selectRace); await loadRacePreview(entry.id); }
+    async function loadClassPreview(classKey = selectedClass && selectedClass.id){ if (!classKey) return; setBusy(true); setStatus(`Loading class preview for ${classKey}...`); try { const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'class', args:[classKey] }) }); populateClassForm(payload.preview.class_key, payload.preview.class || {}); output.textContent = JSON.stringify(payload.preview, null, 2); setStatus(`Loaded class preview for ${classKey}.`, 'good'); } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
+    async function loadRacePreview(raceKey = selectedRace && selectedRace.id){ if (!raceKey) return; setBusy(true); setStatus(`Loading race preview for ${raceKey}...`); try { const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'race', args:[raceKey] }) }); populateRaceForm(payload.preview.race_key, payload.preview.race || {}); output.textContent = JSON.stringify(payload.preview, null, 2); setStatus(`Loaded race preview for ${raceKey}.`, 'good'); } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
+    async function mutate(kind, target, payload, write){ const result = await apiFetch('/mutate', { method:'POST', body: JSON.stringify({ kind, target, payload, write }) }); output.textContent = result.diff || JSON.stringify(result, null, 2); if (write) { const errors = result.validation_errors || []; if (errors.length) { setStatus(`Write completed with ${errors.length} validation issue(s).`, 'bad'); output.textContent = `${result.diff || ''}
+
+Validation errors:
+- ${errors.join('
+- ')}`.trim(); } else { setStatus(`Wrote ${kind} ${target || 'config'}.`, 'good'); await loadReferences(); await loadConfigPreview(); if (selectedClass) await loadClassPreview(selectedClass.id); if (selectedRace) await loadRacePreview(selectedRace.id); } } else { setStatus(`Dry-run diff ready for ${kind} ${target || 'config'}.`, 'good'); } }
+    async function mutateClass(write){ const payload = syncClassFormToJson(); const target = classId.value.trim(); if (!payload || !target) return; setBusy(true); setStatus(write ? `Writing class ${target}...` : `Generating class diff for ${target}...`); try { await mutate('class', target, payload, write); selectedClass = { id: target, label: payload.name, meta: payload.role }; } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
+    async function mutateRace(write){ const payload = syncRaceFormToJson(); const target = raceId.value.trim(); if (!payload || !target) return; setBusy(true); setStatus(write ? `Writing race ${target}...` : `Generating race diff for ${target}...`); try { await mutate('race', target, payload, write); selectedRace = { id: target, label: payload.name, meta: payload.perk }; } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
+    async function mutateConfig(write){ const payload = syncConfigFormToJson(); if (!payload) return; setBusy(true); setStatus(write ? 'Writing character config...' : 'Generating character-config diff...'); try { await mutate('character-config', '', payload, write); } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
+    async function validateContent(){ setBusy(true); setStatus('Validating content packs...'); try { const payload = await apiFetch('/validate', { method:'POST', body:'{}' }); if (payload.errors.length) { setStatus(`Validation found ${payload.errors.length} issue(s).`, 'bad'); output.textContent = payload.errors.join('
+'); } else { setStatus('Content validation passed.', 'good'); output.textContent = JSON.stringify(payload, null, 2); } } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
+    async function reloadContent(){ setBusy(true); setStatus('Reloading registry from disk...'); try { const payload = await apiFetch('/reload', { method:'POST', body:'{}' }); setStatus('Content registry reloaded.', 'good'); output.textContent = JSON.stringify(payload, null, 2); await loadReferences(); await loadConfigPreview(); if (selectedClass) await loadClassPreview(selectedClass.id); if (selectedRace) await loadRacePreview(selectedRace.id); } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
+    function newClassDraft(){ selectedClass = null; populateClassForm('new_class', classDraft()); editorTitle.textContent = 'New Class Draft'; editorSubtitle.textContent = 'Stage a new class and progression list before writing it to the pack.'; renderList(classList, classes, null, classSearch.value, selectClass); setStatus('New class draft staged in the form.', 'good'); }
+    function newRaceDraft(){ selectedRace = null; populateRaceForm('new_race', raceDraft()); renderList(raceList, races, null, raceSearch.value, selectRace); setStatus('New race draft staged in the form.', 'good'); }
+    classSearch.addEventListener('input', () => renderList(classList, classes, selectedClass && selectedClass.id, classSearch.value, selectClass));
+    raceSearch.addEventListener('input', () => renderList(raceList, races, selectedRace && selectedRace.id, raceSearch.value, selectRace));
+    loadContentButton.addEventListener('click', async () => { await loadConfigPreview(); if (selectedClass) await loadClassPreview(selectedClass.id); if (selectedRace) await loadRacePreview(selectedRace.id); });
+    newClassButton.addEventListener('click', newClassDraft); newRaceButton.addEventListener('click', newRaceDraft); syncClassButton.addEventListener('click', () => { if (syncClassFormToJson()) setStatus('Class form synced to JSON.', 'good'); }); diffClassButton.addEventListener('click', () => mutateClass(false)); writeClassButton.addEventListener('click', () => mutateClass(true)); syncRaceButton.addEventListener('click', () => { if (syncRaceFormToJson()) setStatus('Race form synced to JSON.', 'good'); }); diffRaceButton.addEventListener('click', () => mutateRace(false)); writeRaceButton.addEventListener('click', () => mutateRace(true)); syncConfigButton.addEventListener('click', () => { if (syncConfigFormToJson()) setStatus('Character config synced to JSON.', 'good'); }); diffConfigButton.addEventListener('click', () => mutateConfig(false)); writeConfigButton.addEventListener('click', () => mutateConfig(true)); validateButton.addEventListener('click', validateContent); reloadButton.addEventListener('click', reloadContent);
+    newClassDraft(); newRaceDraft(); loadReferences().then(loadConfigPreview).catch((error) => { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; });
+  </script>
+</body>
+</html>

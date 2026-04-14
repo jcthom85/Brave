@@ -10,7 +10,7 @@ from world.navigation import format_route_hint, sort_exits
 from world.party import get_follow_target, get_party_leader, get_party_members
 from world.questing import get_active_quests, get_completed_quests, get_tracked_quest
 from world.resonance import get_resource_label, get_resonance_label, get_stat_label
-from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
+from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state, get_tutorial_quest_payload
 
 CONTENT = get_content_registry()
 CHARACTER_CONTENT = CONTENT.characters
@@ -691,6 +691,7 @@ def build_quests_panel(character):
     quest_log = character.db.brave_quests or {}
     tracked_key = get_tracked_quest(character)
     tutorial_state = ensure_tutorial_state(character)
+    tutorial_payload = get_tutorial_quest_payload(character)
 
     view_items = [
         _item("quests active", icon="assignment", badge="ON" if journal_mode == "active" else None),
@@ -698,7 +699,12 @@ def build_quests_panel(character):
     ]
     sections = [_section("View", "menu", view_items)]
 
-    if journal_mode == "active" and tracked_key:
+    if journal_mode == "active" and tutorial_payload:
+        tutorial_lines = [tutorial_payload["title"]]
+        if tutorial_payload.get("objectives"):
+            tutorial_lines.append(f"Next: {tutorial_payload['objectives'][0]}")
+        sections.append(_section("Tracked", "school", [_item(" · ".join(tutorial_lines), icon="school")]))
+    elif journal_mode == "active" and tracked_key:
         tracked_definition = QUESTS[tracked_key]
         tracked_state = quest_log.get(tracked_key, {})
         remaining = [
@@ -716,7 +722,7 @@ def build_quests_panel(character):
             tracked_lines.append(f"Next: {objective['description']}{suffix}")
         sections.append(_section("Tracked", "flag", [_item(" · ".join(tracked_lines), icon="flag")]))
 
-    if journal_mode == "active" and tutorial_state.get("status") == "active":
+    if journal_mode == "active" and tutorial_state.get("status") == "active" and not tutorial_payload:
         step_key = tutorial_state.get("step") or "first_steps"
         step = TUTORIAL_STEPS.get(step_key)
         if step:
@@ -737,7 +743,7 @@ def build_quests_panel(character):
         region_items = [_item("No quests in this view.", icon="info")]
     sections.append(_section("Regions", "explore", region_items))
 
-    if journal_mode == "active" and not active_keys and tutorial_state.get("status") != "active":
+    if journal_mode == "active" and not active_keys and not tutorial_payload:
         sections.append(
             _section(
                 "Status",

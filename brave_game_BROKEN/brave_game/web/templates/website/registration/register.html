@@ -1,0 +1,66 @@
+{% extends "website/base.html" %}
+
+{% block titleblock %}Register{% endblock %}
+
+{% block body %}
+{% load addclass %}
+<div class="brave-auth">
+  <div class="brave-auth__shell">
+    <section class="brave-auth__hero">
+      <p class="brave-auth__eyebrow">BRAVE</p>
+      <h1>Create your account.</h1>
+      <p>Registration opens the door. Character creation happens right after login, where you will choose your name, race, and class.</p>
+      <ul class="brave-auth__features">
+        <li>One account can hold multiple characters.</li>
+        <li>Saved drafts can be resumed after login.</li>
+        <li>Your browser theme follows the same session.</li>
+      </ul>
+    </section>
+
+    <section class="brave-auth__card">
+      {% if user.is_authenticated %}
+        <div class="alert alert-info" role="alert">You are already registered and logged in.</div>
+      {% else %}
+        {% if form.errors %}
+          {% for field in form %}
+            {% for error in field.errors %}
+              <div class="alert alert-danger" role="alert">{{ error }}</div>
+            {% endfor %}
+          {% endfor %}
+        {% endif %}
+
+        {% if register_enabled %}
+          <div class="brave-auth__panel">
+            <h2>New Account</h2>
+            <form method="post" action="?">
+              {% csrf_token %}
+              {% for field in form %}
+                <div class="brave-auth__field">
+                  {{ field.label_tag }}
+                  {{ field | addclass:"form-control" }}
+                  {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+                  {% endif %}
+                </div>
+              {% endfor %}
+              <input type="hidden" name="next" value="{{ next }}" />
+              <div class="brave-auth__actions">
+                <button class="brave-auth__button brave-auth__button--primary brave-auth__button--full" type="submit">Create Account</button>
+                <a class="brave-auth__button brave-auth__button--secondary brave-auth__button--full" href="{% url 'login' %}">Back to Login</a>
+              </div>
+            </form>
+          </div>
+        {% else %}
+          <div class="brave-auth__panel">
+            <h2>Registration Closed</h2>
+            <p>Registration is currently disabled.</p>
+            <div class="brave-auth__actions" style="grid-template-columns: 1fr;">
+              <a class="brave-auth__button brave-auth__button--secondary brave-auth__button--full" href="{% url 'login' %}">Back to Login</a>
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

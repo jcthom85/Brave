@@ -22,7 +22,7 @@ from world.navigation import (
     sort_exits,
 )
 from world.party import get_character_by_id, get_follow_target, get_party_leader, get_party_members
-from world.questing import get_tracked_quest
+from world.questing import get_tracked_quest, get_tracked_quest_payload
 from world.resonance import (
     format_ability_display,
     get_world_label,
@@ -32,7 +32,7 @@ from world.resonance import (
     get_stat_label,
     resolve_ability_query,
 )
-from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
+from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state, get_tutorial_objectives, get_tutorial_quest_payload
 
 CONTENT = get_content_registry()
 CHARACTER_CONTENT = CONTENT.characters
@@ -392,7 +392,7 @@ def _make_view(
     }
 
 
-def _reactive_view(source=None, *, scene="system", danger=None, boss=False):
+def _reactive_view(source=None, *, scene="system", danger=None, boss=False, tracked_quest=None):
     """Build semantic browser-reactivity metadata for a view."""
 
     reactive = {
@@ -403,6 +403,8 @@ def _reactive_view(source=None, *, scene="system", danger=None, boss=False):
         reactive["danger"] = danger
     if boss:
         reactive["boss"] = True
+    if tracked_quest:
+        reactive["tracked_quest"] = tracked_quest
     return reactive
 
 
@@ -730,6 +732,91 @@ CHARGEN_STEP_META = {
 }
 
 
+CHARGEN_RACE_ICONS = {
+    "human": "person",
+    "elf": "forest",
+    "dwarf": "terrain",
+    "halfling": "grass",
+    "half_orc": "fitness_center",
+}
+
+
+def _format_chargen_bonus_summary(bonuses):
+    if not bonuses:
+        return ""
+
+    parts = []
+    for key, value in bonuses.items():
+        sign = "+" if value >= 0 else ""
+        parts.append(f"{get_stat_label(key, None)} {sign}{value}")
+    return ", ".join(parts)
+
+
+def _class_level_abilities(class_data, level):
+    return [
+        ability
+        for unlock_level, ability in class_data.get("progression", [])
+        if unlock_level == level
+    ]
+
+
+def _class_next_unlock(class_data):
+    for unlock_level, ability in class_data.get("progression", []):
+        if unlock_level > 1:
+            return unlock_level, ability
+    return None, None
+
+
+def _starter_loadout_summary(class_key):
+    loadout = ITEM_CONTENT.starter_loadouts.get(class_key, {})
+    if not loadout:
+        return ""
+
+    ordered_slots = ("main_hand", "off_hand", "chest")
+    names = []
+    for slot in ordered_slots:
+        template_id = loadout.get(slot)
+        item = ITEM_TEMPLATES.get(template_id or "")
+        if item:
+            names.append(item.get("name", template_id))
+    return ", ".join(names)
+
+
+def _chargen_nav_actions(state, step_key):
+    actions = []
+
+    if step_key == "menunode_welcome":
+        actions.append(_action("Continue", "continue", "arrow_forward", tone="accent"))
+    elif step_key == "menunode_choose_race":
+        if state.get("race"):
+            actions.append(_action("Continue", "continue", "arrow_forward", tone="accent"))
+        actions.append(_action("Back", "back", "arrow_back", tone="muted"))
+    elif step_key == "menunode_choose_class":
+        if state.get("class"):
+            actions.append(_action("Review", "review", "task_alt", tone="accent"))
+        actions.append(_action("Back", "back", "arrow_back", tone="muted"))
+    elif step_key == "menunode_confirm":
+        actions.extend(
+            [
+                _action("Create Character", "finish", "play_arrow", tone="good"),
+                _action("Back", "back", "arrow_back", tone="muted"),
+            ]
+        )
+
+    if any(state.get(field) for field in ("name", "race", "class")):
+        actions.append(
+            _action(
+                "Discard",
+                "discard",
+                "delete",
+                tone="danger",
+                confirm="Discard this saved character draft?",
+            )
+        )
+    actions.append(_action("Close", "quit", "close", tone="muted"))
+    return actions
+
+
 def build_chargen_view(account, state, *, error=None):
     """Return a browser-native main view for the character creator."""
 
@@ -742,8 +829,13 @@ def build_chargen_view(account, state, *, error=None):
     race_name = RACES.get(state.get("race"), {}).get("name", "Not set")
     class_name = CLASSES.get(state.get("class"), {}).get("name", "Not set")
 
+    draft_complete = all(state.get(field) for field in ("name", "race", "class"))
     chips = [
-        _chip(f"Step {step_meta['step_index'] + 1} / 5", "steps", "accent"),
+        _chip(
+            "Ready to create" if draft_complete else "Draft in progress",
+            "task_alt" if draft_complete else "edit_note",
+            "good" if draft_complete else "accent",
+        ),
         _chip(f"{slot_text} open", "add_circle", "muted"),
     ]
     if state.get("race"):
@@ -762,10 +854,11 @@ def build_chargen_view(account, state, *, error=None):
                 _pair("Class", class_name, "swords"),
             ],
             span="wide",
+            variant="draft",
         )
     ]
 
-    actions = []
+    actions = _chargen_nav_actions(state, step_key)
 
     if step_key == "menunode_welcome":
         next_step = get_next_chargen_step(state)
@@ -796,9 +889,8 @@ def build_chargen_view(account, state, *, error=None):
                 chips=[_chip("Ready", "check_circle", "good")],
             ),
         }[next_step]
-        sections.append(_section("Next Step", "format_list_numbered", "entries", items=[next_step_entry]))
+        sections.append(_section("Next Step", "format_list_numbered", "entries", items=[next_step_entry], span="wide"))
     elif step_key == "menunode_choose_name":
-        sections = []
         if error:
             sections.append(
                 _section(
@@ -845,59 +937,60 @@ def build_chargen_view(account, state, *, error=None):
                 ],
             )
         )
-        sections.append(
-            _section(
-                "Draft",
-                "checklist",
-                "pairs",
-                items=[
-                    _pair("Name", state.get("name") or "Not set", "badge"),
-                    _pair("Race", race_name, "diversity_3"),
-                    _pair("Class", class_name, "swords"),
-                ],
-                span="wide",
-            )
-        )
-        actions.append(_action("Back", "back", "arrow_back", tone="muted"))
     elif step_key == "menunode_choose_race":
-        actions.append(_action("Back", "back", "arrow_back", tone="muted"))
         race_entries = []
         for race_key, race_data in RACES.items():
+            primary = _format_chargen_bonus_summary(race_data.get("bonuses", {}))
+            traits = _format_chargen_bonus_summary(race_data.get("trait_bonuses", {}))
+            lines = [race_data["summary"], f"Perk: {race_data['perk']}"]
+            if primary:
+                lines.append(f"Primary traits: {primary}")
+            if traits:
+                lines.append(f"Combat traits: {traits}")
             race_entries.append(
                 _entry(
                     race_data["name"],
                     meta="Selected" if state.get("race") == race_key else "Available",
-                    lines=[race_data["summary"], f"Perk: {race_data['perk']}"],
-                    icon="forest",
+                    lines=lines,
+                    icon=CHARGEN_RACE_ICONS.get(race_key, "diversity_3"),
+                    background_icon=CHARGEN_RACE_ICONS.get(race_key, "diversity_3"),
                     command=race_key,
+                    selected=state.get("race") == race_key,
                     chips=[_chip("Current", "check_circle", "good")] if state.get("race") == race_key else [],
                 )
             )
-        sections.append(_section("Races", "forest", "entries", items=race_entries, span="wide"))
+        sections.append(_section("Choose Race", "forest", "entries", items=race_entries, span="wide"))
     elif step_key == "menunode_choose_class":
-        actions.append(_action("Back", "back", "arrow_back", tone="muted"))
         class_entries = []
         for class_key in VERTICAL_SLICE_CLASSES:
             class_data = CLASSES[class_key]
+            opening = ", ".join(_class_level_abilities(class_data, 1))
+            next_level, next_unlock = _class_next_unlock(class_data)
+            starter_loadout = _starter_loadout_summary(class_key)
+            lines = [
+                class_data["summary"],
+                f"Resource: {get_resource_label(class_data.get('resource'), None)}",
+            ]
+            if opening:
+                lines.append(f"Starts with: {opening}")
+            if next_unlock:
+                lines.append(f"First unlock: {next_unlock} at level {next_level}")
+            if starter_loadout:
+                lines.append(f"Starter gear: {starter_loadout}")
             class_entries.append(
                 _entry(
                     class_data["name"],
                     meta=class_data["role"],
-                    lines=[class_data["summary"]],
+                    lines=lines,
                     icon=class_data.get("icon", "swords"),
                     background_icon=_class_icon(class_data),
                     command=class_key,
+                    selected=state.get("class") == class_key,
                     chips=[_chip("Current", "check_circle", "good")] if state.get("class") == class_key else [],
                 )
             )
-        sections.append(_section("Classes", "swords", "entries", items=class_entries, span="wide"))
+        sections.append(_section("Choose Class", "swords", "entries", items=class_entries, span="wide"))
     elif step_key == "menunode_confirm":
-        actions.extend(
-            [
-                _action("Create Character", "finish", "play_arrow", tone="good"),
-                _action("Back", "back", "arrow_back", tone="muted"),
-            ]
-        )
         race_data = RACES.get(state.get("race"), {})
         class_data = CLASSES.get(state.get("class"), {})
         if error:
@@ -919,16 +1012,26 @@ def build_chargen_view(account, state, *, error=None):
                     _entry(
                         race_data.get("name", "Race"),
                         meta="Race Perk",
-                        lines=[race_data.get("perk", "No perk found.")],
-                        icon="forest",
+                        lines=[
+                            race_data.get("perk", "No perk found."),
+                            _format_chargen_bonus_summary(race_data.get("bonuses", {})),
+                            _format_chargen_bonus_summary(race_data.get("trait_bonuses", {})),
+                        ],
+                        icon=CHARGEN_RACE_ICONS.get(state.get("race"), "forest"),
+                        background_icon=CHARGEN_RACE_ICONS.get(state.get("race"), "forest"),
                     ),
                     _entry(
                         class_data.get("name", "Class"),
                         meta=class_data.get("role", "Role"),
-                        lines=[class_data.get("summary", "No class summary found.")],
-                        icon="swords",
+                        lines=[
+                            class_data.get("summary", "No class summary found."),
+                            "Starts with: " + ", ".join(_class_level_abilities(class_data, 1)),
+                            "Starter gear: " + _starter_loadout_summary(state.get("class")),
+                        ],
+                        icon=class_data.get("icon", "swords"),
                     ),
                 ],
+                span="wide",
             )
         )
         sections.append(
@@ -1107,22 +1210,120 @@ def _build_tutorial_guidance(character):
         guidance.extend(
             [
                 ("Speak with Quartermaster Nella Cobb.", "forum" if not flags.get("talked_nella") else "check_circle"),
-                ("Check your gear.", "shield" if not flags.get("viewed_gear") else "check_circle"),
-                ("Open your pack.", "inventory_2" if not flags.get("viewed_pack") else "check_circle"),
-                ("Read the supply board.", "article" if not flags.get("read_supply_board") else "check_circle"),
+                ("Optional: check gear, pack, or the supply board.", "inventory_2"),
             ]
         )
     elif step_key == "stand_your_ground":
-        guidance.append(("Speak with Ringhand Brask.", "forum" if not flags.get("talked_brask") else "check_circle"))
-    elif step_key == "clear_the_pens":
-        guidance.append(("Win one fight in the Vermin Pens.", "swords" if not flags.get("won_vermin_fight") else "check_circle"))
+        guidance.extend(
+            [
+                ("Speak with Ringhand Brask.", "forum" if not flags.get("talked_brask") else "check_circle"),
+                ("Win one fight in the Vermin Pens.", "swords" if not flags.get("won_vermin_fight") else "check_circle"),
+            ]
+        )
     elif step_key == "through_the_gate":
         guidance.append(("Report to Captain Harl Rowan.", "forum" if not flags.get("talked_harl") else "check_circle"))
 
-    optional_done = flags.get("read_family_post_sign") or flags.get("talked_peep")
-    guidance.append(("Optional: Visit Family Post for party basics.", "groups" if not optional_done else "check_circle"))
-
     return guidance
+
+
+def _tutorial_lesson_action(character, room):
+    """Return the most useful tutorial action for the current room."""
+
+    state = ensure_tutorial_state(character)
+    if state.get("status") != "active" or not room:
+        return None
+
+    step_key = state.get("step") or "first_steps"
+    flags = state.get("flags", {})
+    room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+
+    def action(title, command, icon, *lines, actions=None):
+        return _entry(
+            title,
+            meta="Tutorial Step",
+            lines=list(lines or [TUTORIAL_STEPS[step_key]["summary"]]),
+            icon=icon,
+            command=command,
+            actions=actions or [_action("Do This", command, icon, tone="accent")],
+        )
+
+    if step_key == "first_steps":
+        if room_id == "tutorial_wayfarers_yard" and not flags.get("talked_tamsin"):
+            return action("Talk to Sergeant Tamsin Vale", "talk Sergeant Tamsin Vale", "forum")
+        if room_id == "tutorial_wayfarers_yard" and not flags.get("visited_quartermaster_shed"):
+            return action("Go east to Quartermaster Shed", "east", "east")
+        if room_id == "tutorial_quartermaster_shed":
+            return action("Return west to Wayfarer's Yard", "west", "west")
+        if room_id == "tutorial_wayfarers_yard":
+            return action("Go east and speak with Nella", "east", "east")
+
+    if step_key == "pack_before_walk":
+        if room_id == "tutorial_wayfarers_yard":
+            return action("Go east to Quartermaster Nella", "east", "east")
+        if room_id == "tutorial_quartermaster_shed":
+            if not flags.get("talked_nella"):
+                return action("Talk to Quartermaster Nella Cobb", "talk Quartermaster Nella Cobb", "forum")
+            return action("Return west to Wayfarer's Yard", "west", "west")
+
+    if step_key == "stand_your_ground":
+        if room_id == "tutorial_wayfarers_yard":
+            return action("Go west to the Sparring Ring", "west", "west")
+        if room_id == "tutorial_family_post":
+            return action("Read the family post sign", "read family post sign", "groups", "Optional party basics. You can return south when ready.")
+        if room_id == "tutorial_sparring_ring":
+            if flags.get("talked_brask"):
+                return action("Go south into the Vermin Pens", "south", "south")
+            return action("Talk to Ringhand Brask", "talk Ringhand Brask", "forum")
+        if room_id == "tutorial_vermin_pens":
+            return action("Start the vermin fight", "fight", "swords", "Then use enemies, attack e1, and your class skill when ready.")
+
+    if step_key == "through_the_gate":
+        route = {
+            "tutorial_vermin_pens": ("Go north to the Sparring Ring", "north", "north"),
+            "tutorial_sparring_ring": ("Go east to Wayfarer's Yard", "east", "east"),
+            "tutorial_wayfarers_yard": ("Go south to Gate Walk", "south", "south"),
+            "tutorial_gate_walk": ("Open your quest journal, then go south", "quests", "assignment"),
+            "brambleford_training_yard": ("Talk to Captain Harl Rowan", "talk Captain Harl Rowan", "forum"),
+        }
+        if room_id in route:
+            title, command, icon = route[room_id]
+            lines = ["Gate Walk is a safe place to check quests and rest before you report to Harl."]
+            if room_id == "tutorial_gate_walk":
+                lines.append("After checking quests, use south to enter the Training Yard.")
+                return action(
+                    title,
+                    command,
+                    icon,
+                    *lines,
+                    actions=[
+                        _action("Open Quests", "quests", "assignment", tone="accent"),
+                        _action("Rest", "rest", "hotel"),
+                        _action("Go South", "south", "south"),
+                    ],
+                )
+            return action(title, command, icon, *lines)
+
+    return None
+
+
+def _tutorial_carousel_payload(carousel_id, pages, *, title, final_label=None, final_command=None, final_icon=None):
+    """Return a non-layout-shifting tutorial carousel payload for the webclient."""
+
+    if not pages:
+        return None
+    payload = {
+        "id": carousel_id,
+        "source": "tutorial",
+        "title": title,
+        "pages": list(pages),
+    }
+    if final_label and final_command:
+        payload["final_action"] = {
+            "label": final_label,
+            "command": final_command,
+            "icon": final_icon or "arrow_right_alt",
+        }
+    return payload
 
 
 WELCOME_PAGES = [
@@ -1195,7 +1396,15 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         flags = state.get("flags", {})
         if not flags.get("talked_tamsin") and state.get("step") == "first_steps":
             welcome_pages = WELCOME_PAGES
-            looker.db.brave_welcome_shown = True
+
+    tutorial_carousel = _tutorial_carousel_payload(
+        "tutorial_welcome",
+        welcome_pages,
+        title="Brambleford Basics",
+        final_label="Talk To Tamsin",
+        final_command="talk Sergeant Tamsin Vale",
+        final_icon="forum",
+    )
 
     sections.append(
         _section(
@@ -1242,6 +1451,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
                 room,
                 scene="explore",
                 danger="safe" if room.db.brave_safe else "danger",
+                tracked_quest=get_tracked_quest_payload(looker),
             ),
         ),
         "layout": "explore",
@@ -1250,6 +1460,9 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         "tone": "safe" if room.db.brave_safe else "danger",
         "guidance": tutorial_guidance,
         "welcome_pages": welcome_pages,
+        "tutorial_notice": None,
+        "tutorial_carousel": tutorial_carousel,
+        "tutorial_quest": get_tutorial_quest_payload(looker),
     }
 
 
@@ -1679,43 +1892,40 @@ def build_prayer_view(character, *, blessing=None, applied=False):
     )
 
 
-def _build_tutorial_entry(character):
-    state = ensure_tutorial_state(character)
-    if state.get("status") != "active":
+def _build_tutorial_entry(character, *, detailed=False):
+    payload = get_tutorial_quest_payload(character)
+    if not payload:
         return None
 
-    step_key = state.get("step") or "first_steps"
-    step = TUTORIAL_STEPS[step_key]
-    flags = state.get("flags", {})
-    lines = [step["summary"]]
+    objectives = get_tutorial_objectives(character)
+    lines = [payload["summary"]]
+    visible_objectives = []
+    for objective in objectives:
+        visible_objectives.append(objective)
+        if not objective.get("completed"):
+            break
+    for objective in visible_objectives:
+        marker = "[x]" if objective.get("completed") else "[ ]"
+        optional = "Optional: " if objective.get("optional") else ""
+        lines.append(f"{marker} {optional}{objective['description']}")
 
-    if step_key == "first_steps":
-        lines.extend(
-            [
-                f"[{'x' if flags.get('talked_tamsin') else ' '}] Speak with Sergeant Tamsin Vale.",
-                f"[{'x' if flags.get('visited_quartermaster_shed') else ' '}] Head east to Quartermaster Shed.",
-                f"[{'x' if flags.get('returned_to_wayfarers_yard') else ' '}] Return to Wayfarer's Yard.",
-            ]
-        )
-    elif step_key == "pack_before_walk":
-        lines.extend(
-            [
-                f"[{'x' if flags.get('talked_nella') else ' '}] Speak with Quartermaster Nella Cobb.",
-                f"[{'x' if flags.get('viewed_gear') else ' '}] Check your gear.",
-                f"[{'x' if flags.get('viewed_pack') else ' '}] Open your pack.",
-                f"[{'x' if flags.get('read_supply_board') else ' '}] Read the supply board.",
-            ]
-        )
-    elif step_key == "stand_your_ground":
-        lines.append(f"[{'x' if flags.get('talked_brask') else ' '}] Speak with Ringhand Brask.")
-    elif step_key == "clear_the_pens":
-        lines.append(f"[{'x' if flags.get('won_vermin_fight') else ' '}] Win one fight in the Vermin Pens.")
-    elif step_key == "through_the_gate":
-        lines.append(f"[{'x' if flags.get('talked_harl') else ' '}] Report to Captain Harl Rowan.")
+    actions = []
+    command = None
+    if detailed:
+        lesson = _tutorial_lesson_action(character, getattr(character, "location", None))
+        if lesson:
+            actions = list(lesson.get("actions") or [])
+            command = lesson.get("command")
 
-    optional_done = flags.get("read_family_post_sign") or flags.get("talked_peep")
-    lines.append(f"[{'x' if optional_done else ' '}] Optional: Visit Family Post for party basics.")
-    return _entry(step["title"], meta="Tutorial", lines=lines, icon="school")
+    return _entry(
+        payload["title"],
+        meta=f"{payload['region']} · {payload['giver']}",
+        lines=lines,
+        icon="school",
+        command=command,
+        actions=actions,
+        chips=[_chip(payload["progress_label"], "checklist", "accent")],
+    )
 
 
 def _format_objective_progress(objective):
@@ -1726,6 +1936,55 @@ def _format_objective_progress(objective):
     return text
 
 
+def _checkbox_objective_line(objective):
+    marker = "[x]" if objective.get("completed") else "[ ]"
+    return f"{marker} {_format_objective_progress(objective)}"
+
+
+def _visible_objectives_for_state(state):
+    objectives = list(state.get("objectives", []))
+    if state.get("status") == "completed":
+        return objectives
+
+    visible = []
+    for objective in objectives:
+        visible.append(objective)
+        if not objective.get("completed"):
+            break
+    return visible
+
+
+def _quest_outcome_text(definition):
+    if definition.get("chapter_complete"):
+        return f"Chapter complete: {definition['chapter_complete']}"
+    if definition.get("completion_reaction"):
+        return definition["completion_reaction"]
+    return f"Resolved: {definition['summary']}"
+
+
+def _quest_entry_lines(definition, state, *, detailed=False):
+    status = state.get("status")
+    lines = []
+
+    if status == "completed":
+        lines.append(_quest_outcome_text(definition))
+        lines.extend(_checkbox_objective_line(objective) for objective in _visible_objectives_for_state(state))
+        return lines
+
+    lines.append(definition["summary"])
+    lines.extend(_checkbox_objective_line(objective) for objective in _visible_objectives_for_state(state))
+    return lines
+
+
+def _quest_entry_chips(definition, state):
+    chips = []
+    if definition.get("branch_choice") and state.get("status") == "active":
+        chips.append(_chip("Branch Choice", "alt_route", "accent"))
+    if definition.get("chapter_complete") and state.get("status") == "completed":
+        chips.append(_chip("Chapter Win", "emoji_events", "accent"))
+    return chips
+
+
 def _get_journal_mode(character):
     mode = getattr(getattr(character, "db", None), "brave_journal_tab", "active")
     return mode if mode in {"active", "completed"} else "active"
@@ -1734,19 +1993,15 @@ def _get_journal_mode(character):
 def _build_journal_quest_entry(character, quest_key, *, tracked_key=None, nearby_npcs=None, detailed=False):
     state = (character.db.brave_quests or {}).get(quest_key, {})
     definition = QUESTS[quest_key]
-    remaining_objectives = [
-        objective for objective in state.get("objectives", []) if not objective.get("completed")
-    ]
-    next_objective = remaining_objectives[0] if remaining_objectives else None
-    lines = []
+    remaining_objectives = [objective for objective in state.get("objectives", []) if not objective.get("completed")]
+    lines = _quest_entry_lines(definition, state, detailed=detailed)
     actions = []
     command = None
-    icon = "assignment"
-    meta = definition["giver"]
+    icon = "flag" if definition.get("branch_choice") and state.get("status") == "active" else "assignment"
+    meta = f"{get_quest_region(quest_key)} · {definition['giver']}"
+    chips = _quest_entry_chips(definition, state)
 
     if detailed:
-        lines.append(definition["summary"])
-        lines.extend(f"[ ] {_format_objective_progress(objective)}" for objective in remaining_objectives[:4])
         completed_count = len(state.get("objectives", [])) - len(remaining_objectives)
         total_count = max(1, len(state.get("objectives", [])))
         return _entry(
@@ -1762,13 +2017,8 @@ def _build_journal_quest_entry(character, quest_key, *, tracked_key=None, nearby
                     else []
                 ),
             ],
-            chips=[_chip(f"{completed_count}/{total_count} steps", "checklist", "accent")],
+            chips=[_chip(f"{completed_count}/{total_count} steps", "checklist", "accent"), *chips],
         )
-
-    if next_objective:
-        lines.append(f"Next: {_format_objective_progress(next_objective)}")
-    else:
-        lines.append(definition["summary"])
 
     command = f"quests track {quest_key}"
     if quest_key == tracked_key:
@@ -1787,6 +2037,7 @@ def _build_journal_quest_entry(character, quest_key, *, tracked_key=None, nearby
         icon=icon,
         command=command,
         actions=actions,
+        chips=chips,
     )
 
 
@@ -1795,23 +2046,16 @@ def _build_journal_region_sections(character, quest_keys, *, tracked_key=None, s
     sections = []
     filtered_keys = [quest_key for quest_key in quest_keys if not (status == "active" and quest_key == tracked_key)]
     for region, region_keys in group_quest_keys_by_region(filtered_keys):
-        if status == "completed":
-            items = [
-                _item(QUESTS[quest_key]["title"], icon="task_alt")
-                for quest_key in region_keys
-            ]
-            kind = "list"
-        else:
-            items = [
-                _build_journal_quest_entry(
-                    character,
-                    quest_key,
-                    tracked_key=tracked_key,
-                    nearby_npcs=nearby_npcs,
-                )
-                for quest_key in region_keys
-            ]
-            kind = "entries"
+        items = [
+            _build_journal_quest_entry(
+                character,
+                quest_key,
+                tracked_key=tracked_key,
+                nearby_npcs=nearby_npcs,
+            )
+            for quest_key in region_keys
+        ]
+        kind = "entries"
 
         sections.append(
             _section(
@@ -1829,7 +2073,7 @@ def build_quests_view(character):
     """Return a browser-first main view for the quest journal."""
 
     journal_mode = _get_journal_mode(character)
-    tutorial_entry = _build_tutorial_entry(character)
+    tutorial_entry = _build_tutorial_entry(character, detailed=True)
     tracked_key = get_tracked_quest(character)
     nearby_npcs = _local_npc_keys(character)
     tracked_entry = _build_journal_quest_entry(
@@ -1838,7 +2082,7 @@ def build_quests_view(character):
         tracked_key=tracked_key,
         nearby_npcs=nearby_npcs,
         detailed=True,
-    ) if tracked_key else None
+    ) if tracked_key and not tutorial_entry else None
     active_keys = [
         quest_key
         for quest_key in STARTING_QUESTS
@@ -1877,7 +2121,18 @@ def build_quests_view(character):
         )
     ]
     if journal_mode == "active":
-        if tracked_entry:
+        if tutorial_entry:
+            sections.append(
+                _section(
+                    "",
+                    "school",
+                    "entries",
+                    items=[tutorial_entry],
+                    variant="tracked",
+                    hide_label=True,
+                )
+            )
+        elif tracked_entry:
             sections.append(
                 _section(
                     "",
@@ -1888,21 +2143,11 @@ def build_quests_view(character):
                     hide_label=True,
                 )
             )
-        if tutorial_entry:
-            sections.append(
-                _section(
-                    "Tutorial",
-                    "school",
-                    "entries",
-                    items=[tutorial_entry],
-                    variant="tutorial",
-                )
-            )
         sections.extend(
             _build_journal_region_sections(
                 character,
                 active_keys,
-                tracked_key=tracked_key,
+                tracked_key=tracked_key if not tutorial_entry else None,
                 status="active",
             )
         )
@@ -2151,6 +2396,18 @@ def build_shop_view(character):
     if bonus:
         chips.append(_chip(format_shop_bonus(bonus), "storefront", "good"))
 
+    loop_notes = []
+    if sellables:
+        loop_notes.append(_item("Clear excess loot here before the next longer run.", icon="sell"))
+    else:
+        loop_notes.append(_item("No obvious selloff right now. Keep useful ingredients and quest pieces moving.", icon="inventory_2"))
+    if bonus:
+        loop_notes.append(_item("Merchant favor is active, so this is the right time to cash out better stacks.", icon="storefront"))
+    else:
+        loop_notes.append(_item("Work Shift is best just before a bigger selloff, not after you've already cleared the pack.", icon="front_hand"))
+    if reserved:
+        loop_notes.append(_item("Quest items stay protected here, so you can sell fast without breaking active collection goals.", icon="lock"))
+
     return _make_view(
         "Town Service",
         "Brambleford Outfitters",
@@ -2173,6 +2430,7 @@ def build_shop_view(character):
                 items=[{"text": f"{entry['name']} x{entry['reserved']}", "icon": "lock"} for entry in reserved]
                 or [{"text": "Nothing currently reserved.", "icon": "info"}],
             ),
+            _section("Loop Notes", "route", "list", items=loop_notes),
         ],
         back=True,
         reactive=_reactive_from_character(character, scene="service"),
@@ -2224,6 +2482,15 @@ def build_forge_view(character):
         _chip(f"{ready_count} ready", "task_alt", "good" if ready_count else "muted"),
     ]
 
+    loop_notes = []
+    if ready_entries:
+        loop_notes.append(_item("You have a real upgrade waiting. This is the point in the town loop where silver should turn back into power.", icon="construction"))
+    elif pending_entries:
+        loop_notes.append(_item("You are partway there. Sell extra loot, finish the next field push, then come back when the materials line up.", icon="schedule"))
+    else:
+        loop_notes.append(_item("No current reworks from your equipped gear. Treat forge as a mid-run payoff, not a permanent obligation.", icon="info"))
+    loop_notes.append(_item("Best rhythm: recover, sell what you do not need, then forge before committing to the next harder branch.", icon="route"))
+
     return _make_view(
         "Town Service",
         "Forge",
@@ -2244,6 +2511,7 @@ def build_forge_view(character):
                 "entries",
                 items=pending_entries or [_entry("No pending orders.", icon="task_alt")],
             ),
+            _section("Loop Notes", "route", "list", items=loop_notes),
         ],
         back=True,
         reactive=_reactive_from_character(character, scene="service"),
@@ -2307,6 +2575,13 @@ def build_cook_view(character, *, status_message=None, status_tone="muted"):
     if meal_entries:
         chips.append(_chip(f"{len(meal_entries)} meals packed", "lunch_dining", "accent"))
 
+    prep_notes = [
+        _item("Cook while you are safe, then eat just before you leave town so the buff is not wasted idling.", icon="restaurant"),
+        _item("Meals are the easiest way to turn fishing and spare ingredients into a cleaner next run.", icon="lunch_dining"),
+    ]
+    if getattr(character.db, "brave_party_id", None):
+        prep_notes.append(_item("With company nearby, the hearth can turn meals into a cozier pre-run reset instead of just a solo refill.", icon="groups"))
+
     sections = []
     if status_message:
         status_icon = "task_alt" if status_tone == "good" else "info"
@@ -2325,6 +2600,7 @@ def build_cook_view(character, *, status_message=None, status_tone="muted"):
             _section("Ready", "restaurant", "entries", items=ready_entries or [_entry("Nothing is ready from your current ingredients.", icon="schedule")]),
             _section("Missing", "grocery", "entries", items=missing_entries or [_entry("No missing recipes right now.", icon="task_alt")]),
             _section("Meals", "lunch_dining", "entries", items=meal_entries or [_entry("You are not carrying any prepared meals.", icon="backpack")]),
+            _section("Road Prep", "route", "list", items=prep_notes),
         ]
     )
 
@@ -2418,23 +2694,26 @@ def build_read_view(target, response):
     """Return a browser-first view for readable world text."""
 
     paragraphs = [line.strip() for line in str(response or "").splitlines() if line.strip()]
-    return _make_view(
-        "",
-        _display_name(target),
-        eyebrow_icon=None,
-        title_icon=None,
-        sections=[
-            _section(
-                "",
-                "menu_book",
-                "lines",
-                lines=paragraphs or ["There is nothing legible here right now."],
-                hide_label=True,
-            )
-        ],
-        back=True,
-        reactive=_reactive_view(getattr(target, "location", None), scene="read"),
-    )
+    return {
+        **_make_view(
+            "",
+            _display_name(target),
+            eyebrow_icon=None,
+            title_icon=None,
+            sections=[
+                _section(
+                    "",
+                    "menu_book",
+                    "lines",
+                    lines=paragraphs or ["There is nothing legible here right now."],
+                    hide_label=True,
+                )
+            ],
+            back=True,
+            reactive=_reactive_view(getattr(target, "location", None), scene="read"),
+        ),
+        "variant": "read",
+    }
 
 
 def build_arcade_view(character, cabinet, *, focus_game=None):

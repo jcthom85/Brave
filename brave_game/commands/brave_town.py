@@ -92,6 +92,7 @@ class CmdShop(BraveCharacterCommand):
             *wrap_text("Use |wsell <item>|n to sell one item.", indent="  "),
             *wrap_text("Use |wsell <item> = all|n to clear a full stack.", indent="  "),
             *wrap_text("Use |wshift|n to help at the counter and improve your next few sales.", indent="  "),
+            *wrap_text("Best loop: |wrest|n in town, clear excess loot here, then check |wforge|n or |wcook|n before the next run.", indent="  "),
         ]
 
         screen = render_screen(
@@ -284,6 +285,13 @@ class CmdForge(BraveCharacterCommand):
                     ("Ready To Rework", _stack_blocks(ready_blocks) if ready_blocks else ["  Nothing is fully ready yet."]),
                     ("Still Missing", _stack_blocks(pending_blocks) if pending_blocks else ["  No pending orders."]),
                     ("How To Order", wrap_text("Use |wforge <item>|n to commission one listed rework.", indent="  ")),
+                    (
+                        "Forge Rhythm",
+                        [
+                            *wrap_text("Cash out unneeded loot at the Outfitters first if silver is the blocker.", indent="  "),
+                            *wrap_text("Forge upgrades make more sense after a town reset than in the middle of a field push.", indent="  "),
+                        ],
+                    ),
                 ],
             )
             self.scene_msg(screen, panel=build_forge_panel(character), view=build_forge_view(character))

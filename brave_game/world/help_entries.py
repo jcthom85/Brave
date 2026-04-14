@@ -64,7 +64,7 @@ HELP_ENTRY_DICTS = [
 
             The live slice is still compact, but the core loop is in place. You can already:
 
-            - Explore Brambleford, the current fantasy ladder through Drowned Weir, and the first portal world
+            - Explore Brambleford and the current fantasy ladder through Drowned Weir
             - Use `build`, `race`, and `class` to set your starting identity
             - Use `sheet`, `gear`, and `pack` to inspect your adventurer and loot
             - Use `fish` and `reel` at Hobbyist's Wharf for the first town activity loop
@@ -96,7 +96,7 @@ HELP_ENTRY_DICTS = [
             Use `s` again from the wharf to reach Ironroot Forge and check `forge` for gear upgrades.
             Use `pray` at the Chapel of the Dawn Bell when you want a modest one-run blessing before a harder push.
             Use `cook` in the inn to see simple fish recipes, then `eat <meal>` to carry a buff into the field.
-            Use `n` to reach the Training Yard, then `e` to reach the Great Observatory and `e` again for the Nexus Gate.
+            Use `n` to reach the Training Yard, then `e` to reach the Great Observatory.
             Use `party` to review members or invite allies standing in the same room.
             Use `party where` to get route hints to your family and `party follow` when you want someone to lead.
             Use `shop` to review prices, `sell` to trade pack items, and `shift` to improve your next few sales.
@@ -119,7 +119,6 @@ HELP_ENTRY_DICTS = [
             - Hobbyist's Wharf
             - Ironroot Forge
             - Great Observatory
-            - Nexus Gate
             - Mayor's Hall
             - Chapel of the Dawn Bell
             - Training Yard
@@ -147,11 +146,6 @@ HELP_ENTRY_DICTS = [
             - Sludge Run
             - Feast Hall
             - Pot-King's Court
-            - Junk-Yard Landing
-            - Scrapway Verge
-            - Relay Trench
-            - Crane Grave
-            - Anchor Pit
             - Fenreach Track
             - Reedflats
             - Boglight Hollow

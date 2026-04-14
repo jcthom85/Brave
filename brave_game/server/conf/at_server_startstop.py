@@ -32,11 +32,13 @@ def at_server_start():
     """
     from evennia.server.models import ServerConfig
     from world.bootstrap import ensure_brave_world
+    from typeclasses.scripts import ensure_threat_roamer
 
     if ServerConfig.objects.conf("last_initial_setup_step") != "done":
         return
 
     ensure_brave_world()
+    ensure_threat_roamer()
 
 
 def at_server_stop():

@@ -41,8 +41,11 @@ let defaultout_plugin = (function () {
     var currentViewData = null;
     var currentSceneData = null;
     var currentRoomFeedEntries = [];
+    var lastRoomActivityViewTitle = "";
     var currentMapText = "";
     var currentMapGrid = null;
+    var sceneRailLayoutBatchDepth = 0;
+    var sceneRailLayoutSyncQueued = false;
     var currentArcadeState = null;
     var currentMobileUtilityTab = null;
     var mobileRoomActivityUnreadCount = 0;
@@ -51,6 +54,8 @@ let defaultout_plugin = (function () {
     var currentPickerData = null;
     var currentPickerAnchorRect = null;
     var currentNoticeTimer = null;
+    var dismissedTutorialNoticeIds = {};
+    var dismissedTutorialCarouselIds = {};
     var currentConnectionScreen = "menu";
     var suppressBrowserClickUntil = 0;
     var ENABLE_ROOM_SWIPE_NAV = false;
@@ -62,9 +67,10 @@ let defaultout_plugin = (function () {
     var currentCombatFxTimeout = null;
     var combatFxBusyUntilMs = 0;
     var COMBAT_FX_RETRY_DELAY_MS = 80;
-    var COMBAT_FX_MAX_RETRY_MS = 1400;
-    var COMBAT_FX_RENDER_SETTLE_MS = 90;
+    var COMBAT_FX_MAX_RETRY_MS = 6000;
+    var COMBAT_FX_RENDER_SETTLE_MS = 40;
     var COMBAT_LUNGE_DURATION_MS = 440;
+    var COMBAT_LUNGE_QUEUE_DELAY_MS = 400;
     var pendingCombatSwapTimeout = null;
     var suppressedCombatEntryRefs = {};
     var combatFxGhostNodesByRef = {};
@@ -1635,8 +1641,17 @@ let defaultout_plugin = (function () {
         }
     };
 
-    var clearPickerSheet = function () {
+    var clearPickerSheet = function (options) {
+        options = options || {};
         var host = document.getElementById("brave-picker-sheet");
+        if (
+            options.dismiss
+            && currentPickerData
+            && currentPickerData.type === "tutorial_carousel"
+            && currentPickerData.id
+        ) {
+            dismissedTutorialCarouselIds[String(currentPickerData.id)] = true;
+        }
         currentPickerData = null;
         currentPickerAnchorRect = null;
         if (host) {
@@ -1648,15 +1663,25 @@ let defaultout_plugin = (function () {
         }
     };
 
-    var clearBrowserNotice = function () {
+    var clearBrowserNotice = function (options) {
+        options = options || {};
         if (currentNoticeTimer) {
             window.clearTimeout(currentNoticeTimer);
             currentNoticeTimer = null;
         }
         var host = document.getElementById("brave-notice-stack");
         if (host) {
+            if (
+                options.dismiss
+                && host.dataset.braveNoticeSource === "tutorial"
+                && host.dataset.braveNoticeId
+            ) {
+                dismissedTutorialNoticeIds[host.dataset.braveNoticeId] = true;
+            }
             host.innerHTML = "";
             host.setAttribute("aria-hidden", "true");
+            delete host.dataset.braveNoticeId;
+            delete host.dataset.braveNoticeSource;
         }
         if (document.body) {
             document.body.classList.remove("brave-notice-active");
@@ -1685,7 +1710,14 @@ let defaultout_plugin = (function () {
         var lines = noticeData && Array.isArray(noticeData.lines)
             ? noticeData.lines.filter(Boolean)
             : (noticeData && noticeData.lines ? [noticeData.lines] : []);
-        if (!host || !noticeData || (!noticeData.title && !lines.length)) {
+        var actions = noticeData && Array.isArray(noticeData.actions)
+            ? noticeData.actions.filter(Boolean)
+            : [];
+        if (noticeData && noticeData.source === "tutorial" && isMobileViewport()) {
+            lines = lines.length ? [lines[0]] : [];
+            actions = [];
+        }
+        if (!host || !noticeData || (!noticeData.title && !lines.length && !actions.length)) {
             clearBrowserNotice();
             return false;
         }
@@ -1718,8 +1750,25 @@ let defaultout_plugin = (function () {
                     }).join("")
                     + "</div>"
                 : "")
+            + (actions.length
+                ? "<div class='brave-notice__actions'>"
+                    + actions.map(function (entry) {
+                        var toneClass = entry && entry.tone ? " brave-view__action--" + escapeHtml(entry.tone) : "";
+                        return (
+                            "<button type='button' class='brave-notice__action brave-view__action brave-click" + toneClass + "'"
+                            + commandAttrs(entry, false)
+                            + ">"
+                            + icon(entry && entry.icon ? entry.icon : "arrow_right_alt", "brave-view__action-icon")
+                            + "<span>" + escapeHtml(entry && entry.label ? entry.label : "Do This") + "</span>"
+                            + "</button>"
+                        );
+                    }).join("")
+                    + "</div>"
+                : "")
             + "</div>";
         host.setAttribute("aria-hidden", "false");
+        host.dataset.braveNoticeId = noticeData.id ? String(noticeData.id) : "";
+        host.dataset.braveNoticeSource = noticeData.source ? String(noticeData.source) : "";
         document.body.classList.add("brave-notice-active");
 
         if (!noticeData.sticky && duration > 0) {
@@ -1728,6 +1777,195 @@ let defaultout_plugin = (function () {
             }, duration);
         }
         return true;
+    };
+
+    var syncTutorialNotice = function (viewData) {
+        var host = document.getElementById("brave-notice-stack");
+        var noticeData = viewData && viewData.tutorial_notice ? viewData.tutorial_notice : null;
+        if (!noticeData) {
+            if (host && host.dataset.braveNoticeSource === "tutorial") {
+                clearBrowserNotice();
+            }
+            return;
+        }
+        var noticeId = noticeData.id ? String(noticeData.id) : "";
+        if (noticeId && dismissedTutorialNoticeIds[noticeId]) {
+            return;
+        }
+        if (
+            host
+            && host.getAttribute("aria-hidden") === "false"
+            && host.dataset.braveNoticeSource === "tutorial"
+            && host.dataset.braveNoticeId === noticeId
+        ) {
+            return;
+        }
+        renderBrowserNotice(noticeData);
+    };
+
+    var normalizeTutorialCarousel = function (carouselData) {
+        var rawPages = carouselData && Array.isArray(carouselData.pages) ? carouselData.pages : [];
+        var pages = rawPages.map(function (page) {
+            if (!page) {
+                return null;
+            }
+            var body = [];
+            if (Array.isArray(page.body)) {
+                body = page.body.filter(Boolean);
+            } else if (Array.isArray(page.lines)) {
+                body = page.lines.filter(Boolean);
+            } else if (page.text) {
+                body = [page.text];
+            }
+            return {
+                title: page.title || "",
+                icon: page.icon || "school",
+                body: body,
+            };
+        }).filter(function (page) {
+            return !!(page && (page.title || page.body.length));
+        });
+        if (!pages.length) {
+            return null;
+        }
+        return {
+            type: "tutorial_carousel",
+            id: carouselData && carouselData.id ? String(carouselData.id) : "tutorial_carousel",
+            title: carouselData && carouselData.title ? String(carouselData.title) : "Tutorial",
+            pages: pages,
+            pageIndex: 0,
+            final_action: carouselData && carouselData.final_action ? carouselData.final_action : null,
+        };
+    };
+
+    var renderTutorialCarouselPicker = function (host, pickerData) {
+        var pages = Array.isArray(pickerData.pages) ? pickerData.pages : [];
+        if (!pages.length) {
+            clearPickerSheet();
+            return;
+        }
+        var pageIndex = Math.max(0, Math.min(pages.length - 1, parseInt(pickerData.pageIndex || 0, 10) || 0));
+        var page = pages[pageIndex] || {};
+        var finalAction = pickerData.final_action || {};
+        var isLast = pageIndex >= pages.length - 1;
+        var primaryLabel = isLast ? (finalAction.label || "Done") : "Next";
+        var primaryIcon = isLast ? (finalAction.icon || "check") : "arrow_forward";
+        var primaryAttrs = isLast
+            ? (
+                finalAction.command
+                    ? " data-brave-tutorial-finish='1' data-brave-command='" + escapeHtml(finalAction.command) + "'"
+                    : " data-brave-picker-close='1'"
+            )
+            : " data-brave-tutorial-page='" + String(pageIndex + 1) + "'";
+        var progressDots = pages.map(function (_, index) {
+            var activeClass = index === pageIndex ? " brave-tutorial-carousel__dot--active" : "";
+            return "<span class='brave-tutorial-carousel__dot" + activeClass + "' aria-hidden='true'></span>";
+        }).join("");
+
+        host.innerHTML =
+            "<div class='brave-picker-sheet__backdrop' data-brave-picker-close='1'></div>"
+            + "<div class='brave-picker-sheet__panel brave-picker-sheet__panel--tutorial' role='dialog' aria-modal='true' aria-label='" + escapeHtml(pickerData.title || "Tutorial") + "'>"
+            + "<div class='brave-picker-sheet__head'>"
+            + "<div class='brave-picker-sheet__titlebar'>"
+            + "<div class='brave-picker-sheet__title'>" + escapeHtml(pickerData.title || "Tutorial") + "</div>"
+            + "<button type='button' class='brave-picker-sheet__close brave-view__action brave-view__action--muted brave-view__back' data-brave-picker-close='1'>"
+            + icon("close", "brave-view__action-icon")
+            + "<span>Close</span>"
+            + "</button>"
+            + "</div>"
+            + "<div class='brave-picker-sheet__subtitle'>" + escapeHtml(String(pageIndex + 1)) + " of " + escapeHtml(String(pages.length)) + "</div>"
+            + "</div>"
+            + "<div class='brave-tutorial-carousel'>"
+            + "<div class='brave-tutorial-carousel__icon'>" + icon(page.icon || "school") + "</div>"
+            + "<div class='brave-tutorial-carousel__copy'>"
+            + "<div class='brave-tutorial-carousel__title'>" + escapeHtml(page.title || "") + "</div>"
+            + "<div class='brave-tutorial-carousel__body'>"
+            + (page.body || []).map(function (line) {
+                return "<div class='brave-tutorial-carousel__line'>" + escapeHtml(line) + "</div>";
+            }).join("")
+            + "</div>"
+            + "</div>"
+            + "</div>"
+            + "<div class='brave-tutorial-carousel__footer'>"
+            + "<div class='brave-tutorial-carousel__progress' aria-label='Tutorial progress'>" + progressDots + "</div>"
+            + "<div class='brave-tutorial-carousel__actions'>"
+            + "<button type='button' class='brave-view__action brave-view__action--muted' data-brave-tutorial-page='" + String(pageIndex - 1) + "'" + (pageIndex <= 0 ? " disabled" : "") + ">"
+            + icon("arrow_back", "brave-view__action-icon")
+            + "<span>Back</span>"
+            + "</button>"
+            + "<button type='button' class='brave-view__action brave-view__action--accent brave-click'" + primaryAttrs + ">"
+            + icon(primaryIcon, "brave-view__action-icon")
+            + "<span>" + escapeHtml(primaryLabel) + "</span>"
+            + "</button>"
+            + "</div>"
+            + "</div>"
+            + "</div>";
+        host.setAttribute("aria-hidden", "false");
+        document.body.classList.add("brave-picker-active");
+    };
+
+    var openTutorialCarousel = function (carouselData) {
+        var pickerData = carouselData && carouselData.type === "tutorial_carousel"
+            ? carouselData
+            : normalizeTutorialCarousel(carouselData);
+        if (!pickerData) {
+            return false;
+        }
+        if (isMobileViewport()) {
+            currentMobileUtilityTab = null;
+            clearMobileUtilitySheet();
+            renderMobileNavDock();
+        }
+        currentPickerData = pickerData;
+        currentPickerAnchorRect = null;
+        renderPickerSheet();
+        return true;
+    };
+
+    var setTutorialCarouselPage = function (pageIndex) {
+        if (!currentPickerData || currentPickerData.type !== "tutorial_carousel") {
+            return false;
+        }
+        var pages = Array.isArray(currentPickerData.pages) ? currentPickerData.pages : [];
+        if (!pages.length) {
+            clearPickerSheet();
+            return false;
+        }
+        currentPickerData.pageIndex = Math.max(0, Math.min(pages.length - 1, parseInt(pageIndex, 10) || 0));
+        renderPickerSheet();
+        return true;
+    };
+
+    var finishTutorialCarousel = function (command) {
+        if (
+            currentPickerData
+            && currentPickerData.type === "tutorial_carousel"
+            && currentPickerData.id
+        ) {
+            dismissedTutorialCarouselIds[String(currentPickerData.id)] = true;
+        }
+        clearPickerSheet();
+        if (command) {
+            sendBrowserCommand(command);
+        }
+    };
+
+    var syncTutorialCarousel = function (viewData) {
+        var carouselData = viewData && viewData.tutorial_carousel ? viewData.tutorial_carousel : null;
+        if (!carouselData) {
+            return;
+        }
+        var pickerData = normalizeTutorialCarousel(carouselData);
+        if (!pickerData || dismissedTutorialCarouselIds[pickerData.id]) {
+            return;
+        }
+        if (currentPickerData && currentPickerData.type === "tutorial_carousel" && currentPickerData.id === pickerData.id) {
+            return;
+        }
+        if (currentPickerData && currentPickerData.type !== "tutorial_carousel") {
+            return;
+        }
+        openTutorialCarousel(pickerData);
     };
 
     var renderPickerSheet = function () {
@@ -1744,6 +1982,10 @@ let defaultout_plugin = (function () {
             && currentPickerAnchorRect
         );
         if (!host) {
+            return;
+        }
+        if (pickerData && pickerData.type === "tutorial_carousel") {
+            renderTutorialCarouselPicker(host, pickerData);
             return;
         }
         if (!pickerData || (!pickerOptions.length && !pickerBody.length)) {
@@ -2095,7 +2337,33 @@ let defaultout_plugin = (function () {
         rail.style.removeProperty("height");
     };
 
+    var beginSceneRailLayoutBatch = function () {
+        sceneRailLayoutBatchDepth += 1;
+    };
+
+    var endSceneRailLayoutBatch = function () {
+        sceneRailLayoutBatchDepth = Math.max(0, sceneRailLayoutBatchDepth - 1);
+        if (sceneRailLayoutBatchDepth === 0 && sceneRailLayoutSyncQueued) {
+            syncSceneRailLayout();
+        }
+    };
+
+    var withSceneRailLayoutBatch = function (callback) {
+        beginSceneRailLayoutBatch();
+        try {
+            return callback();
+        } finally {
+            endSceneRailLayoutBatch();
+        }
+    };
+
     var syncSceneRailLayout = function () {
+        if (sceneRailLayoutBatchDepth > 0) {
+            sceneRailLayoutSyncQueued = true;
+            return;
+        }
+        sceneRailLayoutSyncQueued = false;
+
         var rail = ensureSceneRailHost();
         var card = document.getElementById("scene-card");
         var packPanel = document.getElementById("scene-pack-panel");
@@ -2134,6 +2402,96 @@ let defaultout_plugin = (function () {
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
+    };
+
+    var decodeHtmlText = function (value) {
+        var probe = document.createElement("div");
+        probe.innerHTML = String(value == null ? "" : value);
+        return probe.textContent || probe.innerText || "";
+    };
+
+    var normalizeRoomActivityText = function (value) {
+        return decodeHtmlText(value)
+            .replace(/\u00a0/g, " ")
+            .replace(/\|(?:#[0-9a-fA-F]{6}|[0-9]{3}|[a-zA-Z])/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+    };
+
+    var sentenceCaseRoomActivity = function (text) {
+        var normalized = typeof text === "string" ? text.trim().replace(/[.!?]+$/, "") : "";
+        if (!normalized) {
+            return "";
+        }
+        return normalized + ".";
+    };
+
+    var buildRoomActivityEntry = function (rawText, cls, kwargs) {
+        var cssClass = typeof cls === "string" ? cls : "out";
+        var text = normalizeRoomActivityText(rawText);
+        var match = null;
+        if (!text) {
+            return null;
+        }
+        if (cssClass.indexOf("inp") !== -1) {
+            return null;
+        }
+        if (kwargs && (kwargs.type === "look" || kwargs.type === "say")) {
+            return null;
+        }
+
+        if (/[\r\n]/.test(decodeHtmlText(rawText))) {
+            return null;
+        }
+        if (text.length > 96) {
+            return null;
+        }
+
+        if (/^The encounter is over\. The road is clear for now\.?$/i.test(text)) {
+            text = "The fight ends.";
+        } else if (/^The last of them falls\. The way is clear for now\.?$/i.test(text)) {
+            text = "The fight ends.";
+        } else if (/^The fight ends with the road still dangerous\.?$/i.test(text)) {
+            text = "The fight ends.";
+        } else if (/^The party is driven back toward town\.?$/i.test(text)) {
+            text = "The party is driven back.";
+        } else if ((match = text.match(/^(.+?) joins the fight[!.]?$/i))) {
+            text = sentenceCaseRoomActivity(match[1] + " joins the fight");
+        } else if ((match = text.match(/^(.+?) falls[.!?]?$/i))) {
+            text = sentenceCaseRoomActivity(match[1] + " falls");
+        } else if ((match = text.match(/^(.+?) breaks away and falls back to (.+?)[.!?]?$/i))) {
+            text = sentenceCaseRoomActivity(match[1] + " falls back to " + match[2]);
+        } else if ((match = text.match(/^(.+?) go(?:es)?(?: (.+?))?[.!?]?$/i))) {
+            var goVerb = /^you$/i.test(match[1]) ? "go" : "goes";
+            text = sentenceCaseRoomActivity(match[1] + " " + goVerb + (match[2] ? " " + match[2] : ""));
+        } else if ((match = text.match(/^(.+?) (?:arrive|arrives|enter|enters)(?: from (.+?))?[.!?]?$/i))) {
+            var arriveVerb = /^you$/i.test(match[1]) ? "arrive" : "arrives";
+            text = sentenceCaseRoomActivity(match[1] + " " + arriveVerb + (match[2] ? " from " + match[2] : ""));
+        } else if ((match = text.match(/^(.+?) leaves(?: to)?(?: (.+?))?[.!?]?$/i))) {
+            text = sentenceCaseRoomActivity(match[1] + " leaves" + (match[2] ? " to " + match[2] : ""));
+        } else if ((match = text.match(/^(.+?) says?, \"(.+)\"[.!?]?$/i))) {
+            var sayVerb = /^you$/i.test(match[1]) ? "say" : "says";
+            text = sentenceCaseRoomActivity(match[1] + " " + sayVerb + ', "' + match[2] + '"');
+        } else if ((match = text.match(/^(.+?) appears[.!?]?$/i))) {
+            text = sentenceCaseRoomActivity(match[1] + " appears");
+        } else if ((match = text.match(/^(.+?) (uses|downs|applies|casts) (.+?)[.!?]?$/i))) {
+            text = sentenceCaseRoomActivity(match[1] + " " + match[2].toLowerCase() + " " + match[3]);
+        } else if ((match = text.match(/^(.+?) snatches a moment to eat (.+?)[.!?]?$/i))) {
+            text = sentenceCaseRoomActivity(match[1] + " eats " + match[2]);
+        } else if ((match = text.match(/^(.+?) restores (\d+) HP to (.+?)[.!?]?$/i))) {
+            text = sentenceCaseRoomActivity(match[1] + " restores " + match[3]);
+        } else if ((match = text.match(/^(.+?) mends (.+?) for (\d+) HP[.!?]?$/i))) {
+            text = sentenceCaseRoomActivity(match[1] + " mends " + match[2]);
+        } else if (/^The fight ends[.!?]?$/i.test(text)) {
+            text = "The fight ends.";
+        } else {
+            return null;
+        }
+
+        return {
+            cls: cssClass,
+            html: escapeHtml(text),
+        };
     };
 
     var icon = function (name, extraClass) {
@@ -2765,6 +3123,13 @@ let defaultout_plugin = (function () {
         suppressedCombatEntryRefs[ref] = true;
     };
 
+    var clearSuppressedCombatEntryRef = function (ref) {
+        if (!ref) {
+            return;
+        }
+        delete suppressedCombatEntryRefs[ref];
+    };
+
     var isCombatEntryRefSuppressed = function (ref) {
         return !!(ref && suppressedCombatEntryRefs[ref]);
     };
@@ -2918,7 +3283,14 @@ let defaultout_plugin = (function () {
             delete combatFxGhostNodesByRef[ref];
         }
         if (targetNode && targetNode.parentNode) {
-            targetNode.parentNode.removeChild(targetNode);
+            var container = targetNode.parentNode;
+            if (container && container.classList.contains("brave-combat-ghost-container")) {
+                if (container.parentNode) {
+                    container.parentNode.removeChild(container);
+                }
+            } else {
+                targetNode.parentNode.removeChild(targetNode);
+            }
         }
     };
 
@@ -2930,7 +3302,14 @@ let defaultout_plugin = (function () {
         Object.keys(combatFxGhostNodesByRef).forEach(function (ref) {
             var ghostNode = combatFxGhostNodesByRef[ref];
             if (ghostNode && ghostNode.parentNode) {
-                ghostNode.parentNode.removeChild(ghostNode);
+                var container = ghostNode.parentNode;
+                if (container && container.classList.contains("brave-combat-ghost-container")) {
+                    if (container.parentNode) {
+                        container.parentNode.removeChild(container);
+                    }
+                } else {
+                    ghostNode.parentNode.removeChild(ghostNode);
+                }
             }
         });
         combatFxGhostNodesByRef = {};
@@ -2959,20 +3338,37 @@ let defaultout_plugin = (function () {
         if (!rect.width || !rect.height) {
             return null;
         }
+
+        // We wrap the ghost in a container that provides the combat context
+        // so that the lunge animation (which is scoped to .brave-view--combat)
+        // actually triggers.
+        var container = document.createElement("div");
+        container.className = "brave-view--combat brave-combat-ghost-container";
+        container.style.position = "fixed";
+        container.style.left = "0";
+        container.style.top = "0";
+        container.style.width = "100%";
+        container.style.height = "100%";
+        container.style.pointerEvents = "none";
+        container.style.zIndex = "999";
+
         var ghost = document.createElement("div");
         ghost.className = "brave-combat-ghost";
         ghost.innerHTML = snapshot.html;
-        ghost = ghost.firstElementChild || ghost;
-        ghost.classList.add("brave-combat-ghost");
+        
         ghost.style.position = "fixed";
         ghost.style.left = rect.left + "px";
         ghost.style.top = rect.top + "px";
         ghost.style.width = rect.width + "px";
         ghost.style.height = rect.height + "px";
         ghost.style.margin = "0";
+        ghost.style.padding = "0";
+        ghost.style.background = "transparent";
+        ghost.style.border = "none";
         ghost.style.pointerEvents = "none";
-        ghost.style.zIndex = "999";
-        document.body.appendChild(ghost);
+
+        container.appendChild(ghost);
+        document.body.appendChild(container);
         return ghost;
     };
 
@@ -3059,6 +3455,23 @@ let defaultout_plugin = (function () {
         return assigned;
     };
 
+    var assignPendingCombatSourceSnapshot = function (ref, snapshot) {
+        if (!ref || !snapshot || !pendingCombatFxEvents.length) {
+            return false;
+        }
+        var assigned = false;
+        pendingCombatFxEvents.forEach(function (event) {
+            if (!(event && event.source_ref === ref)) {
+                return;
+            }
+            if (!event.source_snapshot) {
+                event.source_snapshot = snapshot;
+                assigned = true;
+            }
+        });
+        return assigned;
+    };
+
     var dropPendingCombatFxForRef = function (ref) {
         if (!ref || !pendingCombatFxEvents.length) {
             return;
@@ -3069,7 +3482,8 @@ let defaultout_plugin = (function () {
     };
 
     var getCombatEntryTitle = function (node) {
-        var titleNode = node ? node.querySelector(".brave-view__entry-title") : null;
+        if (!node) return "";
+        var titleNode = node.querySelector(".brave-view__entry-title") || node.querySelector(".brave-view__title");
         return titleNode ? titleNode.textContent || "" : "";
     };
 
@@ -3078,15 +3492,22 @@ let defaultout_plugin = (function () {
         if (!normalized) {
             return null;
         }
-        var matches = getCombatEntryNodes().filter(function (node) {
+        var getNodes = function () {
+            var nodes = getCombatEntryNodes();
+            var hero = document.querySelector(".brave-view--combat .brave-view__hero");
+            if (hero) nodes.push(hero);
+            return nodes;
+        };
+        var matches = getNodes().filter(function (node) {
             return normalizeCombatName(getCombatEntryTitle(node)) === normalized;
         });
         if (matches.length) {
             return matches[0];
         }
-        var contains = getCombatEntryNodes().filter(function (node) {
-            return normalized.indexOf(normalizeCombatName(getCombatEntryTitle(node))) >= 0
-                || normalizeCombatName(getCombatEntryTitle(node)).indexOf(normalized) >= 0;
+        var contains = getNodes().filter(function (node) {
+            var title = getCombatEntryTitle(node);
+            return title && (normalized.indexOf(normalizeCombatName(title)) >= 0
+                || normalizeCombatName(title).indexOf(normalized) >= 0);
         });
         return contains.length ? contains[0] : null;
     };
@@ -3095,7 +3516,9 @@ let defaultout_plugin = (function () {
         if (!ref) {
             return null;
         }
-        return document.querySelector(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']");
+        return document.querySelector(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']")
+            || document.querySelector(".brave-view--combat .brave-view__hero[data-entry-ref='" + ref + "']")
+            || document.querySelector(".brave-view--combat .brave-view__section[data-entry-ref='" + ref + "']");
     };
 
     var resolveCombatEntryNode = function (ref, name) {
@@ -3106,19 +3529,28 @@ let defaultout_plugin = (function () {
         if (!node || !text) {
             return;
         }
+        var rect = node.getBoundingClientRect();
+        if (!rect || !rect.width || !rect.height) {
+            return;
+        }
         var floater = document.createElement("span");
         floater.className = "brave-combat-floater brave-combat-floater--" + (tone || "neutral");
-        var driftX = ((Math.random() * 18) - 9).toFixed(2) + "px";
-        var driftY = (18 + (Math.random() * 12)).toFixed(2) + "px";
+        var driftX = ((Math.random() * 18) - 9).toFixed(2);
+        var driftY = (18 + (Math.random() * 12)).toFixed(2);
         var popScale = (1.06 + (Math.random() * 0.16)).toFixed(2);
-        floater.style.setProperty("--brave-floater-drift-x", driftX);
-        floater.style.setProperty("--brave-floater-rise-y", driftY);
+        floater.style.setProperty("--brave-floater-drift-x", driftX + "px");
+        floater.style.setProperty("--brave-floater-rise-y", driftY + "px");
         floater.style.setProperty("--brave-floater-pop-scale", popScale);
         if (element) {
             floater.classList.add("brave-combat-floater--element-" + element);
         }
         floater.textContent = text;
-        node.appendChild(floater);
+        floater.style.position = "fixed";
+        floater.style.left = (rect.left + (rect.width / 2)) + "px";
+        floater.style.top = (rect.top + (rect.height / 2)) + "px";
+        floater.style.pointerEvents = "none";
+        floater.style.zIndex = "1001";
+        document.body.appendChild(floater);
         window.setTimeout(function () {
             if (floater && floater.parentNode) {
                 floater.parentNode.removeChild(floater);
@@ -3154,28 +3586,71 @@ let defaultout_plugin = (function () {
         if (!attackerNode || !targetNode) {
             return;
         }
-        var attackerRect = attackerNode.getBoundingClientRect();
-        var targetRect = targetNode.getBoundingClientRect();
-        var dx = (targetRect.left + (targetRect.width / 2)) - (attackerRect.left + (attackerRect.width / 2));
-        var dy = (targetRect.top + (targetRect.height / 2)) - (attackerRect.top + (attackerRect.height / 2));
-        var magnitude = Math.sqrt((dx * dx) + (dy * dy));
-        if (!magnitude) {
+
+        var attackerRef = attackerNode.dataset.entryRef || "";
+        var snapshot = captureCombatEntrySnapshot(attackerNode);
+        if (!snapshot) {
             return;
         }
 
-        var lungeDistance = Math.min(18, Math.max(8, magnitude * 0.08));
+        var ghost = createCombatGhostFromSnapshot(snapshot);
+        if (!ghost) {
+            return;
+        }
+
+        var targetRect = targetNode.getBoundingClientRect();
+        var ghostRect = ghost.getBoundingClientRect();
+
+        var ghostCenterX = ghostRect.left + (ghostRect.width / 2);
+        var ghostCenterY = ghostRect.top + (ghostRect.height / 2);
+        var targetCenterX = targetRect.left + (targetRect.width / 2);
+        var targetCenterY = targetRect.top + (targetRect.height / 2);
+
+        var dx = targetCenterX - ghostCenterX;
+        var dy = targetCenterY - ghostCenterY;
+        var magnitude = Math.sqrt((dx * dx) + (dy * dy));
+
+        if (!magnitude) {
+            var container = ghost.parentNode;
+            if (container && container.parentNode) container.parentNode.removeChild(container);
+            return;
+        }
+
+        // Lunging about 15-20% of the distance usually looks best for JRPG style
+        var lungeDistance = Math.min(60, Math.max(20, magnitude * 0.18));
         var unitX = dx / magnitude;
         var unitY = dy / magnitude;
 
-        attackerNode.style.setProperty("--brave-combat-lunge-x", (unitX * lungeDistance).toFixed(2) + "px");
-        attackerNode.style.setProperty("--brave-combat-lunge-y", (unitY * lungeDistance).toFixed(2) + "px");
-        attackerNode.classList.remove("brave-view__entry--lunge");
-        void attackerNode.offsetWidth;
-        attackerNode.classList.add("brave-view__entry--lunge");
+        // Hide the real node if it's still in the DOM
+        attackerNode.style.visibility = "hidden";
+        attackerNode.classList.add("brave-lunge-suppressed");
+        if (attackerRef) {
+            suppressCombatEntryRef(attackerRef);
+        }
+
+        ghost.style.setProperty("--brave-combat-lunge-x", (unitX * lungeDistance).toFixed(2) + "px");
+        ghost.style.setProperty("--brave-combat-lunge-y", (unitY * lungeDistance).toFixed(2) + "px");
+        void ghost.offsetWidth;
+        ghost.classList.add("brave-view__entry--lunge");
+
         window.setTimeout(function () {
-            attackerNode.classList.remove("brave-view__entry--lunge");
-            attackerNode.style.removeProperty("--brave-combat-lunge-x");
-            attackerNode.style.removeProperty("--brave-combat-lunge-y");
+            var container = ghost.parentNode;
+            if (container && container.classList.contains("brave-combat-ghost-container")) {
+                if (container.parentNode) {
+                    container.parentNode.removeChild(container);
+                }
+            } else if (ghost.parentNode) {
+                ghost.parentNode.removeChild(ghost);
+            }
+            // Show the real node again (it might be a new one after re-render)
+            var liveNode = resolveCombatEntryNode(attackerRef);
+            if (liveNode) {
+                liveNode.style.visibility = "";
+                liveNode.classList.remove("brave-lunge-suppressed");
+            }
+            if (attackerRef) {
+                clearSuppressedCombatEntryRef(attackerRef);
+            }
         }, COMBAT_LUNGE_DURATION_MS);
     };
 
@@ -3284,9 +3759,15 @@ let defaultout_plugin = (function () {
         var targetSnapshot = event ? (event.target_snapshot || null) : null;
         var defeatSnapshot = event && event.defeat ? (event.defeat_snapshot || targetSnapshot || null) : null;
         var effectTargetNode = targetNode || ensureCombatFxGhost(event, targetSnapshot || defeatSnapshot);
+        var attackerSnapshot = event ? (event.source_snapshot || null) : null;
         var attackerNode = (event.lunge && event.source)
-            ? resolveCombatEntryNode(event.source_ref, event.source)
+            ? (resolveCombatEntryNode(event.source_ref, event.source) || ensureCombatFxGhost({ target_ref: event.source_ref }, attackerSnapshot))
             : null;
+
+        if (event.lunge && (!attackerNode || !effectTargetNode)) {
+            return false;
+        }
+
         if (!effectTargetNode && !defeatSnapshot) {
             return false;
         }
@@ -3313,7 +3794,7 @@ let defaultout_plugin = (function () {
             return 560;
         }
         if (event.lunge) {
-            return COMBAT_LUNGE_DURATION_MS;
+            return COMBAT_LUNGE_QUEUE_DELAY_MS;
         }
         if (event.kind === "miss" || event.impact === "miss") {
             return 260;
@@ -3357,6 +3838,11 @@ let defaultout_plugin = (function () {
             return;
         }
         var nowMs = Date.now();
+        if (nowMs < combatFxBusyUntilMs) {
+            scheduleCombatFxFlush(Math.max(20, combatFxBusyUntilMs - nowMs));
+            return;
+        }
+
         if (!currentViewData || currentViewData.variant !== "combat") {
             pruneExpiredCombatFxEvents(nowMs);
             if (pendingCombatFxEvents.length) {
@@ -3364,30 +3850,23 @@ let defaultout_plugin = (function () {
             }
             return;
         }
-        if (combatFxBusyUntilMs > nowMs) {
-            scheduleCombatFxFlush(combatFxBusyUntilMs - nowMs);
-            return;
-        }
-        var remaining = [];
-        var nextEvent = null;
-        pendingCombatFxEvents.forEach(function (event) {
-            if (!nextEvent && playCombatFxEvent(event)) {
-                nextEvent = event;
-                return;
+
+        var event = pendingCombatFxEvents[0];
+        if (playCombatFxEvent(event)) {
+            pendingCombatFxEvents.shift();
+            var delay = combatFxEventDelayMs(event);
+            combatFxBusyUntilMs = nowMs + delay;
+            scheduleCombatFxFlush(delay);
+        } else {
+            // If we couldn't play the event, it might be waiting for a node to appear.
+            // Move it to the back or prune it if it's too old.
+            var failed = pendingCombatFxEvents.shift();
+            pruneExpiredCombatFxEvents(nowMs);
+            if (failed && (!failed._queuedAtMs || nowMs - failed._queuedAtMs < COMBAT_FX_MAX_RETRY_MS)) {
+                pendingCombatFxEvents.push(failed);
             }
-            remaining.push(event);
-        });
-        pendingCombatFxEvents = remaining.slice(-24);
-        if (!nextEvent) {
-            pruneExpiredCombatFxEvents(Date.now());
-            if (pendingCombatFxEvents.length) {
-                scheduleCombatFxFlush(COMBAT_FX_RETRY_DELAY_MS);
-            }
-            return;
+            scheduleCombatFxFlush(COMBAT_FX_RETRY_DELAY_MS);
         }
-        var delayMs = combatFxEventDelayMs(nextEvent);
-        combatFxBusyUntilMs = Date.now() + delayMs;
-        scheduleCombatFxFlush(delayMs);
     };
 
     var handleCombatFxEvent = function (payload) {
@@ -3401,6 +3880,15 @@ let defaultout_plugin = (function () {
             return;
         }
         var event = normalizeCombatEvent(payload);
+        if (event.lunge && event.source && !event.source_snapshot) {
+            var sourceNode = resolveCombatEntryNode(event.source_ref, event.source);
+            if (sourceNode) {
+                var sourceSnapshot = captureCombatEntrySnapshot(sourceNode);
+                if (sourceSnapshot) {
+                    event.source_snapshot = sourceSnapshot;
+                }
+            }
+        }
         if (!event.target_snapshot || (event.defeat && !event.defeat_snapshot)) {
             var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
             if (targetNode) {
@@ -3778,15 +4266,18 @@ let defaultout_plugin = (function () {
         return "<div class='" + cls + "'>" + entry.html + "</div>";
     };
 
+    var getRoomFeedMarkup = function () {
+        if (!currentRoomFeedEntries.length) {
+            return "";
+        }
+        return currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("");
+    };
+
     var addRoomFeedEntry = function (cls, html) {
         if (typeof html !== "string" || !html.trim()) {
             return;
         }
         var normalizedCls = cls || "out";
-        var lastEntry = currentRoomFeedEntries.length ? currentRoomFeedEntries[currentRoomFeedEntries.length - 1] : null;
-        if (lastEntry && lastEntry.cls === normalizedCls && lastEntry.html === html) {
-            return;
-        }
         currentRoomFeedEntries.push({ cls: normalizedCls, html: html });
         if (currentRoomFeedEntries.length > 24) {
             currentRoomFeedEntries = currentRoomFeedEntries.slice(currentRoomFeedEntries.length - 24);
@@ -3795,7 +4286,7 @@ let defaultout_plugin = (function () {
 
     var syncRoomActivityLog = function (body) {
         if (body) {
-            body.innerHTML = currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("");
+            body.innerHTML = getRoomFeedMarkup();
             body.scrollTop = body.scrollHeight;
         }
         syncRailActivityLog();
@@ -3811,7 +4302,7 @@ let defaultout_plugin = (function () {
         if (!body) {
             return null;
         }
-        body.innerHTML = currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("");
+        body.innerHTML = getRoomFeedMarkup();
         body.scrollTop = body.scrollHeight;
         return $(body);
     };
@@ -3829,9 +4320,10 @@ let defaultout_plugin = (function () {
         }
 
         strayEntries.each(function () {
-            if (shouldLogRoomActivity(this.textContent || "", this.className || "out", null)) {
+            var entry = buildRoomActivityEntry(this.innerHTML || this.textContent || "", this.className || "out", null);
+            if (entry) {
                 var beforeCount = currentRoomFeedEntries.length;
-                addRoomFeedEntry(this.className || "out", this.innerHTML || "");
+                addRoomFeedEntry(entry.cls, entry.html);
                 if (currentRoomFeedEntries.length > beforeCount) {
                     claimedCount += 1;
                 }
@@ -3908,7 +4400,11 @@ let defaultout_plugin = (function () {
     };
 
     var pushRoomFeedEntry = function (cls, rawText) {
-        addRoomFeedEntry(cls, rawText);
+        var entry = buildRoomActivityEntry(rawText, cls, null);
+        if (!entry) {
+            return;
+        }
+        addRoomFeedEntry(entry.cls, entry.html);
         syncRoomActivityLog();
         if (isMobileViewport()) {
             if (currentMobileUtilityTab === "activity") {
@@ -3921,8 +4417,20 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var ensureRoomArrivalEntry = function (viewData) {
+        var title = viewData && typeof viewData.title === "string" ? viewData.title.trim() : "";
+        if (!title) {
+            return;
+        }
+        if (title === lastRoomActivityViewTitle) {
+            return;
+        }
+        lastRoomActivityViewTitle = title;
+    };
+
     var clearRoomActivityLog = function () {
         currentRoomFeedEntries = [];
+        lastRoomActivityViewTitle = "";
         syncRoomActivityLog();
     };
 
@@ -3933,16 +4441,11 @@ let defaultout_plugin = (function () {
         }
 
         var sticky = mwin.children(".brave-sticky-view");
-        var inlineSectionParent = sticky.find(".brave-view--combat .brave-view__sections").first();
-        var useInlineStickyLog = sticky.length
-            && document.body.getAttribute("data-brave-scene") === "combat"
-            && window.matchMedia("(max-width: 640px)").matches;
-        var preferredParent = useInlineStickyLog && inlineSectionParent.length ? inlineSectionParent : (useInlineStickyLog ? sticky : mwin);
-        var fallbackParent = useInlineStickyLog ? sticky.add(mwin) : sticky;
+        var preferredParent = mwin;
 
         var log = preferredParent.children(".brave-combat-log");
-        if (!log.length && fallbackParent && fallbackParent.length) {
-            log = fallbackParent.children(".brave-combat-log");
+        if (!log.length && sticky.length) {
+            log = sticky.find(".brave-combat-log").first();
             if (log.length) {
                 preferredParent.append(log);
             }
@@ -4002,14 +4505,16 @@ let defaultout_plugin = (function () {
     };
 
     var clearSceneRail = function () {
-        currentMapText = "";
-        currentMapGrid = null;
-        clearMicromap();
-        clearPackPanel();
-        clearVicinityPanel();
-        clearSceneCard();
-        syncSceneRailLayout();
-        syncMobileShell();
+        withSceneRailLayoutBatch(function () {
+            currentMapText = "";
+            currentMapGrid = null;
+            clearMicromap();
+            clearPackPanel();
+            clearVicinityPanel();
+            clearSceneCard();
+            syncSceneRailLayout();
+            syncMobileShell();
+        });
     };
 
     var resetAllScrollPositions = function () {
@@ -4136,7 +4641,8 @@ let defaultout_plugin = (function () {
             if (!Array.isArray(items) || !items.length) {
                 return "";
             }
-            var heading = label
+            var hideLabels = !!(label && isMobileViewport());
+            var heading = (label && !hideLabels)
                 ? "<div class='scene-card__label'>"
                     + icon(iconName, "scene-card__section-icon")
                     + "<span>" + escapeHtml(label) + "</span>"
@@ -4343,6 +4849,7 @@ let defaultout_plugin = (function () {
     var renderSceneCard = function (sceneData) {
         setMainViewMode(false);
         if (!sceneData || typeof sceneData !== "object" || !sceneData.tracked_quest) {
+            currentSceneData = null;
             clearSceneCard();
             return;
         }
@@ -4352,7 +4859,13 @@ let defaultout_plugin = (function () {
         var tracked = sceneData.tracked_quest || {};
         var objectiveItems = Array.isArray(tracked.objectives)
             ? tracked.objectives.map(function (entry) {
-                return { text: entry, icon: "radio_button_unchecked" };
+                if (entry && typeof entry === "object") {
+                    return {
+                        text: entry.text || entry.description || "",
+                        icon: entry.completed ? "check_box" : "check_box_outline_blank",
+                    };
+                }
+                return { text: entry, icon: "check_box_outline_blank" };
             })
             : [];
 
@@ -4381,6 +4894,31 @@ let defaultout_plugin = (function () {
         syncMobileShell();
     };
 
+    var syncSceneCardForView = function (viewData) {
+        var sceneData = viewData && viewData.reactive && typeof viewData.reactive === "object"
+            ? viewData.reactive
+            : null;
+        if (sceneData && sceneData.tracked_quest) {
+            renderSceneCard(sceneData);
+            return;
+        }
+        if (isRoomLikeView(viewData)) {
+            clearSceneCard();
+            return;
+        }
+        if (currentSceneData) {
+            renderSceneCard(currentSceneData);
+        }
+    };
+
+    var clearChargenCreatePending = function () {
+        if (!document.body || !document.body.classList.contains("brave-chargen-create-pending")) {
+            return;
+        }
+        document.body.classList.remove("brave-chargen-create-pending");
+        clearBrowserNotice();
+    };
+
     var renderMainView = function (viewData) {
         var mwin = $("#messagewindow");
         if (!mwin.length) {
@@ -4402,6 +4940,7 @@ let defaultout_plugin = (function () {
             clearSceneCard();
             return;
         }
+        clearChargenCreatePending();
         syncInputContextForView(viewData);
         var preservePickerAcrossViewSwap = shouldPreservePickerForViewSwap(viewData);
         if (!preservePickerAcrossViewSwap) {
@@ -4856,10 +5395,7 @@ let defaultout_plugin = (function () {
         };
 
         var renderMobileRoomUtility = function () {
-            if (!isMobileViewport() || viewData.variant !== "room") {
-                return "";
-            }
-            return buildMobileRoomUtilityMarkup();
+            return "";
         };
 
         var renderThemePreview = function (preview) {
@@ -4922,6 +5458,9 @@ let defaultout_plugin = (function () {
                     }
                     if (backgroundIcon) {
                         rowClass += " brave-view__entry--ornamented";
+                    }
+                    if (entry && entry.entry_ref && isCombatEntryRefSuppressed(entry.entry_ref)) {
+                        rowClass += " brave-lunge-suppressed";
                     }
                     var headClass = "brave-view__entry-head" + (lead ? "" : " brave-view__entry-head--iconless");
                     var metaToneClass = entry && entry.meta_tone ? " brave-view__entry-meta--" + escapeHtml(entry.meta_tone) : "";
@@ -5003,9 +5542,17 @@ let defaultout_plugin = (function () {
                 "brave-view__section brave-view__section--" + escapeHtml(kind)
                 + (section && section.span ? " brave-view__section--" + escapeHtml(section.span) : "")
                 + (section && section.variant ? " brave-view__section--" + escapeHtml(section.variant) : "");
+            
+            var sectionAttrs = "";
+            if (section && section.entry_ref) {
+                sectionAttrs += " data-entry-ref='" + escapeHtml(section.entry_ref) + "'";
+                if (isCombatEntryRefSuppressed(section.entry_ref)) {
+                    sectionClass += " brave-lunge-suppressed";
+                }
+            }
 
             return (
-                "<section class='" + sectionClass + "'>"
+                "<section class='" + sectionClass + "'" + sectionAttrs + ">"
                 + (!(section && section.hide_label)
                     ? "<div class='brave-view__section-label'>"
                         + icon(section.icon || "label", "brave-view__section-icon")
@@ -5059,9 +5606,18 @@ let defaultout_plugin = (function () {
             );
         };
 
+        var heroClass = "brave-view__hero";
+        var heroAttrs = "";
+        if (viewData.entry_ref) {
+            heroAttrs += " data-entry-ref='" + escapeHtml(viewData.entry_ref) + "'";
+            if (isCombatEntryRefSuppressed(viewData.entry_ref)) {
+                heroClass += " brave-lunge-suppressed";
+            }
+        }
+
         var viewMarkup =
             "<div class='brave-view" + variantClass + toneClass + "'>"
-            + "<div class='brave-view__hero'>"
+            + "<div class='" + heroClass + "'" + heroAttrs + ">"
             + (viewData.wordmark ? "<div class='brave-view__wordmark' aria-label='" + escapeHtml(viewData.wordmark) + "'><span class='brave-view__wordmark-text'>" + escapeHtml(viewData.wordmark) + "</span></div>" : "")
             + ((viewData.eyebrow_icon || viewData.eyebrow)
                 ? "<div class='brave-view__eyebrow'>"
@@ -5126,10 +5682,14 @@ let defaultout_plugin = (function () {
                 nextCombatRefs = collectCombatEntryRefsFromMarkup(viewMarkup);
                 previousCombatSnapshots.forEach(function (snapshot) {
                     var ref = snapshot && snapshot.ref;
-                    if (!ref || nextCombatRefs[ref] || isCombatEntryRefSuppressed(ref)) {
+                    if (!ref || isCombatEntryRefSuppressed(ref)) {
                         return;
                     }
+                    assignPendingCombatSourceSnapshot(ref, snapshot);
                     assignPendingCombatTargetSnapshot(ref, snapshot);
+                    if (nextCombatRefs[ref]) {
+                        return;
+                    }
                     assignPendingCombatDefeatSnapshot(ref, snapshot);
                 });
                 shouldDelayCombatSwap = previousCombatSnapshots.some(function (snapshot) {
@@ -5163,25 +5723,27 @@ let defaultout_plugin = (function () {
                 if (viewData.variant === "combat" && previousCombatSnapshots.length) {
                     restoreCombatAtbContinuity(previousCombatSnapshots);
                 }
-                if (currentMapGrid || currentMapText) {
-                    renderMap(currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText);
-                }
-                if (viewData.variant === "combat") {
-                    ensureCombatLog();
-                    claimCombatLogEntries();
-                }
-                if (isRoomLikeView(viewData)) {
-                    ensureRoomActivityLog();
-                    renderVicinityPanel(viewData);
-                } else {
-                    clearVicinityPanel();
-                }
-                renderPackPanel();
-                if (currentSceneData) {
-                    renderSceneCard(currentSceneData);
-                }
+                withSceneRailLayoutBatch(function () {
+                    if (currentMapGrid || currentMapText) {
+                        renderMap(currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText);
+                    }
+                    if (viewData.variant === "combat") {
+                        ensureCombatLog();
+                        claimCombatLogEntries();
+                    }
+                    if (isRoomLikeView(viewData)) {
+                        ensureRoomActivityLog();
+                        renderVicinityPanel(viewData);
+                    } else {
+                        clearVicinityPanel();
+                    }
+                    renderPackPanel();
+                    syncSceneCardForView(viewData);
+                });
                 renderDesktopToolbar();
                 syncMobileShell();
+                syncTutorialNotice(viewData);
+                syncTutorialCarousel(viewData);
                 if (preservePickerAcrossViewSwap && currentPickerData) {
                     renderPickerSheet();
                 }
@@ -5231,24 +5793,29 @@ let defaultout_plugin = (function () {
             resetCombatLogAutoscroll();
             currentViewData = viewData;
             setBodyState("view", viewData && viewData.variant ? viewData.variant : "");
+            if (isRoomLikeView(viewData)) {
+                ensureRoomArrivalEntry(viewData);
+            }
 
             mwin.html(viewMarkup);
-            if (isRoomLikeView(viewData)) {
-                ensureRoomActivityLog();
-                claimRoomActivityEntries();
-                renderVicinityPanel(viewData);
-            } else {
-                clearVicinityPanel();
-            }
-            if (currentMapGrid || currentMapText) {
-                renderMap(currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText);
-            }
-            renderPackPanel();
-            if (currentSceneData) {
-                renderSceneCard(currentSceneData);
-            }
+            withSceneRailLayoutBatch(function () {
+                if (isRoomLikeView(viewData)) {
+                    ensureRoomActivityLog();
+                    claimRoomActivityEntries();
+                    renderVicinityPanel(viewData);
+                } else {
+                    clearVicinityPanel();
+                }
+                if (currentMapGrid || currentMapText) {
+                    renderMap(currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText);
+                }
+                renderPackPanel();
+                syncSceneCardForView(viewData);
+            });
             renderDesktopToolbar();
             syncMobileShell();
+            syncTutorialNotice(viewData);
+            syncTutorialCarousel(viewData);
             if (preservePickerAcrossViewSwap && currentPickerData) {
                 renderPickerSheet();
             }
@@ -5412,6 +5979,34 @@ let defaultout_plugin = (function () {
         syncCombatActionTray();
     };
 
+    var markChargenCreatePending = function (command) {
+        if (command !== "finish" || !currentViewData || currentViewData.variant !== "chargen") {
+            return;
+        }
+        if (document.body) {
+            document.body.classList.add("brave-chargen-create-pending");
+        }
+        document.querySelectorAll(".brave-view--chargen [data-brave-command='finish']").forEach(function (target) {
+            target.classList.add("brave-view__action--pending");
+            target.setAttribute("aria-busy", "true");
+            if (typeof target.disabled !== "undefined") {
+                target.disabled = true;
+            }
+            var label = target.querySelector("span");
+            if (label) {
+                label.textContent = "Creating...";
+            }
+        });
+        renderBrowserNotice({
+            title: "Creating character",
+            lines: ["Finalizing your character and returning to character select."],
+            tone: "good",
+            icon: "progress_activity",
+            sticky: true,
+            duration_ms: 0,
+        });
+    };
+
     var sendBrowserCommand = function (command, confirmText) {
         if (!command || !plugin_handler || !plugin_handler.onSend) {
             return;
@@ -5421,6 +6016,7 @@ let defaultout_plugin = (function () {
         }
         clearPickerSheet();
         clearBrowserNotice();
+        markChargenCreatePending(command);
         if (isMobileViewport()) {
             if (currentMobileUtilityTab) {
                 currentMobileUtilityTab = null;
@@ -5572,14 +6168,30 @@ let defaultout_plugin = (function () {
             if (pickerCloseTarget) {
                 event.preventDefault();
                 event.stopPropagation();
-                clearPickerSheet();
+                clearPickerSheet({ dismiss: true });
+                return;
+            }
+            var tutorialPageTarget = event.target.closest("[data-brave-tutorial-page]");
+            if (tutorialPageTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!tutorialPageTarget.disabled) {
+                    setTutorialCarouselPage(tutorialPageTarget.getAttribute("data-brave-tutorial-page"));
+                }
+                return;
+            }
+            var tutorialFinishTarget = event.target.closest("[data-brave-tutorial-finish]");
+            if (tutorialFinishTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                finishTutorialCarousel(tutorialFinishTarget.getAttribute("data-brave-command"));
                 return;
             }
             var noticeCloseTarget = event.target.closest("[data-brave-notice-close]");
             if (noticeCloseTarget) {
                 event.preventDefault();
                 event.stopPropagation();
-                clearBrowserNotice();
+                clearBrowserNotice({ dismiss: true });
                 return;
             }
             var mobileTarget = event.target.closest("[data-brave-mobile-panel], [data-brave-mobile-action]");
@@ -5921,7 +6533,7 @@ let defaultout_plugin = (function () {
                 return;
             }
             if (event.key === "Escape" && document.body.classList.contains("brave-notice-active")) {
-                clearBrowserNotice();
+                clearBrowserNotice({ dismiss: true });
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -5952,14 +6564,30 @@ let defaultout_plugin = (function () {
             }
             var pickerCloseButton = event.target.closest("[data-brave-picker-close]");
             if (pickerCloseButton) {
-                clearPickerSheet();
+                clearPickerSheet({ dismiss: true });
                 event.preventDefault();
                 event.stopPropagation();
                 return;
             }
+            var tutorialPageButton = event.target.closest("[data-brave-tutorial-page]");
+            if (tutorialPageButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!tutorialPageButton.disabled) {
+                    setTutorialCarouselPage(tutorialPageButton.getAttribute("data-brave-tutorial-page"));
+                }
+                return;
+            }
+            var tutorialFinishButton = event.target.closest("[data-brave-tutorial-finish]");
+            if (tutorialFinishButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                finishTutorialCarousel(tutorialFinishButton.getAttribute("data-brave-command"));
+                return;
+            }
             var noticeCloseButton = event.target.closest("[data-brave-notice-close]");
             if (noticeCloseButton) {
-                clearBrowserNotice();
+                clearBrowserNotice({ dismiss: true });
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -6057,18 +6685,7 @@ let defaultout_plugin = (function () {
     };
 
     var shouldLogRoomActivity = function (rawText, cls, kwargs) {
-        var text = typeof rawText === "string" ? rawText.trim() : "";
-        var cssClass = typeof cls === "string" ? cls : "out";
-        if (!text) {
-            return false;
-        }
-        if (cssClass.indexOf("inp") !== -1) {
-            return false;
-        }
-        if (kwargs && kwargs.type === "look") {
-            return false;
-        }
-        return true;
+        return !!buildRoomActivityEntry(rawText, cls, kwargs);
     };
 
     //
@@ -6115,6 +6732,12 @@ let defaultout_plugin = (function () {
         var combatFx = null;
         var combatLogNode = null;
         var shouldStickCombatLog = false;
+        var roomActivityEntry = buildRoomActivityEntry(rawText, cls, kwargs);
+        if (roomActivityEntry) {
+            addRoomFeedEntry(roomActivityEntry.cls, roomActivityEntry.html);
+            syncRoomActivityLog();
+        }
+
         if (
             currentViewData
             && currentViewData.variant === "combat"
@@ -6127,9 +6750,7 @@ let defaultout_plugin = (function () {
             currentViewData
             && isRoomLikeView(currentViewData)
         ) {
-            if (shouldLogRoomActivity(rawText, cls, kwargs)) {
-                mwin.append("<div class='" + cls + "'>" + rawText + "</div>");
-                claimRoomActivityEntries();
+            if (roomActivityEntry) {
                 ensureRoomActivityLog();
             }
             return true;
@@ -6225,12 +6846,21 @@ let defaultout_plugin = (function () {
         }
 
         if (cmdname === "brave_combat_fx") {
-            handleCombatFxEvent(kwargs || {});
+            handleCombatFxEvent((kwargs && Object.keys(kwargs).length) ? kwargs : args);
             return true;
         }
 
         if (cmdname === "brave_notice") {
             renderBrowserNotice(kwargs || {});
+            return true;
+        }
+
+        if (cmdname === "brave_activity") {
+            var activityText = kwargs && typeof kwargs.text === "string" ? kwargs.text : "";
+            if (activityText) {
+                pushRoomFeedEntry("out", activityText);
+                ensureRoomActivityLog();
+            }
             return true;
         }
 

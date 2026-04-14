@@ -26,7 +26,7 @@ from .account import (
     CmdBraveUnconnectedLook,
 )
 from .brave_arcade import CmdArcade, CmdArcadeSubmit
-from .brave_combat import CmdAttack, CmdEnemies, CmdFight, CmdFlee, CmdUse
+from .brave_combat import CmdAttack, CmdEnemies, CmdFight, CmdFlee, CmdThreatDebug, CmdUse
 from .brave_creator import CmdContent
 from .brave_explore import CmdCook, CmdEat, CmdFish, CmdItem, CmdMap, CmdMore, CmdReel, CmdRest, CmdTravel
 from .brave_party import CmdParty
@@ -73,10 +73,12 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdTravel())
         self.add(CmdFight())
         self.add(CmdEnemies())
+        self.add(CmdThreatDebug())
         self.add(CmdAttack())
         self.add(CmdUse())
         self.add(CmdFlee())
         self.add(CmdRest())
+        self.add(CmdParty())
         self.add(CmdArcade())
         self.add(CmdArcadeSubmit())
         self.add(CmdTalk())

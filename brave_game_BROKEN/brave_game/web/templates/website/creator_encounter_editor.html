@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }}</title>
+  <style>
+    :root { --ink:#1d2430; --accent:#8b4a29; --panel:#fff9f0; --line:#d9c8ac; --muted:#6b6157; --good:#2f6d4c; --bad:#8d3122; --shadow:rgba(29,36,48,0.12); }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:radial-gradient(circle at top right, rgba(139,74,41,.15), transparent 26%),linear-gradient(180deg,#f3eadb 0%,#f9f3e8 44%,#efe2cf 100%); min-height:100vh; }
+    .shell { width:min(1600px,calc(100vw - 32px)); margin:24px auto; display:grid; grid-template-columns:320px minmax(0,1fr); gap:20px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
+    .panel-head { padding:18px 20px; border-bottom:1px solid var(--line); background:linear-gradient(135deg, rgba(139,74,41,.12), rgba(217,200,172,.22)); }
+    .panel-head h1,.panel-head h2,.panel-head h3 { margin:0; font-weight:700; letter-spacing:.02em; }
+    .panel-head p { margin:8px 0 0; color:var(--muted); line-height:1.4; }
+    .panel-body { padding:18px 20px 20px; }
+    .search,.field input,.field select,textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:10px 12px; font:inherit; background:#fff; }
+    .search { margin-bottom:12px; }
+    .room-list,.enemy-list,.selector-list { display:grid; gap:8px; max-height:260px; overflow:auto; padding-right:4px; }
+    .row,.selector-row { width:100%; text-align:left; border:1px solid var(--line); background:#fff; border-radius:12px; padding:12px; cursor:pointer; transition:transform 120ms ease,border-color 120ms ease,background 120ms ease; }
+    .row:hover,.row.active,.selector-row:hover,.selector-row.active { transform:translateY(-1px); border-color:var(--accent); background:#fff8f2; }
+    .row strong,.row span,.selector-row strong,.selector-row span { display:block; }
+    .row span,.selector-row span { color:var(--muted); font-size:.92rem; margin-top:4px; }
+    .selector-row.empty { cursor:default; }
+    .workspace { display:grid; grid-template-rows:auto auto minmax(440px,auto) minmax(240px,auto); gap:16px; }
+    .toolbar,.editor-toolbar,.chips { display:flex; flex-wrap:wrap; gap:10px; }
+    .meta { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.94rem; }
+    .editor-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .stack { display:grid; gap:12px; }
+    .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .field { display:grid; gap:6px; }
+    .field.full { grid-column:1/-1; }
+    .field label { font-size:.88rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+    button { border:0; border-radius:999px; padding:10px 16px; font:inherit; cursor:pointer; background:var(--accent); color:#fff; box-shadow:0 10px 24px rgba(139,74,41,.24); }
+    button.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none; }
+    button.danger { background:#fff0ed; color:var(--bad); border:1px solid rgba(141,49,34,.2); box-shadow:none; }
+    button:disabled { opacity:.55; cursor:progress; }
+    .chip { border:1px solid var(--line); border-radius:999px; padding:8px 12px; background:#fff; font-size:.92rem; }
+    textarea,pre { width:100%; margin:0; border:1px solid var(--line); border-radius:14px; background:#fffdfa; font:.95rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
+    textarea { min-height:250px; padding:16px; resize:vertical; }
+    pre { min-height:220px; padding:16px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+    .status { padding:12px 14px; border-radius:12px; background:#fff6e7; color:var(--ink); border:1px solid var(--line); }
+    .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
+    .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
+    @media (max-width:1180px) { .editor-grid { grid-template-columns:1fr; } }
+    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .room-list,.enemy-list,.selector-list { max-height:240px; } .field-grid { grid-template-columns:1fr; } }
+  
+    .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
+    .validation-notes[hidden] { display:none; }
+    .validation-notes strong { display:block; margin-bottom:8px; }
+    .validation-notes ul { margin:0; padding-left:20px; display:grid; gap:6px; }
+
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel">
+      <div class="panel-head"><h1>Encounters</h1><p>Author room encounter tables and enemy templates using the live encounter registry.</p></div>
+      <div class="panel-body stack">
+        <input id="room-search" class="search" type="search" placeholder="Search rooms">
+        <div id="room-list" class="room-list"></div>
+        <input id="enemy-search" class="search" type="search" placeholder="Search enemy templates">
+        <div id="enemy-list" class="enemy-list"></div>
+      </div>
+    </section>
+    <section class="workspace">
+      <div class="panel"><div class="panel-head"><h2 id="editor-title">Encounter Editor</h2><p id="editor-subtitle">Select a room and enemy template to load encounter and template previews.</p></div><div class="panel-body"><div class="meta"><span>API root: <strong>{{ api_root }}</strong></span><span>Reference domain: <strong>{{ reference_domain }}</strong></span></div></div></div>
+      <div class="toolbar"><button id="load-previews" class="secondary" type="button">Reload Encounter Preview</button><button id="validate-content" class="secondary" type="button">Validate Packs</button><button id="reload-content" class="secondary" type="button">Reload Registry</button></div>
+      <div class="editor-grid">
+        <section class="panel"><div class="panel-head"><h3>Encounter List</h3><p>Select, add, or remove room encounter entries, then sync the full room table to JSON.</p></div><div class="panel-body stack">
+          <div id="encounter-list" class="selector-list"></div>
+          <div class="field-grid">
+            <div class="field"><label for="encounter-key">Encounter Key</label><input id="encounter-key" type="text"></div>
+            <div class="field"><label for="encounter-title">Encounter Title</label><input id="encounter-title" type="text"></div>
+            <div class="field full"><label for="encounter-intro">Intro</label><input id="encounter-intro" type="text"></div>
+            <div class="field"><label for="encounter-enemy-one">Enemy One</label><select id="encounter-enemy-one"></select></div>
+            <div class="field"><label for="encounter-enemy-two">Enemy Two</label><select id="encounter-enemy-two"></select></div>
+            <div class="field"><label for="encounter-enemy-three">Enemy Three</label><select id="encounter-enemy-three"></select></div>
+            <div class="field"><label for="encounter-enemy-four">Enemy Four</label><select id="encounter-enemy-four"></select></div>
+          </div>
+          <div class="editor-toolbar"><button id="new-encounter" class="secondary" type="button">New Encounter Entry</button><button id="remove-encounter" class="danger" type="button">Remove Encounter Entry</button><button id="sync-encounter-form" class="secondary" type="button">Sync Encounter List To JSON</button><button id="diff-encounters" type="button">Dry-Run Encounters</button><button id="write-encounters" type="button">Write Encounters</button></div>
+          <textarea id="encounters-json" spellcheck="false"></textarea>
+          <div class="chips"><div id="room-chip" class="chip">Room: -</div><div id="encounter-count-chip" class="chip">Entries: 0</div></div>
+        </div></section>
+        <section class="panel"><div class="panel-head"><h3>Enemy Template</h3><p>Edit one enemy template and sync it to the enemy JSON payload.</p></div><div class="panel-body stack">
+          <div class="field-grid">
+            <div class="field"><label for="enemy-id">Template Key</label><input id="enemy-id" type="text"></div>
+            <div class="field"><label for="enemy-name">Enemy Name</label><input id="enemy-name" type="text"></div>
+            <div class="field"><label for="enemy-xp">XP</label><input id="enemy-xp" type="number" min="1" value="1"></div>
+            <div class="field"><label for="enemy-hp">Max HP</label><input id="enemy-hp" type="number" min="1" value="1"></div>
+            <div class="field"><label for="enemy-attack">Attack Power</label><input id="enemy-attack" type="number" min="0" value="0"></div>
+            <div class="field"><label for="enemy-armor">Armor</label><input id="enemy-armor" type="number" min="0" value="0"></div>
+            <div class="field"><label for="enemy-accuracy">Accuracy</label><input id="enemy-accuracy" type="number" min="0" value="0"></div>
+            <div class="field"><label for="enemy-dodge">Dodge</label><input id="enemy-dodge" type="number" min="0" value="0"></div>
+            <div class="field full"><label for="enemy-desc">Description</label><input id="enemy-desc" type="text"></div>
+            <div class="field full"><label for="enemy-tags">Tags</label><input id="enemy-tags" type="text" placeholder="comma,separated,tags"></div>
+          </div>
+          <div class="editor-toolbar"><button id="new-enemy" class="secondary" type="button">New Enemy Draft</button><button id="sync-enemy-form" class="secondary" type="button">Sync Enemy Form To JSON</button><button id="diff-enemy" type="button">Dry-Run Enemy</button><button id="write-enemy" type="button">Write Enemy</button></div>
+          <textarea id="enemy-json" spellcheck="false"></textarea>
+          <div class="chips"><div id="enemy-chip" class="chip">Enemy: -</div></div>
+        </div></section>
+      </div>
+      <div class="panel"><div class="panel-head"><h2>Preview / Diff Output</h2><p>Encounter preview resolves room encounter lists and enemy metadata from the live content registry.</p></div><div class="panel-body"><div id="status" class="status">Waiting for room and enemy selection.</div><pre id="output"></pre></div></div>
+    </section>
+  </div>
+  <script src="/static/website/js/creator_common.js"></script>
+  <script>
+    const API_ROOT = "{{ api_root|escapejs }}";
+    const roomSearch = document.getElementById('room-search');
+    const roomList = document.getElementById('room-list');
+    const enemySearch = document.getElementById('enemy-search');
+    const enemyList = document.getElementById('enemy-list');
+    const encounterList = document.getElementById('encounter-list');
+    const output = document.getElementById('output');
+    const statusBox = document.getElementById('status');
+    const validationNotes = document.getElementById('validation-notes');
+    const creatorTools = window.BraveCreator.bind(API_ROOT, statusBox, validationNotes);
+    const editorTitle = document.getElementById('editor-title');
+    const editorSubtitle = document.getElementById('editor-subtitle');
+    const roomChip = document.getElementById('room-chip');
+    const encounterCountChip = document.getElementById('encounter-count-chip');
+    const enemyChip = document.getElementById('enemy-chip');
+    const loadPreviewsButton = document.getElementById('load-previews');
+    const validateButton = document.getElementById('validate-content');
+    const reloadButton = document.getElementById('reload-content');
+    const encounterKey = document.getElementById('encounter-key');
+    const encounterTitle = document.getElementById('encounter-title');
+    const encounterIntro = document.getElementById('encounter-intro');
+    const encounterEnemyOne = document.getElementById('encounter-enemy-one');
+    const encounterEnemyTwo = document.getElementById('encounter-enemy-two');
+    const encounterEnemyThree = document.getElementById('encounter-enemy-three');
+    const encounterEnemyFour = document.getElementById('encounter-enemy-four');
+    const newEncounterButton = document.getElementById('new-encounter');
+    const removeEncounterButton = document.getElementById('remove-encounter');
+    const syncEncounterButton = document.getElementById('sync-encounter-form');
+    const diffEncountersButton = document.getElementById('diff-encounters');
+    const writeEncountersButton = document.getElementById('write-encounters');
+    const encountersJson = document.getElementById('encounters-json');
+    const enemyId = document.getElementById('enemy-id');
+    const enemyName = document.getElementById('enemy-name');
+    const enemyXp = document.getElementById('enemy-xp');
+    const enemyHp = document.getElementById('enemy-hp');
+    const enemyAttack = document.getElementById('enemy-attack');
+    const enemyArmor = document.getElementById('enemy-armor');
+    const enemyAccuracy = document.getElementById('enemy-accuracy');
+    const enemyDodge = document.getElementById('enemy-dodge');
+    const enemyDesc = document.getElementById('enemy-desc');
+    const enemyTags = document.getElementById('enemy-tags');
+    const newEnemyButton = document.getElementById('new-enemy');
+    const syncEnemyButton = document.getElementById('sync-enemy-form');
+    const diffEnemyButton = document.getElementById('diff-enemy');
+    const writeEnemyButton = document.getElementById('write-enemy');
+    const enemyJson = document.getElementById('enemy-json');
+
+    let rooms = [];
+    let enemies = [];
+    let selectedRoom = null;
+    let selectedEnemy = null;
+    let encounterEntries = [];
+    let selectedEncounterIndex = -1;
+
+    function setBusy(isBusy) {
+      for (const button of [loadPreviewsButton, validateButton, reloadButton, newEncounterButton, removeEncounterButton, syncEncounterButton, diffEncountersButton, writeEncountersButton, newEnemyButton, syncEnemyButton, diffEnemyButton, writeEnemyButton]) {
+        button.disabled = isBusy;
+      }
+    }
+
+    function setStatus(message, tone = '') {
+      creatorTools.setStatus(message, tone);
+    }
+
+    function showValidation(messages) {
+      return creatorTools.showValidation(messages);
+    }
+
+    async function apiFetch(path, options = {}) {
+      const response = await fetch(`${API_ROOT}${path}`, { credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload.ok === false) throw new Error(payload.error || `Request failed with ${response.status}`);
+      return payload;
+    }
+
+    function fillEnemySelect(select, selected = '') {
+      const chosen = selected || select.value || '';
+      select.innerHTML = '';
+      const blank = document.createElement('option');
+      blank.value = '';
+      blank.textContent = 'None';
+      select.appendChild(blank);
+      for (const enemy of enemies) {
+        const option = document.createElement('option');
+        option.value = enemy.id;
+        option.textContent = `${enemy.label || enemy.id} (${enemy.id})`;
+        if (enemy.id === chosen) option.selected = true;
+        select.appendChild(option);
+      }
+    }
+
+    function renderList(container, entries, selectedId, filter, onSelect) {
+      const token = filter.trim().toLowerCase();
+      const filtered = entries.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || '').toLowerCase().includes(token)));
+      container.innerHTML = '';
+      for (const entry of filtered) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'row' + (entry.id === selectedId ? ' active' : '');
+        button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id}${entry.meta ? ` · ${entry.meta}` : ''}</span>`;
+        button.addEventListener('click', () => onSelect(entry));
+        container.appendChild(button);
+      }
+    }
+
+    function buildEncounterDraft() {
+      return { key: 'new_encounter', title: 'New Encounter', intro: '', enemies: [] };
+    }
+
+    function buildEnemyDraft() {
+      return { key: 'new_enemy', name: 'New Enemy', xp: 1, max_hp: 1, attack_power: 0, armor: 0, accuracy: 0, dodge: 0, desc: '', tags: [] };
+    }
+
+    function renderEncounterList() {
+      encounterList.innerHTML = '';
+      if (!encounterEntries.length) {
+        const empty = document.createElement('div');
+        empty.className = 'selector-row empty';
+        empty.innerHTML = '<strong>No Encounter Entries</strong><span>Create the first encounter for this room.</span>';
+        encounterList.appendChild(empty);
+      }
+      encounterEntries.forEach((entry, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'selector-row' + (index === selectedEncounterIndex ? ' active' : '');
+        const summary = (entry.enemies || []).join(', ') || 'No enemies';
+        button.innerHTML = `<strong>${entry.title || entry.key || `Encounter ${index + 1}`}</strong><span>${entry.key || 'encounter'} · ${summary}</span>`;
+        button.addEventListener('click', () => selectEncounter(index));
+        encounterList.appendChild(button);
+      });
+      encounterCountChip.textContent = `Entries: ${encounterEntries.length}`;
+      removeEncounterButton.disabled = selectedEncounterIndex < 0 || !encounterEntries.length;
+    }
+
+    function populateEncounterForm(entry) {
+      encounterKey.value = entry.key || '';
+      encounterTitle.value = entry.title || '';
+      encounterIntro.value = entry.intro || '';
+      const ids = entry.enemies || [];
+      fillEnemySelect(encounterEnemyOne, ids[0] || '');
+      fillEnemySelect(encounterEnemyTwo, ids[1] || '');
+      fillEnemySelect(encounterEnemyThree, ids[2] || '');
+      fillEnemySelect(encounterEnemyFour, ids[3] || '');
+    }
+
+    function syncEncounterStateToJson() {
+      creatorTools.clearValidation();
+      encountersJson.value = JSON.stringify(encounterEntries, null, 2);
+      encounterCountChip.textContent = `Entries: ${encounterEntries.length}`;
+      return encounterEntries;
+    }
+
+    function syncEncounterFormToState() {
+      if (!selectedRoom) {
+        setStatus('Choose a room first.', 'bad');
+        return null;
+      }
+      if (selectedEncounterIndex < 0) {
+        if (!encounterEntries.length) {
+          encounterEntries = [buildEncounterDraft()];
+          selectedEncounterIndex = 0;
+        } else {
+          selectedEncounterIndex = 0;
+        }
+      }
+      const key = encounterKey.value.trim();
+      const title = encounterTitle.value.trim();
+      const enemiesSelected = [encounterEnemyOne.value, encounterEnemyTwo.value, encounterEnemyThree.value, encounterEnemyFour.value].filter(Boolean);
+      const messages = creatorTools.requireFields([
+        { label: 'Encounter key', value: key },
+        { label: 'Encounter title', value: title },
+      ]);
+      if (!enemiesSelected.length) messages.push('At least one encounter enemy is required.');
+      if (!showValidation(messages)) {
+        setStatus('Encounter entry is incomplete.', 'bad');
+        return null;
+      }
+      const payload = {
+        key,
+        title,
+        intro: encounterIntro.value.trim() || '',
+        enemies: enemiesSelected,
+      };
+      encounterEntries[selectedEncounterIndex] = payload;
+      syncEncounterStateToJson();
+      renderEncounterList();
+      return encounterEntries;
+    }
+
+    function selectEncounter(index) {
+      selectedEncounterIndex = index;
+      populateEncounterForm(encounterEntries[index] || buildEncounterDraft());
+      renderEncounterList();
+    }
+
+    function createEncounter() {
+      syncEncounterFormToState();
+      encounterEntries.push(buildEncounterDraft());
+      selectedEncounterIndex = encounterEntries.length - 1;
+      populateEncounterForm(encounterEntries[selectedEncounterIndex]);
+      syncEncounterStateToJson();
+      renderEncounterList();
+      setStatus('New encounter entry draft added.', 'good');
+    }
+
+    function removeEncounter() {
+      if (selectedEncounterIndex < 0 || !encounterEntries.length) {
+        setStatus('Select an encounter entry first.', 'bad');
+        return;
+      }
+      encounterEntries.splice(selectedEncounterIndex, 1);
+      if (!encounterEntries.length) {
+        selectedEncounterIndex = -1;
+        populateEncounterForm(buildEncounterDraft());
+      } else {
+        selectedEncounterIndex = Math.max(0, selectedEncounterIndex - 1);
+        populateEncounterForm(encounterEntries[selectedEncounterIndex]);
+      }
+      syncEncounterStateToJson();
+      renderEncounterList();
+      setStatus('Encounter entry removed from the staged list.', 'good');
+    }
+
+    function syncEnemyFormToJson() {
+      const templateKey = enemyId.value.trim();
+      if (!templateKey) {
+        setStatus('Enemy template key is required.', 'bad');
+        return null;
+      }
+      const payload = {
+        name: enemyName.value.trim() || templateKey,
+        xp: Number(enemyXp.value || 1),
+        max_hp: Number(enemyHp.value || 1),
+        attack_power: Number(enemyAttack.value || 0),
+        armor: Number(enemyArmor.value || 0),
+        accuracy: Number(enemyAccuracy.value || 0),
+        dodge: Number(enemyDodge.value || 0),
+        desc: enemyDesc.value.trim() || '',
+        tags: enemyTags.value.split(',').map((value) => value.trim()).filter(Boolean),
+      };
+      enemyJson.value = JSON.stringify(payload, null, 2);
+      return payload;
+    }
+
+    function populateEnemyForm(templateKey, enemy) {
+      enemyId.value = templateKey || '';
+      enemyName.value = enemy.name || '';
+      enemyXp.value = enemy.xp || 1;
+      enemyHp.value = enemy.max_hp || 1;
+      enemyAttack.value = enemy.attack_power || 0;
+      enemyArmor.value = enemy.armor || 0;
+      enemyAccuracy.value = enemy.accuracy || 0;
+      enemyDodge.value = enemy.dodge || 0;
+      enemyDesc.value = enemy.desc || '';
+      enemyTags.value = (enemy.tags || []).join(', ');
+      enemyJson.value = JSON.stringify(enemy, null, 2);
+    }
+
+    async function loadReferences() {
+      [rooms, enemies] = await Promise.all([
+        creatorTools.fetchReferences('rooms'),
+        creatorTools.fetchReferences('enemies'),
+      ]);
+      [encounterEnemyOne, encounterEnemyTwo, encounterEnemyThree, encounterEnemyFour].forEach((select) => fillEnemySelect(select));
+      renderList(roomList, rooms, selectedRoom && selectedRoom.id, roomSearch.value, selectRoom);
+      renderList(enemyList, enemies, selectedEnemy && selectedEnemy.id, enemySearch.value, selectEnemy);
+      renderEncounterList();
+    }
+
+    async function selectRoom(entry) {
+      selectedRoom = entry;
+      roomChip.textContent = `Room: ${entry.id}`;
+      renderList(roomList, rooms, entry.id, roomSearch.value, selectRoom);
+      await loadEncounterPreview();
+    }
+
+    async function selectEnemy(entry) {
+      selectedEnemy = entry;
+      enemyChip.textContent = `Enemy: ${entry.id}`;
+      renderList(enemyList, enemies, entry.id, enemySearch.value, selectEnemy);
+      await loadEnemyPreview();
+    }
+
+    async function loadEncounterPreview() {
+      if (!selectedRoom) return;
+      setBusy(true);
+      setStatus(`Loading encounter preview for ${selectedRoom.id}...`);
+      try {
+        const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'encounters', args:[selectedRoom.id] }) });
+        encounterEntries = Array.isArray(payload.preview.encounters) ? payload.preview.encounters.map((entry) => ({ ...entry })) : [];
+        if (!encounterEntries.length) encounterEntries = [buildEncounterDraft()];
+        selectedEncounterIndex = 0;
+        populateEncounterForm(encounterEntries[0]);
+        syncEncounterStateToJson();
+        renderEncounterList();
+        output.textContent = JSON.stringify(payload.preview, null, 2);
+        editorTitle.textContent = selectedRoom.label || selectedRoom.id;
+        editorSubtitle.textContent = `${selectedRoom.id} encounter table`;
+        setStatus(`Loaded encounter preview for ${selectedRoom.id}.`, 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function loadEnemyPreview() {
+      if (!selectedEnemy) return;
+      setBusy(true);
+      setStatus(`Loading enemy preview for ${selectedEnemy.id}...`);
+      try {
+        const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'enemy', args:[selectedEnemy.id] }) });
+        populateEnemyForm(payload.preview.template_key || selectedEnemy.id, payload.preview.enemy || {});
+        output.textContent = JSON.stringify(payload.preview, null, 2);
+        setStatus(`Loaded enemy preview for ${selectedEnemy.id}.`, 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function createEnemyDraft() {
+      const draft = buildEnemyDraft();
+      selectedEnemy = { id: draft.key, label: draft.name, meta: draft.xp };
+      enemyChip.textContent = `Enemy: ${draft.key}`;
+      populateEnemyForm(draft.key, draft);
+      renderList(enemyList, enemies, null, enemySearch.value, selectEnemy);
+      setStatus('New enemy draft staged in the form.', 'good');
+    }
+
+    async function mutate(kind, target, payload, write) {
+      const result = await apiFetch('/mutate', { method:'POST', body: JSON.stringify({ kind, target, payload, write }) });
+      output.textContent = result.diff || JSON.stringify(result, null, 2);
+      if (write) {
+        const errors = result.validation_errors || [];
+        if (errors.length) {
+          setStatus(`Write completed with ${errors.length} validation issue(s).`, 'bad');
+          output.textContent = `${result.diff || ''}
+
+Validation errors:
+- ${errors.join('
+- ')}`.trim();
+        } else {
+          setStatus(`Wrote ${kind} ${target}.`, 'good');
+          await loadReferences();
+          if (selectedRoom) await loadEncounterPreview();
+          if (selectedEnemy) await loadEnemyPreview();
+        }
+      } else {
+        setStatus(`Dry-run diff ready for ${kind} ${target}.`, 'good');
+      }
+    }
+
+    async function mutateEncounters(write) {
+      const payload = syncEncounterFormToState();
+      if (!payload || !selectedRoom) return;
+      setBusy(true);
+      setStatus(write ? `Writing encounters for ${selectedRoom.id}...` : `Generating encounter diff for ${selectedRoom.id}...`);
+      try {
+        await mutate('encounters', selectedRoom.id, payload, write);
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function mutateEnemy(write) {
+      const payload = syncEnemyFormToJson();
+      const target = enemyId.value.trim();
+      if (!payload || !target) return;
+      setBusy(true);
+      setStatus(write ? `Writing enemy ${target}...` : `Generating enemy diff for ${target}...`);
+      try {
+        await mutate('enemy', target, payload, write);
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function validateContent() {
+      setBusy(true);
+      setStatus('Validating content packs...');
+      try {
+        const payload = await apiFetch('/validate', { method:'POST', body:'{}' });
+        if (payload.errors.length) {
+          setStatus(`Validation found ${payload.errors.length} issue(s).`, 'bad');
+          output.textContent = payload.errors.join('
+');
+        } else {
+          setStatus('Content validation passed.', 'good');
+          output.textContent = JSON.stringify(payload, null, 2);
+        }
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function reloadContent() {
+      setBusy(true);
+      setStatus('Reloading registry from disk...');
+      try {
+        const payload = await apiFetch('/reload', { method:'POST', body:'{}' });
+        setStatus('Content registry reloaded.', 'good');
+        output.textContent = JSON.stringify(payload, null, 2);
+        await loadReferences();
+        if (selectedRoom) await loadEncounterPreview();
+        if (selectedEnemy) await loadEnemyPreview();
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    roomSearch.addEventListener('input', () => renderList(roomList, rooms, selectedRoom && selectedRoom.id, roomSearch.value, selectRoom));
+    enemySearch.addEventListener('input', () => renderList(enemyList, enemies, selectedEnemy && selectedEnemy.id, enemySearch.value, selectEnemy));
+    loadPreviewsButton.addEventListener('click', async () => { if (selectedRoom) await loadEncounterPreview(); if (selectedEnemy) await loadEnemyPreview(); });
+    newEncounterButton.addEventListener('click', createEncounter);
+    removeEncounterButton.addEventListener('click', removeEncounter);
+    syncEncounterButton.addEventListener('click', () => { if (syncEncounterFormToState()) setStatus('Encounter list synced to JSON.', 'good'); });
+    diffEncountersButton.addEventListener('click', () => mutateEncounters(false));
+    writeEncountersButton.addEventListener('click', () => mutateEncounters(true));
+    newEnemyButton.addEventListener('click', createEnemyDraft);
+    syncEnemyButton.addEventListener('click', () => { if (syncEnemyFormToJson()) setStatus('Enemy form synced to JSON.', 'good'); });
+    diffEnemyButton.addEventListener('click', () => mutateEnemy(false));
+    writeEnemyButton.addEventListener('click', () => mutateEnemy(true));
+    validateButton.addEventListener('click', validateContent);
+    reloadButton.addEventListener('click', reloadContent);
+    populateEncounterForm(buildEncounterDraft());
+    populateEnemyForm('new_enemy', buildEnemyDraft());
+    syncEncounterStateToJson();
+    renderEncounterList();
+    loadReferences().catch((error) => { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; });
+  </script>
+</body>
+</html>

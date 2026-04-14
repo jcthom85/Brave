@@ -1,5 +1,6 @@
 """Idempotent world bootstrap for Brave."""
 
+from django.db.utils import OperationalError, ProgrammingError
 from evennia.utils import create, logger, search
 
 from world.content import get_content_registry
@@ -13,7 +14,10 @@ ENTITY_TAG_CATEGORY = "brave_entity"
 
 
 def _first_match(tag_key, category):
-    matches = list(search.search_tag(tag_key, category=category))
+    try:
+        matches = list(search.search_tag(tag_key, category=category))
+    except (OperationalError, ProgrammingError):
+        return None
     return matches[0] if matches else None
 
 
@@ -42,7 +46,7 @@ def _ensure_room(room_data):
     room.key = room_data["key"]
     room.db.desc = room_data["desc"]
     room.db.brave_room_id = room_data["id"]
-    room.db.brave_zone = room_data["zone"]
+    room.db.brave_zone = room_data.get("zone", room_data["id"])
     room.db.brave_world = room_data.get("world", "Brave")
     room.db.brave_resonance = room_data.get("resonance", "fantasy")
     room.db.brave_map_region = room_data.get("map_region", room_data["zone"])
@@ -50,8 +54,10 @@ def _ensure_room(room_data):
     room.db.brave_map_y = room_data.get("map_y", 0)
     room.db.brave_map_icon = room_data.get("map_icon", room_data["key"][:1].upper())
     room.db.brave_safe = room_data["safe"]
+    room.db.brave_enemy_movement_blocked = bool(room_data.get("enemy_movement_blocked", False))
+    if room.db.brave_room_threat_previews is None:
+        room.db.brave_room_threat_previews = []
     room.db.brave_activities = list(room_data.get("activities", []))
-    room.db.brave_portal_hub = bool(room_data.get("portal_hub", False))
     room.tags.add(room_data["id"], category=ROOM_TAG_CATEGORY)
     room.save()
     return room

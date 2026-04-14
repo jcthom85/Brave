@@ -431,12 +431,6 @@
         "summary": "The pale prism taken from the wrong south light at the drowned weir, hung now as proof Brambleford's first hard chapter ended with the lamp finally dark.",
         "world": "Drowned Weir"
       },
-      "junkyard_beacon_core": {
-        "name": "Beacon Core",
-        "placeholder": "A brass label waits for the first relic from Junk-Yard Planet.",
-        "summary": "The first recovered heart-core from beyond the Nexus, still faintly warm with route light.",
-        "world": "Junk-Yard Planet"
-      },
       "miretooth_fen_jaw": {
         "name": "Miretooth's Fen Jaw",
         "placeholder": "A narrow iron cradle waits for whatever proof finally comes back from the Blackfen edge.",

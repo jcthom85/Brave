@@ -71,17 +71,17 @@ class CreatorContentCommandTests(unittest.TestCase):
         self.assertEqual("Testing", mutation.payload["quest_regions"]["creator_test_quest"])
         self.assertIn("creator_test_quest", mutation.payload["starting_quests"])
 
-    def test_mutate_content_portal_write_persists(self):
+    def test_mutate_content_forge_write_persists(self):
         mutate_content(
-            "portal",
-            "creator_test_portal",
-            json.dumps({"name": "Creator Test Portal", "status": "stable", "resonance": "fantasy", "summary": "A temporary portal added by command coverage.", "travel_hint": "north", "entry_room": "brambleford_town_green"}),
+            "forge",
+            "creator_test_blade",
+            json.dumps({"result": "ironroot_longblade", "silver": 12, "materials": {"wolf_fang": 1}, "text": "A temporary forge recipe added by command coverage."}),
             write=True,
             editor=self.editor,
             author="tester",
         )
         persisted = json.loads(self.pack_paths["systems"].read_text(encoding="utf-8"))
-        self.assertIn("creator_test_portal", persisted["portals"]["portals"])
+        self.assertIn("creator_test_blade", persisted["forging"]["forge_recipes"])
         self.assertEqual("tester", persisted["_meta"]["last_modified_by"])
 
     def test_remove_content_readable_dry_run_removes_entry(self):

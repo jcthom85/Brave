@@ -66,17 +66,16 @@ Target content:
 Exit criteria:
 - A family can sit together, catch fish, cook a meal, and finish the "Rats in the Cellar" quest with sound effects.
 
-### Milestone 2: Core Combat & The First Portal
+### Milestone 2: Core Combat & Wilderness Depth
 
 Target content:
 - Whispering Woods.
 - Mage and Rogue.
-- The Nexus: **Junk-Yard Planet** (First Sci-Fi Portal).
 - First "Lore Highlights" in room descriptions.
 
 Exit criteria:
-- Players can "step through the portal" to the Junk-Yard Planet and see their stats/abilities change to Sci-Fi skins.
-- Audio transitions smoothly between fantasy and sci-fi themes.
+- Players can move cleanly from Brambleford into Goblin Road and Whispering Woods without friction.
+- Audio and UI transitions remain readable across town, road, and woods.
 
 ### Milestone 3: Creative Expansion (Building Tools)
 
@@ -120,13 +119,12 @@ Recommended order:
 
 1. **Brambleford Hub** (Home Base, Wharf, Inn, Observatory)
 2. **Goblin Road** (First Combat)
-3. **The Junk-Yard Planet** (First Portal / Genre Swap)
-4. **Whispering Woods** (Environmental Tension)
-5. **Old Barrow Field** (The "Apprentice Architect" Sandbox)
-6. **Ruined Watchtower** (Tactical Boss Fight)
-7. **Goblin Warrens** (Dungeon Crawl)
-8. **The Training Island** (Second Portal / Ki Combat)
-9. **Blackfen Approach** (End-of-Phase Challenge)
+3. **Whispering Woods** (Environmental Tension)
+4. **Old Barrow Field** (Undead escalation)
+5. **Ruined Watchtower** (Tactical Boss Fight)
+6. **Goblin Warrens** (Dungeon Crawl)
+7. **Blackfen Approach** (End-of-Phase Challenge)
+8. **Drowned Weir** (Chapter capstone)
 
 Recommended class order:
 

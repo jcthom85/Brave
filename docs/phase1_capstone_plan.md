@@ -146,7 +146,7 @@ Do not let this turn into:
 
 - another long branch like Blackfen
 - a new major system
-- a second multiverse arc
+- a second unrelated expansion arc
 - a lore dump
 
 The capstone should be short, atmospheric, and decisive.

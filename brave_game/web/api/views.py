@@ -100,8 +100,6 @@ def _reference_entries(domain, registry):
         return [{"id": quest_id, "label": quest.get("title"), "meta": registry.quests.get_quest_region(quest_id)} for quest_id, quest in registry.quests.quests.items()]
     if domain == "enemies":
         return [{"id": template_id, "label": template.get("name"), "meta": template.get("xp", 0)} for template_id, template in registry.encounters.enemy_templates.items()]
-    if domain == "portals":
-        return [{"id": portal_id, "label": portal.get("name"), "meta": portal.get("status")} for portal_id, portal in registry.systems.portals.items()]
     if domain == "forge":
         return [{"id": source_id, "label": (registry.items.get(source_id) or {}).get("name", source_id), "meta": recipe.get("result")} for source_id, recipe in registry.systems.forge_recipes.items()]
     raise KeyError(domain)
@@ -129,7 +127,14 @@ def content_status(request):
             "world": {"source": registry.world.source_path, "draft": str(editor._path_for("world", stage="draft")), "rooms": len(registry.world.rooms), "entities": len(registry.world.entities), "exits": len(registry.world.exits)},
             "encounters": {"source": registry.encounters.source_path, "draft": str(editor._path_for("encounters", stage="draft")), "enemies": len(registry.encounters.enemy_templates), "rooms": len(registry.encounters.room_encounters)},
             "dialogue": {"source": registry.dialogue.source_path, "draft": str(editor._path_for("dialogue", stage="draft")), "talk_entities": len(registry.dialogue.talk_rules), "readables": len(registry.dialogue.static_read_responses)},
-            "systems": {"source": registry.systems.source_path, "draft": str(editor._path_for("systems", stage="draft")), "portals": len(registry.systems.portals), "forge_recipes": len(registry.systems.forge_recipes)},
+            "systems": {
+                "source": registry.systems.source_path,
+                "draft": str(editor._path_for("systems", stage="draft")),
+                "fishing_spots": len(registry.systems.fishing_spots),
+                "cooking_recipes": len(registry.systems.cooking_recipes),
+                "forge_recipes": len(registry.systems.forge_recipes),
+                "trophies": len(registry.systems.trophies),
+            },
         },
     }
     return JsonResponse(payload)

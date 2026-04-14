@@ -8,12 +8,6 @@ TROPHIES = CONTENT.systems.trophies
 
 
 _UNUSED_TROPHIES = {
-    "junkyard_beacon_core": {
-        "name": "Beacon Core",
-        "world": "Junk-Yard Planet",
-        "summary": "The first recovered heart-core from beyond the Nexus, still faintly warm with route light.",
-        "placeholder": "A brass label waits for the first relic from Junk-Yard Planet.",
-    },
     "blackreed_battle_standard": {
         "name": "Blackreed Battle Standard",
         "world": "Ruined Watchtower",

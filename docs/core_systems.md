@@ -210,7 +210,7 @@ This delivers the clearest fantasy RPG core first.
 
 ## Multiverse Resonance (Genre Scaling)
 
-To support portals (Star Wars, Dragonball, etc.), the core stats map to genre-specific "skins."
+The core stats can support alternate presentation styles if Brave ever experiments beyond the fantasy chapter, but phase 1 should treat the fantasy labels as canonical.
 
 | Core Stat | Fantasy (Default) | Sci-Fi / Tech | Martial / Ki |
 | --- | --- | --- | --- |

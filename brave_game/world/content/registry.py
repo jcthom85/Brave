@@ -380,13 +380,39 @@ def _build_world_registry():
     )
 
 
+def _normalize_room_encounters(room_encounters, world_registry):
+    room_zone_by_id = {
+        room.get("id"): str(room.get("zone", "") or "").strip()
+        for room in world_registry.rooms
+    }
+    normalized = {}
+    for room_id, encounter_list in dict(room_encounters or {}).items():
+        room_zone = room_zone_by_id.get(room_id, "")
+        normalized_list = []
+        for encounter in list(encounter_list or []):
+            entry = dict(encounter or {})
+            allowed_zones = [
+                str(zone or "").strip()
+                for zone in list(entry.get("allowed_zones", []))
+                if str(zone or "").strip()
+            ]
+            if not allowed_zones and room_zone:
+                allowed_zones = [room_zone]
+            entry["allowed_zones"] = allowed_zones
+            entry["roaming"] = bool(entry.get("roaming", True))
+            entry["roam_radius"] = max(0, int(entry.get("roam_radius", 3) or 0))
+            normalized_list.append(entry)
+        normalized[room_id] = normalized_list
+    return normalized
 
-def _build_encounter_registry():
+
+
+def _build_encounter_registry(world_registry):
     payload = _load_json_pack(ENCOUNTERS_PACK_PATH)
     return EncounterContentRegistry(
         source_path=str(ENCOUNTERS_PACK_PATH),
         enemy_templates=dict(payload.get("enemy_templates", {})),
-        room_encounters=dict(payload.get("room_encounters", {})),
+        room_encounters=_normalize_room_encounters(payload.get("room_encounters", {}), world_registry),
         enemy_temperament_overrides=dict(payload.get("enemy_temperament_overrides", {})),
         temperament_labels=dict(payload.get("temperament_labels", {})),
     )
@@ -420,12 +446,14 @@ def _build_systems_registry():
     )
 
 
+_WORLD_REGISTRY = _build_world_registry()
+
 _CONTENT_REGISTRY = BraveContentRegistry(
     characters=_build_character_registry(),
     items=_build_item_registry(),
     quests=_build_quest_registry(),
-    world=_build_world_registry(),
-    encounters=_build_encounter_registry(),
+    world=_WORLD_REGISTRY,
+    encounters=_build_encounter_registry(_WORLD_REGISTRY),
     dialogue=_build_dialogue_registry(),
     systems=_build_systems_registry(),
 )
@@ -437,8 +465,9 @@ def reload_content_registry():
     object.__setattr__(_CONTENT_REGISTRY, "characters", _build_character_registry())
     object.__setattr__(_CONTENT_REGISTRY, "items", _build_item_registry())
     object.__setattr__(_CONTENT_REGISTRY, "quests", _build_quest_registry())
-    object.__setattr__(_CONTENT_REGISTRY, "world", _build_world_registry())
-    object.__setattr__(_CONTENT_REGISTRY, "encounters", _build_encounter_registry())
+    world_registry = _build_world_registry()
+    object.__setattr__(_CONTENT_REGISTRY, "world", world_registry)
+    object.__setattr__(_CONTENT_REGISTRY, "encounters", _build_encounter_registry(world_registry))
     object.__setattr__(_CONTENT_REGISTRY, "dialogue", _build_dialogue_registry())
     object.__setattr__(_CONTENT_REGISTRY, "systems", _build_systems_registry())
     return _CONTENT_REGISTRY

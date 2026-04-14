@@ -263,7 +263,6 @@ ROOMS = [
             "Brass plaques, humming anchor lines, and a floor inlaid with star charts make the place feel "
             "half observatory, half impossible harbor."
         ),
-        "portal_hub": True,
     },
     {
         "id": "brambleford_rat_and_kettle_cellar",
@@ -278,89 +277,6 @@ ROOMS = [
             "The inn cellar is all stone, old barrel racks, and corners that seem designed specifically "
             "for unpleasant scratching noises. Flour dust, spilled grain, and chewed crate corners make it "
             "clear the rats have been treating it as a festival ground."
-        ),
-    },
-    {
-        "id": "junkyard_planet_landing_pad",
-        "key": "Junk-Yard Landing",
-        "zone": "Junk-Yard Planet",
-        "world": "Junk-Yard Planet",
-        "resonance": "tech",
-        "map_region": "junkyard_planet",
-        "map_x": 0,
-        "map_y": 0,
-        "map_icon": "L",
-        "safe": True,
-        "desc": (
-            "The return side of the gate opens onto a steel platform sunk into an ocean of salvage. Broken "
-            "railcars, dish arrays, and hull plates lie under a copper sky while distant towers blink with "
-            "cold practical light."
-        ),
-    },
-    {
-        "id": "junkyard_planet_scrapway",
-        "key": "Scrapway Verge",
-        "zone": "Junk-Yard Planet",
-        "world": "Junk-Yard Planet",
-        "resonance": "tech",
-        "map_region": "junkyard_planet",
-        "map_x": 1,
-        "map_y": 0,
-        "map_icon": "S",
-        "safe": False,
-        "desc": (
-            "A narrow path winds between knee-high drifts of stripped wire, cracked panels, and humming scrap. "
-            "Motion flickers under the debris whenever the wind pushes hard enough to wake whatever still powers "
-            "this place."
-        ),
-    },
-    {
-        "id": "junkyard_planet_relay_trench",
-        "key": "Relay Trench",
-        "zone": "Junk-Yard Planet",
-        "world": "Junk-Yard Planet",
-        "resonance": "tech",
-        "map_region": "junkyard_planet",
-        "map_x": 1,
-        "map_y": 1,
-        "map_icon": "R",
-        "safe": False,
-        "desc": (
-            "A cut trench runs between salvage berms and humming cable towers, every surface striped with old "
-            "hazard paint and newer scorch marks. White pulses flicker along the route glass underfoot like the "
-            "ground is still trying to remember its orders."
-        ),
-    },
-    {
-        "id": "junkyard_planet_crane_grave",
-        "key": "Crane Grave",
-        "zone": "Junk-Yard Planet",
-        "world": "Junk-Yard Planet",
-        "resonance": "tech",
-        "map_region": "junkyard_planet",
-        "map_x": 2,
-        "map_y": 0,
-        "map_icon": "C",
-        "safe": False,
-        "desc": (
-            "Collapsed yard cranes lean over the salvage field like dead metal herons. Cab glass crunches underfoot, "
-            "and half-severed hook-lines sway whenever the wind crosses the pit."
-        ),
-    },
-    {
-        "id": "junkyard_planet_anchor_pit",
-        "key": "Anchor Pit",
-        "zone": "Junk-Yard Planet",
-        "world": "Junk-Yard Planet",
-        "resonance": "tech",
-        "map_region": "junkyard_planet",
-        "map_x": 2,
-        "map_y": 1,
-        "map_icon": "A",
-        "safe": False,
-        "desc": (
-            "A broad salvage pit drops away beneath gantries and broken cranes arranged around a central beacon socket. "
-            "The machinery here still obeys something, and whatever that something is has no interest in visitors."
         ),
     },
     {
@@ -1160,114 +1076,6 @@ EXITS = [
         "direction": "west",
         "label": "Great Observatory",
         "aliases": ["w", "observatory", "stairs", "great observatory"],
-    },
-    {
-        "id": "nexus_gate_to_junkyard",
-        "source": "brambleford_nexus_gate",
-        "destination": "junkyard_planet_landing_pad",
-        "key": "east",
-        "direction": "east",
-        "label": "Junk-Yard Planet",
-        "aliases": ["e", "junkyard", "planet", "junk-yard planet", "junk yard planet", "test gate"],
-    },
-    {
-        "id": "junkyard_to_nexus_gate",
-        "source": "junkyard_planet_landing_pad",
-        "destination": "brambleford_nexus_gate",
-        "key": "west",
-        "direction": "west",
-        "label": "Nexus Gate",
-        "aliases": ["w", "return", "anchor", "gate", "home", "nexus", "nexus gate"],
-    },
-    {
-        "id": "landing_to_scrapway",
-        "source": "junkyard_planet_landing_pad",
-        "destination": "junkyard_planet_scrapway",
-        "key": "east",
-        "direction": "east",
-        "label": "Scrapway Verge",
-        "aliases": ["e", "scrapway", "verge", "out"],
-    },
-    {
-        "id": "scrapway_to_landing",
-        "source": "junkyard_planet_scrapway",
-        "destination": "junkyard_planet_landing_pad",
-        "key": "west",
-        "direction": "west",
-        "label": "Junk-Yard Landing",
-        "aliases": ["w", "landing", "return", "back", "junk-yard landing", "junk yard landing"],
-    },
-    {
-        "id": "scrapway_to_relay_trench",
-        "source": "junkyard_planet_scrapway",
-        "destination": "junkyard_planet_relay_trench",
-        "key": "north",
-        "direction": "north",
-        "label": "Relay Trench",
-        "aliases": ["n", "relay", "trench", "relay trench"],
-    },
-    {
-        "id": "relay_trench_to_scrapway",
-        "source": "junkyard_planet_relay_trench",
-        "destination": "junkyard_planet_scrapway",
-        "key": "south",
-        "direction": "south",
-        "label": "Scrapway Verge",
-        "aliases": ["s", "scrapway", "verge"],
-    },
-    {
-        "id": "scrapway_to_crane_grave",
-        "source": "junkyard_planet_scrapway",
-        "destination": "junkyard_planet_crane_grave",
-        "key": "east",
-        "direction": "east",
-        "label": "Crane Grave",
-        "aliases": ["e", "crane", "grave", "crane grave"],
-    },
-    {
-        "id": "crane_grave_to_scrapway",
-        "source": "junkyard_planet_crane_grave",
-        "destination": "junkyard_planet_scrapway",
-        "key": "west",
-        "direction": "west",
-        "label": "Scrapway Verge",
-        "aliases": ["w", "scrapway", "verge"],
-    },
-    {
-        "id": "relay_trench_to_anchor_pit",
-        "source": "junkyard_planet_relay_trench",
-        "destination": "junkyard_planet_anchor_pit",
-        "key": "east",
-        "direction": "east",
-        "label": "Anchor Pit",
-        "aliases": ["e", "anchor", "pit", "anchor pit"],
-    },
-    {
-        "id": "anchor_pit_to_relay_trench",
-        "source": "junkyard_planet_anchor_pit",
-        "destination": "junkyard_planet_relay_trench",
-        "key": "west",
-        "direction": "west",
-        "label": "Relay Trench",
-        "aliases": ["w", "relay", "trench", "relay trench"],
-    },
-    {
-        "id": "crane_grave_to_anchor_pit",
-        "source": "junkyard_planet_crane_grave",
-        "destination": "junkyard_planet_anchor_pit",
-        "key": "north",
-        "direction": "north",
-        "label": "Anchor Pit",
-        "aliases": ["n", "anchor", "pit", "anchor pit"],
-    },
-    {
-        "id": "anchor_pit_to_crane_grave",
-        "source": "junkyard_planet_anchor_pit",
-        "destination": "junkyard_planet_crane_grave",
-        "key": "south",
-        "direction": "south",
-        "label": "Crane Grave",
-        "aliases": ["s", "crane", "grave", "crane grave"],
     },
     {
         "id": "wharf_to_town_green",
@@ -2258,39 +2066,6 @@ WORLD_OBJECTS = [
         "desc": (
             "A polished brass plaque is riveted into the gate dais, each portal name engraved beside a thin "
             "glass strip that glows or stays dark depending on the gate's condition."
-        ),
-    },
-    {
-        "id": "salvage_beacon",
-        "key": "salvage beacon",
-        "aliases": ["beacon", "signal", "tower"],
-        "kind": "readable",
-        "location": "junkyard_planet_landing_pad",
-        "desc": (
-            "A waist-high beacon blinks in clipped pulses through the scrap haze, anchoring the return gate to "
-            "something on this world that still remembers how to answer."
-        ),
-    },
-    {
-        "id": "relay_route_mast",
-        "key": "relay route mast",
-        "aliases": ["mast", "relay mast", "route mast"],
-        "kind": "readable",
-        "location": "junkyard_planet_relay_trench",
-        "desc": (
-            "A metal mast rises from the trench with route glass still threaded through its ribs. Static ticks across "
-            "it like rain on wire."
-        ),
-    },
-    {
-        "id": "crane_gantry",
-        "key": "collapsed crane gantry",
-        "aliases": ["gantry", "crane gantry", "crane"],
-        "kind": "readable",
-        "location": "junkyard_planet_crane_grave",
-        "desc": (
-            "The gantry lies folded across the yard, cab glass burst outward and old work orders sealed under layers "
-            "of rust dust and magnet grit."
         ),
     },
     {

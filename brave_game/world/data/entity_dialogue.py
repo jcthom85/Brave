@@ -64,8 +64,12 @@ TALK_RULES = {
             active="smoke_on_the_ridge",
         ),
         _rule(
-            "There you are. Before you run after trouble, settle your build with `race` and `class`, then check `sheet` and `gear`. Once you have your feet under you, the inn has the first honest job waiting.",
+            "There you are. Head south to the green, then west to the Lantern Rest. Uncle Pib has the first honest job waiting, and it stays inside the walls.",
             active="practice_makes_heroes",
+        ),
+        _rule(
+            "That is the yard handled. Your first real job should stay inside town walls: head south to the green, west to the Lantern Rest, and talk to Uncle Pib about his cellar.",
+            completed="practice_makes_heroes",
         ),
         _rule(
             "Ruk is the sort of brute who punishes anyone foolish enough to face him alone. Use `party invite <name>` if you need to gather the family, then hit him together.",
@@ -85,12 +89,20 @@ TALK_RULES = {
             completed="the_hollow_lantern",
         ),
         _rule(
+            "Ruk's down, so now the town gets to notice the trouble it was postponing. Maybelle has the next immediate problem in the woods. The mayor's also taking reports about the west lantern watch, but that's the sort of business that gets worse if you rush it blind.",
+            completed="ruk_the_fence_cutter",
+        ),
+        _rule(
             "You look steadier now. Let the toughest one take the first hit, let the sharpest one pick the target, and come back alive enough for supper."
         ),
     ],
     "uncle_pib_underbough": [
         _rule(
-            "If you're looking for work that smells worse but hurts less than Goblin Road, head west into the inn and then `down` to the cellar. Clear it out with `fight`, then come back upstairs once the scratching stops.",
+            "Harl sent you? Good. Take the stairs `down` to the cellar, clear the thorn rats with `fight`, then come back upstairs so I can stop guarding flour like a dragon with back pain.",
+            active="practice_makes_heroes",
+        ),
+        _rule(
+            "You found the inn. Take the stairs `down` to the cellar, clear the rats with `fight`, then come back upstairs once the scratching stops.",
             active="rats_in_the_kettle",
         ),
         _rule(
@@ -184,7 +196,7 @@ TALK_RULES = {
             completed="the_hollow_lantern",
         ),
         _rule(
-            "Goblin Road can breathe again, but the woods have gone strange. Sister Maybelle's been asking after moonleaf, and I've seen wolf sign deeper than I like.",
+            "Goblin Road can breathe again, but I would spend that breathing room on the south trail. Sister Maybelle needs moonleaf, I need cleaner eyes in the woods, and whatever's moving under those trees feels more measured than hungry.",
             completed="ruk_the_fence_cutter",
         ),
         _rule(
@@ -229,7 +241,7 @@ TALK_RULES = {
             completed="greymaws_trail",
         ),
         _rule(
-            "Ruk is done, thank the lanterns. Now the woods need looking after. Speak to Mira, or head south if you've already decided trouble deserves a personal visit.",
+            "Ruk is done, thank the lanterns. Good. Then use the breathing room properly. The woods south of the gate need tending now, and after that I suspect Brother Alden will have sterner things to say about the west road than I do.",
             completed="ruk_the_fence_cutter",
         ),
         _rule(
@@ -250,28 +262,12 @@ TALK_RULES = {
             active="the_south_light",
         ),
         _rule(
-            "Coilback sits in the Anchor Pit like a bad idea nobody managed to turn off. Hit the pit from the relay trench or the crane grave, keep moving when the clamps come down, and don't let that foreman decide the bridge belongs to him.",
-            active="foreman_coilback",
-        ),
-        _rule(
-            "Good. The trench route still answers. Now chart the Crane Grave and bring me one clean shard of anchor glass so I can tune the lens without guessing.",
-            active="signal_in_the_scrap",
-        ),
-        _rule(
-            "The first trench east of the landing still carries a route pulse. Reach it, then bring back a live flux coil. Preferably one that isn't trying to bite through your gloves by the time you return.",
-            active="bridgework_for_joss",
-        ),
-        _rule(
             "The south line is dark again. Properly dark, not waiting-to-be-clever dark. That's worth more than a tidy lens report. If you haven't looked upstairs yet, the Trophy Hall has a frame waiting for the prism.",
             completed="the_hollow_lantern",
         ),
         _rule(
-            "There. Hear that? The gate's hum is cleaner now. The Trophy Hall upstairs has a place for the Beacon Core because some wins ought to stay where the whole family can point at them.",
-            completed="foreman_coilback",
-        ),
-        _rule(
-            "Different sky, same bones. The world here skins your instincts as tech. `sheet` will show the local names, and the return path will always answer while I keep the bridge lit.",
-            resonance="tech",
+            "Road goblins are yesterday's problem if the town is lucky. I would take Maybelle's woods trouble first, because the older systems tend to reveal themselves one layer at a time out here. When you start wanting the pattern instead of the symptom, come talk to me again.",
+            completed="ruk_the_fence_cutter",
         ),
         _rule(
             "Most folk think I light lamps. True enough. They just forget a gate is another sort of lamp if you know what to feed it. The observatory's the town's center, whether the mayor likes the phrase or not."
@@ -323,6 +319,10 @@ TALK_RULES = {
             completed="the_knight_without_rest",
         ),
         _rule(
+            "Good. One road problem closed. Now the town gets to admit it has others. Maybelle's woods trouble sounds like the next immediate cut, while the chapel keeps warning me that the west lantern line is turning stranger than weather has any right to be.",
+            completed="ruk_the_fence_cutter",
+        ),
+        _rule(
             "Good. Then phase one of this town's current bad luck is closed: road, woods, barrows, ridge, warrens, fen, and now the drowned light beyond it. Brambleford will find a way to make more trouble eventually, but for one evening the board may stay quieter.",
             completed="the_hollow_lantern",
         ),
@@ -350,6 +350,10 @@ TALK_RULES = {
         _rule(
             "The bell rings clean again. That is not peace, exactly, but it is close enough for town sleep and chapel thanks.",
             completed="the_knight_without_rest",
+        ),
+        _rule(
+            "Ruk's fall bought the town a breath, not a blessing. The woods have started whispering wrong, and the mayor's western lantern reports have not improved my mood. Help Maybelle steady the south trail first. If the bell keeps answering strangely after that, come back to me.",
+            completed="ruk_the_fence_cutter",
         ),
         _rule(
             "The chapel keeps records, candles, and the sort of silence people only notice when they lose it. If you need the Dawn Bell at your back before a hard road, ring your courage true and |wpray|n here before you leave."
@@ -431,16 +435,7 @@ STATIC_READ_RESPONSES = {
         "The cracked slab still carries a knightly carving beneath the moss: SIR EDRIC VALE, WHO HELD THE LINE UNTIL THE LINE OUTLIVED HIM."
     ),
     "star_lens": (
-        "The etched brass rings mark stars, routes, and a handful of names that are definitely not villages anywhere near Brambleford. One line is picked out brighter than the rest: JUNK-YARD PLANET."
-    ),
-    "salvage_beacon": (
-        "A clipped scrolling line repeats across the beacon housing in a script your eyes somehow decide they understand: ANCHOR STABLE. RETURN VECTOR CLEAN. LOCAL SALVAGE FIELD ACTIVE."
-    ),
-    "relay_route_mast": (
-        "The mast flashes a repeating route code through the trench glass: RELAY / YARD / PIT. Someone has etched a newer note beneath it in softer metal: IF IT HUMS BACK, DUCK."
-    ),
-    "crane_gantry": (
-        "A dead foreman schedule still clings to the cab wall, every shift crossed out except one line left legible in angry strokes: COILBACK CLAIMS PIT AUTHORITY."
+        "The etched brass rings mark stars, routes, and a handful of survey names no one in Brambleford has fully trusted in years. Most of the brighter lines now end in crossed-out maintenance marks."
     ),
     "cellar_warning_slate": (
         "Uncle Pib's chalk scrawl reads: IF YOU ARE HOLDING THIS SLATE, THE RATS HAVE NOT EATEN YOU. GOOD. CLEAR THEM OUT AND I'LL CALL IT HEROISM."

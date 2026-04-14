@@ -3,7 +3,7 @@
 In `Brave`, combat is only half the fun. Minigames are first-class citizens designed for relaxation, creative expression, and family cooperation.
 
 ## 1. The Fishing System (Relax & Collect)
-Fishing is a tactical, timing-based minigame that can be played at any water source (The Bramble River, Blackfen Pools, or Cosmic Oceans).
+Fishing is a tactical, timing-based minigame that can be played at water sources across the fantasy chapter (the Bramble River, marsh pools, and later frontier spots).
 - **The Mechanic:** Players cast a line and must react to "ripples" (text cues) to hook a fish. Rarer fish require better rods or specific baits.
 - **The "Great Catch" Log:** A shared family board in the Lantern Rest Inn that tracks the biggest fish caught by each person.
 - **Creative Side:** Kids can design their own "Legendary Fish"—defining its name, description, and where it lives.
@@ -21,9 +21,9 @@ This is a roleplaying-heavy minigame where players take over a shop in Bramblefo
 
 ## 4. Resource Management: The Town Project
 The family can work together to "upgrade" Brambleford or their own shared housing.
-- **Gathering:** Wood from Whispering Woods, Iron from the Warrens, or "Flux" from portals.
+- **Gathering:** Wood from Whispering Woods, iron and scrap from the warrens, and rare materials from late-chapter danger zones.
 - **Building:** Using resources to add a "Trophy Room," a "Library," or a "Garden" to the town hub.
-- **Impact:** Upgrades unlock new quests, better gear, or new portal destinations.
+- **Impact:** Upgrades unlock new quests, better gear, or stronger town-side support options.
 
 ## 5. The Hobbyist's Kit: Mastering Game Mechanics
 Each minigame is a "Module" that demonstrates a specific game design concept:

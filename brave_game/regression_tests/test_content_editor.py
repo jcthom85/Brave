@@ -63,20 +63,18 @@ class ContentEditorTests(unittest.TestCase):
         self.assertEqual("Testing", mutation.payload["quest_regions"]["creator_test_quest"])
         self.assertIn("creator_test_quest", mutation.payload["starting_quests"])
 
-    def test_write_pack_persists_system_portal_update(self):
-        mutation = self.editor.upsert_portal(
-            "creator_test_portal",
+    def test_write_pack_persists_forge_recipe_update(self):
+        mutation = self.editor.upsert_forge_recipe(
+            "creator_test_blade",
             {
-                "name": "Creator Test Portal",
-                "status": "stable",
-                "resonance": "fantasy",
-                "summary": "A temporary portal for editor tests.",
-                "travel_hint": "north",
-                "entry_room": "brambleford_town_green",
+                "result": "ironroot_longblade",
+                "silver": 18,
+                "materials": {"wolf_fang": 1},
+                "text": "A temporary forge recipe for editor tests.",
             },
             write=True,
         )
 
         persisted = json.loads(self.pack_paths["systems"].read_text(encoding="utf-8"))
-        self.assertIn("creator_test_portal", persisted["portals"]["portals"])
-        self.assertIn("Creator Test Portal", mutation.diff)
+        self.assertIn("creator_test_blade", persisted["forging"]["forge_recipes"])
+        self.assertIn("creator_test_blade", mutation.diff)

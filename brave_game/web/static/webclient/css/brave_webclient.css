@@ -5,8 +5,14 @@
 }
 
 :root {
-    --brave-font-family: "Brave Plex Mono", monospace;
+    --brave-ui-font-family: "Brave Plex Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
     --brave-font-size-scale: 1;
     --brave-pack-rail-width: var(--brave-map-size);
@@ -521,36 +527,6 @@ body[data-brave-world-tone="nexus"] {
     --brave-world-surface-tint-strong: rgba(var(--brave-accent-rgb), 0.13);
 }
 
-body[data-brave-world-tone="junkyard"] {
-    --brave-accent: #dd8f52;
-    --brave-accent-deep: #8d532a;
-    --brave-accent-rgb: 221, 143, 82;
-    --brave-accent-mid: #af6e37;
-    --brave-accent-dark: #7a4b26;
-    --brave-link: #f0b276;
-    --brave-prompt: #efc18f;
-    --brave-bg-warm-glow: rgba(178, 105, 46, 0.2);
-    --brave-bg-cool-glow: rgba(58, 118, 132, 0.18);
-    --brave-world-surface-tint: rgba(var(--brave-accent-rgb), 0.09);
-    --brave-world-surface-tint-soft: rgba(var(--brave-accent-rgb), 0.056);
-    --brave-world-surface-tint-strong: rgba(var(--brave-accent-rgb), 0.135);
-}
-
-body[data-brave-world-tone="portal"] {
-    --brave-accent: #9ab8da;
-    --brave-accent-deep: #5b7596;
-    --brave-accent-rgb: 154, 184, 218;
-    --brave-accent-mid: #738eb0;
-    --brave-accent-dark: #556783;
-    --brave-link: #b8d0ea;
-    --brave-prompt: #c8d9ea;
-    --brave-bg-warm-glow: rgba(98, 128, 166, 0.15);
-    --brave-bg-cool-glow: rgba(72, 103, 149, 0.16);
-    --brave-world-surface-tint: rgba(var(--brave-accent-rgb), 0.085);
-    --brave-world-surface-tint-soft: rgba(var(--brave-accent-rgb), 0.05);
-    --brave-world-surface-tint-strong: rgba(var(--brave-accent-rgb), 0.13);
-}
-
 .material-symbols-outlined {
     font-family: "Material Symbols Outlined";
     font-weight: 400;
@@ -632,6 +608,20 @@ body[data-brave-world-tone="portal"] {
 }
 
 @font-face {
+    font-family: "Brave Source Sans 3";
+    src: url("../fonts/SourceSans3-Regular.ttf") format("truetype");
+    font-display: swap;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "Brave Source Sans 3";
+    src: url("../fonts/SourceSans3-Medium.ttf") format("truetype");
+    font-display: swap;
+    font-weight: 500;
+}
+
+@font-face {
     font-family: "Brave Silkscreen";
     src: url("../fonts/Silkscreen-Regular.ttf") format("truetype");
     font-display: swap;
@@ -650,74 +640,146 @@ body[data-brave-world-tone="portal"] {
 }
 
 body[data-brave-font="plex"] {
-    --brave-font-family: "Brave Plex Mono", monospace;
+    --brave-ui-font-family: "Brave Plex Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="dejavu"] {
-    --brave-font-family: "Brave DejaVu Sans Mono", monospace;
+    --brave-ui-font-family: "Brave DejaVu Sans Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="ubuntu"] {
-    --brave-font-family: "Brave Ubuntu Mono", monospace;
+    --brave-ui-font-family: "Brave Ubuntu Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="redhat"] {
-    --brave-font-family: "Brave Red Hat Mono", monospace;
+    --brave-ui-font-family: "Brave Red Hat Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
+    --brave-body-letter-spacing: 0;
+    --brave-dialogue-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="anonymous"] {
-    --brave-font-family: "Brave Anonymous Pro", monospace;
+    --brave-ui-font-family: "Brave Anonymous Pro", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
+    --brave-body-letter-spacing: 0;
+    --brave-dialogue-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="fira"] {
-    --brave-font-family: "Brave Fira Mono", monospace;
+    --brave-ui-font-family: "Brave Fira Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="sharetech"] {
-    --brave-font-family: "Brave Share Tech Mono", monospace;
+    --brave-ui-font-family: "Brave Share Tech Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.015em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="space"] {
-    --brave-font-family: "Brave Space Mono", monospace;
+    --brave-ui-font-family: "Brave Space Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
+    --brave-body-letter-spacing: 0;
+    --brave-dialogue-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="vt323"] {
-    --brave-font-family: "Brave VT323", monospace;
+    --brave-ui-font-family: "Brave VT323", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.03em;
+    --brave-body-letter-spacing: 0;
+    --brave-dialogue-letter-spacing: 0;
     --brave-text-scale: 1.16;
 }
 
 body[data-brave-font="silkscreen"] {
-    --brave-font-family: "Brave Silkscreen", monospace;
+    --brave-ui-font-family: "Brave Silkscreen", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.02em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="tiny5"] {
-    --brave-font-family: "Brave Tiny5", monospace;
+    --brave-ui-font-family: "Brave Tiny5", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.025em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1.22;
 }
 
 body[data-brave-font="pressstart"] {
-    --brave-font-family: "Brave Press Start 2P", monospace;
+    --brave-ui-font-family: "Brave Press Start 2P", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.02em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 0.92;
 }
 
@@ -747,7 +809,7 @@ body {
         radial-gradient(circle at 82% 0, var(--brave-bg-cool-glow), transparent 26%),
         linear-gradient(180deg, var(--brave-bg-top), var(--brave-bg-bottom));
     color: var(--brave-text);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     letter-spacing: var(--brave-letter-spacing);
     transition: color 220ms ease, background 220ms ease;
 }
@@ -867,7 +929,7 @@ body::-webkit-scrollbar,
 
 /* Ensure font variables are inherited by Evennia's output classes */
 .out, .msg, .messagewindow, #messagewindow, .lm_content {
-    font-family: var(--brave-font-family) !important;
+    font-family: var(--brave-ui-font-family) !important;
 }
 
 .lm_controls,
@@ -936,7 +998,7 @@ body::-webkit-scrollbar,
 .goldenlayout-options-ui label,
 .goldenlayout-options-ui div,
 .goldenlayout-options-ui {
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     letter-spacing: var(--brave-letter-spacing);
 }
 
@@ -1049,7 +1111,8 @@ body::-webkit-scrollbar,
     color: var(--brave-text);
     font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.62;
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
     text-shadow: var(--brave-text-glow);
 }
 
@@ -1091,7 +1154,7 @@ body::-webkit-scrollbar,
 .prompt {
     margin: 0 0 6px;
     color: var(--brave-prompt);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: calc(var(--brave-letter-spacing) + 0.02em);
     text-transform: uppercase;
@@ -1129,7 +1192,7 @@ body::-webkit-scrollbar,
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 42%),
         linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
     color: var(--brave-text-dim);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: calc(var(--brave-letter-spacing) + 0.06em);
     text-transform: uppercase;
@@ -1159,7 +1222,7 @@ body::-webkit-scrollbar,
 #inputfield {
     grid-column: 1;
     grid-row: 1;
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: var(--brave-letter-spacing);
     width: auto;
@@ -1255,7 +1318,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     border-radius: var(--brave-radius-control);
     background: linear-gradient(180deg, var(--brave-accent), var(--brave-accent-mid) 72%, var(--brave-accent-dark) 100%);
     color: var(--brave-accent-contrast);
-    font-family: "Material Symbols Outlined", var(--brave-font-family);
+    font-family: "Material Symbols Outlined", var(--brave-ui-font-family);
     font-size: 1.28rem;
     font-weight: 400;
     letter-spacing: normal;
@@ -1373,16 +1436,19 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     flex: 1 1 auto;
     min-width: 0;
     color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
     font-size: calc(1.02rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.1;
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.06em);
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     text-transform: uppercase;
     overflow-wrap: anywhere;
 }
 
 .brave-picker-sheet__subtitle {
     color: var(--brave-text-soft);
+    font-family: var(--brave-body-font-family);
     font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.45;
 }
 
@@ -1404,7 +1470,9 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .brave-picker-sheet__bodyline {
     color: var(--brave-text-soft);
+    font-family: var(--brave-body-font-family);
     font-size: calc(0.8rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.45;
 }
 
@@ -1523,6 +1591,90 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     border-radius: var(--brave-radius-card-tight);
 }
 
+.brave-picker-sheet__panel--tutorial {
+    width: min(640px, calc(100% - 32px));
+    gap: 18px;
+    overflow-y: auto;
+}
+
+.brave-tutorial-carousel {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.brave-tutorial-carousel__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.28);
+    border-radius: var(--brave-radius-card);
+    background:
+        radial-gradient(circle at 50% 0, rgba(var(--brave-accent-rgb), 0.18), transparent 64%),
+        rgba(255, 255, 255, 0.035);
+    color: var(--brave-text-bright);
+}
+
+.brave-tutorial-carousel__icon .material-symbols-outlined {
+    font-size: 2rem;
+}
+
+.brave-tutorial-carousel__copy {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+}
+
+.brave-tutorial-carousel__title {
+    color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
+    font-size: calc(1.12rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    letter-spacing: var(--brave-dialogue-letter-spacing);
+}
+
+.brave-tutorial-carousel__body {
+    display: grid;
+    gap: 8px;
+}
+
+.brave-tutorial-carousel__line {
+    color: var(--brave-text-soft);
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.95rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.5;
+    letter-spacing: var(--brave-body-letter-spacing);
+}
+
+.brave-tutorial-carousel__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.brave-tutorial-carousel__progress,
+.brave-tutorial-carousel__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brave-tutorial-carousel__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--brave-text-dim) 44%, transparent);
+}
+
+.brave-tutorial-carousel__dot--active {
+    width: 22px;
+    background: var(--brave-accent);
+}
+
 .brave-notice {
     display: grid;
     gap: 12px;
@@ -1579,9 +1731,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     flex: 1 1 auto;
     min-width: 0;
     color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
     font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.1;
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.04em);
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     text-transform: uppercase;
     overflow-wrap: anywhere;
 }
@@ -1595,9 +1748,17 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     gap: 8px;
 }
 
+.brave-notice__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
 .brave-notice__line {
     color: var(--brave-text-soft);
-    font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.88rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.48;
 }
 
@@ -1614,7 +1775,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     grid-template-rows: minmax(0, 1fr) minmax(220px, 0.82fr);
     grid-template-areas:
         "card pack"
-        ". vicinity";
+        "vicinity vicinity";
     column-gap: var(--brave-rail-gap);
     row-gap: 6px;
     align-items: stretch;
@@ -1747,6 +1908,59 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     flex: 1 1 auto;
 }
 
+.scene-rail__panel--vicinity .brave-room-log {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--brave-world-line) 18%, transparent);
+    border-radius: 999px;
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(var(--brave-accent-rgb), 0.24);
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body > .out,
+.scene-rail__panel--vicinity .brave-room-log__body > .msg,
+.scene-rail__panel--vicinity .brave-room-log__body > .err,
+.scene-rail__panel--vicinity .brave-room-log__body > .sys {
+    margin-top: 0;
+    padding: 8px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.12);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--brave-text);
+    font-size: calc(0.7rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.45;
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body > .err {
+    border-color: rgba(194, 92, 78, 0.22);
+    color: #f2c3ba;
+}
+
 .scene-rail__panel--vicinity .scene-card__list {
     flex: 1 1 auto;
     min-height: 0;
@@ -1801,7 +2015,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
         linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
     border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.18));
     border-radius: var(--brave-radius-card);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-mono-font-family);
     font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.08;
     letter-spacing: 0;
@@ -1913,9 +2127,11 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     align-items: flex-start;
     gap: 10px;
     color: var(--brave-text-bright);
-    font-size: calc(0.94rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-dialogue-font-family);
+    font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 500;
     line-height: 1.45;
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.01em);
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     text-transform: none;
 }
 
@@ -2028,7 +2244,9 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     gap: 10px;
     align-items: start;
     color: var(--brave-text-soft);
-    font-size: calc(0.86rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.92rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.42;
 }
 
@@ -2108,6 +2326,8 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .scene-card__text {
     min-width: 0;
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
     overflow-wrap: anywhere;
 }
 
@@ -2183,6 +2403,7 @@ body.brave-mainview-active .scene-rail {
     flex-direction: column;
     gap: 18px;
     max-width: 980px;
+    font-family: var(--brave-ui-font-family);
 }
 
 .brave-view__titlebar {
@@ -2939,7 +3160,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--chargen {
-    max-width: 920px;
+    max-width: 1040px;
     gap: 14px;
     min-height: 100%;
 }
@@ -2975,7 +3196,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--chargen .brave-view__sections {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
-    max-width: 920px;
+    max-width: 1040px;
     flex: 1 1 auto;
     align-content: start;
 }
@@ -2987,7 +3208,6 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--chargen .brave-view__entry {
-    min-height: 100%;
     gap: 8px;
     padding: 14px 14px 12px;
 }
@@ -3027,6 +3247,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     max-width: 42ch;
 }
 
+.brave-view--connection .brave-view__eyebrow {
+    letter-spacing: var(--brave-letter-spacing);
+    text-transform: none;
+}
+
 .brave-view--connection .brave-view__list-item {
     align-items: center;
     padding: 11px 12px;
@@ -3060,6 +3285,40 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     max-width: 56ch;
 }
 
+.brave-view--chargen .brave-view__actions {
+    gap: 8px;
+}
+
+.brave-view--chargen .brave-view__section--draft {
+    padding: 12px 14px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-surface-well-top) 72%, transparent), color-mix(in srgb, var(--brave-surface-well-bottom) 82%, transparent));
+}
+
+.brave-view--chargen .brave-view__section--draft .brave-view__section-label {
+    margin-bottom: 0;
+}
+
+.brave-view--chargen .brave-view__section--draft .brave-view__pairs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.brave-view--chargen .brave-view__section--draft .brave-view__pair {
+    align-items: start;
+    padding: 0 12px 0 0;
+    border-right: 1px solid rgba(var(--brave-accent-rgb), 0.1);
+    border-bottom: 0;
+}
+
+.brave-view--chargen .brave-view__section--draft .brave-view__pair:last-child {
+    padding-right: 0;
+    border-right: 0;
+}
+
+.brave-view--chargen .brave-view__section--draft .brave-view__pair-value {
+    text-align: left;
+}
+
 .brave-view--connection .brave-view__entry-line:first-child {
     color: var(--brave-link);
 }
@@ -3070,7 +3329,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--chargen .brave-view__entries {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 12px;
 }
 
@@ -3239,7 +3498,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     overflow: hidden;
     white-space: pre;
     text-align: center;
-    font-family: "Brave Plex Mono", monospace;
+    font-family: var(--brave-mono-font-family);
     font-size: 12px;
     line-height: 1;
     letter-spacing: 0;
@@ -3283,7 +3542,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: block;
     max-width: 100%;
     color: color-mix(in srgb, var(--brave-text-bright) 74%, var(--brave-accent));
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     font-size: clamp(2.4rem, 5vw, 4.4rem);
     font-weight: 700;
     line-height: 0.88;
@@ -3347,9 +3606,10 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     align-items: center;
     gap: 12px;
     color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
     font-size: calc(1.16rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.015em);
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     text-transform: uppercase;
 }
 
@@ -3358,9 +3618,17 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     font-size: 1.28rem;
 }
 
+.brave-view--dialogue .brave-view__title,
+.brave-view--read .brave-view__title {
+    letter-spacing: var(--brave-dialogue-letter-spacing);
+    text-transform: none;
+}
+
 .brave-view__subtitle {
     color: var(--brave-text-soft);
-    font-size: calc(0.88rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
+    font-size: calc(0.94rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.55;
     max-width: 64ch;
 }
@@ -3368,13 +3636,18 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--room .brave-view__subtitle {
     max-width: 100%;
     color: color-mix(in srgb, var(--brave-text-soft) 82%, var(--brave-text-bright));
-    font-size: calc(0.92rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.58;
 }
 
 .brave-view--room .brave-view__title {
-    font-size: calc(1.26rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-dialogue-font-family);
+    font-size: calc(1.34rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.15;
     text-shadow: 0 0 18px rgba(var(--brave-accent-rgb), 0.06);
+    text-transform: none;
 }
 
 .brave-view--room .brave-view__eyebrow {
@@ -3484,7 +3757,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: -webkit-box;
     overflow: hidden;
     color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
     font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     line-height: 1.16;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -3575,6 +3850,16 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view__action--danger {
     border-color: rgba(213, 138, 118, 0.28);
     color: #ebb3a4;
+}
+
+.brave-view__action--pending,
+.brave-view__action:disabled {
+    cursor: wait;
+    opacity: 0.84;
+}
+
+.brave-view__action--pending .brave-view__action-icon {
+    color: color-mix(in srgb, var(--brave-good) 72%, var(--brave-text-bright));
 }
 
 .brave-view__sections {
@@ -4027,7 +4312,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__pair-value {
     color: var(--brave-text-brighter);
+    font-family: var(--brave-body-font-family);
     font-size: calc(0.92rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.4;
     text-align: right;
 }
@@ -4058,7 +4345,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint-soft) 94%, rgba(var(--brave-accent-rgb), 0.035)), transparent 30%),
         linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
     color: var(--brave-text-brighter);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     font-size: calc(0.96rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: var(--brave-letter-spacing);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -4218,7 +4505,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: flex;
     align-items: center;
     color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
     font-size: calc(0.94rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     line-height: 1.35;
     min-height: 1.35em;
 }
@@ -4289,6 +4578,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: flex;
     flex-direction: column;
     gap: 4px;
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
 }
 
 .brave-view__meters {
@@ -4517,7 +4808,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section {
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     isolation: isolate;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
@@ -4863,7 +5154,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry {
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     height: 192px;
     min-height: 192px;
     max-height: 192px;
@@ -4880,12 +5171,20 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--combat .brave-view__section--party .brave-view__entry {
     position: relative;
     min-height: 204px;
+    overflow: visible;
 }
 
 .brave-view--chargen .brave-view__entry {
     position: relative;
     overflow: hidden;
-    min-height: 240px;
+    min-height: 218px;
+}
+
+.brave-view--chargen .brave-view__entry--selected {
+    border-color: color-mix(in srgb, var(--brave-good) 52%, var(--brave-world-line));
+    background:
+        radial-gradient(circle at 100% 0, rgba(138, 191, 151, 0.16), transparent 38%),
+        linear-gradient(180deg, var(--brave-surface-soft-top), var(--brave-surface-soft-bottom));
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-ornament {
@@ -4906,9 +5205,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     transform: translate(-50%, -50%);
     font-size: 6.2rem;
     line-height: 1;
-    color: rgba(139, 74, 41, 0.08);
+    color: rgba(var(--brave-accent-rgb), 0.2);
+    text-shadow: 0 0 24px rgba(var(--brave-accent-rgb), 0.16);
     font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 48;
     z-index: 0;
+}
+
+.brave-view--chargen .brave-view__entry--selected .brave-view__entry-ornament {
+    color: rgba(138, 191, 151, 0.24);
+    text-shadow: 0 0 24px rgba(138, 191, 151, 0.18);
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry-ornament {
@@ -5638,7 +5943,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-combat-ghost {
     border-radius: inherit;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .brave-combat-ghost--defeat {
@@ -6115,7 +6420,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view__arcade-screen {
     margin: 0;
     min-height: 13em;
-    font-family: "VT323", "DejaVu Sans Mono", monospace;
+    font-family: "Brave VT323", "Brave DejaVu Sans Mono", monospace;
     font-size: clamp(0.92rem, 1.2vw, 1.24rem);
     line-height: 1;
     letter-spacing: 0.02em;
@@ -6277,7 +6582,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         linear-gradient(180deg, rgba(21, 27, 36, 0.98), rgba(7, 10, 14, 1)),
         radial-gradient(circle at 50% 0, rgba(112, 220, 255, 0.08), transparent 56%);
     color: #ecfbff;
-    font-family: "VT323", "DejaVu Sans Mono", monospace;
+    font-family: "Brave VT323", "Brave DejaVu Sans Mono", monospace;
     font-size: 1.7rem;
     line-height: 1;
     touch-action: none;
@@ -6486,7 +6791,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         radial-gradient(circle at 18% 0, var(--brave-world-surface-tint), transparent 34%),
         linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
     color: var(--brave-text-bright);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-mono-font-family);
     font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.16;
     letter-spacing: 0;
@@ -6522,7 +6827,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         inset 0 0 0 1px rgba(255, 255, 255, 0.015),
         0 16px 28px rgba(0, 0, 0, 0.22);
     color: color-mix(in srgb, var(--brave-accent) 74%, var(--brave-text-soft));
-    font-family: "Brave Plex Mono", monospace;
+    font-family: var(--brave-mono-font-family);
     font-size: 12px;
     line-height: 1;
     letter-spacing: 0;
@@ -6689,7 +6994,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view__entry-line,
 .brave-view__line {
     color: var(--brave-text-soft);
-    font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.9rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.5;
 }
 
@@ -6704,10 +7011,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__line--quote {
     color: var(--brave-text-bright);
-    font-size: calc(0.96rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-dialogue-font-family);
+    font-size: calc(1.04rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.7;
-    font-style: italic;
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.01em);
+    font-style: normal;
+    letter-spacing: var(--brave-dialogue-letter-spacing);
 }
 
 .brave-view__list {
@@ -6800,11 +7108,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     min-width: 0;
     display: grid;
     gap: 2px;
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
 }
 
 .brave-view__list-text {
     color: var(--brave-text-soft);
-    font-size: calc(0.88rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.94rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.45;
 }
 
@@ -8244,12 +8556,89 @@ body.brave-scene-combat-enter .inputwrap {
     #brave-notice-stack {
         left: 12px;
         right: 12px;
-        bottom: calc(var(--brave-mobile-input-reserve) + 12px);
+        top: calc(env(safe-area-inset-top, 0px) + 12px);
+        bottom: auto;
         width: auto;
+        max-height: min(52vh, calc(100dvh - 32px));
+        overflow-y: auto;
+    }
+
+    .brave-notice {
+        gap: 8px;
+        padding: 10px 12px;
+    }
+
+    .brave-notice__head {
+        gap: 8px;
+    }
+
+    .brave-notice__titlebar {
+        gap: 8px;
+    }
+
+    .brave-notice__icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .brave-notice__title {
+        font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    .brave-notice__close {
+        min-width: 2.1rem;
+        width: 2.1rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .brave-notice__close span {
+        display: none;
+    }
+
+    .brave-notice__line {
+        font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        line-height: 1.42;
     }
 
     .brave-picker-sheet__titlebar {
         gap: 10px;
+    }
+
+    .brave-picker-sheet__panel--tutorial {
+        max-height: min(68dvh, calc(100dvh - var(--brave-mobile-dock-clearance) - 44px), 620px);
+    }
+
+    .brave-tutorial-carousel {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .brave-tutorial-carousel__icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .brave-tutorial-carousel__icon .material-symbols-outlined {
+        font-size: 1.6rem;
+    }
+
+    .brave-tutorial-carousel__title {
+        font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    .brave-tutorial-carousel__line {
+        font-size: calc(0.9rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        line-height: 1.44;
+    }
+
+    .brave-tutorial-carousel__footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .brave-tutorial-carousel__actions {
+        justify-content: space-between;
     }
 
     .brave-input-modebar {
@@ -8509,6 +8898,25 @@ body.brave-scene-combat-enter .inputwrap {
         min-height: 100%;
     }
 
+    .brave-view--chargen .brave-view__section--draft .brave-view__pairs {
+        grid-template-columns: 1fr;
+    }
+
+    .brave-view--chargen .brave-view__section--draft .brave-view__pair {
+        padding: 0 0 8px;
+        border-right: 0;
+        border-bottom: 1px solid rgba(var(--brave-accent-rgb), 0.08);
+    }
+
+    .brave-view--chargen .brave-view__section--draft .brave-view__pair:last-child {
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+
+    .brave-view--chargen .brave-view__entry {
+        min-height: auto;
+    }
+
     body.brave-mobile-input-open .content,
     body.brave-mobile-input-open #messagewindow {
         padding-bottom: calc(var(--brave-mobile-input-reserve) + 10px);
@@ -8687,8 +9095,9 @@ body.brave-scene-combat-enter .inputwrap {
 
     .brave-mobile-sheet__title {
         color: var(--brave-text-bright);
+        font-family: var(--brave-dialogue-font-family);
         font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-        letter-spacing: calc(var(--brave-letter-spacing) + 0.04em);
+        letter-spacing: var(--brave-dialogue-letter-spacing);
         text-transform: uppercase;
     }
 
@@ -8874,7 +9283,7 @@ body.brave-scene-combat-enter .inputwrap {
             radial-gradient(circle at 0 0, var(--brave-state-surface-tint-soft), transparent 46%),
             linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
         color: var(--brave-text-bright);
-        font-family: var(--brave-font-family);
+        font-family: var(--brave-mono-font-family);
         font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
         line-height: 1.08;
         white-space: pre;
@@ -9110,7 +9519,7 @@ body.brave-scene-combat-enter .inputwrap {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: "Brave Plex Mono", monospace;
+        font-family: var(--brave-mono-font-family);
         font-size: 9.5px;
         line-height: 1;
         white-space: pre;
@@ -9472,6 +9881,7 @@ body.brave-scene-combat-enter .inputwrap {
             inset 0 1px 0 rgba(255, 255, 255, 0.035),
             0 10px 18px rgba(0, 0, 0, 0.18);
         scroll-snap-align: start;
+        overflow: visible;
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry {
@@ -10150,41 +10560,46 @@ body.brave-scene-combat-enter .inputwrap {
 .brave-theme-preview[data-brave-theme-preview="hearth"] {
     background: linear-gradient(180deg, rgba(40, 30, 22, 0.95), rgba(14, 10, 8, 0.96));
     color: #f4ead8;
-    font-family: "Brave Plex Mono", monospace;
+    font-family: "Brave Red Hat Mono", monospace;
 }
 
 .brave-theme-preview[data-brave-theme-preview="signalglass"] {
     background: linear-gradient(180deg, rgba(8, 11, 11, 0.98), rgba(2, 3, 3, 1));
     color: #d6e6df;
-    font-family: "Share Tech Mono", monospace;
+    font-family: "Brave Share Tech Mono", monospace;
 }
 
 .brave-theme-preview[data-brave-theme-preview="terminal"] {
     background: linear-gradient(180deg, rgba(5, 7, 8, 0.92), rgba(2, 3, 4, 0.98));
     color: #d9e2de;
-    font-family: "DejaVu Sans Mono", monospace;
+    font-family: "Brave DejaVu Sans Mono", monospace;
 }
 
 .brave-theme-preview[data-brave-theme-preview="campfire"] {
     background: linear-gradient(180deg, rgba(27, 24, 21, 0.94), rgba(8, 7, 6, 0.98));
     color: #f1e9dc;
-    font-family: "VT323", monospace;
+    font-family: "Brave VT323", monospace;
 }
 
 .brave-theme-preview[data-brave-theme-preview="journal"] {
     background: linear-gradient(180deg, rgba(250, 244, 230, 0.98), rgba(237, 228, 209, 0.98));
     color: #2a1f14;
-    font-family: "Anonymous Pro", monospace;
+    font-family: "Brave Anonymous Pro", monospace;
 }
 
 .brave-theme-preview[data-brave-theme-preview="atlas"] {
     background: linear-gradient(180deg, rgba(17, 21, 25, 0.98), rgba(7, 9, 11, 1));
     color: #edf1f5;
-    font-family: "Space Mono", monospace;
+    font-family: "Brave Space Mono", monospace;
 }
 
 @media (max-width: 900px) {
     #toolbar {
         display: none !important;
     }
+}
+
+.brave-view__entry.brave-lunge-suppressed {
+    visibility: hidden !important;
+    pointer-events: none !important;
 }

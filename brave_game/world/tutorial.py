@@ -37,6 +37,10 @@ TUTORIAL_FLAGS = (
     "talked_harl",
 )
 
+TUTORIAL_QUEST_KEY = "tutorial_brambleford_basics"
+TUTORIAL_QUEST_GIVER = "Sergeant Tamsin Vale"
+TUTORIAL_QUEST_REGION = "Tutorial"
+
 CLASS_ABILITY_HINTS = {
     "warrior": "Strike",
     "ranger": "Quick Shot",
@@ -54,20 +58,34 @@ TUTORIAL_STEPS = {
     },
     "pack_before_walk": {
         "title": "Pack Before You Walk",
-        "summary": "Let Nella square your kit away, then check your gear, open your pack, and read the supply board.",
+        "summary": "Let Nella square your kit away before you report to Brask at the ring.",
     },
     "stand_your_ground": {
         "title": "Stand Your Ground",
-        "summary": "Speak with Ringhand Brask before you test yourself in the vermin pens.",
-    },
-    "clear_the_pens": {
-        "title": "Clear The Pens",
-        "summary": "Start a fight in the vermin pens and win one clean encounter.",
+        "summary": "Speak with Ringhand Brask, then win one clean fight in the vermin pens.",
     },
     "through_the_gate": {
         "title": "Through The Gate",
         "summary": "Head south to the Training Yard and report to Captain Harl Rowan.",
     },
+}
+
+TUTORIAL_STEP_OBJECTIVES = {
+    "first_steps": (
+        ("talked_tamsin", "Speak with Sergeant Tamsin Vale."),
+        ("visited_quartermaster_shed", "Head east to Quartermaster Shed."),
+        ("returned_to_wayfarers_yard", "Return to Wayfarer's Yard."),
+    ),
+    "pack_before_walk": (
+        ("talked_nella", "Speak with Quartermaster Nella Cobb."),
+    ),
+    "stand_your_ground": (
+        ("talked_brask", "Speak with Ringhand Brask in the Sparring Ring."),
+        ("won_vermin_fight", "Win one fight in the Vermin Pens."),
+    ),
+    "through_the_gate": (
+        ("talked_harl", "Report to Captain Harl Rowan in the Training Yard."),
+    ),
 }
 
 
@@ -170,17 +188,10 @@ def _determine_step(flags):
         return "first_steps"
     if not flags.get("visited_quartermaster_shed") or not flags.get("returned_to_wayfarers_yard"):
         return "first_steps"
-    if not (
-        flags.get("talked_nella")
-        and flags.get("viewed_gear")
-        and flags.get("viewed_pack")
-        and flags.get("read_supply_board")
-    ):
+    if not flags.get("talked_nella"):
         return "pack_before_walk"
-    if not flags.get("talked_brask"):
+    if not flags.get("talked_brask") or not flags.get("won_vermin_fight"):
         return "stand_your_ground"
-    if not flags.get("won_vermin_fight"):
-        return "clear_the_pens"
     if not flags.get("talked_harl"):
         return "through_the_gate"
     return None
@@ -254,6 +265,89 @@ def _is_active_quest(character, quest_key):
     return (character.db.brave_quests or {}).get(quest_key, {}).get("status") == "active"
 
 
+def _is_completed_quest(character, quest_key):
+    return (character.db.brave_quests or {}).get(quest_key, {}).get("status") == "completed"
+
+
+def _quest_objective_done(character, quest_key, index):
+    objectives = (character.db.brave_quests or {}).get(quest_key, {}).get("objectives", [])
+    if index < 0 or index >= len(objectives):
+        return False
+    return bool(objectives[index].get("completed"))
+
+
+def _tutorial_objectives_for_state(state):
+    step_key = state.get("step") or "first_steps"
+    flags = state.get("flags", {})
+    objectives = []
+    for flag, description in TUTORIAL_STEP_OBJECTIVES.get(step_key, ()):
+        completed = bool(flags.get(flag))
+        objectives.append(
+            {
+                "description": description,
+                "completed": completed,
+                "progress": 1 if completed else 0,
+                "required": 1,
+                "flag": flag,
+            }
+        )
+    return objectives
+
+
+def get_tutorial_objectives(character):
+    """Return quest-style objective state for the active tutorial step."""
+
+    state = ensure_tutorial_state(character)
+    if state.get("status") != "active":
+        return []
+    return _tutorial_objectives_for_state(state)
+
+
+def get_tutorial_quest_payload(character):
+    """Return compact quest data for tutorial-driven onboarding UI."""
+
+    state = ensure_tutorial_state(character)
+    if state.get("status") != "active":
+        return None
+
+    step_key = state.get("step") or "first_steps"
+    step = TUTORIAL_STEPS[step_key]
+    objectives = _tutorial_objectives_for_state(state)
+    required_objectives = [objective for objective in objectives if not objective.get("optional")]
+    remaining_required = [
+        objective for objective in required_objectives if not objective.get("completed")
+    ]
+    remaining_optional = [
+        objective
+        for objective in objectives
+        if objective.get("optional") and not objective.get("completed")
+    ]
+    visible_objectives = []
+    for objective in objectives:
+        visible_objectives.append(objective)
+        if not objective.get("completed"):
+            break
+    completed_required = len(required_objectives) - len(remaining_required)
+    total_required = max(1, len(required_objectives))
+
+    return {
+        "key": TUTORIAL_QUEST_KEY,
+        "source": "tutorial",
+        "title": step["title"],
+        "giver": TUTORIAL_QUEST_GIVER,
+        "region": TUTORIAL_QUEST_REGION,
+        "summary": step["summary"],
+        "objectives": [
+            {"text": objective["description"], "completed": bool(objective.get("completed"))}
+            for objective in visible_objectives
+        ],
+        "objective_details": objectives,
+        "progress_label": f"{completed_required}/{total_required} steps",
+        "step": step_key,
+        "icon": "school",
+    }
+
+
 def format_tutorial_block(character):
     """Return a tutorial journal block for the active onboarding flow."""
 
@@ -283,20 +377,10 @@ def format_tutorial_block(character):
         lines.append(
             f"  [{'x' if flags.get('talked_nella') else ' '}] Speak with Quartermaster Nella Cobb."
         )
-        lines.append(
-            f"  [{'x' if flags.get('viewed_gear') else ' '}] Check your gear."
-        )
-        lines.append(
-            f"  [{'x' if flags.get('viewed_pack') else ' '}] Open your pack."
-        )
-        lines.append(
-            f"  [{'x' if flags.get('read_supply_board') else ' '}] Read the supply board."
-        )
     elif step_key == "stand_your_ground":
         lines.append(
             f"  [{'x' if flags.get('talked_brask') else ' '}] Speak with Ringhand Brask in the Sparring Ring."
         )
-    elif step_key == "clear_the_pens":
         lines.append(
             f"  [{'x' if flags.get('won_vermin_fight') else ' '}] Win one fight in the Vermin Pens."
         )
@@ -304,11 +388,6 @@ def format_tutorial_block(character):
         lines.append(
             f"  [{'x' if flags.get('talked_harl') else ' '}] Report to Captain Harl Rowan in the Training Yard."
         )
-
-    optional_done = flags.get("read_family_post_sign") or flags.get("talked_peep")
-    lines.append(
-        f"  [{'x' if optional_done else ' '}] Optional: Visit Family Post to learn party basics."
-    )
     return "\n".join(lines)
 
 
@@ -348,16 +427,13 @@ def get_tutorial_focus(character, room):
                 return [f"Invite {others[0]} with party invite", "Read the family post sign"]
             return ["Talk to Courier Peep", "Read the family post sign"]
         if room_id == "tutorial_sparring_ring":
+            if flags.get("talked_brask"):
+                return ["Head south into the Vermin Pens"]
             return ["Talk to Ringhand Brask"]
+        if room_id == TUTORIAL_VERMIN_ROOM_ID:
+            return ["Use fight to engage the pens", "Use enemies, attack, and your class skill"]
         if room_id == TUTORIAL_START_ROOM_ID:
             return ["Head west to the Sparring Ring"]
-
-    if step == "clear_the_pens":
-        hints = ["Use fight to engage the pens", "Use enemies, attack, and your class skill"]
-        if room_id == "tutorial_sparring_ring":
-            return ["Head south into the Vermin Pens"]
-        if room_id == TUTORIAL_VERMIN_ROOM_ID:
-            return hints
 
     if step == "through_the_gate":
         if room_id == TUTORIAL_TRAINING_ROOM_ID:
@@ -377,18 +453,20 @@ def get_beginner_focus(character, room):
 
     if _is_active_quest(character, "practice_makes_heroes"):
         if room_id == TUTORIAL_TRAINING_ROOM_ID:
-            return ["Talk to Captain Harl", "Check sheet and gear before you head out"]
+            if not _quest_objective_done(character, "practice_makes_heroes", 0):
+                return ["Talk to Captain Harl", "Get the town handoff"]
+            return ["Head south to Town Green", "Then west to the Lantern Rest Inn"]
         if room_id == "brambleford_town_green":
-            return ["Head north to the Training Yard", "Read the town notice board"]
-
-    if _is_active_quest(character, "rats_in_the_kettle"):
-        if room_id == TUTORIAL_TRAINING_ROOM_ID:
-            return ["Head south to Town Green", "Go west to the inn and talk to Uncle Pib"]
-        if room_id == "brambleford_town_green":
-            return ["Read the town notice board", "Head west to the inn"]
+            return ["Head west to the Lantern Rest Inn", "Talk to Uncle Pib"]
         if room_id == "brambleford_lantern_rest_inn":
-            return ["Talk to Uncle Pib", "Go down to the cellar"]
+            if _quest_objective_done(character, "practice_makes_heroes", 6):
+                return ["Talk to Uncle Pib", "Collect the cellar reward"]
+            if _quest_objective_done(character, "practice_makes_heroes", 3):
+                return ["Go down to the cellar", "Clear the rats"]
+            return ["Talk to Uncle Pib", "Take the cellar job"]
         if room_id == "brambleford_rat_and_kettle_cellar":
+            if _quest_objective_done(character, "practice_makes_heroes", 5):
+                return ["Go up to Uncle Pib", "Collect the cellar reward"]
             return ["Use fight to engage the rats", "Clear the cellar before heading back up"]
 
     if _is_active_quest(character, "roadside_howls"):
@@ -456,6 +534,7 @@ def _talk_tamsin(character):
 
     if not flags.get("talked_tamsin"):
         _set_flag(character, "talked_tamsin")
+        character.db.brave_welcome_shown = True
         return (
             "Easy now. You're in Brambleford, not the ditch outside it. First thing: get your bearings. "
             "Head east to the shed, have a look around, then come back and report."
@@ -471,9 +550,6 @@ def _talk_tamsin(character):
         return "Nella's the one with the kit sense. Get your gear straight before Brask decides to test it for you."
 
     if step == "stand_your_ground":
-        return "You know where your gear is now. Good. Brask is waiting in the ring to the west."
-
-    if step == "clear_the_pens":
         return (
             "The pens are live enough to sting and small enough not to kill your confidence. Start the fight when you're ready, "
             "finish it clean, then head south to Harl."
@@ -483,23 +559,11 @@ def _talk_tamsin(character):
 
 
 def _talk_nella(character):
-    state = ensure_tutorial_state(character)
-    flags = state["flags"]
     _set_flag(character, "talked_nella")
-
-    remaining = _remaining_pack_tasks(flags)
-    if not flags.get("viewed_gear"):
-        return (
-            "Before you go wandering, know what you're wearing. Use `gear` and look over your kit. "
-            "After that, open your pack."
-        )
-    if not flags.get("viewed_pack"):
-        return "Good. Now use `pack` and see what you're carrying before the road teaches you the hard way."
-    if not flags.get("read_supply_board"):
-        return "One last thing. Read the supply board before you leave the shed."
-    if remaining:
-        return "You're nearly done here. Finish the last bit of kit-checking before you go chasing instructions elsewhere."
-    return "That will do. Brask is west in the ring, and he likes people better when they know where their own straps and knives are."
+    return (
+        "That will do. Your kit is squared away enough for Brask. You can still use `gear`, `pack`, or read the supply board "
+        "if you want the details, but the ring waits west."
+    )
 
 
 def _talk_peep(character):

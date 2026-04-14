@@ -45,9 +45,27 @@ class CmdFight(BraveCharacterCommand):
             self.msg("This is a safe place. No immediate fight is pressing in here.")
             return
 
+        selected_preview = None
+        if self.args.strip():
+            selected_preview = BraveEncounter.find_room_threat(character.location, self.args.strip())
+            if isinstance(selected_preview, list):
+                self.msg(
+                    "Be more specific. That could mean: "
+                    + ", ".join(
+                        threat.get("encounter_title") or threat.get("encounter_key") or "hostiles"
+                        for threat in selected_preview
+                    )
+                )
+                return
+            if not selected_preview:
+                self.msg("No visible threat here matches that target.")
+                return
+
         encounter, created = BraveEncounter.start_for_room(
             character.location,
             expected_party_size=self.get_present_party_size(character),
+            query=self.args.strip() or None,
+            preview=selected_preview,
         )
         if not encounter:
             self.msg("Nothing stirs here right now.")
@@ -116,6 +134,91 @@ class CmdEnemies(BraveCharacterCommand):
         self.msg("Threats here:\n  " + "\n  ".join(lines) + "\nUse |wattack <name>|n to open a fight or |wfight|n to join the current one.")
 
 
+class CmdThreatDebug(BraveCharacterCommand):
+    """
+    Inspect and control server-side roaming threats.
+
+    Usage:
+      threatdebug
+      threatdebug zone
+      threatdebug seed
+      threatdebug tick
+
+    Developer-only helper for inspecting current room/zone roaming state and
+    forcing a server-side seed or roam tick.
+    """
+
+    key = "threatdebug"
+    aliases = ["roamdebug", "threatsdebug"]
+    locks = "cmd:pperm(Player)"
+    help_category = "Brave"
+
+    def func(self):
+        from typeclasses.scripts import BraveEncounter
+
+        character = self.get_character()
+        if not character or not character.location:
+            self.msg("No active character location.")
+            return
+
+        action = (self.args or "").strip().lower()
+        if action == "seed":
+            BraveEncounter.ensure_roaming_threat_population()
+        elif action == "tick":
+            BraveEncounter.advance_roaming_threats()
+
+        room = character.location
+        room_previews = BraveEncounter._get_room_threat_preview_states(room)
+        active_zone_previews = []
+        room_zone = str(getattr(room.db, "brave_zone", "") or "").strip()
+        for candidate in BraveEncounter._iter_world_rooms():
+            if str(getattr(candidate.db, "brave_zone", "") or "").strip() != room_zone:
+                continue
+            previews = BraveEncounter._get_room_threat_preview_states(candidate)
+            for preview in previews:
+                active_zone_previews.append(
+                    (
+                        getattr(candidate.db, "brave_room_id", ""),
+                        preview.get("encounter_key"),
+                        preview.get("origin_room_id"),
+                    )
+                )
+
+        lines = [
+            f"Room: {getattr(room.db, 'brave_room_id', '?')}",
+            f"Zone: {room_zone or '?'}",
+            f"Safe: {bool(getattr(room.db, 'brave_safe', False))}",
+            f"Movement Blocked: {bool(getattr(room.db, 'brave_enemy_movement_blocked', False))}",
+            f"Current Previews: {len(room_previews)}",
+        ]
+        for index, room_preview in enumerate(room_previews[:6], start=1):
+            lines.extend(
+                [
+                    f"Preview {index}: {room_preview.get('encounter_key')}",
+                    f"  Origin: {room_preview.get('origin_room_id')}",
+                    f"  Allowed Zones: {', '.join(room_preview.get('allowed_zone_keys', [])) or 'none'}",
+                    f"  Roaming: {bool(room_preview.get('roaming', False))}",
+                    f"  Roam Radius: {room_preview.get('roam_radius')}",
+                ]
+            )
+        lines.append(f"Active Zone Previews: {len(active_zone_previews)}")
+        if action == "zone" or action == "tick" or action == "seed":
+            for room_id, encounter_key, origin_room_id in active_zone_previews:
+                lines.append(f"  {room_id}: {encounter_key} (origin {origin_room_id})")
+        output = "\n".join(lines)
+        if self.send_browser_notice(
+            "Threat Debug",
+            lines=lines,
+            tone="muted",
+            icon="bug_report",
+            duration_ms=12000,
+            sticky=True,
+        ):
+            self.send_other_sessions(output)
+            return
+        self.msg(output)
+
+
 class CmdAttack(BraveCharacterCommand):
     """
     Queue a basic attack in combat.
@@ -153,7 +256,7 @@ class CmdAttack(BraveCharacterCommand):
             if self.args.strip():
                 preview_match = BraveEncounter.find_room_threat(character.location, self.args.strip())
                 if isinstance(preview_match, list):
-                    self.msg("Be more specific. That could mean: " + ", ".join(enemy["key"] for enemy in preview_match))
+                    self.msg("Be more specific. That could mean: " + ", ".join(threat.get("encounter_title") or threat.get("encounter_key") or "hostiles" for threat in preview_match))
                     return
                 if not preview_match:
                     self.msg("No visible threat here matches that target.")
@@ -162,6 +265,8 @@ class CmdAttack(BraveCharacterCommand):
             encounter, _created = BraveEncounter.start_for_room(
                 character.location,
                 expected_party_size=self.get_present_party_size(character),
+                preview=preview_match if self.args.strip() else None,
+                query=self.args.strip() or None,
             )
             if not encounter:
                 self.msg("Nothing hostile stirs here right now.")

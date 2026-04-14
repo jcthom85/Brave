@@ -12,7 +12,6 @@ from world.content.preview import (
     preview_encounter,
     preview_forge_recipe,
     preview_item,
-    preview_portal,
     preview_quest,
     preview_race,
     preview_room,
@@ -78,9 +77,3 @@ class ContentPreviewTests(unittest.TestCase):
         self.assertEqual("Militia Blade", preview["source_name"])
         self.assertEqual("Ironroot Longblade", preview["result_name"])
         self.assertTrue(preview["materials"])
-
-    def test_preview_portal_resolves_status_label(self):
-        preview = preview_portal("junkyard_planet")
-
-        self.assertEqual("Stable", preview["status_label"])
-        self.assertEqual("Junk-Yard Planet", preview["portal"]["name"])

@@ -22,9 +22,22 @@ class ContentValidationTests(unittest.TestCase):
         broken_items = replace(
             registry.items,
             starter_consumables=(("missing_item", 1),),
+            item_templates={
+                **registry.items.item_templates,
+                "unobtainable_item": {"name": "Unobtainable Item", "kind": "loot"},
+            },
         )
         broken_quests = replace(
             registry.quests,
+            starting_quests=[
+                *registry.quests.starting_quests,
+                registry.quests.starting_quests[0],
+            ],
+            quest_regions={
+                quest_key: region
+                for quest_key, region in registry.quests.quest_regions.items()
+                if quest_key != "practice_makes_heroes"
+            },
             quests={
                 **registry.quests.quests,
                 "practice_makes_heroes": {
@@ -39,10 +52,38 @@ class ContentValidationTests(unittest.TestCase):
                     ],
                     "rewards": {"items": [{"item": "missing_item", "quantity": 1}]},
                 },
+                "journey_broken_quest": {
+                    "title": "Journey Broken Quest",
+                    "giver": "Test Suite",
+                    "summary": "Exercises journey validation failures.",
+                    "objectives": [
+                        {
+                            "type": "visit_room",
+                            "room_id": "broken_room",
+                            "description": "Visit a disconnected room.",
+                        },
+                        {
+                            "type": "defeat_enemy",
+                            "enemy_tag": "missing_enemy_tag",
+                            "description": "Defeat an enemy tag that no encounter provides.",
+                        },
+                        {
+                            "type": "collect_item",
+                            "item_id": "unobtainable_item",
+                            "description": "Collect an item with no acquisition source.",
+                        },
+                        {
+                            "type": "unsupported",
+                            "description": "Use an unsupported objective type.",
+                        },
+                    ],
+                    "rewards": {},
+                },
             },
         )
         broken_world = replace(
             registry.world,
+            rooms=[*registry.world.rooms, {"id": "broken_room", "key": "Broken Room", "desc": "Broken."}],
             exits=[*registry.world.exits, {"id": "broken_exit", "source": "missing_room", "destination": "also_missing", "key": "north"}],
             entities=[*registry.world.entities, {"id": "broken_entity", "location": "missing_room", "key": "Broken", "desc": "Broken."}],
         )
@@ -57,7 +98,7 @@ class ContentValidationTests(unittest.TestCase):
             },
             room_encounters={
                 **registry.encounters.room_encounters,
-                "missing_room": [{"key": "broken", "enemies": ["missing_enemy"]}],
+                "missing_room": [{"key": "broken", "enemies": ["missing_enemy"], "allowed_zones": ["Missing Zone"], "roam_radius": -1}],
             },
             enemy_temperament_overrides={
                 **registry.encounters.enemy_temperament_overrides,
@@ -95,11 +136,24 @@ class ContentValidationTests(unittest.TestCase):
         self.assertTrue(any("has unknown prerequisite" in error for error in errors))
         self.assertTrue(any("collects unknown item" in error for error in errors))
         self.assertTrue(any("rewards unknown item" in error for error in errors))
+        self.assertTrue(any("Starting quest list contains duplicate quest" in error for error in errors))
+        self.assertTrue(any("Room broken_room is not reachable" in error for error in errors))
+        self.assertTrue(any("Encounter table is on unreachable room" in error for error in errors))
+        self.assertTrue(any("Quest practice_makes_heroes is missing a quest region" in error for error in errors))
+        self.assertTrue(any("Quest journey_broken_quest is not listed in starting_quests" in error for error in errors))
+        self.assertTrue(any("visits unreachable room: broken_room" in error for error in errors))
+        self.assertTrue(any("has no encounter enemy with tag: missing_enemy_tag" in error for error in errors))
+        self.assertTrue(any("collects item with no acquisition source: unobtainable_item" in error for error in errors))
+        self.assertTrue(any("uses unsupported objective type: unsupported" in error for error in errors))
         self.assertTrue(any("unknown source room" in error for error in errors))
         self.assertTrue(any("unknown location room" in error for error in errors))
+        self.assertTrue(any("is missing a zone" in error for error in errors))
+        self.assertTrue(any("is missing a safe flag" in error for error in errors))
         self.assertTrue(any("drops unknown item" in error for error in errors))
         self.assertTrue(any("Encounter table references unknown room" in error for error in errors))
         self.assertTrue(any("references unknown enemy" in error for error in errors))
+        self.assertTrue(any("uses unknown allowed zone" in error for error in errors))
+        self.assertTrue(any("has negative roam_radius" in error for error in errors))
         self.assertTrue(any("Temperament override references unknown enemy" in error for error in errors))
         self.assertTrue(any("uses unknown temperament" in error for error in errors))
         self.assertTrue(any("Dialogue references unknown talk entity" in error for error in errors))

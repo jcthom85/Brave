@@ -1,0 +1,28 @@
+<div class="brave-home">
+  <section class="brave-home__hero">
+    <p class="brave-home__eyebrow">BRAVE</p>
+    <h1 class="brave-home__title">A cozy frontier town, a dangerous world beyond it.</h1>
+    <p class="brave-home__lede">
+      Brave is a text-first multiplayer adventure built around character growth, tactical combat, and a living town
+      that opens into stranger places as you progress. Sign in to continue your account or create one to start fresh.
+    </p>
+
+    <div class="brave-home__actions">
+      {% if webclient_enabled %}
+        <a href="{% url 'webclient:index' %}" class="brave-auth__button brave-auth__button--primary">Play Online</a>
+      {% endif %}
+      {% if user.is_authenticated %}
+        <a href="{% url 'characters' %}" class="brave-auth__button brave-auth__button--secondary">Characters</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="brave-auth__button brave-auth__button--primary">Log In</a>
+        {% if register_enabled %}
+          <a href="{% url 'register' %}" class="brave-auth__button brave-auth__button--secondary">Create Account</a>
+        {% endif %}
+      {% endif %}
+    </div>
+
+    <p class="brave-home__note">
+      Character creation begins after login, then the game guides you through name, race, class, and starter setup.
+    </p>
+  </section>
+</div>

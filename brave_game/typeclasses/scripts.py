@@ -12,12 +12,16 @@ just overloads its hooks to have it perform its function.
 
 """
 
+import math
 import random
 import time
 from collections.abc import Mapping
 from urllib.parse import urlencode
 
+from evennia import TICKER_HANDLER
 from evennia.objects.models import ObjectDB
+from evennia.server.models import ServerConfig
+from evennia.scripts.models import ScriptDB
 from evennia.scripts.scripts import DefaultScript
 from evennia.utils.ansi import strip_ansi
 from evennia.utils import create, delay
@@ -53,6 +57,8 @@ from world.questing import advance_enemy_defeat, pop_recent_quest_updates
 from world.resonance import get_ability_display_name, get_resource_label, resolve_ability_query
 from world.rewards import format_reward_summary, merge_reward_entries, roll_enemy_rewards
 from world.tutorial import get_tutorial_defeat_room, record_encounter_victory
+from typeclasses.rooms import _broadcast_webclient_activity, _refresh_room_webclient_views
+from world.navigation import get_exit_direction
 
 COMBAT_BOSS_CREDIT_RATIO = (2, 3)
 COMBAT_ACTION_SCORE_CAP = 3.0
@@ -118,6 +124,55 @@ def _combat_fx_marker(**fields):
     return f" [[BRAVEFX {urlencode(payload)}]]"
 
 
+def _emit_room_activity(room, text, *, recipients=None, exclude=None):
+    """Forward a concise activity line to browser clients in a room."""
+
+    _broadcast_webclient_activity(room, text, recipients=recipients, exclude=exclude)
+
+
+def _normalize_zone_key(value):
+    """Return a stable normalized zone key."""
+
+    return str(value or "").strip().lower()
+
+
+def _room_zone_key(room):
+    """Return the normalized zone key for a room."""
+
+    if not room:
+        return ""
+    return _normalize_zone_key(getattr(getattr(room, "db", None), "brave_zone", None))
+
+
+def _direction_between_rooms(source_room, destination_room):
+    """Return the exit direction from one room to another, if connected."""
+
+    if not source_room or not destination_room:
+        return None
+    for exit_obj in list(getattr(source_room, "exits", []) or []):
+        if getattr(exit_obj, "destination", None) == destination_room:
+            db_holder = getattr(exit_obj, "db", None)
+            direction = getattr(db_holder, "brave_direction", None) or getattr(exit_obj, "key", None)
+            return str(direction or "").lower() or None
+    return None
+
+
+def _format_arrival_direction(direction):
+    if not direction:
+        return ""
+    if direction in {"in", "out"}:
+        return f" from {direction}"
+    return f" from the {direction}"
+
+
+def _format_departure_direction(direction):
+    if not direction:
+        return ""
+    if direction in {"in", "out"}:
+        return f" to {direction}"
+    return f" to the {direction}"
+
+
 def _enemy_damage_type(enemy):
     """Return a broad damage type tag for an enemy action."""
 
@@ -128,8 +183,6 @@ def _enemy_damage_type(enemy):
         return "shadow"
     if template_key in {"fen_wisp", "bog_creeper", "miretooth"}:
         return "nature"
-    if template_key in {"mag_clamp_drone", "foreman_coilback", "relay_tick"}:
-        return "lightning"
     return "physical"
 
 
@@ -183,6 +236,14 @@ ROOM_THREAT_SKULL_DELTA = 3
 
 
 ROOM_THREAT_RESPAWN_DELAY = 45
+ROOM_THREAT_ROAM_INTERVAL = 5
+ROOM_THREAT_ROAM_CHANCE = 1.0
+ROOM_THREAT_DEFAULT_ROAM_RADIUS = 3
+ROOM_THREAT_ZONE_DENSITY_DIVISOR = 2
+ROOM_THREAT_MIN_PER_ZONE = 2
+ROOM_THREAT_MAX_PER_ROOM = 2
+ROOM_THREAT_LAST_STEP_CONFIG_KEY = "brave_threat_roamer_last_step"
+ROOM_THREAT_STEP_IN_PROGRESS = False
 
 ATB_READY_GAUGE = 400
 
@@ -349,8 +410,104 @@ class BraveEncounter(Script):
 
         if not room:
             return
-        room.ndb.brave_room_threat_preview = None
-        room.ndb.brave_room_threat_ready_at = time.time() + max(0, int(cooldown or 0))
+        room.db.brave_room_threat_preview = None
+        room.db.brave_room_threat_previews = []
+        room.db.brave_room_threat_ready_at = time.time() + max(0, int(cooldown or 0))
+
+    @classmethod
+    def _get_room_threat_preview_state(cls, room):
+        """Return the persisted roaming/static threat preview for a room."""
+
+        if not room:
+            return None
+        previews = cls._get_room_threat_preview_states(room)
+        return dict(previews[0]) if previews else None
+
+    @classmethod
+    def _get_room_threat_preview_states(cls, room):
+        """Return all persisted roaming/static threat previews for a room."""
+
+        if not room:
+            return []
+        previews = getattr(room.db, "brave_room_threat_previews", None)
+        if isinstance(previews, list):
+            normalized = [dict(preview) for preview in previews if isinstance(preview, Mapping)]
+            if normalized != previews:
+                room.db.brave_room_threat_previews = normalized
+            if getattr(room.db, "brave_room_threat_preview", None) is None and normalized:
+                room.db.brave_room_threat_preview = dict(normalized[0])
+            return normalized
+
+        legacy = getattr(room.db, "brave_room_threat_preview", None)
+        if isinstance(legacy, Mapping):
+            normalized = [dict(legacy)]
+            room.db.brave_room_threat_previews = normalized
+            return normalized
+        room.db.brave_room_threat_previews = []
+        return []
+
+    @classmethod
+    def _set_room_threat_preview_state(cls, room, preview):
+        """Persist the current threat preview for a room."""
+
+        if not room:
+            return
+        if isinstance(preview, Mapping):
+            previews = [dict(preview)]
+        else:
+            previews = []
+        cls._set_room_threat_preview_states(room, previews)
+
+    @classmethod
+    def _set_room_threat_preview_states(cls, room, previews):
+        """Persist all current threat previews for a room."""
+
+        if not room:
+            return
+        normalized = [dict(preview) for preview in (previews or []) if isinstance(preview, Mapping)]
+        room.db.brave_room_threat_previews = normalized
+        room.db.brave_room_threat_preview = dict(normalized[0]) if normalized else None
+
+    @classmethod
+    def _add_room_threat_preview_state(cls, room, preview):
+        """Append one persisted threat preview to a room."""
+
+        if not room or not isinstance(preview, Mapping):
+            return
+        previews = cls._get_room_threat_preview_states(room)
+        previews.append(dict(preview))
+        cls._set_room_threat_preview_states(room, previews)
+
+    @classmethod
+    def _remove_room_threat_preview_state(cls, room, preview_id, *, cooldown=None):
+        """Remove one persisted threat preview from a room by preview id."""
+
+        if not room or not preview_id:
+            return False
+        previews = cls._get_room_threat_preview_states(room)
+        kept = [preview for preview in previews if str(preview.get("preview_id") or "") != str(preview_id)]
+        if len(kept) == len(previews):
+            return False
+        cls._set_room_threat_preview_states(room, kept)
+        if cooldown is not None:
+            room.db.brave_room_threat_ready_at = time.time() + max(0, int(cooldown or 0))
+        return True
+
+    @classmethod
+    def _get_room_threat_ready_at(cls, room):
+        """Return the next timestamp at which the room may respawn a threat preview."""
+
+        if not room:
+            return 0
+        return float(getattr(room.db, "brave_room_threat_ready_at", 0) or 0)
+
+    @classmethod
+    def _set_room_threat_ready_at(cls, room, ready_at):
+        """Persist the room-threat respawn timestamp."""
+
+        if not room:
+            return
+        room.db.brave_room_threat_ready_at = float(ready_at or 0)
 
     @classmethod
     def _build_preview_data(cls, room, encounter_data):
@@ -382,7 +539,20 @@ class BraveEncounter(Script):
             )
 
         return {
+            "preview_id": f"{getattr(room.db, 'brave_room_id', 'room')}:{encounter_data['key']}:{int(time.time() * 1000)}:{random.randint(1000, 9999)}",
             "room_id": getattr(room.db, "brave_room_id", None),
+            "origin_room_id": getattr(room.db, "brave_room_id", None),
+            "zone_key": _room_zone_key(room),
+            "allowed_zone_keys": [
+                _normalize_zone_key(zone)
+                for zone in (
+                    list(encounter_data.get("allowed_zones", []))
+                    or [getattr(room.db, "brave_zone", None)]
+                )
+                if _normalize_zone_key(zone)
+            ],
+            "roaming": bool(encounter_data.get("roaming", True)),
+            "roam_radius": max(0, int(encounter_data.get("roam_radius", ROOM_THREAT_DEFAULT_ROAM_RADIUS) or 0)),
             "encounter_data": encounter_data,
             "encounter_key": encounter_data["key"],
             "encounter_title": encounter_data["title"],
@@ -393,6 +563,8 @@ class BraveEncounter(Script):
     @classmethod
     def get_room_threat_preview(cls, room):
         """Return the current visible room-threat preview, creating one if needed."""
+
+        cls.advance_roaming_threats_if_due()
 
         if not room or getattr(room.db, "brave_safe", False):
             return None
@@ -420,23 +592,325 @@ class BraveEncounter(Script):
                 ],
             }
 
-        ready_at = getattr(room.ndb, "brave_room_threat_ready_at", 0) or 0
+        ready_at = cls._get_room_threat_ready_at(room)
         if ready_at and ready_at > time.time():
             return None
 
-        preview = getattr(room.ndb, "brave_room_threat_preview", None)
+        previews = cls._get_room_threat_preview_states(room)
         room_id = getattr(room.db, "brave_room_id", None)
-        if preview and preview.get("room_id") == room_id:
-            return preview
+        if previews:
+            valid = [preview for preview in previews if preview.get("room_id") == room_id]
+            cls._set_room_threat_preview_states(room, valid)
+            if valid:
+                return dict(valid[0])
+        return None
 
+    @classmethod
+    def get_room_threat_previews(cls, room):
+        """Return all visible room-threat previews, creating a baseline one if needed."""
+
+        cls.advance_roaming_threats_if_due()
+
+        if not room or getattr(room.db, "brave_safe", False):
+            return []
+
+        encounter = cls.get_for_room(room)
+        active = list(cls._get_room_threat_preview_states(room))
+        active = [preview for preview in active if preview.get("room_id") == getattr(room.db, "brave_room_id", None)]
+        cls._set_room_threat_preview_states(room, active)
+        if encounter:
+            engaged_preview = {
+                "room_id": getattr(room.db, "brave_room_id", None),
+                "encounter_key": encounter.db.encounter_key,
+                "encounter_title": encounter.db.encounter_title,
+                "encounter_intro": encounter.db.encounter_intro,
+                "preview_id": f"encounter:{encounter.id}",
+                "enemies": [
+                    {
+                        "id": enemy["id"],
+                        "template_key": enemy["template_key"],
+                        "key": enemy["key"],
+                        "desc": ENEMY_TEMPLATES[enemy["template_key"]].get("desc", ""),
+                        "tags": list(ENEMY_TEMPLATES[enemy["template_key"]].get("tags", [])),
+                        "temperament": get_enemy_temperament(enemy["template_key"]),
+                        "temperament_label": get_enemy_temperament_label(get_enemy_temperament(enemy["template_key"])),
+                        "rank": get_enemy_rank(enemy["template_key"]),
+                        "engaged": True,
+                    }
+                    for enemy in encounter.get_active_enemies()
+                ],
+            }
+            return [engaged_preview] + active
+
+        return [dict(item) for item in active]
+
+    @classmethod
+    def _iter_world_rooms(cls):
+        """Yield live world rooms from authored room content."""
+
+        seen = set()
+        for room_data in getattr(CONTENT.world, "rooms", []) or []:
+            room_id = room_data.get("id")
+            if not room_id or room_id in seen:
+                continue
+            seen.add(room_id)
+            room = get_room(room_id)
+            if room:
+                yield room
+
+    @classmethod
+    def _room_blocks_enemy_movement(cls, room):
+        """Whether a room blocks roaming enemy movement."""
+
+        if not room:
+            return True
+        if getattr(room.db, "brave_safe", False):
+            return True
+        return bool(getattr(room.db, "brave_enemy_movement_blocked", False))
+
+    @classmethod
+    def _preview_allowed_zone_keys(cls, preview, room=None):
+        """Return the normalized zone keys a threat preview may occupy."""
+
+        allowed = [
+            _normalize_zone_key(zone)
+            for zone in list((preview or {}).get("allowed_zone_keys", []))
+            if _normalize_zone_key(zone)
+        ]
+        if allowed:
+            return allowed
+        if room:
+            zone_key = _room_zone_key(room)
+            return [zone_key] if zone_key else []
+        return []
+
+    @classmethod
+    def _preview_origin_room(cls, preview):
+        """Return the origin room for a roaming threat preview, if any."""
+
+        origin_room_id = (preview or {}).get("origin_room_id")
+        return get_room(origin_room_id) if origin_room_id else None
+
+    @classmethod
+    def _within_roam_radius(cls, room, preview):
+        """Return whether a room stays within the preview's roam radius."""
+
+        roam_radius = int((preview or {}).get("roam_radius", ROOM_THREAT_DEFAULT_ROAM_RADIUS) or 0)
+        if roam_radius <= 0:
+            return True
+
+        origin_room = cls._preview_origin_room(preview)
+        if not origin_room:
+            return True
+
+        if getattr(origin_room.db, "brave_map_region", None) != getattr(room.db, "brave_map_region", None):
+            return False
+
+        origin_x = getattr(origin_room.db, "brave_map_x", None)
+        origin_y = getattr(origin_room.db, "brave_map_y", None)
+        room_x = getattr(room.db, "brave_map_x", None)
+        room_y = getattr(room.db, "brave_map_y", None)
+        if None in {origin_x, origin_y, room_x, room_y}:
+            return True
+
+        distance = abs(int(room_x) - int(origin_x)) + abs(int(room_y) - int(origin_y))
+        return distance <= roam_radius
+
+    @classmethod
+    def _can_preview_roam_to_room(cls, source_room, destination_room, preview):
+        """Return whether a threat preview may roam from source to destination."""
+
+        if not source_room or not destination_room or not preview:
+            return False
+        if cls._room_blocks_enemy_movement(destination_room):
+            return False
+        if cls.get_for_room(destination_room):
+            return False
+        if len(cls._get_room_threat_preview_states(destination_room)) >= ROOM_THREAT_MAX_PER_ROOM:
+            return False
+        allowed_zone_keys = cls._preview_allowed_zone_keys(preview, room=source_room)
+        destination_zone = _room_zone_key(destination_room)
+        if allowed_zone_keys and destination_zone not in allowed_zone_keys:
+            return False
+
+        return cls._within_roam_radius(destination_room, preview)
+
+    @classmethod
+    def _move_room_threat_preview(cls, source_room, destination_room, preview):
+        """Move a persisted threat preview from one room to another."""
+
+        moved_preview = dict(preview)
+        moved_preview["room_id"] = getattr(destination_room.db, "brave_room_id", None)
+        moved_preview["zone_key"] = _room_zone_key(destination_room)
+        cls._add_room_threat_preview_state(destination_room, moved_preview)
+        cls._set_room_threat_ready_at(destination_room, 0)
+        cls._remove_room_threat_preview_state(
+            source_room,
+            preview.get("preview_id"),
+            cooldown=ROOM_THREAT_RESPAWN_DELAY,
+        )
+        threat_name = cls._compact_encounter_title(moved_preview)
+        departure_direction = _direction_between_rooms(source_room, destination_room)
+        arrival_direction = _direction_between_rooms(destination_room, source_room)
+        _emit_room_activity(
+            source_room,
+            f"{threat_name} leaves{_format_departure_direction(departure_direction)}.",
+        )
+        _emit_room_activity(
+            destination_room,
+            f"{threat_name} arrives{_format_arrival_direction(arrival_direction)}.",
+        )
+        _refresh_room_webclient_views(source_room)
+        _refresh_room_webclient_views(destination_room)
+
+    @classmethod
+    def _room_has_encounter_table(cls, room):
+        room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+        return bool(room_id and ROOM_ENCOUNTERS.get(room_id))
+
+    @classmethod
+    def _spawn_room_threat_preview(cls, room):
+        """Create and persist a roaming/static threat preview for one room."""
+
+        if not room or cls._room_blocks_enemy_movement(room) or cls.get_for_room(room):
+            return None
+        if len(cls._get_room_threat_preview_states(room)) >= ROOM_THREAT_MAX_PER_ROOM:
+            return None
+        ready_at = cls._get_room_threat_ready_at(room)
+        if ready_at and ready_at > time.time():
+            return None
+
+        room_id = getattr(room.db, "brave_room_id", None)
         choices = ROOM_ENCOUNTERS.get(room_id)
         if not choices:
             return None
 
         preview = cls._build_preview_data(room, random.choice(choices))
-        room.ndb.brave_room_threat_preview = preview
-        room.ndb.brave_room_threat_ready_at = 0
+        cls._add_room_threat_preview_state(room, preview)
+        cls._set_room_threat_ready_at(room, 0)
+        _refresh_room_webclient_views(room)
         return preview
+
+    @classmethod
+    def _target_zone_preview_count(cls, zone_rooms):
+        count = len(zone_rooms)
+        if count <= 0:
+            return 0
+        return min(
+            len(zone_rooms) * ROOM_THREAT_MAX_PER_ROOM,
+            max(ROOM_THREAT_MIN_PER_ZONE, int(math.ceil(count / float(ROOM_THREAT_ZONE_DENSITY_DIVISOR)))),
+        )
+
+    @classmethod
+    def ensure_roaming_threat_population(cls):
+        """Maintain a baseline number of roaming threat previews per hostile zone."""
+
+        zone_rooms = {}
+        changed_rooms = {}
+        for room in cls._iter_world_rooms():
+            if cls._room_blocks_enemy_movement(room):
+                continue
+            if not cls._room_has_encounter_table(room):
+                continue
+            zone_rooms.setdefault(_room_zone_key(room), []).append(room)
+
+        for zone_key, rooms in zone_rooms.items():
+            active = []
+            for room in rooms:
+                if cls.get_for_room(room):
+                    continue
+                room_previews = cls._get_room_threat_preview_states(room)
+                if len(room_previews) > ROOM_THREAT_MAX_PER_ROOM:
+                    room_previews = room_previews[:ROOM_THREAT_MAX_PER_ROOM]
+                    cls._set_room_threat_preview_states(room, room_previews)
+                    changed_rooms[getattr(room.db, "brave_room_id", id(room))] = room
+                active.extend((room, preview) for preview in room_previews)
+            target = cls._target_zone_preview_count(rooms)
+            if len(active) > target:
+                overflow = len(active) - target
+                removable = list(active)
+                random.shuffle(removable)
+                for room, preview in removable[:overflow]:
+                    if cls._remove_room_threat_preview_state(room, preview.get("preview_id")):
+                        changed_rooms[getattr(room.db, "brave_room_id", id(room))] = room
+                active = [
+                    (room, preview)
+                    for room in rooms
+                    for preview in cls._get_room_threat_preview_states(room)
+                    if not cls.get_for_room(room)
+                ]
+            if len(active) >= target:
+                continue
+
+            candidates = [
+                room for room in rooms
+                if not cls.get_for_room(room)
+                and len(cls._get_room_threat_preview_states(room)) < ROOM_THREAT_MAX_PER_ROOM
+                and not (cls._get_room_threat_ready_at(room) and cls._get_room_threat_ready_at(room) > time.time())
+            ]
+            random.shuffle(candidates)
+            while len(active) < target and candidates:
+                room = candidates.pop()
+                preview = cls._spawn_room_threat_preview(room)
+                if preview:
+                    active.append((room, preview))
+                    changed_rooms[getattr(room.db, "brave_room_id", id(room))] = room
+
+        for room in changed_rooms.values():
+            _refresh_room_webclient_views(room)
+
+    @classmethod
+    def advance_roaming_threats(cls):
+        """Move eligible room-threat previews between adjacent hostile rooms."""
+
+        moved_room_ids = set()
+        for room in cls._iter_world_rooms():
+            room_id = getattr(room.db, "brave_room_id", None)
+            if room_id in moved_room_ids:
+                continue
+            previews = list(cls._get_room_threat_preview_states(room))
+            if not previews or cls.get_for_room(room):
+                continue
+            exits = list(getattr(room, "exits", []) or [])
+            for preview in previews:
+                if not preview.get("roaming", True):
+                    continue
+                if random.random() > ROOM_THREAT_ROAM_CHANCE:
+                    continue
+
+                destinations = []
+                for exit_obj in exits:
+                    destination = getattr(exit_obj, "destination", None)
+                    if cls._can_preview_roam_to_room(room, destination, preview):
+                        destinations.append(destination)
+                if not destinations:
+                    continue
+
+                destination = random.choice(destinations)
+                cls._move_room_threat_preview(room, destination, preview)
+                moved_room_ids.add(room_id)
+                moved_room_ids.add(getattr(destination.db, "brave_room_id", None))
+        cls.ensure_roaming_threat_population()
+
+    @classmethod
+    def advance_roaming_threats_if_due(cls, *, now=None, force=False):
+        """Advance roaming on-demand once the shared roam interval has elapsed."""
+
+        global ROOM_THREAT_STEP_IN_PROGRESS
+
+        if ROOM_THREAT_STEP_IN_PROGRESS:
+            return False
+        current_time = float(now if now is not None else time.time())
+        last_step = float(ServerConfig.objects.conf(ROOM_THREAT_LAST_STEP_CONFIG_KEY, default=0) or 0)
+        if not force and last_step and (current_time - last_step) < ROOM_THREAT_ROAM_INTERVAL:
+            return False
+        ROOM_THREAT_STEP_IN_PROGRESS = True
+        try:
+            cls.advance_roaming_threats()
+            ServerConfig.objects.conf(ROOM_THREAT_LAST_STEP_CONFIG_KEY, current_time)
+            return True
+        finally:
+            ROOM_THREAT_STEP_IN_PROGRESS = False
 
     @classmethod
     def _get_present_party_targets(cls, character):
@@ -574,8 +1048,9 @@ class BraveEncounter(Script):
             "detail": f"Engaged · {descriptor}" if engaged else descriptor,
             "badge": str(len(enemies)),
             "tooltip": " · ".join(bit for bit in tooltip_bits if bit),
-            "command": "fight",
+            "command": "fight " + cls._compact_encounter_title(preview),
             "engaged": engaged,
+            "preview_id": preview.get("preview_id"),
             "marker_icon": "swords" if engaged else ("skull" if overpowering else None),
             "icon": "warning",
             "temperament_label": max(
@@ -589,12 +1064,12 @@ class BraveEncounter(Script):
     def get_visible_room_threats(cls, room, viewer=None):
         """Return visible hostile threats for room rendering and threat commands."""
 
-        preview = cls.get_room_threat_preview(room)
-        if not preview:
-            return []
-
-        card = cls._build_room_threat_card(preview, viewer=viewer)
-        return [card] if card else []
+        cards = []
+        for preview in cls.get_room_threat_previews(room):
+            card = cls._build_room_threat_card(preview, viewer=viewer)
+            if card:
+                cards.append(card)
+        return cards
 
     @classmethod
     def find_room_threat(cls, room, query):
@@ -603,44 +1078,58 @@ class BraveEncounter(Script):
         if not room:
             return None
 
-        preview = cls.get_room_threat_preview(room)
-        if not preview:
+        previews = cls.get_room_threat_previews(room)
+        if not previews:
             return None
 
         query_norm = _normalize_token(query)
         if not query_norm:
-            return preview["enemies"][0] if preview.get("enemies") else None
+            return previews[0]
 
         matches = []
-        for enemy in preview.get("enemies", []):
-            if query_norm == _normalize_token(enemy["key"]):
-                matches.append(enemy)
+        for preview in previews:
+            if query_norm == _normalize_token(cls._compact_encounter_title(preview)):
+                matches.append(preview)
         if matches:
             return matches[0] if len(matches) == 1 else matches
 
-        for enemy in preview.get("enemies", []):
-            if query_norm in _normalize_token(enemy["key"]):
-                matches.append(enemy)
+        for preview in previews:
+            if query_norm in _normalize_token(cls._compact_encounter_title(preview)):
+                matches.append(preview)
+                continue
+            for enemy in preview.get("enemies", []):
+                if query_norm == _normalize_token(enemy["key"]) or query_norm in _normalize_token(enemy["key"]):
+                    matches.append(preview)
+                    break
         if not matches:
             return None
-        return matches[0] if len(matches) == 1 else matches
+        deduped = []
+        seen = set()
+        for preview in matches:
+            preview_id = preview.get("preview_id") or preview.get("encounter_key")
+            if preview_id in seen:
+                continue
+            seen.add(preview_id)
+            deduped.append(preview)
+        return deduped[0] if len(deduped) == 1 else deduped
 
     @classmethod
     def _should_auto_aggro(cls, room, character):
         """Return whether visible room threats should auto-engage this party."""
 
-        preview = cls.get_room_threat_preview(room)
-        if not preview or not character:
+        previews = cls.get_room_threat_previews(room)
+        if not previews or not character:
             return False
 
         effective_level = cls._effective_party_level(character)
-        for enemy in preview.get("enemies", []):
-            temperament = enemy.get("temperament", "aggressive")
-            threat_label = get_relative_threat_label(enemy.get("rank", 1), effective_level)
-            if temperament == "relentless":
-                return True
-            if temperament == "aggressive" and threat_label != "Trivial":
-                return True
+        for preview in previews:
+            for enemy in preview.get("enemies", []):
+                temperament = enemy.get("temperament", "aggressive")
+                threat_label = get_relative_threat_label(enemy.get("rank", 1), effective_level)
+                if temperament == "relentless":
+                    return True
+                if temperament == "aggressive" and threat_label != "Trivial":
+                    return True
         return False
 
     @classmethod
@@ -672,15 +1161,25 @@ class BraveEncounter(Script):
         return encounter
 
     @classmethod
-    def start_for_room(cls, room, expected_party_size=1):
+    def start_for_room(cls, room, expected_party_size=1, query=None, preview=None):
         """Create a new encounter for a room if encounter data exists."""
 
         encounter = cls.get_for_room(room)
         if encounter:
             return encounter, False
 
-        preview = cls.get_room_threat_preview(room)
-        if not preview:
+        chosen_preview = None
+        if isinstance(preview, Mapping):
+            chosen_preview = dict(preview)
+        elif query:
+            chosen_preview = cls.find_room_threat(room, query)
+            if isinstance(chosen_preview, list):
+                chosen_preview = None
+        else:
+            previews = cls.get_room_threat_previews(room)
+            chosen_preview = previews[0] if previews else None
+
+        if not chosen_preview:
             return None, False
 
         encounter = create.create_script(
@@ -690,8 +1189,8 @@ class BraveEncounter(Script):
             autostart=False,
             persistent=False,
         )
-        encounter.configure(preview["room_id"], preview["encounter_data"], expected_party_size=expected_party_size)
-        room.ndb.brave_room_threat_preview = None
+        encounter.configure(chosen_preview["room_id"], chosen_preview["encounter_data"], expected_party_size=expected_party_size)
+        cls._remove_room_threat_preview_state(room, chosen_preview.get("preview_id"))
         room.ndb.brave_encounter = encounter
         encounter.start()
         return encounter, True
@@ -716,6 +1215,7 @@ class BraveEncounter(Script):
         self.db.encounter_key = encounter_data["key"]
         self.db.encounter_title = encounter_data["title"]
         self.db.encounter_intro = encounter_data["intro"]
+        self.db.encounter_data = dict(encounter_data or {})
         self.db.expected_party_size = max(1, min(4, int(expected_party_size or 1)))
         self.db.pending_actions = {}
         self.db.participants = []
@@ -756,9 +1256,15 @@ class BraveEncounter(Script):
         if self.obj:
             self.obj.ndb.brave_encounter = None
             if not self.get_active_enemies():
-                self._clear_room_threat_preview(self.obj, cooldown=ROOM_THREAT_RESPAWN_DELAY)
+                self._set_room_threat_ready_at(self.obj, time.time() + ROOM_THREAT_RESPAWN_DELAY)
             else:
-                self._clear_room_threat_preview(self.obj, cooldown=0)
+                encounter_data = dict(self.db.encounter_data or {})
+                if encounter_data:
+                    encounter_data["enemies"] = [enemy["template_key"] for enemy in self.get_active_enemies()]
+                    preview = self._build_preview_data(self.obj, encounter_data)
+                    self._add_room_threat_preview_state(self.obj, preview)
+                self._set_room_threat_ready_at(self.obj, 0)
+            _refresh_room_webclient_views(self.obj)
         for participant in participants:
             participant.ndb.brave_encounter = None
 
@@ -1355,9 +1861,9 @@ class BraveEncounter(Script):
 
     def _enemy_action_timing(self, enemy):
         template_key = (enemy or {}).get("template_key")
-        if template_key in {"old_greymaw", "miretooth", "tower_archer", "mag_clamp_drone"}:
+        if template_key in {"old_greymaw", "miretooth", "tower_archer"}:
             return normalize_atb_profile({"windup_ticks": 1, "recovery_ticks": 1, "telegraph": True})
-        if template_key in {"sir_edric_restless", "foreman_coilback", "captain_varn_blackreed", "grubnak_the_pot_king", "hollow_lantern"}:
+        if template_key in {"sir_edric_restless", "captain_varn_blackreed", "grubnak_the_pot_king", "hollow_lantern"}:
             return normalize_atb_profile({"windup_ticks": 2, "recovery_ticks": 1, "telegraph": True})
         return dict(DEFAULT_ENEMY_ATTACK_ATB_PROFILE)
 
@@ -1367,9 +1873,7 @@ class BraveEncounter(Script):
             "old_greymaw": "Brush Pounce",
             "miretooth": "Reed Ambush",
             "tower_archer": "Aimed Shot",
-            "mag_clamp_drone": "Clamp Burst",
             "sir_edric_restless": "Funeral Charge",
-            "foreman_coilback": "Overcharge Arc",
             "captain_varn_blackreed": "Execution Cut",
             "grubnak_the_pot_king": "Cauldron Rush",
             "hollow_lantern": "Blackwater Flare",
@@ -1381,9 +1885,7 @@ class BraveEncounter(Script):
             "old_greymaw": f"|y{enemy['key']} lowers into the brush, gathering for {label}.|n",
             "miretooth": f"|y{enemy['key']} disappears into the reeds and lines up {label}.|n",
             "tower_archer": f"|y{enemy['key']} draws a careful bead for {label}.|n",
-            "mag_clamp_drone": f"|y{enemy['key']} locks its rig and charges {label}.|n",
             "sir_edric_restless": f"|y{enemy['key']} raises his blade for {label}.|n",
-            "foreman_coilback": f"|y{enemy['key']} routes static through the frame for {label}.|n",
             "captain_varn_blackreed": f"|y{enemy['key']} shifts his stance and sets up {label}.|n",
             "grubnak_the_pot_king": f"|y{enemy['key']} heaves the cauldron high for {label}.|n",
             "hollow_lantern": f"|y{enemy['key']} swells with drowned light and prepares {label}.|n",
@@ -1641,6 +2143,8 @@ class BraveEncounter(Script):
             character.ndb.brave_encounter = self
             self.obj.msg_contents(f"{character.key} joins the fight.", exclude=[character])
             character.msg("You join the fight.")
+            _emit_room_activity(self.obj, "You join the fight.", recipients=[character])
+            _emit_room_activity(self.obj, f"{character.key} joins the fight.", exclude=[character])
         else:
             character.ndb.brave_encounter = self
             self._get_participant_contribution(character)
@@ -1888,6 +2392,7 @@ class BraveEncounter(Script):
         )
         if announce and self.obj:
             self.obj.msg_contents(f"|r{enemy['key']} joins the fight!|n")
+            _emit_room_activity(self.obj, f"{enemy['key']} joins the fight.")
         return enemy
 
     def _add_threat(self, character, amount):
@@ -1984,6 +2489,7 @@ class BraveEncounter(Script):
         if enemy["hp"] <= 0:
             self._emit_defeat_fx(enemy)
             self.obj.msg_contents(f"{enemy['key']} falls.")
+            _emit_room_activity(self.obj, f"{enemy['key']} falls.")
             self._award_enemy_defeat_credit(enemy)
 
     def _heal_character(self, source, target, amount, heal_type="healing"):
@@ -2224,6 +2730,7 @@ class BraveEncounter(Script):
                 if enemy["hp"] <= 0:
                     self._emit_defeat_fx(enemy)
                     self.obj.msg_contents(f"{enemy['key']} falls.")
+                    _emit_room_activity(self.obj, f"{enemy['key']} falls.")
                     self._award_enemy_defeat_credit(enemy)
 
     def _handle_enemy_specials(self, enemy):
@@ -2251,21 +2758,6 @@ class BraveEncounter(Script):
                 enemy["reposition_ready"] = True
                 enemy["marked_turns"] = 0
                 self.obj.msg_contents("|rOld Greymaw vanishes into the brush.|n")
-                changed = True
-
-        if enemy["template_key"] == "foreman_coilback":
-            if enemy["hp"] <= (enemy["max_hp"] * 2) // 3 and not enemy.get("called_help"):
-                self._spawn_enemy("relay_tick", display_key="Relay Tick Overwatch")
-                enemy["called_help"] = True
-                self.obj.msg_contents("|rForeman Coilback vents static through the pit and a relay tick drops into the fight!|n")
-                changed = True
-
-            if enemy["hp"] <= enemy["max_hp"] // 2 and not enemy.get("enraged"):
-                enemy["enraged"] = True
-                enemy["attack_power"] += 3
-                enemy["spell_power"] += 4
-                enemy["accuracy"] += 4
-                self.obj.msg_contents("|rForeman Coilback overcharges his rig and the whole pit starts to scream.|n")
                 changed = True
 
         if enemy["template_key"] == "sir_edric_restless":
@@ -2499,6 +2991,7 @@ class BraveEncounter(Script):
 
         self.remove_participant(character)
         self.obj.msg_contents(f"{character.key} breaks away and falls back to {destination.key}.")
+        _emit_room_activity(self.obj, f"{character.key} falls back to {destination.key}.")
         character.msg(f"|yYou break away from the fight and fall back to {destination.key}.|n")
         if character.location:
             character.msg(character.at_look(character.location))
@@ -2532,6 +3025,7 @@ class BraveEncounter(Script):
 
         if result and result.get("public_message"):
             self.obj.msg_contents(result["public_message"])
+            _emit_room_activity(self.obj, result["public_message"])
         if result:
             use = dict(result.get("use") or {})
             effect_type = use.get("effect_type")
@@ -2837,8 +3331,6 @@ class BraveEncounter(Script):
             self._apply_snare(target, turns=2, accuracy_penalty=5, dodge_penalty=5)
         elif enemy["template_key"] in {"restless_shade", "barrow_wisp", "sir_edric_restless"} and resources["hp"] > 0 and random.randint(1, 100) <= 50:
             self._apply_curse(target, turns=2, armor_penalty=4, message=f"|m{target.key} shudders under a grave-cold curse!|n")
-        elif enemy["template_key"] in {"mag_clamp_drone", "foreman_coilback"} and resources["hp"] > 0 and random.randint(1, 100) <= 50:
-            self._apply_snare(target, turns=2, accuracy_penalty=5, dodge_penalty=5)
         elif enemy["template_key"] == "grubnak_the_pot_king" and resources["hp"] > 0 and random.randint(1, 100) <= 55:
             self._apply_snare(target, turns=2, accuracy_penalty=4, dodge_penalty=4)
         elif enemy["template_key"] == "bog_creeper" and resources["hp"] > 0 and random.randint(1, 100) <= 50:
@@ -3310,3 +3802,60 @@ class BraveEncounter(Script):
         if actor_activity:
             clear_turn_states()
         self._refresh_browser_combat_views()
+
+
+class BraveThreatRoamer(Script):
+    """Background mover for hostile room-threat previews."""
+
+    def at_script_creation(self):
+        self.key = "brave_threat_roamer"
+        self.interval = ROOM_THREAT_ROAM_INTERVAL
+        self.start_delay = True
+        self.persistent = True
+        self.desc = "Brave hostile threat roamer"
+
+    def at_repeat(self):
+        BraveEncounter.advance_roaming_threats()
+
+    def at_start(self):
+        BraveEncounter.ensure_roaming_threat_population()
+
+
+def run_threat_roamer_tick(*args, **kwargs):
+    """Advance shared hostile roaming for the live server ticker."""
+
+    BraveEncounter.advance_roaming_threats_if_due(force=True)
+
+
+def ensure_threat_roamer():
+    """Ensure the persistent hostile-roaming ticker exists and is active."""
+
+    matches = list(ScriptDB.objects.filter(db_key="brave_threat_roamer"))
+    for script in matches:
+        try:
+            script.stop()
+        except Exception:
+            pass
+        try:
+            script.delete()
+        except Exception:
+            pass
+
+    try:
+        TICKER_HANDLER.remove(
+            ROOM_THREAT_ROAM_INTERVAL,
+            run_threat_roamer_tick,
+            idstring="brave_threat_roamer",
+            persistent=True,
+        )
+    except Exception:
+        pass
+
+    BraveEncounter.ensure_roaming_threat_population()
+    TICKER_HANDLER.add(
+        ROOM_THREAT_ROAM_INTERVAL,
+        run_threat_roamer_tick,
+        idstring="brave_threat_roamer",
+        persistent=True,
+    )
+    return True

@@ -1,4 +1,4 @@
-"""Reactive browser tone profiles for Brave regions and worlds."""
+"""Reactive browser tone profiles for Brave regions."""
 
 WORLD_TONES = {
     "neutral": {
@@ -37,17 +37,9 @@ WORLD_TONES = {
         "label": "Drowned Weir",
         "accent": "#7ebbc5",
     },
-    "nexus": {
-        "label": "Nexus Gate",
+    "observatory": {
+        "label": "Great Observatory",
         "accent": "#7cb7d7",
-    },
-    "junkyard": {
-        "label": "Junk-Yard Planet",
-        "accent": "#dd8f52",
-    },
-    "portal": {
-        "label": "Portal World",
-        "accent": "#9ab8da",
     },
 }
 
@@ -78,13 +70,8 @@ def get_world_tone_key(source):
     room_key = str(getattr(room, "key", "") or "").strip()
     combined = " ".join(part for part in (world, zone, room_key) if part).lower()
 
-    if getattr(room.db, "brave_portal_hub", False) or "nexus" in combined or "observatory" in combined:
-        return "nexus"
-
-    if world.lower() != "brave":
-        if any(token in combined for token in ("junk", "scrap", "relay trench", "crane grave", "anchor pit")):
-            return "junkyard"
-        return "portal"
+    if "nexus" in combined or "observatory" in combined:
+        return "observatory"
 
     if any(token in combined for token in ("drowned", "weir", "blackwater", "sluice", "lamp house")):
         return "drownedweir"

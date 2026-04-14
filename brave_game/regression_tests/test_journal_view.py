@@ -88,24 +88,31 @@ class JournalViewTests(unittest.TestCase):
         self.assertEqual(["Active", "Completed"], [item.get("label") for item in switcher.get("items", [])])
 
         tracked = view.get("sections", [])[1]
-        tutorial = _section(view, "Tutorial")
         goblin_road = _section(view, "Goblin Road")
 
         self.assertEqual("entries", tracked.get("kind"))
         self.assertEqual("tracked", tracked.get("variant"))
         self.assertTrue(tracked.get("hide_label"))
-        self.assertEqual(QUESTS[active_key]["title"], tracked.get("items", [])[0].get("title"))
-        self.assertEqual("entries", tutorial.get("kind"))
+        self.assertEqual("First Steps In Brambleford", tracked.get("items", [])[0].get("title"))
+        self.assertEqual("Tutorial · Sergeant Tamsin Vale", tracked.get("items", [])[0].get("meta"))
+        self.assertIn("[ ] Speak with Sergeant Tamsin Vale.", tracked.get("items", [])[0].get("lines"))
         self.assertEqual("entries", goblin_road.get("kind"))
         self.assertEqual([QUESTS[second_active_key]["title"]], [item.get("title") for item in goblin_road.get("items", [])])
-        self.assertEqual([f"Next: {QUESTS[second_active_key]['objectives'][0]['description']}"], goblin_road.get("items", [])[0].get("lines"))
+        self.assertEqual(
+            [
+                QUESTS[second_active_key]["summary"],
+                f"[ ] {QUESTS[second_active_key]['objectives'][0]['description']}",
+            ],
+            goblin_road.get("items", [])[0].get("lines"),
+        )
 
         labels = [section.get("label") for section in view.get("sections", [])]
+        self.assertNotIn("Tutorial", labels)
         self.assertNotIn("Completed Quests", labels)
 
     def test_journal_view_switches_to_completed_regions(self):
         completed_key = STARTING_QUESTS[1]
-        later_completed_key = STARTING_QUESTS[6]
+        later_completed_key = STARTING_QUESTS[5]
         character = DummyCharacter(
             quests={
                 completed_key: _quest_state(completed_key, "completed"),
@@ -122,8 +129,9 @@ class JournalViewTests(unittest.TestCase):
         self.assertEqual([], view.get("actions", []))
         self.assertEqual(["Active", "Completed"], [item.get("label") for item in view.get("sections", [])[0].get("items", [])])
         labels = [section.get("label") for section in view.get("sections", [])]
-        self.assertEqual(["", "Brambleford", "Junk-Yard Planet"], labels)
-        self.assertEqual("list", view.get("sections", [])[1].get("kind"))
+        self.assertEqual(["", "Brambleford", "Whispering Woods"], labels)
+        self.assertEqual("entries", view.get("sections", [])[1].get("kind"))
+        self.assertTrue(view.get("sections", [])[1].get("items", [])[0].get("lines"))
 
     def test_journal_view_keeps_empty_states(self):
         character = DummyCharacter(
@@ -140,6 +148,20 @@ class JournalViewTests(unittest.TestCase):
         character.db.brave_journal_tab = "completed"
         completed = _section(build_quests_view(character), "Completed Quests")
         self.assertEqual("No completed quests yet.", completed.get("items", [])[0].get("title"))
+
+    def test_journal_view_marks_branch_opening_for_post_ruk_quest(self):
+        branch_key = "what_whispers_in_the_wood"
+        character = DummyCharacter(
+            quests={branch_key: _quest_state(branch_key, "active")},
+            tracked=branch_key,
+            tutorial={"status": "inactive", "step": None, "flags": {}},
+        )
+
+        view = build_quests_view(character)
+        tracked = view.get("sections", [])[1].get("items", [])[0]
+
+        self.assertIn("[ ]", tracked.get("lines", [])[1])
+        self.assertEqual("Branch Choice", tracked.get("chips", [])[1].get("label"))
 
 
 if __name__ == "__main__":

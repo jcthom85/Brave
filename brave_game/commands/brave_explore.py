@@ -381,4 +381,14 @@ class CmdRest(BraveCharacterCommand):
             return
 
         character.restore_resources()
+        room_id = getattr(character.location.db, "brave_room_id", "")
+        if room_id == "brambleford_lantern_rest_inn":
+            self.msg("You take a moment to recover your strength. Check |wpack|n, then |wcook|n or |weat|n before you head back out.")
+            return
+        if room_id == "brambleford_outfitters":
+            self.msg("You take a moment to recover your strength. While you're here, |wshop|n, |wsell|n, or |wshift|n can turn the last run into cleaner town silver.")
+            return
+        if room_id == "brambleford_ironroot_forge":
+            self.msg("You take a moment to recover your strength. If Torren has a ready order for your kit, use |wforge|n before the next push.")
+            return
         self.msg("You take a moment to recover your strength.")

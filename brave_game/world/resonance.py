@@ -1,4 +1,4 @@
-"""Helpers for world resonance, portal listings, and ability skinning."""
+"""Helpers for world resonance and ability skinning."""
 
 from world.content import get_content_registry
 

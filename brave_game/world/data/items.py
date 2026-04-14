@@ -611,33 +611,12 @@ ITEM_TEMPLATES = {
         "summary": "A cracked control wafer pried from some long-dead machine mind.",
         "value": 8,
     },
-    "flux_coil": {
-        "name": "Flux Coil",
-        "kind": "loot",
-        "stackable": True,
-        "summary": "A humming coil that still holds a nervous charge.",
-        "value": 12,
-    },
     "magnetized_scrap": {
         "name": "Magnetized Scrap",
         "kind": "loot",
         "stackable": True,
         "summary": "A plate of salvage still tugging toward anything metal with irritating enthusiasm.",
         "value": 9,
-    },
-    "anchor_glass_shard": {
-        "name": "Anchor Glass Shard",
-        "kind": "loot",
-        "stackable": True,
-        "summary": "A blue-white shard of route glass that thrums faintly when held near the Nexus.",
-        "value": 14,
-    },
-    "beacon_core": {
-        "name": "Beacon Core",
-        "kind": "loot",
-        "stackable": True,
-        "summary": "A heavy heart-core from the Junk-Yard beacon network, fit for a trophy shelf more than a pocket.",
-        "value": 28,
     },
     "lantern_pixel_pin": {
         "name": "Lantern Pixel Pin",
