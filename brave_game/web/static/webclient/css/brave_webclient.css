@@ -5,8 +5,14 @@
 }
 
 :root {
-    --brave-font-family: "Brave Plex Mono", monospace;
+    --brave-ui-font-family: "Brave Plex Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
     --brave-font-size-scale: 1;
     --brave-pack-rail-width: var(--brave-map-size);
@@ -65,6 +71,49 @@
     --brave-surface-well-bottom: rgba(10, 15, 12, 0.985);
     --brave-surface-deep-top: rgba(16, 23, 19, 0.98);
     --brave-surface-deep-bottom: rgba(7, 10, 8, 0.99);
+    --brave-combat-shell-top: color-mix(in srgb, var(--brave-surface-deep-top) 82%, rgba(46, 28, 22, 0.98));
+    --brave-combat-shell-bottom: color-mix(in srgb, var(--brave-surface-deep-bottom) 86%, rgba(14, 10, 10, 1));
+    --brave-combat-hero-top: color-mix(in srgb, var(--brave-surface-top) 82%, rgba(54, 34, 26, 0.98));
+    --brave-combat-hero-bottom: color-mix(in srgb, var(--brave-surface-bottom) 86%, rgba(13, 10, 11, 1));
+    --brave-combat-hero-tint-left: color-mix(in srgb, var(--brave-overlay-warm) 150%, rgba(168, 94, 74, 0.16));
+    --brave-combat-hero-tint-right: color-mix(in srgb, var(--brave-overlay-cool) 125%, rgba(122, 82, 58, 0.08));
+    --brave-combat-party-top: color-mix(in srgb, var(--brave-surface-top) 84%, rgba(32, 38, 34, 0.98));
+    --brave-combat-party-bottom: color-mix(in srgb, var(--brave-surface-bottom) 88%, rgba(11, 12, 12, 1));
+    --brave-combat-party-tint-left: color-mix(in srgb, var(--brave-good) 14%, transparent);
+    --brave-combat-party-tint-right: color-mix(in srgb, var(--brave-overlay-warm) 115%, rgba(145, 116, 82, 0.1));
+    --brave-combat-party-border: color-mix(in srgb, var(--brave-good) 26%, var(--brave-world-line));
+    --brave-combat-allies-top: color-mix(in srgb, var(--brave-surface-soft-top) 84%, rgba(40, 29, 22, 0.98));
+    --brave-combat-allies-bottom: color-mix(in srgb, var(--brave-surface-soft-bottom) 88%, rgba(15, 11, 10, 1));
+    --brave-combat-allies-tint-left: color-mix(in srgb, var(--brave-good) 12%, transparent);
+    --brave-combat-allies-tint-right: color-mix(in srgb, var(--brave-accent) 11%, transparent);
+    --brave-combat-allies-border: color-mix(in srgb, var(--brave-accent) 24%, var(--brave-world-line));
+    --brave-combat-enemy-top: color-mix(in srgb, var(--brave-surface-top) 76%, rgba(43, 24, 22, 0.98));
+    --brave-combat-enemy-bottom: color-mix(in srgb, var(--brave-surface-bottom) 82%, rgba(15, 9, 9, 1));
+    --brave-combat-enemy-tint-left: color-mix(in srgb, var(--brave-bad) 18%, transparent);
+    --brave-combat-enemy-tint-right: color-mix(in srgb, var(--brave-accent-deep) 14%, transparent);
+    --brave-combat-enemy-border: color-mix(in srgb, var(--brave-bad) 34%, var(--brave-world-line));
+    --brave-combat-command-top: color-mix(in srgb, var(--brave-surface-well-top) 72%, rgba(48, 31, 22, 0.95));
+    --brave-combat-command-bottom: color-mix(in srgb, var(--brave-surface-well-bottom) 82%, rgba(19, 13, 11, 0.99));
+    --brave-combat-command-border: color-mix(in srgb, var(--brave-accent) 28%, var(--brave-world-line));
+    --brave-combat-command-button-top: color-mix(in srgb, var(--brave-panel-soft) 72%, rgba(76, 49, 35, 0.96));
+    --brave-combat-command-button-bottom: color-mix(in srgb, var(--brave-panel-deep) 84%, rgba(29, 19, 15, 1));
+    --brave-combat-command-button-border: color-mix(in srgb, var(--brave-accent) 36%, var(--brave-world-line));
+    --brave-combat-command-text: color-mix(in srgb, var(--brave-text-bright) 82%, var(--brave-text));
+    --brave-combat-command-icon: color-mix(in srgb, var(--brave-accent) 76%, var(--brave-text-bright));
+    --brave-combat-feed-top: color-mix(in srgb, var(--brave-surface-well-top) 78%, rgba(38, 25, 20, 0.98));
+    --brave-combat-feed-bottom: color-mix(in srgb, var(--brave-surface-well-bottom) 84%, rgba(15, 10, 10, 1));
+    --brave-combat-feed-border: color-mix(in srgb, var(--brave-accent) 24%, var(--brave-world-line));
+    --brave-combat-feed-item-top: color-mix(in srgb, var(--brave-panel-soft) 72%, rgba(41, 28, 22, 0.96));
+    --brave-combat-feed-item-bottom: color-mix(in srgb, var(--brave-panel-deep) 84%, rgba(20, 14, 13, 1));
+    --brave-combat-feed-item-border: color-mix(in srgb, var(--brave-accent) 18%, var(--brave-world-line));
+    --brave-combat-log-height: 240px;
+    --brave-mobile-combat-log-height: 176px;
+    --brave-combat-semantic-ally: var(--brave-good);
+    --brave-combat-semantic-party: color-mix(in srgb, var(--brave-good) 74%, var(--brave-text-bright));
+    --brave-combat-semantic-joined: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-soft));
+    --brave-combat-semantic-danger: var(--brave-bad);
+    --brave-combat-semantic-warn: color-mix(in srgb, var(--brave-accent) 78%, var(--brave-text-bright));
+    --brave-combat-semantic-targeted: color-mix(in srgb, var(--brave-accent) 88%, var(--brave-text-bright));
     --brave-room-safe-top: color-mix(in srgb, var(--brave-world-surface-tint-strong) 92%, rgba(26, 37, 31, 0.7));
     --brave-room-safe-bottom: color-mix(in srgb, var(--brave-world-surface-tint-soft) 82%, rgba(11, 16, 13, 0.6));
     --brave-room-safe-border: rgba(var(--brave-accent-rgb), 0.18);
@@ -478,36 +527,6 @@ body[data-brave-world-tone="nexus"] {
     --brave-world-surface-tint-strong: rgba(var(--brave-accent-rgb), 0.13);
 }
 
-body[data-brave-world-tone="junkyard"] {
-    --brave-accent: #dd8f52;
-    --brave-accent-deep: #8d532a;
-    --brave-accent-rgb: 221, 143, 82;
-    --brave-accent-mid: #af6e37;
-    --brave-accent-dark: #7a4b26;
-    --brave-link: #f0b276;
-    --brave-prompt: #efc18f;
-    --brave-bg-warm-glow: rgba(178, 105, 46, 0.2);
-    --brave-bg-cool-glow: rgba(58, 118, 132, 0.18);
-    --brave-world-surface-tint: rgba(var(--brave-accent-rgb), 0.09);
-    --brave-world-surface-tint-soft: rgba(var(--brave-accent-rgb), 0.056);
-    --brave-world-surface-tint-strong: rgba(var(--brave-accent-rgb), 0.135);
-}
-
-body[data-brave-world-tone="portal"] {
-    --brave-accent: #9ab8da;
-    --brave-accent-deep: #5b7596;
-    --brave-accent-rgb: 154, 184, 218;
-    --brave-accent-mid: #738eb0;
-    --brave-accent-dark: #556783;
-    --brave-link: #b8d0ea;
-    --brave-prompt: #c8d9ea;
-    --brave-bg-warm-glow: rgba(98, 128, 166, 0.15);
-    --brave-bg-cool-glow: rgba(72, 103, 149, 0.16);
-    --brave-world-surface-tint: rgba(var(--brave-accent-rgb), 0.085);
-    --brave-world-surface-tint-soft: rgba(var(--brave-accent-rgb), 0.05);
-    --brave-world-surface-tint-strong: rgba(var(--brave-accent-rgb), 0.13);
-}
-
 .material-symbols-outlined {
     font-family: "Material Symbols Outlined";
     font-weight: 400;
@@ -589,6 +608,20 @@ body[data-brave-world-tone="portal"] {
 }
 
 @font-face {
+    font-family: "Brave Source Sans 3";
+    src: url("../fonts/SourceSans3-Regular.ttf") format("truetype");
+    font-display: swap;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "Brave Source Sans 3";
+    src: url("../fonts/SourceSans3-Medium.ttf") format("truetype");
+    font-display: swap;
+    font-weight: 500;
+}
+
+@font-face {
     font-family: "Brave Silkscreen";
     src: url("../fonts/Silkscreen-Regular.ttf") format("truetype");
     font-display: swap;
@@ -607,74 +640,146 @@ body[data-brave-world-tone="portal"] {
 }
 
 body[data-brave-font="plex"] {
-    --brave-font-family: "Brave Plex Mono", monospace;
+    --brave-ui-font-family: "Brave Plex Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="dejavu"] {
-    --brave-font-family: "Brave DejaVu Sans Mono", monospace;
+    --brave-ui-font-family: "Brave DejaVu Sans Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="ubuntu"] {
-    --brave-font-family: "Brave Ubuntu Mono", monospace;
+    --brave-ui-font-family: "Brave Ubuntu Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="redhat"] {
-    --brave-font-family: "Brave Red Hat Mono", monospace;
+    --brave-ui-font-family: "Brave Red Hat Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
+    --brave-body-letter-spacing: 0;
+    --brave-dialogue-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="anonymous"] {
-    --brave-font-family: "Brave Anonymous Pro", monospace;
+    --brave-ui-font-family: "Brave Anonymous Pro", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
+    --brave-body-letter-spacing: 0;
+    --brave-dialogue-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="fira"] {
-    --brave-font-family: "Brave Fira Mono", monospace;
+    --brave-ui-font-family: "Brave Fira Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="sharetech"] {
-    --brave-font-family: "Brave Share Tech Mono", monospace;
+    --brave-ui-font-family: "Brave Share Tech Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.015em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="space"] {
-    --brave-font-family: "Brave Space Mono", monospace;
+    --brave-ui-font-family: "Brave Space Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
+    --brave-body-letter-spacing: 0;
+    --brave-dialogue-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="vt323"] {
-    --brave-font-family: "Brave VT323", monospace;
+    --brave-ui-font-family: "Brave VT323", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.03em;
+    --brave-body-letter-spacing: 0;
+    --brave-dialogue-letter-spacing: 0;
     --brave-text-scale: 1.16;
 }
 
 body[data-brave-font="silkscreen"] {
-    --brave-font-family: "Brave Silkscreen", monospace;
+    --brave-ui-font-family: "Brave Silkscreen", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.02em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1;
 }
 
 body[data-brave-font="tiny5"] {
-    --brave-font-family: "Brave Tiny5", monospace;
+    --brave-ui-font-family: "Brave Tiny5", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.025em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 1.22;
 }
 
 body[data-brave-font="pressstart"] {
-    --brave-font-family: "Brave Press Start 2P", monospace;
+    --brave-ui-font-family: "Brave Press Start 2P", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    --brave-body-font-family: var(--brave-ui-font-family);
+    --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-mono-font-family: var(--brave-ui-font-family);
+    --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.02em;
+    --brave-body-letter-spacing: var(--brave-letter-spacing);
+    --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
     --brave-text-scale: 0.92;
 }
 
@@ -704,7 +809,7 @@ body {
         radial-gradient(circle at 82% 0, var(--brave-bg-cool-glow), transparent 26%),
         linear-gradient(180deg, var(--brave-bg-top), var(--brave-bg-bottom));
     color: var(--brave-text);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     letter-spacing: var(--brave-letter-spacing);
     transition: color 220ms ease, background 220ms ease;
 }
@@ -824,7 +929,7 @@ body::-webkit-scrollbar,
 
 /* Ensure font variables are inherited by Evennia's output classes */
 .out, .msg, .messagewindow, #messagewindow, .lm_content {
-    font-family: var(--brave-font-family) !important;
+    font-family: var(--brave-ui-font-family) !important;
 }
 
 .lm_controls,
@@ -893,7 +998,7 @@ body::-webkit-scrollbar,
 .goldenlayout-options-ui label,
 .goldenlayout-options-ui div,
 .goldenlayout-options-ui {
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     letter-spacing: var(--brave-letter-spacing);
 }
 
@@ -965,6 +1070,7 @@ body::-webkit-scrollbar,
     height: calc(100% - 28px);
     margin: 12px 16px 16px;
     padding: 18px 20px 22px;
+    position: relative;
     border: 1px solid color-mix(in srgb, var(--brave-world-line) 72%, var(--brave-border));
     border-radius: var(--brave-radius-panel);
     background:
@@ -1005,7 +1111,8 @@ body::-webkit-scrollbar,
     color: var(--brave-text);
     font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.62;
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
     text-shadow: var(--brave-text-glow);
 }
 
@@ -1047,7 +1154,7 @@ body::-webkit-scrollbar,
 .prompt {
     margin: 0 0 6px;
     color: var(--brave-prompt);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: calc(var(--brave-letter-spacing) + 0.02em);
     text-transform: uppercase;
@@ -1085,7 +1192,7 @@ body::-webkit-scrollbar,
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 42%),
         linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
     color: var(--brave-text-dim);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: calc(var(--brave-letter-spacing) + 0.06em);
     text-transform: uppercase;
@@ -1115,7 +1222,7 @@ body::-webkit-scrollbar,
 #inputfield {
     grid-column: 1;
     grid-row: 1;
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: var(--brave-letter-spacing);
     width: auto;
@@ -1211,7 +1318,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     border-radius: var(--brave-radius-control);
     background: linear-gradient(180deg, var(--brave-accent), var(--brave-accent-mid) 72%, var(--brave-accent-dark) 100%);
     color: var(--brave-accent-contrast);
-    font-family: "Material Symbols Outlined", var(--brave-font-family);
+    font-family: "Material Symbols Outlined", var(--brave-ui-font-family);
     font-size: 1.28rem;
     font-weight: 400;
     letter-spacing: normal;
@@ -1329,16 +1436,19 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     flex: 1 1 auto;
     min-width: 0;
     color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
     font-size: calc(1.02rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.1;
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.06em);
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     text-transform: uppercase;
     overflow-wrap: anywhere;
 }
 
 .brave-picker-sheet__subtitle {
     color: var(--brave-text-soft);
+    font-family: var(--brave-body-font-family);
     font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.45;
 }
 
@@ -1360,7 +1470,9 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .brave-picker-sheet__bodyline {
     color: var(--brave-text-soft);
+    font-family: var(--brave-body-font-family);
     font-size: calc(0.8rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.45;
 }
 
@@ -1479,6 +1591,90 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     border-radius: var(--brave-radius-card-tight);
 }
 
+.brave-picker-sheet__panel--tutorial {
+    width: min(640px, calc(100% - 32px));
+    gap: 18px;
+    overflow-y: auto;
+}
+
+.brave-tutorial-carousel {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.brave-tutorial-carousel__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.28);
+    border-radius: var(--brave-radius-card);
+    background:
+        radial-gradient(circle at 50% 0, rgba(var(--brave-accent-rgb), 0.18), transparent 64%),
+        rgba(255, 255, 255, 0.035);
+    color: var(--brave-text-bright);
+}
+
+.brave-tutorial-carousel__icon .material-symbols-outlined {
+    font-size: 2rem;
+}
+
+.brave-tutorial-carousel__copy {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+}
+
+.brave-tutorial-carousel__title {
+    color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
+    font-size: calc(1.12rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    letter-spacing: var(--brave-dialogue-letter-spacing);
+}
+
+.brave-tutorial-carousel__body {
+    display: grid;
+    gap: 8px;
+}
+
+.brave-tutorial-carousel__line {
+    color: var(--brave-text-soft);
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.95rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.5;
+    letter-spacing: var(--brave-body-letter-spacing);
+}
+
+.brave-tutorial-carousel__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.brave-tutorial-carousel__progress,
+.brave-tutorial-carousel__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brave-tutorial-carousel__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--brave-text-dim) 44%, transparent);
+}
+
+.brave-tutorial-carousel__dot--active {
+    width: 22px;
+    background: var(--brave-accent);
+}
+
 .brave-notice {
     display: grid;
     gap: 12px;
@@ -1535,9 +1731,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     flex: 1 1 auto;
     min-width: 0;
     color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
     font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.1;
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.04em);
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     text-transform: uppercase;
     overflow-wrap: anywhere;
 }
@@ -1551,9 +1748,17 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     gap: 8px;
 }
 
+.brave-notice__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
 .brave-notice__line {
     color: var(--brave-text-soft);
-    font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.88rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.48;
 }
 
@@ -1567,7 +1772,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     max-height: calc(100% - 76px);
     display: grid;
     grid-template-columns: repeat(2, minmax(0, var(--brave-rail-column-width)));
-    grid-template-rows: minmax(0, 1fr) 320px;
+    grid-template-rows: minmax(0, 1fr) minmax(220px, 0.82fr);
     grid-template-areas:
         "card pack"
         "vicinity vicinity";
@@ -1703,6 +1908,59 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     flex: 1 1 auto;
 }
 
+.scene-rail__panel--vicinity .brave-room-log {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--brave-world-line) 18%, transparent);
+    border-radius: 999px;
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(var(--brave-accent-rgb), 0.24);
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body > .out,
+.scene-rail__panel--vicinity .brave-room-log__body > .msg,
+.scene-rail__panel--vicinity .brave-room-log__body > .err,
+.scene-rail__panel--vicinity .brave-room-log__body > .sys {
+    margin-top: 0;
+    padding: 8px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.12);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--brave-text);
+    font-size: calc(0.7rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.45;
+}
+
+.scene-rail__panel--vicinity .brave-room-log__body > .err {
+    border-color: rgba(194, 92, 78, 0.22);
+    color: #f2c3ba;
+}
+
 .scene-rail__panel--vicinity .scene-card__list {
     flex: 1 1 auto;
     min-height: 0;
@@ -1757,7 +2015,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
         linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
     border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.18));
     border-radius: var(--brave-radius-card);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-mono-font-family);
     font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.08;
     letter-spacing: 0;
@@ -1869,9 +2127,11 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     align-items: flex-start;
     gap: 10px;
     color: var(--brave-text-bright);
-    font-size: calc(0.94rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-dialogue-font-family);
+    font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 500;
     line-height: 1.45;
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.01em);
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     text-transform: none;
 }
 
@@ -1984,7 +2244,9 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     gap: 10px;
     align-items: start;
     color: var(--brave-text-soft);
-    font-size: calc(0.86rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.92rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.42;
 }
 
@@ -2064,6 +2326,8 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .scene-card__text {
     min-width: 0;
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
     overflow-wrap: anywhere;
 }
 
@@ -2139,6 +2403,7 @@ body.brave-mainview-active .scene-rail {
     flex-direction: column;
     gap: 18px;
     max-width: 980px;
+    font-family: var(--brave-ui-font-family);
 }
 
 .brave-view__titlebar {
@@ -2895,7 +3160,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--chargen {
-    max-width: 920px;
+    max-width: 1040px;
     gap: 14px;
     min-height: 100%;
 }
@@ -2931,7 +3196,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--chargen .brave-view__sections {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
-    max-width: 920px;
+    max-width: 1040px;
     flex: 1 1 auto;
     align-content: start;
 }
@@ -2943,7 +3208,6 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--chargen .brave-view__entry {
-    min-height: 100%;
     gap: 8px;
     padding: 14px 14px 12px;
 }
@@ -2983,6 +3247,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     max-width: 42ch;
 }
 
+.brave-view--connection .brave-view__eyebrow {
+    letter-spacing: var(--brave-letter-spacing);
+    text-transform: none;
+}
+
 .brave-view--connection .brave-view__list-item {
     align-items: center;
     padding: 11px 12px;
@@ -3016,6 +3285,40 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     max-width: 56ch;
 }
 
+.brave-view--chargen .brave-view__actions {
+    gap: 8px;
+}
+
+.brave-view--chargen .brave-view__section--draft {
+    padding: 12px 14px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-surface-well-top) 72%, transparent), color-mix(in srgb, var(--brave-surface-well-bottom) 82%, transparent));
+}
+
+.brave-view--chargen .brave-view__section--draft .brave-view__section-label {
+    margin-bottom: 0;
+}
+
+.brave-view--chargen .brave-view__section--draft .brave-view__pairs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.brave-view--chargen .brave-view__section--draft .brave-view__pair {
+    align-items: start;
+    padding: 0 12px 0 0;
+    border-right: 1px solid rgba(var(--brave-accent-rgb), 0.1);
+    border-bottom: 0;
+}
+
+.brave-view--chargen .brave-view__section--draft .brave-view__pair:last-child {
+    padding-right: 0;
+    border-right: 0;
+}
+
+.brave-view--chargen .brave-view__section--draft .brave-view__pair-value {
+    text-align: left;
+}
+
 .brave-view--connection .brave-view__entry-line:first-child {
     color: var(--brave-link);
 }
@@ -3026,7 +3329,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--chargen .brave-view__entries {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 12px;
 }
 
@@ -3195,7 +3498,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     overflow: hidden;
     white-space: pre;
     text-align: center;
-    font-family: "Brave Plex Mono", monospace;
+    font-family: var(--brave-mono-font-family);
     font-size: 12px;
     line-height: 1;
     letter-spacing: 0;
@@ -3239,7 +3542,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: block;
     max-width: 100%;
     color: color-mix(in srgb, var(--brave-text-bright) 74%, var(--brave-accent));
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     font-size: clamp(2.4rem, 5vw, 4.4rem);
     font-weight: 700;
     line-height: 0.88;
@@ -3303,9 +3606,10 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     align-items: center;
     gap: 12px;
     color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
     font-size: calc(1.16rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.015em);
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     text-transform: uppercase;
 }
 
@@ -3314,9 +3618,17 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     font-size: 1.28rem;
 }
 
+.brave-view--dialogue .brave-view__title,
+.brave-view--read .brave-view__title {
+    letter-spacing: var(--brave-dialogue-letter-spacing);
+    text-transform: none;
+}
+
 .brave-view__subtitle {
     color: var(--brave-text-soft);
-    font-size: calc(0.88rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
+    font-size: calc(0.94rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.55;
     max-width: 64ch;
 }
@@ -3324,13 +3636,18 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--room .brave-view__subtitle {
     max-width: 100%;
     color: color-mix(in srgb, var(--brave-text-soft) 82%, var(--brave-text-bright));
-    font-size: calc(0.92rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.58;
 }
 
 .brave-view--room .brave-view__title {
-    font-size: calc(1.26rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-dialogue-font-family);
+    font-size: calc(1.34rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.15;
     text-shadow: 0 0 18px rgba(var(--brave-accent-rgb), 0.06);
+    text-transform: none;
 }
 
 .brave-view--room .brave-view__eyebrow {
@@ -3440,7 +3757,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: -webkit-box;
     overflow: hidden;
     color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
     font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     line-height: 1.16;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -3533,6 +3852,16 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: #ebb3a4;
 }
 
+.brave-view__action--pending,
+.brave-view__action:disabled {
+    cursor: wait;
+    opacity: 0.84;
+}
+
+.brave-view__action--pending .brave-view__action-icon {
+    color: color-mix(in srgb, var(--brave-good) 72%, var(--brave-text-bright));
+}
+
 .brave-view__sections {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -3592,7 +3921,10 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__sections {
-    grid-template-columns: minmax(184px, 0.54fr) minmax(0, 1.46fr);
+    grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.28fr);
+    grid-template-areas:
+        "hero enemies"
+        "allies enemies";
     align-items: start;
     gap: 12px;
 }
@@ -3980,7 +4312,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__pair-value {
     color: var(--brave-text-brighter);
+    font-family: var(--brave-body-font-family);
     font-size: calc(0.92rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.4;
     text-align: right;
 }
@@ -4011,7 +4345,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint-soft) 94%, rgba(var(--brave-accent-rgb), 0.035)), transparent 30%),
         linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
     color: var(--brave-text-brighter);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-ui-font-family);
     font-size: calc(0.96rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: var(--brave-letter-spacing);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -4132,6 +4466,10 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     align-items: start;
 }
 
+.brave-view__entry-head--iconless {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .brave-view__entry-icon-wrap,
 .brave-view__entry-badge,
 .brave-view__badge,
@@ -4167,9 +4505,21 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: flex;
     align-items: center;
     color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
     font-size: calc(0.94rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-dialogue-letter-spacing);
     line-height: 1.35;
     min-height: 1.35em;
+}
+
+.brave-view__entry-head--iconless {
+    padding-left: 0.2rem;
+}
+
+.brave-view__entry-ornament {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
 }
 
 .brave-view--theme .brave-view__entry-head {
@@ -4197,6 +4547,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view__entry-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.32rem;
     margin-top: 2px;
     color: var(--brave-text-dim);
     font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
@@ -4204,11 +4557,29 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     text-transform: uppercase;
 }
 
+.brave-view__entry-meta-icon {
+    font-size: 0.9rem;
+}
+
+.brave-view__entry-meta--accent {
+    color: color-mix(in srgb, var(--brave-accent) 68%, var(--brave-text-bright));
+}
+
+.brave-view__entry-meta--good {
+    color: #bde7d5;
+}
+
+.brave-view__entry-meta--muted {
+    color: #d8c2ad;
+}
+
 .brave-view__entry-body,
 .brave-view__lines {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
 }
 
 .brave-view__meters {
@@ -4271,6 +4642,20 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     background: linear-gradient(90deg, rgba(213, 138, 118, 0.98), rgba(174, 82, 74, 0.92));
 }
 
+.brave-view__entry-spacer {
+    flex: 1 1 auto;
+}
+
+.brave-view__entry-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.brave-view__entry-footer:empty {
+    display: none;
+}
+
 .brave-view__entry-chips {
     display: flex;
     flex-wrap: wrap;
@@ -4291,12 +4676,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     padding: 18px 20px 16px;
     position: relative;
     overflow: hidden;
-    border-color: rgba(178, 118, 100, 0.22);
+    border-color: color-mix(in srgb, var(--brave-combat-party-border) 78%, transparent);
     background:
-        radial-gradient(circle at 8% 0, rgba(150, 87, 69, 0.22), transparent 34%),
-        radial-gradient(circle at 90% 0, rgba(69, 108, 125, 0.18), transparent 38%),
+        radial-gradient(circle at 8% 0, var(--brave-combat-hero-tint-left), transparent 34%),
+        radial-gradient(circle at 90% 0, var(--brave-combat-hero-tint-right), transparent 38%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
-        linear-gradient(180deg, rgba(17, 22, 30, 0.98), rgba(9, 11, 16, 1));
+        linear-gradient(180deg, var(--brave-combat-hero-top), var(--brave-combat-hero-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.05),
         0 22px 40px rgba(0, 0, 0, 0.34);
@@ -4331,22 +4716,76 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
+    padding: 8px;
+    border: 1px solid var(--brave-combat-command-border);
+    border-radius: calc(var(--brave-radius-card) - 2px);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
+        linear-gradient(180deg, var(--brave-combat-command-top), var(--brave-combat-command-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.015);
 }
 
 .brave-view--combat .brave-view__action {
     justify-content: center;
-    min-height: 2.65rem;
+    min-height: 2.85rem;
     padding: 9px 12px;
-    border-radius: 12px;
+    border: 1px solid var(--brave-combat-command-button-border);
+    border-radius: 10px;
+    background:
+        linear-gradient(180deg, rgba(234, 190, 145, 0.08), rgba(255, 255, 255, 0.02) 28%, transparent 28%),
+        linear-gradient(180deg, var(--brave-combat-command-button-top), var(--brave-combat-command-button-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 245, 230, 0.08),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.34),
+        0 8px 14px rgba(0, 0, 0, 0.16);
+    color: var(--brave-combat-command-text);
     font-size: calc(0.74rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: calc(var(--brave-letter-spacing) + 0.04em);
     text-transform: uppercase;
 }
 
+.brave-view--combat .brave-view__action span {
+    position: relative;
+    top: 1px;
+}
+
+.brave-view--combat .brave-view__action-icon {
+    color: var(--brave-combat-command-icon);
+}
+
+.brave-view--combat .brave-view__action:hover,
+.brave-view--combat .brave-view__action:focus-visible {
+    border-color: color-mix(in srgb, var(--brave-combat-command-button-border) 80%, var(--brave-combat-semantic-warn));
+    background:
+        linear-gradient(180deg, rgba(244, 201, 148, 0.12), rgba(255, 255, 255, 0.03) 28%, transparent 28%),
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--brave-combat-command-button-top) 82%, var(--brave-combat-semantic-warn)),
+            color-mix(in srgb, var(--brave-combat-command-button-bottom) 88%, rgba(16, 12, 10, 1))
+        );
+    box-shadow:
+        inset 0 1px 0 rgba(255, 245, 230, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.34),
+        0 10px 18px rgba(0, 0, 0, 0.2);
+}
+
 .brave-view--combat .brave-view__action--danger {
     background:
-        linear-gradient(180deg, rgba(111, 42, 40, 0.44), rgba(54, 21, 21, 0.7));
-    color: #ffd2c7;
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--brave-combat-semantic-danger) 18%, rgba(255, 255, 255, 0.02)),
+            rgba(255, 255, 255, 0.02) 24%,
+            transparent 24%
+        ),
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--brave-combat-command-button-top) 74%, var(--brave-combat-semantic-danger)),
+            color-mix(in srgb, var(--brave-combat-command-button-bottom) 78%, rgba(25, 10, 10, 1))
+        );
+    border-color: color-mix(in srgb, var(--brave-combat-semantic-danger) 42%, var(--brave-combat-command-button-border));
+    color: #ffd8ca;
 }
 
 .brave-view--combat .brave-view__action--icon-only {
@@ -4359,17 +4798,17 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--combat .brave-view__hero {
     padding: 14px 16px 14px;
     gap: 8px;
-    border-color: rgba(169, 106, 92, 0.24);
+    border-color: color-mix(in srgb, var(--brave-combat-party-border) 72%, transparent);
     background:
-        radial-gradient(circle at 0 0, rgba(159, 90, 76, 0.12), transparent 42%),
-        radial-gradient(circle at 100% 0, rgba(76, 111, 130, 0.1), transparent 38%),
+        radial-gradient(circle at 0 0, var(--brave-combat-hero-tint-left), transparent 42%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-hero-tint-right), transparent 38%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 20%),
-        linear-gradient(180deg, rgba(19, 16, 18, 0.985), rgba(10, 11, 15, 1));
+        linear-gradient(180deg, var(--brave-combat-hero-top), var(--brave-combat-hero-bottom));
 }
 
 .brave-view--combat .brave-view__section {
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     isolation: isolate;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
@@ -4412,12 +4851,13 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party {
-    border-color: rgba(92, 141, 135, 0.24);
+    grid-area: hero;
+    border-color: var(--brave-combat-party-border);
     background:
-        radial-gradient(circle at 0 0, rgba(84, 144, 131, 0.14), transparent 38%),
-        radial-gradient(circle at 100% 0, rgba(94, 120, 146, 0.15), transparent 42%),
+        radial-gradient(circle at 0 0, var(--brave-combat-party-tint-left), transparent 38%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-party-tint-right), transparent 42%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.026), transparent 22%),
-        linear-gradient(180deg, rgba(14, 21, 27, 0.98), rgba(8, 12, 16, 1));
+        linear-gradient(180deg, var(--brave-combat-party-top), var(--brave-combat-party-bottom));
 }
 
 .brave-view--combat .brave-view__section--party::before {
@@ -4428,13 +4868,32 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: #8bc9bf;
 }
 
-.brave-view--combat .brave-view__section--targets {
-    border-color: rgba(166, 92, 84, 0.26);
+.brave-view--combat .brave-view__section--allies {
+    grid-area: allies;
+    border-color: var(--brave-combat-allies-border);
     background:
-        radial-gradient(circle at 0 0, rgba(152, 74, 63, 0.18), transparent 40%),
-        radial-gradient(circle at 100% 0, rgba(85, 42, 37, 0.18), transparent 40%),
+        radial-gradient(circle at 0 0, var(--brave-combat-allies-tint-left), transparent 40%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-allies-tint-right), transparent 42%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.024), transparent 24%),
+        linear-gradient(180deg, var(--brave-combat-allies-top), var(--brave-combat-allies-bottom));
+}
+
+.brave-view--combat .brave-view__section--allies::before {
+    background: linear-gradient(180deg, rgba(196, 168, 122, 0.06), transparent 24%, transparent 84%, rgba(255, 255, 255, 0.015));
+}
+
+.brave-view--combat .brave-view__section--allies .brave-view__section-icon {
+    color: #d6b487;
+}
+
+.brave-view--combat .brave-view__section--targets {
+    grid-area: enemies;
+    border-color: var(--brave-combat-enemy-border);
+    background:
+        radial-gradient(circle at 0 0, var(--brave-combat-enemy-tint-left), transparent 40%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-enemy-tint-right), transparent 40%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.026), transparent 22%),
-        linear-gradient(180deg, rgba(26, 16, 16, 0.98), rgba(13, 8, 8, 1));
+        linear-gradient(180deg, var(--brave-combat-enemy-top), var(--brave-combat-enemy-bottom));
 }
 
 .brave-view--combat .brave-view__section--targets::before {
@@ -4449,6 +4908,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 9px;
+}
+
+.brave-view--combat .brave-view__section--allies .brave-view__entries {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(144px, 1fr));
+    gap: 8px;
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entries {
@@ -4613,6 +5078,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--combat .brave-view__section--targets .brave-view__entry {
     padding: 11px 11px 9px;
     gap: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
     transition:
         transform 150ms ease,
         box-shadow 180ms ease,
@@ -4621,8 +5089,17 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         filter 180ms ease;
 }
 
+.brave-view--combat .brave-view__entry--ornamented .brave-view__entry-head,
+.brave-view--combat .brave-view__entry--ornamented .brave-view__meters,
+.brave-view--combat .brave-view__entry--ornamented .brave-view__entry-chips,
+.brave-view--combat .brave-view__entry--ornamented .brave-view__entry-body,
+.brave-view--combat .brave-view__entry--ornamented .brave-view__inline-actions {
+    position: relative;
+    z-index: 1;
+}
+
 .brave-view--combat .brave-view__entry--lunge {
-    animation: brave-combat-card-lunge 300ms cubic-bezier(0.2, 0.86, 0.24, 1) 1;
+    animation: brave-combat-card-lunge 420ms cubic-bezier(0.2, 0.86, 0.24, 1) 1;
     will-change: transform;
 }
 
@@ -4632,16 +5109,31 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry {
-    border-color: rgba(92, 141, 135, 0.2);
+    border-color: color-mix(in srgb, var(--brave-combat-party-border) 82%, transparent);
     background:
-        radial-gradient(circle at 0 0, rgba(92, 141, 135, 0.12), transparent 44%),
+        radial-gradient(circle at 0 0, var(--brave-combat-party-tint-left), transparent 44%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.032), transparent 28%),
-        rgba(255, 255, 255, 0.028);
+        linear-gradient(180deg, var(--brave-combat-party-top), var(--brave-combat-party-bottom));
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-icon-wrap {
-    background: rgba(102, 166, 151, 0.14);
-    color: #a8dfd2;
+    background: color-mix(in srgb, var(--brave-combat-semantic-party) 14%, transparent);
+    color: var(--brave-combat-semantic-party);
+}
+
+.brave-view--combat .brave-view__section--allies .brave-view__entry {
+    position: relative;
+    min-height: 148px;
+    border-color: color-mix(in srgb, var(--brave-combat-allies-border) 82%, transparent);
+    background:
+        radial-gradient(circle at 0 0, var(--brave-combat-allies-tint-left), transparent 46%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 24%),
+        linear-gradient(180deg, var(--brave-combat-allies-top), var(--brave-combat-allies-bottom));
+}
+
+.brave-view--combat .brave-view__section--allies .brave-view__entry-icon-wrap {
+    background: color-mix(in srgb, var(--brave-combat-semantic-joined) 14%, transparent);
+    color: var(--brave-combat-semantic-joined);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -4662,15 +5154,78 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry {
     position: relative;
-    overflow: hidden;
-    border-color: rgba(166, 92, 84, 0.22);
+    overflow: visible;
+    height: 192px;
+    min-height: 192px;
+    max-height: 192px;
+    border-color: color-mix(in srgb, var(--brave-combat-enemy-border) 78%, transparent);
     background:
-        radial-gradient(circle at 0 0, rgba(166, 92, 84, 0.14), transparent 44%),
+        radial-gradient(circle at 0 0, var(--brave-combat-enemy-tint-left), transparent 44%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.032), transparent 28%),
-        linear-gradient(180deg, rgba(31, 18, 18, 0.98), rgba(15, 9, 9, 1));
+        linear-gradient(180deg, var(--brave-combat-enemy-top), var(--brave-combat-enemy-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         0 16px 28px rgba(0, 0, 0, 0.22);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry {
+    position: relative;
+    min-height: 204px;
+    overflow: visible;
+}
+
+.brave-view--chargen .brave-view__entry {
+    position: relative;
+    overflow: hidden;
+    min-height: 218px;
+}
+
+.brave-view--chargen .brave-view__entry--selected {
+    border-color: color-mix(in srgb, var(--brave-good) 52%, var(--brave-world-line));
+    background:
+        radial-gradient(circle at 100% 0, rgba(138, 191, 151, 0.16), transparent 38%),
+        linear-gradient(180deg, var(--brave-surface-soft-top), var(--brave-surface-soft-bottom));
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-ornament {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 6.2rem;
+    line-height: 1;
+    color: rgba(113, 182, 165, 0.12);
+    text-shadow: 0 0 22px rgba(113, 182, 165, 0.08);
+    font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 48;
+    z-index: 0;
+}
+
+.brave-view--chargen .brave-view__entry-ornament {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 6.2rem;
+    line-height: 1;
+    color: rgba(var(--brave-accent-rgb), 0.2);
+    text-shadow: 0 0 24px rgba(var(--brave-accent-rgb), 0.16);
+    font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 48;
+    z-index: 0;
+}
+
+.brave-view--chargen .brave-view__entry--selected .brave-view__entry-ornament {
+    color: rgba(138, 191, 151, 0.24);
+    text-shadow: 0 0 24px rgba(138, 191, 151, 0.18);
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry-ornament {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 6.2rem;
+    line-height: 1;
+    color: rgba(240, 177, 163, 0.14);
+    text-shadow: 0 0 22px rgba(194, 109, 96, 0.12);
+    font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 48;
+    z-index: 0;
 }
 
 .brave-combat-floater {
@@ -4777,6 +5332,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__entry--defeating {
     opacity: 0;
+    pointer-events: none;
 }
 
 .brave-view--combat .brave-view__entry--impact-miss {
@@ -4827,6 +5383,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         0 0 0 1px rgba(231, 157, 132, 0.22),
         0 22px 34px rgba(0, 0, 0, 0.28);
     animation: brave-combat-target-pulse 1.1s ease-in-out infinite;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry.brave-view__entry--selected .brave-view__entry-ornament {
+    color: rgba(255, 228, 193, 0.2);
+    text-shadow: 0 0 24px rgba(247, 196, 120, 0.18);
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry::before {
@@ -4923,6 +5484,10 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: #b2d8d2;
 }
 
+.brave-view--combat .brave-view__section--allies .brave-view__entry-meta {
+    color: #d9c2a2;
+}
+
 .brave-view--combat .brave-view__section--targets .brave-view__entry-badge {
     min-width: 1.8rem;
     border-radius: 10px;
@@ -4968,13 +5533,36 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-body,
+.brave-view--combat .brave-view__section--allies .brave-view__entry-body,
 .brave-view--combat .brave-view__section--targets .brave-view__entry-body {
     gap: 2px;
 }
 
+.brave-view--combat .brave-view__entry-spacer {
+    min-height: 0;
+}
+
+.brave-view--combat .brave-view__entry-footer {
+    justify-content: flex-end;
+    margin-top: auto;
+}
+
+.brave-view--combat .brave-view__entry-footer:empty {
+    display: flex;
+}
+
 .brave-view--combat .brave-view__section--party .brave-view__meters,
+.brave-view--combat .brave-view__section--allies .brave-view__meters,
 .brave-view--combat .brave-view__section--targets .brave-view__meters {
     padding-top: 2px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__meters {
+    gap: 5px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__meter {
+    gap: 2px;
 }
 
 .brave-view--combat .brave-view__meter[data-meter-kind="atb"] {
@@ -5000,8 +5588,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-body:empty,
+.brave-view--combat .brave-view__section--allies .brave-view__entry-body:empty,
 .brave-view--combat .brave-view__section--targets .brave-view__entry-body:empty {
     display: none;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry-footer {
+    flex: 0 0 2.75rem;
+    min-height: 2.75rem;
+    max-height: 2.75rem;
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-title {
@@ -5009,7 +5604,25 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: #e8f6f2;
 }
 
+.brave-view--combat .brave-view__section--allies .brave-view__entry-title {
+    font-size: calc(0.74rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    color: #f2e4d2;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry {
+    padding-bottom: 2.9rem;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-footer {
+    position: absolute;
+    left: 11px;
+    right: 11px;
+    bottom: 9px;
+    min-height: 2.2rem;
+}
+
 .brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip,
+.brave-view--combat .brave-view__section--allies .brave-view__entry-chips .scene-card__chip,
 .brave-view--combat .brave-view__section--targets .brave-view__entry-chips .scene-card__chip {
     font-size: calc(0.54rem * var(--brave-text-scale) * var(--brave-font-size-scale));
 }
@@ -5066,11 +5679,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__meter-track {
+    height: 6px;
     background: rgba(86, 122, 117, 0.16);
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-track {
-    height: 7px;
+    height: 6px;
     background: rgba(77, 120, 128, 0.24);
 }
 
@@ -5329,7 +5943,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-combat-ghost {
     border-radius: inherit;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .brave-combat-ghost--defeat {
@@ -5806,7 +6420,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view__arcade-screen {
     margin: 0;
     min-height: 13em;
-    font-family: "VT323", "DejaVu Sans Mono", monospace;
+    font-family: "Brave VT323", "Brave DejaVu Sans Mono", monospace;
     font-size: clamp(0.92rem, 1.2vw, 1.24rem);
     line-height: 1;
     letter-spacing: 0.02em;
@@ -5968,7 +6582,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         linear-gradient(180deg, rgba(21, 27, 36, 0.98), rgba(7, 10, 14, 1)),
         radial-gradient(circle at 50% 0, rgba(112, 220, 255, 0.08), transparent 56%);
     color: #ecfbff;
-    font-family: "VT323", "DejaVu Sans Mono", monospace;
+    font-family: "Brave VT323", "Brave DejaVu Sans Mono", monospace;
     font-size: 1.7rem;
     line-height: 1;
     touch-action: none;
@@ -6177,7 +6791,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         radial-gradient(circle at 18% 0, var(--brave-world-surface-tint), transparent 34%),
         linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
     color: var(--brave-text-bright);
-    font-family: var(--brave-font-family);
+    font-family: var(--brave-mono-font-family);
     font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.16;
     letter-spacing: 0;
@@ -6213,7 +6827,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         inset 0 0 0 1px rgba(255, 255, 255, 0.015),
         0 16px 28px rgba(0, 0, 0, 0.22);
     color: color-mix(in srgb, var(--brave-accent) 74%, var(--brave-text-soft));
-    font-family: "Brave Plex Mono", monospace;
+    font-family: var(--brave-mono-font-family);
     font-size: 12px;
     line-height: 1;
     letter-spacing: 0;
@@ -6380,7 +6994,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view__entry-line,
 .brave-view__line {
     color: var(--brave-text-soft);
-    font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.9rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.5;
 }
 
@@ -6395,10 +7011,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__line--quote {
     color: var(--brave-text-bright);
-    font-size: calc(0.96rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-dialogue-font-family);
+    font-size: calc(1.04rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.7;
-    font-style: italic;
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.01em);
+    font-style: normal;
+    letter-spacing: var(--brave-dialogue-letter-spacing);
 }
 
 .brave-view__list {
@@ -6491,11 +7108,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     min-width: 0;
     display: grid;
     gap: 2px;
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
 }
 
 .brave-view__list-text {
     color: var(--brave-text-soft);
-    font-size: calc(0.88rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.94rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-body-letter-spacing);
     line-height: 1.45;
 }
 
@@ -7251,13 +7872,13 @@ body[data-brave-theme="atlas"] .brave-view__entry {
 body[data-brave-scene="combat"] .content,
 body[data-brave-scene="combat"] #messagewindow,
 body[data-brave-scene="combat"] .inputwrap {
-    border-color: rgba(169, 106, 92, 0.3);
+    border-color: color-mix(in srgb, var(--brave-combat-command-border) 88%, transparent);
     background:
-        radial-gradient(circle at 12% 0, rgba(159, 90, 76, 0.12), transparent 22%),
-        radial-gradient(circle at 86% 8%, rgba(76, 111, 130, 0.1), transparent 24%),
+        radial-gradient(circle at 12% 0, var(--brave-combat-hero-tint-left), transparent 22%),
+        radial-gradient(circle at 86% 8%, var(--brave-combat-hero-tint-right), transparent 24%),
         radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.28), transparent 34%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 18%),
-        linear-gradient(180deg, rgba(17, 21, 29, 0.98), rgba(9, 11, 16, 1));
+        linear-gradient(180deg, var(--brave-combat-shell-top), var(--brave-combat-shell-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         inset 0 0 0 1px rgba(255, 255, 255, 0.015),
@@ -7315,10 +7936,27 @@ body[data-brave-scene="explore"] .minimap-overlay {
 }
 
 @media screen and (min-width: 1100px) {
+    body[data-brave-scene="explore"] {
+        --brave-rail-column-width: clamp(248px, 19vw, 304px);
+        --brave-rail-width: calc((var(--brave-rail-column-width) * 2) + var(--brave-rail-gap));
+    }
+
     body[data-brave-scene="explore"] .scene-rail {
-        bottom: 168px;
+        top: 18px;
+        right: 20px;
+        bottom: 22px;
         height: auto;
         max-height: none;
+        padding-right: 0;
+        grid-template-rows: minmax(0, 1fr) minmax(220px, 0.82fr);
+        align-content: stretch;
+        align-items: stretch;
+    }
+
+    body[data-brave-scene="explore"] .scene-rail__panel--vicinity {
+        width: 100%;
+        justify-self: stretch;
+        align-self: stretch;
     }
 }
 
@@ -7335,44 +7973,54 @@ body[data-brave-scene="combat"] .brave-combat-log {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 10px 10px 8px;
-    border: 1px solid rgba(169, 106, 92, 0.22);
+    height: var(--brave-combat-log-height);
+    min-height: var(--brave-combat-log-height);
+    max-height: var(--brave-combat-log-height);
+    padding: 12px 12px 10px;
+    border: 1px solid var(--brave-combat-feed-border);
     border-radius: var(--brave-radius-card);
     background:
-        radial-gradient(circle at 0 0, rgba(159, 90, 76, 0.08), transparent 42%),
-        radial-gradient(circle at 100% 0, rgba(76, 111, 130, 0.07), transparent 38%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 22%),
-        linear-gradient(180deg, rgba(17, 21, 29, 0.98), rgba(9, 11, 16, 1));
+        radial-gradient(circle at 0 0, var(--brave-combat-hero-tint-left), transparent 42%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-hero-tint-right), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 22%),
+        linear-gradient(180deg, var(--brave-combat-feed-top), var(--brave-combat-feed-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.015),
         0 18px 32px rgba(0, 0, 0, 0.24);
 }
 
 body[data-brave-scene="combat"] .brave-combat-log__head {
-    color: #d4b49d;
-    font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.08em);
+    color: var(--brave-combat-command-text);
+    font-size: calc(0.62rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 700;
+    letter-spacing: calc(var(--brave-letter-spacing) + 0.12em);
     text-transform: uppercase;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid color-mix(in srgb, var(--brave-combat-feed-border) 74%, transparent);
 }
 
 body[data-brave-scene="combat"] .brave-combat-log__head::before {
-    content: "";
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-    background: rgba(221, 148, 119, 0.8);
-    box-shadow: 0 0 10px rgba(221, 148, 119, 0.3);
+    content: "◦";
+    width: auto;
+    height: auto;
+    color: var(--brave-combat-command-icon);
+    font-size: 1rem;
+    line-height: 1;
+    text-shadow: 0 0 10px color-mix(in srgb, var(--brave-combat-command-icon) 24%, transparent);
 }
 
 body[data-brave-scene="combat"] .brave-combat-log__body {
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
     gap: 6px;
-    max-height: calc(1.62em * 4 + 2.4rem);
-    min-height: calc(1.62em * 2 + 1.2rem);
+    height: 100%;
+    min-height: 0;
+    max-height: none;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-right: 4px;
@@ -7392,22 +8040,23 @@ body[data-brave-scene="combat"] .brave-combat-log__body > .out,
 body[data-brave-scene="combat"] .brave-combat-log__body > .msg,
 body[data-brave-scene="combat"] .brave-combat-log__body > .err {
     margin-top: 0;
-    padding: 8px 10px;
-    border: 1px solid color-mix(in srgb, rgba(var(--brave-accent-rgb), 0.16) 62%, var(--brave-world-line));
-    border-radius: var(--brave-radius-card-tight);
+    padding: 9px 11px;
+    border: 1px solid var(--brave-combat-feed-item-border);
+    border-radius: 12px;
     background:
-        radial-gradient(circle at 0 0, rgba(164, 101, 87, 0.1), transparent 50%),
-        radial-gradient(circle at 100% 0, rgba(73, 109, 127, 0.08), transparent 42%),
-        linear-gradient(180deg, color-mix(in srgb, var(--brave-panel-soft) 88%, transparent), color-mix(in srgb, var(--brave-panel-deep) 90%, transparent));
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 26%),
+        radial-gradient(circle at 0 0, var(--brave-combat-hero-tint-left), transparent 52%),
+        linear-gradient(180deg, var(--brave-combat-feed-item-top), var(--brave-combat-feed-item-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         0 12px 24px rgba(0, 0, 0, 0.18);
+    color: var(--brave-combat-command-text);
     font-size: calc(0.92rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.45;
 }
 
 body[data-brave-scene="combat"] .brave-combat-log__body > .err {
-    border-color: rgba(213, 138, 118, 0.34);
+    border-color: color-mix(in srgb, var(--brave-combat-semantic-danger) 38%, var(--brave-combat-feed-item-border));
 }
 
 body[data-brave-scene="combat"] .scene-rail__panel,
@@ -7425,10 +8074,10 @@ body[data-brave-scene="combat"] .brave-view__entry {
 body[data-brave-scene="combat"] .scene-rail__panel,
 body[data-brave-scene="combat"] .scene-card {
     background:
-        radial-gradient(circle at 0 0, rgba(159, 90, 76, 0.1), transparent 40%),
-        radial-gradient(circle at 100% 0, rgba(76, 111, 130, 0.08), transparent 38%),
+        radial-gradient(circle at 0 0, var(--brave-combat-hero-tint-left), transparent 40%),
+        radial-gradient(circle at 100% 0, var(--brave-combat-hero-tint-right), transparent 38%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 22%),
-        linear-gradient(180deg, rgba(17, 21, 29, 0.98), rgba(9, 11, 16, 1));
+        linear-gradient(180deg, var(--brave-combat-shell-top), var(--brave-combat-shell-bottom));
 }
 
 body[data-brave-danger="danger"] {
@@ -7907,12 +8556,89 @@ body.brave-scene-combat-enter .inputwrap {
     #brave-notice-stack {
         left: 12px;
         right: 12px;
-        bottom: calc(var(--brave-mobile-input-reserve) + 12px);
+        top: calc(env(safe-area-inset-top, 0px) + 12px);
+        bottom: auto;
         width: auto;
+        max-height: min(52vh, calc(100dvh - 32px));
+        overflow-y: auto;
+    }
+
+    .brave-notice {
+        gap: 8px;
+        padding: 10px 12px;
+    }
+
+    .brave-notice__head {
+        gap: 8px;
+    }
+
+    .brave-notice__titlebar {
+        gap: 8px;
+    }
+
+    .brave-notice__icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .brave-notice__title {
+        font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    .brave-notice__close {
+        min-width: 2.1rem;
+        width: 2.1rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .brave-notice__close span {
+        display: none;
+    }
+
+    .brave-notice__line {
+        font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        line-height: 1.42;
     }
 
     .brave-picker-sheet__titlebar {
         gap: 10px;
+    }
+
+    .brave-picker-sheet__panel--tutorial {
+        max-height: min(68dvh, calc(100dvh - var(--brave-mobile-dock-clearance) - 44px), 620px);
+    }
+
+    .brave-tutorial-carousel {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .brave-tutorial-carousel__icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .brave-tutorial-carousel__icon .material-symbols-outlined {
+        font-size: 1.6rem;
+    }
+
+    .brave-tutorial-carousel__title {
+        font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    .brave-tutorial-carousel__line {
+        font-size: calc(0.9rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        line-height: 1.44;
+    }
+
+    .brave-tutorial-carousel__footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .brave-tutorial-carousel__actions {
+        justify-content: space-between;
     }
 
     .brave-input-modebar {
@@ -8172,6 +8898,25 @@ body.brave-scene-combat-enter .inputwrap {
         min-height: 100%;
     }
 
+    .brave-view--chargen .brave-view__section--draft .brave-view__pairs {
+        grid-template-columns: 1fr;
+    }
+
+    .brave-view--chargen .brave-view__section--draft .brave-view__pair {
+        padding: 0 0 8px;
+        border-right: 0;
+        border-bottom: 1px solid rgba(var(--brave-accent-rgb), 0.08);
+    }
+
+    .brave-view--chargen .brave-view__section--draft .brave-view__pair:last-child {
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+
+    .brave-view--chargen .brave-view__entry {
+        min-height: auto;
+    }
+
     body.brave-mobile-input-open .content,
     body.brave-mobile-input-open #messagewindow {
         padding-bottom: calc(var(--brave-mobile-input-reserve) + 10px);
@@ -8350,8 +9095,9 @@ body.brave-scene-combat-enter .inputwrap {
 
     .brave-mobile-sheet__title {
         color: var(--brave-text-bright);
+        font-family: var(--brave-dialogue-font-family);
         font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-        letter-spacing: calc(var(--brave-letter-spacing) + 0.04em);
+        letter-spacing: var(--brave-dialogue-letter-spacing);
         text-transform: uppercase;
     }
 
@@ -8537,7 +9283,7 @@ body.brave-scene-combat-enter .inputwrap {
             radial-gradient(circle at 0 0, var(--brave-state-surface-tint-soft), transparent 46%),
             linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
         color: var(--brave-text-bright);
-        font-family: var(--brave-font-family);
+        font-family: var(--brave-mono-font-family);
         font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
         line-height: 1.08;
         white-space: pre;
@@ -8773,7 +9519,7 @@ body.brave-scene-combat-enter .inputwrap {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: "Brave Plex Mono", monospace;
+        font-family: var(--brave-mono-font-family);
         font-size: 9.5px;
         line-height: 1;
         white-space: pre;
@@ -8873,7 +9619,7 @@ body.brave-scene-combat-enter .inputwrap {
     body {
         --brave-mobile-dock-clearance: 124px;
         --brave-mobile-input-pane-height: 112px;
-        --brave-mobile-combat-log-height: clamp(132px, 28vh, 196px);
+        --brave-mobile-combat-log-height: 176px;
     }
 
     body[data-brave-scene="combat"] .brave-gl-main-item,
@@ -8901,14 +9647,14 @@ body.brave-scene-combat-enter .inputwrap {
         content: "";
         position: absolute;
         inset: 12px;
-        border: 1px solid rgba(169, 106, 92, 0.3);
+        border: 1px solid color-mix(in srgb, var(--brave-combat-command-border) 88%, transparent);
         border-radius: var(--brave-radius-panel);
         background:
-            radial-gradient(circle at 12% 0, rgba(159, 90, 76, 0.12), transparent 22%),
-            radial-gradient(circle at 86% 8%, rgba(76, 111, 130, 0.1), transparent 24%),
+            radial-gradient(circle at 12% 0, var(--brave-combat-hero-tint-left), transparent 22%),
+            radial-gradient(circle at 86% 8%, var(--brave-combat-hero-tint-right), transparent 24%),
             radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.28), transparent 34%),
             linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 18%),
-            linear-gradient(180deg, rgba(17, 21, 29, 0.98), rgba(9, 11, 16, 1));
+            linear-gradient(180deg, var(--brave-combat-shell-top), var(--brave-combat-shell-bottom));
         box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.04),
             inset 0 0 0 1px rgba(255, 255, 255, 0.015),
@@ -8950,7 +9696,7 @@ body.brave-scene-combat-enter .inputwrap {
         border-bottom-right-radius: 26px;
         overflow: hidden;
         background:
-            linear-gradient(180deg, rgba(6, 9, 7, 0.985), rgba(6, 9, 7, 0.978) 72%, rgba(6, 9, 7, 0.962));
+            linear-gradient(180deg, var(--brave-combat-shell-top), var(--brave-combat-shell-bottom) 72%, var(--brave-combat-shell-bottom));
     }
 
     body[data-brave-scene="combat"] #messagewindow > .brave-sticky-view > .brave-view--combat {
@@ -9023,13 +9769,15 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--party,
+    .brave-view--combat .brave-view__section--allies,
     .brave-view--combat .brave-view__section--targets {
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.026), transparent 22%),
-            linear-gradient(180deg, rgba(17, 21, 29, 0.98), rgba(9, 11, 16, 1));
+            linear-gradient(180deg, var(--brave-combat-shell-top), var(--brave-combat-shell-bottom));
     }
 
     .brave-view--combat .brave-view__section--party::before,
+    .brave-view--combat .brave-view__section--allies::before,
     .brave-view--combat .brave-view__section--targets::before {
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 22%, transparent 84%, rgba(255, 255, 255, 0.012));
     }
@@ -9042,8 +9790,12 @@ body.brave-scene-combat-enter .inputwrap {
         order: 2;
     }
 
-    .brave-combat-tray-tabs {
+    .brave-view--combat .brave-view__section--allies {
         order: 3;
+    }
+
+    .brave-combat-tray-tabs {
+        order: 4;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 6px;
@@ -9051,11 +9803,11 @@ body.brave-scene-combat-enter .inputwrap {
 
     .brave-combat-tray-tabs__tab {
         appearance: none;
-        border: 1px solid rgba(154, 120, 103, 0.24);
+        border: 1px solid color-mix(in srgb, var(--brave-combat-command-border) 82%, transparent);
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 30%),
-            linear-gradient(180deg, rgba(19, 23, 31, 0.98), rgba(10, 13, 18, 1));
-        color: rgba(225, 212, 201, 0.82);
+            linear-gradient(180deg, var(--brave-combat-command-top), var(--brave-combat-command-bottom));
+        color: color-mix(in srgb, var(--brave-combat-command-text) 84%, transparent);
         border-radius: 12px;
         padding: 8px 10px;
         font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
@@ -9094,6 +9846,7 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entries,
+    .brave-view--combat .brave-view__section--allies .brave-view__entries,
     .brave-view--combat .brave-view__section--targets .brave-view__entries {
         display: grid;
         grid-auto-flow: column;
@@ -9108,15 +9861,16 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entries::-webkit-scrollbar,
+    .brave-view--combat .brave-view__section--allies .brave-view__entries::-webkit-scrollbar,
     .brave-view--combat .brave-view__section--targets .brave-view__entries::-webkit-scrollbar {
         display: none;
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry,
+    .brave-view--combat .brave-view__section--allies .brave-view__entry,
     .brave-view--combat .brave-view__section--targets .brave-view__entry {
-        display: grid;
-        grid-template-rows: auto auto auto 1fr;
-        align-content: start;
+        display: flex;
+        flex-direction: column;
         gap: 5px;
         padding: 7px 7px 6px;
         min-height: 104px;
@@ -9127,17 +9881,29 @@ body.brave-scene-combat-enter .inputwrap {
             inset 0 1px 0 rgba(255, 255, 255, 0.035),
             0 10px 18px rgba(0, 0, 0, 0.18);
         scroll-snap-align: start;
+        overflow: visible;
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry {
+        min-height: 122px;
         border-color: rgba(116, 149, 146, 0.24);
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
             linear-gradient(180deg, rgba(23, 28, 36, 0.98), rgba(11, 15, 20, 1));
     }
 
+    .brave-view--combat .brave-view__section--allies .brave-view__entry {
+        min-height: 106px;
+        border-color: rgba(164, 130, 90, 0.24);
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
+            linear-gradient(180deg, rgba(35, 27, 22, 0.98), rgba(16, 12, 11, 1));
+    }
+
     .brave-view--combat .brave-view__section--targets .brave-view__entry {
-        min-height: 104px;
+        height: 112px;
+        min-height: 112px;
+        max-height: 112px;
         border-color: rgba(170, 109, 96, 0.24);
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
@@ -9145,12 +9911,19 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-head,
+    .brave-view--combat .brave-view__section--allies .brave-view__entry-head,
     .brave-view--combat .brave-view__section--targets .brave-view__entry-head {
         gap: 7px;
         align-items: center;
     }
 
+    .brave-view--combat .brave-view__section--allies .brave-view__entry-head--iconless,
+    .brave-view--combat .brave-view__section--targets .brave-view__entry-head--iconless {
+        gap: 0;
+    }
+
     .brave-view--combat .brave-view__section--party .brave-view__entry-icon-wrap,
+    .brave-view--combat .brave-view__section--allies .brave-view__entry-icon-wrap,
     .brave-view--combat .brave-view__section--targets .brave-view__entry-icon-wrap,
     .brave-view--combat .brave-view__section--targets .brave-view__entry-badge {
         width: 20px;
@@ -9215,8 +9988,32 @@ body.brave-scene-combat-enter .inputwrap {
         min-height: 1.2em;
     }
 
+    .brave-view--combat .brave-view__section--targets .brave-view__entry-footer {
+        flex-basis: 1.9rem;
+        min-height: 1.9rem;
+        max-height: 1.9rem;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry {
+        padding-bottom: 2.35rem;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry-footer {
+        left: 7px;
+        right: 7px;
+        bottom: 6px;
+        min-height: 1.7rem;
+    }
+
     .brave-view--combat .brave-view__section--targets .brave-view__entry-body:empty {
         display: none;
+    }
+
+    .brave-view--combat .brave-view__section--targets .brave-view__entry-ornament {
+        left: 50%;
+        font-size: 4.9rem;
+        transform: translate(-50%, -50%);
+        color: rgba(240, 177, 163, 0.12);
     }
 
     .brave-view--combat .brave-view__meter-head {
@@ -9307,11 +10104,12 @@ body.brave-scene-combat-enter .inputwrap {
     body[data-brave-scene="combat"] .brave-combat-log {
         display: flex;
         order: 5;
-        flex: 1 1 auto;
+        flex: 0 0 var(--brave-mobile-combat-log-height);
         align-self: stretch;
         width: 100%;
+        height: var(--brave-mobile-combat-log-height);
         min-height: var(--brave-mobile-combat-log-height);
-        max-height: none;
+        max-height: var(--brave-mobile-combat-log-height);
         overflow: hidden;
         gap: 6px;
         padding: 8px 8px 7px;
@@ -9319,6 +10117,7 @@ body.brave-scene-combat-enter .inputwrap {
 
     body[data-brave-scene="combat"] .brave-combat-log__head {
         font-size: calc(0.58rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        padding-bottom: 2px;
     }
 
     body[data-brave-scene="combat"] .brave-combat-log__body {
@@ -9761,41 +10560,46 @@ body.brave-scene-combat-enter .inputwrap {
 .brave-theme-preview[data-brave-theme-preview="hearth"] {
     background: linear-gradient(180deg, rgba(40, 30, 22, 0.95), rgba(14, 10, 8, 0.96));
     color: #f4ead8;
-    font-family: "Brave Plex Mono", monospace;
+    font-family: "Brave Red Hat Mono", monospace;
 }
 
 .brave-theme-preview[data-brave-theme-preview="signalglass"] {
     background: linear-gradient(180deg, rgba(8, 11, 11, 0.98), rgba(2, 3, 3, 1));
     color: #d6e6df;
-    font-family: "Share Tech Mono", monospace;
+    font-family: "Brave Share Tech Mono", monospace;
 }
 
 .brave-theme-preview[data-brave-theme-preview="terminal"] {
     background: linear-gradient(180deg, rgba(5, 7, 8, 0.92), rgba(2, 3, 4, 0.98));
     color: #d9e2de;
-    font-family: "DejaVu Sans Mono", monospace;
+    font-family: "Brave DejaVu Sans Mono", monospace;
 }
 
 .brave-theme-preview[data-brave-theme-preview="campfire"] {
     background: linear-gradient(180deg, rgba(27, 24, 21, 0.94), rgba(8, 7, 6, 0.98));
     color: #f1e9dc;
-    font-family: "VT323", monospace;
+    font-family: "Brave VT323", monospace;
 }
 
 .brave-theme-preview[data-brave-theme-preview="journal"] {
     background: linear-gradient(180deg, rgba(250, 244, 230, 0.98), rgba(237, 228, 209, 0.98));
     color: #2a1f14;
-    font-family: "Anonymous Pro", monospace;
+    font-family: "Brave Anonymous Pro", monospace;
 }
 
 .brave-theme-preview[data-brave-theme-preview="atlas"] {
     background: linear-gradient(180deg, rgba(17, 21, 25, 0.98), rgba(7, 9, 11, 1));
     color: #edf1f5;
-    font-family: "Space Mono", monospace;
+    font-family: "Brave Space Mono", monospace;
 }
 
 @media (max-width: 900px) {
     #toolbar {
         display: none !important;
     }
+}
+
+.brave-view__entry.brave-lunge-suppressed {
+    visibility: hidden !important;
+    pointer-events: none !important;
 }

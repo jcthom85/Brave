@@ -18,6 +18,7 @@ from world.tutorial import ensure_tutorial_state, handle_room_enter, is_tutorial
 from evennia.objects.objects import DefaultCharacter
 
 from .objects import ObjectParent
+from .rooms import _broadcast_webclient_activity, _send_webclient_event
 
 CONTENT = get_content_registry()
 CHARACTER_CONTENT = CONTENT.characters
@@ -66,8 +67,42 @@ class Character(ObjectParent, DefaultCharacter):
         self.msg(brave_clear={}, session=latest_session)
         super().at_post_puppet(**kwargs)
         self.ensure_brave_character()
+        _send_webclient_event(self, brave_activity={"text": f"Welcome back, {self.key}!"})
         if not self.db.brave_seen_welcome:
             self.db.brave_seen_welcome = True
+
+    def at_post_unpuppet(self, account=None, session=None, **kwargs):
+        _send_webclient_event(self, brave_activity={"text": f"Safe travels, {self.key}!"})
+        return super().at_post_unpuppet(account=account, session=session, **kwargs)
+
+    def at_say(
+        self,
+        message,
+        msg_self=None,
+        msg_location=None,
+        receivers=None,
+        msg_receivers=None,
+        **kwargs,
+    ):
+        super().at_say(
+            message,
+            msg_self=msg_self,
+            msg_location=msg_location,
+            receivers=receivers,
+            msg_receivers=msg_receivers,
+            **kwargs,
+        )
+
+        if kwargs.get("whisper", False):
+            return
+
+        speech = str(message or "").strip()
+        if not speech:
+            return
+
+        _send_webclient_event(self, brave_activity={"text": f'You say, "{speech}"'})
+        if self.location:
+            _broadcast_webclient_activity(self.location, f'{self.key} says, "{speech}"', exclude=[self])
 
     def ensure_brave_character(self):
         """Initialize Brave-specific state if missing."""
@@ -117,6 +152,11 @@ class Character(ObjectParent, DefaultCharacter):
         for stat in CHARACTER_CONTENT.primary_stats:
             primary[stat] = class_data["base_stats"].get(stat, 0) + race["bonuses"].get(stat, 0)
 
+        race_trait_bonuses = race.get("trait_bonuses", {})
+        for stat, bonus in race_trait_bonuses.items():
+            if stat in CHARACTER_CONTENT.primary_stats:
+                primary[stat] += bonus
+
         passive_bonuses = CHARACTER_CONTENT.get_passive_ability_bonuses(self.db.brave_class, level)
         for stat in CHARACTER_CONTENT.primary_stats:
             primary[stat] += passive_bonuses.get(stat, 0)
@@ -162,6 +202,11 @@ class Character(ObjectParent, DefaultCharacter):
             derived[stat] = derived.get(stat, 0) + bonus
 
         for stat, bonus in chapel_bonuses.items():
+            if stat in CHARACTER_CONTENT.primary_stats:
+                continue
+            derived[stat] = derived.get(stat, 0) + bonus
+
+        for stat, bonus in race_trait_bonuses.items():
             if stat in CHARACTER_CONTENT.primary_stats:
                 continue
             derived[stat] = derived.get(stat, 0) + bonus

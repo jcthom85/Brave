@@ -19,18 +19,12 @@ The canonical room-by-room town layout now lives in [Brambleford Town Plan](bram
 - **Ironroot Forge:** For gear upgrades and crafting discussion.
 - **Brambleford Outfitters:** Where the "Shopkeeper's Shift" minigame takes place.
 - **Chapel of the Dawn Bell:** Blessings, healing, cleansing, and undead lore.
-- **The Great Observatory (The Nexus):** A high hill overlooking the town. Contains the portal ring to the Multiverse.
+- **The Great Observatory:** A high hill overlooking the town. It now serves as a lookout, story hub, and reminder of stranger ambitions Brambleford is not currently chasing.
 - **The Hobbyist's Wharf:** A small dock on the Bramble River for fishing and resource gathering.
 - **Town Green:** For family meetings and public announcements.
 - **Training Yard:** Where kids practice their "Design Quests" on dummies.
 - **Mayor's Hall:** Quest central.
 - **Rat and Kettle Tavern Cellar:** The first "Dungeon" for the boys to clear.
-
-### The Nexus: Portal Worlds (Phase 1)
-
-- **The Junk-Yard Planet (Sci-Fi):** A first look at "Tech" skins for the fantasy classes.
-- **The Training Island (Martial):** Testing the "Ki" and speed-based combat.
-- **The Drafting Table:** A blank "Sandbox" zone for the boys to build in.
 
 ### Key NPCs
 

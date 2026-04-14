@@ -2,11 +2,9 @@
   "quest_regions": {
     "below_the_fencebreakers": "Goblin Warrens",
     "bogwater_rumors": "Blackfen",
-    "bridgework_for_joss": "Junk-Yard Planet",
     "captain_varn_blackreed": "Ruined Watchtower",
     "do_not_disturb_the_dead": "Old Barrow Field",
     "fencebreakers": "Goblin Road",
-    "foreman_coilback": "Junk-Yard Planet",
     "greymaws_trail": "Whispering Woods",
     "gutters_and_hexes": "Goblin Warrens",
     "herbs_for_sister_maybelle": "Whispering Woods",
@@ -19,7 +17,6 @@
     "rats_in_the_kettle": "Brambleford",
     "roadside_howls": "Goblin Road",
     "ruk_the_fence_cutter": "Goblin Road",
-    "signal_in_the_scrap": "Junk-Yard Planet",
     "smoke_on_the_ridge": "Ruined Watchtower",
     "the_hollow_lantern": "Drowned Weir",
     "the_knight_without_rest": "Old Barrow Field",
@@ -76,31 +73,6 @@
       "summary": "Follow the bad trail south of the old goblin camp and confirm what has been moving through the Blackfen edge beyond the road country.",
       "title": "Bogwater Rumors"
     },
-    "bridgework_for_joss": {
-      "giver": "Joss Veller",
-      "objectives": [
-        {
-          "description": "Reach the Relay Trench beyond the first salvage drifts.",
-          "room_id": "junkyard_planet_relay_trench",
-          "type": "visit_room"
-        },
-        {
-          "count": 1,
-          "description": "Recover a live Flux Coil from Junk-Yard salvage machines.",
-          "item_id": "flux_coil",
-          "type": "collect_item"
-        }
-      ],
-      "prerequisites": [
-        "ruk_the_fence_cutter"
-      ],
-      "rewards": {
-        "silver": 12,
-        "xp": 130
-      },
-      "summary": "Help Joss steady the Junk-Yard bridge by reaching the relay trench and bringing back a live flux coil.",
-      "title": "Bridgework for Joss"
-    },
     "captain_varn_blackreed": {
       "giver": "Captain Harl Rowan",
       "objectives": [
@@ -154,6 +126,7 @@
       "title": "Do Not Disturb the Dead"
     },
     "fencebreakers": {
+      "completion_reaction": "The cutters are thinning and the camp beyond Wolf Turn is clearly the heart of the problem now.",
       "giver": "Mira Fenleaf",
       "next_step": "Push through to Fencebreaker Camp and bring down Ruk the Fence-Cutter.",
       "objectives": [
@@ -167,39 +140,13 @@
       "prerequisites": [
         "roadside_howls"
       ],
+      "reward_tip": "You should have enough silver by now to care about shop, sell, and your first forge options before Ruk.",
       "rewards": {
         "silver": 12,
         "xp": 80
       },
       "summary": "Drive off the goblin raiders cutting apart roadside fences before the farmers lose what little they have left.",
       "title": "Fencebreakers"
-    },
-    "foreman_coilback": {
-      "giver": "Joss Veller",
-      "objectives": [
-        {
-          "description": "Find the Anchor Pit at the heart of the salvage field.",
-          "room_id": "junkyard_planet_anchor_pit",
-          "type": "visit_room"
-        },
-        {
-          "description": "Defeat Foreman Coilback.",
-          "enemy_tag": "coilback",
-          "type": "defeat_enemy"
-        }
-      ],
-      "prerequisites": [
-        "signal_in_the_scrap"
-      ],
-      "rewards": {
-        "silver": 24,
-        "trophies": [
-          "junkyard_beacon_core"
-        ],
-        "xp": 190
-      },
-      "summary": "Descend into the Anchor Pit and destroy the salvage foreman that keeps the Junk-Yard bridge violent and unstable.",
-      "title": "Foreman Coilback"
     },
     "greymaws_trail": {
       "giver": "Mira Fenleaf",
@@ -407,23 +354,69 @@
       "title": "Miretooth's Claim"
     },
     "practice_makes_heroes": {
+      "completion_reaction": "The town has seen you follow directions, handle a cellar fight, and return for the handoff. That is enough for Brambleford to start trusting you with the road.",
       "giver": "Captain Harl Rowan",
-      "next_step": "Go south to Town Green, then west to the inn and speak with Uncle Pib Underbough.",
+      "next_step": "Go east to the East Gate and speak with Mira Fenleaf about the road.",
       "objectives": [
         {
-          "description": "Visit Captain Harl Rowan at the Training Yard.",
-          "room_id": "brambleford_training_yard",
+          "description": "Speak with Captain Harl Rowan in the Training Yard.",
+          "entity_id": "captain_harl_rowan",
+          "type": "talk_entity"
+        },
+        {
+          "description": "Head south from the Training Yard to Town Green.",
+          "room_id": "brambleford_town_green",
           "type": "visit_room"
+        },
+        {
+          "description": "Go west to the Lantern Rest Inn.",
+          "room_id": "brambleford_lantern_rest_inn",
+          "type": "visit_room"
+        },
+        {
+          "description": "Talk to Uncle Pib Underbough about the cellar.",
+          "entity_id": "uncle_pib_underbough",
+          "type": "talk_entity"
+        },
+        {
+          "description": "Head down into the Rat and Kettle Cellar beneath the inn.",
+          "room_id": "brambleford_rat_and_kettle_cellar",
+          "type": "visit_room"
+        },
+        {
+          "count": 3,
+          "description": "Defeat 3 thorn rats in the Rat and Kettle Cellar.",
+          "enemy_tag": "rat",
+          "type": "defeat_enemy"
+        },
+        {
+          "description": "Return upstairs to Uncle Pib at the Lantern Rest Inn.",
+          "room_id": "brambleford_lantern_rest_inn",
+          "type": "visit_room"
+        },
+        {
+          "description": "Tell Uncle Pib the cellar is clear.",
+          "entity_id": "uncle_pib_underbough",
+          "type": "talk_entity"
         }
       ],
+      "reward_tip": "Keep Uncle Pib's fish pie for the road, then check your pack and rest before you head for the East Gate.",
       "rewards": {
-        "silver": 6,
-        "xp": 40
+        "items": [
+          {
+            "item": "innkeepers_fishpie",
+            "quantity": 1
+          }
+        ],
+        "silver": 14,
+        "xp": 100
       },
-      "summary": "Report to the training yard and get your bearings before leaving town.",
+      "summary": "Finish your first Brambleford circuit: leave the yard, find the inn, and clear Pib's cellar.",
       "title": "Practice Makes Heroes"
     },
     "rats_in_the_kettle": {
+      "auto_start": false,
+      "completion_reaction": "The cellar is fit for flour again, and the inn starts treating you like a real problem-solver instead of a fresh arrival.",
       "giver": "Uncle Pib Underbough",
       "next_step": "Go east to the East Gate and speak with Mira Fenleaf about the road.",
       "objectives": [
@@ -434,14 +427,20 @@
         },
         {
           "count": 3,
-          "description": "Defeat 3 thorn rats in or around Brambleford.",
+          "description": "Defeat 3 thorn rats in the Rat and Kettle Cellar.",
           "enemy_tag": "rat",
           "type": "defeat_enemy"
+        },
+        {
+          "description": "Return upstairs to Uncle Pib at the Lantern Rest Inn.",
+          "room_id": "brambleford_lantern_rest_inn",
+          "type": "visit_room"
         }
       ],
       "prerequisites": [
         "practice_makes_heroes"
       ],
+      "reward_tip": "Keep Uncle Pib's fish pie for the road, then check your pack and rest before you head for the East Gate.",
       "rewards": {
         "items": [
           {
@@ -456,6 +455,7 @@
       "title": "Rats in the Kettle"
     },
     "roadside_howls": {
+      "completion_reaction": "You have seen enough of Goblin Road to feel the town walls fall behind you.",
       "giver": "Mira Fenleaf",
       "next_step": "Thin the goblin cutters still working along Goblin Road.",
       "objectives": [
@@ -476,8 +476,9 @@
         }
       ],
       "prerequisites": [
-        "rats_in_the_kettle"
+        "practice_makes_heroes"
       ],
+      "reward_tip": "The road is paying in real silver now. If your pack is filling up, sell the junk before the next longer push.",
       "rewards": {
         "items": [
           {
@@ -492,8 +493,10 @@
       "title": "Roadside Howls"
     },
     "ruk_the_fence_cutter": {
+      "chapter_complete": "First Hour Chapter",
+      "chapter_reaction": "Mira, Sister Maybelle, Joss, and the Trophy Hall all have something new waiting back in Brambleford.",
       "giver": "Mira Fenleaf",
-      "next_step": "After Ruk falls, check in with Mira, Sister Maybelle, or Joss to choose the next branch.",
+      "next_step": "Return to Brambleford. Sister Maybelle can send you south into Whispering Woods, while Joss and the mayor can sketch the larger trouble starting to gather around town.",
       "objectives": [
         {
           "description": "Find the Fencebreaker Camp beyond Wolf Turn.",
@@ -509,37 +512,16 @@
       "prerequisites": [
         "fencebreakers"
       ],
+      "reward_tip": "Spend the silver and sort your pack before leaving the road behind. The next branch is longer and less forgiving.",
       "rewards": {
         "silver": 18,
+        "trophies": [
+          "ruk_fencecleaver_head"
+        ],
         "xp": 120
       },
       "summary": "Track down the goblin brute leading the fence raiders and break his hold on Goblin Road.",
       "title": "Ruk the Fence-Cutter"
-    },
-    "signal_in_the_scrap": {
-      "giver": "Joss Veller",
-      "objectives": [
-        {
-          "description": "Reach the Crane Grave deeper in Junk-Yard Planet.",
-          "room_id": "junkyard_planet_crane_grave",
-          "type": "visit_room"
-        },
-        {
-          "count": 1,
-          "description": "Recover an Anchor Glass Shard from the relay swarm.",
-          "item_id": "anchor_glass_shard",
-          "type": "collect_item"
-        }
-      ],
-      "prerequisites": [
-        "bridgework_for_joss"
-      ],
-      "rewards": {
-        "silver": 16,
-        "xp": 150
-      },
-      "summary": "Push deeper into the scrapfield, chart the crane grave, and recover a shard of anchor glass for the observatory lens.",
-      "title": "Signal in the Scrap"
     },
     "smoke_on_the_ridge": {
       "giver": "Captain Harl Rowan",
@@ -671,7 +653,9 @@
       "title": "The South Light"
     },
     "what_whispers_in_the_wood": {
+      "branch_choice": true,
       "giver": "Sister Maybelle",
+      "next_step": "Speak with Sister Maybelle or Mira, then head south from the gate into Whispering Woods.",
       "objectives": [
         {
           "description": "Enter Whispering Woods by the old trail.",
@@ -700,9 +684,6 @@
     "roadside_howls",
     "fencebreakers",
     "ruk_the_fence_cutter",
-    "bridgework_for_joss",
-    "signal_in_the_scrap",
-    "foreman_coilback",
     "what_whispers_in_the_wood",
     "herbs_for_sister_maybelle",
     "greymaws_trail",

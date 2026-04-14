@@ -1,0 +1,292 @@
+:root {
+  --brave-ink: #211814;
+  --brave-paper: #fff7ec;
+  --brave-paper-strong: #f5e7d3;
+  --brave-accent: #8b4a29;
+  --brave-accent-dark: #6e351d;
+  --brave-line: #cfb796;
+  --brave-muted: #6f6257;
+}
+
+.brave-auth {
+  min-height: calc(100vh - 92px);
+  padding: 48px 16px 64px;
+  background:
+    radial-gradient(circle at top left, rgba(139, 74, 41, 0.14), transparent 32%),
+    radial-gradient(circle at top right, rgba(33, 24, 20, 0.08), transparent 24%),
+    linear-gradient(180deg, #f7eedf 0%, #fdf9f2 48%, #efe0cb 100%);
+}
+
+.brave-auth__shell {
+  width: min(1040px, calc(100vw - 32px));
+  margin: 0 auto;
+  display: grid;
+  gap: 20px;
+}
+
+.brave-auth__hero,
+.brave-auth__card {
+  background: var(--brave-paper);
+  border: 1px solid var(--brave-line);
+  border-radius: 20px;
+  box-shadow: 0 20px 54px rgba(33, 24, 20, 0.12);
+}
+
+.brave-auth__hero {
+  padding: 28px;
+  display: grid;
+  gap: 14px;
+}
+
+.brave-auth__eyebrow {
+  margin: 0;
+  color: var(--brave-accent);
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.brave-auth__hero h1,
+.brave-auth__card h2 {
+  margin: 0;
+  color: var(--brave-ink);
+}
+
+.brave-auth__hero p,
+.brave-auth__card p,
+.brave-auth__card li,
+.brave-auth__meta,
+.brave-auth__note {
+  color: var(--brave-muted);
+}
+
+.brave-auth__features {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.brave-auth__features li {
+  background: rgba(255, 255, 255, 0.56);
+  border: 1px solid rgba(111, 98, 87, 0.12);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.brave-auth__card {
+  padding: 24px;
+}
+
+.brave-auth__field {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.brave-auth__field label {
+  color: var(--brave-ink);
+  font-weight: 700;
+}
+
+.brave-auth__field input {
+  border-radius: 14px !important;
+  border: 1px solid rgba(111, 98, 87, 0.22) !important;
+  background: #fff !important;
+  padding: 12px 14px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.brave-auth__actions {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.brave-auth__button,
+.brave-auth__button:link,
+.brave-auth__button:visited {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.brave-auth__button:hover,
+.brave-auth__button:focus-visible {
+  transform: translateY(-1px);
+}
+
+.brave-auth__button--primary {
+  background: linear-gradient(180deg, var(--brave-accent) 0%, var(--brave-accent-dark) 100%);
+  color: #fff !important;
+  box-shadow: 0 12px 30px rgba(139, 74, 41, 0.26);
+}
+
+.brave-auth__button--secondary {
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--brave-ink) !important;
+  border-color: rgba(111, 98, 87, 0.22);
+}
+
+.brave-auth__button--ghost {
+  background: transparent;
+  color: var(--brave-accent) !important;
+  border-color: rgba(139, 74, 41, 0.24);
+}
+
+.brave-auth__button--full {
+  width: 100%;
+}
+
+.brave-auth__split {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 18px;
+}
+
+.brave-auth__panel {
+  background: rgba(255, 255, 255, 0.52);
+  border: 1px solid rgba(111, 98, 87, 0.12);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.brave-auth__panel h3 {
+  margin: 0 0 8px;
+  color: var(--brave-ink);
+}
+
+.brave-auth__list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.brave-auth__list li + li {
+  margin-top: 6px;
+}
+
+.brave-home {
+  padding: 36px 0 16px;
+}
+
+.brave-home__hero {
+  position: relative;
+  overflow: hidden;
+  padding: 32px;
+  border-radius: 24px;
+  border: 1px solid var(--brave-line);
+  background:
+    radial-gradient(circle at top right, rgba(139, 74, 41, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(255, 250, 242, 0.98), rgba(244, 229, 205, 0.92));
+  box-shadow: 0 24px 60px rgba(33, 24, 20, 0.12);
+}
+
+.brave-home__hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -15% -42% auto;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 74, 41, 0.16), transparent 68%);
+  pointer-events: none;
+}
+
+.brave-home__eyebrow {
+  margin: 0 0 10px;
+  color: var(--brave-accent);
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.brave-home__title {
+  margin: 0;
+  color: var(--brave-ink);
+  font-size: clamp(2.4rem, 5vw, 4.6rem);
+  line-height: 0.95;
+}
+
+.brave-home__lede {
+  max-width: 62ch;
+  margin: 18px 0 0;
+  color: var(--brave-muted);
+  font-size: 1.06rem;
+  line-height: 1.7;
+}
+
+.brave-home__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.brave-home__note {
+  margin-top: 18px;
+  max-width: 58ch;
+  color: var(--brave-muted);
+}
+
+.brave-nav-cta,
+.brave-nav-cta:link,
+.brave-nav-cta:visited {
+  min-height: 38px;
+  margin: 8px 6px;
+  padding: 0.35rem 1rem !important;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: linear-gradient(180deg, rgba(139, 74, 41, 0.96), rgba(110, 53, 29, 0.96));
+  color: #fff !important;
+  box-shadow: 0 10px 24px rgba(139, 74, 41, 0.22);
+}
+
+.brave-nav-cta:hover,
+.brave-nav-cta:focus-visible {
+  color: #fff !important;
+  background: linear-gradient(180deg, #9b5b34, #7b3f23);
+}
+
+.brave-nav-cta--register,
+.brave-nav-cta--register:link,
+.brave-nav-cta--register:visited,
+.brave-nav-cta--logout,
+.brave-nav-cta--logout:link,
+.brave-nav-cta--logout:visited {
+  background: rgba(255, 248, 238, 0.14);
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.brave-nav-cta--register:hover,
+.brave-nav-cta--register:focus-visible,
+.brave-nav-cta--logout:hover,
+.brave-nav-cta--logout:focus-visible {
+  background: rgba(255, 248, 238, 0.22);
+}
+
+@media (max-width: 820px) {
+  .brave-auth__split,
+  .brave-auth__features,
+  .brave-auth__actions {
+    grid-template-columns: 1fr;
+  }
+  .brave-home__actions {
+    flex-direction: column;
+  }
+}

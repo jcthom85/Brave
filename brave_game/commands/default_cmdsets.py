@@ -26,12 +26,12 @@ from .account import (
     CmdBraveUnconnectedLook,
 )
 from .brave_arcade import CmdArcade, CmdArcadeSubmit
-from .brave_combat import CmdAttack, CmdEnemies, CmdFight, CmdFlee, CmdUse
+from .brave_combat import CmdAttack, CmdEnemies, CmdFight, CmdFlee, CmdThreatDebug, CmdUse
 from .brave_creator import CmdContent
 from .brave_explore import CmdCook, CmdEat, CmdFish, CmdItem, CmdMap, CmdMore, CmdReel, CmdRest, CmdTravel
 from .brave_party import CmdParty
 from .brave_profile import CmdBuild, CmdClass, CmdGear, CmdPack, CmdQuests, CmdRace, CmdSheet
-from .brave_town import CmdForge, CmdPortals, CmdPray, CmdRead, CmdSell, CmdShift, CmdShop, CmdTalk
+from .brave_town import CmdForge, CmdPray, CmdRead, CmdSell, CmdShift, CmdShop, CmdTalk
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -67,18 +67,18 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdReel())
         self.add(CmdCook())
         self.add(CmdEat())
-        self.add(CmdItem())
-        self.add(CmdPortals())
-        self.add(CmdParty())
-        self.add(CmdQuests())
+        self.add(CmdForge())
         self.add(CmdPray())
+        self.add(CmdQuests())
         self.add(CmdTravel())
         self.add(CmdFight())
         self.add(CmdEnemies())
+        self.add(CmdThreatDebug())
         self.add(CmdAttack())
         self.add(CmdUse())
         self.add(CmdFlee())
         self.add(CmdRest())
+        self.add(CmdParty())
         self.add(CmdArcade())
         self.add(CmdArcadeSubmit())
         self.add(CmdTalk())

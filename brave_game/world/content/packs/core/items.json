@@ -30,13 +30,6 @@
     "snack"
   ],
   "item_templates": {
-    "anchor_glass_shard": {
-      "kind": "loot",
-      "name": "Anchor Glass Shard",
-      "stackable": true,
-      "summary": "A blue-white shard of route glass that thrums faintly when held near the Nexus.",
-      "value": 14
-    },
     "ashwood_bow": {
       "bonuses": {
         "accuracy": 5,
@@ -67,13 +60,6 @@
       "stackable": true,
       "summary": "A tied bundle of cave-bat wing leather, oily and irritatingly useful.",
       "value": 8
-    },
-    "beacon_core": {
-      "kind": "loot",
-      "name": "Beacon Core",
-      "stackable": true,
-      "summary": "A heavy heart-core from the Junk-Yard beacon network, fit for a trophy shelf more than a pocket.",
-      "value": 28
     },
     "bellguard_bastion": {
       "bonuses": {
@@ -320,13 +306,6 @@
         "target": "enemy",
         "verb": "throw"
       }
-    },
-    "flux_coil": {
-      "kind": "loot",
-      "name": "Flux Coil",
-      "stackable": true,
-      "summary": "A humming coil that still holds a nervous charge.",
-      "value": 12
     },
     "focus_tonic": {
       "kind": "consumable",

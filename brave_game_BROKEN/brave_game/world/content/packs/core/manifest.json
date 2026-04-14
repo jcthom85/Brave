@@ -1,0 +1,13 @@
+{
+  "pack_id": "core",
+  "version": 1,
+  "domains": [
+    "characters",
+    "items",
+    "quests",
+    "world",
+    "encounters",
+    "dialogue",
+    "systems"
+  ]
+}

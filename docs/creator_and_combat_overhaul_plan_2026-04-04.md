@@ -30,9 +30,9 @@ The content system is now centered on pack-based mutation rather than ad hoc edi
 - `encounters`: enemies and room encounter tables
 - `items`
 - `characters`: races, classes, and character config
-- `systems`: portals and forge recipes
+- `systems`: activity loops, trophies, and forge recipes
 
-This gives Brave a practical authoring path for the core fantasy ladder and future portal content without hardcoding every content change directly into Python modules.
+This gives Brave a practical authoring path for the core fantasy ladder without hardcoding every content change directly into Python modules.
 
 ### 2. Browser Creator Editors
 
@@ -154,7 +154,7 @@ Still needed:
 - Stronger schema guidance and helper text for complex payloads.
 - Shared affordances for clone, duplicate, and create-from-template flows.
 - Safer delete UX.
-- A full systems editor pass for portal and forge content.
+- A full systems editor pass for activity, trophy, and forge content.
 - Better support for cross-domain authoring tasks such as "create room + encounter + quest hook" without jumping through multiple screens manually.
 
 ### 5. Content Build Integration
@@ -400,7 +400,7 @@ The order below keeps momentum while protecting the live slice.
 
 - Rebuild the combat browser experience around timing and reaction windows.
 - Tune class kits around timing identity rather than just effect lists.
-- Upgrade encounter authoring for elites, bosses, and portal combat variants.
+- Upgrade encounter authoring for elites, bosses, and late-chapter combat variants.
 - Run a readability and pacing pass on combat logs, mobile interaction, and co-op flow.
 
 ## Working Rules For The Next Phase
@@ -420,4 +420,4 @@ When this plan is complete, Brave should have:
 - Enough browser editing coverage to author and tune most phase-1 content without raw file surgery.
 - An ATB combat engine that supports readable timing pressure and meaningful class response windows.
 - A combat UI that is fast, dramatic, and legible on both desktop and mobile.
-- A combat experience strong enough to justify the larger progression, portal, and boss overhaul that comes after it.
+- A combat experience strong enough to justify the larger progression and boss overhaul that comes after it.

@@ -5,6 +5,7 @@ import re
 from typeclasses.characters import Character
 from world.browser_panels import send_webclient_event
 from world.content import get_content_registry
+from world.resonance import get_stat_label
 
 from evennia.utils.evmenu import EvMenu
 from evennia.utils.utils import dedent
@@ -14,6 +15,26 @@ CHARACTER_CONTENT = CONTENT.characters
 
 _VALID_NAME = re.compile(r"^[A-Za-z][A-Za-z' -]{1,23}$")
 WEB_PROTOCOLS = {"websocket", "ajax/comet", "webclient"}
+
+
+PRIMARY_STAT_ORDER = ("strength", "agility", "intellect", "spirit", "vitality")
+
+
+def _format_bonus_line(bonuses):
+    parts = []
+    seen = set()
+    for stat in PRIMARY_STAT_ORDER:
+        seen.add(stat)
+        amount = int((bonuses or {}).get(stat) or 0)
+        if amount:
+            sign = "+" if amount > 0 else ""
+            parts.append(f"{sign}{amount} {get_stat_label(stat, None)}")
+    for stat in sorted(set((bonuses or {}).keys()) - seen):
+        amount = int((bonuses or {}).get(stat) or 0)
+        if amount:
+            sign = "+" if amount > 0 else ""
+            parts.append(f"{sign}{amount} {get_stat_label(stat, None)}")
+    return ", ".join(parts)
 
 
 def _is_web_session(session):
@@ -79,9 +100,30 @@ def get_resume_chargen_step(account):
     """Return the best step to resume this account's chargen flow."""
 
     state = get_chargen_state(account)
-    if not has_chargen_progress(account):
-        return "menunode_welcome"
     return get_next_chargen_step(state)
+
+
+def _discard_chargen(caller, raw_string=None, **kwargs):
+    """Discard the saved draft and exit chargen."""
+
+    clear_chargen_state(caller.account)
+    caller.msg("Saved character draft discarded.")
+    return "menunode_exit"
+
+
+def _chargen_edit_options(state, current_step):
+    """Return direct edit options for reachable draft sections."""
+
+    options = []
+    if any(state.get(field) for field in ("name", "race", "class")):
+        options.append(
+            {
+                "key": ("discard", "clear draft"),
+                "desc": "Discard this draft.",
+                "goto": _discard_chargen,
+            }
+        )
+    return options
 
 
 def _clean_ansi(text):
@@ -182,6 +224,7 @@ def menunode_welcome(caller, raw_string=None, **kwargs):
             "goto": (_continue_chargen, {}),
         }
     ]
+    options.extend(_chargen_edit_options(state, "menunode_welcome"))
     return text, options
 
 
@@ -214,10 +257,8 @@ def menunode_choose_name(caller, raw_string=None, error=None, **kwargs):
         {_summarize_state(state)}
         """
     )
-    options = (
-        {"key": "_default", "goto": _set_character_name},
-        {"key": ("back", "b"), "desc": "Return to the chargen overview.", "goto": "menunode_welcome"},
-    )
+    options = _chargen_edit_options(state, "menunode_choose_name")
+    options.append({"key": "_default", "goto": _set_character_name})
     return text, options
 
 
@@ -232,8 +273,10 @@ def _set_character_name(caller, raw_string, **kwargs):
     if Character.objects.filter_family(db_key__iexact=name).exists():
         return "menunode_choose_name", {"error": "|rThat character name is already taken.|n"}
 
-    set_chargen_state(account, name=name, step="menunode_choose_race")
-    return "menunode_choose_race"
+    state = set_chargen_state(account, name=name)
+    next_step = get_next_chargen_step(state)
+    set_chargen_state(account, step=next_step)
+    return next_step
 
 
 def menunode_choose_race(caller, raw_string=None, **kwargs):
@@ -250,25 +293,38 @@ def menunode_choose_race(caller, raw_string=None, **kwargs):
         """
     )
     options = []
+    if state.get("race"):
+        options.append(
+            {
+                "key": ("continue", "next"),
+                "desc": "Continue with this race.",
+                "goto": (_continue_chargen, {}),
+            }
+        )
     for race_key, race_data in CHARACTER_CONTENT.races.items():
+        trait_line = _format_bonus_line(race_data.get("trait_bonuses", {}))
+        desc = f"{race_data['name']}  |  {race_data['summary']}  |  Perk: {race_data['perk']}"
+        if trait_line:
+            desc += f"  |  Traits: {trait_line}"
         options.append(
             {
                 "key": (race_key, race_data["name"].lower()),
-                "desc": f"{race_data['name']}  |  {race_data['summary']}  |  Perk: {race_data['perk']}",
+                "desc": desc,
                 "goto": (_set_race, {"race_key": race_key}),
             }
         )
     options.append(
         {"key": ("back", "b"), "desc": "Go back to name selection.", "goto": "menunode_choose_name"}
     )
+    options.extend(_chargen_edit_options(state, "menunode_choose_race"))
     return text, options
 
 
 def _set_race(caller, raw_string=None, race_key=None, **kwargs):
     """Save race selection."""
 
-    set_chargen_state(caller.account, race=race_key, step="menunode_choose_class")
-    return "menunode_choose_class"
+    set_chargen_state(caller.account, race=race_key, step="menunode_choose_race")
+    return "menunode_choose_race"
 
 
 def menunode_choose_class(caller, raw_string=None, **kwargs):
@@ -287,26 +343,40 @@ def menunode_choose_class(caller, raw_string=None, **kwargs):
         """
     )
     options = []
+    if state.get("class"):
+        options.append(
+            {
+                "key": ("continue", "next"),
+                "desc": "Review this character.",
+                "goto": (_continue_chargen, {}),
+            }
+        )
     for class_key in CHARACTER_CONTENT.vertical_slice_classes:
         class_data = CHARACTER_CONTENT.classes[class_key]
+        opening = ", ".join(ability for level, ability in class_data["progression"] if level == 1)
+        followup = next((ability for level, ability in class_data["progression"] if level > 1), None)
+        desc = f"{class_data['name']}  |  {class_data['role']}  |  {class_data['summary']}  |  Starts with: {opening}"
+        if followup:
+            desc += f"  |  First unlock: {followup}"
         options.append(
             {
                 "key": (class_key, class_data["name"].lower()),
-                "desc": f"{class_data['name']}  |  {class_data['role']}  |  {class_data['summary']}",
+                "desc": desc,
                 "goto": (_set_class, {"class_key": class_key}),
             }
         )
     options.append(
         {"key": ("back", "b"), "desc": "Go back to race selection.", "goto": "menunode_choose_race"}
     )
+    options.extend(_chargen_edit_options(state, "menunode_choose_class"))
     return text, options
 
 
 def _set_class(caller, raw_string=None, class_key=None, **kwargs):
     """Save class selection."""
 
-    set_chargen_state(caller.account, **{"class": class_key, "step": "menunode_confirm"})
-    return "menunode_confirm"
+    set_chargen_state(caller.account, **{"class": class_key, "step": "menunode_choose_class"})
+    return "menunode_choose_class"
 
 
 def menunode_confirm(caller, raw_string=None, error=None, **kwargs):
@@ -331,10 +401,11 @@ def menunode_confirm(caller, raw_string=None, error=None, **kwargs):
         {error or 'Choose whether to create this character or go back and edit it.'}
         """
     )
-    options = (
+    options = [
         {"key": ("finish", "create", "confirm", "1"), "desc": "Create this character", "goto": _finalize_character},
         {"key": ("back", "b"), "desc": "Go back to class selection.", "goto": "menunode_choose_class"},
-    )
+    ]
+    options.extend(_chargen_edit_options(state, "menunode_confirm"))
     return text, options
 
 

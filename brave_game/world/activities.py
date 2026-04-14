@@ -317,6 +317,7 @@ def format_kitchen_hearth_text(character=None):
 
     if character:
         lines.append("Use |weat <meal>|n once you are ready to take the buff with you.")
+        lines.append("Best rhythm: |wrest|n, check |wpack|n, |wcook|n if you can, then |weat|n right before you head back out.")
 
     lines.append("")
     for recipe in COOKING_RECIPES.values():
@@ -364,7 +365,16 @@ def format_recipe_list(character):
         "Kitchen Hearth",
         subtitle="Simple inn recipes you can turn out without wasting the room or the pan.",
         meta=[f"{ready_count} ready recipes", f"{len(COOKING_RECIPES)} total recipes"],
-        sections=[("Tonight's Menu", ["  No recipes are posted here."] if not recipe_blocks else _stack_recipe_blocks(recipe_blocks))],
+        sections=[
+            ("Tonight's Menu", ["  No recipes are posted here."] if not recipe_blocks else _stack_recipe_blocks(recipe_blocks)),
+            (
+                "Road Prep",
+                [
+                    "  Good rhythm: rest first, cook while you are safe, then eat just before you leave town.",
+                    "  Meals restore resources and carry a buff into the next stretch.",
+                ],
+            ),
+        ],
     )
 
 

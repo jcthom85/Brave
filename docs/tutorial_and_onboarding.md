@@ -567,7 +567,7 @@ Recommended order:
 6. East Gate: wilderness launch point
 7. Goblin Road: first outdoor pressure and first real adventure path
 
-Do not front-load the Observatory, Nexus, Forge complexity, or deeper side systems into the player's first minutes. Those should feel like discoveries after basic literacy is established.
+Do not front-load the Observatory, forge complexity, or deeper side systems into the player's first minutes. Those should feel like discoveries after basic literacy is established.
 
 ## Beginner Quest Ladder
 
@@ -586,7 +586,7 @@ Recommended order:
 - New players should not receive all beginner quests at once.
 - The next quest should unlock only after the current teaching beat is resolved.
 - NPC dialogue, the board, and the scene card should all point at the same next quest.
-- The portal branch should stay out of the way until the player has finished the early road arc.
+- Optional side branches should stay out of the way until the player has finished the early road arc.
 
 This keeps the early game feeling paced, intentional, and teachable.
 

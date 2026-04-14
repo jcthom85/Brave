@@ -425,6 +425,10 @@ let defaultInPlugin = (function () {
         }
     };
 
+    var shouldForceCommandInChatMode = function (trimmed) {
+        return /^(?:threatdebug|roamdebug|threatsdebug)(?:\s|$)/i.test(String(trimmed || ""));
+    };
+
     var handleUnfocusedDelete = function (inputfield, isBackspace) {
         var element = inputfield.get(0);
         if (!element) {
@@ -472,6 +476,8 @@ let defaultInPlugin = (function () {
             if (effectiveMode === INPUT_MODE_CHAT) {
                 if (trimmed.charAt(0) === "/") {
                     plugin_handler.onSend(trimmed.slice(1));
+                } else if (shouldForceCommandInChatMode(trimmed)) {
+                    plugin_handler.onSend(trimmed);
                 } else {
                     plugin_handler.onSend("say " + trimmed);
                 }

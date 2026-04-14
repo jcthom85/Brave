@@ -1,0 +1,26 @@
+{% extends "webclient/base.html" %}
+{% load static %}
+{% block client %}
+<div id="toolbar"></div>
+
+<div id="main" class="split split-vertical" data-role-default>
+  <div id="main-sub" class="split-sub">
+    <div id="messagewindow"></div>
+    <div id="mobile-nav-dock" aria-hidden="true"></div>
+    <div id="mobile-utility-sheet" aria-hidden="true"></div>
+    <div id="brave-picker-sheet" aria-hidden="true"></div>
+    <div id="brave-notice-stack" aria-hidden="true"></div>
+    <div id="scene-rail" class="scene-rail" aria-hidden="true">
+      <section id="scene-pack-panel" class="scene-rail__panel scene-rail__panel--pack scene-rail__panel--hidden scene-rail__panel--clickable brave-click" aria-label="Pack" data-brave-command="pack" title="pack" role="button" tabindex="0"></section>
+      <section id="scene-vicinity-panel" class="scene-rail__panel scene-rail__panel--vicinity scene-rail__panel--hidden" aria-label="The Vicinity"></section>
+      <div id="scene-card" class="scene-card"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0">
+<link rel="stylesheet" href="{% static 'webclient/css/brave_webclient.css' %}">
+<script src="{% static 'webclient/js/brave_bootstrap.js' %}"></script>
+{% endblock %}

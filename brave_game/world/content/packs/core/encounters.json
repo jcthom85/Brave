@@ -347,46 +347,6 @@
       "target_strategy": "lowest_hp",
       "xp": 70
     },
-    "foreman_coilback": {
-      "accuracy": 76,
-      "armor": 6,
-      "attack_kind": "spell",
-      "attack_power": 18,
-      "desc": "A salvage overseer welded into a crane-rig harness, all piston limbs and command lights gone hostile.",
-      "dodge": 7,
-      "loot": [
-        {
-          "chance": 1.0,
-          "item": "beacon_core"
-        },
-        {
-          "chance": 1.0,
-          "item": "flux_coil",
-          "max": 2,
-          "min": 1
-        },
-        {
-          "chance": 1.0,
-          "item": "anchor_glass_shard"
-        }
-      ],
-      "max_hp": 146,
-      "name": "Foreman Coilback",
-      "silver": [
-        14,
-        18
-      ],
-      "special": "coilback",
-      "spell_power": 19,
-      "tags": [
-        "construct",
-        "tech",
-        "boss",
-        "coilback",
-        "foreman"
-      ],
-      "xp": 160
-    },
     "forest_wolf": {
       "accuracy": 72,
       "armor": 2,
@@ -714,38 +674,6 @@
       "target_strategy": "lowest_hp",
       "xp": 76
     },
-    "mag_clamp_drone": {
-      "accuracy": 73,
-      "armor": 3,
-      "attack_kind": "spell",
-      "attack_power": 9,
-      "desc": "A hovering clamp rig that locks, drags, and tags targets with ugly machine patience.",
-      "dodge": 7,
-      "loot": [
-        {
-          "chance": 0.6,
-          "item": "flux_coil"
-        },
-        {
-          "chance": 0.5,
-          "item": "magnetized_scrap"
-        }
-      ],
-      "max_hp": 46,
-      "name": "Mag-Clamp Drone",
-      "silver": [
-        4,
-        8
-      ],
-      "spell_power": 13,
-      "tags": [
-        "construct",
-        "tech",
-        "support",
-        "clamp"
-      ],
-      "xp": 32
-    },
     "mire_hound": {
       "accuracy": 79,
       "armor": 5,
@@ -882,39 +810,6 @@
       "target_strategy": "lowest_hp",
       "xp": 130
     },
-    "relay_tick": {
-      "accuracy": 77,
-      "armor": 2,
-      "attack_kind": "spell",
-      "attack_power": 8,
-      "desc": "A darting relay parasite throwing needle-bright pulses through the scrap fog.",
-      "dodge": 11,
-      "loot": [
-        {
-          "chance": 0.55,
-          "item": "anchor_glass_shard"
-        },
-        {
-          "chance": 0.45,
-          "item": "fractured_circuit"
-        }
-      ],
-      "max_hp": 28,
-      "name": "Relay Tick",
-      "silver": [
-        3,
-        6
-      ],
-      "spell_power": 14,
-      "tags": [
-        "construct",
-        "tech",
-        "signal",
-        "skirmisher"
-      ],
-      "target_strategy": "lowest_hp",
-      "xp": 24
-    },
     "restless_shade": {
       "accuracy": 75,
       "armor": 2,
@@ -1037,92 +932,6 @@
         "raider"
       ],
       "xp": 90
-    },
-    "salvage_drone": {
-      "accuracy": 75,
-      "armor": 3,
-      "attack_kind": "spell",
-      "attack_power": 10,
-      "desc": "A hovering work drone whose tool arms now serve nobody gentle.",
-      "dodge": 7,
-      "loot": [
-        {
-          "chance": 0.5,
-          "item": "fractured_circuit"
-        },
-        {
-          "chance": 0.45,
-          "item": "flux_coil"
-        }
-      ],
-      "max_hp": 38,
-      "name": "Salvage Drone",
-      "silver": [
-        4,
-        7
-      ],
-      "spell_power": 12,
-      "tags": [
-        "construct",
-        "tech",
-        "ranged"
-      ],
-      "xp": 28
-    },
-    "scrap_hound": {
-      "accuracy": 70,
-      "armor": 4,
-      "attack_power": 13,
-      "desc": "A four-legged salvage brute stitched from plates, clamps, and bad civic planning.",
-      "dodge": 5,
-      "loot": [
-        {
-          "chance": 0.75,
-          "item": "magnetized_scrap"
-        },
-        {
-          "chance": 0.4,
-          "item": "fractured_circuit"
-        }
-      ],
-      "max_hp": 54,
-      "name": "Scrap Hound",
-      "silver": [
-        4,
-        7
-      ],
-      "tags": [
-        "construct",
-        "tech",
-        "brute",
-        "hound"
-      ],
-      "xp": 34
-    },
-    "scrap_mite": {
-      "accuracy": 72,
-      "armor": 1,
-      "attack_power": 7,
-      "desc": "A palm-sized salvage machine skittering on too many magnetic feet.",
-      "dodge": 9,
-      "loot": [
-        {
-          "chance": 0.7,
-          "item": "fractured_circuit"
-        }
-      ],
-      "max_hp": 24,
-      "name": "Scrap Mite",
-      "silver": [
-        2,
-        4
-      ],
-      "tags": [
-        "construct",
-        "tech",
-        "scrap"
-      ],
-      "xp": 18
     },
     "silt_stalker": {
       "accuracy": 83,
@@ -1827,112 +1636,6 @@
         "intro": "A tunnel brute drives forward while something wet and hungry slides around the torchbend behind it.",
         "key": "slime_turn",
         "title": "Slime Turn"
-      }
-    ],
-    "junkyard_planet_anchor_pit": [
-      {
-        "enemies": [
-          "foreman_coilback"
-        ],
-        "intro": "A crane-rig giant unfolds from the pit gantry, lights flaring across its welded spine as the whole yard answers to it.",
-        "key": "foremans_redoubt",
-        "title": "Foreman Coilback"
-      }
-    ],
-    "junkyard_planet_crane_grave": [
-      {
-        "enemies": [
-          "scrap_hound",
-          "salvage_drone"
-        ],
-        "intro": "Dead crane arms creak overhead as a hound and salvage drone break from cover together.",
-        "key": "craneward_pair",
-        "title": "Craneward Pair"
-      },
-      {
-        "enemies": [
-          "mag_clamp_drone",
-          "mag_clamp_drone"
-        ],
-        "intro": "Two clamp rigs sweep through the yard, trying to pin anything that still moves like a person.",
-        "key": "clamp_line",
-        "title": "Clamp Line"
-      },
-      {
-        "enemies": [
-          "relay_tick",
-          "scrap_hound",
-          "salvage_drone"
-        ],
-        "intro": "The crane grave wakes all at once: a relay tick darts between broken cabs while heavier machines advance behind it.",
-        "key": "grave_static",
-        "title": "Grave Static"
-      }
-    ],
-    "junkyard_planet_relay_trench": [
-      {
-        "enemies": [
-          "relay_tick",
-          "relay_tick"
-        ],
-        "intro": "Signal ticks pour from a trench conduit in a burst of white static and angry light.",
-        "key": "relay_swarm",
-        "title": "Relay Swarm"
-      },
-      {
-        "enemies": [
-          "mag_clamp_drone",
-          "relay_tick"
-        ],
-        "intro": "A clamp drone rises over the trench just as a relay tick starts painting targets below.",
-        "key": "trench_hold",
-        "title": "Trench Hold"
-      },
-      {
-        "enemies": [
-          "scrap_hound",
-          "mag_clamp_drone"
-        ],
-        "intro": "A scrap hound prowls the trench lip while a drone tracks movement from above.",
-        "key": "yard_watch",
-        "title": "Yard Watch"
-      }
-    ],
-    "junkyard_planet_scrapway": [
-      {
-        "enemies": [
-          "scrap_mite",
-          "scrap_mite"
-        ],
-        "intro": "The scrap drift splits open and a cluster of skittering machine mites comes alive around you.",
-        "key": "sparking_nest",
-        "title": "Sparking Nest"
-      },
-      {
-        "enemies": [
-          "salvage_drone"
-        ],
-        "intro": "A salvage drone rises from the metal haze, tool arms rotating into something much less civic.",
-        "key": "drone_sweep",
-        "title": "Drone Sweep"
-      },
-      {
-        "enemies": [
-          "salvage_drone",
-          "scrap_mite"
-        ],
-        "intro": "A drone hums awake overhead just as scrap mites surge through the wire drifts below.",
-        "key": "broken_line",
-        "title": "Broken Line"
-      },
-      {
-        "enemies": [
-          "scrap_hound",
-          "scrap_mite"
-        ],
-        "intro": "A plate-plated hound lopes through the salvage smoke while smaller machines wake around its paws.",
-        "key": "hound_and_haze",
-        "title": "Hound and Haze"
       }
     ],
     "old_barrow_field_barrow_circle": [

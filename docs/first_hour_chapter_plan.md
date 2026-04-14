@@ -135,7 +135,7 @@ The intended handoffs are:
 - `Rats in the Kettle` -> Mira at the East Gate
 - `Roadside Howls` -> continue working Goblin Road
 - `Fencebreakers` -> push to Fencebreaker Camp
-- `Ruk the Fence-Cutter` -> choose between woods, portal, or later town/world branches
+- `Ruk the Fence-Cutter` -> choose between woods, town loops, or the later fantasy branches
 
 If a quest completes and the player still has to guess what to do next, the chapter is under-authored.
 

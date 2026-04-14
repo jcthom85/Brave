@@ -321,17 +321,6 @@ class ContentEditor:
 
         return self.apply_pack_update("encounters", updater, write=write, stage=stage, author=author, action="upsert", target=room_id)
 
-    def upsert_portal(self, portal_key, portal_data, *, write=False, stage="live", author="system"):
-        def updater(payload):
-            portals = dict(payload.get("portals", {}).get("portals", {}))
-            portal_labels = dict(payload.get("portals", {}).get("portal_status_labels", {}))
-            portals[portal_key] = portal_data
-            payload.setdefault("portals", {})["portals"] = dict(sorted(portals.items()))
-            payload["portals"]["portal_status_labels"] = dict(sorted(portal_labels.items()))
-            return payload
-
-        return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="upsert", target=portal_key)
-
     def upsert_forge_recipe(self, source_template_id, recipe_data, *, write=False, stage="live", author="system"):
         def updater(payload):
             forging = dict(payload.get("forging", {}))
@@ -445,17 +434,6 @@ class ContentEditor:
             return payload
 
         return self.apply_pack_update("encounters", updater, write=write, stage=stage, author=author, action="remove", target=room_id)
-
-    def delete_portal(self, portal_key, *, write=False, stage="live", author="system"):
-        def updater(payload):
-            portals_block = dict(payload.get("portals", {}))
-            portals = dict(portals_block.get("portals", {}))
-            portals.pop(portal_key, None)
-            portals_block["portals"] = dict(sorted(portals.items()))
-            payload["portals"] = portals_block
-            return payload
-
-        return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="remove", target=portal_key)
 
     def delete_forge_recipe(self, source_template_id, *, write=False, stage="live", author="system"):
         def updater(payload):

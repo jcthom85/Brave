@@ -248,14 +248,37 @@ def _format_quest_screen_block(character, quest_key, tracked_key=None):
         return []
 
     status = state.get("status", "active").replace("_", " ").title()
-    details = [definition["summary"], f"Given by: {definition['giver']}"]
+    details = [f"Given by: {definition['giver']}"]
 
-    for objective in state.get("objectives", []):
-        progress_suffix = ""
-        if objective.get("required", 1) > 1:
-            progress_suffix = f" ({objective.get('progress', 0)}/{objective.get('required', 1)})"
-        marker = "x" if objective.get("completed") else " "
-        details.append(f"[{marker}] {objective.get('description', 'Objective')}{progress_suffix}")
+    remaining = [objective for objective in state.get("objectives", []) if not objective.get("completed")]
+    if state.get("status") == "completed":
+        if definition.get("chapter_complete"):
+            details.append(f"Outcome: Chapter complete - {definition['chapter_complete']}")
+        elif definition.get("completion_reaction"):
+            details.append(f"Outcome: {definition['completion_reaction']}")
+        else:
+            details.append(f"Outcome: {definition['summary']}")
+        if definition.get("next_step"):
+            details.append(f"Afterward: {definition['next_step']}")
+    else:
+        details.append(f"Field note: {definition['summary']}")
+        if definition.get("branch_choice"):
+            details.append(f"Branch opening: {definition['next_step']}")
+        elif remaining:
+            objective = remaining[0]
+            progress_suffix = ""
+            if objective.get("required", 1) > 1:
+                progress_suffix = f" ({objective.get('progress', 0)}/{objective.get('required', 1)})"
+            details.append(f"Now: {objective.get('description', 'Objective')}{progress_suffix}")
+        for objective in remaining[1:4]:
+            progress_suffix = ""
+            if objective.get("required", 1) > 1:
+                progress_suffix = f" ({objective.get('progress', 0)}/{objective.get('required', 1)})"
+            details.append(f"Then: {objective.get('description', 'Objective')}{progress_suffix}")
+        if definition.get("next_step") and not definition.get("branch_choice"):
+            details.append(f"Lead: {definition['next_step']}")
+        if definition.get("reward_tip"):
+            details.append(f"Preparation: {definition['reward_tip']}")
 
     reward_text = _format_quest_reward_text(definition)
     if reward_text:

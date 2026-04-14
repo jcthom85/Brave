@@ -10,7 +10,7 @@ import textwrap
 from evennia.objects.objects import DefaultRoom
 
 from world.browser_views import build_room_view
-from world.navigation import format_exit_summary, render_minimap, sort_exits
+from world.navigation import format_exit_summary, get_exit_direction, render_minimap, sort_exits
 from world.questing import get_tracked_quest_payload
 from world.resonance import get_resonance_label, get_world_label
 
@@ -25,7 +25,10 @@ EXIT_LABEL = "EXITS: "
 
 def _get_available_sessions(recipient):
     """Return all sessions attached to this recipient."""
-    sessions = getattr(recipient, "sessions", None)
+    try:
+        sessions = getattr(recipient, "sessions", None)
+    except Exception:
+        return []
     if not sessions:
         return []
 
@@ -64,6 +67,73 @@ def _send_webclient_event(recipient, **payload):
         recipient.msg(session=web_sessions, **payload)
 
 
+def _broadcast_webclient_activity(room, text, *, recipients=None, exclude=None):
+    """Send an activity-line OOB event to connected web clients in a room."""
+
+    if not room or not text:
+        return
+
+    exclude_ids = {
+        getattr(obj, "id", None)
+        for obj in (exclude or [])
+        if obj is not None
+    }
+    if recipients is None:
+        recipients = [
+            obj
+            for obj in getattr(room, "contents", [])
+            if obj is not None
+            and getattr(obj, "id", None) not in exclude_ids
+            and obj.is_typeclass("typeclasses.characters.Character", exact=False)
+            and getattr(obj, "is_connected", False)
+        ]
+
+    for recipient in recipients:
+        _send_webclient_event(recipient, brave_activity={"text": text})
+
+
+def _refresh_room_webclient_views(room, *, recipients=None, exclude=None):
+    """Refresh the room browser view for connected web clients in one room."""
+
+    if not room:
+        return
+
+    exclude_ids = {
+        getattr(obj, "id", None)
+        for obj in (exclude or [])
+        if obj is not None
+    }
+    if recipients is None:
+        recipients = [
+            obj
+            for obj in getattr(room, "contents", [])
+            if obj is not None
+            and getattr(obj, "id", None) not in exclude_ids
+            and obj.is_typeclass("typeclasses.characters.Character", exact=False)
+            and getattr(obj, "is_connected", False)
+            and obj.location == room
+        ]
+
+    if not recipients:
+        return
+
+    from typeclasses.scripts import BraveEncounter
+
+    for recipient in recipients:
+        visible_entities, visible_chars = _visible_room_contents(room, recipient)
+        visible_threats = BraveEncounter.get_visible_room_threats(room, recipient)
+        _send_webclient_event(
+            recipient,
+            brave_view=build_room_view(
+                room,
+                recipient,
+                visible_threats=visible_threats,
+                visible_entities=visible_entities,
+                visible_chars=visible_chars,
+            ),
+        )
+
+
 def _visible_room_contents(room, looker):
     visible_entities = [
         obj for obj in room.contents
@@ -83,6 +153,42 @@ def _build_scene_payload(room, looker, visible_entities=None):
     if not tracked:
         return {}
     return {"tracked_quest": tracked}
+
+
+def _find_direction_to_room(source_room, destination_room):
+    if not source_room or not destination_room:
+        return None
+
+    for exit_obj in sort_exits(list(getattr(source_room, "exits", []) or [])):
+        if getattr(exit_obj, "destination", None) == destination_room:
+            return get_exit_direction(exit_obj)
+    return None
+
+
+def _format_enter_direction(direction):
+    if not direction:
+        return ""
+    if direction in {"in", "out"}:
+        return f" from {direction}"
+    return f" from the {direction}"
+
+
+def _format_leave_direction(direction):
+    if not direction:
+        return ""
+    if direction in {"in", "out"}:
+        return f" to {direction}"
+    return f" to the {direction}"
+
+
+def _should_announce_room_movement(obj, move_type):
+    if not obj or not obj.is_typeclass("typeclasses.characters.Character", exact=False):
+        return False
+    if not getattr(obj, "is_connected", False):
+        return False
+    if move_type in {"defeat", "flee", "teleport", "teleportation"}:
+        return False
+    return True
 
 
 class Room(ObjectParent, DefaultRoom):
@@ -162,6 +268,42 @@ class Room(ObjectParent, DefaultRoom):
 
         return "".join(output)
 
+    def at_object_receive(self, obj, source_location, move_type="move", **kwargs):
+        super().at_object_receive(obj, source_location, move_type=move_type, **kwargs)
+        if not _should_announce_room_movement(obj, move_type):
+            return
+        if not source_location or source_location == self:
+            return
+
+        enter_direction = _find_direction_to_room(self, source_location)
+        move_direction = _find_direction_to_room(source_location, self)
+        if not _only_web_sessions(obj):
+            if move_direction:
+                obj.msg(f"You go {move_direction}.")
+            else:
+                obj.msg("You go.")
+        _broadcast_webclient_activity(self, f"You go {move_direction}." if move_direction else "You go.", recipients=[obj])
+        self.msg_contents(f"{obj.key} arrives{_format_enter_direction(enter_direction)}.", exclude=[obj])
+        _broadcast_webclient_activity(self, f"{obj.key} arrives{_format_enter_direction(enter_direction)}.", exclude=[obj])
+        _refresh_room_webclient_views(self)
+
+    def at_object_leave(self, obj, target_location, move_type="move", **kwargs):
+        super().at_object_leave(obj, target_location, move_type=move_type, **kwargs)
+        if not _should_announce_room_movement(obj, move_type):
+            return
+        if not target_location or target_location == self:
+            return
+
+        direction = _find_direction_to_room(self, target_location)
+        if direction:
+            self.msg_contents(f"{obj.key} leaves{_format_leave_direction(direction)}.", exclude=[obj])
+            _broadcast_webclient_activity(self, f"{obj.key} leaves{_format_leave_direction(direction)}.", exclude=[obj])
+            _refresh_room_webclient_views(self)
+            return
+        self.msg_contents(f"{obj.key} leaves.", exclude=[obj])
+        _broadcast_webclient_activity(self, f"{obj.key} leaves.", exclude=[obj])
+        _refresh_room_webclient_views(self)
+
     def get_display_header(self, looker, **kwargs):
         zone = self.db.brave_zone
         world = getattr(self.db, "brave_world", "Brave")
@@ -212,9 +354,6 @@ class Room(ObjectParent, DefaultRoom):
             prompts.append("        |cThe water looks fishable here.|n")
         if "cooking" in activities:
             prompts.append("        |yA warm hearth is ready here.|n")
-        if self.db.brave_portal_hub:
-            prompts.append("        |mThe Nexus ring is active here.|n")
-        
         if prompts:
             footer_sections.append("\n" + "\n".join(prompts))
 
