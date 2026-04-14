@@ -3892,6 +3892,10 @@ let defaultout_plugin = (function () {
         if (!pendingCombatFxEvents.length) {
             return;
         }
+        if (pendingCombatSwapTimeout) {
+            scheduleCombatFxFlush(Math.max(20, COMBAT_FX_RETRY_DELAY_MS));
+            return;
+        }
         var nowMs = Date.now();
         if (nowMs < combatFxBusyUntilMs) {
             scheduleCombatFxFlush(Math.max(20, combatFxBusyUntilMs - nowMs));
