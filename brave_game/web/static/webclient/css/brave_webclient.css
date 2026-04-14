@@ -100,6 +100,8 @@
     --brave-combat-feed-item-top: color-mix(in srgb, var(--brave-panel-soft) 72%, rgba(41, 28, 22, 0.96));
     --brave-combat-feed-item-bottom: color-mix(in srgb, var(--brave-panel-deep) 84%, rgba(20, 14, 13, 1));
     --brave-combat-feed-item-border: color-mix(in srgb, var(--brave-accent) 18%, var(--brave-world-line));
+    --brave-combat-log-height: 240px;
+    --brave-mobile-combat-log-height: 176px;
     --brave-combat-semantic-ally: var(--brave-good);
     --brave-combat-semantic-party: color-mix(in srgb, var(--brave-good) 74%, var(--brave-text-bright));
     --brave-combat-semantic-joined: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-soft));
@@ -4787,6 +4789,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     gap: 6px;
     display: flex;
     flex-direction: column;
+    overflow: visible;
     transition:
         transform 150ms ease,
         box-shadow 180ms ease,
@@ -4805,7 +4808,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__entry--lunge {
-    animation: brave-combat-card-lunge 300ms cubic-bezier(0.2, 0.86, 0.24, 1) 1;
+    animation: brave-combat-card-lunge 420ms cubic-bezier(0.2, 0.86, 0.24, 1) 1;
     will-change: transform;
 }
 
@@ -7658,6 +7661,9 @@ body[data-brave-scene="combat"] .brave-combat-log {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    height: var(--brave-combat-log-height);
+    min-height: var(--brave-combat-log-height);
+    max-height: var(--brave-combat-log-height);
     padding: 12px 12px 10px;
     border: 1px solid var(--brave-combat-feed-border);
     border-radius: var(--brave-radius-card);
@@ -7698,9 +7704,11 @@ body[data-brave-scene="combat"] .brave-combat-log__head::before {
 body[data-brave-scene="combat"] .brave-combat-log__body {
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
     gap: 6px;
-    max-height: calc(1.62em * 4 + 2.4rem);
-    min-height: calc(1.62em * 2 + 1.2rem);
+    height: 100%;
+    min-height: 0;
+    max-height: none;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-right: 4px;
@@ -9202,7 +9210,7 @@ body.brave-scene-combat-enter .inputwrap {
     body {
         --brave-mobile-dock-clearance: 124px;
         --brave-mobile-input-pane-height: 112px;
-        --brave-mobile-combat-log-height: clamp(132px, 28vh, 196px);
+        --brave-mobile-combat-log-height: 176px;
     }
 
     body[data-brave-scene="combat"] .brave-gl-main-item,
@@ -9686,11 +9694,12 @@ body.brave-scene-combat-enter .inputwrap {
     body[data-brave-scene="combat"] .brave-combat-log {
         display: flex;
         order: 5;
-        flex: 1 1 auto;
+        flex: 0 0 var(--brave-mobile-combat-log-height);
         align-self: stretch;
         width: 100%;
+        height: var(--brave-mobile-combat-log-height);
         min-height: var(--brave-mobile-combat-log-height);
-        max-height: none;
+        max-height: var(--brave-mobile-combat-log-height);
         overflow: hidden;
         gap: 6px;
         padding: 8px 8px 7px;

@@ -61,8 +61,14 @@ let defaultout_plugin = (function () {
     var combatAtbFrozenUntilMs = 0;
     var currentCombatFxTimeout = null;
     var combatFxBusyUntilMs = 0;
+    var COMBAT_FX_RETRY_DELAY_MS = 80;
+    var COMBAT_FX_MAX_RETRY_MS = 1400;
+    var COMBAT_FX_RENDER_SETTLE_MS = 90;
+    var COMBAT_LUNGE_DURATION_MS = 440;
     var pendingCombatSwapTimeout = null;
     var suppressedCombatEntryRefs = {};
+    var combatFxGhostNodesByRef = {};
+    var combatFxGhostTimeoutsByRef = {};
     var combatLogBodyNode = null;
     var combatLogScrollHandler = null;
     var currentCombatLogScrollFrame = null;
@@ -2902,12 +2908,110 @@ let defaultout_plugin = (function () {
         return refs;
     };
 
+    var clearCombatFxGhost = function (ref, node) {
+        if (ref && combatFxGhostTimeoutsByRef[ref]) {
+            window.clearTimeout(combatFxGhostTimeoutsByRef[ref]);
+            delete combatFxGhostTimeoutsByRef[ref];
+        }
+        var targetNode = node || (ref ? combatFxGhostNodesByRef[ref] : null);
+        if (ref) {
+            delete combatFxGhostNodesByRef[ref];
+        }
+        if (targetNode && targetNode.parentNode) {
+            targetNode.parentNode.removeChild(targetNode);
+        }
+    };
+
+    var clearAllCombatFxGhosts = function () {
+        Object.keys(combatFxGhostTimeoutsByRef).forEach(function (ref) {
+            window.clearTimeout(combatFxGhostTimeoutsByRef[ref]);
+        });
+        combatFxGhostTimeoutsByRef = {};
+        Object.keys(combatFxGhostNodesByRef).forEach(function (ref) {
+            var ghostNode = combatFxGhostNodesByRef[ref];
+            if (ghostNode && ghostNode.parentNode) {
+                ghostNode.parentNode.removeChild(ghostNode);
+            }
+        });
+        combatFxGhostNodesByRef = {};
+    };
+
+    var scheduleCombatFxGhostCleanup = function (ref, node, delayMs) {
+        if (ref) {
+            if (combatFxGhostTimeoutsByRef[ref]) {
+                window.clearTimeout(combatFxGhostTimeoutsByRef[ref]);
+            }
+            combatFxGhostTimeoutsByRef[ref] = window.setTimeout(function () {
+                clearCombatFxGhost(ref, node);
+            }, Math.max(0, delayMs || 0));
+            return;
+        }
+        window.setTimeout(function () {
+            clearCombatFxGhost("", node);
+        }, Math.max(0, delayMs || 0));
+    };
+
+    var createCombatGhostFromSnapshot = function (snapshot) {
+        if (!snapshot || !snapshot.rect || !snapshot.html) {
+            return null;
+        }
+        var rect = snapshot.rect;
+        if (!rect.width || !rect.height) {
+            return null;
+        }
+        var ghost = document.createElement("div");
+        ghost.className = "brave-combat-ghost";
+        ghost.innerHTML = snapshot.html;
+        ghost = ghost.firstElementChild || ghost;
+        ghost.classList.add("brave-combat-ghost");
+        ghost.style.position = "fixed";
+        ghost.style.left = rect.left + "px";
+        ghost.style.top = rect.top + "px";
+        ghost.style.width = rect.width + "px";
+        ghost.style.height = rect.height + "px";
+        ghost.style.margin = "0";
+        ghost.style.pointerEvents = "none";
+        ghost.style.zIndex = "999";
+        document.body.appendChild(ghost);
+        return ghost;
+    };
+
+    var ensureCombatFxGhost = function (event, snapshot) {
+        if (!snapshot) {
+            return null;
+        }
+        var ref = (event && event.target_ref) || snapshot.ref || "";
+        if (ref && combatFxGhostNodesByRef[ref] && combatFxGhostNodesByRef[ref].parentNode) {
+            return combatFxGhostNodesByRef[ref];
+        }
+        var ghost = createCombatGhostFromSnapshot(snapshot);
+        if (!ghost) {
+            return null;
+        }
+        if (ref) {
+            combatFxGhostNodesByRef[ref] = ghost;
+        }
+        scheduleCombatFxGhostCleanup(ref, ghost, 1500);
+        return ghost;
+    };
+
     var queueCombatFxEvents = function (events) {
         if (!Array.isArray(events) || !events.length) {
             return;
         }
-        pendingCombatFxEvents = pendingCombatFxEvents.concat(events.map(normalizeCombatEvent)).slice(-24);
-        scheduleCombatFxFlush(0);
+        var queuedAtMs = Date.now();
+        pendingCombatFxEvents = pendingCombatFxEvents.concat(events.map(function (event) {
+            var normalized = normalizeCombatEvent(event);
+            normalized._queuedAtMs = normalized._queuedAtMs || queuedAtMs;
+            return normalized;
+        })).slice(-24);
+        scheduleCombatFxFlush(COMBAT_FX_RENDER_SETTLE_MS);
+    };
+
+    var pruneExpiredCombatFxEvents = function (nowMs) {
+        pendingCombatFxEvents = pendingCombatFxEvents.filter(function (event) {
+            return event && (!event._queuedAtMs || nowMs - event._queuedAtMs <= COMBAT_FX_MAX_RETRY_MS);
+        });
     };
 
     var hasPendingCombatDefeatRef = function (ref) {
@@ -2930,6 +3034,27 @@ let defaultout_plugin = (function () {
             }
             event.defeat_snapshot = snapshot;
             assigned = true;
+        });
+        return assigned;
+    };
+
+    var assignPendingCombatTargetSnapshot = function (ref, snapshot) {
+        if (!ref || !snapshot || !pendingCombatFxEvents.length) {
+            return false;
+        }
+        var assigned = false;
+        pendingCombatFxEvents.forEach(function (event) {
+            if (!(event && event.target_ref === ref)) {
+                return;
+            }
+            if (!event.target_snapshot) {
+                event.target_snapshot = snapshot;
+                assigned = true;
+            }
+            if (event.defeat && !event.defeat_snapshot) {
+                event.defeat_snapshot = snapshot;
+                assigned = true;
+            }
         });
         return assigned;
     };
@@ -3051,11 +3176,28 @@ let defaultout_plugin = (function () {
             attackerNode.classList.remove("brave-view__entry--lunge");
             attackerNode.style.removeProperty("--brave-combat-lunge-x");
             attackerNode.style.removeProperty("--brave-combat-lunge-y");
-        }, 320);
+        }, COMBAT_LUNGE_DURATION_MS);
     };
 
     var animateCombatDefeat = function (nodeOrSnapshot) {
         if (!nodeOrSnapshot) {
+            return;
+        }
+        var ghostRef = nodeOrSnapshot.nodeType ? getCombatEntryRef(nodeOrSnapshot) : (nodeOrSnapshot.ref || "");
+        if (!nodeOrSnapshot.nodeType && ghostRef && combatFxGhostNodesByRef[ghostRef]) {
+            animateCombatDefeat(combatFxGhostNodesByRef[ghostRef]);
+            return;
+        }
+        if (nodeOrSnapshot.nodeType && nodeOrSnapshot.classList.contains("brave-combat-ghost")) {
+            if (nodeOrSnapshot.classList.contains("brave-combat-ghost--defeat")) {
+                return;
+            }
+            if (ghostRef) {
+                suppressCombatEntryRef(ghostRef);
+                dropPendingCombatFxForRef(ghostRef);
+            }
+            nodeOrSnapshot.classList.add("brave-combat-ghost--defeat");
+            scheduleCombatFxGhostCleanup(ghostRef, nodeOrSnapshot, 900);
             return;
         }
         if (nodeOrSnapshot.nodeType && nodeOrSnapshot.classList.contains("brave-view__entry--defeating")) {
@@ -3065,38 +3207,28 @@ let defaultout_plugin = (function () {
         if (!snapshot || !snapshot.rect) {
             return;
         }
-        var rect = snapshot.rect;
-        if (!rect.width || !rect.height) {
+        var ghost = createCombatGhostFromSnapshot(snapshot);
+        if (!ghost) {
             return;
         }
-        var ghost = document.createElement("div");
-        ghost.className = "brave-combat-ghost brave-combat-ghost--defeat";
-        ghost.innerHTML = snapshot.html;
-        ghost = ghost.firstElementChild || ghost;
-        ghost.classList.add("brave-combat-ghost", "brave-combat-ghost--defeat");
-        ghost.style.position = "fixed";
-        ghost.style.left = rect.left + "px";
-        ghost.style.top = rect.top + "px";
-        ghost.style.width = rect.width + "px";
-        ghost.style.height = rect.height + "px";
-        ghost.style.margin = "0";
-        ghost.style.pointerEvents = "none";
-        ghost.style.zIndex = "999";
-        document.body.appendChild(ghost);
+        if (ghostRef) {
+            combatFxGhostNodesByRef[ghostRef] = ghost;
+        }
+        ghost.classList.add("brave-combat-ghost--defeat");
         if (nodeOrSnapshot.nodeType) {
             var suppressedRef = getCombatEntryRef(nodeOrSnapshot);
             suppressCombatEntryRef(suppressedRef);
             dropPendingCombatFxForRef(suppressedRef);
             nodeOrSnapshot.classList.add("brave-view__entry--defeating");
         }
-        window.setTimeout(function () {
-            if (ghost && ghost.parentNode) {
-                ghost.parentNode.removeChild(ghost);
-            }
-            if (nodeOrSnapshot.nodeType && nodeOrSnapshot.parentNode) {
-                nodeOrSnapshot.parentNode.removeChild(nodeOrSnapshot);
-            }
-        }, 900);
+        scheduleCombatFxGhostCleanup(ghostRef, ghost, 900);
+        if (nodeOrSnapshot.nodeType) {
+            window.setTimeout(function () {
+                if (nodeOrSnapshot.nodeType && nodeOrSnapshot.parentNode) {
+                    nodeOrSnapshot.parentNode.removeChild(nodeOrSnapshot);
+                }
+            }, 900);
+        }
     };
 
     var parseCombatFloaters = function (text) {
@@ -3149,24 +3281,26 @@ let defaultout_plugin = (function () {
 
     var playCombatFxEvent = function (event) {
         var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
-        var defeatSnapshot = event && event.defeat ? (event.defeat_snapshot || null) : null;
+        var targetSnapshot = event ? (event.target_snapshot || null) : null;
+        var defeatSnapshot = event && event.defeat ? (event.defeat_snapshot || targetSnapshot || null) : null;
+        var effectTargetNode = targetNode || ensureCombatFxGhost(event, targetSnapshot || defeatSnapshot);
         var attackerNode = (event.lunge && event.source)
             ? resolveCombatEntryNode(event.source_ref, event.source)
             : null;
-        if ((!targetNode && !defeatSnapshot) || (event.lunge && event.source && !attackerNode)) {
+        if (!effectTargetNode && !defeatSnapshot) {
             return false;
         }
-        if (event.text && targetNode) {
-            spawnCombatFloater(targetNode, event.text, event.tone, event.element);
+        if (event.text && effectTargetNode) {
+            spawnCombatFloater(effectTargetNode, event.text, event.tone, event.element);
         }
-        if (event.impact && targetNode) {
-            animateCombatImpact(targetNode, event.impact, event.element);
+        if (event.impact && effectTargetNode) {
+            animateCombatImpact(effectTargetNode, event.impact, event.element);
         }
         if (event.defeat) {
-            animateCombatDefeat(targetNode || defeatSnapshot);
+            animateCombatDefeat(effectTargetNode || defeatSnapshot);
         }
-        if (event.lunge && attackerNode) {
-            animateCombatLunge(attackerNode, targetNode);
+        if (event.lunge && attackerNode && effectTargetNode) {
+            animateCombatLunge(attackerNode, effectTargetNode);
         }
         return true;
     };
@@ -3179,7 +3313,7 @@ let defaultout_plugin = (function () {
             return 560;
         }
         if (event.lunge) {
-            return 320;
+            return COMBAT_LUNGE_DURATION_MS;
         }
         if (event.kind === "miss" || event.impact === "miss") {
             return 260;
@@ -3219,10 +3353,17 @@ let defaultout_plugin = (function () {
     };
 
     var flushPendingCombatFxEvents = function () {
-        if (!pendingCombatFxEvents.length || !currentViewData || currentViewData.variant !== "combat") {
+        if (!pendingCombatFxEvents.length) {
             return;
         }
         var nowMs = Date.now();
+        if (!currentViewData || currentViewData.variant !== "combat") {
+            pruneExpiredCombatFxEvents(nowMs);
+            if (pendingCombatFxEvents.length) {
+                scheduleCombatFxFlush(COMBAT_FX_RETRY_DELAY_MS);
+            }
+            return;
+        }
         if (combatFxBusyUntilMs > nowMs) {
             scheduleCombatFxFlush(combatFxBusyUntilMs - nowMs);
             return;
@@ -3238,6 +3379,10 @@ let defaultout_plugin = (function () {
         });
         pendingCombatFxEvents = remaining.slice(-24);
         if (!nextEvent) {
+            pruneExpiredCombatFxEvents(Date.now());
+            if (pendingCombatFxEvents.length) {
+                scheduleCombatFxFlush(COMBAT_FX_RETRY_DELAY_MS);
+            }
             return;
         }
         var delayMs = combatFxEventDelayMs(nextEvent);
@@ -3246,16 +3391,27 @@ let defaultout_plugin = (function () {
     };
 
     var handleCombatFxEvent = function (payload) {
+        if (Array.isArray(payload)) {
+            payload = payload.length ? payload[0] : {};
+        }
+        if (payload && typeof payload === "object" && payload.brave_combat_fx && typeof payload.brave_combat_fx === "object") {
+            payload = payload.brave_combat_fx;
+        }
         if (!payload || typeof payload !== "object") {
             return;
         }
         var event = normalizeCombatEvent(payload);
-        if (event.defeat && !event.defeat_snapshot) {
-            var defeatNode = resolveCombatEntryNode(event.target_ref, event.target);
-            if (defeatNode) {
-                var defeatSnapshot = captureCombatEntrySnapshot(defeatNode);
-                if (defeatSnapshot) {
-                    event.defeat_snapshot = defeatSnapshot;
+        if (!event.target_snapshot || (event.defeat && !event.defeat_snapshot)) {
+            var targetNode = resolveCombatEntryNode(event.target_ref, event.target);
+            if (targetNode) {
+                var targetSnapshot = captureCombatEntrySnapshot(targetNode);
+                if (targetSnapshot) {
+                    if (!event.target_snapshot) {
+                        event.target_snapshot = targetSnapshot;
+                    }
+                    if (event.defeat && !event.defeat_snapshot) {
+                        event.defeat_snapshot = targetSnapshot;
+                    }
                 }
             }
         }
@@ -3599,6 +3755,7 @@ let defaultout_plugin = (function () {
         }
         combatAtbFrozenUntilMs = 0;
         pendingCombatFxEvents = [];
+        clearAllCombatFxGhosts();
         suppressedCombatEntryRefs = {};
         resetCombatLogAutoscroll();
         if (currentViewData && currentViewData.variant === "combat") {
@@ -4972,6 +5129,7 @@ let defaultout_plugin = (function () {
                     if (!ref || nextCombatRefs[ref] || isCombatEntryRefSuppressed(ref)) {
                         return;
                     }
+                    assignPendingCombatTargetSnapshot(ref, snapshot);
                     assignPendingCombatDefeatSnapshot(ref, snapshot);
                 });
                 shouldDelayCombatSwap = previousCombatSnapshots.some(function (snapshot) {
@@ -5883,6 +6041,7 @@ let defaultout_plugin = (function () {
         pendingCombatFxEvents = [];
         combatFxBusyUntilMs = 0;
         combatAtbFrozenUntilMs = 0;
+        clearAllCombatFxGhosts();
         clearSuppressedCombatEntryRefs();
         resetCombatLogAutoscroll();
         setMainViewMode(false);
