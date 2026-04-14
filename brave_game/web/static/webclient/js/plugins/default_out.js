@@ -3582,76 +3582,58 @@ let defaultout_plugin = (function () {
         }, 360);
     };
 
+    var clearCombatLungeState = function (node) {
+        if (!node) {
+            return;
+        }
+        if (node._braveCombatLungeTimeout) {
+            window.clearTimeout(node._braveCombatLungeTimeout);
+            node._braveCombatLungeTimeout = null;
+        }
+        node.classList.remove("brave-view__entry--lunge");
+        node.style.removeProperty("--brave-combat-lunge-x");
+        node.style.removeProperty("--brave-combat-lunge-y");
+    };
+
     var animateCombatLunge = function (attackerNode, targetNode) {
         if (!attackerNode || !targetNode) {
             return;
         }
 
-        var attackerRef = attackerNode.dataset.entryRef || "";
-        var snapshot = captureCombatEntrySnapshot(attackerNode);
-        if (!snapshot) {
-            return;
-        }
-
-        var ghost = createCombatGhostFromSnapshot(snapshot);
-        if (!ghost) {
-            return;
-        }
-
+        var attackerRect = attackerNode.getBoundingClientRect();
         var targetRect = targetNode.getBoundingClientRect();
-        var ghostRect = ghost.getBoundingClientRect();
+        if (!attackerRect.width || !attackerRect.height || !targetRect.width || !targetRect.height) {
+            return;
+        }
 
-        var ghostCenterX = ghostRect.left + (ghostRect.width / 2);
-        var ghostCenterY = ghostRect.top + (ghostRect.height / 2);
+        var attackerCenterX = attackerRect.left + (attackerRect.width / 2);
+        var attackerCenterY = attackerRect.top + (attackerRect.height / 2);
         var targetCenterX = targetRect.left + (targetRect.width / 2);
         var targetCenterY = targetRect.top + (targetRect.height / 2);
 
-        var dx = targetCenterX - ghostCenterX;
-        var dy = targetCenterY - ghostCenterY;
+        var dx = targetCenterX - attackerCenterX;
+        var dy = targetCenterY - attackerCenterY;
         var magnitude = Math.sqrt((dx * dx) + (dy * dy));
 
         if (!magnitude) {
-            var container = ghost.parentNode;
-            if (container && container.parentNode) container.parentNode.removeChild(container);
             return;
         }
 
-        // Lunging about 15-20% of the distance usually looks best for JRPG style
+        // Move the live card itself instead of hiding it and swapping in a ghost.
+        // That keeps the attacker visible through the whole motion and avoids the
+        // vanish/reappear artifact when combat view updates are happening rapidly.
         var lungeDistance = Math.min(60, Math.max(20, magnitude * 0.18));
         var unitX = dx / magnitude;
         var unitY = dy / magnitude;
 
-        // Hide the real node if it's still in the DOM
-        attackerNode.style.visibility = "hidden";
-        attackerNode.classList.add("brave-lunge-suppressed");
-        if (attackerRef) {
-            suppressCombatEntryRef(attackerRef);
-        }
-
-        ghost.style.setProperty("--brave-combat-lunge-x", (unitX * lungeDistance).toFixed(2) + "px");
-        ghost.style.setProperty("--brave-combat-lunge-y", (unitY * lungeDistance).toFixed(2) + "px");
-        void ghost.offsetWidth;
-        ghost.classList.add("brave-view__entry--lunge");
-
-        window.setTimeout(function () {
-            var container = ghost.parentNode;
-            if (container && container.classList.contains("brave-combat-ghost-container")) {
-                if (container.parentNode) {
-                    container.parentNode.removeChild(container);
-                }
-            } else if (ghost.parentNode) {
-                ghost.parentNode.removeChild(ghost);
-            }
-            // Show the real node again (it might be a new one after re-render)
-            var liveNode = resolveCombatEntryNode(attackerRef);
-            if (liveNode) {
-                liveNode.style.visibility = "";
-                liveNode.classList.remove("brave-lunge-suppressed");
-            }
-            if (attackerRef) {
-                clearSuppressedCombatEntryRef(attackerRef);
-            }
-        }, COMBAT_LUNGE_DURATION_MS);
+        clearCombatLungeState(attackerNode);
+        attackerNode.style.setProperty("--brave-combat-lunge-x", (unitX * lungeDistance).toFixed(2) + "px");
+        attackerNode.style.setProperty("--brave-combat-lunge-y", (unitY * lungeDistance).toFixed(2) + "px");
+        void attackerNode.offsetWidth;
+        attackerNode.classList.add("brave-view__entry--lunge");
+        attackerNode._braveCombatLungeTimeout = window.setTimeout(function () {
+            clearCombatLungeState(attackerNode);
+        }, COMBAT_LUNGE_DURATION_MS + 40);
     };
 
     var animateCombatDefeat = function (nodeOrSnapshot) {
