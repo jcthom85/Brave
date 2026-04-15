@@ -17,6 +17,25 @@ at_server_cold_stop()
 
 """
 
+from twisted.internet.task import LoopingCall
+
+_ROAMING_LOOP = None
+
+
+def _run_roaming_loop():
+    from world.roaming import advance_roaming_parties
+
+    advance_roaming_parties()
+
+
+def _ensure_roaming_loop(interval):
+    global _ROAMING_LOOP
+
+    if _ROAMING_LOOP and getattr(_ROAMING_LOOP, "running", False):
+        return
+    _ROAMING_LOOP = LoopingCall(_run_roaming_loop)
+    _ROAMING_LOOP.start(interval, now=False)
+
 
 def at_server_init():
     """
@@ -32,11 +51,14 @@ def at_server_start():
     """
     from evennia.server.models import ServerConfig
     from world.bootstrap import ensure_brave_world
+    from world.roaming import ROAMING_TICK_INTERVAL, ensure_roaming_party_manager
 
     if ServerConfig.objects.conf("last_initial_setup_step") != "done":
         return
 
     ensure_brave_world()
+    ensure_roaming_party_manager()
+    _ensure_roaming_loop(ROAMING_TICK_INTERVAL)
 
 
 def at_server_stop():
