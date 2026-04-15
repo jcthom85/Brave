@@ -10166,6 +10166,41 @@ body.brave-scene-combat-enter .inputwrap {
     margin: 0;
 }
 
+.brave-room-log__jump {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 20px;
+    margin-left: auto;
+    padding: 0 7px;
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.52);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(var(--brave-accent-rgb), 0.24), rgba(var(--brave-accent-rgb), 0.12)),
+        rgba(0, 0, 0, 0.16);
+    color: var(--brave-text-bright);
+    font-family: var(--brave-ui-font-family);
+    font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 0 0 1px rgba(var(--brave-accent-rgb), 0.08);
+}
+
+.brave-room-log__jump--visible {
+    display: inline-flex;
+}
+
+.brave-room-log__jump:hover,
+.brave-room-log__jump:focus-visible {
+    border-color: rgba(var(--brave-accent-rgb), 0.78);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-accent-rgb), 0.34), rgba(var(--brave-accent-rgb), 0.18)),
+        rgba(0, 0, 0, 0.2);
+    outline: none;
+}
+
 .scene-pack-panel__title-icon {
     font-size: 0.96rem;
 }

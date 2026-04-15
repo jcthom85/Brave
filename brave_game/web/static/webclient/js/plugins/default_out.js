@@ -41,6 +41,9 @@ let defaultout_plugin = (function () {
     var currentViewData = null;
     var currentSceneData = null;
     var currentRoomFeedEntries = [];
+    var roomActivityRailPinnedToBottom = true;
+    var roomActivityRailScrollTop = 0;
+    var roomActivityRailMissedCount = 0;
     var currentMapText = "";
     var currentMapGrid = null;
     var currentArcadeState = null;
@@ -3439,27 +3442,133 @@ let defaultout_plugin = (function () {
 
     var addRoomFeedEntry = function (cls, rawContent) {
         if (typeof rawContent !== "string" || !rawContent.trim()) {
-            return;
+            return false;
         }
         var text = rawContent.replace(/\s+/g, " ").trim();
         if (!text) {
-            return;
+            return false;
         }
         var normalizedCls = cls || "out";
         var lastEntry = currentRoomFeedEntries.length ? currentRoomFeedEntries[currentRoomFeedEntries.length - 1] : null;
         if (lastEntry && lastEntry.cls === normalizedCls && lastEntry.text === text) {
-            return;
+            return false;
         }
         currentRoomFeedEntries.push({ cls: normalizedCls, text: text });
         if (currentRoomFeedEntries.length > 24) {
             currentRoomFeedEntries = currentRoomFeedEntries.slice(currentRoomFeedEntries.length - 24);
         }
+        return true;
+    };
+
+    var isRoomActivityScrolledToBottom = function (body) {
+        if (!body) {
+            return true;
+        }
+        if (body.clientHeight <= 0) {
+            return roomActivityRailPinnedToBottom;
+        }
+        return (body.scrollHeight - body.scrollTop - body.clientHeight) <= 16;
+    };
+
+    var updateRailActivityCue = function () {
+        var panel = document.getElementById("scene-vicinity-panel");
+        if (!panel) {
+            return;
+        }
+        var cue = panel.querySelector("[data-brave-activity-scroll='rail']");
+        if (!cue) {
+            return;
+        }
+        var hasMissed = roomActivityRailMissedCount > 0;
+        cue.textContent = roomActivityRailMissedCount > 99 ? "99+" : String(roomActivityRailMissedCount);
+        cue.setAttribute(
+            "aria-label",
+            hasMissed
+                ? "Scroll Activity to " + roomActivityRailMissedCount + " missed line" + (roomActivityRailMissedCount === 1 ? "" : "s")
+                : "Activity is at the latest line"
+        );
+        cue.classList.toggle("brave-room-log__jump--visible", hasMissed);
+        cue.disabled = !hasMissed;
+    };
+
+    var syncRailActivityScrollState = function (body) {
+        if (!body) {
+            return;
+        }
+        if (body.clientHeight <= 0) {
+            updateRailActivityCue();
+            return;
+        }
+        roomActivityRailPinnedToBottom = isRoomActivityScrolledToBottom(body);
+        roomActivityRailScrollTop = body.scrollTop;
+        if (roomActivityRailPinnedToBottom && roomActivityRailMissedCount) {
+            roomActivityRailMissedCount = 0;
+        }
+        updateRailActivityCue();
+    };
+
+    var restoreRailActivityScroll = function (body, shouldStickToBottom) {
+        if (!body) {
+            return;
+        }
+        var applyScroll = function () {
+            if (shouldStickToBottom) {
+                body.scrollTop = body.scrollHeight;
+                roomActivityRailPinnedToBottom = true;
+                roomActivityRailScrollTop = body.scrollTop;
+                if (roomActivityRailMissedCount) {
+                    roomActivityRailMissedCount = 0;
+                }
+            } else {
+                body.scrollTop = Math.min(roomActivityRailScrollTop, Math.max(0, body.scrollHeight - body.clientHeight));
+            }
+            syncRailActivityScrollState(body);
+        };
+        applyScroll();
+        if (typeof window.requestAnimationFrame === "function") {
+            window.requestAnimationFrame(applyScroll);
+        }
+    };
+
+    var bindRailActivityScrollState = function (body) {
+        if (!body || body.dataset.braveActivityScrollBound === "1") {
+            return;
+        }
+        body.dataset.braveActivityScrollBound = "1";
+        body.addEventListener("scroll", function () {
+            syncRailActivityScrollState(body);
+        }, { passive: true });
+    };
+
+    var noteRoomActivityEntriesAdded = function (count) {
+        if (!count || isMobileViewport()) {
+            return;
+        }
+        var railBody = document.querySelector(".brave-room-log__body--rail");
+        if (railBody) {
+            syncRailActivityScrollState(railBody);
+        }
+        if (!roomActivityRailPinnedToBottom) {
+            roomActivityRailMissedCount += count;
+        }
+        updateRailActivityCue();
+    };
+
+    var scrollRailActivityToBottom = function () {
+        var body = document.querySelector(".brave-room-log__body--rail");
+        if (!body) {
+            return;
+        }
+        roomActivityRailPinnedToBottom = true;
+        roomActivityRailMissedCount = 0;
+        restoreRailActivityScroll(body, true);
+        updateRailActivityCue();
     };
 
     var syncRoomActivityLog = function (body) {
         var shouldStickToBottom = true;
         if (body) {
-            shouldStickToBottom = (body.scrollHeight - body.scrollTop - body.clientHeight) <= 16;
+            shouldStickToBottom = isRoomActivityScrolledToBottom(body);
             body.innerHTML = currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("");
             if (shouldStickToBottom) {
                 body.scrollTop = body.scrollHeight;
@@ -3478,11 +3587,13 @@ let defaultout_plugin = (function () {
         if (!body) {
             return null;
         }
-        var shouldStickToBottom = (body.scrollHeight - body.scrollTop - body.clientHeight) <= 16;
-        body.innerHTML = currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("");
-        if (shouldStickToBottom) {
-            body.scrollTop = body.scrollHeight;
+        if (body.dataset.braveActivityScrollBound === "1") {
+            syncRailActivityScrollState(body);
         }
+        var shouldStickToBottom = roomActivityRailPinnedToBottom;
+        body.innerHTML = currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("");
+        bindRailActivityScrollState(body);
+        restoreRailActivityScroll(body, shouldStickToBottom);
         return $(body);
     };
 
@@ -3500,9 +3611,7 @@ let defaultout_plugin = (function () {
 
         strayEntries.each(function () {
             if (shouldLogRoomActivity(this.textContent || "", this.className || "out", null)) {
-                var beforeCount = currentRoomFeedEntries.length;
-                addRoomFeedEntry(this.className || "out", this.textContent || "");
-                if (currentRoomFeedEntries.length > beforeCount) {
+                if (addRoomFeedEntry(this.className || "out", this.textContent || "")) {
                     claimedCount += 1;
                 }
             }
@@ -3537,6 +3646,8 @@ let defaultout_plugin = (function () {
                 mobileRoomActivityUnreadCount += claimedCount;
                 renderMobileNavDock();
             }
+        } else if (claimedCount) {
+            noteRoomActivityEntriesAdded(claimedCount);
         }
 
         var mobileBody = syncMobileRoomActivityLog();
@@ -3578,9 +3689,12 @@ let defaultout_plugin = (function () {
     };
 
     var pushRoomFeedEntry = function (cls, rawText) {
-        addRoomFeedEntry(cls, rawText);
+        var added = addRoomFeedEntry(cls, rawText);
+        if (added) {
+            noteRoomActivityEntriesAdded(1);
+        }
         syncRoomActivityLog();
-        if (isMobileViewport()) {
+        if (added && isMobileViewport()) {
             if (currentMobileUtilityTab === "activity") {
                 mobileRoomActivityUnreadCount = 0;
                 renderMobileUtilitySheet();
@@ -3593,6 +3707,9 @@ let defaultout_plugin = (function () {
 
     var clearRoomActivityLog = function () {
         currentRoomFeedEntries = [];
+        roomActivityRailPinnedToBottom = true;
+        roomActivityRailScrollTop = 0;
+        roomActivityRailMissedCount = 0;
         syncRoomActivityLog();
     };
 
@@ -3912,20 +4029,33 @@ let defaultout_plugin = (function () {
         if (!panel) {
             return;
         }
-        panel.innerHTML =
-            "<div class='scene-card__eyebrow scene-pack-panel__title'>"
-            + icon("forum", "scene-card__eyebrow-icon scene-pack-panel__title-icon")
-            + "<span>Activity</span>"
-            + "</div>"
-            + "<div class='brave-room-log brave-room-log--rail'>"
-            + "<div class='brave-room-log__body brave-room-log__body--rail' role='log' aria-live='polite' aria-relevant='additions text'></div>"
-            + "</div>";
+        var body = panel.querySelector(".brave-room-log__body--rail");
+        if (!body) {
+            panel.innerHTML =
+                "<div class='scene-card__eyebrow scene-pack-panel__title'>"
+                + icon("forum", "scene-card__eyebrow-icon scene-pack-panel__title-icon")
+                + "<span>Activity</span>"
+                + "<button type='button' class='brave-room-log__jump' data-brave-activity-scroll='rail' aria-label='Activity is at the latest line' disabled>0</button>"
+                + "</div>"
+                + "<div class='brave-room-log brave-room-log--rail'>"
+                + "<div class='brave-room-log__body brave-room-log__body--rail' role='log' aria-live='polite' aria-relevant='additions text'></div>"
+                + "</div>";
+        } else if (!panel.querySelector("[data-brave-activity-scroll='rail']")) {
+            var title = panel.querySelector(".scene-pack-panel__title");
+            if (title) {
+                title.insertAdjacentHTML(
+                    "beforeend",
+                    "<button type='button' class='brave-room-log__jump' data-brave-activity-scroll='rail' aria-label='Activity is at the latest line' disabled>0</button>"
+                );
+            }
+        }
         panel.removeAttribute("data-brave-command");
         panel.removeAttribute("title");
         panel.removeAttribute("role");
         panel.removeAttribute("tabindex");
         panel.classList.remove("brave-click");
         syncRailActivityLog();
+        updateRailActivityCue();
     };
 
     var renderVicinityPanel = function (roomView) {
@@ -5277,6 +5407,13 @@ let defaultout_plugin = (function () {
                     return;
                 }
                 handleMobileUtilityAction(mobileTarget.getAttribute("data-brave-mobile-action"));
+                return;
+            }
+            var activityScrollTarget = event.target.closest("[data-brave-activity-scroll='rail']");
+            if (activityScrollTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                scrollRailActivityToBottom();
                 return;
             }
             var combatTabTarget = event.target.closest("[data-brave-combat-tab]");
