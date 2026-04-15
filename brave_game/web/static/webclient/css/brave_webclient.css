@@ -7614,7 +7614,7 @@ body[data-brave-scene="explore"] .minimap-overlay {
 
 @media screen and (min-width: 1100px) {
     body[data-brave-scene="explore"] .scene-rail {
-        bottom: 96px;
+        bottom: 152px;
         height: auto;
         max-height: none;
     }

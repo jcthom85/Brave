@@ -1934,6 +1934,44 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var positionSceneRail = function () {
+        var rail = document.getElementById("scene-rail");
+        var host = document.getElementById("main-sub");
+        if (!rail || !host) {
+            return;
+        }
+        if (
+            isMobileViewport()
+            || !currentViewData
+            || !isRoomLikeView(currentViewData)
+            || document.body.getAttribute("data-brave-scene") !== "explore"
+        ) {
+            rail.style.removeProperty("bottom");
+            return;
+        }
+
+        var roomView = document.querySelector("#messagewindow > .brave-sticky-view > .brave-view--room")
+            || document.querySelector("#messagewindow > .brave-view--room");
+        if (!roomView) {
+            rail.style.removeProperty("bottom");
+            return;
+        }
+
+        var navSection = roomView.querySelector(".brave-view__section--navpad");
+        var vicinitySection = roomView.querySelector(".brave-view__section--vicinity");
+        if (!navSection || !vicinitySection) {
+            rail.style.removeProperty("bottom");
+            return;
+        }
+
+        var hostRect = host.getBoundingClientRect();
+        var rowBottom = Math.max(
+            navSection.getBoundingClientRect().bottom,
+            vicinitySection.getBoundingClientRect().bottom
+        );
+        rail.style.bottom = Math.max(0, Math.round(hostRect.bottom - rowBottom)) + "px";
+    };
+
     var renderDesktopToolbar = function () {
         var toolbar = document.getElementById("toolbar");
         var show = !!(
@@ -2063,6 +2101,11 @@ let defaultout_plugin = (function () {
         rail.classList.toggle("scene-rail--card-hidden", !hasCard);
         rail.classList.toggle("scene-rail--detail-hidden", !hasCard && !hasPack && !hasVicinity);
         rail.classList.toggle("scene-rail--empty", !hasCard && !hasPack && !hasVicinity);
+        if (window.requestAnimationFrame) {
+            window.requestAnimationFrame(positionSceneRail);
+        } else {
+            positionSceneRail();
+        }
     };
 
     var escapeHtml = function (value) {
@@ -5545,6 +5588,11 @@ let defaultout_plugin = (function () {
         window.addEventListener("resize", function () {
             syncMobileShell();
             positionDesktopToolbar();
+            if (window.requestAnimationFrame) {
+                window.requestAnimationFrame(positionSceneRail);
+            } else {
+                positionSceneRail();
+            }
             syncArcadeBodyState();
             if (currentArcadeState && currentArcadeState.fitScreen) {
                 currentArcadeState.fitScreen();
