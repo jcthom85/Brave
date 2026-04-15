@@ -2099,9 +2099,18 @@ WORLD_OBJECTS = [
     },
     {
         "id": "lantern_rest_arcade_cabinet",
-        "key": "Joss's Flashing Cabinet",
-        "display_name": "Joss's Flashing Cabinet",
-        "aliases": ["cabinet", "arcade cabinet", "arcade", "machine", "flashing cabinet", "game cabinet"],
+        "key": "Joss's Arcade Cabinet",
+        "display_name": "Joss's Arcade Cabinet",
+        "aliases": [
+            "cabinet",
+            "arcade cabinet",
+            "arcade",
+            "machine",
+            "flashing cabinet",
+            "game cabinet",
+            "joss's flashing cabinet",
+            "joss flashing cabinet",
+        ],
         "kind": "arcade",
         "typeclass": "typeclasses.objects.ArcadeCabinet",
         "location": "brambleford_lantern_rest_inn",
@@ -2111,7 +2120,7 @@ WORLD_OBJECTS = [
             "maze_runner": {"threshold": 2000, "item": "lantern_pixel_pin"},
         },
         "desc": (
-            "A humming black-glass cabinet squats near the inn wall, all bright dots, sharp corners, and a speaker "
+            "A humming black-glass arcade cabinet squats near the inn wall, all bright dots, sharp corners, and a speaker "
             "that crackles like a tiny storm. A painted card reads MAZE RUNNER. Beneath it, somebody has added in "
             "grease pencil: Beat 2,000 and Joss owes you a proper prize."
         ),

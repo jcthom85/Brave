@@ -77,7 +77,7 @@ PACK_KIND_LABELS = {
 ROOM_ENTITY_KIND_ICONS = {
     "npc": "forum",
     "readable": "menu_book",
-    "arcade": "sports_esports",
+    "arcade": "videogame_asset",
     "object": "category",
 }
 
@@ -263,6 +263,7 @@ def _entry(
     selected=False,
     combat_state=None,
     entry_ref=None,
+    hide_icon=False,
 ):
     entry = {
         "title": title,
@@ -272,6 +273,8 @@ def _entry(
         "icon": icon,
         "badge": badge,
     }
+    if hide_icon:
+        entry["hide_icon"] = True
     if selected:
         entry["selected"] = True
     if combat_state:
@@ -1587,10 +1590,10 @@ def build_theme_view(current_theme_key=None):
         "",
         "Themes",
         eyebrow_icon=None,
-        title_icon=None,
+        title_icon="snowflake",
         subtitle="",
         chips=[],
-        sections=[_section("Styles", "palette", "entries", items=entries)],
+        sections=[_section("", "palette", "entries", items=entries, hide_label=True)],
         actions=[],
         back=True,
         reactive=_reactive_view(scene="theme"),
@@ -1708,18 +1711,49 @@ def _get_journal_mode(character):
     return mode if mode in {"active", "completed"} else "active"
 
 
-def _build_journal_quest_entry(character, quest_key, *, tracked_key=None, nearby_npcs=None, detailed=False):
+def _get_expanded_completed_quest(character):
+    value = getattr(getattr(character, "db", None), "brave_journal_expanded_completed", None)
+    return value or None
+
+
+def _build_journal_quest_picker(character, quest_key, *, tracked_key=None, nearby_npcs=None):
     state = (character.db.brave_quests or {}).get(quest_key, {})
     definition = QUESTS[quest_key]
+    all_objectives = list(state.get("objectives", []))
+    completed = state.get("status") == "completed"
+    options = []
+
+    if completed:
+        options.append(_picker_option("Completed", icon="check_circle", tone="good"))
+    elif quest_key == tracked_key:
+        options.append(_picker_option("Untrack", command="quests untrack", icon="flag", tone="accent"))
+    else:
+        options.append(_picker_option("Track", command=f"quests track {quest_key}", icon="flag", tone="accent"))
+
+    body = [definition["summary"]]
+    body.extend(
+        ("[x] " if objective.get("completed") else "[ ] ") + _format_objective_progress(objective)
+        for objective in all_objectives[:8]
+    )
+
+    return _picker(
+        definition["title"],
+        subtitle=f"{get_quest_region(quest_key)} · {definition['giver']}",
+        options=options,
+        body=body,
+    )
+
+
+def _build_journal_quest_entry(character, quest_key, *, tracked_key=None, nearby_npcs=None, detailed=False, inline_command=None):
+    state = (character.db.brave_quests or {}).get(quest_key, {})
+    definition = QUESTS[quest_key]
+    completed = state.get("status") == "completed"
     all_objectives = list(state.get("objectives", []))
     remaining_objectives = [
         objective for objective in all_objectives if not objective.get("completed")
     ]
     next_objective = remaining_objectives[0] if remaining_objectives else None
     lines = []
-    actions = []
-    command = None
-    icon = "assignment"
     meta = definition["giver"]
 
     if detailed:
@@ -1729,24 +1763,28 @@ def _build_journal_quest_entry(character, quest_key, *, tracked_key=None, nearby
                 _format_objective_progress(objective),
                 icon="check_box" if objective.get("completed") else "check_box_outline_blank",
             )
-            for objective in all_objectives[:4]
+            for objective in all_objectives
         )
-        completed_count = len(all_objectives) - len(remaining_objectives)
-        total_count = max(1, len(all_objectives))
         return _entry(
             definition["title"],
             meta=f"{get_quest_region(quest_key)} · {definition['giver']}",
             lines=lines,
-            icon="flag",
-            actions=[
+            icon=None if completed else "flag",
+            hide_icon=completed,
+            command=inline_command,
+            actions=[] if state.get("status") == "completed" else [
                 _action("Untrack", "quests untrack", "flag", tone="accent"),
-                *(
-                    [_action("Talk", f"talk {definition['giver']}", "forum", tone="muted")]
-                    if definition["giver"] in (nearby_npcs or set())
-                    else []
-                ),
             ],
-            chips=[_chip(f"{completed_count}/{total_count} steps", "checklist", "accent")],
+        )
+
+    if completed:
+        return _entry(
+            definition["title"],
+            meta=f"{get_quest_region(quest_key)} · {definition['giver']}",
+            lines=[],
+            icon=None,
+            hide_icon=True,
+            command=inline_command,
         )
 
     if next_objective:
@@ -1754,48 +1792,44 @@ def _build_journal_quest_entry(character, quest_key, *, tracked_key=None, nearby
     else:
         lines.append(definition["summary"])
 
-    command = f"quests track {quest_key}"
-    if quest_key == tracked_key:
-        command = "quests untrack"
-        actions.append(_action("Untrack", "quests untrack", "flag", tone="accent"))
-    else:
-        actions.append(_action("Track", command, "flag", tone="accent"))
-
-    if state.get("status") != "completed" and definition["giver"] in (nearby_npcs or set()):
-        actions.append(_action("Talk", f"talk {definition['giver']}", "forum", tone="muted"))
-
     return _entry(
         definition["title"],
         meta=meta,
         lines=lines,
-        icon=icon,
-        command=command,
-        actions=actions,
+        icon=None,
+        hide_icon=True,
+        command=inline_command,
+        picker=None if completed else _build_journal_quest_picker(
+            character,
+            quest_key,
+            tracked_key=tracked_key,
+            nearby_npcs=nearby_npcs,
+        ),
     )
 
 
 def _build_journal_region_sections(character, quest_keys, *, tracked_key=None, status="active"):
     nearby_npcs = _local_npc_keys(character)
     sections = []
+    expanded_completed_key = _get_expanded_completed_quest(character) if status == "completed" else None
     filtered_keys = [quest_key for quest_key in quest_keys if not (status == "active" and quest_key == tracked_key)]
     for region, region_keys in group_quest_keys_by_region(filtered_keys):
-        if status == "completed":
-            items = [
-                _item(QUESTS[quest_key]["title"], icon="task_alt")
-                for quest_key in region_keys
-            ]
-            kind = "list"
-        else:
-            items = [
-                _build_journal_quest_entry(
-                    character,
-                    quest_key,
-                    tracked_key=tracked_key,
-                    nearby_npcs=nearby_npcs,
-                )
-                for quest_key in region_keys
-            ]
-            kind = "entries"
+        items = [
+            _build_journal_quest_entry(
+                character,
+                quest_key,
+                tracked_key=tracked_key,
+                nearby_npcs=nearby_npcs,
+                detailed=(status == "completed" and quest_key == expanded_completed_key),
+                inline_command=(
+                    f"quests collapse {quest_key}"
+                    if status == "completed" and quest_key == expanded_completed_key
+                    else (f"quests expand {quest_key}" if status == "completed" else None)
+                ),
+            )
+            for quest_key in region_keys
+        ]
+        kind = "entries"
 
         sections.append(
             _section(
@@ -1844,7 +1878,7 @@ def build_quests_view(character):
         _action(
             "Completed",
             "quests completed",
-            "task_alt",
+            "check_circle",
             tone="accent" if journal_mode == "completed" else "muted",
         ),
     ]
@@ -2078,7 +2112,7 @@ def build_party_view(character, mode="status"):
         "",
         "Party",
         eyebrow_icon=None,
-        title_icon=None,
+        title_icon="group",
         subtitle="",
         chips=[],
         sections=sections,
@@ -2438,7 +2472,6 @@ def build_talk_view(target, response):
             reactive=_reactive_view(getattr(target, "location", None), scene="dialogue"),
         ),
         "variant": "dialogue",
-        "preserve_rail": True,
     }
 
 
@@ -2470,22 +2503,84 @@ def build_arcade_view(character, cabinet, *, focus_game=None):
 
     available_games = [game_key for game_key in cabinet.get_available_games() if game_key in ARCADE_GAMES]
     selected_game = focus_game if focus_game in available_games else (available_games[0] if available_games else None)
+    selected_definition = ARCADE_GAMES[selected_game] if selected_game else None
+
+    if selected_game and len(available_games) == 1:
+        reward = get_reward_definition(cabinet, selected_game)
+        best_score = format_arcade_score(get_personal_best(character, cabinet, selected_game))
+        leaderboard = cabinet.get_leaderboard(selected_game)
+        high_score = format_arcade_score((leaderboard[0] or {}).get("score", 0)) if leaderboard else None
+        info_lines = []
+        if selected_definition.get("summary"):
+            info_lines.append(selected_definition["summary"])
+
+        score_bits = []
+        if high_score:
+            score_bits.append(f"High {high_score}")
+        score_bits.append(f"Best {best_score}")
+        if score_bits:
+            info_lines.append(" · ".join(score_bits))
+
+        threshold = reward.get("threshold", 0)
+        if threshold and reward.get("item_name"):
+            if has_arcade_reward(character, cabinet, selected_game):
+                info_lines.append(f"Prize claimed: {reward['item_name']}")
+            else:
+                info_lines.append(f"Prize at {format_arcade_score(threshold)}: {reward['item_name']}")
+
+        return {
+            **_make_view(
+                _display_name(cabinet),
+                selected_definition["name"],
+                eyebrow_icon="sports_esports",
+                title_icon="sports_esports",
+                subtitle="",
+                chips=[],
+                sections=[
+                    _section(
+                        "",
+                        "sports_esports",
+                        "entries",
+                        items=[
+                            _entry(
+                                "Play",
+                                meta=f"{cabinet.get_game_price(selected_game)} silver",
+                                lines=[line for line in info_lines if line],
+                                icon="play_arrow",
+                                command=f"arcade play {selected_game}",
+                                actions=[_action("Play", f"arcade play {selected_game}", "play_arrow", tone="accent")],
+                            )
+                        ],
+                        span="wide",
+                        hide_label=True,
+                    ),
+                ],
+                back=True,
+                reactive=_reactive_from_character(character, scene="arcade"),
+            ),
+            "variant": "arcade",
+        }
 
     game_entries = []
     for game_key in available_games:
         definition = ARCADE_GAMES[game_key]
         reward = get_reward_definition(cabinet, game_key)
-        prize_text = ""
+        best_score = format_arcade_score(get_personal_best(character, cabinet, game_key))
+        leaderboard = cabinet.get_leaderboard(game_key)
+        high_score = format_arcade_score((leaderboard[0] or {}).get("score", 0)) if leaderboard else None
+        status_parts = []
+        if high_score:
+            status_parts.append(f"High {high_score}")
+        status_parts.append(f"Best {best_score}")
+
         threshold = reward.get("threshold", 0)
         if threshold and reward.get("item_name"):
             if has_arcade_reward(character, cabinet, game_key):
-                prize_text = f"Prize claimed: {reward['item_name']}."
+                status_parts.append(f"Prize claimed: {reward['item_name']}")
             else:
-                prize_text = (
-                    f"Prize at {format_arcade_score(threshold)}: {reward['item_name']}. "
-                    f"Your best: {format_arcade_score(get_personal_best(character, cabinet, game_key))}."
-                )
-        lines = [definition.get("summary", ""), definition.get("score_summary", ""), prize_text]
+                status_parts.append(f"Prize {format_arcade_score(threshold)}: {reward['item_name']}")
+
+        lines = [definition.get("summary", ""), " · ".join(part for part in status_parts if part)]
         game_entries.append(
             _entry(
                 definition["name"],
@@ -2495,53 +2590,24 @@ def build_arcade_view(character, cabinet, *, focus_game=None):
                 command=f"arcade play {game_key}",
                 actions=[
                     _action("Play", f"arcade play {game_key}", "play_arrow", tone="accent"),
-                    _action("Scores", f"arcade scores {game_key}", "military_tech", tone="muted"),
                 ],
             )
         )
-
-    leaderboard_items = []
-    if selected_game:
-        for index, entry in enumerate(cabinet.get_leaderboard(selected_game), start=1):
-            leaderboard_items.append(
-                _item(
-                    f"{index}. {entry.get('name', 'Unknown')} · {format_arcade_score(entry.get('score', 0))}",
-                    icon="military_tech",
-                )
-            )
-    if not leaderboard_items:
-        leaderboard_items = [_item("Nobody has claimed this board yet.", icon="star_outline")]
-
-    instruction_lines = []
-    if selected_game:
-        instruction_lines.extend(ARCADE_GAMES[selected_game].get("instructions", []))
-
     return {
         **_make_view(
             _display_name(cabinet),
             "ARCADE",
             eyebrow_icon="sports_esports",
             title_icon="sports_esports",
-            chips=[_chip(f"{len(available_games)} game" + ("" if len(available_games) == 1 else "s"), "stadia_controller", "accent")],
+            subtitle="",
+            chips=[],
             sections=[
                 _section(
-                    "Cabinet Lineup",
+                    "Games",
                     "sports_esports",
                     "entries",
                     items=game_entries or [_entry("This cabinet is dark right now.", icon="power_off")],
                     span="wide",
-                ),
-                _section(
-                    "Local Scores",
-                    "military_tech",
-                    "list",
-                    items=leaderboard_items,
-                ),
-                _section(
-                    "How To Play",
-                    "gamepad",
-                    "lines",
-                    lines=instruction_lines or ["No active program notes are posted for this cabinet yet."],
                 ),
             ],
             back=True,
@@ -3305,50 +3371,6 @@ def build_gear_view(character):
     }
 
 
-def build_more_view(character):
-    """Return a browser-native utility menu for secondary actions."""
-
-    sections = [
-        _section(
-            "Character",
-            "person",
-            "entries",
-            items=[
-                _entry("Character Sheet", icon="assignment_ind", command="sheet"),
-                _entry("Equipment", icon="shield", command="gear"),
-                _entry("Pack", icon="backpack", command="pack"),
-                _entry("Quest Journal", icon="assignment", command="quests"),
-            ],
-        ),
-        _section(
-            "Social And Settings",
-            "settings",
-            "entries",
-            items=[
-                _entry("Party", icon="groups", command="party"),
-                _entry("Theme", icon="palette", command="theme"),
-                _entry("Help", icon="help", command="help"),
-                _entry("Quit", icon="logout", command="quit"),
-            ],
-        ),
-    ]
-
-    view = _make_view(
-        "",
-        "MENU",
-        eyebrow_icon=None,
-        title_icon=None,
-        subtitle="",
-        sections=sections,
-        back=True,
-        reactive=_reactive_from_character(character, scene="character"),
-    )
-    if view.get("back_action"):
-        view["back_action"]["label"] = ""
-        view["back_action"]["aria_label"] = "Close"
-    return view
-
-
 def _pack_item_icon(item):
     kind = get_item_category(item)
     if item.get("kind") == "equipment":
@@ -3460,13 +3482,13 @@ def _build_pack_consumable_action(character, template_id, item):
         return _action(
             "Use",
             None,
-            "restaurant",
-            tone="good",
+            None,
+            tone="muted",
             picker=_picker(f"Use {item_name}", subtitle="Choose target", options=options),
         )
 
     if target_type in {"self", "none"}:
-        return _action("Use", f"use {item_name}", "restaurant", tone="good")
+        return _action("Use", f"use {item_name}", None, tone="muted")
     return None
 
 
@@ -3480,8 +3502,7 @@ def _build_pack_item(character, template_id, quantity):
 
     entry = _item(
         title,
-        icon=_pack_item_icon(item),
-        badge=str(quantity) if quantity > 1 else None,
+        badge=str(max(1, int(quantity or 1))),
         picker=_picker(title, subtitle=subtitle, body=body),
         tooltip=tooltip,
     )

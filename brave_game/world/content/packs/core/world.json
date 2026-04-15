@@ -178,7 +178,9 @@
         "arcade",
         "machine",
         "flashing cabinet",
-        "game cabinet"
+        "game cabinet",
+        "joss's flashing cabinet",
+        "joss flashing cabinet"
       ],
       "arcade_games": [
         "maze_runner"
@@ -190,10 +192,10 @@
           "threshold": 2000
         }
       },
-      "desc": "A humming black-glass cabinet squats near the inn wall, all bright dots, sharp corners, and a speaker that crackles like a tiny storm. A painted card reads MAZE RUNNER. Beneath it, somebody has added in grease pencil: Beat 2,000 and Joss owes you a proper prize.",
-      "display_name": "Joss's Flashing Cabinet",
+      "desc": "A humming black-glass arcade cabinet squats near the inn wall, all bright dots, sharp corners, and a speaker that crackles like a tiny storm. A painted card reads MAZE RUNNER. Beneath it, somebody has added in grease pencil: Beat 2,000 and Joss owes you a proper prize.",
+      "display_name": "Joss's Arcade Cabinet",
       "id": "lantern_rest_arcade_cabinet",
-      "key": "Joss's Flashing Cabinet",
+      "key": "Joss's Arcade Cabinet",
       "kind": "arcade",
       "location": "brambleford_lantern_rest_inn",
       "typeclass": "typeclasses.objects.ArcadeCabinet"

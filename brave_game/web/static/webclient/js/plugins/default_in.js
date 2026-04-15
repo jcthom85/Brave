@@ -22,14 +22,7 @@ let defaultInPlugin = (function () {
         chat: "Say something nearby. Prefix with / to send a command.",
         command: "Type a command. Try: map, n, e, sheet, talk mira, fight",
     };
-    var playInputMode = (function () {
-        try {
-            var stored = window.localStorage ? window.localStorage.getItem(INPUT_MODE_STORAGE_KEY) : "";
-            return stored === INPUT_MODE_COMMAND ? INPUT_MODE_COMMAND : INPUT_MODE_CHAT;
-        } catch (error) {
-            return INPUT_MODE_CHAT;
-        }
-    })();
+    var playInputMode = INPUT_MODE_CHAT;
     var inputContext = INPUT_CONTEXT_COMMAND;
     var isLoggedIn = false;
     var lastMobileInputOpenAt = 0;
@@ -37,16 +30,47 @@ let defaultInPlugin = (function () {
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
     };
 
+    var getDefaultOutPlugin = function () {
+        if (!window.plugins || !window.plugins.defaultout) {
+            return null;
+        }
+        return window.plugins.defaultout;
+    };
+
+    var isGameplayBodyState = function () {
+        var body = document.body;
+        if (!body) {
+            return false;
+        }
+        var view = body.getAttribute("data-brave-view") || "";
+        var scene = body.getAttribute("data-brave-scene") || "";
+        if (view && view !== "connection" && view !== "chargen") {
+            return true;
+        }
+        if (scene && scene !== "account" && scene !== "system") {
+            return true;
+        }
+        return false;
+    };
+
+    var getResolvedInputContext = function () {
+        if (inputContext === INPUT_CONTEXT_COMMAND && isGameplayBodyState()) {
+            return INPUT_CONTEXT_PLAY;
+        }
+        return inputContext;
+    };
+
     var getEffectiveInputMode = function () {
-        return inputContext === INPUT_CONTEXT_COMMAND ? INPUT_MODE_COMMAND : playInputMode;
+        return getResolvedInputContext() === INPUT_CONTEXT_COMMAND ? INPUT_MODE_COMMAND : INPUT_MODE_CHAT;
     };
 
     var syncInputModeBodyState = function () {
         if (!document.body) {
             return;
         }
+        var resolvedContext = getResolvedInputContext();
         document.body.setAttribute("data-brave-input-mode", getEffectiveInputMode());
-        document.body.setAttribute("data-brave-input-context", inputContext);
+        document.body.setAttribute("data-brave-input-context", resolvedContext);
     };
 
     var dispatchInputModeChange = function () {
@@ -180,9 +204,10 @@ let defaultInPlugin = (function () {
 
     var buildInputModeBarMarkup = function () {
         var effectiveMode = getEffectiveInputMode();
+        var resolvedContext = getResolvedInputContext();
         var chatActive = effectiveMode === INPUT_MODE_CHAT ? " brave-input-modebar__button--active" : "";
         var commandActive = effectiveMode === INPUT_MODE_COMMAND ? " brave-input-modebar__button--active" : "";
-        var chatDisabled = inputContext === INPUT_CONTEXT_COMMAND ? " disabled" : "";
+        var chatDisabled = resolvedContext === INPUT_CONTEXT_COMMAND ? " disabled" : "";
         return (
             "<div class='brave-input-modebar' role='tablist' aria-label='Input mode'>"
             + "<button type='button' class='brave-input-modebar__button" + chatActive + "' data-brave-input-mode='" + INPUT_MODE_CHAT + "' aria-pressed='" + (effectiveMode === INPUT_MODE_CHAT ? "true" : "false") + "'" + chatDisabled + ">"
@@ -197,9 +222,10 @@ let defaultInPlugin = (function () {
 
     var ensureInputModeBar = function () {
         var effectiveMode = getEffectiveInputMode();
+        var resolvedContext = getResolvedInputContext();
         var chatActive = effectiveMode === INPUT_MODE_CHAT;
         var commandActive = effectiveMode === INPUT_MODE_COMMAND;
-        var chatDisabled = inputContext === INPUT_CONTEXT_COMMAND;
+        var chatDisabled = resolvedContext === INPUT_CONTEXT_COMMAND;
         $(".inputwrap").each(function () {
             var wrap = $(this);
             var wrapper = wrap.find(".inputfieldwrapper").first();
@@ -231,7 +257,8 @@ let defaultInPlugin = (function () {
     };
 
     var decorateInputs = function () {
-        $(".inputfield, #inputfield").attr("placeholder", placeholderByMode[getEffectiveInputMode()] || placeholderByMode.command);
+        var effectiveMode = getEffectiveInputMode();
+        $(".inputfield, #inputfield").attr("placeholder", effectiveMode === INPUT_MODE_CHAT ? placeholderByMode.chat : placeholderByMode.command);
         ensureInputModeBar();
     };
 
@@ -263,7 +290,7 @@ let defaultInPlugin = (function () {
     var persistPlayInputMode = function () {
         try {
             if (window.localStorage) {
-                window.localStorage.setItem(INPUT_MODE_STORAGE_KEY, playInputMode);
+                window.localStorage.setItem(INPUT_MODE_STORAGE_KEY, INPUT_MODE_CHAT);
             }
         } catch (error) {
             // Ignore storage failures.
@@ -278,10 +305,14 @@ let defaultInPlugin = (function () {
     };
 
     var setInputMode = function (mode) {
+        var resolvedContext = getResolvedInputContext();
         if (mode !== INPUT_MODE_CHAT && mode !== INPUT_MODE_COMMAND) {
             return getEffectiveInputMode();
         }
-        if (inputContext === INPUT_CONTEXT_COMMAND && mode !== INPUT_MODE_COMMAND) {
+        if (resolvedContext === INPUT_CONTEXT_COMMAND && mode !== INPUT_MODE_COMMAND) {
+            return getEffectiveInputMode();
+        }
+        if (resolvedContext === INPUT_CONTEXT_PLAY && mode === INPUT_MODE_COMMAND) {
             return getEffectiveInputMode();
         }
         if (playInputMode !== mode) {
@@ -326,10 +357,13 @@ let defaultInPlugin = (function () {
     };
 
     var focusInput = function (options) {
-        if (inputContext === INPUT_CONTEXT_COMMAND) {
+        if (getResolvedInputContext() === INPUT_CONTEXT_COMMAND) {
             return $();
         }
         options = options || {};
+        if (options.chatMode && getResolvedInputContext() === INPUT_CONTEXT_PLAY) {
+            setInputMode(INPUT_MODE_CHAT);
+        }
         if (!focusOnKeydown && !options.force) {
             return $();
         }
@@ -405,7 +439,7 @@ let defaultInPlugin = (function () {
     };
 
     var primeInput = function () {
-        if (inputContext === INPUT_CONTEXT_COMMAND) {
+        if (getResolvedInputContext() === INPUT_CONTEXT_COMMAND) {
             return $();
         }
         if (isMobileViewport()) {
@@ -422,7 +456,7 @@ let defaultInPlugin = (function () {
         if (options.mode) {
             setInputMode(options.mode);
         } else {
-            setInputMode(INPUT_MODE_COMMAND);
+            setInputMode(INPUT_MODE_CHAT);
         }
         var inputfield = focusInput({ force: true });
         if (inputfield.length < 1) {
@@ -555,9 +589,24 @@ let defaultInPlugin = (function () {
                 return true;
 
             case 27:
+                var outputPlugin = getDefaultOutPlugin();
+                if (outputPlugin && typeof outputPlugin.handleEscapeKey === "function" && outputPlugin.handleEscapeKey()) {
+                    event.preventDefault();
+                    return true;
+                }
                 if (inputfield.length > 0) {
                     inputfield.blur();
                     setReadyState();
+                    event.preventDefault();
+                }
+                return true;
+
+            case 192:
+                if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+                    if (getResolvedInputContext() === INPUT_CONTEXT_PLAY) {
+                        setInputMode(INPUT_MODE_CHAT);
+                    }
+                    focusInput({ force: true, moveCaret: true, chatMode: true });
                     event.preventDefault();
                 }
                 return true;

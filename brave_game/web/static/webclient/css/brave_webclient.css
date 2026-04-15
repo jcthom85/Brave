@@ -1877,22 +1877,37 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
-    padding-right: 4px;
+    padding-right: 2px;
     scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
 }
 
 .scene-rail__panel--vicinity .scene-card__list::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 
 .scene-rail__panel--vicinity .scene-card__list::-webkit-scrollbar-track {
-    background: color-mix(in srgb, var(--brave-world-line) 18%, transparent);
     border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 42%, transparent), color-mix(in srgb, var(--brave-surface-deep-bottom) 64%, transparent));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brave-world-line) 34%, transparent);
 }
 
 .scene-rail__panel--vicinity .scene-card__list::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--brave-accent) 42%, var(--brave-world-line));
+    border: 2px solid transparent;
     border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-soft)), color-mix(in srgb, var(--brave-accent) 44%, var(--brave-world-line)));
+    background-clip: padding-box;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 0 0 1px rgba(var(--brave-accent-rgb), 0.12);
+}
+
+.scene-rail__panel--vicinity .scene-card__list::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 84%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 56%, var(--brave-world-line)));
+    background-clip: padding-box;
 }
 
 .scene-rail__panel--hidden {
@@ -1975,6 +1990,42 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     overflow: hidden;
 }
 
+.scene-card--scrollable {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
+}
+
+.scene-card--scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scene-card--scrollable::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 42%, transparent), color-mix(in srgb, var(--brave-surface-deep-bottom) 64%, transparent));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brave-world-line) 34%, transparent);
+}
+
+.scene-card--scrollable::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-soft)), color-mix(in srgb, var(--brave-accent) 44%, var(--brave-world-line)));
+    background-clip: padding-box;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 0 0 1px rgba(var(--brave-accent-rgb), 0.12);
+}
+
+.scene-card--scrollable::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 84%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 56%, var(--brave-world-line)));
+    background-clip: padding-box;
+}
+
 .scene-rail .scene-card__section {
     display: flex;
     flex-direction: column;
@@ -1989,22 +2040,48 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
-    padding-right: 4px;
+    padding-right: 2px;
     scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
 }
 
 .scene-rail .scene-card__list::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 
 .scene-rail .scene-card__list::-webkit-scrollbar-track {
-    background: color-mix(in srgb, var(--brave-world-line) 18%, transparent);
     border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 42%, transparent), color-mix(in srgb, var(--brave-surface-deep-bottom) 64%, transparent));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brave-world-line) 34%, transparent);
 }
 
 .scene-rail .scene-card__list::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--brave-accent) 42%, var(--brave-world-line));
     border-radius: 999px;
+    border: 2px solid transparent;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-soft)), color-mix(in srgb, var(--brave-accent) 44%, var(--brave-world-line)));
+    background-clip: padding-box;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 0 0 1px rgba(var(--brave-accent-rgb), 0.12);
+}
+
+.scene-rail .scene-card__list::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 84%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 56%, var(--brave-world-line)));
+    background-clip: padding-box;
+}
+
+.scene-rail .scene-card--scrollable .scene-card__section,
+.scene-rail .scene-card--scrollable .scene-card__section:last-child,
+.scene-rail .scene-card--scrollable .scene-card__list {
+    flex: 0 0 auto;
+}
+
+.scene-rail .scene-card--scrollable .scene-card__list {
+    overflow: visible;
+    padding-right: 0;
 }
 
 .scene-card:empty {
@@ -2055,6 +2132,14 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 .scene-card__title-icon {
     color: var(--brave-link);
     font-size: 1.08rem;
+}
+
+.scene-card__subtitle {
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
+    color: var(--brave-text-dim);
+    font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.45;
 }
 
 .scene-card__meta {
@@ -3406,7 +3491,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     cursor: pointer;
     position: relative;
     align-self: center;
-    margin: 4px auto 2px;
+    margin: 4px auto 16px;
     width: 124px;
     height: 124px;
     padding: 14px;
@@ -3981,6 +4066,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     width: 100%;
     justify-self: stretch;
     align-self: start;
+    display: flex;
+    flex-direction: column;
 }
 
 @media screen and (min-width: 901px) {
@@ -4031,6 +4118,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
     .brave-view--room .brave-view__section--vicinity {
         display: flex;
+        flex-direction: column;
         grid-area: activity;
         width: 100%;
         margin-left: 0;
@@ -4041,6 +4129,44 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         grid-row: auto;
         grid-column: auto;
     }
+}
+
+.brave-view--room .brave-view__section--vicinity .brave-view__list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
+}
+
+.brave-view--room .brave-view__section--vicinity .brave-view__list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.brave-view--room .brave-view__section--vicinity .brave-view__list::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 42%, transparent), color-mix(in srgb, var(--brave-surface-deep-bottom) 64%, transparent));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brave-world-line) 34%, transparent);
+}
+
+.brave-view--room .brave-view__section--vicinity .brave-view__list::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-soft)), color-mix(in srgb, var(--brave-accent) 44%, var(--brave-world-line)));
+    background-clip: padding-box;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 0 0 1px rgba(var(--brave-accent-rgb), 0.12);
+}
+
+.brave-view--room .brave-view__section--vicinity .brave-view__list::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 84%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 56%, var(--brave-world-line)));
+    background-clip: padding-box;
 }
 
 .brave-view--room .brave-view__section--activitylog {
@@ -4069,12 +4195,60 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     min-height: 0;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
     gap: 6px;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-right: 4px;
     scrollbar-width: thin;
+}
+
+.brave-room-log__body--rail {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: scroll;
+    overscroll-behavior: contain;
+    padding-right: 2px;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
+}
+
+.brave-room-log__body--rail::-webkit-scrollbar {
+    width: 8px;
+}
+
+.brave-room-log__body--rail::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 42%, transparent), color-mix(in srgb, var(--brave-surface-deep-bottom) 64%, transparent));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brave-world-line) 34%, transparent);
+}
+
+.brave-room-log__body--rail::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-soft)), color-mix(in srgb, var(--brave-accent) 44%, var(--brave-world-line)));
+    background-clip: padding-box;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 0 0 1px rgba(var(--brave-accent-rgb), 0.12);
+}
+
+.brave-room-log__body--rail::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 84%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 56%, var(--brave-world-line)));
+    background-clip: padding-box;
+}
+
+.scene-rail__panel--vicinity .brave-room-log--rail {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .brave-view--room .brave-room-log__body::-webkit-scrollbar {
@@ -6869,6 +7043,29 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     transform: rotate(40deg) translate(-0.03rem, -0.03rem);
 }
 
+.brave-icon--check-circle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.98rem;
+    height: 0.98rem;
+    flex: 0 0 0.98rem;
+    border-radius: 999px;
+    margin-top: 0.04rem;
+    background: rgba(var(--brave-accent-rgb), 0.11);
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.24);
+}
+
+.brave-icon--check-circle::after {
+    content: "";
+    width: 0.24rem;
+    height: 0.5rem;
+    border-right: 2px solid color-mix(in srgb, var(--brave-accent) 62%, var(--brave-text-bright));
+    border-bottom: 2px solid color-mix(in srgb, var(--brave-accent) 62%, var(--brave-text-bright));
+    transform: rotate(40deg) translate(-0.03rem, -0.03rem);
+}
+
 .brave-view--map .brave-view__badge {
     min-width: 2.2rem;
 }
@@ -6974,6 +7171,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view__navcard-label {
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
     display: block;
     color: var(--brave-text-soft);
     width: 100%;
@@ -9118,7 +9317,7 @@ body.brave-scene-combat-enter .inputwrap {
         letter-spacing: 0;
         cursor: pointer;
         position: relative;
-        margin: 4px auto 12px;
+        margin: 4px auto 22px;
         width: 80px;
         height: 80px;
         background:
@@ -10048,6 +10247,8 @@ body.brave-scene-combat-enter .inputwrap {
 }
 
 .scene-pack-panel__item-label {
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
     min-width: 0;
     color: var(--brave-text-soft);
     font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
@@ -10055,12 +10256,16 @@ body.brave-scene-combat-enter .inputwrap {
 }
 
 .scene-pack-panel__item-qty {
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
     color: var(--brave-text-dim);
     font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
 }
 
 .scene-pack-panel__overflow,
 .scene-pack-panel__empty {
+    font-family: var(--brave-body-font-family);
+    letter-spacing: var(--brave-body-letter-spacing);
     color: var(--brave-text-dim);
     font-size: calc(0.7rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     padding-top: 4px;

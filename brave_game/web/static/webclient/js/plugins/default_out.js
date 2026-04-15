@@ -1631,6 +1631,29 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var handleEscapeKey = function () {
+        if (currentPickerData) {
+            clearPickerSheet();
+            return true;
+        }
+        if (document.body && document.body.classList.contains("brave-notice-active")) {
+            clearBrowserNotice();
+            return true;
+        }
+        if (
+            currentViewData
+            && currentViewData.back_action
+            && currentViewData.back_action.command
+            && currentViewData.variant !== "connection"
+            && currentViewData.variant !== "chargen"
+            && currentViewData.variant !== "account"
+        ) {
+            sendBrowserCommand(currentViewData.back_action.command, currentViewData.back_action.confirm);
+            return true;
+        }
+        return false;
+    };
+
     var getNoticeIcon = function (noticeData) {
         var tone = noticeData && noticeData.tone ? noticeData.tone : "muted";
         if (noticeData && noticeData.icon) {
@@ -1890,13 +1913,13 @@ let defaultout_plugin = (function () {
         return {
             title: "Menu",
             options: [
-                { label: "Character Sheet", icon: "badge", command: "sheet" },
-                { label: "Equipment", icon: "swords", command: "gear" },
+                { label: "Character Sheet", icon: "person", command: "sheet" },
+                { label: "Equipment", icon: "shield", command: "gear" },
                 { label: "Pack", icon: "backpack", command: "pack" },
                 { label: "Journal", icon: "menu_book", command: "quests" },
                 { label: "Map", icon: "map", command: "map" },
-                { label: "Party", icon: "groups", command: "party" },
-                { label: "Theme", icon: "palette", command: "theme" },
+                { label: "Party", icon: "group", command: "party" },
+                { label: "Theme", icon: "snowflake", command: "theme" },
                 { label: "Help", icon: "help", command: "help" },
                 { label: "Quit", icon: "logout", command: "quit", tone: "danger" }
             ]
@@ -1974,36 +1997,15 @@ let defaultout_plugin = (function () {
 
     var renderDesktopToolbar = function () {
         var toolbar = document.getElementById("toolbar");
-        var show = !!(
-            toolbar
-            && !isMobileViewport()
-            && currentViewData
-            && currentViewData.variant
-            && !isRoomLikeView(currentViewData)
-            && currentViewData.variant !== "connection"
-            && currentViewData.variant !== "chargen"
-            && currentViewData.variant !== "account"
-        );
         if (!toolbar) {
             return;
         }
-        toolbar.innerHTML = show
-            ? "<div class='brave-toolbar'><button type='button' class='brave-toolbar__button brave-click' data-brave-picker='" + escapeHtml(JSON.stringify(buildDesktopMenuPicker())) + "' title='menu'>MENU</button></div>"
-            : "";
-        toolbar.setAttribute("aria-hidden", show ? "false" : "true");
-        if (!show) {
-            toolbar.style.removeProperty("top");
-            toolbar.style.removeProperty("right");
-            toolbar.style.removeProperty("bottom");
-            toolbar.style.removeProperty("left");
-            return;
-        }
-        positionDesktopToolbar();
-        if (window.requestAnimationFrame) {
-            window.requestAnimationFrame(positionDesktopToolbar);
-        }
-        window.setTimeout(positionDesktopToolbar, 0);
-        window.setTimeout(positionDesktopToolbar, 80);
+        toolbar.innerHTML = "";
+        toolbar.setAttribute("aria-hidden", "true");
+        toolbar.style.removeProperty("top");
+        toolbar.style.removeProperty("right");
+        toolbar.style.removeProperty("bottom");
+        toolbar.style.removeProperty("left");
     };
 
     var getMapPayloadState = function (payload) {
@@ -2133,7 +2135,7 @@ let defaultout_plugin = (function () {
         "delete": "demolish",
         "palette": "kaleidoscope",
         "tune": "gears",
-        "check_circle": "on-target",
+        "check_circle": "check",
         "radio_button_unchecked": "circle-of-circles",
         "task_alt": "on-target",
         "checklist": "on-target",
@@ -2182,7 +2184,7 @@ let defaultout_plugin = (function () {
         "bolt": "lightning-bolt",
         "auto_awesome": "aura",
         "warning": "uncertainty",
-        "sports_esports": "gamepad",
+        "sports_esports": "gamepad-cross",
         "videogame_asset": "gamepad-cross",
         "construction": "anvil",
         "build": "wrench",
@@ -2239,6 +2241,13 @@ let defaultout_plugin = (function () {
                 checkboxClasses += " " + extraClass;
             }
             return "<span class='" + checkboxClasses + "' aria-hidden='true'></span>";
+        }
+        if (name === "check_circle" || name === "task_alt") {
+            var checkClasses = "brave-icon brave-icon--check-circle";
+            if (extraClass) {
+                checkClasses += " " + extraClass;
+            }
+            return "<span class='" + checkClasses + "' aria-hidden='true'></span>";
         }
         var raName = ICON_MAP[name] || name.replace(/_/g, "-");
         var classes = "ra ra-" + raName;
@@ -2448,9 +2457,13 @@ let defaultout_plugin = (function () {
     };
 
     var prefillBrowserInput = function (value) {
+        var normalized = String(value || "");
+        if (normalized && normalized.charAt(0) !== "/") {
+            normalized = "/" + normalized;
+        }
         var inputPlugin = getDefaultInPlugin();
         if (inputPlugin && typeof inputPlugin.setInputValue === "function") {
-            inputPlugin.setInputValue(value || "");
+            inputPlugin.setInputValue(normalized, { mode: "chat" });
             return;
         }
         var inputfield = getCommandInput();
@@ -2458,7 +2471,7 @@ let defaultout_plugin = (function () {
             return;
         }
         inputfield.focus();
-        inputfield.val(value || "");
+        inputfield.val(normalized);
         var element = inputfield.get(0);
         if (element && typeof element.setSelectionRange === "function") {
             var length = inputfield.val().length;
@@ -3309,7 +3322,7 @@ let defaultout_plugin = (function () {
                     + commandAttrs(entry, false)
                     + aria
                     + ">"
-                    + icon(entry && entry.icon ? entry.icon : "chevron_right", "brave-view__mini-action-icon")
+                    + (entry && entry.icon ? icon(entry.icon, "brave-view__mini-action-icon") : "")
                     + (entry && entry.icon_only ? "" : "<span>" + escapeHtml(entry && entry.label ? entry.label : "") + "</span>")
                     + "</button>"
                 );
@@ -3444,9 +3457,13 @@ let defaultout_plugin = (function () {
     };
 
     var syncRoomActivityLog = function (body) {
+        var shouldStickToBottom = true;
         if (body) {
+            shouldStickToBottom = (body.scrollHeight - body.scrollTop - body.clientHeight) <= 16;
             body.innerHTML = currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("");
-            body.scrollTop = body.scrollHeight;
+            if (shouldStickToBottom) {
+                body.scrollTop = body.scrollHeight;
+            }
         }
         syncRailActivityLog();
         return $(body);
@@ -3461,8 +3478,11 @@ let defaultout_plugin = (function () {
         if (!body) {
             return null;
         }
+        var shouldStickToBottom = (body.scrollHeight - body.scrollTop - body.clientHeight) <= 16;
         body.innerHTML = currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("");
-        body.scrollTop = body.scrollHeight;
+        if (shouldStickToBottom) {
+            body.scrollTop = body.scrollHeight;
+        }
         return $(body);
     };
 
@@ -3637,7 +3657,7 @@ let defaultout_plugin = (function () {
             card.removeAttribute("title");
             card.removeAttribute("role");
             card.removeAttribute("tabindex");
-            card.classList.remove("scene-card--clickable", "brave-click");
+            card.classList.remove("scene-card--clickable", "scene-card--scrollable", "brave-click");
         }
         currentSceneData = null;
         syncSceneRailLayout();
@@ -3707,7 +3727,7 @@ let defaultout_plugin = (function () {
         panel.removeAttribute("title");
         panel.removeAttribute("role");
         panel.removeAttribute("tabindex");
-        panel.classList.remove("scene-card--clickable", "brave-click");
+        panel.classList.remove("scene-card--clickable", "scene-card--scrollable", "brave-click");
     };
 
     var renderStructuredPanel = function (panel, panelData) {
@@ -3828,6 +3848,7 @@ let defaultout_plugin = (function () {
                     + "<span>" + escapeHtml(panelData.title || "") + "</span>"
                     + "</div>"
                 : "")
+            + (panelData.subtitle ? "<div class='scene-card__subtitle'>" + escapeHtml(panelData.subtitle) + "</div>" : "")
             + (chips.length ? "<div class='scene-card__meta'>" + chips.map(renderChip).join("") + "</div>" : "")
             + renderedSections.join("");
     };
@@ -4007,11 +4028,10 @@ let defaultout_plugin = (function () {
             eyebrow_icon: "flag",
             title: tracked.title || "",
             title_icon: "assignment",
-            chips: tracked.giver ? [{ label: tracked.giver, icon: "person_pin", tone: "muted" }] : [],
+            subtitle: tracked.giver || "",
             hide_empty_state: true,
             sections: objectiveItems.length ? [{
                 label: "Objectives",
-                icon: "checklist",
                 items: objectiveItems,
             }] : [],
         });
@@ -4022,7 +4042,7 @@ let defaultout_plugin = (function () {
             card.setAttribute("title", "quests");
             card.setAttribute("role", "button");
             card.setAttribute("tabindex", "0");
-            card.classList.add("scene-card--clickable", "brave-click");
+            card.classList.add("scene-card--clickable", "scene-card--scrollable", "brave-click");
         }
         syncMobileShell();
     };
@@ -4529,7 +4549,7 @@ let defaultout_plugin = (function () {
                     var backgroundIcon = entry && entry.background_icon ? entry.background_icon : "";
                     if (entry && entry.badge) {
                         lead = "<span class='brave-view__entry-badge'>" + escapeHtml(entry.badge) + "</span>";
-                    } else if (!backgroundIcon) {
+                    } else if (!backgroundIcon && !(entry && entry.hide_icon)) {
                         lead = "<span class='brave-view__entry-icon-wrap'>"
                             + icon(entry && entry.icon ? entry.icon : "inventory_2", "brave-view__entry-icon")
                             + "</span>";
@@ -5539,14 +5559,7 @@ let defaultout_plugin = (function () {
                 event.stopPropagation();
                 return;
             }
-            if (event.key === "Escape" && currentPickerData) {
-                clearPickerSheet();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            if (event.key === "Escape" && document.body.classList.contains("brave-notice-active")) {
-                clearBrowserNotice();
+            if (event.key === "Escape" && handleEscapeKey()) {
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -5930,6 +5943,7 @@ let defaultout_plugin = (function () {
         onUnknownCmd: onUnknownCmd,
         onLoggedIn: onLoggedIn,
         onConnectionClose: onConnectionClose,
+        handleEscapeKey: handleEscapeKey,
     };
 })();
 plugin_handler.add("defaultout", defaultout_plugin);

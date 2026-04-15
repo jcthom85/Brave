@@ -44,10 +44,56 @@ def _get_journal_mode(character):
 
 def _set_journal_mode(character, mode):
     character.db.brave_journal_tab = "completed" if mode == "completed" else "active"
+    if mode != "completed":
+        character.db.brave_journal_expanded_completed = None
+
+
+def _get_expanded_completed_quest(character):
+    value = getattr(getattr(character, "db", None), "brave_journal_expanded_completed", None)
+    return value or None
+
+
+def _set_expanded_completed_quest(character, quest_key=None):
+    character.db.brave_journal_expanded_completed = quest_key or None
 
 
 def _normalize_query(value):
     return str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+
+
+def _resolve_completed_quest_query(character, query):
+    completed_keys = [
+        quest_key
+        for quest_key in QUEST_CONTENT.starting_quests
+        if (character.db.brave_quests or {}).get(quest_key, {}).get("status") == "completed"
+    ]
+    token = "".join(char for char in (query or "").lower() if char.isalnum())
+    if not token:
+        return None
+
+    if token.isdigit():
+        index = int(token) - 1
+        if 0 <= index < len(completed_keys):
+            return completed_keys[index]
+
+    title_map = {
+        quest_key: "".join(char for char in QUEST_CONTENT.quests[quest_key]["title"].lower() if char.isalnum())
+        for quest_key in completed_keys
+    }
+
+    for quest_key in completed_keys:
+        if token == quest_key.lower() or token == title_map[quest_key]:
+            return quest_key
+
+    startswith_matches = [quest_key for quest_key in completed_keys if title_map[quest_key].startswith(token)]
+    if len(startswith_matches) == 1:
+        return startswith_matches[0]
+
+    contains_matches = [quest_key for quest_key in completed_keys if token in title_map[quest_key]]
+    if len(contains_matches) == 1:
+        return contains_matches[0]
+
+    return None
 
 
 class CmdBuild(BraveCharacterCommand):
@@ -566,6 +612,8 @@ class CmdQuests(BraveCharacterCommand):
       quests
       quests active
       quests completed
+      quests expand <quest>
+      quests collapse [quest]
       quests track <quest>
       quests untrack
 
@@ -650,6 +698,31 @@ class CmdQuests(BraveCharacterCommand):
         _set_journal_mode(character, mode)
         self._render_journal(character)
 
+    def _expand_completed(self, character, query):
+        if not query:
+            self.msg("Usage: quests expand <completed quest name>")
+            return
+        quest_key = _resolve_completed_quest_query(character, query)
+        if not quest_key:
+            self.msg("Could not find a completed quest matching that.")
+            return
+        _set_journal_mode(character, "completed")
+        _set_expanded_completed_quest(character, quest_key)
+        self._render_journal(character)
+
+    def _collapse_completed(self, character, query):
+        if query:
+            quest_key = _resolve_completed_quest_query(character, query)
+            if not quest_key:
+                self.msg("Could not find a completed quest matching that.")
+                return
+            if _get_expanded_completed_quest(character) == quest_key:
+                _set_expanded_completed_quest(character, None)
+        else:
+            _set_expanded_completed_quest(character, None)
+        _set_journal_mode(character, "completed")
+        self._render_journal(character)
+
     def func(self):
         character = self.get_character()
         if not character:
@@ -664,13 +737,19 @@ class CmdQuests(BraveCharacterCommand):
             if token in {"completed", "archive", "done"}:
                 self._switch_mode(character, "completed")
                 return
+            if token in {"expand", "open"}:
+                self._expand_completed(character, remainder.strip())
+                return
+            if token in {"collapse", "close"}:
+                self._collapse_completed(character, remainder.strip())
+                return
             if token in {"track", "pin", "focus"}:
                 self._track(character, remainder.strip())
                 return
             if token in {"untrack", "clear", "unpin"}:
                 self._untrack(character)
                 return
-            self.msg("Usage: quests, quests active, quests completed, quests track <quest name>, quests untrack")
+            self.msg("Usage: quests, quests active, quests completed, quests expand <quest name>, quests collapse [quest name], quests track <quest name>, quests untrack")
             return
 
         self._render_journal(character)
