@@ -1860,8 +1860,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     min-width: 0;
     min-height: 0;
     height: 100%;
+    max-height: 100%;
     overflow: hidden;
     pointer-events: auto;
+    align-self: stretch;
 }
 
 .scene-rail__panel--vicinity .scene-card__section {
@@ -7612,7 +7614,7 @@ body[data-brave-scene="explore"] .minimap-overlay {
 
 @media screen and (min-width: 1100px) {
     body[data-brave-scene="explore"] .scene-rail {
-        bottom: 168px;
+        bottom: 96px;
         height: auto;
         max-height: none;
     }
