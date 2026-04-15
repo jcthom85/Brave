@@ -3,7 +3,7 @@
 import time
 
 from world.arcade import format_arcade_score, get_personal_best, get_reward_definition, has_arcade_reward
-from world.activities import get_targetable_consumable_characters
+from world.activities import get_targetable_consumable_characters, room_supports_activity
 from world.combat_atb import render_atb_state
 from world.combat_actions import build_combat_action_payload
 from world.content import get_content_registry
@@ -11,7 +11,7 @@ from world.data.arcade import ARCADE_GAMES
 from world.commerce import format_shop_bonus, get_reserved_entries, get_sellable_entries, get_shop_bonus
 from world.data.themes import THEMES, THEME_BY_KEY, normalize_theme_key
 from world.data.world_tones import get_world_tone_key
-from world.chapel import get_active_blessing
+from world.chapel import get_active_blessing, is_chapel_room
 from world.forging import get_forge_entries
 from world.navigation import (
     build_map_snapshot,
@@ -972,6 +972,22 @@ def _format_room_threat_items(visible_threats):
 
     items = []
     for threat in visible_threats or []:
+        inspect_lines = []
+        badge = str(threat.get("badge") or "").strip()
+        detail = str(threat.get("detail") or "").strip()
+        threat_label = str(threat.get("threat_label") or "").strip()
+        temperament = str(threat.get("temperament_label") or "").strip()
+        tooltip = str(threat.get("tooltip") or "").strip()
+        if badge:
+            inspect_lines.append(f"Hostiles: {badge}")
+        if detail:
+            inspect_lines.append(f"Composition: {detail}")
+        if threat_label:
+            inspect_lines.append(f"Threat: {threat_label}")
+        if temperament:
+            inspect_lines.append(f"Temperament: {temperament}")
+        if tooltip:
+            inspect_lines.append(tooltip)
         items.append(
             _item(
                 str(threat["key"]),
@@ -981,6 +997,22 @@ def _format_room_threat_items(visible_threats):
                 detail=threat.get("detail"),
                 tooltip=threat.get("tooltip"),
                 marker_icon=threat.get("marker_icon"),
+                actions=[
+                    _action(
+                        "Inspect",
+                        None,
+                        "search",
+                        tone="muted",
+                        picker=_picker(
+                            str(threat["key"]),
+                            subtitle="Threat details",
+                            body=inspect_lines or ["No further details are visible from here."],
+                            options=[
+                                _picker_option("Fight", command=threat.get("command") or "fight", icon="swords", tone="danger")
+                            ],
+                        ),
+                    )
+                ],
             )
         )
     return items
@@ -1056,6 +1088,47 @@ def _format_room_entity_items(viewer, visible_entities, visible_chars):
                 label,
                 icon=ROOM_ENTITY_ID_ICONS.get(entity_id, ROOM_ENTITY_KIND_ICONS.get(kind, "category")),
                 command=command,
+            )
+        )
+
+    return items
+
+
+def _character_in_combat(character):
+    encounter_getter = getattr(character, "get_active_encounter", None)
+    if not callable(encounter_getter):
+        return False
+    encounter = encounter_getter()
+    return bool(encounter and encounter.is_participant(character))
+
+
+def _format_room_context_action_items(room, viewer):
+    """Return room-level buttons for core actions that do not belong to one object."""
+
+    if not room or not viewer or _character_in_combat(viewer):
+        return []
+
+    items = []
+    if getattr(room.db, "brave_safe", False):
+        items.append(_item("Rest", icon="hotel", command="rest"))
+
+    if room_supports_activity(room, "fishing"):
+        fishing_state = getattr(getattr(viewer, "ndb", None), "brave_fishing", None) or {}
+        if fishing_state.get("phase") == "bite":
+            items.append(_item("Reel", icon="phishing", command="reel", detail="Something is biting."))
+        elif fishing_state.get("phase") == "waiting":
+            items.append(_item("Line in the water", icon="waves", detail="Wait for a bite."))
+        else:
+            items.append(_item("Fish", icon="phishing", command="fish"))
+
+    if is_chapel_room(room):
+        blessing = get_active_blessing(viewer)
+        items.append(
+            _item(
+                "Pray" if not blessing else "Review Blessing",
+                icon="notifications_active",
+                command="pray",
+                detail=None if not blessing else "Dawn Bell blessing active.",
             )
         )
 
@@ -1167,6 +1240,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
 
     threat_items = _format_room_threat_items(visible_threats)
     visible_items = _format_room_entity_items(looker, visible_entities, visible_chars)
+    context_action_items = _format_room_context_action_items(room, looker)
     sections = []
     tutorial_guidance = _build_tutorial_guidance(looker)
     welcome_pages = []
@@ -1190,6 +1264,17 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
             hide_label=True,
         )
     )
+
+    if context_action_items:
+        sections.append(
+            _section(
+                "Actions",
+                "touch_app",
+                "list",
+                items=context_action_items,
+                variant="actions",
+            )
+        )
 
     vicinity_items = []
     has_threats = bool(threat_items)

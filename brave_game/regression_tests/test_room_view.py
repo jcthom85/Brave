@@ -44,6 +44,8 @@ class DummyRoom:
             brave_world="Brave",
             brave_zone="Brambleford",
             brave_safe=True,
+            brave_room_id="lantern_rest",
+            brave_activities=[],
             desc="Warm light, steady conversation, and a clean path to the street.",
         )
         self.ndb = SimpleNamespace(brave_encounter=None)
@@ -72,6 +74,10 @@ class DummyCharacter:
             brave_tutorial={},
             brave_welcome_shown=False,
         )
+        self.ndb = SimpleNamespace()
+
+    def get_active_encounter(self):
+        return None
 
 
 class DummyVisibleCharacter:
@@ -125,6 +131,35 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual([], view.get("guidance", []))
         self.assertEqual([], view.get("welcome_pages", []))
 
+    def test_room_view_adds_safe_room_rest_action(self):
+        view = build_room_view(DummyRoom(), DummyCharacter())
+
+        actions = _section(view, "Actions")
+        self.assertIn("rest", [item.get("command") for item in actions.get("items", [])])
+
+    def test_room_view_adds_fishing_actions_by_state(self):
+        room = DummyRoom()
+        room.db.brave_activities = ["fishing"]
+        character = DummyCharacter()
+
+        view = build_room_view(room, character)
+        actions = _section(view, "Actions")
+        self.assertIn("fish", [item.get("command") for item in actions.get("items", [])])
+
+        character.ndb.brave_fishing = {"phase": "bite"}
+        view = build_room_view(room, character)
+        actions = _section(view, "Actions")
+        self.assertIn("reel", [item.get("command") for item in actions.get("items", [])])
+
+    def test_room_view_adds_chapel_pray_action(self):
+        room = DummyRoom()
+        room.db.brave_room_id = "brambleford_chapel_dawn_bell"
+
+        view = build_room_view(room, DummyCharacter())
+
+        actions = _section(view, "Actions")
+        self.assertIn("pray", [item.get("command") for item in actions.get("items", [])])
+
     def test_room_view_includes_tutorial_guidance_and_welcome_pages(self):
         character = DummyCharacter()
         tutorial_state = {"status": "active", "step": "first_steps", "flags": {}}
@@ -163,6 +198,12 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual("3", threat_item.get("badge"))
         self.assertEqual("skull", threat_item.get("marker_icon"))
         self.assertEqual("fight", threat_item.get("command"))
+        self.assertEqual("Inspect", threat_item.get("actions", [])[0].get("label"))
+        inspect_picker = threat_item.get("actions", [])[0].get("picker", {})
+        self.assertEqual("Red Wyrm Retinue", inspect_picker.get("title"))
+        self.assertIn("Hostiles: 3", inspect_picker.get("body", []))
+        self.assertIn("Composition: dragon, soldier, wolf", inspect_picker.get("body", []))
+        self.assertEqual("fight", inspect_picker.get("options", [])[0].get("command"))
 
     def test_room_view_marks_engaged_threats_and_characters(self):
         room = DummyRoom()

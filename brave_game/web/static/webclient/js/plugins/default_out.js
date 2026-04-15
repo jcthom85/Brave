@@ -3894,20 +3894,25 @@ let defaultout_plugin = (function () {
                 + (entry && entry.meta ? "<span class='scene-card__item-meta'>" + escapeHtml(entry.meta) + "</span>" : "")
                 + meterMarkup
                 + "</span>";
+            var inlineActions = renderInlineActions(entry && entry.actions);
             if (hasBrowserInteraction(entry)) {
                 return (
                     "<li class='scene-card__item scene-card__item--interactive'>"
+                    + "<div class='scene-card__item-row'>"
                     + "<button type='button' class='scene-card__item-button brave-click'"
-                    + commandAttrs(entry, false)
-                    + ">"
-                    + itemBody
-                    + "</button>"
+                        + commandAttrs(entry, false)
+                        + ">"
+                        + itemBody
+                        + "</button>"
+                        + inlineActions
+                    + "</div>"
                     + "</li>"
                 );
             }
             return (
                 "<li class='scene-card__item'>"
                 + itemBody
+                + inlineActions
                 + "</li>"
             );
         };
@@ -4301,6 +4306,7 @@ let defaultout_plugin = (function () {
                     }
                     var hasInlineActions = !!(entry && Array.isArray(entry.actions) && entry.actions.length);
                     if (interactive && hasInlineActions) {
+                        rowClass += " brave-view__list-item--with-actions";
                         return (
                             "<li class='brave-view__list-row'>"
                             + "<div class='" + rowClass + "'>"

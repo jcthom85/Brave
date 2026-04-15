@@ -2251,6 +2251,14 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     padding: 0;
 }
 
+.scene-card__item-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: stretch;
+    min-width: 0;
+}
+
 .scene-card__item-button {
     appearance: none;
     -webkit-appearance: none;
@@ -2275,6 +2283,19 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     text-align: left;
     cursor: pointer;
     pointer-events: auto;
+}
+
+.scene-card__item-row .brave-view__inline-actions {
+    align-self: stretch;
+    flex-wrap: nowrap;
+    gap: 0;
+}
+
+.scene-card__item-row .brave-view__mini-action {
+    min-height: 100%;
+    padding: 7px 9px;
+    border-radius: var(--brave-radius-card-tight);
+    white-space: nowrap;
 }
 
 .scene-card__item-button:hover,
@@ -4318,6 +4339,29 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--room .brave-view__section--list .brave-view__list-main {
     align-items: center;
+}
+
+.brave-view--room .brave-view__section--vicinity .brave-view__list-item--with-actions {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.brave-view--room .brave-view__section--vicinity .brave-view__list-primary {
+    min-width: 0;
+}
+
+.brave-view--room .brave-view__section--vicinity .brave-view__inline-actions {
+    align-self: stretch;
+    flex-wrap: nowrap;
+    gap: 0;
+}
+
+.brave-view--room .brave-view__section--vicinity .brave-view__mini-action {
+    min-height: 100%;
+    padding: 7px 9px;
+    border-radius: var(--brave-radius-card-tight);
+    white-space: nowrap;
 }
 
 .brave-view--room .brave-view__section--list .brave-view__list-copy {
