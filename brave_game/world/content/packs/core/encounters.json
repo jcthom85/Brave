@@ -2248,6 +2248,178 @@
       }
     ]
   },
+  "roaming_parties": [
+    {
+      "key": "blackreed_patrol",
+      "region": "ruined_watchtower",
+      "start_room": "ruined_watchtower_approach",
+      "interval": 18,
+      "respawn_delay": 180,
+      "avoid_safe": true,
+      "encounter": {
+        "key": "blackreed_patrol",
+        "title": "Blackreed Patrol",
+        "intro": "A Blackreed patrol works the broken road in a loose line, searching for stragglers and bad luck.",
+        "enemies": [
+          "bandit_raider",
+          "bandit_scout"
+        ]
+      }
+    },
+    {
+      "key": "warren_mob",
+      "region": "goblin_warrens",
+      "start_room": "goblin_warrens_sinkmouth_cut",
+      "interval": 16,
+      "respawn_delay": 150,
+      "avoid_safe": true,
+      "encounter": {
+        "key": "warren_mob",
+        "title": "Warren Mob",
+        "intro": "A goblin mob rattles through the tunnels in a hard, hungry knot of teeth and stolen metal.",
+        "enemies": [
+          "goblin_sneak",
+          "goblin_cutter"
+        ]
+      }
+    },
+    {
+      "key": "fen_hunt",
+      "region": "blackfen_approach",
+      "start_room": "blackfen_approach_fenreach_track",
+      "interval": 20,
+      "respawn_delay": 180,
+      "avoid_safe": true,
+      "encounter": {
+        "key": "fen_hunt",
+        "title": "Fen Hunt",
+        "intro": "A marsh hunt slips through the reeds with the patience of something that already knows the mud by name.",
+        "enemies": [
+          "fen_wisp",
+          "bog_creeper"
+        ]
+      }
+    },
+    {
+      "key": "weir_patrol",
+      "region": "drowned_weir",
+      "start_room": "drowned_weir_drowned_causeway",
+      "interval": 18,
+      "respawn_delay": 180,
+      "avoid_safe": true,
+      "encounter": {
+        "key": "weir_patrol",
+        "title": "Weir Patrol",
+        "intro": "Drowned warders drift between the crossings, checking every shadow for something that should not be there.",
+        "enemies": [
+          "drowned_warder",
+          "hollow_wisp"
+        ]
+      }
+    },
+    {
+      "key": "goblin_road_raiders",
+      "region": "goblin_road",
+      "start_room": "goblin_road_old_fence_line",
+      "interval": 18,
+      "respawn_delay": 150,
+      "avoid_safe": true,
+      "encounter": {
+        "key": "goblin_road_raiders",
+        "title": "Road Raiders",
+        "intro": "A pair of goblin raiders keeps to the fence line and ditch cuts, looking for easy travelers and loose planks.",
+        "enemies": [
+          "goblin_sneak",
+          "goblin_cutter"
+        ]
+      }
+    },
+    {
+      "key": "goblin_road_wolves",
+      "region": "goblin_road",
+      "start_room": "goblin_road_wolf_turn",
+      "interval": 16,
+      "respawn_delay": 150,
+      "avoid_safe": true,
+      "encounter": {
+        "key": "goblin_road_wolves",
+        "title": "Road Wolf Pack",
+        "intro": "Lean road wolves work the muddy bends in a restless pack, testing anything that looks slower than hunger.",
+        "enemies": [
+          "road_wolf",
+          "road_wolf"
+        ]
+      }
+    },
+    {
+      "key": "barrow_watch",
+      "region": "old_barrow_field",
+      "start_room": "old_barrow_field_marker_row",
+      "interval": 20,
+      "respawn_delay": 180,
+      "avoid_safe": true,
+      "encounter": {
+        "key": "barrow_watch",
+        "title": "Barrow Watch",
+        "intro": "Old field guardians drift between the markers and causeway, answering every step with bone and pale fire.",
+        "enemies": [
+          "skeletal_soldier",
+          "barrow_wisp"
+        ]
+      }
+    },
+    {
+      "key": "barrow_mourners",
+      "region": "old_barrow_field",
+      "start_room": "old_barrow_field_barrow_circle",
+      "interval": 18,
+      "respawn_delay": 180,
+      "avoid_safe": true,
+      "encounter": {
+        "key": "barrow_mourners",
+        "title": "Barrow Mourners",
+        "intro": "Shades and grave crows wheel through the field in a knot of old grief that refuses to stay buried.",
+        "enemies": [
+          "restless_shade",
+          "grave_crow"
+        ]
+      }
+    },
+    {
+      "key": "whispering_thorns",
+      "region": "whispering_woods",
+      "start_room": "whispering_woods_briar_glade",
+      "interval": 18,
+      "respawn_delay": 180,
+      "avoid_safe": true,
+      "encounter": {
+        "key": "whispering_thorns",
+        "title": "Thornbound Pair",
+        "intro": "A briar imp capers through the brush while a mossling drags the roots along behind it like a leash.",
+        "enemies": [
+          "briar_imp",
+          "mossling"
+        ]
+      }
+    },
+    {
+      "key": "whispering_hunters",
+      "region": "whispering_woods",
+      "start_room": "whispering_woods_old_stone_path",
+      "interval": 20,
+      "respawn_delay": 180,
+      "avoid_safe": true,
+      "encounter": {
+        "key": "whispering_hunters",
+        "title": "Whispering Hunters",
+        "intro": "A forest wolf and a patient spider move the old stone path like they have hunted it together for years.",
+        "enemies": [
+          "forest_wolf",
+          "cave_spider"
+        ]
+      }
+    }
+  ],
   "temperament_labels": {
     "aggressive": "Aggressive",
     "passive": "Passive",

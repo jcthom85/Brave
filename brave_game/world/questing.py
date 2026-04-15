@@ -57,6 +57,21 @@ def _record_recent_updates(character, messages):
     character.ndb.brave_recent_quest_updates = recent[-12:]
 
 
+def _refresh_tracked_quest_scene(character):
+    """Refresh the exploration tracked-quest card for active webclient sessions."""
+
+    if not character:
+        return
+
+    try:
+        from world.browser_panels import send_webclient_event
+    except Exception:
+        return
+
+    tracked = get_tracked_quest_payload(character)
+    send_webclient_event(character, brave_scene={"tracked_quest": tracked} if tracked else {})
+
+
 def pop_recent_quest_updates(character):
     """Return and clear recent quest/progression messages."""
 
@@ -315,6 +330,7 @@ def clear_tracked_quest(character):
 
     character.db.brave_tracked_quest = None
     character.db.brave_track_suppressed = True
+    _refresh_tracked_quest_scene(character)
 
 
 def set_tracked_quest(character, quest_key):
@@ -325,6 +341,7 @@ def set_tracked_quest(character, quest_key):
 
     character.db.brave_tracked_quest = quest_key
     character.db.brave_track_suppressed = False
+    _refresh_tracked_quest_scene(character)
     return True
 
 
@@ -372,13 +389,14 @@ def get_tracked_quest_payload(character):
     state = (character.db.brave_quests or {}).get(quest_key, {})
     objectives = []
     for objective in state.get("objectives", []):
-        if objective.get("completed"):
-            continue
         text = objective.get("description", "Objective")
         required = objective.get("required", 1)
         if required > 1:
             text += f" ({objective.get('progress', 0)}/{required})"
-        objectives.append(text)
+        objectives.append({
+            "text": text,
+            "completed": bool(objective.get("completed")),
+        })
 
     if not objectives:
         return None
@@ -454,6 +472,7 @@ def advance_room_visit(character, room):
 
     if changed:
         character.db.brave_quests = quest_log
+        _refresh_tracked_quest_scene(character)
 
     if messages:
         _record_recent_updates(character, messages)
@@ -506,6 +525,7 @@ def advance_enemy_defeat(character, enemy_tags):
 
     if changed:
         character.db.brave_quests = quest_log
+        _refresh_tracked_quest_scene(character)
 
     if messages:
         _record_recent_updates(character, messages)
@@ -522,6 +542,7 @@ def advance_item_collection(character):
 
     if changed:
         character.db.brave_quests = quest_log
+        _refresh_tracked_quest_scene(character)
 
     if messages:
         _record_recent_updates(character, messages)

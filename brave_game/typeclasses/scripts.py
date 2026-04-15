@@ -34,6 +34,13 @@ from world.combat_atb import (
 )
 from world.combat_execution import execute_combat_ability
 from world.content import get_content_registry
+from world.roaming import (
+    advance_roaming_parties,
+    build_roaming_room_preview,
+    mark_roaming_parties_engaged,
+    release_roaming_parties,
+    room_uses_roaming_threats,
+)
 
 CONTENT = get_content_registry()
 CHARACTER_CONTENT = CONTENT.characters
@@ -346,11 +353,27 @@ class BraveEncounter(Script):
         }
 
     @classmethod
+    def _room_has_static_boss_encounter(cls, room_id):
+        """Return whether this room's authored static encounter contains a boss."""
+
+        if not room_id:
+            return False
+
+        for encounter_data in ROOM_ENCOUNTERS.get(room_id, []):
+            for template_key in encounter_data.get("enemies", []):
+                template = ENEMY_TEMPLATES.get(template_key) or {}
+                if "boss" in set(template.get("tags", [])):
+                    return True
+        return False
+
+    @classmethod
     def get_room_threat_preview(cls, room):
         """Return the current visible room-threat preview, creating one if needed."""
 
         if not room or getattr(room.db, "brave_safe", False):
             return None
+
+        advance_roaming_parties()
 
         encounter = cls.get_for_room(room)
         if encounter:
@@ -375,12 +398,18 @@ class BraveEncounter(Script):
                 ],
             }
 
+        roaming_preview = build_roaming_room_preview(room)
+        if roaming_preview:
+            return roaming_preview
+        room_id = getattr(room.db, "brave_room_id", None)
+        if room_uses_roaming_threats(room) and not cls._room_has_static_boss_encounter(room_id):
+            return None
+
         ready_at = getattr(room.ndb, "brave_room_threat_ready_at", 0) or 0
         if ready_at and ready_at > time.time():
             return None
 
         preview = getattr(room.ndb, "brave_room_threat_preview", None)
-        room_id = getattr(room.db, "brave_room_id", None)
         if preview and preview.get("room_id") == room_id:
             return preview
 
@@ -646,6 +675,10 @@ class BraveEncounter(Script):
             persistent=False,
         )
         encounter.configure(preview["room_id"], preview["encounter_data"], expected_party_size=expected_party_size)
+        roaming_party_keys = list(preview.get("roaming_party_keys") or [])
+        if roaming_party_keys:
+            encounter.db.roaming_party_keys = roaming_party_keys
+            mark_roaming_parties_engaged(roaming_party_keys, room_id=preview["room_id"])
         room.ndb.brave_room_threat_preview = None
         room.ndb.brave_encounter = encounter
         encounter.start()
@@ -703,7 +736,10 @@ class BraveEncounter(Script):
         self._clear_browser_combat_views(participants)
         if self.obj:
             self.obj.ndb.brave_encounter = None
-            if not self.get_active_enemies():
+            roaming_party_keys = list(self.db.roaming_party_keys or [])
+            if roaming_party_keys:
+                release_roaming_parties(roaming_party_keys, defeated=not self.get_active_enemies())
+            elif not self.get_active_enemies():
                 self._clear_room_threat_preview(self.obj, cooldown=ROOM_THREAT_RESPAWN_DELAY)
             else:
                 self._clear_room_threat_preview(self.obj, cooldown=0)

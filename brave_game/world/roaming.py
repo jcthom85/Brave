@@ -326,14 +326,7 @@ class BraveRoamingPartyManager(DefaultScript):
             return True
         from typeclasses.scripts import BraveEncounter
 
-        if BraveEncounter.get_for_room(room):
-            return True
-        for party in list(getattr(room.ndb, "brave_roaming_parties", []) or []):
-            if exclude_key and party.get("key") == exclude_key:
-                continue
-            if party.get("engaged"):
-                return True
-        return False
+        return bool(BraveEncounter.get_for_room(room))
 
     def _select_destination(self, party, parties):
         room = _resolve_room_ref(party.get("room_id"))

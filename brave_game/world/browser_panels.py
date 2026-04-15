@@ -739,7 +739,7 @@ def build_quests_panel(character):
             if required > 1:
                 suffix = f" ({objective.get('progress', 0)}/{required})"
             tracked_lines.append(f"Next: {objective['description']}{suffix}")
-        sections.append(_section("Tracked", "flag", [_item(" · ".join(tracked_lines), icon="flag")]))
+        sections.append(_section("Tracked", "flag", [_item(" · ".join(tracked_lines), icon="check_box_outline_blank")]))
 
     if journal_mode == "active" and tutorial_state.get("status") == "active":
         step_key = tutorial_state.get("step") or "first_steps"

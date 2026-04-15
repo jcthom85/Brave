@@ -227,6 +227,7 @@ class EncounterContentRegistry:
     source_path: str
     enemy_templates: dict
     room_encounters: dict
+    roaming_parties: dict
     enemy_temperament_overrides: dict
     temperament_labels: dict
 
@@ -235,6 +236,12 @@ class EncounterContentRegistry:
 
     def get_room_encounters(self, room_id):
         return self.room_encounters.get(room_id, [])
+
+    def get_roaming_party(self, party_key):
+        return self.roaming_parties.get(party_key)
+
+    def get_roaming_parties(self):
+        return list(self.roaming_parties.values())
 
     def get_enemy_temperament(self, template_key, template=None):
         template = template or self.enemy_templates[template_key]
@@ -391,10 +398,16 @@ def _build_world_registry():
 
 def _build_encounter_registry():
     payload = _load_json_pack(ENCOUNTERS_PACK_PATH)
+    roaming_parties = {}
+    for party in payload.get("roaming_parties", []):
+        party_key = party.get("key")
+        if party_key:
+            roaming_parties[party_key] = dict(party)
     return EncounterContentRegistry(
         source_path=str(ENCOUNTERS_PACK_PATH),
         enemy_templates=dict(payload.get("enemy_templates", {})),
         room_encounters=dict(payload.get("room_encounters", {})),
+        roaming_parties=roaming_parties,
         enemy_temperament_overrides=dict(payload.get("enemy_temperament_overrides", {})),
         temperament_labels=dict(payload.get("temperament_labels", {})),
     )

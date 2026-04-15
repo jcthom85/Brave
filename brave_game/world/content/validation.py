@@ -136,6 +136,34 @@ def _validate_encounter_content(registry, errors):
         if temperament not in encounters.temperament_labels:
             errors.append(f"Temperament override for {template_key} uses unknown temperament: {temperament}")
 
+    for party_key, party in encounters.roaming_parties.items():
+        region = party.get("region")
+        start_room = party.get("start_room")
+        encounter = party.get("encounter") or {}
+        enemies = list(encounter.get("enemies") or [])
+
+        if not region:
+            errors.append(f"Roaming party {party_key} is missing a region")
+        if not start_room:
+            errors.append(f"Roaming party {party_key} is missing a start room")
+        if start_room and start_room not in room_ids:
+            errors.append(f"Roaming party {party_key} references unknown start room: {start_room}")
+        if start_room and start_room in room_ids:
+            room = world.get_room(start_room)
+            if room and room.get("map_region") != region:
+                errors.append(f"Roaming party {party_key} start room is outside its region: {start_room} -> {region}")
+        if int(party.get("interval", 0) or 0) <= 0:
+            errors.append(f"Roaming party {party_key} must have a positive interval")
+        if int(party.get("respawn_delay", 0) or 0) < 0:
+            errors.append(f"Roaming party {party_key} uses a negative respawn delay")
+        if not encounter.get("title"):
+            errors.append(f"Roaming party {party_key} is missing an encounter title")
+        if not enemies:
+            errors.append(f"Roaming party {party_key} has no enemies")
+        for template_key in enemies:
+            if template_key not in encounters.enemy_templates:
+                errors.append(f"Roaming party {party_key} references unknown enemy: {template_key}")
+
 
 def _validate_dialogue_content(registry, errors):
     world = registry.world

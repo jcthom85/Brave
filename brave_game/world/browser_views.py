@@ -181,6 +181,13 @@ def _item(
     return item
 
 
+def _line(text, *, icon=None):
+    line = {"text": text}
+    if icon:
+        line["icon"] = icon
+    return line
+
+
 def _pair(label, value, icon=None):
     return {"label": label, "value": str(value), "icon": icon}
 
@@ -1205,7 +1212,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
             room.db.brave_zone or world_name,
             room.key,
             eyebrow_icon=None,
-            title_icon="home_pin",
+            title_icon=None,
             subtitle=description,
             sections=sections,
             reactive=_reactive_view(
@@ -1704,8 +1711,9 @@ def _get_journal_mode(character):
 def _build_journal_quest_entry(character, quest_key, *, tracked_key=None, nearby_npcs=None, detailed=False):
     state = (character.db.brave_quests or {}).get(quest_key, {})
     definition = QUESTS[quest_key]
+    all_objectives = list(state.get("objectives", []))
     remaining_objectives = [
-        objective for objective in state.get("objectives", []) if not objective.get("completed")
+        objective for objective in all_objectives if not objective.get("completed")
     ]
     next_objective = remaining_objectives[0] if remaining_objectives else None
     lines = []
@@ -1716,9 +1724,15 @@ def _build_journal_quest_entry(character, quest_key, *, tracked_key=None, nearby
 
     if detailed:
         lines.append(definition["summary"])
-        lines.extend(f"[ ] {_format_objective_progress(objective)}" for objective in remaining_objectives[:4])
-        completed_count = len(state.get("objectives", [])) - len(remaining_objectives)
-        total_count = max(1, len(state.get("objectives", [])))
+        lines.extend(
+            _line(
+                _format_objective_progress(objective),
+                icon="check_box" if objective.get("completed") else "check_box_outline_blank",
+            )
+            for objective in all_objectives[:4]
+        )
+        completed_count = len(all_objectives) - len(remaining_objectives)
+        total_count = max(1, len(all_objectives))
         return _entry(
             definition["title"],
             meta=f"{get_quest_region(quest_key)} · {definition['giver']}",

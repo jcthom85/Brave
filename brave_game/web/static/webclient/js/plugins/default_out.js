@@ -2228,6 +2228,18 @@ let defaultout_plugin = (function () {
     };
 
     var icon = function (name, extraClass) {
+        if (name === "check_box" || name === "check_box_outline_blank") {
+            var checkboxClasses = "brave-icon brave-icon--checkbox";
+            if (name === "check_box") {
+                checkboxClasses += " brave-icon--checkbox-checked";
+            } else {
+                checkboxClasses += " brave-icon--checkbox-unchecked";
+            }
+            if (extraClass) {
+                checkboxClasses += " " + extraClass;
+            }
+            return "<span class='" + checkboxClasses + "' aria-hidden='true'></span>";
+        }
         var raName = ICON_MAP[name] || name.replace(/_/g, "-");
         var classes = "ra ra-" + raName;
         if (extraClass) {
@@ -3066,6 +3078,20 @@ let defaultout_plugin = (function () {
         return mapped;
     };
 
+    var applyCombatEventToTarget = function (event, targetNode) {
+        if (!event || !targetNode || event._appliedTarget) {
+            return;
+        }
+        spawnCombatFloater(targetNode, event.text, event.tone, event.element);
+        if (event.impact) {
+            animateCombatImpact(targetNode, event.impact, event.element);
+        }
+        if (event.defeat) {
+            animateCombatDefeat(targetNode);
+        }
+        event._appliedTarget = true;
+    };
+
     var applyCombatFloatersFromNode = function (node) {
         if (!node) {
             return;
@@ -3088,20 +3114,16 @@ let defaultout_plugin = (function () {
         events.forEach(function (event) {
             var targetNode = findCombatEntryByName(event.target);
             if (targetNode) {
-                spawnCombatFloater(targetNode, event.text, event.tone, event.element);
-                if (event.impact) {
-                    animateCombatImpact(targetNode, event.impact, event.element);
-                }
-                if (event.defeat) {
-                    animateCombatDefeat(targetNode);
-                }
+                applyCombatEventToTarget(event, targetNode);
             }
             if (event.lunge && event.source) {
                 var attackerNode = findCombatEntryByName(event.source);
                 if (attackerNode && targetNode) {
                     animateCombatLunge(attackerNode, targetNode);
+                } else {
+                    unresolved.push(event);
                 }
-            } else {
+            } else if (!targetNode) {
                 unresolved.push(event);
             }
         });
@@ -3117,15 +3139,11 @@ let defaultout_plugin = (function () {
             var targetNode = findCombatEntryByName(event.target);
             var attackerNode = event.source ? findCombatEntryByName(event.source) : null;
             if (targetNode) {
-                spawnCombatFloater(targetNode, event.text, event.tone, event.element);
-                if (event.impact) {
-                    animateCombatImpact(targetNode, event.impact, event.element);
-                }
-                if (event.defeat) {
-                    animateCombatDefeat(targetNode);
-                }
+                applyCombatEventToTarget(event, targetNode);
                 if (event.lunge && attackerNode) {
                     animateCombatLunge(attackerNode, targetNode);
+                } else if (event.lunge && event.source) {
+                    remaining.push(event);
                 }
             } else {
                 remaining.push(event);
@@ -3399,23 +3417,27 @@ let defaultout_plugin = (function () {
     };
 
     var renderRoomFeedEntryMarkup = function (entry) {
-        if (!entry || !entry.html) {
+        if (!entry || !entry.text) {
             return "";
         }
         var cls = entry.cls || "out";
-        return "<div class='" + cls + "'>" + entry.html + "</div>";
+        return "<div class='" + cls + "'>" + escapeHtml(entry.text) + "</div>";
     };
 
-    var addRoomFeedEntry = function (cls, html) {
-        if (typeof html !== "string" || !html.trim()) {
+    var addRoomFeedEntry = function (cls, rawContent) {
+        if (typeof rawContent !== "string" || !rawContent.trim()) {
+            return;
+        }
+        var text = rawContent.replace(/\s+/g, " ").trim();
+        if (!text) {
             return;
         }
         var normalizedCls = cls || "out";
         var lastEntry = currentRoomFeedEntries.length ? currentRoomFeedEntries[currentRoomFeedEntries.length - 1] : null;
-        if (lastEntry && lastEntry.cls === normalizedCls && lastEntry.html === html) {
+        if (lastEntry && lastEntry.cls === normalizedCls && lastEntry.text === text) {
             return;
         }
-        currentRoomFeedEntries.push({ cls: normalizedCls, html: html });
+        currentRoomFeedEntries.push({ cls: normalizedCls, text: text });
         if (currentRoomFeedEntries.length > 24) {
             currentRoomFeedEntries = currentRoomFeedEntries.slice(currentRoomFeedEntries.length - 24);
         }
@@ -3459,7 +3481,7 @@ let defaultout_plugin = (function () {
         strayEntries.each(function () {
             if (shouldLogRoomActivity(this.textContent || "", this.className || "out", null)) {
                 var beforeCount = currentRoomFeedEntries.length;
-                addRoomFeedEntry(this.className || "out", this.innerHTML || "");
+                addRoomFeedEntry(this.className || "out", this.textContent || "");
                 if (currentRoomFeedEntries.length > beforeCount) {
                     claimedCount += 1;
                 }
@@ -3970,7 +3992,13 @@ let defaultout_plugin = (function () {
         var tracked = sceneData.tracked_quest || {};
         var objectiveItems = Array.isArray(tracked.objectives)
             ? tracked.objectives.map(function (entry) {
-                return { text: entry, icon: "radio_button_unchecked" };
+                if (entry && typeof entry === "object") {
+                    return {
+                        text: entry.text || "",
+                        icon: entry.completed ? "check_box" : "check_box_outline_blank",
+                    };
+                }
+                return { text: entry, icon: "check_box_outline_blank" };
             })
             : [];
 
@@ -4561,6 +4589,14 @@ let defaultout_plugin = (function () {
                         + (lines.length
                             ? "<div class='brave-view__entry-body'>"
                                 + lines.map(function (line) {
+                                    if (line && typeof line === "object") {
+                                        return (
+                                            "<div class='brave-view__entry-line brave-view__entry-line--icon'>"
+                                            + (line.icon ? icon(line.icon, "brave-view__entry-line-icon") : "")
+                                            + "<span class='brave-view__entry-line-text'>" + escapeHtml(line.text || "") + "</span>"
+                                            + "</div>"
+                                        );
+                                    }
                                     return "<div class='brave-view__entry-line'>" + escapeHtml(line) + "</div>";
                                 }).join("")
                                 + "</div>"
