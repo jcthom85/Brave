@@ -1198,7 +1198,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         vicinity_items.append(item)
     vicinity_items.extend(visible_items or [])
     if not vicinity_items:
-        vicinity_items.append(_item("The vicinity is quiet.", icon="visibility_off"))
+        vicinity_items.append(_item("All is quiet.", icon="visibility_off"))
 
     sections.append(
         _section(

@@ -17,6 +17,7 @@ chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
 from world.browser_views import WELCOME_PAGES, build_map_view, build_room_view
+from typeclasses.scripts import BraveEncounter
 
 
 def _section(view, label):
@@ -111,7 +112,8 @@ class RoomViewTests(unittest.TestCase):
             view.get("mobile_pack", {}).get("preview"),
         )
 
-        ways_forward = _section(view, "Ways Forward")
+        ways_forward = view.get("sections", [])[0]
+        self.assertTrue(ways_forward.get("hide_label"))
         self.assertEqual("navpad", ways_forward.get("kind"))
         self.assertEqual(["N", "E"], [item.get("badge") for item in ways_forward.get("items", [])])
         self.assertEqual(["U"], [item.get("badge") for item in ways_forward.get("vertical_items", [])])
@@ -119,7 +121,7 @@ class RoomViewTests(unittest.TestCase):
         vicinity = _section(view, "The Vicinity")
         self.assertEqual("vicinity", vicinity.get("variant"))
         self.assertEqual("list", vicinity.get("kind"))
-        self.assertEqual("The vicinity is quiet.", vicinity.get("items", [])[0].get("text"))
+        self.assertEqual("All is quiet.", vicinity.get("items", [])[0].get("text"))
         self.assertEqual([], view.get("guidance", []))
         self.assertEqual([], view.get("welcome_pages", []))
 
@@ -194,6 +196,45 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual("Engaged", items[1].get("detail"))
         self.assertEqual("swords", items[1].get("marker_icon"))
 
+    def test_visible_threats_list_identical_roaming_parties_separately(self):
+        room = DummyRoom()
+        room.db.brave_safe = False
+        room.db.brave_room_id = "wolf_turn"
+        viewer = DummyCharacter()
+        viewer.location = room
+
+        preview = {
+            "room_id": "wolf_turn",
+            "roaming_parties": [
+                {
+                    "key": "road_wolves_a",
+                    "room_id": "wolf_turn",
+                    "encounter": {
+                        "key": "road_wolves",
+                        "title": "Road Wolves",
+                        "intro": "",
+                        "enemies": ["road_wolf", "road_wolf"],
+                    },
+                },
+                {
+                    "key": "road_wolves_b",
+                    "room_id": "wolf_turn",
+                    "encounter": {
+                        "key": "road_wolves",
+                        "title": "Road Wolves",
+                        "intro": "",
+                        "enemies": ["road_wolf", "road_wolf"],
+                    },
+                },
+            ],
+        }
+
+        with patch.object(BraveEncounter, "get_room_threat_preview", return_value=preview):
+            threats = BraveEncounter.get_visible_room_threats(room, viewer)
+
+        self.assertEqual(2, len(threats))
+        self.assertEqual(["Road Wolves", "Road Wolves"], [threat.get("key") for threat in threats])
+        self.assertEqual(["2", "2"], [threat.get("badge") for threat in threats])
 
     def test_map_view_uses_map_icon_and_region_card_label(self):
         character = DummyCharacter()

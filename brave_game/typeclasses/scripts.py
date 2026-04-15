@@ -570,12 +570,36 @@ class BraveEncounter(Script):
         }
 
     @classmethod
+    def _build_roaming_room_threat_cards(cls, room, preview, viewer=None):
+        """Build one compact threat card for each roaming party in the room."""
+
+        cards = []
+        for party in preview.get("roaming_parties") or []:
+            encounter_data = dict(party.get("encounter") or {})
+            encounter_data.setdefault("key", party.get("key") or "roaming_party")
+            encounter_data.setdefault("title", encounter_data.get("key") or "Hostile Party")
+            encounter_data.setdefault("intro", "")
+            encounter_data.setdefault("enemies", list(encounter_data.get("enemies") or []))
+            if not encounter_data["enemies"]:
+                continue
+
+            party_preview = cls._build_preview_data(room, encounter_data)
+            party_preview["roaming_party_keys"] = [party.get("key")] if party.get("key") else []
+            card = cls._build_room_threat_card(party_preview, viewer=viewer)
+            if card:
+                cards.append(card)
+        return cards
+
+    @classmethod
     def get_visible_room_threats(cls, room, viewer=None):
         """Return visible hostile threats for room rendering and threat commands."""
 
         preview = cls.get_room_threat_preview(room)
         if not preview:
             return []
+
+        if preview.get("roaming_parties"):
+            return cls._build_roaming_room_threat_cards(room, preview, viewer=viewer)
 
         card = cls._build_room_threat_card(preview, viewer=viewer)
         return [card] if card else []
