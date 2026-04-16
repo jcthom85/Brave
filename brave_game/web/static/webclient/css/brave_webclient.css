@@ -7378,6 +7378,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     max-width: 344px;
     margin: 0 auto;
     grid-template-columns: minmax(0, 1fr) minmax(112px, 0.84fr) minmax(0, 1fr);
+    grid-template-rows: repeat(3, 96px);
     grid-template-areas:
         ". north ."
         "west center east"
@@ -7387,7 +7388,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view__navslot {
-    height: 76px;
+    height: 100%;
     visibility: hidden;
     pointer-events: none;
     align-self: stretch;
@@ -7412,7 +7413,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 96px;
+    height: 100%;
+    min-height: 0;
     padding: 11px 10px 9px;
     color: var(--brave-text-bright);
     text-align: center;
@@ -9546,12 +9548,13 @@ body.brave-scene-combat-enter .inputwrap {
         max-width: none;
         margin: 0;
         grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-rows: repeat(3, 82px);
         gap: 6px;
     }
 
     #mobile-nav-dock .brave-view__navcard,
     #mobile-nav-dock .brave-view__navslot {
-        height: 82px;
+        height: 100%;
     }
 
     #mobile-nav-dock .brave-view__navcard {
