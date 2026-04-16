@@ -7474,7 +7474,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     min-width: 0;
     padding: 12px 2px 0;
     transform: translateY(2px);
-    font-size: calc(0.59rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(0.75rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.0;
     text-align: center;
     justify-self: center;
