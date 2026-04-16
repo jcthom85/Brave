@@ -15,6 +15,9 @@ chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules["world.chargen"] = chargen_stub
 
 from world.browser_views import build_chargen_view
+from world.content import get_content_registry
+
+CONTENT = get_content_registry()
 
 
 def _section(view, label):
@@ -40,6 +43,44 @@ class ChargenViewTests(unittest.TestCase):
         self.assertEqual("Aria", form.get("value"))
         self.assertEqual("Save And Continue", form.get("submit_label"))
         self.assertEqual("raw", form.get("submit_mode"))
+
+    def test_class_step_uses_distinct_class_icons(self):
+        view = build_chargen_view(DummyAccount(), {"step": "menunode_choose_class", "name": "Aria"})
+        classes = _section(view, "Classes")
+        entries = classes.get("items", [])
+        icons_by_title = {entry.get("title"): entry.get("icon") for entry in entries}
+
+        self.assertEqual(
+            {
+                "Warrior": "heavy-shield",
+                "Cleric": "hospital-cross",
+                "Ranger": "archer",
+                "Mage": "crystal-wand",
+                "Rogue": "cloak-and-dagger",
+                "Paladin": "bolt-shield",
+                "Druid": "sprout-emblem",
+            },
+            icons_by_title,
+        )
+        self.assertEqual(len(entries), len({entry.get("icon") for entry in entries}))
+
+    def test_race_step_uses_distinct_race_icons(self):
+        view = build_chargen_view(DummyAccount(), {"step": "menunode_choose_race", "name": "Aria"})
+        races = _section(view, "Races")
+        entries = races.get("items", [])
+        icons_by_title = {entry.get("title"): entry.get("icon") for entry in entries}
+
+        self.assertEqual(
+            {
+                CONTENT.characters.races["human"]["name"]: "player",
+                CONTENT.characters.races["elf"]["name"]: "fairy",
+                CONTENT.characters.races["dwarf"]["name"]: "anvil",
+                CONTENT.characters.races["halfling"]["name"]: "clover",
+                CONTENT.characters.races["half_orc"]["name"]: "horns",
+            },
+            icons_by_title,
+        )
+        self.assertEqual(len(entries), len({entry.get("icon") for entry in entries}))
 
 
 if __name__ == "__main__":

@@ -98,6 +98,7 @@ class SheetViewTests(unittest.TestCase):
 
         status_entry = status.get("items", [])[0]
         self.assertEqual(character.key, status_entry.get("title"))
+        self.assertEqual("heavy-shield", status_entry.get("icon"))
         self.assertEqual(
             f"{RACES['human']['name']} {CLASSES['warrior']['name']} · Level 6",
             status_entry.get("meta"),
@@ -112,6 +113,8 @@ class SheetViewTests(unittest.TestCase):
         )
 
         status_chips = [chip.get("label") for chip in status_entry.get("chips", [])]
+        self.assertIn("Human", status_chips)
+        self.assertEqual("player", status_entry.get("chips", [])[0].get("icon"))
         self.assertNotIn("34 silver", status_chips)
         self.assertNotIn("Resolve", status_chips)
 

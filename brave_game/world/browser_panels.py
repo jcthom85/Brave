@@ -3,6 +3,7 @@
 import time
 
 from world.combat_atb import render_atb_state
+from world.character_icons import get_class_icon, get_race_icon
 from world.enemy_icons import get_enemy_icon_name
 from world.commerce import get_reserved_entries, get_sellable_entries, get_shop_bonus
 from world.content import get_content_registry
@@ -258,9 +259,9 @@ def build_chargen_panel(account, state):
 
     chips = [_chip(f"{slot_text} open", "add_circle", "accent")]
     if state.get("race"):
-        chips.append(_chip(race_value, "diversity_3", "muted"))
+        chips.append(_chip(race_value, get_race_icon(state.get("race"), RACES.get(state.get("race"))), "muted"))
     if state.get("class"):
-        chips.append(_chip(class_value, "swords", "muted"))
+        chips.append(_chip(class_value, get_class_icon(state.get("class"), CLASSES.get(state.get("class"))), "muted"))
 
     progress_items = [
         _item(f"Name · {name_value}", icon="check_circle" if state.get("name") else "radio_button_unchecked"),
@@ -298,8 +299,8 @@ def build_build_panel(character):
         eyebrow_icon="tune",
         title_icon="badge",
         chips=[
-            _chip(race_name, "diversity_3", "muted"),
-            _chip(class_name, "swords", "muted"),
+            _chip(race_name, get_race_icon(character.db.brave_race, RACES.get(character.db.brave_race)), "muted"),
+            _chip(class_name, get_class_icon(character.db.brave_class, CLASSES.get(character.db.brave_class)), "muted"),
             _chip(change_text, "lock_open" if character.can_customize_build() else "lock", "accent"),
         ],
         sections=[

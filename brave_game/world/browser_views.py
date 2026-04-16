@@ -13,6 +13,7 @@ from world.commerce import format_shop_bonus, get_reserved_entries, get_sellable
 from world.data.themes import THEMES, THEME_BY_KEY, normalize_theme_key
 from world.data.world_tones import get_world_tone_key
 from world.chapel import get_active_blessing, is_chapel_room
+from world.character_icons import get_class_icon, get_race_icon
 from world.forging import get_forge_entries
 from world.navigation import (
     build_map_snapshot,
@@ -732,9 +733,9 @@ def build_chargen_view(account, state, *, error=None):
         _chip(f"{slot_text} open", "add_circle", "muted"),
     ]
     if state.get("race"):
-        chips.append(_chip(race_name, "diversity_3", "muted"))
+        chips.append(_chip(race_name, get_race_icon(state.get("race"), RACES.get(state.get("race"))), "muted"))
     if state.get("class"):
-        chips.append(_chip(class_name, "swords", "muted"))
+        chips.append(_chip(class_name, get_class_icon(state.get("class"), CLASSES.get(state.get("class"))), "muted"))
 
     sections = [
         _section(
@@ -743,8 +744,8 @@ def build_chargen_view(account, state, *, error=None):
             "pairs",
             items=[
                 _pair("Name", state.get("name") or "Not set", "badge"),
-                _pair("Race", race_name, "diversity_3"),
-                _pair("Class", class_name, "swords"),
+                _pair("Race", race_name, get_race_icon(state.get("race"), RACES.get(state.get("race")))),
+                _pair("Class", class_name, get_class_icon(state.get("class"), CLASSES.get(state.get("class")))),
             ],
             span="wide",
         )
@@ -837,8 +838,8 @@ def build_chargen_view(account, state, *, error=None):
                 "pairs",
                 items=[
                     _pair("Name", state.get("name") or "Not set", "badge"),
-                    _pair("Race", race_name, "diversity_3"),
-                    _pair("Class", class_name, "swords"),
+                    _pair("Race", race_name, get_race_icon(state.get("race"), RACES.get(state.get("race")))),
+                    _pair("Class", class_name, get_class_icon(state.get("class"), CLASSES.get(state.get("class")))),
                 ],
                 span="wide",
             )
@@ -853,7 +854,7 @@ def build_chargen_view(account, state, *, error=None):
                     race_data["name"],
                     meta="Selected" if state.get("race") == race_key else "Available",
                     lines=[race_data["summary"], f"Perk: {race_data['perk']}"],
-                    icon="forest",
+                    icon=get_race_icon(race_key, race_data),
                     command=race_key,
                     chips=[_chip("Current", "check_circle", "good")] if state.get("race") == race_key else [],
                 )
@@ -869,7 +870,7 @@ def build_chargen_view(account, state, *, error=None):
                     class_data["name"],
                     meta=class_data["role"],
                     lines=[class_data["summary"]],
-                    icon="swords",
+                    icon=get_class_icon(class_key, class_data),
                     command=class_key,
                     chips=[_chip("Current", "check_circle", "good")] if state.get("class") == class_key else [],
                 )
@@ -904,13 +905,13 @@ def build_chargen_view(account, state, *, error=None):
                         race_data.get("name", "Race"),
                         meta="Race Perk",
                         lines=[race_data.get("perk", "No perk found.")],
-                        icon="forest",
+                        icon=get_race_icon(state.get("race"), race_data),
                     ),
                     _entry(
                         class_data.get("name", "Class"),
                         meta=class_data.get("role", "Role"),
                         lines=[class_data.get("summary", "No class summary found.")],
-                        icon="swords",
+                        icon=get_class_icon(state.get("class"), class_data),
                     ),
                 ],
             )
@@ -1598,7 +1599,7 @@ def build_account_view(account):
                 character.key,
                 meta=f"Slot {index}",
                 lines=lines,
-                icon="person",
+                icon=get_class_icon(character.db.brave_class, CLASSES.get(character.db.brave_class)),
                 badge=str(index),
                 command=f"play {index}",
                 chips=entry_chips,
@@ -3032,7 +3033,7 @@ def build_combat_view(encounter, character):
                 participant.key,
                 meta=None,
                 icon="person",
-                background_icon="person",
+                background_icon=get_class_icon(participant.db.brave_class, CLASSES.get(participant.db.brave_class)),
                 size_class=_combat_card_size_class(participant),
                 chips=status_chips,
                 meters=meters,
@@ -3256,8 +3257,9 @@ def build_sheet_view(character):
         character.key,
         meta=f"{race['name']} {class_data['name']} · Level {level}",
         lines=[class_data["summary"]],
-        icon="badge",
+        icon=get_class_icon(character.db.brave_class, class_data),
         chips=[
+            _chip(race["name"], get_race_icon(character.db.brave_race, race), "muted"),
             _chip(xp_text, "timeline", "accent"),
             *(
                 [_chip(resonance_label, "travel_explore", "accent")]

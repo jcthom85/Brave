@@ -409,6 +409,7 @@
         "strength": 2,
         "vitality": 5
       },
+      "icon": "hospital-cross",
       "name": "Cleric",
       "progression": [
         [
@@ -468,6 +469,7 @@
         "strength": 2,
         "vitality": 4
       },
+      "icon": "sprout-emblem",
       "name": "Druid",
       "progression": [
         [
@@ -527,6 +529,7 @@
         "strength": 1,
         "vitality": 3
       },
+      "icon": "crystal-wand",
       "name": "Mage",
       "progression": [
         [
@@ -586,6 +589,7 @@
         "strength": 4,
         "vitality": 6
       },
+      "icon": "bolt-shield",
       "name": "Paladin",
       "progression": [
         [
@@ -645,6 +649,7 @@
         "strength": 3,
         "vitality": 4
       },
+      "icon": "archer",
       "name": "Ranger",
       "progression": [
         [
@@ -704,6 +709,7 @@
         "strength": 3,
         "vitality": 4
       },
+      "icon": "cloak-and-dagger",
       "name": "Rogue",
       "progression": [
         [
@@ -763,6 +769,7 @@
         "strength": 5,
         "vitality": 6
       },
+      "icon": "heavy-shield",
       "name": "Warrior",
       "progression": [
         [
@@ -1029,6 +1036,7 @@
         "strength": 1,
         "vitality": 3
       },
+      "icon": "anvil",
       "name": "Dwarf",
       "perk": "Stoneblood",
       "summary": "Hardy, disciplined, and stubborn."
@@ -1039,6 +1047,7 @@
         "intellect": 1,
         "spirit": 1
       },
+      "icon": "fairy",
       "name": "Elf",
       "perk": "Keen Senses",
       "summary": "Graceful, perceptive, and naturally magical."
@@ -1048,6 +1057,7 @@
         "strength": 3,
         "vitality": 2
       },
+      "icon": "horns",
       "name": "Half-Orc",
       "perk": "Battle Hunger",
       "summary": "Fierce, intimidating, and strong."
@@ -1058,6 +1068,7 @@
         "intellect": 1,
         "vitality": 1
       },
+      "icon": "clover",
       "name": "Halfling",
       "perk": "Fortune's Step",
       "summary": "Quick, lucky, and easy to underestimate."
@@ -1070,6 +1081,7 @@
         "strength": 1,
         "vitality": 1
       },
+      "icon": "player",
       "name": "Human",
       "perk": "Resolve",
       "summary": "Flexible, ambitious, and practical."

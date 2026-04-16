@@ -189,8 +189,8 @@ class CombatViewTests(unittest.TestCase):
         party = _section(view, "Party")
         dad_entry = _entry(party, "Dad")
         peep_entry = _entry(party, "Peep")
-        self.assertEqual("person", dad_entry.get("background_icon"))
-        self.assertEqual("person", peep_entry.get("background_icon"))
+        self.assertEqual("hospital-cross", dad_entry.get("background_icon"))
+        self.assertEqual("heavy-shield", peep_entry.get("background_icon"))
         self.assertEqual("normal", dad_entry.get("size_class"))
         self.assertEqual("normal", peep_entry.get("size_class"))
         self.assertEqual(
