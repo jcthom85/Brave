@@ -214,6 +214,32 @@ class CombatViewTests(unittest.TestCase):
         )
         self.assertEqual([], wolf_entry.get("lines", []))
 
+    def test_four_member_party_uses_compact_party_grid(self):
+        room = DummyRoom()
+        party = [
+            DummyCharacter(7, "Dad", room, "warrior", {"hp": 20, "mana": 0, "stamina": 12}, {"max_hp": 24, "max_mana": 0, "max_stamina": 14}, ["Strike"]),
+            DummyCharacter(8, "Peep", room, "mage", {"hp": 16, "mana": 14, "stamina": 8}, {"max_hp": 20, "max_mana": 18, "max_stamina": 10}, ["Bolt"]),
+            DummyCharacter(9, "Mara", room, "rogue", {"hp": 18, "mana": 4, "stamina": 11}, {"max_hp": 21, "max_mana": 6, "max_stamina": 12}, ["Slash"]),
+            DummyCharacter(10, "Rook", room, "paladin", {"hp": 23, "mana": 9, "stamina": 10}, {"max_hp": 28, "max_mana": 12, "max_stamina": 13}, ["Smite"]),
+        ]
+        enemies = [
+            {"id": "e1", "template_key": "road_wolf", "key": "Road Wolf", "hp": 11, "max_hp": 16},
+            {"id": "e2", "template_key": "road_wolf", "key": "Road Wolf", "hp": 11, "max_hp": 16},
+            {"id": "e3", "template_key": "road_wolf", "key": "Road Wolf", "hp": 11, "max_hp": 16},
+            {"id": "e4", "template_key": "road_wolf", "key": "Road Wolf", "hp": 11, "max_hp": 16},
+        ]
+        encounter = DummyEncounter(room, party, enemies)
+
+        view = build_combat_view(encounter, party[0])
+        party_section = _section(view, "Party")
+        enemies_section = _section(view, "Enemies")
+
+        self.assertEqual(4, view.get("party_count"))
+        self.assertEqual(4, view.get("enemy_count"))
+        self.assertEqual("compact", party_section.get("span"))
+        self.assertEqual(4, len(party_section.get("items", [])))
+        self.assertEqual(4, len(enemies_section.get("items", [])))
+
     def test_enemy_windup_surfaces_named_telegraph_in_view(self):
         room = DummyRoom()
         warrior = DummyCharacter(

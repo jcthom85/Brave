@@ -5069,6 +5069,44 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     gap: 9px;
 }
 
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entries {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry {
+    height: 188px;
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-icon-wrap {
+    min-width: 1.3rem;
+    min-height: 1.3rem;
+    padding: 1px 4px;
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-title {
+    font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.05;
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-meta,
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__meter-label,
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__meter-value {
+    font-size: calc(0.43rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-label {
+    font-size: calc(0.4rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-chips .scene-card__chip {
+    font-size: calc(0.43rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__meter-track {
+    height: 4px;
+}
+
 .brave-view--combat .brave-view__section--targets .brave-view__entries {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(172px, 172px));
@@ -5262,7 +5300,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry {
-    height: 248px;
+    height: 228px;
     padding: 10px 10px 8px;
 }
 
@@ -5692,8 +5730,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-title {
-    font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-    line-height: 1.08;
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.06;
     color: #e8f6f2;
 }
 
@@ -5708,7 +5746,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip {
-    font-size: calc(0.48rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(0.44rem * var(--brave-text-scale) * var(--brave-font-size-scale));
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-body {
@@ -5803,15 +5841,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--party .brave-view__meter-label,
 .brave-view--combat .brave-view__section--party .brave-view__meter-value {
-    font-size: calc(0.46rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-}
-
-.brave-view--combat .brave-view__section--party .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-label {
     font-size: calc(0.44rem * var(--brave-text-scale) * var(--brave-font-size-scale));
 }
 
+.brave-view--combat .brave-view__section--party .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-label {
+    font-size: calc(0.4rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
 .brave-view--combat .brave-view__section--party .brave-view__meter-track {
-    height: 5px;
+    height: 4px;
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-track {
@@ -9991,7 +10029,7 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry {
-        height: 216px;
+        height: 200px;
         border-color: rgba(116, 149, 146, 0.24);
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
@@ -10089,7 +10127,7 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__meter-track {
-        height: 5px;
+        height: 4px;
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip {
@@ -10161,21 +10199,21 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-title {
-        font-size: calc(0.64rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        font-size: calc(0.6rem * var(--brave-text-scale) * var(--brave-font-size-scale));
         line-height: 1.06;
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip {
-        font-size: calc(0.46rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        font-size: calc(0.42rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__meter-label,
     .brave-view--combat .brave-view__section--party .brave-view__meter-value {
-        font-size: calc(0.46rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        font-size: calc(0.42rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-label {
-        font-size: calc(0.44rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        font-size: calc(0.4rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-body {

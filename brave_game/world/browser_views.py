@@ -3001,6 +3001,7 @@ def build_combat_view(encounter, character):
     combat_actions = build_combat_action_payload(encounter, character)
 
     party_entries = []
+    party_count = len(ordered_participants)
     for participant in ordered_participants:
         participant.ensure_brave_character()
         resources = participant.db.brave_resources or {}
@@ -3104,13 +3105,15 @@ def build_combat_view(encounter, character):
                 _action("Flee", "flee", "logout", tone="danger"),
             ],
             sections=[
-                _section("Party", "groups", "entries", items=party_entries or [_entry("No active party members.", icon="person_off")], variant="party"),
+                _section("Party", "groups", "entries", items=party_entries or [_entry("No active party members.", icon="person_off")], variant="party", span="compact" if party_count >= 4 else None),
                 _section("Enemies", "warning", "entries", items=enemy_entries or [_entry("No enemies remain.", icon="task_alt")], variant="targets"),
             ],
             reactive=_reactive_view(encounter.obj, scene="combat", danger="combat"),
         ),
         "variant": "combat",
         "combat_actions": combat_actions,
+        "party_count": party_count,
+        "enemy_count": foe_count,
         "sticky": True,
     }
 
