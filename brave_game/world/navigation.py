@@ -4,6 +4,14 @@ from collections import deque
 
 from evennia.utils import search
 
+from world.content import get_content_registry
+
+
+CONTENT = get_content_registry()
+ENCOUNTER_CONTENT = CONTENT.encounters
+QUEST_CONTENT = CONTENT.quests
+SYSTEMS_CONTENT = CONTENT.systems
+
 
 DIRECTION_ORDER = [
     "north",
@@ -41,6 +49,36 @@ CARDINAL_DELTAS = {
     "south": (0, -1),
     "west": (-1, 0),
 }
+
+MAP_MARKERS = {
+    "current": {"icon": "player", "label": "You", "tone": "current"},
+    "quest": {"icon": "castle-flag", "label": "Tracked Quest", "tone": "quest"},
+    "boss": {"icon": "skull-trophy", "label": "Boss", "tone": "danger"},
+    "threat": {"icon": "crossed-swords", "label": "Threat", "tone": "danger"},
+    "portal": {"icon": "spawn-node", "label": "Portal", "tone": "portal"},
+    "forge": {"icon": "anvil", "label": "Forge", "tone": "service"},
+    "shop": {"icon": "wooden-sign", "label": "Shop", "tone": "service"},
+    "rest": {"icon": "campfire", "label": "Rest", "tone": "service"},
+    "trophy": {"icon": "trophy", "label": "Trophy Hall", "tone": "service"},
+    "fishing": {"icon": "fish", "label": "Fishing", "tone": "activity"},
+    "cooking": {"icon": "knife-fork", "label": "Cooking", "tone": "activity"},
+    "party": {"icon": "double-team", "label": "Party", "tone": "party"},
+}
+
+MAP_MARKER_PRIORITY = (
+    "current",
+    "quest",
+    "boss",
+    "threat",
+    "portal",
+    "forge",
+    "shop",
+    "rest",
+    "trophy",
+    "fishing",
+    "cooking",
+    "party",
+)
 
 
 def get_exit_direction(exit_obj):
@@ -159,36 +197,103 @@ def _has_connection(room_by_coord, x, y, direction):
     return False
 
 
-def _map_symbol_name(room, *, current=False, party=False):
-    """Return a Material Symbol name for one room marker."""
+def _map_marker(marker_key):
+    """Return a serialized map marker for the browser renderer."""
+
+    marker = MAP_MARKERS[marker_key]
+    return {
+        "key": marker_key,
+        "icon": marker["icon"],
+        "label": marker["label"],
+        "tone": marker["tone"],
+    }
+
+
+def _tracked_quest_room_ids(character):
+    """Return incomplete visit-room objectives for the tracked active quest."""
+
+    if not character:
+        return set()
+
+    tracked_key = getattr(character.db, "brave_tracked_quest", None)
+    quest_state = getattr(character.db, "brave_quests", None) or {}
+    if not tracked_key or not isinstance(quest_state, dict):
+        return set()
+
+    active_state = quest_state.get(tracked_key) or {}
+    if active_state.get("status") != "active":
+        return set()
+
+    quest_data = QUEST_CONTENT.quests.get(tracked_key) or {}
+    objectives = quest_data.get("objectives") or []
+    state_objectives = active_state.get("objectives") or []
+    room_ids = set()
+    for index, objective in enumerate(objectives):
+        objective_state = state_objectives[index] if index < len(state_objectives) else {}
+        if objective_state.get("completed"):
+            continue
+        if objective.get("type") == "visit_room" and objective.get("room_id"):
+            room_ids.add(objective["room_id"])
+    return room_ids
+
+
+def _room_has_boss_encounter(room_id):
+    """Return True if any encounter in the room includes a boss-tagged enemy."""
+
+    for encounter in ENCOUNTER_CONTENT.get_room_encounters(room_id):
+        enemy_keys = encounter.get("enemies") or []
+        for enemy_key in enemy_keys:
+            enemy_data = ENCOUNTER_CONTENT.enemy_templates.get(enemy_key) or {}
+            if "boss" in (enemy_data.get("tags") or []):
+                return True
+    return False
+
+
+def _map_marker_keys(room, *, current=False, party=False, tracked_room_ids=None):
+    """Return prioritized full-map marker keys for one room."""
+
+    tracked_room_ids = tracked_room_ids or set()
+    room_id = getattr(room.db, "brave_room_id", None)
+    activities = set(getattr(room.db, "brave_activities", None) or [])
+    keys = set()
 
     if current:
-        return "person_pin_circle"
+        keys.add("current")
+    if room_id and room_id in tracked_room_ids:
+        keys.add("quest")
+    if room_id and _room_has_boss_encounter(room_id):
+        keys.add("boss")
+    elif room_id and ENCOUNTER_CONTENT.get_room_encounters(room_id):
+        keys.add("threat")
+    if getattr(room.db, "brave_portal_hub", False) or (
+        room_id and any(portal.get("entry_room") == room_id for portal in SYSTEMS_CONTENT.portals.values())
+    ):
+        keys.add("portal")
+    if room_id and room_id == SYSTEMS_CONTENT.forge_room_id:
+        keys.add("forge")
+    if room_id and room_id == SYSTEMS_CONTENT.outfitters_room_id:
+        keys.add("shop")
+    if "cooking" in activities:
+        keys.add("rest")
+        keys.add("cooking")
+    if room_id and room_id in SYSTEMS_CONTENT.fishing_spots:
+        keys.add("fishing")
+    if room_id and "trophy" in room_id:
+        keys.add("trophy")
     if party:
-        return "groups"
+        keys.add("party")
 
-    label = (getattr(room, "key", "") or "").lower()
-    keyword_symbols = [
-        (("inn", "tavern", "lodge"), "bed"),
-        (("outfitters", "shop", "store", "market", "quartermaster"), "storefront"),
-        (("yard", "sparring", "training", "pens"), "swords"),
-        (("gate",), "gate"),
-        (("chapel", "church", "sanctuary"), "church"),
-        (("hall", "mayor", "council"), "account_balance"),
-        (("forge", "smith"), "construction"),
-        (("green", "park", "grove"), "park"),
-        (("farm", "field", "orchard"), "agriculture"),
-        (("river", "dock", "harbor", "bridge", "water"), "water"),
-        (("camp",), "camping"),
-        (("road", "walk", "path", "crossing"), "route"),
-        (("mine", "cave", "tunnel"), "tunnel"),
-        (("tower",), "home_work"),
-        (("post", "station"), "outgoing_mail"),
-    ]
-    for keywords, symbol in keyword_symbols:
-        if any(keyword in label for keyword in keywords):
-            return symbol
-    return "place"
+    return [marker_key for marker_key in MAP_MARKER_PRIORITY if marker_key in keys]
+
+
+def _micromap_symbol_name(*, current=False, party=False):
+    """Return the low-noise room symbol used by the micromap."""
+
+    if current:
+        return "player"
+    if party:
+        return "double-team"
+    return "guarded-tower"
 
 
 def build_map_snapshot(room, radius=None, character=None):
@@ -244,6 +349,7 @@ def build_map_snapshot(room, radius=None, character=None):
                         getattr(member.location.db, "brave_map_y", 0),
                     )
                 )
+    tracked_room_ids = _tracked_quest_room_ids(character)
 
     def connector_cell(axis):
         return {"kind": "connector", "axis": axis}
@@ -268,9 +374,19 @@ def build_map_snapshot(room, radius=None, character=None):
         has_party = (x, y) in party_coords
         glyph = str(getattr(candidate.db, "brave_map_icon", "?") or "?")[:1]
         center = glyph
-        symbol = _map_symbol_name(candidate, current=is_current, party=has_party)
+        marker_keys = _map_marker_keys(
+            candidate,
+            current=is_current,
+            party=has_party,
+            tracked_room_ids=tracked_room_ids,
+        )
+        markers = [_map_marker(marker_key) for marker_key in marker_keys]
+        primary_marker = markers[0] if markers else None
+        symbol = primary_marker["icon"] if primary_marker else "guarded-tower"
         members_here = party_names_by_room.get(candidate.id, [])
         tooltip = candidate.key
+        if markers:
+            tooltip += f" · {', '.join(marker['label'] for marker in markers)}"
         if members_here:
             tooltip += f" · Party: {', '.join(sorted(members_here))}"
 
@@ -287,9 +403,12 @@ def build_map_snapshot(room, radius=None, character=None):
                     {
                         "kind": "room",
                         "symbol": symbol,
+                        "micro_symbol": _micromap_symbol_name(current=is_current, party=has_party),
                         "glyph": center,
                         "title": tooltip,
-                        "tone": "current" if is_current else ("party" if has_party else "room"),
+                        "tone": primary_marker["tone"] if primary_marker else "room",
+                        "primary_marker": primary_marker["key"] if primary_marker else "",
+                        "markers": markers,
                     },
                     connector_cell("horizontal") if east else empty_cell(),
                 ],
@@ -310,32 +429,38 @@ def build_map_snapshot(room, radius=None, character=None):
         lines.extend("".join(parts).rstrip() for parts in row_bands)
         grid_rows.extend(cell_bands)
 
-    visible_rooms = sorted(
-        rooms,
-        key=lambda candidate: (
-            getattr(candidate.db, "brave_map_y", 0),
-            getattr(candidate.db, "brave_map_x", 0),
-            candidate.key.lower(),
-        ),
-    )
-
     current_party = party_names_by_room.get(room.id, [])
-    legend = [{
-        "icon": "@",
-        "symbol": _map_symbol_name(room, current=True),
-        "label": "You",
-        "suffix": f"Party: {', '.join(sorted(current_party))}" if current_party else "",
-    }]
-    for candidate in visible_rooms:
-        if candidate.id == room.id:
+    used_marker_keys = []
+    for row in grid_rows:
+        for cell in row:
+            if cell.get("kind") != "room":
+                continue
+            for marker in cell.get("markers") or []:
+                used_marker_keys.append(marker["key"])
+    legend = []
+    for marker_key in MAP_MARKER_PRIORITY:
+        if marker_key not in used_marker_keys:
             continue
-        members_here = party_names_by_room.get(candidate.id, [])
+        marker = _map_marker(marker_key)
         legend.append(
             {
-                "icon": getattr(candidate.db, "brave_map_icon", "?"),
-                "symbol": _map_symbol_name(candidate, party=bool(members_here)),
-                "label": candidate.key,
-                "suffix": f"Party: {', '.join(sorted(members_here))}" if members_here else "",
+                "icon": marker["icon"],
+                "symbol": marker["icon"],
+                "label": marker["label"],
+                "tone": marker["tone"],
+                "suffix": f"Party: {', '.join(sorted(current_party))}" if marker_key == "current" and current_party else "",
+            }
+        )
+    for room_id, member_names in sorted(party_names_by_room.items()):
+        if room_id == room.id:
+            continue
+        legend.append(
+            {
+                "icon": MAP_MARKERS["party"]["icon"],
+                "symbol": MAP_MARKERS["party"]["icon"],
+                "label": "Party",
+                "tone": MAP_MARKERS["party"]["tone"],
+                "suffix": ", ".join(sorted(member_names)),
             }
         )
 
@@ -375,9 +500,26 @@ def build_minimap_snapshot(room, radius=2, character=None):
     snapshot = build_map_snapshot(room, radius=radius, character=character)
     if not snapshot:
         return None
+    map_tiles = snapshot.get("map_tiles") or {"columns": 0, "rows": []}
+    compact_rows = []
+    for row in map_tiles.get("rows") or []:
+        compact_row = []
+        for cell in row:
+            if cell.get("kind") != "room":
+                compact_row.append(cell)
+                continue
+            compact_cell = dict(cell)
+            compact_cell["symbol"] = compact_cell.get("micro_symbol") or compact_cell.get("symbol") or "guarded-tower"
+            compact_cell["markers"] = []
+            compact_cell["primary_marker"] = ""
+            compact_row.append(compact_cell)
+        compact_rows.append(compact_row)
     return {
         "map_text": snapshot.get("map_text", ""),
-        "map_tiles": snapshot.get("map_tiles") or {"columns": 0, "rows": []},
+        "map_tiles": {
+            "columns": map_tiles.get("columns", 0),
+            "rows": compact_rows,
+        },
         "radius": radius,
     }
 

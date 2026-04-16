@@ -7093,6 +7093,83 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: color-mix(in srgb, var(--brave-accent) 84%, var(--brave-text-bright));
 }
 
+.brave-view__map-room-primary {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+.brave-view__map-badges {
+    position: absolute;
+    right: 1px;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    pointer-events: none;
+}
+
+.brave-view__map-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 9px;
+    height: 9px;
+    min-width: 9px;
+    border-radius: 999px;
+    color: var(--brave-text-bright);
+    background: rgba(19, 28, 42, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+    font-size: 0.42rem;
+    line-height: 1;
+}
+
+.brave-view__map-badge-icon {
+    font-size: 0.42rem;
+}
+
+.brave-view__map-badge--current {
+    background: color-mix(in srgb, var(--brave-accent) 72%, #162033);
+}
+
+.brave-view__map-badge--quest {
+    background: color-mix(in srgb, #d7b85c 72%, #162033);
+}
+
+.brave-view__map-badge--danger {
+    background: color-mix(in srgb, #d76464 76%, #162033);
+}
+
+.brave-view__map-badge--portal {
+    background: color-mix(in srgb, #8c7df2 72%, #162033);
+}
+
+.brave-view__map-badge--service {
+    background: color-mix(in srgb, #6cb1d8 72%, #162033);
+}
+
+.brave-view__map-badge--activity {
+    background: color-mix(in srgb, #69b980 72%, #162033);
+}
+
+.brave-view__map-badge--party {
+    background: color-mix(in srgb, #79d1a8 72%, #162033);
+}
+
+.brave-view__map-badge--overflow {
+    width: auto;
+    min-width: 10px;
+    padding: 0 2px;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
 .brave-view__map-cell--party .brave-view__map-room-icon {
     color: color-mix(in srgb, #9ce7c1 84%, var(--brave-text-bright));
 }
@@ -7126,6 +7203,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     font-size: 0.52rem;
 }
 
+.brave-view__map-grid--micro .brave-view__map-room-primary {
+    width: 8px;
+    height: 8px;
+}
+
+.brave-view__map-grid--micro .brave-view__map-badges {
+    display: none;
+}
+
 .brave-view__map-grid--compact {
     --brave-map-cell-size: 9px;
 }
@@ -7147,6 +7233,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__map-grid--compact .brave-view__map-room-icon {
     font-size: 0.46rem;
+}
+
+.brave-view__map-grid--compact .brave-view__map-room-primary {
+    width: 7px;
+    height: 7px;
+}
+
+.brave-view__map-grid--compact .brave-view__map-badges {
+    display: none;
 }
 
 

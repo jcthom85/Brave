@@ -17,6 +17,7 @@ chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
 from world.browser_views import WELCOME_PAGES, build_map_view, build_room_view
+from world.navigation import build_map_snapshot, build_minimap_snapshot
 from typeclasses.scripts import BraveEncounter
 
 
@@ -96,6 +97,22 @@ class DummyMapRoom:
             brave_zone="Brambleford",
             brave_safe=True,
         )
+
+
+class DummyMappedRoom:
+    def __init__(self, room_id, key="Blackreed's Roost", x=0, y=0):
+        self.id = 501
+        self.key = key
+        self.db = SimpleNamespace(
+            brave_map_region="Test Ridge",
+            brave_map_x=x,
+            brave_map_y=y,
+            brave_map_icon="R",
+            brave_room_id=room_id,
+            brave_activities=[],
+            brave_portal_hub=False,
+        )
+        self.exits = []
 
 
 class RoomViewTests(unittest.TestCase):
@@ -323,6 +340,56 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual("pre", map_section.get("kind"))
         self.assertEqual("Brambleford", map_section.get("label"))
         self.assertEqual(1, map_section.get("grid", {}).get("columns"))
+
+    def test_map_snapshot_stacks_full_map_markers_by_priority(self):
+        character = DummyCharacter()
+        character.db.brave_tracked_quest = "captain_varn_blackreed"
+        character.db.brave_quests = {
+            "captain_varn_blackreed": {
+                "status": "active",
+                "objectives": [
+                    {"completed": False},
+                    {"completed": False},
+                ],
+            }
+        }
+        room = DummyMappedRoom("ruined_watchtower_blackreed_roost")
+
+        with patch("world.navigation.get_rooms_in_map_region", return_value=[room]):
+            snapshot = build_map_snapshot(room, character=character)
+
+        center_cell = snapshot["map_tiles"]["rows"][1][1]
+        self.assertEqual("player", center_cell.get("symbol"))
+        self.assertEqual("current", center_cell.get("primary_marker"))
+        self.assertEqual(["current", "quest", "boss"], [marker.get("key") for marker in center_cell.get("markers")])
+        self.assertIn("Tracked Quest", center_cell.get("title"))
+        self.assertIn("Boss", center_cell.get("title"))
+        self.assertEqual(
+            ["You", "Tracked Quest", "Boss"],
+            [entry.get("label") for entry in snapshot.get("legend")],
+        )
+
+    def test_minimap_snapshot_uses_simple_symbols_without_marker_stack(self):
+        character = DummyCharacter()
+        character.db.brave_tracked_quest = "captain_varn_blackreed"
+        character.db.brave_quests = {
+            "captain_varn_blackreed": {
+                "status": "active",
+                "objectives": [
+                    {"completed": False},
+                    {"completed": False},
+                ],
+            }
+        }
+        room = DummyMappedRoom("ruined_watchtower_blackreed_roost")
+
+        with patch("world.navigation.get_rooms_in_map_region", return_value=[room]):
+            snapshot = build_minimap_snapshot(room, character=character)
+
+        center_cell = snapshot["map_tiles"]["rows"][1][1]
+        self.assertEqual("player", center_cell.get("symbol"))
+        self.assertEqual([], center_cell.get("markers"))
+        self.assertEqual("", center_cell.get("primary_marker"))
 
 
 if __name__ == "__main__":

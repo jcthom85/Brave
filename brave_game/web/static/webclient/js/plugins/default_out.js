@@ -4604,7 +4604,7 @@ let defaultout_plugin = (function () {
             );
         };
 
-        var renderMapGridCell = function (cell) {
+        var renderMapGridCell = function (cell, showMarkers) {
             var tile = cell && typeof cell === "object" ? cell : {};
             var kind = tile.kind || "empty";
             var classes = "brave-view__map-cell brave-view__map-cell--" + escapeHtml(kind);
@@ -4615,7 +4615,32 @@ let defaultout_plugin = (function () {
                 if (tile.tone) {
                     classes += " brave-view__map-cell--" + escapeHtml(tile.tone);
                 }
-                body = icon(tile.symbol || "place", "brave-view__map-room-icon");
+                if (tile.primary_marker) {
+                    classes += " brave-view__map-cell--marker-" + escapeHtml(tile.primary_marker);
+                }
+                var markers = showMarkers && Array.isArray(tile.markers) ? tile.markers : [];
+                var badges = markers.slice(1);
+                var visibleBadges = badges.slice(0, 3);
+                var overflow = badges.length - visibleBadges.length;
+                var badgeMarkup = "";
+                if (visibleBadges.length || overflow > 0) {
+                    badgeMarkup = "<span class='brave-view__map-badges'>"
+                        + visibleBadges.map(function (marker) {
+                            var toneClass = marker && marker.tone ? " brave-view__map-badge--" + escapeHtml(marker.tone) : "";
+                            var markerTitle = marker && marker.label ? " title='" + escapeHtml(marker.label) + "'" : "";
+                            return "<span class='brave-view__map-badge" + toneClass + "'" + markerTitle + ">"
+                                + icon(marker && marker.icon ? marker.icon : "guarded-tower", "brave-view__map-badge-icon")
+                                + "</span>";
+                        }).join("")
+                        + (overflow > 0
+                            ? "<span class='brave-view__map-badge brave-view__map-badge--overflow'>+" + escapeHtml(String(overflow)) + "</span>"
+                            : "")
+                        + "</span>";
+                }
+                body = "<span class='brave-view__map-room-primary'>"
+                    + icon(tile.symbol || "guarded-tower", "brave-view__map-room-icon")
+                    + "</span>"
+                    + badgeMarkup;
             } else if (kind === "connector") {
                 var axis = tile.axis === "vertical" ? "vertical" : "horizontal";
                 classes += " brave-view__map-cell--connector-" + escapeHtml(axis);
@@ -4633,13 +4658,15 @@ let defaultout_plugin = (function () {
             if (!columns) {
                 return "";
             }
+            var gridClass = "brave-view__map-grid" + (extraClass ? " " + extraClass : "");
+            var showMarkers = gridClass.indexOf("brave-view__map-grid--micro") === -1
+                && gridClass.indexOf("brave-view__map-grid--compact") === -1;
             var cells = [];
             grid.rows.forEach(function (row) {
                 (Array.isArray(row) ? row : []).forEach(function (cell) {
-                    cells.push(renderMapGridCell(cell));
+                    cells.push(renderMapGridCell(cell, showMarkers));
                 });
             });
-            var gridClass = "brave-view__map-grid" + (extraClass ? " " + extraClass : "");
             return "<div class='" + gridClass + "' style='--brave-map-columns: " + columns + ";'>" + cells.join("") + "</div>";
         };
 
