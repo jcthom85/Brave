@@ -3,6 +3,7 @@
 import time
 
 from world.combat_atb import render_atb_state
+from world.enemy_icons import get_enemy_icon_name
 from world.commerce import get_reserved_entries, get_sellable_entries, get_shop_bonus
 from world.content import get_content_registry
 from world.forging import get_forge_entries
@@ -863,7 +864,7 @@ def build_combat_panel(encounter):
             [
                 _item(
                     enemy["key"],
-                    icon="warning",
+                    icon=str(enemy.get("icon") or get_enemy_icon_name(enemy.get("template_key"), None)),
                     badge=atb_badge(actor_atb_state(enemy=enemy)),
                     meta=(
                         dict(actor_atb_state(enemy=enemy).get("current_action") or {}).get("label")

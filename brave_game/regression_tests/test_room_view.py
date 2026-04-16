@@ -99,6 +99,25 @@ class DummyMapRoom:
 
 
 class RoomViewTests(unittest.TestCase):
+    def test_room_view_includes_room_actions_payload_for_valid_room_verbs(self):
+        room = DummyRoom()
+        room.db.brave_safe = True
+
+        view = build_room_view(room, DummyCharacter())
+        room_actions = view.get("room_actions", [])
+
+        self.assertEqual(["rest", None], [item.get("command") for item in room_actions])
+        self.assertEqual("Emote", room_actions[-1].get("text"))
+        self.assertEqual("sentiment_satisfied", room_actions[-1].get("icon"))
+        self.assertIn("picker", room_actions[-1])
+        picker = room_actions[-1]["picker"]
+        self.assertEqual("Emote", picker.get("title"))
+        self.assertEqual("Choose a social emote.", picker.get("subtitle"))
+        self.assertEqual(
+            ["Smile", "Nod", "Wave", "Shrug", "Laugh", "Frown", "Bow", "Think"],
+            [option.get("label") for option in picker.get("options", [])],
+        )
+
     def test_room_view_includes_mobile_pack_summary_and_navpad(self):
         view = build_room_view(DummyRoom(), DummyCharacter())
 
@@ -131,35 +150,6 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual([], view.get("guidance", []))
         self.assertEqual([], view.get("welcome_pages", []))
 
-    def test_room_view_adds_safe_room_rest_action(self):
-        view = build_room_view(DummyRoom(), DummyCharacter())
-
-        actions = _section(view, "Actions")
-        self.assertIn("rest", [item.get("command") for item in actions.get("items", [])])
-
-    def test_room_view_adds_fishing_actions_by_state(self):
-        room = DummyRoom()
-        room.db.brave_activities = ["fishing"]
-        character = DummyCharacter()
-
-        view = build_room_view(room, character)
-        actions = _section(view, "Actions")
-        self.assertIn("fish", [item.get("command") for item in actions.get("items", [])])
-
-        character.ndb.brave_fishing = {"phase": "bite"}
-        view = build_room_view(room, character)
-        actions = _section(view, "Actions")
-        self.assertIn("reel", [item.get("command") for item in actions.get("items", [])])
-
-    def test_room_view_adds_chapel_pray_action(self):
-        room = DummyRoom()
-        room.db.brave_room_id = "brambleford_chapel_dawn_bell"
-
-        view = build_room_view(room, DummyCharacter())
-
-        actions = _section(view, "Actions")
-        self.assertIn("pray", [item.get("command") for item in actions.get("items", [])])
-
     def test_room_view_includes_tutorial_guidance_and_welcome_pages(self):
         character = DummyCharacter()
         tutorial_state = {"status": "active", "step": "first_steps", "flags": {}}
@@ -180,8 +170,10 @@ class RoomViewTests(unittest.TestCase):
             DummyCharacter(),
             visible_threats=[
                 {
-                    "key": "Red Wyrm Retinue",
-                    "detail": "dragon, soldier, wolf",
+                    "display_name": "Red Wyrm Retinue",
+                    "composition": "2 Red Wyrms + 1 Red Wyrm Champion",
+                    "count": 3,
+                    "detail": "2 Red Wyrms + 1 Red Wyrm Champion",
                     "badge": "3",
                     "marker_icon": "skull",
                     "command": "fight",
@@ -194,16 +186,41 @@ class RoomViewTests(unittest.TestCase):
         threat_item = vicinity.get("items", [])[0]
 
         self.assertEqual("Red Wyrm Retinue", threat_item.get("text"))
-        self.assertEqual("dragon, soldier, wolf", threat_item.get("detail"))
+        self.assertIsNone(threat_item.get("detail"))
         self.assertEqual("3", threat_item.get("badge"))
         self.assertEqual("skull", threat_item.get("marker_icon"))
         self.assertEqual("fight", threat_item.get("command"))
         self.assertEqual("Inspect", threat_item.get("actions", [])[0].get("label"))
         inspect_picker = threat_item.get("actions", [])[0].get("picker", {})
         self.assertEqual("Red Wyrm Retinue", inspect_picker.get("title"))
-        self.assertIn("Hostiles: 3", inspect_picker.get("body", []))
-        self.assertIn("Composition: dragon, soldier, wolf", inspect_picker.get("body", []))
+        self.assertEqual(["2 Red Wyrms + 1 Red Wyrm Champion"], inspect_picker.get("body", []))
         self.assertEqual("fight", inspect_picker.get("options", [])[0].get("command"))
+
+    def test_single_enemy_party_uses_enemy_name_and_no_redundant_composition(self):
+        room = DummyRoom()
+        room.db.brave_safe = False
+
+        view = build_room_view(
+            room,
+            DummyCharacter(),
+            visible_threats=[
+                {
+                    "display_name": "Road Wolf",
+                    "composition": "Road Wolf",
+                    "count": 1,
+                    "badge": "1",
+                    "command": "fight",
+                    "tooltip": "1 hostile · wary threat",
+                }
+            ],
+        )
+
+        threat_item = _section(view, "The Vicinity").get("items", [])[0]
+        inspect_picker = threat_item.get("actions", [])[0].get("picker", {})
+        self.assertEqual("Road Wolf", threat_item.get("text"))
+        self.assertIsNone(threat_item.get("detail"))
+        self.assertEqual("Road Wolf", inspect_picker.get("title"))
+        self.assertEqual([], inspect_picker.get("body", []))
 
     def test_room_view_marks_engaged_threats_and_characters(self):
         room = DummyRoom()
@@ -218,12 +235,14 @@ class RoomViewTests(unittest.TestCase):
             viewer,
             visible_threats=[
                 {
-                    "key": "Grave Crow Flight",
-                    "detail": "Engaged · crows",
+                    "display_name": "Grave Crow Flight",
+                    "composition": "2 Grave Crows",
+                    "detail": "Engaged",
                     "badge": "2",
                     "marker_icon": "swords",
                     "command": "fight",
                     "tooltip": "2 hostiles · fight underway",
+                    "engaged": True,
                 }
             ],
             visible_chars=[ally],
@@ -232,7 +251,7 @@ class RoomViewTests(unittest.TestCase):
         vicinity = _section(view, "The Vicinity")
         items = vicinity.get("items", [])
         self.assertEqual("swords", items[0].get("marker_icon"))
-        self.assertEqual("Engaged · crows", items[0].get("detail"))
+        self.assertEqual("Engaged", items[0].get("detail"))
         self.assertEqual("Peep", items[1].get("text"))
         self.assertEqual("Engaged", items[1].get("detail"))
         self.assertEqual("swords", items[1].get("marker_icon"))

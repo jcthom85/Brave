@@ -2,6 +2,7 @@
 
 from world.content import get_content_registry
 from world.combat_atb import get_ability_atb_profile, get_item_atb_profile
+from world.enemy_icons import get_enemy_icon_name
 from world.data.items import ITEM_TEMPLATES, get_item_use_profile
 
 CONTENT = get_content_registry()
@@ -66,21 +67,9 @@ def _enemy_display_options(enemies):
 
 
 def _enemy_option_icon(enemy):
-    template_key = str(enemy.get("template_key") or "").lower()
-    name = str(enemy.get("key") or "").lower()
-    if template_key in {"old_greymaw", "miretooth", "hollow_lantern"} or "dragon" in name:
-        return "workspace_premium"
-    if any(token in template_key for token in ("wolf", "hound")) or any(token in name for token in ("wolf", "hound")):
-        return "pets"
-    if any(token in template_key for token in ("crow", "bat")) or any(token in name for token in ("crow", "bat")):
-        return "flight"
-    if any(token in template_key for token in ("shade", "wisp", "ghost")):
-        return "auto_awesome"
-    if any(token in template_key for token in ("skeleton", "skeletal")):
-        return "skull"
-    if any(token in template_key for token in ("soldier", "knight", "bandit", "goblin", "archer")):
-        return "swords"
-    return "warning"
+    enemy = dict(enemy or {})
+    template_key = str(enemy.get("template_key") or "").strip().lower()
+    return str(enemy.get("icon") or get_enemy_icon_name(template_key, enemy))
 
 
 def _enemy_picker(title, command_prefix, enemies):

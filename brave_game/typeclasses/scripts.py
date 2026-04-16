@@ -34,6 +34,7 @@ from world.combat_atb import (
 )
 from world.combat_execution import execute_combat_ability
 from world.content import get_content_registry
+from world.enemy_icons import get_enemy_icon_name
 from world.roaming import (
     advance_roaming_parties,
     build_roaming_room_preview,
@@ -172,6 +173,142 @@ THREAT_ARCHETYPE_LABELS = {
     "skirmisher": "skirmisher",
     "support": "support",
 }
+
+TEMPERAMENT_PRIORITY = {
+    "relentless": 3,
+    "aggressive": 2,
+    "territorial": 1,
+    "wary": 0,
+}
+
+
+def _enemy_display_name(template_key, template=None):
+    """Return a stable display name for a template."""
+
+    template = template or ENEMY_TEMPLATES.get(template_key, {})
+    name = str(template.get("short_name") or template.get("name") or template_key.replace("_", " ").title()).strip()
+    return name or "Hostile"
+
+
+def _pluralize_display_name(name):
+    """Return a simple plural form for a display name."""
+
+    words = str(name or "").split()
+    if not words:
+        return "Hostiles"
+    tail = words[-1]
+    if tail.endswith("y") and len(tail) > 1 and tail[-2] not in "aeiou":
+        tail = tail[:-1] + "ies"
+    elif tail.endswith(("s", "x", "z", "ch", "sh")):
+        tail = tail + "es"
+    else:
+        tail = tail + "s"
+    return " ".join([*words[:-1], tail])
+
+
+def _format_enemy_count_name(template_key, count, template=None):
+    """Return a count-aware enemy name for compact party summaries."""
+
+    name = _enemy_display_name(template_key, template)
+    if int(count or 0) <= 1:
+        return name
+    return f"{int(count)} {_pluralize_display_name(name)}"
+
+
+def _enemy_role_label(template):
+    """Return a loose role label derived from enemy tags."""
+
+    tags = {str(tag).lower() for tag in (template or {}).get("tags", [])}
+    for tag in ("boss", "brute", "support", "caster", "archer", "ranged", "skirmisher", "raider", "soldier", "beast", "wolf", "hound", "wisp", "shade"):
+        if tag in tags:
+            return tag
+    return "foe"
+
+
+def _build_enemy_party_summary(encounter_data):
+    """Return a structured summary of the exact enemy makeup."""
+
+    enemies = list(encounter_data.get("enemies") or [])
+    counts = {}
+    ordered_keys = []
+    for template_key in enemies:
+        if template_key not in counts:
+            ordered_keys.append(template_key)
+        counts[template_key] = counts.get(template_key, 0) + 1
+
+    members = []
+    composition_parts = []
+    dominant = None
+    for template_key in ordered_keys:
+        template = ENEMY_TEMPLATES.get(template_key) or {}
+        count = counts[template_key]
+        display_name = _enemy_display_name(template_key, template)
+        temperament = get_enemy_temperament(template_key, template)
+        temperament_label = get_enemy_temperament_label(temperament)
+        rank = get_enemy_rank(template_key, template)
+        member = {
+            "template_key": template_key,
+            "name": display_name,
+            "count": count,
+            "role": _enemy_role_label(template),
+            "temperament": temperament,
+            "temperament_label": temperament_label,
+            "rank": rank,
+        }
+        members.append(member)
+        composition_parts.append(_format_enemy_count_name(template_key, count, template))
+        candidate = (
+            int(count or 0),
+            int(rank or 1),
+            TEMPERAMENT_PRIORITY.get(temperament, 0),
+            display_name.lower(),
+        )
+        if dominant is None or candidate > dominant[0]:
+            dominant = (candidate, member)
+
+    if not composition_parts:
+        composition = "hostiles"
+    elif len(composition_parts) == 1:
+        composition = composition_parts[0]
+    elif len(composition_parts) == 2:
+        composition = " + ".join(composition_parts)
+    else:
+        composition = ", ".join(composition_parts)
+
+    dominant_member = dominant[1] if dominant else None
+    return {
+        "count": len(enemies),
+        "members": members,
+        "composition": composition,
+        "dominant_temperament": dominant_member["temperament"] if dominant_member else "aggressive",
+        "temperament_label": dominant_member["temperament_label"] if dominant_member else "Aggressive",
+        "lead_name": dominant_member["name"] if dominant_member else "Hostile Party",
+    }
+
+
+def _generated_party_name(summary, encounter_title=None):
+    """Return a fallback tactical party name from the party summary."""
+
+    members = list(summary.get("members") or [])
+    if not members:
+        encounter_title = str(encounter_title or "").strip()
+        return encounter_title or "Hostile Party"
+
+    lead = max(
+        members,
+        key=lambda member: (
+            int(member.get("rank", 1) or 1),
+            int(member.get("count", 1) or 1),
+            str(member.get("name") or "").lower(),
+        ),
+    )
+    lead_name = str(lead.get("name") or "Hostile").strip() or "Hostile"
+    if len(members) == 1:
+        return lead_name
+    if len(lead_name) > 22:
+        lead_name = lead_name.split()[0]
+    return f"{lead_name} Retinue"
+
 
 ROOM_THREAT_SKULL_DELTA = 3
 
@@ -318,6 +455,12 @@ class BraveEncounter(Script):
     def _build_preview_data(cls, room, encounter_data):
         """Create a stable, visible room-threat preview from encounter data."""
 
+        summary = _build_enemy_party_summary(encounter_data)
+        encounter_title = str(encounter_data.get("title") or "").strip()
+        encounter_intro = str(encounter_data.get("intro") or "").strip()
+        party_name = str(encounter_data.get("party_name") or "").strip()
+        display_name = party_name or (encounter_title if encounter_title and len(encounter_title) <= 32 else None) or _generated_party_name(summary, encounter_title=encounter_title)
+
         template_totals = {}
         for template_key in encounter_data["enemies"]:
             template_totals[template_key] = template_totals.get(template_key, 0) + 1
@@ -340,17 +483,40 @@ class BraveEncounter(Script):
                     "temperament": temperament,
                     "temperament_label": get_enemy_temperament_label(temperament),
                     "rank": get_enemy_rank(template_key, template),
+                    "icon": get_enemy_icon_name(template_key, template),
                 }
             )
+
+        party_icon = None
+        if enemies:
+            lead_enemy = max(
+                enemies,
+                key=lambda enemy: (
+                    int(enemy.get("rank", 1) or 1),
+                    str(enemy.get("key", "")).lower(),
+                ),
+            )
+            party_icon = get_enemy_icon_name(lead_enemy.get("template_key"), ENEMY_TEMPLATES.get(lead_enemy.get("template_key"), {}))
 
         return {
             "room_id": getattr(room.db, "brave_room_id", None),
             "encounter_data": encounter_data,
             "encounter_key": encounter_data["key"],
-            "encounter_title": encounter_data["title"],
-            "encounter_intro": encounter_data["intro"],
+            "encounter_title": encounter_title,
+            "encounter_intro": encounter_intro,
+            "party_name": party_name,
+            "display_name": display_name,
+            "composition": summary["composition"],
+            "count": summary["count"],
+            "members": summary["members"],
+            "temperament": summary["dominant_temperament"],
+            "temperament_label": summary["temperament_label"],
+            "icon": party_icon,
+            "source": str(encounter_data.get("source") or "room"),
+            "engagement_scope": str(encounter_data.get("engagement_scope") or "room"),
             "enemies": enemies,
         }
+
 
     @classmethod
     def _room_has_static_boss_encounter(cls, room_id):
@@ -377,26 +543,40 @@ class BraveEncounter(Script):
 
         encounter = cls.get_for_room(room)
         if encounter:
-            return {
-                "room_id": getattr(room.db, "brave_room_id", None),
-                "encounter_key": encounter.db.encounter_key,
-                "encounter_title": encounter.db.encounter_title,
-                "encounter_intro": encounter.db.encounter_intro,
-                "enemies": [
-                    {
-                        "id": enemy["id"],
-                        "template_key": enemy["template_key"],
-                        "key": enemy["key"],
-                        "desc": ENEMY_TEMPLATES[enemy["template_key"]].get("desc", ""),
-                        "tags": list(ENEMY_TEMPLATES[enemy["template_key"]].get("tags", [])),
-                        "temperament": get_enemy_temperament(enemy["template_key"]),
-                        "temperament_label": get_enemy_temperament_label(get_enemy_temperament(enemy["template_key"])),
-                        "rank": get_enemy_rank(enemy["template_key"]),
-                        "engaged": True,
-                    }
-                    for enemy in encounter.get_active_enemies()
-                ],
+            active_enemies = list(encounter.get_active_enemies())
+            encounter_data = {
+                "key": encounter.db.encounter_key,
+                "title": encounter.db.encounter_title,
+                "intro": encounter.db.encounter_intro,
+                "enemies": [enemy["template_key"] for enemy in active_enemies],
             }
+            preview = cls._build_preview_data(room, encounter_data)
+            preview["enemies"] = [
+                {
+                    "id": enemy["id"],
+                    "template_key": enemy["template_key"],
+                    "key": enemy["key"],
+                    "desc": ENEMY_TEMPLATES[enemy["template_key"]].get("desc", ""),
+                    "tags": list(ENEMY_TEMPLATES[enemy["template_key"]].get("tags", [])),
+                    "temperament": get_enemy_temperament(enemy["template_key"]),
+                    "temperament_label": get_enemy_temperament_label(get_enemy_temperament(enemy["template_key"])),
+                    "rank": get_enemy_rank(enemy["template_key"]),
+                    "icon": get_enemy_icon_name(enemy["template_key"], ENEMY_TEMPLATES.get(enemy["template_key"], {})),
+                    "engaged": True,
+                }
+                for enemy in active_enemies
+            ]
+            if active_enemies:
+                lead_enemy = max(
+                    active_enemies,
+                    key=lambda enemy: (
+                        int(get_enemy_rank(enemy["template_key"]) or 1),
+                        str(enemy.get("key", "")).lower(),
+                    ),
+                )
+                preview["icon"] = get_enemy_icon_name(lead_enemy["template_key"], ENEMY_TEMPLATES.get(lead_enemy["template_key"], {}))
+            preview["engaged"] = True
+            return preview
 
         roaming_preview = build_roaming_room_preview(room)
         if roaming_preview:
@@ -486,9 +666,17 @@ class BraveEncounter(Script):
     def _compact_encounter_title(cls, preview):
         """Return the short room-view title for an encounter preview."""
 
-        title = str(preview.get("encounter_title") or "").strip()
-        if title and len(title) <= 32:
+        title = str(preview.get("display_name") or preview.get("party_name") or "").strip()
+        if title:
             return title
+
+        encounter_title = str(preview.get("encounter_title") or "").strip()
+        if encounter_title and len(encounter_title) <= 32:
+            return encounter_title
+
+        summary = preview.get("members")
+        if summary:
+            return _generated_party_name({"members": list(summary)}, encounter_title=encounter_title)
 
         enemies = list(preview.get("enemies") or [])
         if not enemies:
@@ -508,6 +696,7 @@ class BraveEncounter(Script):
             lead_name = lead_name.split()[0]
         return f"{lead_name} Retinue"
 
+
     @classmethod
     def _build_room_threat_card(cls, preview, viewer=None):
         """Build one compact room threat card from an encounter preview."""
@@ -520,54 +709,51 @@ class BraveEncounter(Script):
         viewer_level = max(1, int(getattr(getattr(viewer, "db", None), "brave_level", 1) or 1))
         lead_rank = max(int(enemy.get("rank", 1) or 1) for enemy in enemies)
         lead_threat = get_relative_threat_label(lead_rank, effective_level)
-
-        sorted_enemies = sorted(
-            enemies,
-            key=lambda enemy: (
-                -int(enemy.get("rank", 1) or 1),
-                str(enemy.get("key", "")).lower(),
-            ),
-        )
-        archetypes = []
-        seen = set()
-        for enemy in sorted_enemies:
-            token = cls._extract_enemy_archetype(enemy)
-            if token in seen:
-                continue
-            seen.add(token)
-            archetypes.append(token)
-
-        if not archetypes:
-            descriptor = "hostiles"
-        elif len(archetypes) == 1:
-            descriptor = cls._pluralize_archetype(archetypes[0]) if len(enemies) > 1 else archetypes[0]
-        else:
-            descriptor = ", ".join(archetypes[:3])
+        display_name = cls._compact_encounter_title(preview)
+        composition = str(preview.get("composition") or "hostiles").strip() or "hostiles"
+        count = int(preview.get("count") or len(enemies) or 0)
+        source = str(preview.get("source") or "room").strip() or "room"
+        engagement_scope = str(preview.get("engagement_scope") or "room").strip() or "room"
 
         overpowering = any(int(enemy.get("rank", 1) or 1) >= viewer_level + ROOM_THREAT_SKULL_DELTA for enemy in enemies)
-        tooltip_bits = [f"{len(enemies)} hostiles", f"{lead_threat.lower()} threat"]
+        tooltip_bits = [f"{count} hostiles", f"{lead_threat.lower()} threat", composition]
         intro = str(preview.get("encounter_intro") or "").strip()
         if intro:
             tooltip_bits.append(intro)
+        if source == "roaming":
+            tooltip_bits.append("roaming party")
         engaged = any(bool(enemy.get("engaged")) for enemy in enemies)
         if engaged:
             tooltip_bits.append("fight underway")
 
+        temperament_label = str(preview.get("temperament_label") or "").strip()
+        if not temperament_label:
+            temperament_label = max(
+                (str(enemy.get("temperament_label") or "Aggressive") for enemy in enemies),
+                key=lambda label: (label == "Relentless", label == "Aggressive", label),
+            )
+
         return {
-            "key": cls._compact_encounter_title(preview),
-            "detail": f"Engaged · {descriptor}" if engaged else descriptor,
-            "badge": str(len(enemies)),
+            "key": display_name,
+            "display_name": display_name,
+            "party_name": str(preview.get("party_name") or display_name).strip() or display_name,
+            "composition": composition,
+            "count": count,
+            "members": list(preview.get("members") or []),
+            "detail": f"Engaged · {composition}" if engaged else composition,
+            "badge": str(count),
             "tooltip": " · ".join(bit for bit in tooltip_bits if bit),
             "command": "fight",
             "engaged": engaged,
             "marker_icon": "swords" if engaged else ("skull" if overpowering else None),
-            "icon": "warning",
-            "temperament_label": max(
-                (str(enemy.get("temperament_label") or "Aggressive") for enemy in enemies),
-                key=lambda label: (label == "Relentless", label == "Aggressive", label),
-            ),
+            "icon": preview.get("icon") or "monster-skull",
+            "temperament_label": temperament_label,
             "threat_label": lead_threat,
+            "intro": intro,
+            "source": source,
+            "engagement_scope": engagement_scope,
         }
+
 
     @classmethod
     def _build_roaming_room_threat_cards(cls, room, preview, viewer=None):
@@ -584,11 +770,14 @@ class BraveEncounter(Script):
                 continue
 
             party_preview = cls._build_preview_data(room, encounter_data)
+            party_preview["source"] = "roaming"
+            party_preview["engagement_scope"] = "room"
             party_preview["roaming_party_keys"] = [party.get("key")] if party.get("key") else []
             card = cls._build_room_threat_card(party_preview, viewer=viewer)
             if card:
                 cards.append(card)
         return cards
+
 
     @classmethod
     def get_visible_room_threats(cls, room, viewer=None):
@@ -1760,6 +1949,7 @@ class BraveEncounter(Script):
             "reposition_used": False,
             "shielded": False,
             "shield_broken": False,
+            "icon": get_enemy_icon_name(template_key, template),
         }
 
         scaling = self._get_scaling_profile()

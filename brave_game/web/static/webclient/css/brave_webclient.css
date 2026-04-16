@@ -2080,7 +2080,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .scene-rail .scene-card--scrollable .scene-card__list {
-    overflow: visible;
+    overflow: hidden;
     padding-right: 0;
 }
 
@@ -3514,7 +3514,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     align-self: center;
     margin: 4px auto 16px;
     width: 124px;
-    height: 124px;
+    height: 196px;
     padding: 14px;
     display: flex;
     align-items: center;
@@ -3906,7 +3906,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     position: relative;
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    overflow: hidden;
     padding: 0;
     border: 0;
     background: transparent;
@@ -4270,6 +4270,119 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     flex: 1 1 auto;
     min-height: 0;
     overflow: hidden;
+}
+
+.scene-rail__panel--vicinity .brave-room-activity-shell {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.scene-rail__panel--vicinity .brave-room-activity-card {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    min-height: 0;
+    padding: 14px 14px 12px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.16));
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at 0 0, var(--brave-state-surface-tint-soft), transparent 46%),
+        linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 14px 26px rgba(0, 0, 0, 0.16);
+}
+
+.scene-rail__panel--vicinity .brave-room-activity-card .scene-pack-panel__title {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.scene-rail__panel--vicinity .brave-room-activity-card .brave-room-log--rail {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.scene-rail__panel--vicinity .brave-room-actions-shell {
+    display: flex;
+    flex: 0 0 102px;
+    min-width: 102px;
+    min-height: 0;
+    align-self: stretch;
+}
+
+.scene-rail__panel--vicinity .brave-room-actions-shell--empty {
+    display: none;
+}
+
+.scene-rail__panel--vicinity .brave-room-actions-shell:empty {
+    display: none;
+}
+
+.scene-rail__panel--vicinity .brave-room-actions {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    min-height: 0;
+    padding: 2px 0 2px 2px;
+}
+
+.scene-rail__panel--vicinity .brave-room-actions__button {
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 40px;
+    padding: 9px 10px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 72%, rgba(var(--brave-accent-rgb), 0.12));
+    border-radius: 14px;
+    background:
+        radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.03), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    color: var(--brave-text);
+    text-align: left;
+    cursor: pointer;
+    transition:
+        transform 120ms ease,
+        border-color 120ms ease,
+        background 120ms ease,
+        box-shadow 120ms ease;
+}
+
+.scene-rail__panel--vicinity .brave-room-actions__button:hover,
+.scene-rail__panel--vicinity .brave-room-actions__button:focus-visible {
+    border-color: rgba(var(--brave-accent-rgb), 0.32);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-accent-rgb), 0.16), transparent 36%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
+    outline: none;
+    transform: translateX(1px);
+}
+
+.scene-rail__panel--vicinity .brave-room-actions__button-icon {
+    flex: 0 0 auto;
+    color: var(--brave-room-safe-icon);
+    font-size: 1.02rem;
+}
+
+.scene-rail__panel--vicinity .brave-room-actions__button-label {
+    min-width: 0;
+    line-height: 1.15;
+    font-size: calc(0.75rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    white-space: normal;
+}
+
+.scene-rail__panel--vicinity .brave-room-actions__button--emote {
+    margin-top: auto;
 }
 
 .brave-view--room .brave-room-log__body::-webkit-scrollbar {
@@ -4958,7 +5071,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--targets .brave-view__entries {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(208px, 208px));
+    grid-template-columns: repeat(auto-fill, minmax(172px, 172px));
     gap: 6px;
     justify-content: start;
     align-content: start;
@@ -5116,8 +5229,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--party .brave-view__entry,
 .brave-view--combat .brave-view__section--targets .brave-view__entry {
-    padding: 11px 11px 9px;
-    gap: 6px;
+    padding: 8px 9px 7px;
+    gap: 4px;
+    height: 144px;
+    overflow: hidden;
+    box-sizing: border-box;
     transition:
         transform 150ms ease,
         box-shadow 180ms ease,
@@ -5132,8 +5248,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry {
-    padding: 7px 7px 6px;
-    gap: 4px;
+    padding: 7px 8px 6px;
+    gap: 3px;
+    height: 150px;
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry {
@@ -5144,18 +5261,52 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         rgba(255, 255, 255, 0.028);
 }
 
+.brave-view--combat .brave-view__section--party .brave-view__entry {
+    height: 248px;
+    padding: 10px 10px 8px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry--size-elite,
+.brave-view--combat .brave-view__section--targets .brave-view__entry--size-elite {
+    height: 196px;
+    padding: 10px 10px 8px;
+}
+
+.brave-view--combat .brave-view__section--targets .brave-view__entry--size-elite,
+.brave-view--combat .brave-view__section--targets .brave-view__entry--size-boss {
+    grid-column: span 2;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry--size-boss,
+.brave-view--combat .brave-view__section--targets .brave-view__entry--size-boss {
+    height: 252px;
+    padding: 12px 12px 10px;
+}
+
 .brave-view--combat .brave-view__section--party .brave-view__entry-ornament {
-    --brave-entry-ornament-ratio: 0.72;
-    --brave-entry-ornament-fallback: 6.7rem;
-    --brave-entry-ornament-color: rgba(168, 223, 210, 0.11);
-    --brave-entry-ornament-glow: rgba(102, 166, 151, 0.1);
+    --brave-entry-ornament-ratio: 0.18;
+    --brave-entry-ornament-fallback: 2rem;
+    --brave-entry-ornament-color: rgba(168, 223, 210, 0.08);
+    --brave-entry-ornament-glow: rgba(102, 166, 151, 0.08);
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry-ornament {
-    --brave-entry-ornament-ratio: 0.48;
-    --brave-entry-ornament-fallback: 6.2rem;
-    --brave-entry-ornament-color: rgba(240, 177, 163, 0.14);
-    --brave-entry-ornament-glow: rgba(194, 109, 96, 0.12);
+    --brave-entry-ornament-ratio: 0.16;
+    --brave-entry-ornament-fallback: 1.8rem;
+    --brave-entry-ornament-color: rgba(240, 177, 163, 0.1);
+    --brave-entry-ornament-glow: rgba(194, 109, 96, 0.08);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry--size-elite .brave-view__entry-ornament,
+.brave-view--combat .brave-view__section--targets .brave-view__entry--size-elite .brave-view__entry-ornament {
+    --brave-entry-ornament-ratio: 0.22;
+    --brave-entry-ornament-fallback: 2.25rem;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry--size-boss .brave-view__entry-ornament,
+.brave-view--combat .brave-view__section--targets .brave-view__entry--size-boss .brave-view__entry-ornament {
+    --brave-entry-ornament-ratio: 0.28;
+    --brave-entry-ornament-fallback: 2.6rem;
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry.brave-view__entry--selected .brave-view__entry-ornament {
@@ -5164,6 +5315,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-icon-wrap {
+    min-width: 1.55rem;
+    min-height: 1.55rem;
+    padding: 2px 5px;
     background: rgba(102, 166, 151, 0.14);
     color: #a8dfd2;
 }
@@ -5195,6 +5349,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         0 16px 28px rgba(0, 0, 0, 0.22);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-body,
+.brave-view--combat .brave-view__section--targets .brave-view__entry-body,
+.brave-view--combat .brave-view__section--party .brave-view__meters,
+.brave-view--combat .brave-view__section--targets .brave-view__meters,
+.brave-view--combat .brave-view__section--party .brave-view__entry-chips,
+.brave-view--combat .brave-view__section--targets .brave-view__entry-chips {
+    overflow: hidden;
 }
 
 .brave-combat-floater {
@@ -5498,12 +5661,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--party .brave-view__meters,
 .brave-view--combat .brave-view__section--targets .brave-view__meters {
-    padding-top: 2px;
+    padding-top: 1px;
 }
 
 .brave-view--combat .brave-view__meter[data-meter-kind="atb"] {
-    gap: 4px;
-    margin-bottom: 1px;
+    gap: 3px;
+    margin-bottom: 0;
 }
 
 .brave-view--combat .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-fill {
@@ -5518,9 +5681,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-label {
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.14em);
+    letter-spacing: calc(var(--brave-letter-spacing) + 0.12em);
     color: color-mix(in srgb, var(--brave-accent) 76%, var(--brave-text-soft));
-    font-size: calc(0.56rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(0.5rem * var(--brave-text-scale) * var(--brave-font-size-scale));
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-body:empty,
@@ -5529,13 +5692,32 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-title {
-    font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.08;
     color: #e8f6f2;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-meta,
+.brave-view--combat .brave-view__section--party .brave-view__meter-label,
+.brave-view--combat .brave-view__section--party .brave-view__meter-value {
+    font-size: calc(0.48rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-label {
+    font-size: calc(0.46rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip {
+    font-size: calc(0.48rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-body {
+    gap: 1px;
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip,
 .brave-view--combat .brave-view__section--targets .brave-view__entry-chips .scene-card__chip {
-    font-size: calc(0.54rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(0.5rem * var(--brave-text-scale) * var(--brave-font-size-scale));
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry-chips .scene-card__chip {
@@ -5591,16 +5773,45 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--party .brave-view__meter-track {
     background: rgba(86, 122, 117, 0.16);
+    height: 5px;
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-track {
-    height: 7px;
+    height: 6px;
     background: rgba(77, 120, 128, 0.24);
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__meter-track {
     background: rgba(121, 59, 50, 0.22);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-icon-wrap {
+    min-width: 1.45rem;
+    min-height: 1.45rem;
+    padding: 2px 4px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-title {
+    font-size: calc(0.74rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.06;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip {
+    font-size: calc(0.46rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__meter-label,
+.brave-view--combat .brave-view__section--party .brave-view__meter-value {
+    font-size: calc(0.46rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-label {
+    font-size: calc(0.44rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__meter-track {
+    height: 5px;
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-track {
@@ -8347,7 +8558,7 @@ body.brave-scene-combat-enter .inputwrap {
 
 .brave-view__swipe-surface {
     position: relative;
-    min-height: 124px;
+    min-height: 196px;
     padding: 18px 18px 16px;
     border: 1px solid color-mix(in srgb, var(--brave-world-line) 70%, rgba(var(--brave-accent-rgb), 0.14));
     border-radius: var(--brave-radius-panel);
@@ -9061,8 +9272,59 @@ body.brave-scene-combat-enter .inputwrap {
         min-height: 0;
     }
 
+
+    .brave-mobile-sheet__section--room-actions,
+    .brave-mobile-sheet__section--activity {
+        flex: 0 0 auto;
+    }
+
     .brave-mobile-sheet__section--activity {
         flex: 1 1 auto;
+    }
+
+    .brave-mobile-sheet__section--room-actions {
+        flex: 0 0 auto;
+        gap: 8px;
+    }
+
+    .brave-mobile-sheet__section--room-actions .brave-room-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .brave-mobile-sheet__section--room-actions .brave-room-actions__button {
+        font-family: inherit;
+        flex: 1 1 calc(50% - 8px);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 40px;
+        padding: 9px 10px;
+        border: 1px solid color-mix(in srgb, var(--brave-world-line) 72%, rgba(var(--brave-accent-rgb), 0.12));
+        border-radius: 14px;
+        background:
+            radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.03), transparent 30%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+        color: var(--brave-text);
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .brave-mobile-sheet__section--room-actions .brave-room-actions__button-icon {
+        color: var(--brave-room-safe-icon);
+        font-size: 1.02rem;
+    }
+
+    .brave-mobile-sheet__section--room-actions .brave-room-actions__button-label {
+        min-width: 0;
+        line-height: 1.15;
+        font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        white-space: normal;
+    }
+
+    .brave-mobile-sheet__section--room-actions .brave-room-actions__button--emote {
+        flex-basis: 100%;
     }
 
     .brave-mobile-activity-log {
@@ -9694,7 +9956,7 @@ body.brave-scene-combat-enter .inputwrap {
     .brave-view--combat .brave-view__section--targets .brave-view__entries {
         display: grid;
         grid-auto-flow: column;
-        grid-auto-columns: minmax(104px, 29vw);
+        grid-auto-columns: minmax(92px, 26vw);
         gap: 5px;
         align-items: stretch;
         overflow-x: auto;
@@ -9714,9 +9976,11 @@ body.brave-scene-combat-enter .inputwrap {
         display: grid;
         grid-template-rows: auto auto auto 1fr;
         align-content: start;
-        gap: 5px;
-        padding: 7px 7px 6px;
-        min-height: 104px;
+        gap: 4px;
+        padding: 6px 6px 5px;
+        height: 150px;
+        overflow: hidden;
+        box-sizing: border-box;
         border-radius: 12px;
         width: auto;
         min-width: 0;
@@ -9727,6 +9991,7 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry {
+        height: 216px;
         border-color: rgba(116, 149, 146, 0.24);
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
@@ -9734,7 +9999,7 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__section--targets .brave-view__entry {
-        min-height: 104px;
+        height: 146px;
         border-color: rgba(170, 109, 96, 0.24);
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
@@ -9743,16 +10008,16 @@ body.brave-scene-combat-enter .inputwrap {
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-head,
     .brave-view--combat .brave-view__section--targets .brave-view__entry-head {
-        gap: 7px;
+        gap: 6px;
         align-items: center;
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-icon-wrap,
     .brave-view--combat .brave-view__section--targets .brave-view__entry-icon-wrap,
     .brave-view--combat .brave-view__section--targets .brave-view__entry-badge {
-        width: 20px;
-        min-width: 20px;
-        height: 20px;
+        width: 19px;
+        min-width: 19px;
+        height: 19px;
     }
 
     .brave-view--combat .brave-view__section--targets .brave-view__entry-icon-wrap,
@@ -9760,6 +10025,36 @@ body.brave-scene-combat-enter .inputwrap {
         width: 18px;
         min-width: 18px;
         height: 18px;
+    }
+
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry--size-elite,
+    .brave-view--combat .brave-view__section--targets .brave-view__entry--size-elite {
+        height: 196px;
+        padding: 8px 8px 6px;
+    }
+
+    .brave-view--combat .brave-view__section--targets .brave-view__entry--size-elite,
+    .brave-view--combat .brave-view__section--targets .brave-view__entry--size-boss {
+        grid-column: span 2;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry--size-boss,
+    .brave-view--combat .brave-view__section--targets .brave-view__entry--size-boss {
+        height: 228px;
+        padding: 10px 10px 8px;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry--size-elite .brave-view__entry-ornament,
+    .brave-view--combat .brave-view__section--targets .brave-view__entry--size-elite .brave-view__entry-ornament {
+        --brave-entry-ornament-ratio: 0.2;
+        --brave-entry-ornament-fallback: 2rem;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry--size-boss .brave-view__entry-ornament,
+    .brave-view--combat .brave-view__section--targets .brave-view__entry--size-boss .brave-view__entry-ornament {
+        --brave-entry-ornament-ratio: 0.24;
+        --brave-entry-ornament-fallback: 2.3rem;
     }
 
     .brave-view--combat .brave-view__entry-title {
@@ -9772,8 +10067,33 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__entry-meta {
-        margin-top: 1px;
-        font-size: calc(0.58rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        margin-top: 0;
+        font-size: calc(0.5rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+    .brave-view--combat .brave-view__section--party .brave-view__entry-title {
+        font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        line-height: 1.08;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry-body {
+        gap: 1px;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__meter-label,
+    .brave-view--combat .brave-view__section--party .brave-view__meter-value {
+        font-size: calc(0.48rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-label {
+        font-size: calc(0.45rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__meter-track {
+        height: 5px;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip {
+        font-size: calc(0.48rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     }
 
     .brave-view--combat .brave-view__entry-body,
@@ -9787,29 +10107,30 @@ body.brave-scene-combat-enter .inputwrap {
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-chips,
     .brave-view--combat .brave-view__section--targets .brave-view__entry-chips {
-        gap: 4px;
+        gap: 3px;
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip,
     .brave-view--combat .brave-view__section--targets .brave-view__entry-chips .scene-card__chip {
-        font-size: calc(0.54rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        font-size: calc(0.5rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     }
 
     .brave-view--combat .brave-view__meters {
-        gap: 4px;
+        gap: 3px;
     }
 
     .brave-view--combat .brave-view__meter {
-        gap: 3px;
+        gap: 2px;
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-body,
     .brave-view--combat .brave-view__section--targets .brave-view__entry-body {
         min-height: 0;
+        overflow: hidden;
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-body {
-        min-height: 1.2em;
+        min-height: 0.9em;
     }
 
     .brave-view--combat .brave-view__section--targets .brave-view__entry-body:empty {
@@ -9817,19 +10138,52 @@ body.brave-scene-combat-enter .inputwrap {
     }
 
     .brave-view--combat .brave-view__meter-head {
-        gap: 6px;
+        gap: 5px;
     }
 
     .brave-view--combat .brave-view__meter-label {
-        font-size: calc(0.56rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        font-size: calc(0.5rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     }
 
     .brave-view--combat .brave-view__meter-value {
-        font-size: calc(0.64rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        font-size: calc(0.58rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     }
 
     .brave-view--combat .brave-view__meter-track {
-        height: 6px;
+        height: 5px;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry-icon-wrap {
+        width: 18px;
+        min-width: 18px;
+        height: 18px;
+        padding: 1px 3px;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry-title {
+        font-size: calc(0.64rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        line-height: 1.06;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry-chips .scene-card__chip {
+        font-size: calc(0.46rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__meter-label,
+    .brave-view--combat .brave-view__section--party .brave-view__meter-value {
+        font-size: calc(0.46rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-label {
+        font-size: calc(0.44rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__entry-body {
+        gap: 1px;
+    }
+
+    .brave-view--combat .brave-view__section--party .brave-view__meter-track {
+        height: 5px;
     }
 
     .brave-view--combat .brave-view__section--abilities .brave-view__list,

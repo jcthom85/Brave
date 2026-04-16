@@ -6,6 +6,7 @@ from world.arcade import format_arcade_score, get_personal_best, get_reward_defi
 from world.activities import get_targetable_consumable_characters, room_supports_activity
 from world.combat_atb import render_atb_state
 from world.combat_actions import build_combat_action_payload
+from world.enemy_icons import get_enemy_icon_name
 from world.content import get_content_registry
 from world.data.arcade import ARCADE_GAMES
 from world.commerce import format_shop_bonus, get_reserved_entries, get_sellable_entries, get_shop_bonus
@@ -147,6 +148,7 @@ def _item(
     text,
     *,
     icon=None,
+    background_icon=None,
     badge=None,
     command=None,
     prefill=None,
@@ -219,29 +221,25 @@ def _resource_meter_tone(current, maximum):
 
 
 def _enemy_icon(enemy):
-    template = ENEMY_TEMPLATES.get((enemy or {}).get("template_key"), {})
-    tags = {str(tag).lower() for tag in template.get("tags", [])}
-    name = str((enemy or {}).get("key") or template.get("name") or "").lower()
+    enemy = dict(enemy or {})
+    template_key = str(enemy.get("template_key") or "").strip().lower()
+    template = ENEMY_TEMPLATES.get(template_key, {})
+    return str(enemy.get("icon") or get_enemy_icon_name(template_key, template))
 
-    if "boss" in tags or "dragon" in tags:
-        return "workspace_premium"
-    if {"wolf", "hound", "beast"} & tags or any(token in name for token in ("wolf", "hound")):
-        return "pets"
-    if {"crow", "bat", "bird"} & tags or any(token in name for token in ("crow", "bat")):
-        return "flight"
-    if {"wisp", "shade", "ghost", "spirit"} & tags:
-        return "auto_awesome"
-    if {"undead", "skeleton"} & tags or any(token in name for token in ("skeletal", "skeleton")):
-        return "skull"
-    if {"soldier", "knight", "bandit", "goblin", "raider", "archer"} & tags:
-        return "swords"
-    if {"spider", "insect", "drone", "construct"} & tags or any(token in name for token in ("spider", "drone")):
-        return "pest_control"
-    if {"plant", "briar", "creeper", "mossling"} & tags or any(token in name for token in ("briar", "creeper", "moss")):
-        return "park"
-    if {"slime", "ooze"} & tags or "slime" in name:
-        return "water_drop"
-    return "warning"
+
+def _combat_card_size_class(entry=None, *, enemy=False):
+    if not enemy:
+        return "normal"
+    entry = dict(entry or {})
+    template_key = str(entry.get("template_key") or "").strip().lower()
+    template = ENEMY_TEMPLATES.get(template_key, {})
+    tags = {str(tag).lower() for tag in template.get("tags", [])}
+    rank = int(entry.get("rank") or 1)
+    if "boss" in tags:
+        return "boss"
+    if rank >= 4 or {"captain", "commander", "elite"} & tags:
+        return "elite"
+    return "normal"
 
 
 def _entry(
@@ -251,6 +249,7 @@ def _entry(
     lines=None,
     summary=None,
     icon=None,
+    background_icon=None,
     badge=None,
     command=None,
     prefill=None,
@@ -259,6 +258,7 @@ def _entry(
     picker=None,
     chips=None,
     meters=None,
+    size_class=None,
     tooltip=None,
     selected=False,
     combat_state=None,
@@ -273,6 +273,8 @@ def _entry(
         "icon": icon,
         "badge": badge,
     }
+    if background_icon:
+        entry["background_icon"] = background_icon
     if hide_icon:
         entry["hide_icon"] = True
     if selected:
@@ -297,6 +299,8 @@ def _entry(
         entry["meters"] = meters
     if tooltip:
         entry["tooltip"] = tooltip
+    if size_class:
+        entry["size_class"] = size_class
     return entry
 
 
@@ -973,28 +977,20 @@ def _format_room_threat_items(visible_threats):
     items = []
     for threat in visible_threats or []:
         inspect_lines = []
-        badge = str(threat.get("badge") or "").strip()
-        detail = str(threat.get("detail") or "").strip()
-        threat_label = str(threat.get("threat_label") or "").strip()
-        temperament = str(threat.get("temperament_label") or "").strip()
-        tooltip = str(threat.get("tooltip") or "").strip()
-        if badge:
-            inspect_lines.append(f"Hostiles: {badge}")
-        if detail:
-            inspect_lines.append(f"Composition: {detail}")
-        if threat_label:
-            inspect_lines.append(f"Threat: {threat_label}")
-        if temperament:
-            inspect_lines.append(f"Temperament: {temperament}")
-        if tooltip:
-            inspect_lines.append(tooltip)
+        display_name = str(threat.get("display_name") or threat.get("key") or "").strip()
+        composition = str(threat.get("composition") or threat.get("detail") or "").strip()
+        intro = str(threat.get("intro") or "").strip()
+        if composition and composition != display_name:
+            inspect_lines.append(composition)
+        if intro:
+            inspect_lines.append(intro)
         items.append(
             _item(
-                str(threat["key"]),
-                icon=threat.get("icon", "warning"),
-                badge=threat.get("badge"),
+                display_name,
+                icon=threat.get("icon") or "monster-skull",
+                badge=threat.get("badge") or threat.get("count"),
                 command=threat.get("command"),
-                detail=threat.get("detail"),
+                detail="Engaged" if threat.get("engaged") else None,
                 tooltip=threat.get("tooltip"),
                 marker_icon=threat.get("marker_icon"),
                 actions=[
@@ -1004,9 +1000,8 @@ def _format_room_threat_items(visible_threats):
                         "search",
                         tone="muted",
                         picker=_picker(
-                            str(threat["key"]),
-                            subtitle="Threat details",
-                            body=inspect_lines or ["No further details are visible from here."],
+                            display_name,
+                            body=inspect_lines,
                             options=[
                                 _picker_option("Fight", command=threat.get("command") or "fight", icon="swords", tone="danger")
                             ],
@@ -1016,6 +1011,8 @@ def _format_room_threat_items(visible_threats):
             )
         )
     return items
+
+
 
 
 def _format_room_entity_items(viewer, visible_entities, visible_chars):
@@ -1102,6 +1099,23 @@ def _character_in_combat(character):
     return bool(encounter and encounter.is_participant(character))
 
 
+def _build_room_emote_picker():
+    return _picker(
+        "Emote",
+        subtitle="Choose a social emote.",
+        options=[
+            {"label": "Smile", "icon": "sentiment_satisfied", "command": "emote smile"},
+            {"label": "Nod", "icon": "how_to_reg", "command": "emote nod"},
+            {"label": "Wave", "icon": "waving_hand", "command": "emote wave"},
+            {"label": "Shrug", "icon": "air", "command": "emote shrug"},
+            {"label": "Laugh", "icon": "sentiment_very_satisfied", "command": "emote laugh"},
+            {"label": "Frown", "icon": "sentiment_dissatisfied", "command": "emote frown"},
+            {"label": "Bow", "icon": "self_improvement", "command": "emote bow"},
+            {"label": "Think", "icon": "psychology", "command": "emote think"},
+        ],
+    )
+
+
 def _format_room_context_action_items(room, viewer):
     """Return room-level buttons for core actions that do not belong to one object."""
 
@@ -1132,6 +1146,7 @@ def _format_room_context_action_items(room, viewer):
             )
         )
 
+    items.append(_item("Emote", icon="sentiment_satisfied", picker=_build_room_emote_picker(), tooltip="Choose a social emote."))
     return items
 
 
@@ -1240,7 +1255,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
 
     threat_items = _format_room_threat_items(visible_threats)
     visible_items = _format_room_entity_items(looker, visible_entities, visible_chars)
-    context_action_items = _format_room_context_action_items(room, looker)
+    room_action_items = _format_room_context_action_items(room, looker)
     sections = []
     tutorial_guidance = _build_tutorial_guidance(looker)
     welcome_pages = []
@@ -1264,17 +1279,6 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
             hide_label=True,
         )
     )
-
-    if context_action_items:
-        sections.append(
-            _section(
-                "Actions",
-                "touch_app",
-                "list",
-                items=context_action_items,
-                variant="actions",
-            )
-        )
 
     vicinity_items = []
     has_threats = bool(threat_items)
@@ -1315,6 +1319,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         "tone": "safe" if room.db.brave_safe else "danger",
         "guidance": tutorial_guidance,
         "welcome_pages": welcome_pages,
+        "room_actions": room_action_items,
     }
 
 
@@ -3024,8 +3029,10 @@ def build_combat_view(encounter, character):
         party_entries.append(
             _entry(
                 participant.key,
-                meta="You" if participant.id == character.id else None,
+                meta=None,
                 icon="person",
+                background_icon="person",
+                size_class=_combat_card_size_class(participant),
                 chips=status_chips,
                 meters=meters,
                 selected=bool(selected_target_kind == "ally" and selected_target_id == participant.id),
@@ -3073,6 +3080,8 @@ def build_combat_view(encounter, character):
                 display_name,
                 lines=lines,
                 icon=_enemy_icon(enemy),
+                background_icon=_enemy_icon(enemy),
+                size_class=_combat_card_size_class(enemy, enemy=True),
                 command=f"attack {enemy['id']}",
                 chips=status_chips,
                 meters=[atb_meter(atb_state, enemy=True), hp_meter(enemy["hp"], enemy["max_hp"])],

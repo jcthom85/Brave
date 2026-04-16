@@ -331,6 +331,32 @@ class CmdMap(BraveCharacterCommand):
         )
 
 
+class CmdEmote(BraveCharacterCommand):
+    """
+    Show a quick social emote.
+
+    Usage:
+      emote <message>
+
+    Sends a short expressive line to the current room.
+    """
+
+    key = "emote"
+    aliases = ["pose"]
+    help_category = "Brave"
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+
+        if not self.args:
+            self.msg("Usage: emote <message>")
+            return
+
+        self.send_room_emote(self.args.strip())
+
+
 class CmdRest(BraveCharacterCommand):
     """
     Recover in a safe place.

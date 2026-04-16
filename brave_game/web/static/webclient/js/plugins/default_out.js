@@ -44,6 +44,8 @@ let defaultout_plugin = (function () {
     var roomActivityRailPinnedToBottom = true;
     var roomActivityRailScrollTop = 0;
     var roomActivityRailMissedCount = 0;
+    var combatLogPinnedToBottom = true;
+    var combatLogScrollTop = 0;
     var currentMapText = "";
     var currentMapGrid = null;
     var currentArcadeState = null;
@@ -61,6 +63,7 @@ let defaultout_plugin = (function () {
     var currentAtbAnimationFrame = null;
     var pendingCombatSwapTimeout = null;
     var suppressedCombatEntryRefs = {};
+    var combatViewTransitionActive = false;
 
     var isMobileViewport = function () {
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
@@ -1532,12 +1535,19 @@ let defaultout_plugin = (function () {
         var bodyMarkup = "";
         var panelClass = "brave-mobile-sheet__panel";
         var bodyClass = "brave-mobile-sheet__body";
+        var roomActionsMarkup = "";
 
         if (tab === "activity") {
             panelClass += " brave-mobile-sheet__panel--activity";
             bodyClass += " brave-mobile-sheet__body--activity";
+            roomActionsMarkup = buildRoomActionRailMarkup(roomView);
             bodyMarkup =
-                "<div class='brave-mobile-sheet__section brave-mobile-sheet__section--activity'>"
+                (roomActionsMarkup
+                    ? "<div class='brave-mobile-sheet__section brave-mobile-sheet__section--room-actions'>"
+                        + roomActionsMarkup
+                        + "</div>"
+                    : "")
+                + "<div class='brave-mobile-sheet__section brave-mobile-sheet__section--activity'>"
                 + "<div class='brave-mobile-activity-log brave-room-log'>"
                 + "<div class='brave-room-log__body brave-room-log__body--mobile' role='log' aria-live='polite' aria-relevant='additions text'>"
                 + currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("")
@@ -2752,6 +2762,10 @@ let defaultout_plugin = (function () {
             return claimedCount;
         }
 
+        var logBodyNode = logBody.get(0);
+        syncCombatLogScrollState(logBodyNode);
+        var shouldStickToBottom = combatLogPinnedToBottom;
+
         var strayEntries = mwin.children(".out, .msg, .err, .sys, .inp");
         if (!strayEntries.length) {
             return claimedCount;
@@ -2762,6 +2776,8 @@ let defaultout_plugin = (function () {
             applyCombatFloatersFromNode(this);
         });
         claimedCount = strayEntries.length;
+        restoreCombatLogScroll(logBodyNode, shouldStickToBottom);
+        updateCombatLogCue();
         return claimedCount;
     };
 
@@ -3578,6 +3594,83 @@ let defaultout_plugin = (function () {
         return $(body);
     };
 
+    var isCombatLogScrolledToBottom = function (body) {
+        if (!body) {
+            return true;
+        }
+        if (body.clientHeight <= 0) {
+            return combatLogPinnedToBottom;
+        }
+        return (body.scrollHeight - body.scrollTop - body.clientHeight) <= 16;
+    };
+
+    var syncCombatLogScrollState = function (body) {
+        if (!body) {
+            return;
+        }
+        if (body.clientHeight <= 0) {
+            return;
+        }
+        combatLogPinnedToBottom = isCombatLogScrolledToBottom(body);
+        combatLogScrollTop = body.scrollTop;
+    };
+
+    var restoreCombatLogScroll = function (body, shouldStickToBottom) {
+        if (!body) {
+            return;
+        }
+        var applyScroll = function () {
+            if (shouldStickToBottom) {
+                body.scrollTop = body.scrollHeight;
+                combatLogPinnedToBottom = true;
+                combatLogScrollTop = body.scrollTop;
+            } else {
+                body.scrollTop = Math.min(combatLogScrollTop, Math.max(0, body.scrollHeight - body.clientHeight));
+            }
+            syncCombatLogScrollState(body);
+        };
+        applyScroll();
+        if (typeof window.requestAnimationFrame === "function") {
+            window.requestAnimationFrame(applyScroll);
+        }
+    };
+
+    var updateCombatLogCue = function () {
+        var cue = document.querySelector(".brave-combat-log [data-brave-combat-scroll='latest']");
+        if (!cue) {
+            return;
+        }
+        var hasMissed = !combatLogPinnedToBottom;
+        cue.classList.toggle("brave-room-log__jump--visible", hasMissed);
+        cue.disabled = !hasMissed;
+        cue.setAttribute(
+            "aria-label",
+            hasMissed ? "Jump battle feed to the latest line" : "Battle feed is at the latest line"
+        );
+    };
+
+    var scrollCombatLogToBottom = function () {
+        var body = document.querySelector(".brave-combat-log__body");
+        if (!body) {
+            return;
+        }
+        combatLogPinnedToBottom = true;
+        combatLogScrollTop = body.scrollTop;
+        restoreCombatLogScroll(body, true);
+        updateCombatLogCue();
+    };
+
+    var bindCombatLogScrollState = function (body) {
+        if (!body || body.dataset.braveCombatScrollBound === "1") {
+            return;
+        }
+        body.dataset.braveCombatScrollBound = "1";
+        body.addEventListener("scroll", function () {
+            syncCombatLogScrollState(body);
+            updateCombatLogCue();
+        }, { passive: true });
+    };
+
     var syncRailActivityLog = function () {
         var panel = document.getElementById("scene-vicinity-panel");
         if (!panel) {
@@ -3737,7 +3830,9 @@ let defaultout_plugin = (function () {
         if (!log.length) {
             log = $(
                 "<div class='brave-combat-log'>"
-                + "<div class='brave-combat-log__head'>Battle Feed</div>"
+                + "<div class='brave-combat-log__head'>Battle Feed"
+                + "<button type='button' class='brave-room-log__jump brave-combat-log__jump' data-brave-combat-scroll='latest' aria-label='Battle feed is at the latest line' disabled>Latest</button>"
+                + "</div>"
                 + "<div class='brave-combat-log__body' role='log' aria-live='polite' aria-relevant='additions text'></div>"
                 + "</div>"
             );
@@ -3749,7 +3844,15 @@ let defaultout_plugin = (function () {
             logBody = $("<div class='brave-combat-log__body' role='log' aria-live='polite' aria-relevant='additions text'></div>");
             var existingEntries = log.children(".out, .msg, .err");
             if (!log.children(".brave-combat-log__head").length) {
-                log.prepend("<div class='brave-combat-log__head'>Battle Feed</div>");
+                log.prepend(
+                    "<div class='brave-combat-log__head'>Battle Feed"
+                    + "<button type='button' class='brave-room-log__jump brave-combat-log__jump' data-brave-combat-scroll='latest' aria-label='Battle feed is at the latest line' disabled>Latest</button>"
+                    + "</div>"
+                );
+            } else if (!log.children("[data-brave-combat-scroll='latest']").length) {
+                log.children(".brave-combat-log__head").first().append(
+                    "<button type='button' class='brave-room-log__jump brave-combat-log__jump' data-brave-combat-scroll='latest' aria-label='Battle feed is at the latest line' disabled>Latest</button>"
+                );
             }
             log.append(logBody);
             if (existingEntries.length) {
@@ -3761,6 +3864,11 @@ let defaultout_plugin = (function () {
         if (strayEntries.length) {
             logBody.append(strayEntries);
         }
+
+        var logBodyNode = logBody.get(0);
+        bindCombatLogScrollState(logBodyNode);
+        restoreCombatLogScroll(logBodyNode, combatLogPinnedToBottom);
+        updateCombatLogCue();
 
         return logBody;
     };
@@ -3986,6 +4094,39 @@ let defaultout_plugin = (function () {
         renderStructuredPanel(card, panelData);
     };
 
+    var buildRoomActionRailMarkup = function (roomView) {
+        if (!roomView || !Array.isArray(roomView.room_actions) || !roomView.room_actions.length) {
+            return "";
+        }
+        return (
+            "<div class='brave-room-actions' aria-label='Room actions'>"
+            + roomView.room_actions.map(function (action) {
+                if (!action || (!action.command && !action.picker)) {
+                    return "";
+                }
+                var ariaLabel = action.aria_label || action.label || action.text || "Action";
+                var title = action.tooltip || action.detail || action.label || action.text || "";
+                var text = action.label || action.text || "";
+                var iconName = action.icon || "bolt";
+                var buttonClass = "brave-room-actions__button brave-click";
+                if (text.toLowerCase() === "emote") {
+                    buttonClass += " brave-room-actions__button--emote";
+                }
+                return (
+                    "<button type='button' class='" + buttonClass + "'"
+                    + (action.command ? " data-brave-command='" + escapeHtml(action.command) + "'" : "")
+                    + (action.picker ? " data-brave-picker='" + escapeHtml(JSON.stringify(action.picker)) + "'" : "")
+                    + (title ? " title='" + escapeHtml(title) + "'" : "")
+                    + " aria-label='" + escapeHtml(ariaLabel) + "'>"
+                    + icon(iconName, "brave-room-actions__button-icon")
+                    + "<span class='brave-room-actions__button-label'>" + escapeHtml(text) + "</span>"
+                    + "</button>"
+                );
+            }).join("")
+            + "</div>"
+        );
+    };
+
     var buildRoomVicinityPanelData = function (roomView) {
         if (!isRoomLikeView(roomView) || !Array.isArray(roomView.sections)) {
             return null;
@@ -4037,14 +4178,20 @@ let defaultout_plugin = (function () {
         var body = panel.querySelector(".brave-room-log__body--rail");
         if (!body) {
             panel.innerHTML =
-                "<div class='scene-card__eyebrow scene-pack-panel__title'>"
+                "<div class='brave-room-activity-shell'>"
+                + "<div class='brave-room-actions-shell'></div>"
+                + "<div class='brave-room-activity-card'>"
+                + "<div class='scene-card__eyebrow scene-pack-panel__title'>"
                 + icon("forum", "scene-card__eyebrow-icon scene-pack-panel__title-icon")
                 + "<span>Activity</span>"
                 + "<button type='button' class='brave-room-log__jump' data-brave-activity-scroll='rail' aria-label='Activity is at the latest line' disabled>0</button>"
                 + "</div>"
                 + "<div class='brave-room-log brave-room-log--rail'>"
                 + "<div class='brave-room-log__body brave-room-log__body--rail' role='log' aria-live='polite' aria-relevant='additions text'></div>"
+                + "</div>"
+                + "</div>"
                 + "</div>";
+            body = panel.querySelector(".brave-room-log__body--rail");
         } else if (!panel.querySelector("[data-brave-activity-scroll='rail']")) {
             var title = panel.querySelector(".scene-pack-panel__title");
             if (title) {
@@ -4053,6 +4200,11 @@ let defaultout_plugin = (function () {
                     "<button type='button' class='brave-room-log__jump' data-brave-activity-scroll='rail' aria-label='Activity is at the latest line' disabled>0</button>"
                 );
             }
+        }
+        var shell = panel.querySelector(".brave-room-actions-shell");
+        if (shell) {
+            shell.innerHTML = buildRoomActionRailMarkup(currentViewData);
+            shell.classList.toggle("brave-room-actions-shell--empty", !shell.innerHTML.trim());
         }
         panel.removeAttribute("data-brave-command");
         panel.removeAttribute("title");
@@ -4066,6 +4218,12 @@ let defaultout_plugin = (function () {
     var renderVicinityPanel = function (roomView) {
         var panel = document.getElementById("scene-vicinity-panel");
         if (!panel) {
+            return;
+        }
+
+        if (combatViewTransitionActive && !isRoomLikeView(roomView)) {
+            clearVicinityPanel();
+            syncSceneRailLayout();
             return;
         }
 
@@ -4083,6 +4241,12 @@ let defaultout_plugin = (function () {
     var renderPackPanel = function () {
         var panel = document.getElementById("scene-pack-panel");
         if (!panel) {
+            return;
+        }
+
+        if (combatViewTransitionActive) {
+            clearPackPanel();
+            syncSceneRailLayout();
             return;
         }
 
@@ -4208,8 +4372,12 @@ let defaultout_plugin = (function () {
 
         var preserveRail = !!(viewData.layout === "explore" || viewData.preserve_rail);
         var stickyView = !!viewData.sticky;
+        var isCombatView = viewData.variant === "combat";
         var variantClass = viewData.variant ? " brave-view--" + escapeHtml(viewData.variant) : "";
         var toneClass = viewData.tone ? " brave-view--tone-" + escapeHtml(viewData.tone) : "";
+        if (isCombatView) {
+            combatViewTransitionActive = true;
+        }
         applyReactiveState(viewData.reactive || {});
 
         var renderChip = function (entry) {
@@ -4701,6 +4869,9 @@ let defaultout_plugin = (function () {
                     if (backgroundIcon) {
                         rowClass += " brave-view__entry--ornamented";
                     }
+                    if (entry && entry.size_class) {
+                        rowClass += " brave-view__entry--size-" + String(entry.size_class);
+                    }
                     if (hasBrowserInteraction(entry)) {
                         rowClass += " brave-click brave-click--row";
                     }
@@ -4980,6 +5151,7 @@ let defaultout_plugin = (function () {
                 window.requestAnimationFrame(function () {
                     flushPendingCombatFxEvents();
                 });
+                combatViewTransitionActive = false;
             };
 
             if (shouldDelayCombatSwap) {
@@ -5040,6 +5212,7 @@ let defaultout_plugin = (function () {
             window.requestAnimationFrame(function () {
                 flushPendingCombatFxEvents();
             });
+            combatViewTransitionActive = false;
             focusViewAutofocusField();
             resetAllScrollPositions();
         };
@@ -5095,7 +5268,7 @@ let defaultout_plugin = (function () {
             return;
         }
 
-        if (currentViewData && currentViewData.variant === "combat") {
+        if (combatViewTransitionActive || (currentViewData && currentViewData.variant === "combat")) {
             dock.innerHTML = "";
             document.body.classList.remove("brave-mobile-nav-active");
             document.body.classList.remove("brave-mobile-command-dock-active");
@@ -5420,6 +5593,13 @@ let defaultout_plugin = (function () {
                 event.preventDefault();
                 event.stopPropagation();
                 scrollRailActivityToBottom();
+                return;
+            }
+            var combatScrollTarget = event.target.closest("[data-brave-combat-scroll='latest']");
+            if (combatScrollTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                scrollCombatLogToBottom();
                 return;
             }
             var combatTabTarget = event.target.closest("[data-brave-combat-tab]");
@@ -5886,7 +6066,8 @@ let defaultout_plugin = (function () {
             return true;
         }
         if (
-            ((document.body.classList.contains("brave-mainview-active")
+            !combatViewTransitionActive
+            && ((document.body.classList.contains("brave-mainview-active")
                 && !document.body.classList.contains("brave-sticky-view-active")
                 && !isRoomLikeView(currentViewData))
                 || ((kwargs && kwargs.type === "look") && !isRoomLikeView(currentViewData)))

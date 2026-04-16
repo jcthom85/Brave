@@ -150,7 +150,7 @@ class CombatViewTests(unittest.TestCase):
         encounter = DummyEncounter(
             room,
             [healer, ally],
-            [{"id": "e1", "key": "Bog Wolf", "hp": 11, "max_hp": 16}],
+            [{"id": "e1", "template_key": "road_wolf", "key": "Bog Wolf", "hp": 11, "max_hp": 16}],
             pending={7: "heal -> Peep"},
             atb_states={
                 "p:7": {"phase": "ready", "gauge": 100, "ready_gauge": 100},
@@ -189,6 +189,10 @@ class CombatViewTests(unittest.TestCase):
         party = _section(view, "Party")
         dad_entry = _entry(party, "Dad")
         peep_entry = _entry(party, "Peep")
+        self.assertEqual("person", dad_entry.get("background_icon"))
+        self.assertEqual("person", peep_entry.get("background_icon"))
+        self.assertEqual("normal", dad_entry.get("size_class"))
+        self.assertEqual("normal", peep_entry.get("size_class"))
         self.assertEqual(
             [("ATB", "100 / 100"), ("HP", "20 / 24"), ("STA", "6 / 10"), ("MP", "18 / 20")],
             [(meter.get("label"), meter.get("value")) for meter in dad_entry.get("meters", [])],
@@ -202,6 +206,8 @@ class CombatViewTests(unittest.TestCase):
 
         enemies_section = _section(view, "Enemies")
         wolf_entry = _entry(enemies_section, "Bog Wolf")
+        self.assertEqual("wolf-head", wolf_entry.get("background_icon"))
+        self.assertEqual("normal", wolf_entry.get("size_class"))
         self.assertEqual(
             [("ATB", "70 / 100"), ("HP", "11 / 16")],
             [(meter.get("label"), meter.get("value")) for meter in wolf_entry.get("meters", [])],
@@ -326,6 +332,29 @@ class CombatViewTests(unittest.TestCase):
             [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
             [(meter.get("label"), meter.get("value")) for meter in warrior_entry.get("meters", [])],
         )
+
+    def test_boss_enemy_gets_boss_size_class(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "template_key": "captain_varn_blackreed", "key": "Captain Varn Blackreed", "hp": 30, "max_hp": 30}],
+        )
+
+        view = build_combat_view(encounter, warrior)
+        enemies_section = _section(view, "Enemies")
+        captain = _entry(enemies_section, "Captain Varn Blackreed")
+        self.assertEqual("boss", captain.get("size_class"))
+        self.assertEqual("knight-helmet", captain.get("background_icon"))
 
     def test_duplicate_enemy_names_are_numbered_in_view(self):
         room = DummyRoom()

@@ -402,6 +402,42 @@ class BraveCharacterCommand(MuxCommand):
             duration_ms=duration_ms,
         )
 
+    def send_room_emote(self, message):
+        """Broadcast a short social emote in the current room."""
+
+        character = self.get_character()
+        if not character or not character.location:
+            return False
+
+        text = str(message or "").strip()
+        if not text:
+            self.msg("Usage: emote <message>")
+            return False
+
+        words = text.split()
+        if len(words) == 1:
+            verb = words[0].rstrip(".!?")
+            if verb.endswith("y") and len(verb) > 1 and verb[-2] not in "aeiou":
+                room_verb = verb[:-1] + "ies"
+            elif verb.endswith(("s", "x", "z", "ch", "sh")):
+                room_verb = verb + "es"
+            else:
+                room_verb = verb + "s"
+            room_text = room_verb
+            self_text = verb
+        else:
+            room_text = text.rstrip(".!?")
+            self_text = room_text
+
+        if text.endswith((".", "!", "?")):
+            room_line = f"{character.key} {room_text}{text[-1]}"
+        else:
+            room_line = f"{character.key} {room_text}."
+
+        character.location.msg_contents(room_line, exclude=[character])
+        self.msg(f"You {self_text}.")
+        return True
+
     def get_character(self):
         caller = self.caller
         if not hasattr(caller, "ensure_brave_character"):
