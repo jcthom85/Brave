@@ -3928,7 +3928,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     width: calc(100% - 48px);
     margin: 0;
     padding: 0 12px;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(3px);
     color: color-mix(in srgb, var(--brave-accent) 32%, var(--brave-text-soft));
     font-size: calc(0.94rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     pointer-events: none;
@@ -4511,7 +4511,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     content: "";
     position: absolute;
     left: 0;
-    top: 10px;
+    top: 15px;
     bottom: 10px;
     width: 2px;
     border-radius: 999px;
@@ -7412,8 +7412,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 76px;
-    padding: 11px 10px;
+    height: 96px;
+    padding: 11px 10px 9px;
     color: var(--brave-text-bright);
     text-align: center;
     appearance: none;
@@ -7449,10 +7449,10 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__navcard-badge {
     position: absolute;
-    top: 6px;
+    top: 12px;
     left: 50%;
     right: auto;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(3px);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -7470,14 +7470,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: var(--brave-text-soft);
     width: 100%;
     min-width: 0;
-    padding: 10px 2px 0;
-    font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-    line-height: 1.12;
+    padding: 12px 2px 0;
+    transform: translateY(2px);
+    font-size: calc(0.59rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.0;
     text-align: center;
     justify-self: center;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    white-space: normal;
+    text-overflow: clip;
 }
 
 .brave-view--room .brave-view__navcard,
@@ -8744,7 +8745,7 @@ body.brave-scene-combat-enter .inputwrap {
         bottom: calc(var(--brave-mobile-dock-clearance) + 18px);
         width: auto;
         max-height: min(64vh, 620px);
-        transform: none;
+        transform: translateY(2px);
         padding: 14px;
     }
 
@@ -9550,7 +9551,7 @@ body.brave-scene-combat-enter .inputwrap {
 
     #mobile-nav-dock .brave-view__navcard,
     #mobile-nav-dock .brave-view__navslot {
-        height: 64px;
+        height: 82px;
     }
 
     #mobile-nav-dock .brave-view__navcard {
@@ -9566,7 +9567,7 @@ body.brave-scene-combat-enter .inputwrap {
         transform: none;
         align-self: center;
         justify-self: center;
-        margin: 0 auto;
+        margin: 3px auto 0;
         min-width: 1.35rem;
         min-height: 1.35rem;
         padding: 2px 6px;
@@ -9576,13 +9577,12 @@ body.brave-scene-combat-enter .inputwrap {
 
     #mobile-nav-dock .brave-view__navcard-label {
         display: block;
-        padding: 0;
-        font-size: calc(0.56rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-        line-height: 1;
-        max-height: none;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        -webkit-line-clamp: 1;
+        padding: 3px 0 0;
+        transform: translateY(2px);
+        font-size: calc(0.49rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        line-height: 1.0;
+        white-space: normal;
+        text-overflow: clip;
     }
 
     #mobile-nav-dock .brave-view__nav-centercard {
