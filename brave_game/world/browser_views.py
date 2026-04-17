@@ -320,11 +320,13 @@ def _picker_option(label, *, command=None, prefill=None, icon=None, meta=None, t
     return option
 
 
-def _picker(title, *, subtitle=None, options=None, body=None):
+def _picker(title, *, subtitle=None, options=None, body=None, picker_id=None):
     picker = {
         "title": title,
         "options": [option for option in (options or []) if option],
     }
+    if picker_id:
+        picker["picker_id"] = picker_id
     if subtitle:
         picker["subtitle"] = subtitle
     if body:
@@ -2855,6 +2857,7 @@ def build_combat_view(encounter, character):
             picker=_picker(
                 title,
                 subtitle="Choose an action.",
+                picker_id=f"combat-{title.strip().lower()}",
                 options=options,
                 body=[] if options else [empty_text],
             ),

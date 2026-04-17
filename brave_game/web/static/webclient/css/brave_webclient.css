@@ -1410,7 +1410,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 #brave-picker-sheet {
     position: fixed;
     inset: 0;
-    z-index: 26;
+    z-index: 1200;
     display: none;
 }
 

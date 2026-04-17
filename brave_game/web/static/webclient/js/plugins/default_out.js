@@ -55,6 +55,7 @@ let defaultout_plugin = (function () {
     var currentMobileSwipe = null;
     var currentPickerData = null;
     var currentPickerAnchorRect = null;
+    var currentPickerSourceId = "";
     var currentNoticeTimer = null;
     var currentConnectionScreen = "menu";
     var suppressBrowserClickUntil = 0;
@@ -1782,6 +1783,7 @@ let defaultout_plugin = (function () {
         var host = document.getElementById("brave-picker-sheet");
         currentPickerData = null;
         currentPickerAnchorRect = null;
+        currentPickerSourceId = "";
         if (host) {
             host.innerHTML = "";
             host.setAttribute("aria-hidden", "true");
@@ -1991,6 +1993,9 @@ let defaultout_plugin = (function () {
         }
         currentPickerData = pickerData;
         currentPickerAnchorRect = pickerData && pickerData.anchorRect ? pickerData.anchorRect : null;
+        if (pickerData && pickerData.picker_id) {
+            currentPickerSourceId = String(pickerData.picker_id);
+        }
         renderPickerSheet();
         return true;
     };
@@ -2001,6 +2006,7 @@ let defaultout_plugin = (function () {
         }
         try {
             var pickerData = JSON.parse(target.getAttribute("data-brave-picker"));
+            var pickerSourceId = target.getAttribute("data-brave-picker-id") || (pickerData && pickerData.picker_id) || "";
             if (!isMobileViewport() && target.closest("#toolbar")) {
                 var rect = target.getBoundingClientRect();
                 pickerData.anchor = "toolbar";
@@ -2011,6 +2017,7 @@ let defaultout_plugin = (function () {
                     left: rect.left,
                 };
             }
+            currentPickerSourceId = String(pickerSourceId || "");
             return openPickerSheet(pickerData);
         } catch (error) {
             return false;
@@ -2031,23 +2038,21 @@ let defaultout_plugin = (function () {
         if (!currentPickerData || !currentViewData || currentViewData.variant !== "combat") {
             return;
         }
-        var pickerTitle = String(currentPickerData.title || "").trim();
-        if (!pickerTitle) {
+        var pickerSourceId = String(currentPickerSourceId || (currentPickerData && currentPickerData.picker_id) || "").trim();
+        if (!pickerSourceId) {
             renderPickerSheet();
             return;
         }
-        var candidates = Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat [data-brave-picker]"));
-        var matched = candidates.find(function (node) {
-            var labelNode = node.querySelector("span:last-child");
-            return labelNode && String(labelNode.textContent || "").trim() === pickerTitle;
-        });
+        var matched = document.querySelector(
+            ".brave-view--combat [data-brave-picker-id='" + escapeCssAttributeValue(pickerSourceId) + "']"
+        );
         if (!matched) {
             renderPickerSheet();
             return;
         }
         try {
             var pickerData = JSON.parse(matched.getAttribute("data-brave-picker"));
-            if (!isMobileViewport() && matched.closest(".brave-view__actions")) {
+            if (!isMobileViewport() && currentPickerData && currentPickerData.anchor === "toolbar") {
                 var rect = matched.getBoundingClientRect();
                 pickerData.anchor = "toolbar";
                 pickerData.anchorRect = {
@@ -2059,6 +2064,7 @@ let defaultout_plugin = (function () {
             }
             currentPickerData = pickerData;
             currentPickerAnchorRect = pickerData && pickerData.anchorRect ? pickerData.anchorRect : null;
+            currentPickerSourceId = pickerSourceId;
         } catch (_error) {
             // keep the existing picker data if the refreshed control can't be parsed
         }
@@ -2514,6 +2520,9 @@ let defaultout_plugin = (function () {
         }
         if (entry.picker) {
             attrs += " data-brave-picker='" + escapeHtml(JSON.stringify(entry.picker)) + "'";
+            if (entry.picker.picker_id) {
+                attrs += " data-brave-picker-id='" + escapeHtml(String(entry.picker.picker_id)) + "'";
+            }
             if (!titleValue && entry.label) {
                 titleValue = entry.label;
             }
