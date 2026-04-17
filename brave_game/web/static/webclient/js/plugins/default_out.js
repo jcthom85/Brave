@@ -70,6 +70,9 @@ let defaultout_plugin = (function () {
     var pendingCombatPanelData = null;
     var currentAtbAnimationFrame = null;
     var pendingCombatSwapTimeout = null;
+    var pendingCombatTransitionViewData = null;
+    var pendingCombatTransitionTimeout = null;
+    var pendingCombatTransitionCleanupTimeout = null;
     var suppressedCombatEntryRefs = {};
     var combatViewTransitionActive = false;
     var COMBAT_IMPACT_RGB = {
@@ -90,6 +93,10 @@ let defaultout_plugin = (function () {
 
     var isMobileViewport = function () {
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
+    };
+
+    var prefersReducedMotion = function () {
+        return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     };
 
     var getDefaultInPlugin = function () {
@@ -3990,6 +3997,108 @@ let defaultout_plugin = (function () {
         }, duration || 220);
     };
 
+    var clearCombatTransitionOverlay = function () {
+        var overlay = document.getElementById("brave-combat-transition");
+        if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+        }
+    };
+
+    var showCombatTransitionOverlay = function (viewData) {
+        if (!document.body) {
+            return;
+        }
+        clearCombatTransitionOverlay();
+        var overlay = document.createElement("div");
+        overlay.id = "brave-combat-transition";
+        overlay.className = "brave-combat-transition";
+        var title = viewData && viewData.title ? String(viewData.title) : "Combat";
+        var subtitle = viewData && viewData.subtitle ? String(viewData.subtitle) : "";
+        overlay.innerHTML =
+            "<div class='brave-combat-transition__wash'></div>"
+            + "<div class='brave-combat-transition__flash'></div>"
+            + "<div class='brave-combat-transition__shutters'>"
+            + "<span class='brave-combat-transition__shutter brave-combat-transition__shutter--1'></span>"
+            + "<span class='brave-combat-transition__shutter brave-combat-transition__shutter--2'></span>"
+            + "<span class='brave-combat-transition__shutter brave-combat-transition__shutter--3'></span>"
+            + "</div>"
+            + "<div class='brave-combat-transition__ring'></div>"
+            + "<div class='brave-combat-transition__card'>"
+            + "<div class='brave-combat-transition__eyebrow'>"
+            + icon("swords", "brave-combat-transition__eyebrow-icon")
+            + "<span>Encounter</span>"
+            + "</div>"
+            + "<div class='brave-combat-transition__title'>" + escapeHtml(title) + "</div>"
+            + (subtitle ? "<div class='brave-combat-transition__subtitle'>" + escapeHtml(subtitle) + "</div>" : "")
+            + "</div>";
+        document.body.appendChild(overlay);
+    };
+
+    var clearCombatTransitionState = function () {
+        if (pendingCombatTransitionTimeout) {
+            window.clearTimeout(pendingCombatTransitionTimeout);
+            pendingCombatTransitionTimeout = null;
+        }
+        if (pendingCombatTransitionCleanupTimeout) {
+            window.clearTimeout(pendingCombatTransitionCleanupTimeout);
+            pendingCombatTransitionCleanupTimeout = null;
+        }
+        pendingCombatTransitionViewData = null;
+        combatViewTransitionActive = false;
+        if (document.body) {
+            document.body.classList.remove("brave-combat-transition-active");
+        }
+        clearCombatTransitionOverlay();
+    };
+
+    var finishCombatTransitionOverlay = function () {
+        var overlay = document.getElementById("brave-combat-transition");
+        if (overlay) {
+            overlay.classList.add("brave-combat-transition--out");
+        }
+        if (pendingCombatTransitionCleanupTimeout) {
+            window.clearTimeout(pendingCombatTransitionCleanupTimeout);
+        }
+        pendingCombatTransitionCleanupTimeout = window.setTimeout(function () {
+            pendingCombatTransitionCleanupTimeout = null;
+            if (document.body) {
+                document.body.classList.remove("brave-combat-transition-active");
+            }
+            clearCombatTransitionOverlay();
+        }, 320);
+    };
+
+    var startCombatTransition = function (viewData) {
+        if (!viewData || viewData.variant !== "combat" || prefersReducedMotion()) {
+            return false;
+        }
+        pendingCombatTransitionViewData = viewData;
+        combatViewTransitionActive = true;
+        if (pendingCombatTransitionTimeout) {
+            window.clearTimeout(pendingCombatTransitionTimeout);
+        }
+        if (pendingCombatTransitionCleanupTimeout) {
+            window.clearTimeout(pendingCombatTransitionCleanupTimeout);
+            pendingCombatTransitionCleanupTimeout = null;
+        }
+        if (document.body) {
+            document.body.classList.add("brave-combat-transition-active");
+        }
+        showCombatTransitionOverlay(viewData);
+        pendingCombatTransitionTimeout = window.setTimeout(function () {
+            var queuedViewData = pendingCombatTransitionViewData;
+            pendingCombatTransitionTimeout = null;
+            pendingCombatTransitionViewData = null;
+            if (!queuedViewData) {
+                clearCombatTransitionState();
+                return;
+            }
+            renderMainView(queuedViewData, { skipCombatTransition: true });
+            finishCombatTransitionOverlay();
+        }, 980);
+        return true;
+    };
+
     var setBodyState = function (name, value) {
         var body = document.body;
         if (!body) {
@@ -4036,7 +4145,18 @@ let defaultout_plugin = (function () {
         setBodyState("danger", "");
         setBodyState("boss", "");
         setBodyState("view", "");
-        document.body.classList.remove("brave-tone-shift", "brave-scene-shift", "brave-scene-combat-enter");
+        document.body.classList.remove("brave-tone-shift", "brave-scene-shift", "brave-scene-combat-enter", "brave-combat-transition-active");
+        if (pendingCombatTransitionTimeout) {
+            window.clearTimeout(pendingCombatTransitionTimeout);
+            pendingCombatTransitionTimeout = null;
+        }
+        if (pendingCombatTransitionCleanupTimeout) {
+            window.clearTimeout(pendingCombatTransitionCleanupTimeout);
+            pendingCombatTransitionCleanupTimeout = null;
+        }
+        pendingCombatTransitionViewData = null;
+        combatViewTransitionActive = false;
+        clearCombatTransitionOverlay();
         clearCombatFxOverlay();
     };
 
@@ -4963,7 +5083,8 @@ let defaultout_plugin = (function () {
         syncMobileShell();
     };
 
-    var renderMainView = function (viewData) {
+    var renderMainView = function (viewData, options) {
+        options = options || {};
         var mwin = $("#messagewindow");
         if (!mwin.length) {
             return;
@@ -4980,9 +5101,17 @@ let defaultout_plugin = (function () {
         }
 
         if (!viewData || typeof viewData !== "object") {
+            clearCombatTransitionState();
             clearTextOutput();
             clearSceneCard();
             return;
+        }
+        if (!options.skipCombatTransition && pendingCombatTransitionViewData) {
+            if (viewData.variant === "combat") {
+                pendingCombatTransitionViewData = viewData;
+                return;
+            }
+            clearCombatTransitionState();
         }
         if (shouldQueueCombatResultView(viewData)) {
             clearDeferredCombatViewRender();
@@ -5010,8 +5139,12 @@ let defaultout_plugin = (function () {
         var preserveRail = !!(viewData.layout === "explore" || viewData.preserve_rail);
         var stickyView = !!viewData.sticky;
         var isCombatView = viewData.variant === "combat";
+        var enteringCombat = !!(isCombatView && (!currentViewData || currentViewData.variant !== "combat"));
         var variantClass = viewData.variant ? " brave-view--" + escapeHtml(viewData.variant) : "";
         var toneClass = viewData.tone ? " brave-view--tone-" + escapeHtml(viewData.tone) : "";
+        if (!options.skipCombatTransition && enteringCombat && startCombatTransition(viewData)) {
+            return;
+        }
         if (isCombatView) {
             combatViewTransitionActive = true;
         }
@@ -5778,7 +5911,7 @@ let defaultout_plugin = (function () {
             && viewData.variant === "combat"
             && (!currentViewData || currentViewData.variant !== "combat")
         ) {
-            clearTextOutput();
+            clearTextOutput({ preserveCombatTransition: !!options.skipCombatTransition });
         }
 
         if (stickyView) {
@@ -5873,7 +6006,7 @@ let defaultout_plugin = (function () {
         }
 
         var applyStandardMarkup = function () {
-            clearTextOutput();
+            clearTextOutput({ preserveCombatTransition: !!options.skipCombatTransition });
             if (!preserveRail) {
                 clearSceneRail();
             }
@@ -6691,7 +6824,8 @@ let defaultout_plugin = (function () {
         }
     };
 
-    var clearTextOutput = function () {
+    var clearTextOutput = function (options) {
+        options = options || {};
         teardownArcadeMode();
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
@@ -6707,6 +6841,9 @@ let defaultout_plugin = (function () {
             pendingCombatResultFallbackTimeout = null;
         }
         pendingCombatResultViewData = null;
+        if (!options.preserveCombatTransition) {
+            clearCombatTransitionState();
+        }
         clearSuppressedCombatEntryRefs();
         setMainViewMode(false);
         setStickyViewMode(false);
