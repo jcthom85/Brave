@@ -3,6 +3,7 @@
     "aimedshot": {
       "class": "ranger",
       "cost": 11,
+      "icon_role": "shot",
       "name": "Aimed Shot",
       "resource": "stamina",
       "target": "enemy"
@@ -10,6 +11,7 @@
     "arcspark": {
       "class": "mage",
       "cost": 11,
+      "icon_role": "lightning",
       "name": "Arc Spark",
       "resource": "mana",
       "target": "enemy"
@@ -17,6 +19,7 @@
     "avenginglight": {
       "class": "paladin",
       "cost": 18,
+      "icon_role": "holy",
       "name": "Avenging Light",
       "resource": "stamina",
       "target": "none"
@@ -24,6 +27,7 @@
     "backstab": {
       "class": "rogue",
       "cost": 10,
+      "icon_role": "attack",
       "name": "Backstab",
       "resource": "stamina",
       "target": "enemy"
@@ -31,6 +35,7 @@
     "barbedarrow": {
       "class": "ranger",
       "cost": 10,
+      "icon_role": "shot",
       "name": "Barbed Arrow",
       "resource": "stamina",
       "target": "enemy"
@@ -38,6 +43,7 @@
     "barkskin": {
       "class": "druid",
       "cost": 10,
+      "icon_role": "guard",
       "name": "Barkskin",
       "resource": "mana",
       "target": "ally"
@@ -45,6 +51,7 @@
     "battlecry": {
       "class": "warrior",
       "cost": 12,
+      "icon_role": "rally",
       "name": "Battle Cry",
       "resource": "stamina",
       "target": "none"
@@ -52,6 +59,7 @@
     "blessing": {
       "class": "cleric",
       "cost": 10,
+      "icon_role": "blessing",
       "name": "Blessing",
       "resource": "mana",
       "target": "ally"
@@ -59,6 +67,7 @@
     "brace": {
       "class": "warrior",
       "cost": 10,
+      "icon_role": "guard",
       "name": "Brace",
       "resource": "stamina",
       "target": "self"
@@ -66,6 +75,7 @@
     "cheapshot": {
       "class": "rogue",
       "cost": 11,
+      "icon_role": "attack",
       "name": "Cheap Shot",
       "resource": "stamina",
       "target": "enemy"
@@ -73,6 +83,7 @@
     "cleanse": {
       "class": "cleric",
       "cost": 10,
+      "icon_role": "cleanse",
       "name": "Cleanse",
       "resource": "mana",
       "target": "ally"
@@ -80,6 +91,7 @@
     "consecrate": {
       "class": "paladin",
       "cost": 13,
+      "icon_role": "holy",
       "name": "Consecrate",
       "resource": "stamina",
       "target": "none"
@@ -87,6 +99,7 @@
     "defend": {
       "class": "warrior",
       "cost": 6,
+      "icon_role": "guard",
       "name": "Defend",
       "resource": "stamina",
       "target": "self"
@@ -94,6 +107,7 @@
     "entanglingroots": {
       "class": "druid",
       "cost": 10,
+      "icon_role": "root",
       "name": "Entangling Roots",
       "resource": "mana",
       "target": "enemy"
@@ -101,6 +115,7 @@
     "evasiveroll": {
       "class": "ranger",
       "cost": 8,
+      "icon_role": "mobility",
       "name": "Evasive Roll",
       "resource": "stamina",
       "target": "self"
@@ -108,6 +123,7 @@
     "eviscerate": {
       "class": "rogue",
       "cost": 16,
+      "icon_role": "attack",
       "name": "Eviscerate",
       "resource": "stamina",
       "target": "enemy"
@@ -115,6 +131,7 @@
     "feint": {
       "class": "rogue",
       "cost": 6,
+      "icon_role": "mobility",
       "name": "Feint",
       "resource": "stamina",
       "target": "self"
@@ -122,6 +139,7 @@
     "firebolt": {
       "class": "mage",
       "cost": 9,
+      "icon_role": "fire",
       "name": "Firebolt",
       "resource": "mana",
       "target": "enemy"
@@ -129,6 +147,7 @@
     "flamewave": {
       "class": "mage",
       "cost": 14,
+      "icon_role": "fire",
       "name": "Flame Wave",
       "resource": "mana",
       "target": "none"
@@ -136,6 +155,7 @@
     "frostbind": {
       "class": "mage",
       "cost": 10,
+      "icon_role": "frost",
       "name": "Frost Bind",
       "resource": "mana",
       "target": "enemy"
@@ -143,6 +163,7 @@
     "guardianlight": {
       "class": "cleric",
       "cost": 18,
+      "icon_role": "guard",
       "name": "Guardian Light",
       "resource": "mana",
       "target": "ally"
@@ -150,6 +171,7 @@
     "guardingaura": {
       "class": "paladin",
       "cost": 8,
+      "icon_role": "guard",
       "name": "Guarding Aura",
       "resource": "stamina",
       "target": "ally"
@@ -157,6 +179,7 @@
     "handofmercy": {
       "class": "paladin",
       "cost": 11,
+      "icon_role": "heal",
       "name": "Hand of Mercy",
       "resource": "stamina",
       "target": "ally"
@@ -164,6 +187,7 @@
     "heal": {
       "class": "cleric",
       "cost": 10,
+      "icon_role": "heal",
       "name": "Heal",
       "resource": "mana",
       "target": "ally"
@@ -171,6 +195,7 @@
     "holystrike": {
       "class": "paladin",
       "cost": 8,
+      "icon_role": "holy",
       "name": "Holy Strike",
       "resource": "stamina",
       "target": "enemy"
@@ -178,6 +203,7 @@
     "icelance": {
       "class": "mage",
       "cost": 12,
+      "icon_role": "frost",
       "name": "Ice Lance",
       "resource": "mana",
       "target": "enemy"
@@ -185,6 +211,7 @@
     "intercept": {
       "class": "warrior",
       "cost": 11,
+      "icon_role": "guard",
       "name": "Intercept",
       "resource": "stamina",
       "target": "ally"
@@ -192,6 +219,7 @@
     "judgement": {
       "class": "paladin",
       "cost": 10,
+      "icon_role": "holy",
       "name": "Judgement",
       "resource": "stamina",
       "target": "enemy"
@@ -199,6 +227,7 @@
     "laststand": {
       "class": "warrior",
       "cost": 16,
+      "icon_role": "guard",
       "name": "Last Stand",
       "resource": "stamina",
       "target": "self"
@@ -206,6 +235,7 @@
     "livingcurrent": {
       "class": "druid",
       "cost": 12,
+      "icon_role": "cleanse",
       "name": "Living Current",
       "resource": "mana",
       "target": "ally"
@@ -213,6 +243,7 @@
     "manashield": {
       "class": "mage",
       "cost": 12,
+      "icon_role": "guard",
       "name": "Mana Shield",
       "resource": "mana",
       "target": "self"
@@ -220,6 +251,7 @@
     "markprey": {
       "class": "ranger",
       "cost": 6,
+      "icon_role": "mark",
       "name": "Mark Prey",
       "resource": "stamina",
       "target": "enemy"
@@ -227,6 +259,7 @@
     "meteorsigil": {
       "class": "mage",
       "cost": 18,
+      "icon_role": "fire",
       "name": "Meteor Sigil",
       "resource": "mana",
       "target": "enemy"
@@ -234,6 +267,7 @@
     "minormend": {
       "class": "druid",
       "cost": 8,
+      "icon_role": "heal",
       "name": "Minor Mend",
       "resource": "mana",
       "target": "ally"
@@ -241,6 +275,7 @@
     "moonfire": {
       "class": "druid",
       "cost": 10,
+      "icon_role": "holy",
       "name": "Moonfire",
       "resource": "mana",
       "target": "enemy"
@@ -248,6 +283,7 @@
     "poisonblade": {
       "class": "rogue",
       "cost": 9,
+      "icon_role": "poison",
       "name": "Poison Blade",
       "resource": "stamina",
       "target": "enemy"
@@ -255,6 +291,7 @@
     "quickshot": {
       "class": "ranger",
       "cost": 8,
+      "icon_role": "shot",
       "name": "Quick Shot",
       "resource": "stamina",
       "target": "enemy"
@@ -262,6 +299,7 @@
     "radiantburst": {
       "class": "cleric",
       "cost": 15,
+      "icon_role": "holy",
       "name": "Radiant Burst",
       "resource": "mana",
       "target": "none"
@@ -269,6 +307,7 @@
     "rainofarrows": {
       "class": "ranger",
       "cost": 16,
+      "icon_role": "barrage",
       "name": "Rain of Arrows",
       "resource": "stamina",
       "target": "none"
@@ -276,6 +315,7 @@
     "rebukeevil": {
       "class": "paladin",
       "cost": 12,
+      "icon_role": "holy",
       "name": "Rebuke Evil",
       "resource": "stamina",
       "target": "enemy"
@@ -283,6 +323,7 @@
     "rejuvenationgrove": {
       "class": "druid",
       "cost": 16,
+      "icon_role": "field",
       "name": "Rejuvenation Grove",
       "resource": "mana",
       "target": "none"
@@ -290,6 +331,7 @@
     "renewinglight": {
       "class": "cleric",
       "cost": 14,
+      "icon_role": "heal",
       "name": "Renewing Light",
       "resource": "mana",
       "target": "ally"
@@ -297,6 +339,7 @@
     "sanctuary": {
       "class": "cleric",
       "cost": 14,
+      "icon_role": "guard",
       "name": "Sanctuary",
       "resource": "mana",
       "target": "none"
@@ -304,6 +347,7 @@
     "shadowstep": {
       "class": "rogue",
       "cost": 12,
+      "icon_role": "mobility",
       "name": "Shadowstep",
       "resource": "stamina",
       "target": "enemy"
@@ -311,6 +355,7 @@
     "shieldbash": {
       "class": "warrior",
       "cost": 10,
+      "icon_role": "attack",
       "name": "Shield Bash",
       "resource": "stamina",
       "target": "enemy"
@@ -318,6 +363,7 @@
     "shieldofdawn": {
       "class": "paladin",
       "cost": 12,
+      "icon_role": "guard",
       "name": "Shield of Dawn",
       "resource": "stamina",
       "target": "ally"
@@ -325,6 +371,7 @@
     "smite": {
       "class": "cleric",
       "cost": 8,
+      "icon_role": "holy",
       "name": "Smite",
       "resource": "mana",
       "target": "enemy"
@@ -332,6 +379,7 @@
     "snaretrap": {
       "class": "ranger",
       "cost": 9,
+      "icon_role": "trap",
       "name": "Snare Trap",
       "resource": "stamina",
       "target": "enemy"
@@ -339,6 +387,7 @@
     "stab": {
       "class": "rogue",
       "cost": 7,
+      "icon_role": "attack",
       "name": "Stab",
       "resource": "stamina",
       "target": "enemy"
@@ -346,6 +395,7 @@
     "staticfield": {
       "class": "mage",
       "cost": 13,
+      "icon_role": "lightning",
       "name": "Static Field",
       "resource": "mana",
       "target": "none"
@@ -353,6 +403,7 @@
     "strike": {
       "class": "warrior",
       "cost": 8,
+      "icon_role": "attack",
       "name": "Strike",
       "resource": "stamina",
       "target": "enemy"
@@ -360,6 +411,7 @@
     "swarm": {
       "class": "druid",
       "cost": 14,
+      "icon_role": "field",
       "name": "Swarm",
       "resource": "mana",
       "target": "none"
@@ -367,6 +419,7 @@
     "tauntingblow": {
       "class": "warrior",
       "cost": 10,
+      "icon_role": "taunt",
       "name": "Taunting Blow",
       "resource": "stamina",
       "target": "enemy"
@@ -374,6 +427,7 @@
     "thornlash": {
       "class": "druid",
       "cost": 8,
+      "icon_role": "nature",
       "name": "Thorn Lash",
       "resource": "mana",
       "target": "enemy"
@@ -381,6 +435,7 @@
     "vanish": {
       "class": "rogue",
       "cost": 10,
+      "icon_role": "stealth",
       "name": "Vanish",
       "resource": "stamina",
       "target": "self"
@@ -388,6 +443,7 @@
     "volley": {
       "class": "ranger",
       "cost": 13,
+      "icon_role": "barrage",
       "name": "Volley",
       "resource": "stamina",
       "target": "none"
@@ -395,6 +451,7 @@
     "wrathofthegrove": {
       "class": "druid",
       "cost": 18,
+      "icon_role": "nature",
       "name": "Wrath of the Grove",
       "resource": "mana",
       "target": "enemy"
@@ -889,6 +946,7 @@
         "spell_power": 2,
         "threat": 1
       },
+      "icon_role": "holy",
       "name": "Beacon Soul"
     },
     "blessedarmor": {
@@ -896,6 +954,7 @@
         "armor": 3,
         "threat": 1
       },
+      "icon_role": "holy",
       "name": "Blessed Armor"
     },
     "bulwark": {
@@ -904,6 +963,7 @@
         "max_hp": 12,
         "threat": 2
       },
+      "icon_role": "defense",
       "name": "Bulwark"
     },
     "deadlyrhythm": {
@@ -911,12 +971,14 @@
         "attack_power": 3,
         "crit_chance": 2
       },
+      "icon_role": "offense",
       "name": "Deadly Rhythm"
     },
     "deepfocus": {
       "bonuses": {
         "max_mana": 14
       },
+      "icon_role": "resource",
       "name": "Deep Focus"
     },
     "elementalattunement": {
@@ -924,6 +986,7 @@
         "accuracy": 2,
         "spell_power": 2
       },
+      "icon_role": "magic",
       "name": "Elemental Attunement"
     },
     "gracefulhands": {
@@ -931,6 +994,7 @@
         "healing_power": 3,
         "spell_power": 2
       },
+      "icon_role": "healing",
       "name": "Graceful Hands"
     },
     "ironwill": {
@@ -938,6 +1002,7 @@
         "max_hp": 12,
         "threat": 2
       },
+      "icon_role": "vitality",
       "name": "Iron Will"
     },
     "killersfocus": {
@@ -945,12 +1010,14 @@
         "crit_chance": 3,
         "precision": 3
       },
+      "icon_role": "precision",
       "name": "Killer's Focus"
     },
     "lightfeet": {
       "bonuses": {
         "dodge": 3
       },
+      "icon_role": "mobility",
       "name": "Light Feet"
     },
     "naturesmemory": {
@@ -959,6 +1026,7 @@
         "max_mana": 10,
         "spell_power": 2
       },
+      "icon_role": "nature",
       "name": "Nature's Memory"
     },
     "predatorseye": {
@@ -966,6 +1034,7 @@
         "accuracy": 4,
         "precision": 2
       },
+      "icon_role": "precision",
       "name": "Predator's Eye"
     },
     "purity": {
@@ -973,6 +1042,7 @@
         "armor": 2,
         "healing_power": 2
       },
+      "icon_role": "holy",
       "name": "Purity"
     },
     "ruthlesstiming": {
@@ -980,6 +1050,7 @@
         "accuracy": 2,
         "attack_power": 3
       },
+      "icon_role": "precision",
       "name": "Ruthless Timing"
     },
     "serenesoul": {
@@ -987,12 +1058,14 @@
         "max_mana": 12,
         "spell_power": 2
       },
+      "icon_role": "magic",
       "name": "Serene Soul"
     },
     "spellecho": {
       "bonuses": {
         "spell_power": 3
       },
+      "icon_role": "magic",
       "name": "Spell Echo"
     },
     "steadfastfaith": {
@@ -1000,18 +1073,21 @@
         "max_hp": 10,
         "max_mana": 8
       },
+      "icon_role": "holy",
       "name": "Steadfast Faith"
     },
     "thickhide": {
       "bonuses": {
         "armor": 3
       },
+      "icon_role": "defense",
       "name": "Thick Hide"
     },
     "trailwise": {
       "bonuses": {
         "dodge": 2
       },
+      "icon_role": "utility",
       "name": "Trailwise"
     },
     "wildgrace": {
@@ -1019,6 +1095,7 @@
         "accuracy": 2,
         "dodge": 2
       },
+      "icon_role": "nature",
       "name": "Wild Grace"
     }
   },
@@ -1100,6 +1177,7 @@
   ],
   "xp_for_level": {
     "1": 0,
+    "10": 1350,
     "2": 50,
     "3": 125,
     "4": 225,
@@ -1107,7 +1185,6 @@
     "6": 500,
     "7": 675,
     "8": 875,
-    "9": 1100,
-    "10": 1350
+    "9": 1100
   }
 }

@@ -2,6 +2,7 @@
 
 import time
 
+from world.ability_icons import get_ability_icon_name, get_passive_icon_name
 from world.combat_atb import render_atb_state
 from world.character_icons import get_class_icon, get_race_icon
 from world.enemy_icons import get_enemy_icon_name
@@ -22,6 +23,8 @@ SYSTEMS_CONTENT = CONTENT.systems
 
 CLASSES = CHARACTER_CONTENT.classes
 RACES = CHARACTER_CONTENT.races
+ABILITY_LIBRARY = CHARACTER_CONTENT.ability_library
+ability_key = CHARACTER_CONTENT.ability_key
 xp_needed_for_next_level = CHARACTER_CONTENT.xp_needed_for_next_level
 
 EQUIPMENT_SLOTS = ITEM_CONTENT.equipment_slots
@@ -356,7 +359,22 @@ def build_sheet_panel(character):
     ]
     if abilities:
         sections.append(
-            _section("Abilities", "bolt", [_item(ability, icon="chevron_right") for ability in abilities])
+            _section(
+                "Abilities",
+                "bolt",
+                [
+                    _item(
+                        ability,
+                        icon=(
+                            get_ability_icon_name(key)
+                            if key in ABILITY_LIBRARY
+                            else get_passive_icon_name(key)
+                        ),
+                    )
+                    for ability in abilities
+                    for key in [ability_key(ability)]
+                ],
+            )
         )
 
     meal_buff = character.db.brave_meal_buff or {}

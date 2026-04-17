@@ -6,6 +6,7 @@ from world.arcade import format_arcade_score, get_personal_best, get_reward_defi
 from world.activities import get_targetable_consumable_characters, room_supports_activity
 from world.combat_atb import render_atb_state
 from world.combat_actions import build_combat_action_payload
+from world.ability_icons import get_ability_icon_name, get_passive_icon_name
 from world.enemy_icons import get_enemy_icon_name
 from world.content import get_content_registry
 from world.data.arcade import ARCADE_GAMES
@@ -431,7 +432,8 @@ def _sheet_detail_tooltip(title, subtitle=None, lines=None):
 
 def _build_sheet_ability_item(character, ability_name):
     display_name = format_ability_display(ability_name, character)
-    ability = ABILITY_LIBRARY.get(ability_key(ability_name), {})
+    key = ability_key(ability_name)
+    ability = ABILITY_LIBRARY.get(key, {})
     target_label = {
         "enemy": "Targets one enemy",
         "ally": "Targets one ally",
@@ -455,7 +457,7 @@ def _build_sheet_ability_item(character, ability_name):
     tooltip = _sheet_detail_tooltip(display_name, subtitle, body)
     return _item(
         display_name,
-        icon="bolt",
+        icon=get_ability_icon_name(key, ability),
         picker=_picker(display_name, subtitle=subtitle, body=body),
         tooltip=tooltip,
     )
@@ -463,6 +465,8 @@ def _build_sheet_ability_item(character, ability_name):
 
 def _build_sheet_passive_item(character, passive_name, *, icon_name="stars", summary_line=None, bonus_map=None):
     display_name = format_ability_display(passive_name, character)
+    passive_key = ability_key(passive_name)
+    passive = PASSIVE_ABILITY_BONUSES.get(passive_key, {})
     body = []
     if summary_line:
         body.append(summary_line)
@@ -474,7 +478,7 @@ def _build_sheet_passive_item(character, passive_name, *, icon_name="stars", sum
     tooltip = _sheet_detail_tooltip(display_name, "Passive trait", body)
     return _item(
         display_name,
-        icon=icon_name,
+        icon=get_passive_icon_name(passive_key, passive) if icon_name == "stars" else icon_name,
         picker=_picker(display_name, subtitle="Passive trait", body=body),
         tooltip=tooltip,
     )
@@ -2801,14 +2805,9 @@ def build_combat_view(encounter, character):
         )
 
     def combat_option_icon(action):
-        target_mode = action.get("target_mode")
-        if target_mode == "enemy":
-            return "warning"
-        if target_mode == "ally":
-            return "person"
-        if target_mode == "self":
-            return "shield"
-        return "bolt" if action.get("kind") == "ability" else "lunch_dining"
+        if action.get("kind") == "ability":
+            return get_ability_icon_name(action.get("key"))
+        return "lunch_dining"
 
     def combat_picker_options(action):
         options = []

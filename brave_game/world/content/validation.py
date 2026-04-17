@@ -5,6 +5,7 @@ character, item, quest, world, and encounter content. This keeps content
 migration safe before broader creator tooling is introduced.
 """
 
+from world.ability_icons import ALLOWED_ABILITY_ICON_ROLES, ALLOWED_PASSIVE_ICON_ROLES
 from world.content import get_content_registry
 
 
@@ -44,6 +45,20 @@ def _validate_character_content(registry, errors):
             if ability_key in characters.passive_ability_bonuses:
                 continue
             errors.append(f"Class {class_key} references unknown progression ability: {ability_name}")
+
+    for ability_key, ability_data in characters.ability_library.items():
+        icon_role = ability_data.get("icon_role")
+        if icon_role and icon_role not in ALLOWED_ABILITY_ICON_ROLES:
+            errors.append(
+                f"Ability {ability_key} uses unknown icon_role: {icon_role}"
+            )
+
+    for passive_key, passive_data in characters.passive_ability_bonuses.items():
+        icon_role = passive_data.get("icon_role")
+        if icon_role and icon_role not in ALLOWED_PASSIVE_ICON_ROLES:
+            errors.append(
+                f"Passive {passive_key} uses unknown icon_role: {icon_role}"
+            )
 
     for class_key, loadout in items.starter_loadouts.items():
         if class_key not in characters.classes:
