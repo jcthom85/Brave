@@ -21,6 +21,7 @@ class DummyRewardCharacter:
             brave_silver=0,
             brave_resources={"hp": 30},
         )
+        self.ndb = SimpleNamespace()
         self.messages = []
         self.xp_awards = []
         self.items = []
@@ -139,6 +140,9 @@ class CombatRewardTests(unittest.TestCase):
         self.assertEqual([], idle.items)
         self.assertEqual({starter, late}, {call.args[0] for call in record_encounter_victory.call_args_list})
         self.assertTrue(any("Victory passes you by" in message for message in idle.messages))
+        self.assertTrue(starter.ndb.brave_showing_combat_result)
+        self.assertTrue(late.ndb.brave_showing_combat_result)
+        self.assertTrue(idle.ndb.brave_showing_combat_result)
 
     @patch("typeclasses.scripts.advance_enemy_defeat")
     def test_boss_defeat_credit_requires_meaningful_action_and_cutoff_eligibility(self, advance_enemy_defeat):
@@ -194,6 +198,8 @@ class CombatRewardTests(unittest.TestCase):
             _add_threat=lambda _attacker, _amount: None,
             _emit_combat_fx=lambda **_kwargs: None,
             _emit_defeat_fx=lambda _target, text="DOWN": None,
+            get_active_enemies=lambda: [],
+            _schedule_victory_sequence=Mock(),
             get_registered_participants=lambda: [starter, late, idle],
         )
         self._bind_reward_helpers(encounter)
@@ -201,6 +207,7 @@ class CombatRewardTests(unittest.TestCase):
         BraveEncounter._damage_enemy(encounter, starter, enemy, 12)
 
         self.assertEqual([starter], [call.args[0] for call in advance_enemy_defeat.call_args_list])
+        encounter._schedule_victory_sequence.assert_called_once_with("|gThe encounter is over. The road is clear for now.|n")
 
     @patch("typeclasses.scripts.delay")
     def test_at_repeat_schedules_victory_after_finish_fx_window(self, delay_mock):
@@ -234,7 +241,7 @@ class CombatRewardTests(unittest.TestCase):
         self.assertEqual(1, encounter.db.round)
         reward_mock.assert_not_called()
         stop_mock.assert_not_called()
-        refresh_mock.assert_called_once_with()
+        refresh_mock.assert_not_called()
         self.assertTrue(encounter.ndb.brave_victory_pending)
         self.assertEqual(COMBAT_FINISH_FX_DELAY, delay_mock.call_args.args[0])
         self.assertEqual("|gThe last of them falls. The way is clear for now.|n", delay_mock.call_args.args[2])
@@ -255,9 +262,22 @@ class CombatRewardTests(unittest.TestCase):
         BraveEncounter._finish_victory_sequence(encounter, "victory message")
 
         self.assertFalse(encounter.ndb.brave_victory_pending)
+        self.assertTrue(encounter.ndb.brave_skip_combat_done)
         reward_mock.assert_called_once_with()
         msg_mock.assert_called_once_with("victory message", exclude=[winner])
         stop_mock.assert_called_once_with()
+
+    @patch("world.browser_panels.send_webclient_event")
+    def test_clear_browser_combat_views_skips_after_victory_view(self, send_webclient_event_mock):
+        winner = DummyRewardCharacter(1, "Starter")
+        encounter = SimpleNamespace(
+            ndb=SimpleNamespace(brave_skip_combat_done=True),
+            get_participants=lambda: [winner],
+        )
+
+        BraveEncounter._clear_browser_combat_views(encounter)
+
+        send_webclient_event_mock.assert_not_called()
 
 
 if __name__ == "__main__":

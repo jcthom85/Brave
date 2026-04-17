@@ -103,6 +103,8 @@ class Room(ObjectParent, DefaultRoom):
         """
         if not looker:
             return ""
+        if hasattr(getattr(looker, "ndb", None), "brave_showing_combat_result"):
+            looker.ndb.brave_showing_combat_result = False
 
         _send_webclient_event(looker, brave_clear={})
 

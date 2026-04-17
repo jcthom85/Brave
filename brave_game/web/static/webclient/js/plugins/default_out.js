@@ -60,6 +60,13 @@ let defaultout_plugin = (function () {
     var suppressBrowserClickUntil = 0;
     var ENABLE_ROOM_SWIPE_NAV = false;
     var pendingCombatFxEvents = [];
+    var pendingCombatFxFlushTimeout = null;
+    var combatFxProcessing = false;
+    var pendingCombatViewRenderTimeout = null;
+    var pendingCombatViewData = null;
+    var pendingCombatResultViewData = null;
+    var pendingCombatResultFallbackTimeout = null;
+    var pendingCombatPanelData = null;
     var currentAtbAnimationFrame = null;
     var pendingCombatSwapTimeout = null;
     var suppressedCombatEntryRefs = {};
@@ -132,6 +139,146 @@ let defaultout_plugin = (function () {
 
     var isRoomLikeView = function (viewData) {
         return !!(viewData && typeof viewData === "object" && (viewData.layout === "explore" || viewData.variant === "room"));
+    };
+
+    var isCombatUiActive = function () {
+        if (combatViewTransitionActive || (currentViewData && currentViewData.variant === "combat")) {
+            return true;
+        }
+        if (document.body && document.body.getAttribute("data-brave-scene") === "combat") {
+            return true;
+        }
+        return !!document.querySelector("#messagewindow .brave-view--combat");
+    };
+
+    var hasCombatFxWork = function () {
+        return !!(combatFxProcessing || pendingCombatFxEvents.length);
+    };
+
+    var shouldDeferCombatViewRender = function (viewData) {
+        if (!viewData || !currentViewData || currentViewData.variant !== "combat") {
+            return false;
+        }
+        if (viewData.variant !== "combat") {
+            return false;
+        }
+        return hasCombatFxWork();
+    };
+
+    var shouldQueueCombatResultView = function (viewData) {
+        return !!(
+            viewData
+            && viewData.variant === "combat-result"
+            && isCombatUiActive()
+            && hasCombatFxWork()
+        );
+    };
+
+    var flushQueuedCombatResultView = function () {
+        if (!pendingCombatResultViewData || hasCombatFxWork()) {
+            return;
+        }
+        if (pendingCombatResultFallbackTimeout) {
+            window.clearTimeout(pendingCombatResultFallbackTimeout);
+            pendingCombatResultFallbackTimeout = null;
+        }
+        var viewData = pendingCombatResultViewData;
+        pendingCombatResultViewData = null;
+        clearDeferredCombatViewRender();
+        pendingCombatPanelData = null;
+        renderMainView(viewData);
+    };
+
+    var forceFlushQueuedCombatResultView = function () {
+        if (!pendingCombatResultViewData) {
+            return;
+        }
+        clearDeferredCombatViewRender();
+        pendingCombatFxEvents = [];
+        combatFxProcessing = false;
+        combatViewTransitionActive = false;
+        flushQueuedCombatResultView();
+    };
+
+    var scheduleCombatResultFallback = function () {
+        if (pendingCombatResultFallbackTimeout) {
+            return;
+        }
+        pendingCombatResultFallbackTimeout = window.setTimeout(function () {
+            pendingCombatResultFallbackTimeout = null;
+            forceFlushQueuedCombatResultView();
+        }, 1800);
+    };
+
+    var shouldIgnoreRoomViewDuringCombat = function (viewData) {
+        return !!(isCombatUiActive() && isRoomLikeView(viewData));
+    };
+
+    var isCombatPanelData = function (panelData) {
+        return !!(
+            panelData
+            && typeof panelData === "object"
+            && String(panelData.title || "").toUpperCase() === "COMBAT"
+        );
+    };
+
+    var compactOobKwargs = function (kwargs) {
+        var compact = {};
+        Object.keys(kwargs || {}).forEach(function (entryKey) {
+            if (entryKey === "options" || entryKey === "cmdid") {
+                return;
+            }
+            compact[entryKey] = kwargs[entryKey];
+        });
+        return compact;
+    };
+
+    var getOobPayload = function (args, kwargs, key, fallback) {
+        if (kwargs && Object.prototype.hasOwnProperty.call(kwargs, key)) {
+            return kwargs[key];
+        }
+        if (kwargs && Object.keys(kwargs).length) {
+            var compact = compactOobKwargs(kwargs);
+            if (Object.keys(compact).length) {
+                return compact;
+            }
+        }
+        if (Array.isArray(args) && args.length) {
+            return args[0];
+        }
+        return fallback;
+    };
+
+    var clearDeferredCombatViewRender = function () {
+        if (pendingCombatViewRenderTimeout) {
+            window.clearTimeout(pendingCombatViewRenderTimeout);
+            pendingCombatViewRenderTimeout = null;
+        }
+        pendingCombatViewData = null;
+    };
+
+    var flushDeferredCombatViewRender = function (force) {
+        if (!pendingCombatViewData) {
+            return;
+        }
+        if (!force && (hasCombatFxWork() || combatViewTransitionActive || pendingCombatResultViewData)) {
+            deferCombatViewRender(pendingCombatViewData);
+            return;
+        }
+        var viewData = pendingCombatViewData;
+        clearDeferredCombatViewRender();
+        renderMainView(viewData);
+    };
+
+    var deferCombatViewRender = function (viewData) {
+        pendingCombatViewData = viewData;
+        if (pendingCombatViewRenderTimeout) {
+            return;
+        }
+        pendingCombatViewRenderTimeout = window.setTimeout(function () {
+            pendingCombatViewRenderTimeout = null;
+            flushDeferredCombatViewRender(false);
+        }, 80);
     };
 
     var getCurrentRoomView = function () {
@@ -2046,12 +2193,12 @@ let defaultout_plugin = (function () {
 
     var renderMicromapMarkup = function (payload, extraClass) {
         var state = getMapPayloadState(payload);
+        if (state.text) {
+            return escapeHtml(state.text);
+        }
         var mapMarkup = state.grid ? renderMapGrid(state.grid, extraClass || "brave-view__map-grid--micro") : "";
         if (mapMarkup) {
             return mapMarkup;
-        }
-        if (state.text) {
-            return escapeHtml(state.text);
         }
         return "";
     };
@@ -2063,7 +2210,10 @@ let defaultout_plugin = (function () {
         currentMapGrid = state.grid;
         if (micromaps.length) {
             micromaps.forEach(function (micromap) {
-                var mapMarkup = currentMapGrid ? renderMapGrid(currentMapGrid, "brave-view__map-grid--micro") : "";
+                var mapMarkup = currentMapText ? escapeHtml(currentMapText) : "";
+                if (!mapMarkup && currentMapGrid) {
+                    mapMarkup = renderMapGrid(currentMapGrid, "brave-view__map-grid--micro");
+                }
                 if (mapMarkup) {
                     micromap.innerHTML = mapMarkup;
                     micromap.setAttribute("aria-hidden", "false");
@@ -2739,6 +2889,11 @@ let defaultout_plugin = (function () {
             roomActivityObserver.disconnect();
         }
         roomActivityObserver = new MutationObserver(function () {
+            if (isCombatUiActive()) {
+                clearVicinityPanel();
+                syncSceneRailLayout();
+                return;
+            }
             if (!isRoomLikeView(currentViewData)) {
                 return;
             }
@@ -2810,6 +2965,17 @@ let defaultout_plugin = (function () {
 
     var getCombatEntryRef = function (node) {
         return node ? (node.getAttribute("data-entry-ref") || "") : "";
+    };
+
+    var escapeCssAttributeValue = function (value) {
+        return String(value || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    };
+
+    var findCombatEntryByRef = function (ref) {
+        if (!ref) {
+            return null;
+        }
+        return document.querySelector(".brave-view--combat .brave-view__entry[data-entry-ref='" + escapeCssAttributeValue(ref) + "']");
     };
 
     var getCombatAtbMeter = function (node) {
@@ -2919,6 +3085,24 @@ let defaultout_plugin = (function () {
             return;
         }
         pendingCombatFxEvents = pendingCombatFxEvents.concat(events).slice(-24);
+        scheduleCombatFxFlush(0);
+    };
+
+    var scheduleCombatFxFlush = function (delayMs) {
+        delayMs = Math.max(0, delayMs || 0);
+        if (pendingCombatFxFlushTimeout) {
+            if (delayMs > 0) {
+                return;
+            }
+            window.clearTimeout(pendingCombatFxFlushTimeout);
+            pendingCombatFxFlushTimeout = null;
+        }
+        pendingCombatFxFlushTimeout = window.setTimeout(function () {
+            pendingCombatFxFlushTimeout = null;
+            window.requestAnimationFrame(function () {
+                flushPendingCombatFxEvents();
+            });
+        }, delayMs);
     };
 
     var getCombatEntryTitle = function (node) {
@@ -2942,6 +3126,17 @@ let defaultout_plugin = (function () {
                 || normalizeCombatName(getCombatEntryTitle(node)).indexOf(normalized) >= 0;
         });
         return contains.length ? contains[0] : null;
+    };
+
+    var findCombatEntryForEvent = function (event, role) {
+        if (!event) {
+            return null;
+        }
+        var refNode = findCombatEntryByRef(event[role + "_ref"]);
+        if (refNode) {
+            return refNode;
+        }
+        return findCombatEntryByName(event[role]);
     };
 
     var spawnCombatFloater = function (node, text, tone, element) {
@@ -3025,6 +3220,19 @@ let defaultout_plugin = (function () {
         if (!nodeOrSnapshot) {
             return;
         }
+        if (nodeOrSnapshot.nodeType) {
+            if (nodeOrSnapshot.classList.contains("brave-view__entry--defeating")) {
+                return;
+            }
+            nodeOrSnapshot.classList.add("brave-view__entry--defeating");
+            var liveRef = getCombatEntryRef(nodeOrSnapshot);
+            window.setTimeout(function () {
+                if (liveRef) {
+                    suppressCombatEntryRef(liveRef);
+                }
+            }, 900);
+            return;
+        }
         var snapshot = nodeOrSnapshot.nodeType ? captureCombatEntrySnapshot(nodeOrSnapshot) : nodeOrSnapshot;
         if (!snapshot || !snapshot.rect) {
             return;
@@ -3049,11 +3257,6 @@ let defaultout_plugin = (function () {
         document.body.appendChild(ghost);
         if (snapshot.ref) {
             suppressCombatEntryRef(snapshot.ref);
-        }
-        if (nodeOrSnapshot.nodeType) {
-            if (nodeOrSnapshot.parentNode) {
-                nodeOrSnapshot.parentNode.removeChild(nodeOrSnapshot);
-            }
         }
         window.setTimeout(function () {
             if (ghost && ghost.parentNode) {
@@ -3142,46 +3345,71 @@ let defaultout_plugin = (function () {
         } else {
             events = events.map(normalizeCombatEvent);
         }
-        var unresolved = [];
-        events.forEach(function (event) {
-            var targetNode = findCombatEntryByName(event.target);
-            if (targetNode) {
-                applyCombatEventToTarget(event, targetNode);
-            }
-            if (event.lunge && event.source) {
-                var attackerNode = findCombatEntryByName(event.source);
-                if (attackerNode && targetNode) {
-                    animateCombatLunge(attackerNode, targetNode);
-                } else {
-                    unresolved.push(event);
-                }
-            } else if (!targetNode) {
-                unresolved.push(event);
-            }
-        });
-        queueCombatFxEvents(unresolved);
+        queueCombatFxEvents(events);
+    };
+
+    var combatFxEventDelay = function (event) {
+        if (!event) {
+            return 140;
+        }
+        if (event.defeat) {
+            return 900;
+        }
+        if (event.lunge) {
+            return 360;
+        }
+        if (event.impact) {
+            return 220;
+        }
+        return 140;
+    };
+
+    var requeueUnresolvedCombatFxEvent = function (event) {
+        if (!event) {
+            return false;
+        }
+        event._attempts = (event._attempts || 0) + 1;
+        if (event._attempts <= 8) {
+            pendingCombatFxEvents.push(event);
+            scheduleCombatFxFlush(90);
+            return true;
+        }
+        return false;
+    };
+
+    var finishCombatFxEvent = function (delayMs) {
+        combatFxProcessing = true;
+        window.setTimeout(function () {
+            combatFxProcessing = false;
+            flushDeferredCombatViewRender(false);
+            flushQueuedCombatResultView();
+            scheduleCombatFxFlush(0);
+        }, Math.max(0, delayMs || 0));
     };
 
     var flushPendingCombatFxEvents = function () {
-        if (!pendingCombatFxEvents.length || !currentViewData || currentViewData.variant !== "combat") {
+        if (combatFxProcessing || !pendingCombatFxEvents.length || !isCombatUiActive() || combatViewTransitionActive) {
             return;
         }
-        var remaining = [];
-        pendingCombatFxEvents.forEach(function (event) {
-            var targetNode = findCombatEntryByName(event.target);
-            var attackerNode = event.source ? findCombatEntryByName(event.source) : null;
-            if (targetNode) {
-                applyCombatEventToTarget(event, targetNode);
-                if (event.lunge && attackerNode) {
-                    animateCombatLunge(attackerNode, targetNode);
-                } else if (event.lunge && event.source) {
-                    remaining.push(event);
-                }
-            } else {
-                remaining.push(event);
+        var event = pendingCombatFxEvents.shift();
+        var targetNode = findCombatEntryForEvent(event, "target");
+        var attackerNode = event.source || event.source_ref ? findCombatEntryForEvent(event, "source") : null;
+        if (!targetNode) {
+            if (!requeueUnresolvedCombatFxEvent(event)) {
+                flushQueuedCombatResultView();
+                scheduleCombatFxFlush(0);
             }
-        });
-        pendingCombatFxEvents = remaining.slice(-24);
+            return;
+        }
+        if (event.lunge && attackerNode) {
+            animateCombatLunge(attackerNode, targetNode);
+            window.setTimeout(function () {
+                applyCombatEventToTarget(event, targetNode);
+            }, 120);
+        } else {
+            applyCombatEventToTarget(event, targetNode);
+        }
+        finishCombatFxEvent(combatFxEventDelay(event));
     };
 
     var handleCombatFxEvent = function (payload) {
@@ -3189,22 +3417,15 @@ let defaultout_plugin = (function () {
             return;
         }
         var event = normalizeCombatEvent(payload);
-        if (event && event.defeat) {
-            var targetNode = findCombatEntryByName(event.target);
+        if (event && event.defeat && isCombatUiActive()) {
+            var targetNode = findCombatEntryForEvent(event, "target");
             if (targetNode) {
-                if (event.text) {
-                    spawnCombatFloater(targetNode, event.text, event.tone, event.element);
-                }
-                if (event.impact) {
-                    animateCombatImpact(targetNode, event.impact, event.element);
-                }
-                animateCombatDefeat(targetNode);
+                applyCombatEventToTarget(event, targetNode);
+                finishCombatFxEvent(combatFxEventDelay(event));
+                return;
             }
         }
         queueCombatFxEvents([event]);
-        window.requestAnimationFrame(function () {
-            flushPendingCombatFxEvents();
-        });
     };
 
     var syncAnimatedAtbMeters = function () {
@@ -3693,7 +3914,7 @@ let defaultout_plugin = (function () {
     var claimRoomActivityEntries = function () {
         var mwin = $("#messagewindow");
         var claimedCount = 0;
-        if (!mwin.length) {
+        if (!mwin.length || isCombatUiActive()) {
             return claimedCount;
         }
 
@@ -3727,7 +3948,7 @@ let defaultout_plugin = (function () {
 
     var ensureRoomActivityLog = function () {
         var mwin = $("#messagewindow");
-        if (!mwin.length) {
+        if (!mwin.length || isCombatUiActive()) {
             return null;
         }
 
@@ -3782,6 +4003,9 @@ let defaultout_plugin = (function () {
     };
 
     var pushRoomFeedEntry = function (cls, rawText) {
+        if (isCombatUiActive()) {
+            return;
+        }
         var added = addRoomFeedEntry(cls, rawText);
         if (added) {
             noteRoomActivityEntriesAdded(1);
@@ -4221,7 +4445,7 @@ let defaultout_plugin = (function () {
             return;
         }
 
-        if (combatViewTransitionActive && !isRoomLikeView(roomView)) {
+        if (isCombatUiActive() && !isRoomLikeView(roomView)) {
             clearVicinityPanel();
             syncSceneRailLayout();
             return;
@@ -4366,6 +4590,24 @@ let defaultout_plugin = (function () {
             clearTextOutput();
             clearSceneCard();
             return;
+        }
+        if (shouldQueueCombatResultView(viewData)) {
+            clearDeferredCombatViewRender();
+            pendingCombatResultViewData = viewData;
+            pendingCombatPanelData = null;
+            scheduleCombatResultFallback();
+            scheduleCombatFxFlush(0);
+            return;
+        }
+        if (shouldDeferCombatViewRender(viewData)) {
+            deferCombatViewRender(viewData);
+            scheduleCombatFxFlush(0);
+            return;
+        }
+        if (viewData.variant !== "combat") {
+            clearDeferredCombatViewRender();
+            pendingCombatResultViewData = null;
+            pendingCombatPanelData = null;
         }
         syncInputContextForView(viewData);
         clearPickerSheet();
@@ -5066,6 +5308,18 @@ let defaultout_plugin = (function () {
             );
         };
 
+        var renderRoomMicromap = function () {
+            if (!isRoomLikeView(viewData)) {
+                return "";
+            }
+            var mapMarkup = viewData.micromap ? renderMicromapMarkup(viewData.micromap) : "";
+            return (
+                "<div class='brave-view__micromap brave-click' data-brave-command='map' title='Open map' role='button' tabindex='0' aria-label='Open map'>"
+                + mapMarkup
+                + "</div>"
+            );
+        };
+
         var viewMarkup =
             "<div class='brave-view" + variantClass + toneClass + "'>"
             + "<div class='brave-view__hero'>"
@@ -5081,7 +5335,7 @@ let defaultout_plugin = (function () {
                     + renderDesktopMenuAction()
                     + "</div>"
                 : "")
-            + (isRoomLikeView(viewData) ? "<div class='brave-view__micromap brave-click' data-brave-command='map' title='Open map' role='button' tabindex='0' aria-label='Open map'></div>" : "")
+            + renderRoomMicromap()
             + ((viewData.title_icon || viewData.title || viewData.back_action)
                 ? "<div class='brave-view__titlebar'>"
                     + ((viewData.title_icon || viewData.title)
@@ -5153,8 +5407,8 @@ let defaultout_plugin = (function () {
                 if (viewData.variant === "combat" && previousCombatSnapshots.length) {
                     restoreCombatAtbContinuity(previousCombatSnapshots);
                 }
-                if (currentMapGrid || currentMapText) {
-                    renderMap(currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText);
+                if (viewData.micromap || currentMapGrid || currentMapText) {
+                    renderMap(viewData.micromap || (currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText));
                 }
                 if (viewData.variant === "combat") {
                     ensureCombatLog();
@@ -5167,6 +5421,10 @@ let defaultout_plugin = (function () {
                     clearVicinityPanel();
                 }
                 renderPackPanel();
+                if (viewData.variant === "combat" && pendingCombatPanelData) {
+                    renderPanelCard(pendingCombatPanelData);
+                    pendingCombatPanelData = null;
+                }
                 renderDesktopToolbar();
                 syncMobileShell();
                 if (viewData.variant === "combat") {
@@ -5175,9 +5433,7 @@ let defaultout_plugin = (function () {
                     clearSuppressedCombatEntryRefs();
                 }
                 syncAnimatedAtbMeters();
-                window.requestAnimationFrame(function () {
-                    flushPendingCombatFxEvents();
-                });
+                scheduleCombatFxFlush(0);
                 combatViewTransitionActive = false;
             };
 
@@ -5187,17 +5443,17 @@ let defaultout_plugin = (function () {
                     if (!ref || nextCombatRefs[ref]) {
                         return;
                     }
-                    var liveNode = document.querySelector(".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "']");
+                    var liveNode = findCombatEntryByRef(ref);
                     if (liveNode && !liveNode.classList.contains("brave-view__entry--defeating")) {
                         animateCombatDefeat(liveNode);
-                    } else {
+                    } else if (!liveNode) {
                         animateCombatDefeat(snapshot);
                     }
                 });
                 pendingCombatSwapTimeout = window.setTimeout(function () {
                     pendingCombatSwapTimeout = null;
                     applyStickyMarkup();
-                }, 860);
+                }, 920);
             } else {
                 applyStickyMarkup();
             }
@@ -5224,8 +5480,8 @@ let defaultout_plugin = (function () {
             } else {
                 clearVicinityPanel();
             }
-            if (currentMapGrid || currentMapText) {
-                renderMap(currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText);
+            if (viewData.micromap || currentMapGrid || currentMapText) {
+                renderMap(viewData.micromap || (currentMapGrid ? { map_text: currentMapText, map_tiles: currentMapGrid } : currentMapText));
             }
             renderPackPanel();
             renderDesktopToolbar();
@@ -5236,9 +5492,7 @@ let defaultout_plugin = (function () {
                 clearSuppressedCombatEntryRefs();
             }
             syncAnimatedAtbMeters();
-            window.requestAnimationFrame(function () {
-                flushPendingCombatFxEvents();
-            });
+            scheduleCombatFxFlush(0);
             combatViewTransitionActive = false;
             focusViewAutofocusField();
             resetAllScrollPositions();
@@ -6031,6 +6285,16 @@ let defaultout_plugin = (function () {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
             currentAtbAnimationFrame = null;
         }
+        if (pendingCombatViewRenderTimeout) {
+            window.clearTimeout(pendingCombatViewRenderTimeout);
+            pendingCombatViewRenderTimeout = null;
+        }
+        pendingCombatViewData = null;
+        if (pendingCombatResultFallbackTimeout) {
+            window.clearTimeout(pendingCombatResultFallbackTimeout);
+            pendingCombatResultFallbackTimeout = null;
+        }
+        pendingCombatResultViewData = null;
         clearSuppressedCombatEntryRefs();
         setMainViewMode(false);
         setStickyViewMode(false);
@@ -6092,7 +6356,10 @@ let defaultout_plugin = (function () {
         if (kwargs && kwargs.type === "look" && suppressNextLookText) {
             return true;
         }
+        var combatActiveAtTextStart = isCombatUiActive();
         if (
+            !combatActiveAtTextStart
+            &&
             !combatViewTransitionActive
             && ((document.body.classList.contains("brave-mainview-active")
                 && !document.body.classList.contains("brave-sticky-view-active")
@@ -6102,10 +6369,8 @@ let defaultout_plugin = (function () {
             clearTextOutput();
         }
         var combatFx = null;
-        if (
-            currentViewData
-            && currentViewData.variant === "combat"
-        ) {
+        var shouldRouteToCombatLog = combatActiveAtTextStart || isCombatUiActive();
+        if (shouldRouteToCombatLog) {
             combatFx = extractCombatFxMarkers(rawText);
             appendTarget = ensureCombatLog() || mwin;
         } else if (
@@ -6121,12 +6386,13 @@ let defaultout_plugin = (function () {
         }
         var displayHtml = combatFx ? combatFx.html : rawText;
         appendTarget.append("<div class='" + cls + "'>" + displayHtml + "</div>");
-        if (currentViewData && currentViewData.variant === "combat") {
+        if (shouldRouteToCombatLog) {
             var appended = appendTarget.children().last().get(0);
             if (appended && combatFx && combatFx.events.length) {
                 appended.dataset.braveFx = JSON.stringify(combatFx.events);
             }
             applyCombatFloatersFromNode(appended);
+            claimCombatLogEntries();
         }
         if (currentViewData && currentViewData.variant === "connection") {
             pruneLegacyConnectionBoilerplate();
@@ -6162,12 +6428,7 @@ let defaultout_plugin = (function () {
     // Handle Brave-specific OOB events before falling back to generic errors.
     var onUnknownCmd = function (cmdname, args, kwargs) {
         if (cmdname === "mapdata") {
-            var mapPayload = "";
-            if (Array.isArray(args) && args.length) {
-                mapPayload = args[0];
-            } else if (kwargs && Object.prototype.hasOwnProperty.call(kwargs, "mapdata")) {
-                mapPayload = kwargs.mapdata;
-            }
+            var mapPayload = getOobPayload(args, kwargs, "mapdata", "");
             renderMap(mapPayload);
             return true;
         }
@@ -6184,36 +6445,62 @@ let defaultout_plugin = (function () {
         }
 
         if (cmdname === "brave_scene") {
-            renderSceneCard(kwargs || {});
+            var scenePayload = getOobPayload(args, kwargs, "brave_scene", {});
+            if (isCombatUiActive()) {
+                return true;
+            }
+            renderSceneCard(scenePayload || {});
             return true;
         }
 
         if (cmdname === "brave_view") {
-            renderMainView(kwargs || {});
+            var viewPayload = getOobPayload(args, kwargs, "brave_view", {});
+            if (shouldIgnoreRoomViewDuringCombat(viewPayload || {})) {
+                return true;
+            }
+            renderMainView(viewPayload || {});
             return true;
         }
 
         if (cmdname === "brave_arcade") {
-            startArcadeMode(kwargs || {});
+            startArcadeMode(getOobPayload(args, kwargs, "brave_arcade", {}) || {});
             return true;
         }
 
         if (cmdname === "brave_panel") {
-            renderPanelCard(kwargs || {});
+            var panelPayload = getOobPayload(args, kwargs, "brave_panel", {});
+            if (isCombatPanelData(panelPayload || {}) && !isCombatUiActive()) {
+                pendingCombatPanelData = panelPayload || {};
+                return true;
+            }
+            if (
+                isCombatPanelData(panelPayload || {})
+                && (hasCombatFxWork() || !!pendingCombatViewData || combatViewTransitionActive || !!pendingCombatResultViewData)
+            ) {
+                pendingCombatPanelData = panelPayload || {};
+                return true;
+            }
+            if (isCombatUiActive() && !isCombatPanelData(panelPayload || {})) {
+                return true;
+            }
+            renderPanelCard(panelPayload || {});
             return true;
         }
 
         if (cmdname === "brave_combat_fx") {
-            handleCombatFxEvent(kwargs || {});
+            handleCombatFxEvent(getOobPayload(args, kwargs, "brave_combat_fx", {}) || {});
             return true;
         }
 
         if (cmdname === "brave_notice") {
-            renderBrowserNotice(kwargs || {});
+            renderBrowserNotice(getOobPayload(args, kwargs, "brave_notice", {}) || {});
             return true;
         }
 
         if (cmdname === "brave_clear") {
+            if (isCombatUiActive()) {
+                return true;
+            }
             clearTextOutput();
             clearSceneRail();
             return true;
@@ -6227,17 +6514,33 @@ let defaultout_plugin = (function () {
         }
 
         if (cmdname === "brave_connection") {
-            resetToConnectionView(kwargs && typeof kwargs.screen === "string" ? kwargs.screen : "menu");
+            var connectionPayload = getOobPayload(args, kwargs, "brave_connection", {}) || {};
+            resetToConnectionView(connectionPayload && typeof connectionPayload.screen === "string" ? connectionPayload.screen : "menu");
             return true;
         }
 
         if (cmdname === "brave_combat_done") {
+            if (pendingCombatResultViewData) {
+                forceFlushQueuedCombatResultView();
+                return true;
+            }
+            if (
+                (currentViewData && currentViewData.variant === "combat-result")
+                || document.querySelector("#messagewindow .brave-view--combat-result")
+            ) {
+                return true;
+            }
+            clearDeferredCombatViewRender();
             clearStickyView();
             return true;
         }
 
         if (cmdname === "brave_arcade_done") {
             teardownArcadeMode();
+            return true;
+        }
+
+        if (isCombatUiActive()) {
             return true;
         }
 

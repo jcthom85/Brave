@@ -37,6 +37,12 @@ def _room_characters(room):
     return [obj for obj in room.contents if _is_connected_character(obj)]
 
 
+def _holds_combat_result(character):
+    """Return whether this character should ignore ambient room refreshes."""
+
+    return bool(getattr(getattr(character, "ndb", None), "brave_showing_combat_result", False))
+
+
 def _party_definition_to_state(party_definition):
     encounter = dict(party_definition.get("encounter") or {})
     encounter.setdefault("key", party_definition.get("key"))
@@ -179,6 +185,8 @@ def _refresh_room_views(room_ids):
         if not room:
             continue
         for character in _room_characters(room):
+            if _holds_combat_result(character):
+                continue
             room.return_appearance(character)
 
 

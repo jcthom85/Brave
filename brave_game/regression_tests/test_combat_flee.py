@@ -91,7 +91,8 @@ class CombatFleeTests(unittest.TestCase):
         )
         self.assertEqual(1, encounter.refreshed)
 
-    def test_execute_flee_moves_character_and_removes_participant(self):
+    @patch("world.browser_panels.send_webclient_event")
+    def test_execute_flee_moves_character_and_removes_participant(self, send_webclient_event):
         destination = DummyRoom("Old Stone Path")
         encounter = DummyEncounter(destination=destination)
         character = DummyCharacter(destination=destination)
@@ -102,5 +103,6 @@ class CombatFleeTests(unittest.TestCase):
         self.assertEqual([(destination, True, "flee")], character.move_calls)
         self.assertEqual([character.id], encounter.removed)
         self.assertTrue(any("falls back to Old Stone Path" in message for message in encounter.obj_messages))
+        send_webclient_event.assert_called_once_with(character, brave_combat_done={})
+        self.assertIn("LOOK Old Stone Path", character.messages[0])
         self.assertTrue(any("break away from the fight" in message for message in character.messages))
-        self.assertIn("LOOK Old Stone Path", character.messages)

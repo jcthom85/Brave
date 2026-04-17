@@ -64,9 +64,10 @@ COMBAT_BOSS_CREDIT_RATIO = (2, 3)
 COMBAT_ACTION_SCORE_CAP = 3.0
 COMBAT_UTILITY_WEIGHT = 6
 COMBAT_HITS_TAKEN_WEIGHT = 2
-# The browser defeat fall is 860ms. Leave enough headroom for network/render
-# latency plus a brief beat so players can actually watch the final death.
-COMBAT_FINISH_FX_DELAY = 1.0
+# The browser serializes lunge/impact before the 860ms defeat fall. Leave
+# headroom for network/render latency plus a brief beat before victory.
+COMBAT_FINISH_FX_DELAY = 1.6
+COMBAT_DEFEAT_REFRESH_DELAY = 1.3
 
 
 def _normalize_token(value):
@@ -98,6 +99,16 @@ def _combat_target_name(target, default=""):
     if isinstance(target, Mapping):
         return target.get("key", default) or default
     return getattr(target, "key", default) or default
+
+
+def _combat_entry_ref(target):
+    """Return the stable browser combat card ref for a character or enemy mapping."""
+
+    if isinstance(target, Mapping):
+        target_id = target.get("id")
+        return f"e:{target_id}" if target_id is not None else None
+    target_id = getattr(target, "id", None)
+    return f"p:{target_id}" if target_id is not None else None
 
 
 def _combat_fx_marker(**fields):
@@ -1316,7 +1327,9 @@ class BraveEncounter(Script):
         self._emit_combat_fx(
             kind="miss",
             source=source_name,
+            source_ref=_combat_entry_ref(source),
             target=target_name,
+            target_ref=_combat_entry_ref(target),
             text=text,
             tone="warn",
             impact="miss",
@@ -1332,6 +1345,7 @@ class BraveEncounter(Script):
         self._emit_combat_fx(
             kind="defeat",
             target=target_name,
+            target_ref=_combat_entry_ref(target),
             text=text,
             tone="break",
             impact="break",
@@ -1342,6 +1356,9 @@ class BraveEncounter(Script):
         """Remove any sticky browser combat UI for participants."""
 
         from world.browser_panels import send_webclient_event
+
+        if getattr(getattr(self, "ndb", None), "brave_skip_combat_done", False):
+            return
 
         targets = participants if participants is not None else self.get_participants()
         for participant in targets:
@@ -2043,6 +2060,7 @@ class BraveEncounter(Script):
             damage = max(1, damage // 2)
             extra_text = " The ward absorbs part of the blow." + extra_text
         enemy["hp"] = max(0, enemy["hp"] - damage)
+        defeated = enemy["hp"] <= 0
         self._save_enemy(enemy)
         self._add_threat(attacker, damage + (8 if attacker.db.brave_class == "warrior" else 0))
         self._record_participant_contribution(attacker, meaningful=True, damage=damage)
@@ -2051,18 +2069,23 @@ class BraveEncounter(Script):
         self._emit_combat_fx(
             kind="damage",
             source=attacker.key,
+            source_ref=_combat_entry_ref(attacker),
             target=enemy["key"],
+            target_ref=_combat_entry_ref(enemy),
             amount=damage,
             text=str(damage),
             tone="damage",
             impact="damage",
             element=damage_type,
+            defeat=defeated,
             lunge=True,
         )
-        if enemy["hp"] <= 0:
+        if defeated:
             self._emit_defeat_fx(enemy)
             self.obj.msg_contents(f"{enemy['key']} falls.")
             self._award_enemy_defeat_credit(enemy)
+            if not self.get_active_enemies():
+                self._schedule_victory_sequence("|gThe encounter is over. The road is clear for now.|n")
 
     def _heal_character(self, source, target, amount, heal_type="healing"):
         resources = dict(target.db.brave_resources or {})
@@ -2078,7 +2101,9 @@ class BraveEncounter(Script):
         self._emit_combat_fx(
             kind="heal",
             source=source.key,
+            source_ref=_combat_entry_ref(source),
             target=target.key,
+            target_ref=_combat_entry_ref(target),
             amount=healed,
             text=str(healed),
             tone="heal",
@@ -2181,6 +2206,7 @@ class BraveEncounter(Script):
                 self._emit_combat_fx(
                     kind="damage",
                     target=participant.key,
+                    target_ref=_combat_entry_ref(participant),
                     amount=damage,
                     text=str(damage),
                     tone="damage",
@@ -2205,6 +2231,7 @@ class BraveEncounter(Script):
                 self._emit_combat_fx(
                     kind="damage",
                     target=participant.key,
+                    target_ref=_combat_entry_ref(participant),
                     amount=damage,
                     text=str(damage),
                     tone="damage",
@@ -2250,6 +2277,17 @@ class BraveEncounter(Script):
                 if enemy["bleed_turns"] <= 0:
                     enemy["bleed_damage"] = 0
                 self.obj.msg_contents(f"|r{enemy['key']} bleeds for {damage} damage.|n")
+                self._emit_combat_fx(
+                    kind="damage",
+                    target=enemy["key"],
+                    target_ref=_combat_entry_ref(enemy),
+                    amount=damage,
+                    text=str(damage),
+                    tone="damage",
+                    impact="damage",
+                    element="bleed",
+                    defeat=enemy["hp"] <= 0,
+                )
                 changed = True
 
             if enemy["hp"] > 0 and enemy.get("poison_turns", 0) > 0:
@@ -2262,17 +2300,20 @@ class BraveEncounter(Script):
                 self._emit_combat_fx(
                     kind="damage",
                     target=enemy["key"],
+                    target_ref=_combat_entry_ref(enemy),
                     amount=damage,
                     text=str(damage),
                     tone="damage",
                     impact="damage",
                     element="poison",
+                    defeat=enemy["hp"] <= 0,
                 )
                 changed = True
 
             if changed:
                 self._save_enemy(enemy)
                 if enemy["hp"] <= 0:
+                    self._emit_defeat_fx(enemy)
                     self.obj.msg_contents(f"{enemy['key']} falls.")
                     self._award_enemy_defeat_credit(enemy)
 
@@ -2438,20 +2479,26 @@ class BraveEncounter(Script):
         return enemy
 
     def _defeat_character(self, character):
+        from world.browser_panels import send_webclient_event
+
         self._emit_defeat_fx(character)
         start_room = get_tutorial_defeat_room(character) or get_room("brambleford_town_green")
         character.clear_chapel_blessing()
         character.restore_resources()
         self._mark_defeated_participant(character)
-        self.remove_participant(character)
+        self.remove_participant(character, refresh=False)
         if start_room:
             character.move_to(start_room, quiet=True, move_type="defeat")
+        send_webclient_event(character, brave_combat_done={})
+        if character.location:
+            character.msg(character.at_look(character.location))
+        delay(COMBAT_DEFEAT_REFRESH_DELAY, self._refresh_browser_combat_views, persistent=False)
         if get_tutorial_defeat_room(character):
             character.msg("|rThe lesson lands hard, but not fatally. You are hauled back to Wayfarer's Yard to catch your breath and try again.|n")
         else:
             character.msg("|rYou are overwhelmed and carried back to Brambleford to recover.|n")
 
-    def remove_participant(self, character):
+    def remove_participant(self, character, *, refresh=True):
         """Remove a participant from the fight."""
 
         participants = [pid for pid in (self.db.participants or []) if pid != character.id]
@@ -2467,7 +2514,8 @@ class BraveEncounter(Script):
         threat.pop(str(character.id), None)
         self.db.threat = threat
         character.ndb.brave_encounter = None
-        self._refresh_browser_combat_views()
+        if refresh:
+            self._refresh_browser_combat_views()
 
     def _default_enemy_target(self):
         enemies = self.get_active_enemies()
@@ -2533,6 +2581,8 @@ class BraveEncounter(Script):
         )
 
     def _execute_flee(self, character):
+        from world.browser_panels import send_webclient_event
+
         destination = self._get_flee_destination(character)
         if not destination:
             self.obj.msg_contents(f"{character.key} looks for a retreat but finds no clean way out.")
@@ -2549,9 +2599,10 @@ class BraveEncounter(Script):
 
         self.remove_participant(character)
         self.obj.msg_contents(f"{character.key} breaks away and falls back to {destination.key}.")
-        character.msg(f"|yYou break away from the fight and fall back to {destination.key}.|n")
+        send_webclient_event(character, brave_combat_done={})
         if character.location:
             character.msg(character.at_look(character.location))
+        character.msg(f"|yYou break away from the fight and fall back to {destination.key}.|n")
 
     def _execute_item(self, character, action):
         from world.activities import _consume_item_by_template
@@ -2829,7 +2880,9 @@ class BraveEncounter(Script):
         self._emit_combat_fx(
             kind="damage",
             source=enemy["key"],
+            source_ref=_combat_entry_ref(enemy),
             target=target.key,
+            target_ref=_combat_entry_ref(target),
             amount=damage,
             text=str(damage),
             tone="damage",
@@ -3007,6 +3060,8 @@ class BraveEncounter(Script):
                     party_size=len(participants),
                 ),
             )
+            if hasattr(participant, "ndb"):
+                participant.ndb.brave_showing_combat_result = True
             participant.clear_chapel_blessing()
 
         return participants
@@ -3020,6 +3075,8 @@ class BraveEncounter(Script):
         if self.obj and room_message:
             kwargs = {"exclude": rewarded} if exclude_rewarded else {}
             self.obj.msg_contents(room_message, **kwargs)
+        if hasattr(self, "ndb"):
+            self.ndb.brave_skip_combat_done = True
         self.stop()
 
     def _schedule_victory_sequence(self, room_message, *, exclude_rewarded=True):
@@ -3027,9 +3084,6 @@ class BraveEncounter(Script):
 
         if getattr(getattr(self, "ndb", None), "brave_victory_pending", False):
             return
-        # Push one last combat-state refresh with the defeated enemy removed so
-        # the browser can play the same removal animation used for non-final kills.
-        self._refresh_browser_combat_views()
         if hasattr(self, "ndb"):
             self.ndb.brave_victory_pending = True
         delay(
