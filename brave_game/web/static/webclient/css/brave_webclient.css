@@ -2391,6 +2391,18 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     background: linear-gradient(90deg, rgba(213, 138, 118, 0.98), rgba(174, 82, 74, 0.92));
 }
 
+.scene-card__meter--mana .scene-card__meter-fill {
+    background: linear-gradient(90deg, rgba(110, 220, 242, 0.98), rgba(56, 158, 212, 0.9));
+}
+
+.scene-card__meter--stamina .scene-card__meter-fill {
+    background: linear-gradient(90deg, rgba(242, 190, 102, 0.98), rgba(194, 128, 42, 0.9));
+}
+
+.scene-card__meter--atb .scene-card__meter-fill {
+    background: linear-gradient(90deg, rgba(124, 255, 226, 0.98), rgba(54, 198, 214, 0.9));
+}
+
 .scene-card__meter-value {
     color: var(--brave-text-dim);
     font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
@@ -4888,6 +4900,18 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     background: linear-gradient(90deg, rgba(213, 138, 118, 0.98), rgba(174, 82, 74, 0.92));
 }
 
+.brave-view__meter--mana .brave-view__meter-fill {
+    background: linear-gradient(90deg, rgba(110, 220, 242, 0.98), rgba(56, 158, 212, 0.9));
+}
+
+.brave-view__meter--stamina .brave-view__meter-fill {
+    background: linear-gradient(90deg, rgba(242, 190, 102, 0.98), rgba(194, 128, 42, 0.9));
+}
+
+.brave-view__meter--atb .brave-view__meter-fill {
+    background: linear-gradient(90deg, rgba(124, 255, 226, 0.98), rgba(54, 198, 214, 0.9));
+}
+
 .brave-view__entry-chips {
     display: flex;
     flex-wrap: wrap;
@@ -5501,7 +5525,8 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__entry--defeating {
-    opacity: 0;
+    animation: brave-combat-defeat-fall 860ms cubic-bezier(0.2, 0.76, 0.24, 1) forwards;
+    pointer-events: none;
 }
 
 .brave-view--combat .brave-view__entry--impact-miss {
@@ -5712,6 +5737,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     transition-duration: 0ms, 160ms, 160ms;
     transition-timing-function: linear, ease, ease;
     will-change: width;
+}
+
+.brave-view--combat .brave-view__meter[data-meter-kind="atb"].brave-view__meter--atb .brave-view__meter-fill {
+    background: linear-gradient(90deg, rgba(124, 255, 226, 0.98), rgba(54, 198, 214, 0.9));
+    box-shadow: 0 0 10px rgba(72, 210, 219, 0.22);
 }
 
 .brave-view--combat .brave-view__meter[data-meter-kind="atb"] .brave-view__meter-head {

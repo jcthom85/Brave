@@ -2867,9 +2867,6 @@ def build_combat_view(encounter, character):
         if phase == "winding":
             ticks = display_atb_ticks((state or {}).get("ticks_remaining", 0))
             return _chip(f"Winding {ticks}", "hourglass_top", "danger")
-        if phase == "recovering":
-            ticks = display_atb_ticks((state or {}).get("ticks_remaining", 0))
-            return _chip(f"Recovering {ticks}", "schedule", "muted")
         if phase == "cooldown":
             ticks = display_atb_ticks((state or {}).get("ticks_remaining", 0))
             return _chip(f"Cooldown {ticks}", "timer", "muted")
@@ -2888,7 +2885,7 @@ def build_combat_view(encounter, character):
         phase_remaining_ms = max(0, phase_duration_ms - elapsed_ms) if phase_duration_ms > 0 else 0
 
         value = gauge
-        tone = "accent"
+        tone = "atb"
         if phase in {"ready", "resolving", "winding"}:
             value = 100
             tone = "danger" if enemy else "good"
@@ -2971,7 +2968,11 @@ def build_combat_view(encounter, character):
             "mana": "MP",
             "stamina": "STA",
         }.get(resource_key, get_resource_label(resource_key, character)[:3].upper())
-        return _meter(short_label, current_value, max_value, tone="accent")
+        tone = {
+            "mana": "mana",
+            "stamina": "stamina",
+        }.get(resource_key, "accent")
+        return _meter(short_label, current_value, max_value, tone=tone)
 
     enemies = encounter.get_active_enemies()
     participants = encounter.get_active_participants()

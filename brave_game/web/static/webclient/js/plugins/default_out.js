@@ -71,6 +71,21 @@ let defaultout_plugin = (function () {
     var pendingCombatSwapTimeout = null;
     var suppressedCombatEntryRefs = {};
     var combatViewTransitionActive = false;
+    var COMBAT_IMPACT_RGB = {
+        damage: "199, 55, 44",
+        heal: "65, 160, 100",
+        guard: "70, 134, 181",
+        break: "201, 145, 38",
+        fire: "224, 121, 45",
+        frost: "104, 196, 224",
+        lightning: "231, 197, 84",
+        holy: "232, 204, 124",
+        nature: "106, 177, 88",
+        poison: "154, 188, 62",
+        shadow: "135, 124, 176",
+        bleed: "199, 55, 44",
+        physical: "199, 55, 44",
+    };
 
     var isMobileViewport = function () {
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
@@ -2002,6 +2017,54 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var preserveCombatPickerOnViewRefresh = function (viewData) {
+        return !!(
+            currentPickerData
+            && currentViewData
+            && currentViewData.variant === "combat"
+            && viewData
+            && viewData.variant === "combat"
+        );
+    };
+
+    var syncOpenCombatPickerFromDom = function () {
+        if (!currentPickerData || !currentViewData || currentViewData.variant !== "combat") {
+            return;
+        }
+        var pickerTitle = String(currentPickerData.title || "").trim();
+        if (!pickerTitle) {
+            renderPickerSheet();
+            return;
+        }
+        var candidates = Array.prototype.slice.call(document.querySelectorAll(".brave-view--combat [data-brave-picker]"));
+        var matched = candidates.find(function (node) {
+            var labelNode = node.querySelector("span:last-child");
+            return labelNode && String(labelNode.textContent || "").trim() === pickerTitle;
+        });
+        if (!matched) {
+            renderPickerSheet();
+            return;
+        }
+        try {
+            var pickerData = JSON.parse(matched.getAttribute("data-brave-picker"));
+            if (!isMobileViewport() && matched.closest(".brave-view__actions")) {
+                var rect = matched.getBoundingClientRect();
+                pickerData.anchor = "toolbar";
+                pickerData.anchorRect = {
+                    top: rect.top,
+                    right: rect.right,
+                    bottom: rect.bottom,
+                    left: rect.left,
+                };
+            }
+            currentPickerData = pickerData;
+            currentPickerAnchorRect = pickerData && pickerData.anchorRect ? pickerData.anchorRect : null;
+        } catch (_error) {
+            // keep the existing picker data if the refreshed control can't be parsed
+        }
+        renderPickerSheet();
+    };
+
     var focusCommandInput = function () {
         if (isMobileViewport() && openMobileCommandTray()) {
             return;
@@ -3139,6 +3202,308 @@ let defaultout_plugin = (function () {
         return findCombatEntryByName(event[role]);
     };
 
+    var getCombatFxOverlayRoot = function () {
+        var overlay = document.getElementById("brave-combat-fx-overlay");
+        if (overlay) {
+            return overlay;
+        }
+        overlay = document.createElement("div");
+        overlay.id = "brave-combat-fx-overlay";
+        overlay.className = "brave-view brave-view--combat brave-combat-fx-overlay";
+        overlay.style.position = "fixed";
+        overlay.style.left = "0";
+        overlay.style.top = "0";
+        overlay.style.width = "100vw";
+        overlay.style.height = "100vh";
+        overlay.style.pointerEvents = "none";
+        overlay.style.zIndex = "980";
+        overlay.style.overflow = "visible";
+        document.body.appendChild(overlay);
+        return overlay;
+    };
+
+    var clearCombatFxOverlay = function () {
+        var overlay = document.getElementById("brave-combat-fx-overlay");
+        if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+        }
+    };
+
+    var createCombatOverlayBox = function (rect, extraClass) {
+        if (!rect || !rect.width || !rect.height) {
+            return null;
+        }
+        var overlay = getCombatFxOverlayRoot();
+        var box = document.createElement("div");
+        box.className = extraClass || "";
+        box.style.position = "fixed";
+        box.style.left = rect.left + "px";
+        box.style.top = rect.top + "px";
+        box.style.width = rect.width + "px";
+        box.style.height = rect.height + "px";
+        box.style.pointerEvents = "none";
+        box.style.overflow = "visible";
+        overlay.appendChild(box);
+        return box;
+    };
+
+    var createCombatGhostElement = function (snapshot, extraClasses) {
+        if (!snapshot || !snapshot.rect) {
+            return null;
+        }
+        var host = createCombatOverlayBox(snapshot.rect, "brave-combat-ghost-host");
+        if (!host) {
+            return null;
+        }
+        host.style.zIndex = "995";
+        host.innerHTML = snapshot.html || "";
+        var ghost = host.firstElementChild;
+        if (!ghost) {
+            if (host.parentNode) {
+                host.parentNode.removeChild(host);
+            }
+            return null;
+        }
+        ghost.removeAttribute("data-entry-ref");
+        ghost.classList.add("brave-combat-ghost");
+        if (Array.isArray(extraClasses)) {
+            extraClasses.forEach(function (className) {
+                if (className) {
+                    ghost.classList.add(className);
+                }
+            });
+        }
+        ghost.style.width = "100%";
+        ghost.style.height = "100%";
+        ghost.style.margin = "0";
+        ghost.style.pointerEvents = "none";
+        return { host: host, ghost: ghost };
+    };
+
+    var removeCombatOverlayNodeLater = function (node, delayMs) {
+        window.setTimeout(function () {
+            if (node && node.parentNode) {
+                node.parentNode.removeChild(node);
+            }
+        }, Math.max(0, delayMs || 0));
+    };
+
+    var spawnCombatFloaterFromSnapshot = function (snapshot, text, tone, element) {
+        if (!snapshot || !text) {
+            return;
+        }
+        var host = createCombatOverlayBox(snapshot.rect, "brave-combat-floater-host");
+        if (!host) {
+            return;
+        }
+        host.style.zIndex = "997";
+        var floater = document.createElement("span");
+        floater.className = "brave-combat-floater brave-combat-floater--" + (tone || "neutral");
+        var driftX = ((Math.random() * 18) - 9).toFixed(2) + "px";
+        var driftY = (18 + (Math.random() * 12)).toFixed(2) + "px";
+        var popScale = (1.06 + (Math.random() * 0.16)).toFixed(2);
+        floater.style.setProperty("--brave-floater-drift-x", driftX);
+        floater.style.setProperty("--brave-floater-rise-y", driftY);
+        floater.style.setProperty("--brave-floater-pop-scale", popScale);
+        if (element) {
+            floater.classList.add("brave-combat-floater--element-" + element);
+        }
+        floater.textContent = text;
+        host.appendChild(floater);
+        removeCombatOverlayNodeLater(host, 1300);
+    };
+
+    var animateCombatImpactFromSnapshot = function (snapshot, tone, element) {
+        if (!snapshot) {
+            return;
+        }
+        var created = createCombatGhostElement(snapshot);
+        if (!created || !created.ghost) {
+            return;
+        }
+        var ghost = created.ghost;
+        var host = created.host;
+        var impactTone = tone || "damage";
+        var durationMs = impactTone === "break" ? 340 : impactTone === "miss" ? 280 : 320;
+        var animationName = {
+            damage: "brave-combat-impact-damage",
+            heal: "brave-combat-impact-heal",
+            guard: "brave-combat-impact-guard",
+            break: "brave-combat-impact-break",
+            miss: "brave-combat-impact-miss",
+        }[impactTone] || "brave-combat-impact-damage";
+        var rgbKey = element || impactTone;
+        if (COMBAT_IMPACT_RGB[rgbKey]) {
+            ghost.style.setProperty("--brave-impact-rgb", COMBAT_IMPACT_RGB[rgbKey]);
+        }
+        ghost.style.animation = animationName + " " + durationMs + "ms ease-out 1";
+        removeCombatOverlayNodeLater(host, durationMs + 80);
+    };
+
+    var animateCombatLungeFromSnapshots = function (attackerSnapshot, targetSnapshot) {
+        if (!attackerSnapshot || !targetSnapshot || !attackerSnapshot.rect || !targetSnapshot.rect) {
+            return;
+        }
+        var created = createCombatGhostElement(attackerSnapshot);
+        if (!created || !created.ghost) {
+            return;
+        }
+        var ghost = created.ghost;
+        var host = created.host;
+        var attackerRect = attackerSnapshot.rect;
+        var targetRect = targetSnapshot.rect;
+        var dx = (targetRect.left + (targetRect.width / 2)) - (attackerRect.left + (attackerRect.width / 2));
+        var dy = (targetRect.top + (targetRect.height / 2)) - (attackerRect.top + (attackerRect.height / 2));
+        var magnitude = Math.sqrt((dx * dx) + (dy * dy));
+        if (!magnitude) {
+            if (host.parentNode) {
+                host.parentNode.removeChild(host);
+            }
+            return;
+        }
+        var lungeDistance = Math.min(18, Math.max(8, magnitude * 0.08));
+        ghost.style.setProperty("--brave-combat-lunge-x", ((dx / magnitude) * lungeDistance).toFixed(2) + "px");
+        ghost.style.setProperty("--brave-combat-lunge-y", ((dy / magnitude) * lungeDistance).toFixed(2) + "px");
+        ghost.style.willChange = "transform";
+        ghost.style.animation = "brave-combat-card-lunge 300ms cubic-bezier(0.2, 0.86, 0.24, 1) 1";
+        removeCombatOverlayNodeLater(host, 360);
+    };
+
+    var parseMarkupRoot = function (markup) {
+        var shell = document.createElement("div");
+        shell.innerHTML = String(markup || "");
+        return shell.firstElementChild;
+    };
+
+    var syncElementAttributes = function (target, source, options) {
+        options = options || {};
+        var preserve = options.preserve || {};
+        Array.prototype.slice.call(target.attributes || []).forEach(function (attr) {
+            if (preserve[attr.name]) {
+                return;
+            }
+            if (!source.hasAttribute(attr.name)) {
+                target.removeAttribute(attr.name);
+            }
+        });
+        Array.prototype.slice.call(source.attributes || []).forEach(function (attr) {
+            if (preserve[attr.name]) {
+                return;
+            }
+            target.setAttribute(attr.name, attr.value);
+        });
+    };
+
+    var patchCombatEntryNode = function (target, source) {
+        if (!target || !source) {
+            return;
+        }
+        var preservedClasses = Array.prototype.slice.call(target.classList || []).filter(function (className) {
+            return className === "brave-view__entry--lunge"
+                || className === "brave-view__entry--defeating"
+                || className.indexOf("brave-view__entry--impact-") === 0;
+        });
+        syncElementAttributes(target, source, { preserve: { style: true } });
+        target.className = source.className;
+        preservedClasses.forEach(function (className) {
+            target.classList.add(className);
+        });
+        target.innerHTML = source.innerHTML;
+    };
+
+    var reconcileCombatEntryCollection = function (targetEntries, sourceEntries) {
+        if (!targetEntries || !sourceEntries) {
+            return;
+        }
+        var currentChildren = Array.prototype.slice.call(targetEntries.children || []);
+        var currentByRef = {};
+        currentChildren.forEach(function (child) {
+            var ref = child.getAttribute("data-entry-ref") || "";
+            if (ref) {
+                currentByRef[ref] = child;
+            }
+        });
+        var nextOrder = [];
+        Array.prototype.slice.call(sourceEntries.children || []).forEach(function (sourceChild) {
+            var ref = sourceChild.getAttribute("data-entry-ref") || "";
+            var currentChild = ref ? currentByRef[ref] : null;
+            if (currentChild) {
+                patchCombatEntryNode(currentChild, sourceChild);
+                nextOrder.push(currentChild);
+                delete currentByRef[ref];
+            } else {
+                nextOrder.push(sourceChild.cloneNode(true));
+            }
+        });
+        currentChildren.forEach(function (child) {
+            if (child.parentNode === targetEntries) {
+                targetEntries.removeChild(child);
+            }
+        });
+        nextOrder.forEach(function (child) {
+            targetEntries.appendChild(child);
+        });
+    };
+
+    var patchCombatStickyView = function (stickyNode, markup) {
+        var currentView = stickyNode ? stickyNode.querySelector(".brave-view--combat") : null;
+        var nextView = parseMarkupRoot(markup);
+        if (!currentView || !nextView) {
+            return false;
+        }
+        syncElementAttributes(currentView, nextView);
+        currentView.className = nextView.className;
+
+        var currentHero = currentView.querySelector(".brave-view__hero");
+        var nextHero = nextView.querySelector(".brave-view__hero");
+        if (currentHero && nextHero) {
+            currentHero.innerHTML = nextHero.innerHTML;
+        }
+
+        var currentSectionsWrap = currentView.querySelector(".brave-view__sections");
+        var nextSectionsWrap = nextView.querySelector(".brave-view__sections");
+        if (!currentSectionsWrap || !nextSectionsWrap) {
+            currentView.innerHTML = nextView.innerHTML;
+            return true;
+        }
+
+        var currentSections = Array.prototype.slice.call(currentSectionsWrap.children || []);
+        var nextSections = Array.prototype.slice.call(nextSectionsWrap.children || []);
+        if (currentSections.length !== nextSections.length) {
+            currentView.innerHTML = nextView.innerHTML;
+            return true;
+        }
+
+        for (var index = 0; index < nextSections.length; index += 1) {
+            var currentSection = currentSections[index];
+            var nextSection = nextSections[index];
+            if (!currentSection || !nextSection) {
+                currentView.innerHTML = nextView.innerHTML;
+                return true;
+            }
+            syncElementAttributes(currentSection, nextSection);
+            currentSection.className = nextSection.className;
+            var currentLabel = currentSection.querySelector(".brave-view__section-label");
+            var nextLabel = nextSection.querySelector(".brave-view__section-label");
+            if (currentLabel && nextLabel) {
+                currentLabel.innerHTML = nextLabel.innerHTML;
+            } else if (!currentLabel && nextLabel) {
+                currentSection.insertBefore(nextLabel.cloneNode(true), currentSection.firstChild || null);
+            } else if (currentLabel && !nextLabel) {
+                currentLabel.parentNode.removeChild(currentLabel);
+            }
+
+            var currentEntries = currentSection.querySelector(".brave-view__entries");
+            var nextEntries = nextSection.querySelector(".brave-view__entries");
+            if (currentEntries && nextEntries) {
+                reconcileCombatEntryCollection(currentEntries, nextEntries);
+            } else {
+                currentSection.innerHTML = nextSection.innerHTML;
+            }
+        }
+        return true;
+    };
+
     var spawnCombatFloater = function (node, text, tone, element) {
         if (!node || !text) {
             return;
@@ -3313,11 +3678,15 @@ let defaultout_plugin = (function () {
         return mapped;
     };
 
-    var applyCombatEventToTarget = function (event, targetNode) {
+    var applyCombatEventToTarget = function (event, targetNode, targetSnapshot) {
         if (!event || !targetNode || event._appliedTarget) {
             return;
         }
-        spawnCombatFloater(targetNode, event.text, event.tone, event.element);
+        if (targetSnapshot) {
+            spawnCombatFloaterFromSnapshot(targetSnapshot, event.text, event.tone, event.element);
+        } else {
+            spawnCombatFloater(targetNode, event.text, event.tone, event.element);
+        }
         if (event.impact) {
             animateCombatImpact(targetNode, event.impact, event.element);
         }
@@ -3394,6 +3763,8 @@ let defaultout_plugin = (function () {
         var event = pendingCombatFxEvents.shift();
         var targetNode = findCombatEntryForEvent(event, "target");
         var attackerNode = event.source || event.source_ref ? findCombatEntryForEvent(event, "source") : null;
+        var targetSnapshot = targetNode ? captureCombatEntrySnapshot(targetNode) : null;
+        var attackerSnapshot = attackerNode ? captureCombatEntrySnapshot(attackerNode) : null;
         if (!targetNode) {
             if (!requeueUnresolvedCombatFxEvent(event)) {
                 flushQueuedCombatResultView();
@@ -3404,10 +3775,10 @@ let defaultout_plugin = (function () {
         if (event.lunge && attackerNode) {
             animateCombatLunge(attackerNode, targetNode);
             window.setTimeout(function () {
-                applyCombatEventToTarget(event, targetNode);
+                applyCombatEventToTarget(event, targetNode, targetSnapshot);
             }, 120);
         } else {
-            applyCombatEventToTarget(event, targetNode);
+            applyCombatEventToTarget(event, targetNode, targetSnapshot);
         }
         finishCombatFxEvent(combatFxEventDelay(event));
     };
@@ -3419,8 +3790,9 @@ let defaultout_plugin = (function () {
         var event = normalizeCombatEvent(payload);
         if (event && event.defeat && isCombatUiActive()) {
             var targetNode = findCombatEntryForEvent(event, "target");
+            var targetSnapshot = targetNode ? captureCombatEntrySnapshot(targetNode) : null;
             if (targetNode) {
-                applyCombatEventToTarget(event, targetNode);
+                applyCombatEventToTarget(event, targetNode, targetSnapshot);
                 finishCombatFxEvent(combatFxEventDelay(event));
                 return;
             }
@@ -3656,17 +4028,29 @@ let defaultout_plugin = (function () {
         setBodyState("boss", "");
         setBodyState("view", "");
         document.body.classList.remove("brave-tone-shift", "brave-scene-shift", "brave-scene-combat-enter");
+        clearCombatFxOverlay();
     };
 
     var clearStickyView = function () {
         var mwin = $("#messagewindow");
         if (!mwin.length) {
+            clearCombatFxOverlay();
             setStickyViewMode(false);
             return;
         }
         mwin.children(".brave-sticky-view").remove();
         mwin.children(".brave-combat-log").remove();
+        clearCombatFxOverlay();
         setStickyViewMode(false);
+    };
+
+    var teardownCombatUiState = function () {
+        clearDeferredCombatViewRender();
+        pendingCombatPanelData = null;
+        combatViewTransitionActive = false;
+        clearStickyView();
+        clearReactiveState();
+        currentViewData = null;
     };
 
     var renderRoomFeedEntryMarkup = function (entry) {
@@ -4610,7 +4994,9 @@ let defaultout_plugin = (function () {
             pendingCombatPanelData = null;
         }
         syncInputContextForView(viewData);
-        clearPickerSheet();
+        if (!preserveCombatPickerOnViewRefresh(viewData)) {
+            clearPickerSheet();
+        }
 
         var preserveRail = !!(viewData.layout === "explore" || viewData.preserve_rail);
         var stickyView = !!viewData.sticky;
@@ -5380,6 +5766,7 @@ let defaultout_plugin = (function () {
             var previousCombatSnapshots = [];
             var nextCombatRefs = {};
             var shouldDelayCombatSwap = false;
+            var patchCombatInPlace = !!(viewData.variant === "combat" && currentViewData && currentViewData.variant === "combat");
             if (viewData.variant === "combat" && currentViewData && currentViewData.variant === "combat") {
                 previousCombatSnapshots = getCombatEntryNodes().map(captureCombatEntrySnapshot).filter(Boolean);
                 nextCombatRefs = collectCombatEntryRefsFromMarkup(viewMarkup);
@@ -5399,7 +5786,13 @@ let defaultout_plugin = (function () {
                 setBodyState("view", viewData && viewData.variant ? viewData.variant : "");
 
                 var stickyContainer = mwin.children(".brave-sticky-view");
-                if (stickyContainer.length) {
+                if (
+                    stickyContainer.length
+                    && patchCombatInPlace
+                    && patchCombatStickyView(stickyContainer.get(0), viewMarkup)
+                ) {
+                    // patched in place
+                } else if (stickyContainer.length) {
                     stickyContainer.html(viewMarkup);
                 } else {
                     mwin.prepend("<div class='brave-sticky-view'>" + viewMarkup + "</div>");
@@ -5434,6 +5827,7 @@ let defaultout_plugin = (function () {
                 }
                 syncAnimatedAtbMeters();
                 scheduleCombatFxFlush(0);
+                syncOpenCombatPickerFromDom();
                 combatViewTransitionActive = false;
             };
 
@@ -5493,6 +5887,7 @@ let defaultout_plugin = (function () {
             }
             syncAnimatedAtbMeters();
             scheduleCombatFxFlush(0);
+            syncOpenCombatPickerFromDom();
             combatViewTransitionActive = false;
             focusViewAutofocusField();
             resetAllScrollPositions();
@@ -6530,8 +6925,7 @@ let defaultout_plugin = (function () {
             ) {
                 return true;
             }
-            clearDeferredCombatViewRender();
-            clearStickyView();
+            teardownCombatUiState();
             return true;
         }
 
