@@ -276,7 +276,7 @@ let defaultout_plugin = (function () {
         if (!pendingCombatViewData) {
             return;
         }
-        if (!force && (hasCombatFxWork() || combatViewTransitionActive || pendingCombatResultViewData)) {
+        if (!force && (hasCombatFxWork() || combatViewTransitionActive || pendingCombatResultViewData || pendingCombatSwapTimeout)) {
             deferCombatViewRender(pendingCombatViewData);
             return;
         }
@@ -3054,7 +3054,7 @@ let defaultout_plugin = (function () {
         if (!document.getElementById(styleId)) {
             var style = document.createElement("style");
             style.id = styleId;
-            style.textContent = ".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "'] { display: none !important; }";
+            style.textContent = ".brave-view--combat .brave-view__entry[data-entry-ref='" + ref + "'] { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }";
             document.head.appendChild(style);
         }
     };
@@ -3691,7 +3691,7 @@ let defaultout_plugin = (function () {
             animateCombatImpact(targetNode, event.impact, event.element);
         }
         if (event.defeat) {
-            animateCombatDefeat(targetNode);
+            animateCombatDefeat(targetSnapshot || targetNode);
         }
         event._appliedTarget = true;
     };
@@ -5749,6 +5749,16 @@ let defaultout_plugin = (function () {
             + "</div>"
             + "</div>";
 
+        if (
+            pendingCombatSwapTimeout
+            && stickyView
+            && viewData.variant === "combat"
+            && currentViewData
+            && currentViewData.variant === "combat"
+        ) {
+            deferCombatViewRender(viewData);
+            return;
+        }
         if (pendingCombatSwapTimeout) {
             window.clearTimeout(pendingCombatSwapTimeout);
             pendingCombatSwapTimeout = null;
@@ -5834,19 +5844,17 @@ let defaultout_plugin = (function () {
             if (shouldDelayCombatSwap) {
                 previousCombatSnapshots.forEach(function (snapshot) {
                     var ref = snapshot && snapshot.ref;
-                    if (!ref || nextCombatRefs[ref]) {
+                    if (!ref || nextCombatRefs[ref] || suppressedCombatEntryRefs[ref]) {
                         return;
                     }
-                    var liveNode = findCombatEntryByRef(ref);
-                    if (liveNode && !liveNode.classList.contains("brave-view__entry--defeating")) {
-                        animateCombatDefeat(liveNode);
-                    } else if (!liveNode) {
+                    if (snapshot) {
                         animateCombatDefeat(snapshot);
                     }
                 });
                 pendingCombatSwapTimeout = window.setTimeout(function () {
                     pendingCombatSwapTimeout = null;
                     applyStickyMarkup();
+                    flushDeferredCombatViewRender(false);
                 }, 920);
             } else {
                 applyStickyMarkup();
