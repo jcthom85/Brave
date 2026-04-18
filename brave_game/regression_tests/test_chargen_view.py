@@ -63,6 +63,8 @@ class ChargenViewTests(unittest.TestCase):
             icons_by_title,
         )
         self.assertEqual(len(entries), len({entry.get("icon") for entry in entries}))
+        ranger_entry = next(entry for entry in entries if entry.get("title") == "Ranger")
+        self.assertIn("Companion Bond", [chip.get("label") for chip in ranger_entry.get("chips", [])])
 
     def test_race_step_uses_distinct_race_icons(self):
         view = build_chargen_view(DummyAccount(), {"step": "menunode_choose_race", "name": "Aria"})
@@ -75,8 +77,8 @@ class ChargenViewTests(unittest.TestCase):
                 CONTENT.characters.races["human"]["name"]: "player",
                 CONTENT.characters.races["elf"]["name"]: "fairy",
                 CONTENT.characters.races["dwarf"]["name"]: "anvil",
-                CONTENT.characters.races["halfling"]["name"]: "clover",
-                CONTENT.characters.races["half_orc"]["name"]: "horns",
+                CONTENT.characters.races["mosskin"]["name"]: "clover",
+                CONTENT.characters.races["ashborn"]["name"]: "horns",
             },
             icons_by_title,
         )

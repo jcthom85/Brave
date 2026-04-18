@@ -4,6 +4,7 @@ import random
 
 from world.content import get_content_registry
 from world.data.items import ITEM_TEMPLATES
+from world.race_world_hooks import get_shift_sales_bonus
 
 CONTENT = get_content_registry()
 QUESTS = CONTENT.quests.quests
@@ -183,12 +184,16 @@ def run_shop_shift(character):
         )
 
     outcome = random.choice(SHIFT_OUTCOMES)
+    sales_left = outcome["sales_left"] + get_shift_sales_bonus(character)
     character.db.brave_shop_bonus = {
         "name": outcome["name"],
         "bonus_pct": outcome["bonus_pct"],
-        "sales_left": outcome["sales_left"],
+        "sales_left": sales_left,
     }
-    return True, outcome["text"] + " " + f"You gain |w{format_shop_bonus(character.db.brave_shop_bonus)}|n."
+    message = outcome["text"] + " " + f"You gain |w{format_shop_bonus(character.db.brave_shop_bonus)}|n."
+    if get_shift_sales_bonus(character):
+        message += " Your practical instincts buy you one extra favorable sale."
+    return True, message
 
 
 def sell_inventory_item(character, template_id, quantity):

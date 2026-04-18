@@ -120,6 +120,29 @@ def _picker_option(picker, label, *, meta=None):
 
 
 class CombatActionPayloadTests(unittest.TestCase):
+    def test_ability_tooltip_includes_authored_summary_when_present(self):
+        room = DummyRoom()
+        mage = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "mage",
+            {"hp": 20, "mana": 30, "stamina": 0},
+            {"max_hp": 24, "max_mana": 30, "max_stamina": 0},
+            ["Firebolt", "Arc Spark"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [mage],
+            [{"id": "e1", "key": "Bog Wolf", "hp": 11, "max_hp": 16}],
+        )
+
+        payload = build_combat_action_payload(encounter, mage)
+        firebolt = _action(payload["abilities"], "firebolt")
+
+        self.assertIn("reliable burst of fire", firebolt.get("tooltip", ""))
+        self.assertIn("Timing:", firebolt.get("tooltip", ""))
+
     def test_payload_normalizes_multi_target_ability_state(self):
         room = DummyRoom()
         healer = DummyCharacter(
@@ -164,7 +187,7 @@ class CombatActionPayloadTests(unittest.TestCase):
         self.assertEqual("enemy", smite.get("target_mode"))
         self.assertEqual("use Smite = e1", smite.get("command"))
         self.assertIn("timing", heal)
-        self.assertEqual(108, heal.get("timing", {}).get("gauge_cost"))
+        self.assertEqual(432, heal.get("timing", {}).get("gauge_cost"))
         self.assertFalse(heal.get("timing", {}).get("target_locked"))
         self.assertEqual(1, smite.get("timing", {}).get("windup_ticks"))
         self.assertIsNone(heal.get("reaction_role"))
@@ -256,7 +279,7 @@ class CombatActionPayloadTests(unittest.TestCase):
             "Dad",
             room,
             "rogue",
-            {"hp": 16, "mana": 0, "stamina": 10},
+            {"hp": 16, "mana": 0, "stamina": 12},
             {"max_hp": 20, "max_mana": 0, "max_stamina": 12},
             ["Cheap Shot"],
         )

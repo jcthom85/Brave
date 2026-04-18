@@ -73,6 +73,8 @@ let defaultout_plugin = (function () {
     var pendingCombatTransitionViewData = null;
     var pendingCombatTransitionTimeout = null;
     var pendingCombatTransitionCleanupTimeout = null;
+    var pendingCombatTransitionMode = "";
+    var pendingCombatResultReturnTransition = false;
     var suppressedCombatEntryRefs = {};
     var combatViewTransitionActive = false;
     var COMBAT_IMPACT_RGB = {
@@ -97,6 +99,20 @@ let defaultout_plugin = (function () {
 
     var prefersReducedMotion = function () {
         return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    };
+
+    var getCombatTransitionRevealDelay = function (mode) {
+        if (mode === "return") {
+            return 1180;
+        }
+        return 980;
+    };
+
+    var getCombatTransitionCleanupDelay = function (mode) {
+        if (mode === "return") {
+            return 360;
+        }
+        return 320;
     };
 
     var getDefaultInPlugin = function () {
@@ -4004,14 +4020,14 @@ let defaultout_plugin = (function () {
         }
     };
 
-    var showCombatTransitionOverlay = function (viewData) {
+    var showCombatTransitionOverlay = function (viewData, mode) {
         if (!document.body) {
             return;
         }
         clearCombatTransitionOverlay();
         var overlay = document.createElement("div");
         overlay.id = "brave-combat-transition";
-        overlay.className = "brave-combat-transition";
+        overlay.className = "brave-combat-transition brave-combat-transition--" + escapeHtml(mode || "enter");
         var title = viewData && viewData.title ? String(viewData.title) : "Combat";
         var subtitle = viewData && viewData.subtitle ? String(viewData.subtitle) : "";
         overlay.innerHTML =
@@ -4023,14 +4039,18 @@ let defaultout_plugin = (function () {
             + "<span class='brave-combat-transition__shutter brave-combat-transition__shutter--3'></span>"
             + "</div>"
             + "<div class='brave-combat-transition__ring'></div>"
-            + "<div class='brave-combat-transition__card'>"
-            + "<div class='brave-combat-transition__eyebrow'>"
-            + icon("swords", "brave-combat-transition__eyebrow-icon")
-            + "<span>Encounter</span>"
-            + "</div>"
-            + "<div class='brave-combat-transition__title'>" + escapeHtml(title) + "</div>"
-            + (subtitle ? "<div class='brave-combat-transition__subtitle'>" + escapeHtml(subtitle) + "</div>" : "")
-            + "</div>";
+            + (
+                mode === "return"
+                    ? ""
+                    : "<div class='brave-combat-transition__card'>"
+                        + "<div class='brave-combat-transition__eyebrow'>"
+                        + icon("swords", "brave-combat-transition__eyebrow-icon")
+                        + "<span>Encounter</span>"
+                        + "</div>"
+                        + "<div class='brave-combat-transition__title'>" + escapeHtml(title) + "</div>"
+                        + (subtitle ? "<div class='brave-combat-transition__subtitle'>" + escapeHtml(subtitle) + "</div>" : "")
+                        + "</div>"
+            );
         document.body.appendChild(overlay);
     };
 
@@ -4044,15 +4064,18 @@ let defaultout_plugin = (function () {
             pendingCombatTransitionCleanupTimeout = null;
         }
         pendingCombatTransitionViewData = null;
+        pendingCombatTransitionMode = "";
         combatViewTransitionActive = false;
         if (document.body) {
             document.body.classList.remove("brave-combat-transition-active");
+            document.body.classList.remove("brave-combat-return-active");
         }
         clearCombatTransitionOverlay();
     };
 
     var finishCombatTransitionOverlay = function () {
         var overlay = document.getElementById("brave-combat-transition");
+        var cleanupDelay = getCombatTransitionCleanupDelay(pendingCombatTransitionMode || (overlay && overlay.classList.contains("brave-combat-transition--return") ? "return" : "enter"));
         if (overlay) {
             overlay.classList.add("brave-combat-transition--out");
         }
@@ -4063,16 +4086,47 @@ let defaultout_plugin = (function () {
             pendingCombatTransitionCleanupTimeout = null;
             if (document.body) {
                 document.body.classList.remove("brave-combat-transition-active");
+                document.body.classList.remove("brave-combat-return-active");
             }
             clearCombatTransitionOverlay();
-        }, 320);
+        }, cleanupDelay);
     };
 
-    var startCombatTransition = function (viewData) {
-        if (!viewData || viewData.variant !== "combat" || prefersReducedMotion()) {
+    var startCombatReturnOverlay = function (viewData) {
+        if (!viewData || !isRoomLikeView(viewData) || prefersReducedMotion()) {
+            return false;
+        }
+        pendingCombatResultReturnTransition = false;
+        pendingCombatTransitionMode = "return";
+        if (pendingCombatTransitionTimeout) {
+            window.clearTimeout(pendingCombatTransitionTimeout);
+        }
+        if (pendingCombatTransitionCleanupTimeout) {
+            window.clearTimeout(pendingCombatTransitionCleanupTimeout);
+            pendingCombatTransitionCleanupTimeout = null;
+        }
+        if (document.body) {
+            document.body.classList.remove("brave-combat-transition-active");
+            document.body.classList.add("brave-combat-return-active");
+        }
+        showCombatTransitionOverlay(viewData, "return");
+        pendingCombatTransitionTimeout = window.setTimeout(function () {
+            pendingCombatTransitionTimeout = null;
+            finishCombatTransitionOverlay();
+        }, getCombatTransitionRevealDelay("return"));
+        return true;
+    };
+
+    var startCombatTransition = function (viewData, mode) {
+        mode = mode || "enter";
+        if (!viewData || prefersReducedMotion()) {
+            return false;
+        }
+        if (mode === "enter" && viewData.variant !== "combat") {
             return false;
         }
         pendingCombatTransitionViewData = viewData;
+        pendingCombatTransitionMode = mode;
         combatViewTransitionActive = true;
         if (pendingCombatTransitionTimeout) {
             window.clearTimeout(pendingCombatTransitionTimeout);
@@ -4082,20 +4136,27 @@ let defaultout_plugin = (function () {
             pendingCombatTransitionCleanupTimeout = null;
         }
         if (document.body) {
-            document.body.classList.add("brave-combat-transition-active");
+            document.body.classList.toggle("brave-combat-transition-active", mode === "enter");
+            document.body.classList.toggle("brave-combat-return-active", mode === "return");
         }
-        showCombatTransitionOverlay(viewData);
+        showCombatTransitionOverlay(viewData, mode);
+        var revealDelay = getCombatTransitionRevealDelay(mode);
         pendingCombatTransitionTimeout = window.setTimeout(function () {
             var queuedViewData = pendingCombatTransitionViewData;
             pendingCombatTransitionTimeout = null;
             pendingCombatTransitionViewData = null;
+            var resolvedMode = pendingCombatTransitionMode || mode;
+            pendingCombatTransitionMode = resolvedMode;
             if (!queuedViewData) {
                 clearCombatTransitionState();
                 return;
             }
+            if (resolvedMode === "return") {
+                combatViewTransitionActive = false;
+            }
             renderMainView(queuedViewData, { skipCombatTransition: true });
             finishCombatTransitionOverlay();
-        }, 980);
+        }, revealDelay);
         return true;
     };
 
@@ -4146,6 +4207,7 @@ let defaultout_plugin = (function () {
         setBodyState("boss", "");
         setBodyState("view", "");
         document.body.classList.remove("brave-tone-shift", "brave-scene-shift", "brave-scene-combat-enter", "brave-combat-transition-active");
+        document.body.classList.remove("brave-combat-return-active");
         if (pendingCombatTransitionTimeout) {
             window.clearTimeout(pendingCombatTransitionTimeout);
             pendingCombatTransitionTimeout = null;
@@ -4155,6 +4217,7 @@ let defaultout_plugin = (function () {
             pendingCombatTransitionCleanupTimeout = null;
         }
         pendingCombatTransitionViewData = null;
+        pendingCombatTransitionMode = "";
         combatViewTransitionActive = false;
         clearCombatTransitionOverlay();
         clearCombatFxOverlay();
@@ -5107,7 +5170,10 @@ let defaultout_plugin = (function () {
             return;
         }
         if (!options.skipCombatTransition && pendingCombatTransitionViewData) {
-            if (viewData.variant === "combat") {
+            if (
+                (pendingCombatTransitionMode === "enter" && viewData.variant === "combat")
+                || (pendingCombatTransitionMode === "return" && isRoomLikeView(viewData))
+            ) {
                 pendingCombatTransitionViewData = viewData;
                 return;
             }
@@ -5126,6 +5192,9 @@ let defaultout_plugin = (function () {
             scheduleCombatFxFlush(0);
             return;
         }
+        if (viewData.variant !== "combat-result" && !isRoomLikeView(viewData)) {
+            pendingCombatResultReturnTransition = false;
+        }
         if (viewData.variant !== "combat") {
             clearDeferredCombatViewRender();
             pendingCombatResultViewData = null;
@@ -5140,9 +5209,20 @@ let defaultout_plugin = (function () {
         var stickyView = !!viewData.sticky;
         var isCombatView = viewData.variant === "combat";
         var enteringCombat = !!(isCombatView && (!currentViewData || currentViewData.variant !== "combat"));
+        var hasCombatResultContext = !!(
+            pendingCombatResultReturnTransition
+            || (currentViewData && currentViewData.variant === "combat-result")
+            || document.querySelector("#messagewindow .brave-view--combat-result")
+            || (document.body && document.body.getAttribute("data-brave-scene") === "victory")
+        );
+        var leavingCombatResult = !!(
+            !isCombatView
+            && hasCombatResultContext
+            && isRoomLikeView(viewData)
+        );
         var variantClass = viewData.variant ? " brave-view--" + escapeHtml(viewData.variant) : "";
         var toneClass = viewData.tone ? " brave-view--tone-" + escapeHtml(viewData.tone) : "";
-        if (!options.skipCombatTransition && enteringCombat && startCombatTransition(viewData)) {
+        if (!options.skipCombatTransition && enteringCombat && startCombatTransition(viewData, "enter")) {
             return;
         }
         if (isCombatView) {
@@ -5981,6 +6061,7 @@ let defaultout_plugin = (function () {
                 scheduleCombatFxFlush(0);
                 syncOpenCombatPickerFromDom();
                 combatViewTransitionActive = false;
+                pendingCombatResultReturnTransition = viewData.variant === "combat-result";
             };
 
             if (shouldDelayCombatSwap) {
@@ -6039,8 +6120,12 @@ let defaultout_plugin = (function () {
             scheduleCombatFxFlush(0);
             syncOpenCombatPickerFromDom();
             combatViewTransitionActive = false;
+            pendingCombatResultReturnTransition = viewData.variant === "combat-result";
             focusViewAutofocusField();
             resetAllScrollPositions();
+            if (!options.skipCombatTransition && leavingCombatResult) {
+                startCombatReturnOverlay(viewData);
+            }
         };
 
         applyStandardMarkup();

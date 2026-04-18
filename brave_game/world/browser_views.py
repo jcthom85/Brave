@@ -15,6 +15,8 @@ from world.data.themes import THEMES, THEME_BY_KEY, normalize_theme_key
 from world.data.world_tones import get_world_tone_key
 from world.chapel import get_active_blessing, is_chapel_room
 from world.character_icons import get_class_icon, get_race_icon
+from world.class_features import get_class_features
+from world.druid_forms import get_druid_form
 from world.forging import get_forge_entries
 from world.navigation import (
     build_map_snapshot,
@@ -447,7 +449,8 @@ def _build_sheet_ability_item(character, ability_name):
         subtitle_parts.append(target_label)
     subtitle = " · ".join(subtitle_parts)
     body = [
-        {
+        ability.get("summary")
+        or {
             "enemy": "A combat technique aimed at a single foe.",
             "ally": "A supportive combat technique used on one ally.",
             "self": "A defensive or empowering combat technique you use on yourself.",
@@ -471,7 +474,7 @@ def _build_sheet_passive_item(character, passive_name, *, icon_name="stars", sum
     if summary_line:
         body.append(summary_line)
     else:
-        body.append("A passive trait that is always active.")
+        body.append(passive.get("summary") or "A passive trait that is always active.")
     bonus_text = _format_context_bonus_summary(bonus_map or {}, character)
     if bonus_text:
         body.append("Bonuses: " + bonus_text)
@@ -526,18 +529,12 @@ def _build_gear_slot_picker(character, slot, equipped_template_id=None):
     else:
         subtitle = "Empty"
 
-    inventory = list(getattr(getattr(character, "db", None), "brave_inventory", []) or [])
     candidates = []
-    for entry in inventory:
+    for entry in getattr(character, "get_equippable_inventory", lambda **kwargs: [])(slot=slot):
         template_id = entry.get("template")
         quantity = max(0, int(entry.get("quantity", 0) or 0))
         template = ITEM_TEMPLATES.get(template_id, {})
-        if (
-            quantity <= 0
-            or template.get("kind") != "equipment"
-            or template.get("slot") != slot
-            or template_id == equipped_template_id
-        ):
+        if quantity <= 0 or template_id == equipped_template_id:
             continue
         candidates.append((template.get("name", template_id.replace("_", " ").title()).lower(), template_id, quantity, template))
 
@@ -871,14 +868,18 @@ def build_chargen_view(account, state, *, error=None):
         class_entries = []
         for class_key in VERTICAL_SLICE_CLASSES:
             class_data = CLASSES[class_key]
+            features = get_class_features(class_key)
             class_entries.append(
                 _entry(
                     class_data["name"],
                     meta=class_data["role"],
-                    lines=[class_data["summary"]],
+                    lines=[class_data["summary"], *[feature["summary"] for feature in features[:1]]],
                     icon=get_class_icon(class_key, class_data),
                     command=class_key,
-                    chips=[_chip("Current", "check_circle", "good")] if state.get("class") == class_key else [],
+                    chips=[
+                        *([_chip("Current", "check_circle", "good")] if state.get("class") == class_key else []),
+                        *[_chip(feature["name"], feature.get("icon", "star"), "muted") for feature in features[:2]],
+                    ],
                 )
             )
         sections.append(_section("Classes", "swords", "entries", items=class_entries, span="wide"))
@@ -991,12 +992,20 @@ def _format_room_threat_items(visible_threats):
             inspect_lines.append(composition)
         if intro:
             inspect_lines.append(intro)
+        inspect_picker = _picker(
+            display_name,
+            body=inspect_lines,
+            options=[
+                _picker_option("Fight", command=threat.get("command") or "fight", icon="swords", tone="danger")
+            ],
+            picker_id=f"room-threat-{str(threat.get('key') or display_name).strip().lower().replace(' ', '-')}",
+        )
         items.append(
             _item(
                 display_name,
                 icon=threat.get("icon") or "monster-skull",
                 badge=threat.get("badge") or threat.get("count"),
-                command=threat.get("command"),
+                picker=inspect_picker,
                 detail="Engaged" if threat.get("engaged") else None,
                 tooltip=threat.get("tooltip"),
                 marker_icon=threat.get("marker_icon"),
@@ -1006,14 +1015,14 @@ def _format_room_threat_items(visible_threats):
                         None,
                         "search",
                         tone="muted",
-                        picker=_picker(
-                            display_name,
-                            body=inspect_lines,
-                            options=[
-                                _picker_option("Fight", command=threat.get("command") or "fight", icon="swords", tone="danger")
-                            ],
-                        ),
-                    )
+                        picker=inspect_picker,
+                    ),
+                    _action(
+                        "Fight",
+                        threat.get("command") or "fight",
+                        "swords",
+                        tone="danger",
+                    ),
                 ],
             )
         )
@@ -1708,11 +1717,14 @@ def build_prayer_view(character, *, blessing=None, applied=False):
     blessing_name = blessing.get("name", "Dawn Bell Blessing")
     duration = blessing.get("duration", "Until your next encounter ends.")
     bonus_text = _format_context_bonus_summary(blessing.get("bonuses", {}), character)
+    rite = dict(blessing.get("rite") or {})
 
     chips = [
         _chip(blessing_name, "wb_sunny", "accent"),
         _chip("One encounter", "schedule", "muted"),
     ]
+    if rite.get("name"):
+        chips.append(_chip(rite["name"], "workspace_premium", "good"))
 
     sections = [
         _section(
@@ -1725,6 +1737,17 @@ def build_prayer_view(character, *, blessing=None, applied=False):
                 "Bonuses: " + bonus_text if bonus_text else "No mechanical bonus recorded.",
             ],
         ),
+    ]
+    if rite:
+        sections.append(
+            _section(
+                "Class Rite",
+                "workspace_premium",
+                "lines",
+                lines=[rite.get("summary", ""), *(rite.get("lines") or [])],
+            )
+        )
+    sections.append(
         _section(
             "Chapel Notes",
             "church",
@@ -1734,8 +1757,8 @@ def build_prayer_view(character, *, blessing=None, applied=False):
                 _item("Sister Maybelle tends the hurt and keeps the town practical about what bravery costs.", icon="forum"),
                 _item("Return here before a harder run when you want the Dawn Bell at your back.", icon="flag"),
             ],
-        ),
-    ]
+        )
+    )
 
     subtitle = (
         "The Dawn Bell answers and steadies you for the next hard road."
@@ -3231,7 +3254,19 @@ def build_sheet_view(character):
     primary = character.db.brave_primary_stats or {}
     derived = character.db.brave_derived_stats or {}
     resources = character.db.brave_resources or {}
-    actions, passives, unknown_abilities = split_unlocked_abilities(character.db.brave_class, level)
+    class_actions, passives, unknown_abilities = split_unlocked_abilities(character.db.brave_class, level)
+    get_unlocked = getattr(character, "get_unlocked_abilities", None)
+    if callable(get_unlocked):
+        unlocked_names = list(get_unlocked())
+        actions = [
+            ability_name
+            for ability_name in unlocked_names
+            if ability_key(ability_name) in ABILITY_LIBRARY and ability_key(ability_name) in CHARACTER_CONTENT.implemented_ability_keys
+        ]
+        if not actions:
+            actions = list(class_actions)
+    else:
+        actions = list(class_actions)
     next_level_xp = xp_needed_for_next_level(level)
     xp_text = (
         f"{character.db.brave_xp}/{next_level_xp} XP"
@@ -3317,6 +3352,21 @@ def build_sheet_view(character):
         ),
         _section("Stats", "tune", "pairs", items=combat_pairs, variant="stats"),
         _section(
+            "Class Features",
+            "workspace_premium",
+            "entries",
+            items=[
+                _entry(
+                    feature["name"],
+                    lines=[feature["summary"]],
+                    icon=feature.get("icon", "star"),
+                )
+                for feature in get_class_features(character.db.brave_class)
+            ]
+            or [_entry("No class feature notes found.", icon="info")],
+            variant="abilities",
+        ),
+        _section(
             "Abilities",
             "bolt",
             "list",
@@ -3326,13 +3376,110 @@ def build_sheet_view(character):
         ),
     ]
 
+    if character.db.brave_class == "ranger":
+        active_companion = dict(getattr(character, "get_active_companion", lambda: {})() or {})
+        unlocked_companions = list(getattr(character, "get_unlocked_companions", lambda: [])() or [])
+        sections.insert(
+            4,
+            _section(
+                "Companion",
+                "pets",
+                "entries",
+                items=[
+                    _entry(
+                        active_companion.get("name", "No active companion"),
+                        meta="Active Bond",
+                        lines=[
+                            active_companion.get("summary", "No bonded companion is currently set."),
+                            f"Unlocked companions: {len(unlocked_companions)}",
+                        ],
+                        icon=active_companion.get("icon", "pets"),
+                    )
+                ],
+                variant="abilities",
+            ),
+        )
+    elif character.db.brave_class == "paladin":
+        active_oath = dict(getattr(character, "get_active_oath", lambda: {})() or {})
+        unlocked_oaths = list(getattr(character, "get_unlocked_oaths", lambda: [])() or [])
+        sections.insert(
+            4,
+            _section(
+                "Sacred Oath",
+                "workspace_premium",
+                "entries",
+                items=[
+                    _entry(
+                        active_oath.get("name", "No active oath"),
+                        meta="Active Vigil",
+                        lines=[
+                            active_oath.get("summary", "No sacred oath is currently guiding your vigil."),
+                            f"Sworn oaths: {len(unlocked_oaths)}",
+                        ],
+                        icon="workspace_premium",
+                    )
+                ],
+                variant="abilities",
+            ),
+        )
+    elif character.db.brave_class == "rogue":
+        theft_log = list(getattr(character, "get_rogue_theft_log", lambda: [])() or [])
+        latest = theft_log[-1] if theft_log else {}
+        sections.insert(
+            4,
+            _section(
+                "Illicit Access",
+                "key",
+                "entries",
+                items=[
+                    _entry(
+                        "Worked Angles",
+                        meta="Rogue-exclusive theft ledger",
+                        lines=[
+                            f"Worked marks: {len(theft_log)}",
+                            f"Latest lift: {latest['target']}" if latest.get("target") else "No theft angles worked yet.",
+                        ],
+                        icon="key",
+                    )
+                ],
+                variant="abilities",
+            ),
+        )
+    elif character.db.brave_class == "druid":
+        unlocked_form_names = [
+            ability_name
+            for ability_name in actions
+            if ability_key(ability_name) in {"wolfform", "bearform", "crowform", "serpentform"}
+        ]
+        form_items = []
+        for ability_name in unlocked_form_names:
+            form = get_druid_form(ability_key(ability_name).replace("form", ""))
+            form_items.append(
+                _entry(
+                    form.get("name", ability_name),
+                    meta="Unlocked Form",
+                    lines=[form.get("summary", ABILITY_LIBRARY.get(ability_key(ability_name), {}).get("summary", ""))],
+                    icon="forest",
+                )
+            )
+        sections.insert(
+            4,
+            _section(
+                "Primal Forms",
+                "forest",
+                "entries",
+                items=form_items or [_entry("No primal forms unlocked.", icon="info")],
+                variant="abilities",
+            ),
+        )
+
     passive_items = [
         _build_sheet_passive_item(
             character,
             race["perk"],
             icon_name="star",
-            summary_line=race["summary"],
-            bonus_map=race.get("bonuses", {}),
+            summary_line=race.get("perk_summary") or race["summary"],
+            bonus_map=race.get("perk_bonuses", {}),
         )
     ]
     passive_items.extend(
@@ -3377,6 +3524,8 @@ def build_sheet_view(character):
         blessing_bonus_text = _format_context_bonus_summary(blessing.get("bonuses", {}), character)
         if blessing_bonus_text:
             blessing_lines.append("Bonuses: " + blessing_bonus_text)
+        if (blessing.get("rite") or {}).get("name"):
+            blessing_lines.append("Rite: " + blessing["rite"]["name"])
         effect_entries.append(
             _entry(
                 blessing.get("name", "Blessing"),
@@ -3489,6 +3638,13 @@ def _pack_item_icon(item):
 
 
 def _pack_item_subtitle(item):
+    use = get_item_use_profile(item)
+    if (use or {}).get("effect_type") == "teach_spell":
+        return "Spellbook"
+    if (use or {}).get("effect_type") == "unlock_companion":
+        return "Bond Item"
+    if (use or {}).get("effect_type") == "unlock_oath":
+        return "Oath Relic"
     if item.get("kind") == "equipment":
         return _gear_slot_label(item.get("slot"))
     if item.get("kind") == "meal":
@@ -3526,6 +3682,23 @@ def _pack_item_body(character, item, quantity):
             body.append("Effect: Clear 1 harmful effect")
         if use.get("effect_type") == "guard":
             body.append(f"Effect: Guard {int(use.get('guard', 0) or 0)}")
+        if use.get("effect_type") == "teach_spell":
+            ability = ABILITY_LIBRARY.get(ability_key(use.get("learn_ability")))
+            if ability:
+                body.append("Teaches: " + ability.get("name", "Unknown Spell"))
+            required_class = use.get("required_class")
+            if required_class:
+                body.append("Study: " + str(required_class).title() + " only")
+        if use.get("effect_type") == "unlock_companion":
+            body.append("Unlocks: " + str(use.get("unlock_companion", "")).replace("_", " ").title())
+            required_class = use.get("required_class")
+            if required_class:
+                body.append("Bond: " + str(required_class).title() + " only")
+        if use.get("effect_type") == "unlock_oath":
+            body.append("Unlocks: " + str(use.get("unlock_oath", "")).replace("_", " ").title())
+            required_class = use.get("required_class")
+            if required_class:
+                body.append("Vow: " + str(required_class).title() + " only")
         contexts = [str(context).title() for context in (use.get("contexts") or [])]
         if contexts:
             body.append("Use: " + ", ".join(contexts))
@@ -3556,6 +3729,15 @@ def _build_pack_consumable_action(character, template_id, item):
         return None
 
     item_name = item.get("name", template_id.replace("_", " ").title())
+    action_label = (
+        "Study"
+        if use.get("verb") == "study"
+        else "Bond"
+        if use.get("verb") == "bond"
+        else "Swear"
+        if use.get("verb") == "swear"
+        else "Use"
+    )
     target_type = use.get("target", "self")
     if target_type == "ally":
         targets = get_targetable_consumable_characters(character, include_self=True)
@@ -3582,15 +3764,15 @@ def _build_pack_consumable_action(character, template_id, item):
                 )
             )
         return _action(
-            "Use",
+            action_label,
             None,
             None,
             tone="muted",
-            picker=_picker(f"Use {item_name}", subtitle="Choose target", options=options),
+            picker=_picker(f"{action_label} {item_name}", subtitle="Choose target", options=options),
         )
 
     if target_type in {"self", "none"}:
-        return _action("Use", f"use {item_name}", None, tone="muted")
+        return _action(action_label, f"use {item_name}", None, tone="muted")
     return None
 
 

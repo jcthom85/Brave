@@ -17,8 +17,8 @@ RACE_ICONS = {
     "human": "player",
     "elf": "fairy",
     "dwarf": "anvil",
-    "halfling": "clover",
-    "half_orc": "horns",
+    "mosskin": "clover",
+    "ashborn": "horns",
 }
 
 

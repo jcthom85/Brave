@@ -30,8 +30,8 @@ from .brave_combat import CmdAttack, CmdEnemies, CmdFight, CmdFlee, CmdUse
 from .brave_creator import CmdContent
 from .brave_explore import CmdCook, CmdEat, CmdEmote, CmdFish, CmdItem, CmdMap, CmdReel, CmdRest, CmdTravel
 from .brave_party import CmdParty
-from .brave_profile import CmdBuild, CmdClass, CmdGear, CmdPack, CmdQuests, CmdRace, CmdSheet
-from .brave_town import CmdForge, CmdPortals, CmdPray, CmdRead, CmdSell, CmdShift, CmdShop, CmdTalk
+from .brave_profile import CmdBuild, CmdClass, CmdCompanion, CmdGear, CmdOath, CmdPack, CmdQuests, CmdRace, CmdSheet
+from .brave_town import CmdForge, CmdPortals, CmdPray, CmdRead, CmdSell, CmdShift, CmdShop, CmdSteal, CmdTalk
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -57,6 +57,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSheet())
         self.add(CmdGear())
         self.add(CmdPack())
+        self.add(CmdCompanion())
+        self.add(CmdOath())
         self.add(CmdShop())
         self.add(CmdSell())
         self.add(CmdShift())
@@ -82,6 +84,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdArcade())
         self.add(CmdArcadeSubmit())
         self.add(CmdTalk())
+        self.add(CmdSteal())
         self.add(CmdRead())
         self.add(CmdContent())
 

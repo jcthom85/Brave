@@ -6,6 +6,7 @@
       "icon_role": "shot",
       "name": "Aimed Shot",
       "resource": "stamina",
+      "summary": "Commit to a clean finishing shot that pays off hardest after you have fixed the target as your quarry.",
       "target": "enemy"
     },
     "arcspark": {
@@ -14,6 +15,7 @@
       "icon_role": "lightning",
       "name": "Arc Spark",
       "resource": "mana",
+      "summary": "Crackling lightning jumps from your chosen target to the next opening in the line.",
       "target": "enemy"
     },
     "avenginglight": {
@@ -22,7 +24,17 @@
       "icon_role": "holy",
       "name": "Avenging Light",
       "resource": "stamina",
+      "summary": "Unleash a burst of holy retaliation after weathering enemy pressure and keeping your allies on their feet.",
       "target": "none"
+    },
+    "bearform": {
+      "class": "druid",
+      "cost": 12,
+      "icon_role": "guard",
+      "name": "Bear Form",
+      "resource": "mana",
+      "summary": "Take on a heavy primal form to hold space, weather pressure, and turn your established field into close-range dominance.",
+      "target": "self"
     },
     "backstab": {
       "class": "rogue",
@@ -30,6 +42,7 @@
       "icon_role": "attack",
       "name": "Backstab",
       "resource": "stamina",
+      "summary": "Drive a precise blade into an enemy already compromised by control, poison, or blood loss.",
       "target": "enemy"
     },
     "barbedarrow": {
@@ -38,6 +51,7 @@
       "icon_role": "shot",
       "name": "Barbed Arrow",
       "resource": "stamina",
+      "summary": "Drive in a cruel arrow that keeps your quarry bleeding, slowed, or too distracted to recover cleanly.",
       "target": "enemy"
     },
     "barkskin": {
@@ -46,7 +60,17 @@
       "icon_role": "guard",
       "name": "Barkskin",
       "resource": "mana",
+      "summary": "Toughen an ally with layered living bark so they can stand inside the field you are building.",
       "target": "ally"
+    },
+    "crowform": {
+      "class": "druid",
+      "cost": 11,
+      "icon_role": "mobility",
+      "name": "Crow Form",
+      "resource": "mana",
+      "summary": "Take on a lean carrion-crow shape that sharpens control, mobility, and evasive spell placement.",
+      "target": "self"
     },
     "battlecry": {
       "class": "warrior",
@@ -54,6 +78,7 @@
       "icon_role": "rally",
       "name": "Battle Cry",
       "resource": "stamina",
+      "summary": "Roar the line into order so allies weather the next exchange more cleanly.",
       "target": "none"
     },
     "blessing": {
@@ -94,6 +119,7 @@
       "icon_role": "holy",
       "name": "Consecrate",
       "resource": "stamina",
+      "summary": "Sanctify the ground around you so allies fight safer there and enemies feel the cost of pressing in.",
       "target": "none"
     },
     "defend": {
@@ -110,6 +136,7 @@
       "icon_role": "root",
       "name": "Entangling Roots",
       "resource": "mana",
+      "summary": "Fast-growing roots seize a foe in place and begin turning the battlefield into your territory.",
       "target": "enemy"
     },
     "evasiveroll": {
@@ -118,6 +145,7 @@
       "icon_role": "mobility",
       "name": "Evasive Roll",
       "resource": "stamina",
+      "summary": "Slip to a better angle so you can keep range, maintain pressure, and continue the chase safely.",
       "target": "self"
     },
     "eviscerate": {
@@ -126,6 +154,7 @@
       "icon_role": "attack",
       "name": "Eviscerate",
       "resource": "stamina",
+      "summary": "Cash in every opening on a target already marked, bound, bleeding, or poisoned.",
       "target": "enemy"
     },
     "feint": {
@@ -142,6 +171,7 @@
       "icon_role": "fire",
       "name": "Firebolt",
       "resource": "mana",
+      "summary": "A reliable burst of fire that punishes targets your side has already pinned or exposed.",
       "target": "enemy"
     },
     "flamewave": {
@@ -166,6 +196,7 @@
       "icon_role": "guard",
       "name": "Guardian Light",
       "resource": "mana",
+      "summary": "Lay a powerful ward over one ally so they can survive the next dangerous push.",
       "target": "ally"
     },
     "guardingaura": {
@@ -174,6 +205,7 @@
       "icon_role": "guard",
       "name": "Guarding Aura",
       "resource": "stamina",
+      "summary": "Wrap one ally in sacred protection so enemy pressure lands softer and is easier to answer.",
       "target": "ally"
     },
     "handofmercy": {
@@ -190,6 +222,7 @@
       "icon_role": "heal",
       "name": "Heal",
       "resource": "mana",
+      "summary": "Restore a wounded ally with dependable holy healing, strongest when they are close to collapse.",
       "target": "ally"
     },
     "holystrike": {
@@ -198,6 +231,7 @@
       "icon_role": "holy",
       "name": "Holy Strike",
       "resource": "stamina",
+      "summary": "A faithful weapon blow that keeps holy pressure on enemies threatening the line.",
       "target": "enemy"
     },
     "icelance": {
@@ -222,6 +256,7 @@
       "icon_role": "holy",
       "name": "Judgement",
       "resource": "stamina",
+      "summary": "Call out a foe with sacred condemnation, making its aggression easier to answer and punish.",
       "target": "enemy"
     },
     "laststand": {
@@ -230,6 +265,7 @@
       "icon_role": "guard",
       "name": "Last Stand",
       "resource": "stamina",
+      "summary": "Refuse to fall, restoring your footing and hardening yourself for the next hit.",
       "target": "self"
     },
     "livingcurrent": {
@@ -238,6 +274,7 @@
       "icon_role": "cleanse",
       "name": "Living Current",
       "resource": "mana",
+      "summary": "Send renewing life through an ally to steady them and wash away part of what is clinging to them.",
       "target": "ally"
     },
     "manashield": {
@@ -254,6 +291,7 @@
       "icon_role": "mark",
       "name": "Mark Prey",
       "resource": "stamina",
+      "summary": "Choose a quarry and focus the hunt so your follow-up shots land cleaner and harder.",
       "target": "enemy"
     },
     "meteorsigil": {
@@ -262,7 +300,17 @@
       "icon_role": "fire",
       "name": "Meteor Sigil",
       "resource": "mana",
+      "summary": "Drop a catastrophic sigil on one prepared target and splash the line around it.",
       "target": "enemy"
+    },
+    "mirrorveil": {
+      "class": "mage",
+      "cost": 10,
+      "icon_role": "guard",
+      "name": "Mirror Veil",
+      "resource": "mana",
+      "summary": "Wrap yourself in refracted arc-light, gaining a defensive shimmer that helps you survive the next answer.",
+      "target": "self"
     },
     "minormend": {
       "class": "druid",
@@ -270,6 +318,7 @@
       "icon_role": "heal",
       "name": "Minor Mend",
       "resource": "mana",
+      "summary": "A small pulse of natural healing meant to keep allies going, not pull them back from disaster alone.",
       "target": "ally"
     },
     "moonfire": {
@@ -278,6 +327,7 @@
       "icon_role": "holy",
       "name": "Moonfire",
       "resource": "mana",
+      "summary": "Call down pale primal fire that keeps pressure on a target already caught in your natural control.",
       "target": "enemy"
     },
     "poisonblade": {
@@ -286,6 +336,7 @@
       "icon_role": "poison",
       "name": "Poison Blade",
       "resource": "stamina",
+      "summary": "Cut deep with venom, especially when the target is already pinned down or distracted.",
       "target": "enemy"
     },
     "quickshot": {
@@ -294,6 +345,7 @@
       "icon_role": "shot",
       "name": "Quick Shot",
       "resource": "stamina",
+      "summary": "A fast, efficient arrow that keeps the chase moving and pressures your chosen prey.",
       "target": "enemy"
     },
     "radiantburst": {
@@ -310,6 +362,7 @@
       "icon_role": "barrage",
       "name": "Rain of Arrows",
       "resource": "stamina",
+      "summary": "Blanket the field in arrows to punish clustered foes and keep the hunt under your control.",
       "target": "none"
     },
     "rebukeevil": {
@@ -318,6 +371,7 @@
       "icon_role": "holy",
       "name": "Rebuke Evil",
       "resource": "stamina",
+      "summary": "Drive holy force into a hostile target to punish cruelty, corruption, or reckless aggression.",
       "target": "enemy"
     },
     "rejuvenationgrove": {
@@ -326,6 +380,7 @@
       "icon_role": "field",
       "name": "Rejuvenation Grove",
       "resource": "mana",
+      "summary": "Grow a pocket of living ground that steadily restores allies and rewards fighting on your terms.",
       "target": "none"
     },
     "renewinglight": {
@@ -342,6 +397,7 @@
       "icon_role": "guard",
       "name": "Sanctuary",
       "resource": "mana",
+      "summary": "Raise a shelter of holy calm that steadies the whole party and rescues the weakest first.",
       "target": "none"
     },
     "shadowstep": {
@@ -366,6 +422,7 @@
       "icon_role": "guard",
       "name": "Shield of Dawn",
       "resource": "stamina",
+      "summary": "Flash a holy barrier over an ally to blunt a dangerous strike and hold the line through a crisis.",
       "target": "ally"
     },
     "smite": {
@@ -382,6 +439,7 @@
       "icon_role": "trap",
       "name": "Snare Trap",
       "resource": "stamina",
+      "summary": "Set or spring a hunter's trap to pin prey where your arrows and companion can keep worrying it.",
       "target": "enemy"
     },
     "stab": {
@@ -398,7 +456,17 @@
       "icon_role": "lightning",
       "name": "Static Field",
       "resource": "mana",
+      "summary": "Flood the battlefield with charged interference that punishes clustered or already-controlled enemies.",
       "target": "none"
+    },
+    "stormlance": {
+      "class": "mage",
+      "cost": 13,
+      "icon_role": "lightning",
+      "name": "Stormlance",
+      "resource": "mana",
+      "summary": "Drive a disciplined bolt through one target, hitting hardest when your other spells have already fixed the opening.",
+      "target": "enemy"
     },
     "strike": {
       "class": "warrior",
@@ -406,6 +474,7 @@
       "icon_role": "attack",
       "name": "Strike",
       "resource": "stamina",
+      "summary": "A disciplined frontline blow that lands hardest once the enemy has already lost control of the exchange.",
       "target": "enemy"
     },
     "swarm": {
@@ -414,7 +483,17 @@
       "icon_role": "field",
       "name": "Swarm",
       "resource": "mana",
+      "summary": "Call a churning mass of stings and wings that harasses enemies and deepens your living control.",
       "target": "none"
+    },
+    "serpentform": {
+      "class": "druid",
+      "cost": 11,
+      "icon_role": "poison",
+      "name": "Serpent Form",
+      "resource": "mana",
+      "summary": "Slip into a venomous serpent form that turns roots and marked prey into slower, dirtier kills.",
+      "target": "self"
     },
     "tauntingblow": {
       "class": "warrior",
@@ -430,6 +509,7 @@
       "icon_role": "nature",
       "name": "Thorn Lash",
       "resource": "mana",
+      "summary": "Snap living briars across a foe, striking best when your roots, swarms, or shifting pressure already have them off balance.",
       "target": "enemy"
     },
     "vanish": {
@@ -446,7 +526,17 @@
       "icon_role": "barrage",
       "name": "Volley",
       "resource": "stamina",
+      "summary": "Loose a disciplined spread of arrows to keep several enemies pressured while you maintain the hunt.",
       "target": "none"
+    },
+    "wolfform": {
+      "class": "druid",
+      "cost": 8,
+      "icon_role": "mobility",
+      "name": "Wolf Form",
+      "resource": "mana",
+      "summary": "Slip into a swift hunting form that thrives on rooted, marked, and harried enemies.",
+      "target": "self"
     },
     "wrathofthegrove": {
       "class": "druid",
@@ -454,6 +544,7 @@
       "icon_role": "nature",
       "name": "Wrath of the Grove",
       "resource": "mana",
+      "summary": "Cash in an established patch of roots, growth, and swarm pressure in one fierce surge of primal retaliation.",
       "target": "enemy"
     }
   },
@@ -516,7 +607,7 @@
       ],
       "resource": "mana",
       "role": "Healer",
-      "summary": "Holy support who keeps the party alive and counters the undead."
+      "summary": "A holy healer who restores allies, purifies afflictions, and turns collapse into recovery through divine power."
     },
     "druid": {
       "base_stats": {
@@ -543,7 +634,7 @@
         ],
         [
           3,
-          "Wild Grace"
+          "Wolf Form"
         ],
         [
           4,
@@ -567,7 +658,7 @@
         ],
         [
           9,
-          "Nature's Memory"
+          "Bear Form"
         ],
         [
           10,
@@ -576,7 +667,7 @@
       ],
       "resource": "mana",
       "role": "Hybrid Support",
-      "summary": "Nature-bound support blending control, healing, and slow pressure."
+      "summary": "A primal shaper who grows battlefield advantage with living magic, then shifts into beast form to exploit the terrain they create."
     },
     "mage": {
       "base_stats": {
@@ -636,7 +727,7 @@
       ],
       "resource": "mana",
       "role": "Magic DPS",
-      "summary": "Elemental caster with burst damage and battlefield control."
+      "summary": "An elemental battle-caster who turns brief openings into decisive bursts of magical control and destruction."
     },
     "paladin": {
       "base_stats": {
@@ -696,7 +787,7 @@
       ],
       "resource": "stamina",
       "role": "Support Tank",
-      "summary": "Holy armored bruiser blending durability, protection, and light support."
+      "summary": "A sacred defender who shields allies from danger and answers enemy aggression with holy punishment."
     },
     "ranger": {
       "base_stats": {
@@ -756,7 +847,7 @@
       ],
       "resource": "stamina",
       "role": "Ranged DPS",
-      "summary": "Mobile ranged hunter with target control and reliable damage."
+      "summary": "A relentless hunter who marks a quarry, controls the chase from range, and brings it down with a bonded companion."
     },
     "rogue": {
       "base_stats": {
@@ -816,7 +907,7 @@
       ],
       "resource": "stamina",
       "role": "Burst DPS",
-      "summary": "Opportunist who strikes hard, repositions, and slips out of danger."
+      "summary": "A lethal opportunist who creates openings through deceit and movement, then cashes them in for brutal burst damage."
     },
     "warrior": {
       "base_stats": {
@@ -876,7 +967,7 @@
       ],
       "resource": "stamina",
       "role": "Tank",
-      "summary": "Frontline protector who controls enemy attention and absorbs punishment."
+      "summary": "A disciplined frontline fighter who controls enemy pressure, holds the line, and keeps the party standing through force and resolve."
     }
   },
   "implemented_ability_keys": [
@@ -885,6 +976,7 @@
     "avenginglight",
     "backstab",
     "barbedarrow",
+    "bearform",
     "barkskin",
     "battlecry",
     "blessing",
@@ -892,6 +984,7 @@
     "cheapshot",
     "cleanse",
     "consecrate",
+    "crowform",
     "defend",
     "entanglingroots",
     "evasiveroll",
@@ -914,6 +1007,7 @@
     "markprey",
     "meteorsigil",
     "minormend",
+    "mirrorveil",
     "moonfire",
     "poisonblade",
     "quickshot",
@@ -923,6 +1017,7 @@
     "rejuvenationgrove",
     "renewinglight",
     "sanctuary",
+    "serpentform",
     "shadowstep",
     "shieldbash",
     "shieldofdawn",
@@ -930,12 +1025,14 @@
     "snaretrap",
     "stab",
     "staticfield",
+    "stormlance",
     "strike",
     "swarm",
     "tauntingblow",
     "thornlash",
     "vanish",
     "volley",
+    "wolfform",
     "wrathofthegrove"
   ],
   "max_level": 10,
@@ -947,7 +1044,8 @@
         "threat": 1
       },
       "icon_role": "holy",
-      "name": "Beacon Soul"
+      "name": "Beacon Soul",
+      "summary": "Your presence becomes a rally point, strengthening nearby recovery and making enemies answer you first."
     },
     "blessedarmor": {
       "bonuses": {
@@ -972,7 +1070,8 @@
         "crit_chance": 2
       },
       "icon_role": "offense",
-      "name": "Deadly Rhythm"
+      "name": "Deadly Rhythm",
+      "summary": "Staying on one prey sharpens your timing, turning steady pursuit into increasingly lethal shots."
     },
     "deepfocus": {
       "bonuses": {
@@ -1020,22 +1119,14 @@
       "icon_role": "mobility",
       "name": "Light Feet"
     },
-    "naturesmemory": {
-      "bonuses": {
-        "healing_power": 2,
-        "max_mana": 10,
-        "spell_power": 2
-      },
-      "icon_role": "nature",
-      "name": "Nature's Memory"
-    },
     "predatorseye": {
       "bonuses": {
         "accuracy": 4,
         "precision": 2
       },
       "icon_role": "precision",
-      "name": "Predator's Eye"
+      "name": "Predator's Eye",
+      "summary": "A hunter's focus keeps your quarry in clean view, improving the reliability of every follow-up shot."
     },
     "purity": {
       "bonuses": {
@@ -1074,7 +1165,8 @@
         "max_mana": 8
       },
       "icon_role": "holy",
-      "name": "Steadfast Faith"
+      "name": "Steadfast Faith",
+      "summary": "Conviction keeps you standing where others would break, so you can continue shielding the party."
     },
     "thickhide": {
       "bonuses": {
@@ -1088,15 +1180,8 @@
         "dodge": 2
       },
       "icon_role": "utility",
-      "name": "Trailwise"
-    },
-    "wildgrace": {
-      "bonuses": {
-        "accuracy": 2,
-        "dodge": 2
-      },
-      "icon_role": "nature",
-      "name": "Wild Grace"
+      "name": "Trailwise",
+      "summary": "Fieldcraft and steady footing help you keep the angle, the trail, and the distance you need."
     }
   },
   "primary_stats": [
@@ -1116,7 +1201,18 @@
       "icon": "anvil",
       "name": "Dwarf",
       "perk": "Stoneblood",
-      "summary": "Hardy, disciplined, and stubborn."
+      "perk_bonuses": {
+        "armor": 2,
+        "max_hp": 14
+      },
+      "perk_effects": {
+        "bleed_turn_reduction": 1,
+        "incoming_damage_reduction": 1,
+        "poison_damage_reduction": 1,
+        "poison_turn_reduction": 1
+      },
+      "perk_summary": "Stoneblood thickens body and resolve, shaving down direct hits and making venom or blood loss take longer to matter.",
+      "summary": "Stone-blooded holdfast folk who outlast wounds, poison, and the kind of pressure meant to wear others down."
     },
     "elf": {
       "bonuses": {
@@ -1127,28 +1223,59 @@
       "icon": "fairy",
       "name": "Elf",
       "perk": "Keen Senses",
-      "summary": "Graceful, perceptive, and naturally magical."
+      "perk_bonuses": {
+        "accuracy": 4,
+        "precision": 2
+      },
+      "perk_effects": {
+        "atb_fill_rate": 6,
+        "interrupt_recovery_ticks": 1
+      },
+      "perk_summary": "Keen Senses sharpen aim, spell placement, and split-second reads, letting elves punish telegraphed openings more cleanly.",
+      "summary": "Keen-eyed inheritors of old disciplines, precise in motion, magic, and the split-second where a fight turns."
     },
-    "half_orc": {
+    "ashborn": {
       "bonuses": {
         "strength": 3,
         "vitality": 2
       },
       "icon": "horns",
-      "name": "Half-Orc",
+      "name": "Ashborn",
       "perk": "Battle Hunger",
-      "summary": "Fierce, intimidating, and strong."
+      "perk_bonuses": {
+        "attack_power": 3
+      },
+      "perk_effects": {
+        "wounded_damage_bonus": 4,
+        "wounded_atb_fill_rate": 10,
+        "wounded_threshold": 0.5
+      },
+      "perk_summary": "Battle Hunger turns pain into momentum, driving Ashborn to hit harder and act faster once the fight has already gone bad.",
+      "summary": "Cinder-marked survivors of furnace, war, and old ruin who grow more dangerous once the fight has already turned ugly."
     },
-    "halfling": {
+    "mosskin": {
       "bonuses": {
         "agility": 2,
         "intellect": 1,
         "vitality": 1
       },
       "icon": "clover",
-      "name": "Halfling",
+      "name": "Mosskin",
       "perk": "Fortune's Step",
-      "summary": "Quick, lucky, and easy to underestimate."
+      "perk_bonuses": {
+        "crit_chance": 2,
+        "dodge": 3
+      },
+      "perk_effects": {
+        "atb_fill_rate": 8,
+        "poison_accuracy_penalty_reduction": 2,
+        "snare_accuracy_penalty_reduction": 2,
+        "snare_dodge_penalty_reduction": 2,
+        "poison_turn_reduction": 1,
+        "snare_turn_reduction": 1
+      },
+      "perk_summary": "Fortune's Step keeps Mosskin moving through poison, roots, and bad ground, letting snares and foul terrain catch less than they should.",
+      "summary": "Fen- and grove-shaped folk who move through rot, roots, and bad ground with uncanny grace and stubborn life."
     },
     "human": {
       "bonuses": {
@@ -1161,7 +1288,17 @@
       "icon": "player",
       "name": "Human",
       "perk": "Resolve",
-      "summary": "Flexible, ambitious, and practical."
+      "perk_bonuses": {
+        "max_hp": 8,
+        "max_mana": 8,
+        "max_stamina": 8
+      },
+      "perk_effects": {
+        "flee_chance": 6,
+        "harmful_effect_turn_reduction": 1
+      },
+      "perk_summary": "Resolve broadens every reserve and helps humans steady themselves faster when pressure, fear, or bad luck try to drag them off balance.",
+      "summary": "Adaptable frontier folk who stay steady under pressure and keep moving when other people start to break."
     }
   },
   "starting_class": "warrior",

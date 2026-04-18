@@ -111,6 +111,38 @@
       "slot": "off_hand",
       "summary": "A brass-braced devotional icon fitted to hold steadier light and steadier prayers."
     },
+    "boar_keeper_charm": {
+      "kind": "consumable",
+      "name": "Boar-Keeper Charm",
+      "stackable": true,
+      "summary": "A resin-bound charm of tusk and thorn cord used by old brush hands to earn the respect of a briar boar.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_companion",
+        "required_class": "ranger",
+        "target": "self",
+        "unlock_companion": "briar_boar",
+        "verb": "bond"
+      }
+    },
+    "cinder_vigil_tablet": {
+      "kind": "consumable",
+      "name": "Cinder Vigil Tablet",
+      "stackable": true,
+      "summary": "A scorched prayer tablet from an older chapel watch, heavy with soot, warning, and the promise to answer darkness hard.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_oath",
+        "required_class": "paladin",
+        "target": "self",
+        "unlock_oath": "oath_of_cinders",
+        "verb": "swear"
+      }
+    },
     "bent_fence_nails": {
       "kind": "loot",
       "name": "Bent Fence Nails",
@@ -194,6 +226,22 @@
       "slot": "main_hand",
       "summary": "A reworked emberglass staff bound in black wire that keeps heat like a grudge."
     },
+    "crowfeather_rite": {
+      "kind": "consumable",
+      "name": "Crowfeather Rite",
+      "stackable": true,
+      "summary": "A soot-inked rite bundle of black feather, reed thread, and hedge script teaching how to ride the field like a watching crow.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "teach_spell",
+        "learn_ability": "crowform",
+        "required_class": "druid",
+        "target": "self",
+        "verb": "study"
+      }
+    },
     "crisped_perch_plate": {
       "kind": "meal",
       "meal_bonuses": {
@@ -243,6 +291,22 @@
       "name": "Ember Lantern Focus",
       "slot": "off_hand",
       "summary": "A brass-caged focus crystal tuned to answer faster when power moves through it."
+    },
+    "hawkcaller_whistle": {
+      "kind": "consumable",
+      "name": "Hawkcaller Whistle",
+      "stackable": true,
+      "summary": "A bone whistle cut and weighted for high hunting calls, meant to seal a bond with a sharp-eyed ash hawk.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_companion",
+        "required_class": "ranger",
+        "target": "self",
+        "unlock_companion": "ash_hawk",
+        "verb": "bond"
+      }
     },
     "emberglass_staff": {
       "bonuses": {
@@ -345,6 +409,38 @@
         },
         "target": "self",
         "verb": "drink"
+      }
+    },
+    "mirror_veil_primer": {
+      "kind": "consumable",
+      "name": "Mirror Veil Primer",
+      "stackable": true,
+      "summary": "A stitched apprentice spellbook of reflective sigils and margin notes on surviving one spell longer than the enemy expected.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "teach_spell",
+        "learn_ability": "mirrorveil",
+        "required_class": "mage",
+        "target": "self",
+        "verb": "study"
+      }
+    },
+    "mercy_votive": {
+      "kind": "consumable",
+      "name": "Mercy Votive",
+      "stackable": true,
+      "summary": "A chapel votive wrapped in linen and ash-blue thread, meant to seal a gentler oath of relief and protection.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_oath",
+        "required_class": "paladin",
+        "target": "self",
+        "unlock_oath": "oath_of_mercy",
+        "verb": "swear"
       }
     },
     "fractured_circuit": {
@@ -721,6 +817,22 @@
       "slot": "chest",
       "summary": "A field robe strengthened with hide, resin, and reed cord, light enough for the marsh and sturdy enough for the argument after."
     },
+    "serpent_scale_manual": {
+      "kind": "consumable",
+      "name": "Serpent Scale Manual",
+      "stackable": true,
+      "summary": "A stitched field manual of shed scales and poison notes teaching how to coil low and let the battlefield do the killing for you.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "teach_spell",
+        "learn_ability": "serpentform",
+        "required_class": "druid",
+        "target": "self",
+        "verb": "study"
+      }
+    },
     "ridgebreaker_blade": {
       "bonuses": {
         "accuracy": 5,
@@ -967,6 +1079,22 @@
       "name": "Trail Mix Satchel",
       "slot": "snack",
       "summary": "A waxed trail pouch packed with nuts, berries, and enough salt to pull you back into the fight."
+    },
+    "stormlance_codex": {
+      "kind": "consumable",
+      "name": "Stormlance Codex",
+      "stackable": true,
+      "summary": "A weather-stained codex of line-casting diagrams, each page more interested in disciplined lightning than safe eyebrows.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "teach_spell",
+        "learn_ability": "stormlance",
+        "required_class": "mage",
+        "target": "self",
+        "verb": "study"
+      }
     },
     "ward_dust": {
       "kind": "consumable",

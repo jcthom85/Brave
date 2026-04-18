@@ -394,6 +394,118 @@ ITEM_TEMPLATES = {
         "granted_ability_name": "Trail Mix",
         "cooldown_turns": 3,
     },
+    "mirror_veil_primer": {
+        "name": "Mirror Veil Primer",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A stitched apprentice spellbook of reflective sigils and margin notes on surviving one spell longer than the enemy expected.",
+        "use": {
+            "verb": "study",
+            "contexts": ("explore",),
+            "target": "self",
+            "effect_type": "teach_spell",
+            "required_class": "mage",
+            "learn_ability": "mirrorveil",
+        },
+    },
+    "stormlance_codex": {
+        "name": "Stormlance Codex",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A weather-stained codex of line-casting diagrams, each page more interested in disciplined lightning than safe eyebrows.",
+        "use": {
+            "verb": "study",
+            "contexts": ("explore",),
+            "target": "self",
+            "effect_type": "teach_spell",
+            "required_class": "mage",
+            "learn_ability": "stormlance",
+        },
+    },
+    "crowfeather_rite": {
+        "name": "Crowfeather Rite",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A soot-inked rite bundle of black feather, reed thread, and hedge script teaching how to ride the field like a watching crow.",
+        "use": {
+            "verb": "study",
+            "contexts": ("explore",),
+            "target": "self",
+            "effect_type": "teach_spell",
+            "required_class": "druid",
+            "learn_ability": "crowform",
+        },
+    },
+    "serpent_scale_manual": {
+        "name": "Serpent Scale Manual",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A stitched field manual of shed scales and poison notes teaching how to coil low and let the battlefield do the killing for you.",
+        "use": {
+            "verb": "study",
+            "contexts": ("explore",),
+            "target": "self",
+            "effect_type": "teach_spell",
+            "required_class": "druid",
+            "learn_ability": "serpentform",
+        },
+    },
+    "hawkcaller_whistle": {
+        "name": "Hawkcaller Whistle",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A bone whistle cut and weighted for high hunting calls, meant to seal a bond with a sharp-eyed ash hawk.",
+        "use": {
+            "verb": "bond",
+            "contexts": ("explore",),
+            "target": "self",
+            "effect_type": "unlock_companion",
+            "required_class": "ranger",
+            "unlock_companion": "ash_hawk",
+        },
+    },
+    "boar_keeper_charm": {
+        "name": "Boar-Keeper Charm",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A resin-bound charm of tusk and thorn cord used by old brush hands to earn the respect of a briar boar.",
+        "use": {
+            "verb": "bond",
+            "contexts": ("explore",),
+            "target": "self",
+            "effect_type": "unlock_companion",
+            "required_class": "ranger",
+            "unlock_companion": "briar_boar",
+        },
+    },
+    "mercy_votive": {
+        "name": "Mercy Votive",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A chapel votive wrapped in linen and ash-blue thread, meant to seal a gentler oath of relief and protection.",
+        "use": {
+            "verb": "swear",
+            "contexts": ("explore",),
+            "target": "self",
+            "effect_type": "unlock_oath",
+            "required_class": "paladin",
+            "unlock_oath": "oath_of_mercy",
+        },
+    },
+    "cinder_vigil_tablet": {
+        "name": "Cinder Vigil Tablet",
+        "kind": "consumable",
+        "stackable": True,
+        "summary": "A scorched prayer tablet from an older chapel watch, heavy with soot, warning, and the promise to answer darkness hard.",
+        "use": {
+            "verb": "swear",
+            "contexts": ("explore",),
+            "target": "self",
+            "effect_type": "unlock_oath",
+            "required_class": "paladin",
+            "unlock_oath": "oath_of_cinders",
+        },
+    },
     "wolf_pelt": {
         "name": "Wolf Pelt",
         "kind": "loot",
@@ -860,6 +972,62 @@ BONUS_LABELS = {
     "threat": "Threat",
 }
 
+ITEM_CLASS_REQUIREMENTS = {
+    "militia_blade": ("warrior", "paladin"),
+    "oakbound_shield": ("warrior", "paladin"),
+    "roadwarden_mail": ("warrior", "paladin"),
+    "ashwood_bow": ("ranger",),
+    "trail_knife": ("ranger", "rogue"),
+    "field_leathers": ("ranger", "rogue"),
+    "pilgrim_mace": ("cleric",),
+    "sun_prayer_icon": ("cleric",),
+    "wayfarer_vestments": ("cleric",),
+    "emberglass_staff": ("mage",),
+    "lantern_focus": ("mage",),
+    "hedgeweave_robes": ("mage",),
+    "hookknife_pair": ("rogue",),
+    "parrying_dagger": ("rogue", "ranger"),
+    "nightpath_leathers": ("rogue", "ranger"),
+    "chapel_blade": ("paladin", "warrior"),
+    "warded_kite": ("paladin", "warrior"),
+    "bellkeeper_mail": ("paladin", "warrior"),
+    "rootwood_staff": ("druid",),
+    "grove_talisman": ("druid",),
+    "mossweave_wraps": ("druid",),
+    "ironroot_longblade": ("warrior", "paladin"),
+    "nailbound_heater": ("warrior", "paladin"),
+    "rivetmail_coat": ("warrior", "paladin"),
+    "ironroot_recurve": ("ranger",),
+    "thornline_knife": ("ranger", "rogue"),
+    "brushrunner_leathers": ("ranger", "rogue"),
+    "dawnbell_mace": ("cleric", "paladin"),
+    "bellwarden_icon": ("cleric",),
+    "roadchapel_vestments": ("cleric",),
+    "cinderwire_staff": ("mage",),
+    "ember_lantern_focus": ("mage",),
+    "lanternlined_robes": ("mage",),
+    "gutterfang_pair": ("rogue",),
+    "smokeglass_dagger": ("rogue", "ranger"),
+    "shadowtrail_leathers": ("rogue", "ranger"),
+    "sunforged_blade": ("paladin", "warrior"),
+    "bellguard_bastion": ("paladin", "warrior"),
+    "wardens_cuirass": ("paladin", "warrior"),
+    "thorncall_staff": ("druid",),
+    "wildbloom_talisman": ("druid",),
+    "briarpath_raiment": ("druid",),
+    "ridgebreaker_blade": ("warrior", "paladin"),
+    "warrenspine_recurve": ("ranger",),
+    "sunwake_maul": ("cleric", "paladin", "warrior"),
+    "slagglass_rod": ("mage",),
+    "kingshiv_pair": ("rogue",),
+    "locklight_blade": ("paladin", "warrior"),
+    "weirward_bulwark": ("paladin", "warrior"),
+    "lamplight_harness": ("paladin", "warrior"),
+    "marshsong_staff": ("druid",),
+    "fenlight_talisman": ("druid",),
+    "reedwoven_raiment": ("druid",),
+}
+
 
 def _normalize_item_token(value):
     """Normalize free-text item queries for fuzzy matching."""
@@ -962,3 +1130,43 @@ def format_bonus_summary(item_data):
         sign = "+" if value >= 0 else ""
         parts.append(f"{label} {sign}{value}")
     return ", ".join(parts)
+
+
+def get_item_allowed_classes(item_or_template):
+    """Return the allowed class list for a piece of equipment, if authored."""
+
+    item = item_or_template if isinstance(item_or_template, dict) else get_item(item_or_template)
+    if not item or item.get("kind") != "equipment":
+        return ()
+
+    template_id = None
+    if not isinstance(item_or_template, dict):
+        template_id = item_or_template
+    else:
+        for key, value in ITEM_TEMPLATES.items():
+            if value is item:
+                template_id = key
+                break
+    return tuple(ITEM_CLASS_REQUIREMENTS.get(template_id, ()))
+
+
+def is_equipment_allowed_for_class(item_or_template, class_key):
+    """Whether a class can equip the given item."""
+
+    item = item_or_template if isinstance(item_or_template, dict) else get_item(item_or_template)
+    if not item or item.get("kind") != "equipment":
+        return True
+    if str(class_key or "").lower() == "warrior":
+        return True
+
+    allowed = get_item_allowed_classes(item_or_template)
+    return not allowed or str(class_key or "").lower() in allowed
+
+
+def format_allowed_class_summary(item_or_template):
+    """Return a readable allowed-class note for one item."""
+
+    allowed = get_item_allowed_classes(item_or_template)
+    if not allowed:
+        return ""
+    return "Allowed: " + ", ".join(class_key.replace("_", " ").title() for class_key in allowed)

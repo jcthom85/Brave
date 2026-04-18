@@ -10,9 +10,18 @@ creation commands.
 
 from world.content import get_content_registry
 from world.chapel import get_active_blessing
-from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, STARTER_CONSUMABLES, STARTER_LOADOUTS
+from world.data.items import (
+    EQUIPMENT_SLOTS,
+    ITEM_TEMPLATES,
+    STARTER_CONSUMABLES,
+    STARTER_LOADOUTS,
+    format_allowed_class_summary,
+    is_equipment_allowed_for_class,
+)
 from world.party import ensure_party_state
+from world.paladin_oaths import DEFAULT_PALADIN_OATH, get_oath, get_oath_name
 from world.questing import advance_item_collection, advance_room_visit, ensure_starter_quests
+from world.ranger_companions import DEFAULT_RANGER_COMPANION, get_companion, get_companion_name
 from world.tutorial import ensure_tutorial_state, handle_room_enter, is_tutorial_active
 
 from evennia.objects.objects import DefaultCharacter
@@ -22,6 +31,13 @@ from .objects import ObjectParent
 CONTENT = get_content_registry()
 CHARACTER_CONTENT = CONTENT.characters
 COZY_BONUS = CONTENT.systems.cozy_bonus
+CLASS_STARTER_ITEMS = {
+    "mage": (("mirror_veil_primer", 1),),
+}
+LEGACY_RACE_KEYS = {
+    "halfling": "mosskin",
+    "half_orc": "ashborn",
+}
 
 
 class Character(ObjectParent, DefaultCharacter):
@@ -35,6 +51,11 @@ class Character(ObjectParent, DefaultCharacter):
     """
 
     default_description = "A sturdy-looking adventurer taking their first steps into danger."
+
+    @staticmethod
+    def _canonicalize_race_key(race_key):
+        race_key = str(race_key or "").strip().lower()
+        return LEGACY_RACE_KEYS.get(race_key, race_key)
 
     def at_object_creation(self):
         super().at_object_creation()
@@ -74,6 +95,8 @@ class Character(ObjectParent, DefaultCharacter):
 
         if not self.db.brave_race:
             self.db.brave_race = CHARACTER_CONTENT.starting_race
+        else:
+            self.db.brave_race = self._canonicalize_race_key(self.db.brave_race)
         if not self.db.brave_class:
             self.db.brave_class = CHARACTER_CONTENT.starting_class
         if not self.db.brave_level:
@@ -97,6 +120,20 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.brave_meal_buff = {}
         if self.db.brave_chapel_blessing is None:
             self.db.brave_chapel_blessing = {}
+        if self.db.brave_learned_abilities is None:
+            self.db.brave_learned_abilities = []
+        if self.db.brave_class_feature_items_class is None:
+            self.db.brave_class_feature_items_class = ""
+        if self.db.brave_companions is None:
+            self.db.brave_companions = []
+        if self.db.brave_active_companion is None:
+            self.db.brave_active_companion = ""
+        if self.db.brave_paladin_oaths is None:
+            self.db.brave_paladin_oaths = []
+        if self.db.brave_active_oath is None:
+            self.db.brave_active_oath = ""
+        if self.db.brave_rogue_theft_log is None:
+            self.db.brave_rogue_theft_log = {}
         ensure_party_state(self)
         ensure_tutorial_state(self)
         if not self.db.desc:
@@ -104,6 +141,9 @@ class Character(ObjectParent, DefaultCharacter):
         ensure_starter_quests(self)
         self.ensure_starter_loadout()
         self.ensure_starter_consumables()
+        self.ensure_class_starter_items()
+        self.ensure_ranger_companion()
+        self.ensure_paladin_oath()
         self.recalculate_stats()
 
     def recalculate_stats(self, restore=False):
@@ -118,8 +158,10 @@ class Character(ObjectParent, DefaultCharacter):
             primary[stat] = class_data["base_stats"].get(stat, 0) + race["bonuses"].get(stat, 0)
 
         passive_bonuses = CHARACTER_CONTENT.get_passive_ability_bonuses(self.db.brave_class, level)
+        race_perk_bonuses = dict(race.get("perk_bonuses", {}))
         for stat in CHARACTER_CONTENT.primary_stats:
             primary[stat] += passive_bonuses.get(stat, 0)
+            primary[stat] += race_perk_bonuses.get(stat, 0)
 
         equipment_bonuses = self.get_equipment_bonuses()
         for stat in CHARACTER_CONTENT.primary_stats:
@@ -147,6 +189,10 @@ class Character(ObjectParent, DefaultCharacter):
             "threat": 5 + primary["vitality"] + (5 if self.db.brave_class in ("warrior", "paladin") else 0),
             "healing_power": 0,
         }
+        for stat, bonus in race_perk_bonuses.items():
+            if stat in CHARACTER_CONTENT.primary_stats:
+                continue
+            derived[stat] = derived.get(stat, 0) + bonus
         for stat, bonus in passive_bonuses.items():
             if stat in CHARACTER_CONTENT.primary_stats:
                 continue
@@ -235,7 +281,7 @@ class Character(ObjectParent, DefaultCharacter):
     def set_brave_race(self, race_key):
         """Set a new race and rebuild derived state."""
 
-        self.db.brave_race = race_key
+        self.db.brave_race = self._canonicalize_race_key(race_key)
         self.recalculate_stats(restore=True)
 
     def set_brave_class(self, class_key):
@@ -243,6 +289,8 @@ class Character(ObjectParent, DefaultCharacter):
 
         self.db.brave_class = class_key
         self.ensure_starter_loadout(force=True)
+        self.ensure_class_starter_items(force=True)
+        self.ensure_paladin_oath()
         self.recalculate_stats(restore=True)
 
     def get_unlocked_abilities(self):
@@ -250,7 +298,42 @@ class Character(ObjectParent, DefaultCharacter):
 
         class_data = CHARACTER_CONTENT.classes[self.db.brave_class]
         level = self.db.brave_level
-        return [ability for unlock_level, ability in class_data["progression"] if unlock_level <= level]
+        unlocked = [ability for unlock_level, ability in class_data["progression"] if unlock_level <= level]
+        seen = {CHARACTER_CONTENT.ability_key(name) for name in unlocked}
+        for ability_name in self.get_learned_abilities():
+            key = CHARACTER_CONTENT.ability_key(ability_name)
+            if key in seen:
+                continue
+            seen.add(key)
+            unlocked.append(ability_name)
+        return unlocked
+
+    def get_learned_abilities(self):
+        """Return extra non-progression abilities learned through class systems."""
+
+        learned = []
+        for ability_key in (self.db.brave_learned_abilities or []):
+            ability = CHARACTER_CONTENT.ability_library.get(str(ability_key or "").lower())
+            if not ability or ability.get("class") != self.db.brave_class:
+                continue
+            learned.append(ability.get("name", str(ability_key)))
+        return learned
+
+    def learn_ability(self, ability_key):
+        """Persist a learned ability if it matches the current class."""
+
+        normalized = CHARACTER_CONTENT.ability_key(ability_key)
+        ability = CHARACTER_CONTENT.ability_library.get(normalized)
+        if not ability:
+            return False, "That technique does not exist."
+        if ability.get("class") != self.db.brave_class:
+            return False, f"{ability.get('name', 'That ability')} does not belong to your current class."
+        learned = [str(key).lower() for key in (self.db.brave_learned_abilities or [])]
+        if normalized in learned:
+            return False, f"You already know {ability.get('name', 'that technique')}."
+        learned.append(normalized)
+        self.db.brave_learned_abilities = learned
+        return True, f"You learn {ability.get('name', 'a new technique')}."
 
     def get_unlocked_combat_abilities(self):
         """Return unlocked combat actions that can be queued with `use`."""
@@ -288,6 +371,169 @@ class Character(ObjectParent, DefaultCharacter):
         for template_id, quantity in STARTER_CONSUMABLES:
             self.add_item_to_inventory(template_id, quantity)
         self.db.brave_starter_consumables_seeded = True
+
+    def ensure_class_starter_items(self, force=False):
+        """Seed light class-specific feature items without duplicating them forever."""
+
+        class_key = self.db.brave_class or CHARACTER_CONTENT.starting_class
+        current = self.db.brave_class_feature_items_class or ""
+        if not force and current == class_key:
+            return
+        if current and current != class_key and self.can_customize_build():
+            for template_id, quantity in CLASS_STARTER_ITEMS.get(current, ()):
+                self.remove_item_from_inventory(template_id, quantity)
+        if not current or current != class_key or force:
+            for template_id, quantity in CLASS_STARTER_ITEMS.get(class_key, ()):
+                if self.get_inventory_quantity(template_id) < quantity:
+                    self.add_item_to_inventory(template_id, quantity - self.get_inventory_quantity(template_id), count_for_collection=False)
+        self.db.brave_class_feature_items_class = class_key
+
+    def ensure_ranger_companion(self):
+        """Seed the default ranger companion when appropriate."""
+
+        if self.db.brave_class != "ranger":
+            return
+        companions = [str(key).lower() for key in (self.db.brave_companions or [])]
+        if DEFAULT_RANGER_COMPANION not in companions:
+            companions.append(DEFAULT_RANGER_COMPANION)
+            self.db.brave_companions = companions
+        if not self.db.brave_active_companion:
+            self.db.brave_active_companion = DEFAULT_RANGER_COMPANION
+
+    def get_unlocked_companions(self):
+        """Return unlocked ranger companion payloads."""
+
+        unlocked = []
+        for companion_key in (self.db.brave_companions or []):
+            companion = get_companion(companion_key)
+            if not companion:
+                continue
+            payload = dict(companion)
+            payload["key"] = str(companion_key).lower()
+            unlocked.append(payload)
+        return unlocked
+
+    def get_active_companion(self):
+        """Return the currently active ranger companion payload."""
+
+        companion_key = str(self.db.brave_active_companion or "").lower()
+        if not companion_key:
+            return {}
+        companion = get_companion(companion_key)
+        if not companion:
+            return {}
+        payload = dict(companion)
+        payload["key"] = companion_key
+        return payload
+
+    def unlock_companion(self, companion_key):
+        """Unlock and optionally activate a ranger companion."""
+
+        if self.db.brave_class != "ranger":
+            return False, "Only a Ranger can bond a battle companion."
+        companion_key = str(companion_key or "").lower()
+        companion = get_companion(companion_key)
+        if not companion:
+            return False, "That companion bond is unknown."
+        companions = [str(key).lower() for key in (self.db.brave_companions or [])]
+        if companion_key in companions:
+            return False, f"You have already bonded with {companion.get('name', 'that companion')}."
+        companions.append(companion_key)
+        self.db.brave_companions = companions
+        self.db.brave_active_companion = companion_key
+        return True, f"{companion.get('name', 'A new companion')} answers your bond and joins your hunt."
+
+    def set_active_companion(self, companion_key):
+        """Set the active ranger companion."""
+
+        if self.db.brave_class != "ranger":
+            return False, "Only a Ranger can call an active companion."
+        companion_key = str(companion_key or "").lower()
+        companions = [str(key).lower() for key in (self.db.brave_companions or [])]
+        if companion_key not in companions:
+            return False, "You have not bonded with that companion."
+        self.db.brave_active_companion = companion_key
+        return True, f"{get_companion_name(companion_key)} takes point for the next hunt."
+
+    def ensure_paladin_oath(self):
+        """Seed the default Paladin oath when appropriate."""
+
+        if self.db.brave_class != "paladin":
+            return
+        oaths = [str(key).lower() for key in (self.db.brave_paladin_oaths or [])]
+        if DEFAULT_PALADIN_OATH not in oaths:
+            oaths.append(DEFAULT_PALADIN_OATH)
+            self.db.brave_paladin_oaths = oaths
+        if not self.db.brave_active_oath:
+            self.db.brave_active_oath = DEFAULT_PALADIN_OATH
+
+    def get_unlocked_oaths(self):
+        """Return unlocked Paladin oath payloads."""
+
+        unlocked = []
+        for oath_key in (self.db.brave_paladin_oaths or []):
+            oath = get_oath(oath_key)
+            if not oath:
+                continue
+            payload = dict(oath)
+            payload["key"] = str(oath_key).lower()
+            unlocked.append(payload)
+        return unlocked
+
+    def get_active_oath(self):
+        """Return the currently active Paladin oath payload."""
+
+        oath_key = str(self.db.brave_active_oath or "").lower()
+        if not oath_key:
+            return {}
+        oath = get_oath(oath_key)
+        if not oath:
+            return {}
+        payload = dict(oath)
+        payload["key"] = oath_key
+        return payload
+
+    def unlock_oath(self, oath_key):
+        """Unlock and activate a Paladin oath."""
+
+        if self.db.brave_class != "paladin":
+            return False, "Only a Paladin can swear that vow."
+        oath_key = str(oath_key or "").lower()
+        oath = get_oath(oath_key)
+        if not oath:
+            return False, "That oath is unknown."
+        oaths = [str(key).lower() for key in (self.db.brave_paladin_oaths or [])]
+        if oath_key in oaths:
+            return False, f"You have already sworn {oath.get('name', 'that oath')}."
+        oaths.append(oath_key)
+        self.db.brave_paladin_oaths = oaths
+        self.db.brave_active_oath = oath_key
+        self.recalculate_stats()
+        return True, f"You swear {oath.get('name', 'a new oath')} and take its vigil on yourself."
+
+    def set_active_oath(self, oath_key):
+        """Set the active Paladin oath."""
+
+        if self.db.brave_class != "paladin":
+            return False, "Only a Paladin keeps an active oath."
+        oath_key = str(oath_key or "").lower()
+        oaths = [str(key).lower() for key in (self.db.brave_paladin_oaths or [])]
+        if oath_key not in oaths:
+            return False, "You have not sworn that oath."
+        self.db.brave_active_oath = oath_key
+        self.recalculate_stats()
+        return True, f"{get_oath_name(oath_key)} now guides your vigil."
+
+    def get_rogue_theft_log(self):
+        """Return authored Rogue theft records in acquisition order."""
+
+        theft_log = dict(self.db.brave_rogue_theft_log or {})
+        entries = []
+        for entity_id, payload in theft_log.items():
+            record = dict(payload or {})
+            record.setdefault("entity_id", entity_id)
+            entries.append(record)
+        return entries
 
     def get_equipment_bonuses(self):
         """Return cumulative bonuses from equipped gear."""
@@ -355,11 +601,14 @@ class Character(ObjectParent, DefaultCharacter):
         """Return carried equipment entries, optionally filtered to one slot."""
 
         items = []
+        class_key = getattr(getattr(self, "db", None), "brave_class", None)
         for entry in (self.db.brave_inventory or []):
             template_id = entry.get("template")
             quantity = max(0, int(entry.get("quantity", 0) or 0))
             template = ITEM_TEMPLATES.get(template_id)
             if quantity <= 0 or not template or template.get("kind") != "equipment":
+                continue
+            if not is_equipment_allowed_for_class(template_id, class_key):
                 continue
             item_slot = template.get("slot")
             if slot and item_slot != slot:
@@ -430,6 +679,11 @@ class Character(ObjectParent, DefaultCharacter):
             return False, f"{template['name']} fits in {target_slot.replace('_', ' ').title()}."
         if self.get_inventory_quantity(template_id) <= 0:
             return False, f"You are not carrying {template['name']}."
+        if not is_equipment_allowed_for_class(template_id, self.db.brave_class):
+            allowed_text = format_allowed_class_summary(template_id)
+            if allowed_text:
+                return False, f"{template['name']} is outside your training. {allowed_text}."
+            return False, f"{template['name']} is outside your training."
 
         equipment = dict(self.db.brave_equipment or {})
         current_template_id = equipment.get(target_slot)

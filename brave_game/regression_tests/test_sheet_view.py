@@ -72,6 +72,29 @@ class DummyCharacter:
 
 
 class SheetViewTests(unittest.TestCase):
+    def test_sheet_view_uses_authored_ability_and_passive_summaries(self):
+        character = DummyCharacter()
+        character.db.brave_class = "ranger"
+        character.db.brave_level = 6
+
+        with (
+            patch("world.browser_views.format_ability_display", side_effect=lambda ability, _: ability),
+            patch("world.browser_views.get_resonance_key", return_value="fantasy"),
+            patch("world.browser_views.get_resonance_label", return_value="Fantasy Resonance"),
+            patch("world.browser_views.get_active_blessing", return_value=None),
+        ):
+            view = build_sheet_view(character)
+
+        abilities = _section(view, "Abilities")
+        passives = _section(view, "Passive Traits")
+        ability_items = {item.get("text"): item for item in abilities.get("items", [])}
+        passive_items = {item.get("text"): item for item in passives.get("items", [])}
+
+        self.assertIn("Mark Prey", ability_items["Mark Prey"].get("tooltip", ""))
+        self.assertIn("Choose a quarry", ability_items["Mark Prey"].get("tooltip", ""))
+        self.assertIn("Trailwise", passive_items["Trailwise"].get("tooltip", ""))
+        self.assertIn("Fieldcraft and steady footing", passive_items["Trailwise"].get("tooltip", ""))
+
     def test_sheet_view_uses_featured_status_card_and_minimal_header(self):
         character = DummyCharacter()
 
@@ -120,10 +143,12 @@ class SheetViewTests(unittest.TestCase):
 
         attributes = _section(view, "Attributes")
         stats = _section(view, "Stats")
+        class_features = _section(view, "Class Features")
         abilities = _section(view, "Abilities")
         passives = _section(view, "Passive Traits")
         self.assertEqual("stats", attributes.get("variant"))
         self.assertEqual("stats", stats.get("variant"))
+        self.assertEqual("Martial Mastery", class_features.get("items", [])[0].get("title"))
         self.assertEqual(["Shield Bash", "War Cry"], [item.get("text") for item in abilities.get("items", [])])
         self.assertEqual(["Resolve", "Iron Stance"], [item.get("text") for item in passives.get("items", [])])
         self.assertTrue(abilities.get("items", [])[0].get("picker"))
@@ -150,7 +175,7 @@ class SheetViewTests(unittest.TestCase):
             patch(
                 "world.browser_views._format_context_bonus_summary",
                 side_effect=[
-                    "Strength +1, Agility +1, Intellect +1, Spirit +1, Vitality +1",
+                    "HP +8, MP +8, STA +8",
                     "Stamina +5",
                     "Armor +2",
                 ],

@@ -134,23 +134,28 @@ def _reaction_role_for_item(use):
     return REACTION_ITEM_EFFECT_TYPES.get(effect_type)
 
 
-def _timing_tooltip(timing, *, reaction_role=None):
+def _timing_tooltip(timing, *, reaction_role=None, summary=None):
     timing = dict(timing or {})
-    parts = [
+    timing_parts = [
         f"ATB {int(timing.get('gauge_cost', 100) or 100)}",
         f"windup {int(timing.get('windup_ticks', 0) or 0)}",
         f"recovery {int(timing.get('recovery_ticks', 0) or 0)}",
     ]
     cooldown = int(timing.get("cooldown_ticks", 0) or 0)
     if cooldown > 0:
-        parts.append(f"cooldown {cooldown}")
+        timing_parts.append(f"cooldown {cooldown}")
     if timing.get("telegraph"):
-        parts.append("telegraphed")
+        timing_parts.append("telegraphed")
     if timing.get("interruptible"):
-        parts.append("interruptible")
+        timing_parts.append("interruptible")
     if reaction_role:
-        parts.append(f"{reaction_role} tool")
-    return "Timing: " + " · ".join(parts)
+        timing_parts.append(f"{reaction_role} tool")
+
+    parts = []
+    if summary:
+        parts.append(summary)
+    parts.append("Timing: " + " · ".join(timing_parts))
+    return "\n".join(parts)
 
 
 def build_combat_ability_actions(encounter, character):
@@ -196,7 +201,7 @@ def build_combat_ability_actions(encounter, character):
             "disabled_reason": None,
             "timing": timing,
             "reaction_role": reaction_role,
-            "tooltip": _timing_tooltip(timing, reaction_role=reaction_role),
+            "tooltip": _timing_tooltip(timing, reaction_role=reaction_role, summary=ability.get("summary")),
         }
 
         if resource_current < ability["cost"]:
@@ -291,7 +296,7 @@ def build_combat_item_actions(encounter, character):
             "effect_type": use.get("effect_type"),
             "timing": timing,
             "reaction_role": reaction_role,
-            "tooltip": _timing_tooltip(timing, reaction_role=reaction_role),
+            "tooltip": _timing_tooltip(timing, reaction_role=reaction_role, summary=item.get("summary")),
         }
 
         if target_mode == "enemy":

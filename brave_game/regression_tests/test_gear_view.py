@@ -21,20 +21,24 @@ from typeclasses.characters import Character
 
 
 class DummyCharacter:
-    def __init__(self, equipment=None, inventory=None):
+    def __init__(self, equipment=None, inventory=None, brave_class="warrior"):
         self.key = "Dad"
         self.location = None
         self.db = SimpleNamespace(
-            brave_class="warrior",
+            brave_class=brave_class,
             brave_race="human",
             brave_equipment=equipment or {},
             brave_inventory=inventory or [],
         )
 
+    def get_equippable_inventory(self, slot=None):
+        return Character.get_equippable_inventory(self, slot=slot)
+
 
 class DummyEquipmentCharacter:
-    def __init__(self, equipment=None, inventory=None):
+    def __init__(self, equipment=None, inventory=None, brave_class="warrior"):
         self.db = SimpleNamespace(
+            brave_class=brave_class,
             brave_equipment=equipment or {},
             brave_inventory=inventory or [],
             brave_quests={},
@@ -59,6 +63,9 @@ class DummyEquipmentCharacter:
 
     def remove_item_from_inventory(self, template_id, quantity=1):
         return Character.remove_item_from_inventory(self, template_id, quantity)
+
+    def get_equippable_inventory(self, slot=None):
+        return Character.get_equippable_inventory(self, slot=slot)
 
 
 class GearViewTests(unittest.TestCase):
@@ -180,6 +187,47 @@ class GearViewTests(unittest.TestCase):
         self.assertEqual("roadwarden_mail", result.get("unequipped"))
         self.assertEqual(1, character.recalculate_calls)
         self.assertEqual(1, Character.get_inventory_quantity(character, "roadwarden_mail"))
+
+    def test_non_warrior_cannot_equip_out_of_class_weapon(self):
+        character = DummyEquipmentCharacter(
+            equipment={},
+            inventory=[{"template": "militia_blade", "quantity": 1}],
+            brave_class="mage",
+        )
+
+        success, result = Character.equip_inventory_item(character, "militia_blade", slot="main_hand")
+
+        self.assertFalse(success)
+        self.assertIn("outside your training", result)
+        self.assertEqual(1, Character.get_inventory_quantity(character, "militia_blade"))
+
+    def test_warrior_can_equip_other_class_weapon(self):
+        character = DummyEquipmentCharacter(
+            equipment={},
+            inventory=[{"template": "cinderwire_staff", "quantity": 1}],
+            brave_class="warrior",
+        )
+
+        success, result = Character.equip_inventory_item(character, "cinderwire_staff", slot="main_hand")
+
+        self.assertTrue(success)
+        self.assertEqual("cinderwire_staff", result.get("equipped"))
+        self.assertEqual("cinderwire_staff", character.db.brave_equipment.get("main_hand"))
+
+    def test_gear_view_filters_incompatible_items_from_picker(self):
+        character = DummyCharacter(
+            inventory=[
+                {"template": "militia_blade", "quantity": 1},
+                {"template": "cinderwire_staff", "quantity": 1},
+            ],
+            brave_class="mage",
+        )
+
+        view = build_gear_view(character)
+        slots = view.get("sections", [])[0]
+        main_hand_picker = slots.get("items", [])[0].get("picker", {})
+
+        self.assertEqual(["Cinderwire Staff"], [option.get("label") for option in main_hand_picker.get("options", [])])
 
 
 if __name__ == "__main__":

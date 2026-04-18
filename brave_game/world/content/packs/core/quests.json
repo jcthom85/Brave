@@ -95,6 +95,12 @@
         "ruk_the_fence_cutter"
       ],
       "rewards": {
+        "items": [
+          {
+            "item": "stormlance_codex",
+            "quantity": 1
+          }
+        ],
         "silver": 12,
         "xp": 130
       },
@@ -263,6 +269,12 @@
         "what_whispers_in_the_wood"
       ],
       "rewards": {
+        "items": [
+          {
+            "item": "crowfeather_rite",
+            "quantity": 1
+          }
+        ],
         "xp": 110
       },
       "summary": "Gather enough moonleaf from the whispering glades to keep Brambleford supplied with poultices.",
@@ -291,6 +303,12 @@
         "greymaws_trail"
       ],
       "rewards": {
+        "items": [
+          {
+            "item": "mercy_votive",
+            "quantity": 1
+          }
+        ],
         "silver": 10,
         "xp": 140
       },
@@ -397,6 +415,12 @@
         "lights_in_the_reeds"
       ],
       "rewards": {
+        "items": [
+          {
+            "item": "serpent_scale_manual",
+            "quantity": 1
+          }
+        ],
         "silver": 40,
         "trophies": [
           "miretooth_fen_jaw"
@@ -481,6 +505,10 @@
       "rewards": {
         "items": [
           {
+            "item": "hawkcaller_whistle",
+            "quantity": 1
+          },
+          {
             "item": "wharfside_skewers",
             "quantity": 1
           }
@@ -510,6 +538,12 @@
         "fencebreakers"
       ],
       "rewards": {
+        "items": [
+          {
+            "item": "boar_keeper_charm",
+            "quantity": 1
+          }
+        ],
         "silver": 18,
         "xp": 120
       },
@@ -612,6 +646,12 @@
         "do_not_disturb_the_dead"
       ],
       "rewards": {
+        "items": [
+          {
+            "item": "cinder_vigil_tablet",
+            "quantity": 1
+          }
+        ],
         "silver": 20,
         "xp": 220
       },

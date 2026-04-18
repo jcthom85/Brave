@@ -13,15 +13,16 @@ from typeclasses.scripts import BraveEncounter
 
 
 class DummyFighter:
-    def __init__(self, char_id, key):
+    def __init__(self, char_id, key, *, race="human", class_key="warrior"):
         self.id = char_id
         self.key = key
         self.location = object()
         self.db = SimpleNamespace(
-            brave_class="warrior",
+            brave_race=race,
+            brave_class=class_key,
             brave_level=10,
             brave_resources={"hp": 30},
-            brave_derived_stats={"max_hp": 30},
+            brave_derived_stats={"max_hp": 30, "accuracy": 10, "dodge": 8, "armor": 6, "attack_power": 10, "spell_power": 10},
         )
 
 
@@ -41,6 +42,7 @@ class CombatReactionTests(unittest.TestCase):
             },
             _enemy_action_label=lambda current_enemy: "Brush Pounce",
             _default_atb_fill_rate=lambda **_kwargs: 100,
+            _atb_tick_ms=lambda: 250,
             _save_actor_atb_state=lambda state, character=None, enemy=None: saved_state.update(state),
             _record_participant_contribution=lambda character, **kwargs: None,
         )
@@ -51,7 +53,34 @@ class CombatReactionTests(unittest.TestCase):
 
         self.assertTrue(interrupted)
         self.assertEqual("recovering", saved_state["phase"])
-        self.assertTrue(any("interrupts Old Greymaw's Brush Pounce" in message for message in messages))
+        self.assertTrue(any("breaks Old Greymaw's Brush Pounce" in message for message in messages))
+
+    def test_elf_interrupt_adds_extra_enemy_recovery(self):
+        attacker = DummyFighter(1, "Leth", race="elf")
+        enemy = {"id": "e1", "key": "Old Greymaw", "template_key": "old_greymaw", "hp": 40}
+        saved_state = {}
+        encounter = SimpleNamespace(
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: None),
+            _get_actor_atb_state=lambda character=None, enemy=None: {
+                "fill_rate": 110,
+                "phase": "winding",
+                "current_action": {"label": "Brush Pounce"},
+                "timing": {"telegraph": True, "interruptible": True},
+            },
+            _enemy_action_label=lambda current_enemy: "Brush Pounce",
+            _default_atb_fill_rate=lambda **_kwargs: 100,
+            _atb_tick_ms=lambda: 250,
+            _save_actor_atb_state=lambda state, character=None, enemy=None: saved_state.update(state),
+            _record_participant_contribution=lambda character, **kwargs: None,
+        )
+        encounter._enemy_reaction_state = lambda current_enemy: BraveEncounter._enemy_reaction_state(encounter, current_enemy)
+        encounter._set_enemy_recovery_state = lambda current_enemy, ticks=1: BraveEncounter._set_enemy_recovery_state(encounter, current_enemy, ticks=ticks)
+
+        interrupted = BraveEncounter._try_interrupt_enemy_action(encounter, attacker, enemy, "Shield Bash")
+
+        self.assertTrue(interrupted)
+        self.assertEqual("recovering", saved_state["phase"])
+        self.assertEqual(2, saved_state["ticks_remaining"])
 
     def test_telegraphed_attack_can_be_redirected_and_mitigated(self):
         messages = []
@@ -109,6 +138,7 @@ class CombatReactionTests(unittest.TestCase):
             _get_participant_state=get_state,
             _record_participant_contribution=lambda character, **kwargs: contributions.append((character.key, kwargs)),
             _defeat_character=lambda character: None,
+            _emit_combat_fx=lambda **kwargs: None,
             _save_enemy=lambda current_enemy: None,
         )
         encounter._enemy_reaction_state = lambda current_enemy: BraveEncounter._enemy_reaction_state(encounter, current_enemy)
@@ -122,8 +152,135 @@ class CombatReactionTests(unittest.TestCase):
 
         self.assertEqual(23, interceptor.db.brave_resources["hp"])
         self.assertEqual(30, target.db.brave_resources["hp"])
-        self.assertTrue(any("dragging it off Rook" in message for message in messages))
-        self.assertTrue(any("blunts Tower Archer's Aimed Shot" in message for message in messages))
+        self.assertTrue(any("pulling it off Rook" in message for message in messages))
+        self.assertTrue(any("hits Tamsin for 7 damage" in message for message in messages))
+
+    def test_dwarf_takes_one_less_direct_damage(self):
+        messages = []
+        target = DummyFighter(1, "Brann", race="dwarf")
+        room = object()
+        target.location = room
+        enemy = {
+            "id": "e1",
+            "key": "Tower Archer",
+            "template_key": "tower_archer",
+            "hp": 20,
+            "accuracy": 80,
+            "attack_power": 12,
+        }
+        states = {
+            str(target.id): {
+                "guard": 0,
+                "reaction_guard": 0,
+                "reaction_guard_source": None,
+                "reaction_label": None,
+                "reaction_redirect_to": None,
+            },
+        }
+
+        encounter = SimpleNamespace(
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: messages.append(message)),
+            _get_actor_atb_state=lambda character=None, enemy=None: {
+                "phase": "resolving",
+                "current_action": {"label": "Aimed Shot"},
+                "timing": {"telegraph": True, "interruptible": True},
+            },
+            _enemy_action_label=lambda current_enemy: "Aimed Shot",
+            _handle_enemy_specials=lambda current_enemy: current_enemy,
+            _choose_enemy_target=lambda current_enemy=None: target,
+            get_active_enemies=lambda: [enemy],
+            _get_character=lambda dbref: target if dbref == target.id else None,
+            get_active_participants=lambda: [target],
+            _get_effective_derived=lambda character: {"dodge": 0, "armor": 0},
+            _roll_hit=lambda accuracy, dodge: True,
+            _weapon_damage=lambda attack_power, armor, bonus=0: 12 + bonus,
+            _spell_damage=lambda spell_power, armor, bonus=0: 12 + bonus,
+            _get_participant_state=lambda character: states[str(character.id)],
+            _record_participant_contribution=lambda character, **kwargs: None,
+            _defeat_character=lambda character: None,
+            _emit_combat_fx=lambda **kwargs: None,
+            _save_enemy=lambda current_enemy: None,
+        )
+        encounter._enemy_reaction_state = lambda current_enemy: BraveEncounter._enemy_reaction_state(encounter, current_enemy)
+
+        original_randint = random.randint
+        random.randint = lambda a, b: 100
+        try:
+            BraveEncounter._execute_enemy_turn(encounter, enemy)
+        finally:
+            random.randint = original_randint
+
+        self.assertEqual(19, target.db.brave_resources["hp"])
+        self.assertTrue(any("hits Brann for 11 damage" in message for message in messages))
+
+    def test_sacred_aegis_retaliates_when_protected_ally_is_hit(self):
+        messages = []
+        target = DummyFighter(1, "Rook")
+        paladin = DummyFighter(2, "Ser Jorin", class_key="paladin")
+        room = object()
+        target.location = room
+        paladin.location = room
+        enemy = {
+            "id": "e1",
+            "key": "Tower Archer",
+            "template_key": "tower_archer",
+            "hp": 20,
+            "accuracy": 80,
+            "attack_power": 12,
+            "judged_turns": 2,
+        }
+        states = {
+            str(target.id): {
+                "guard": 0,
+                "reaction_guard": 0,
+                "reaction_guard_source": None,
+                "reaction_label": None,
+                "reaction_redirect_to": None,
+                "sacred_aegis_turns": 2,
+                "sacred_aegis_source": paladin.id,
+                "sacred_aegis_power": 4,
+            },
+        }
+
+        def damage_enemy(attacker, current_enemy, damage, extra_text="", damage_type="physical"):
+            current_enemy["hp"] -= damage
+            messages.append(f"{attacker.key} retaliates for {damage}.{extra_text}")
+
+        encounter = SimpleNamespace(
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: messages.append(message)),
+            _get_actor_atb_state=lambda character=None, enemy=None: {
+                "phase": "resolving",
+                "current_action": {"label": "Aimed Shot"},
+                "timing": {"telegraph": True, "interruptible": True},
+            },
+            _enemy_action_label=lambda current_enemy: "Aimed Shot",
+            _handle_enemy_specials=lambda current_enemy: current_enemy,
+            _choose_enemy_target=lambda current_enemy=None: target,
+            get_active_enemies=lambda: [enemy],
+            _get_character=lambda dbref: paladin if dbref == paladin.id else target if dbref == target.id else None,
+            get_active_participants=lambda: [target, paladin],
+            _get_effective_derived=lambda character: {"dodge": 0, "armor": 0, "spell_power": 9},
+            _roll_hit=lambda accuracy, dodge: True,
+            _weapon_damage=lambda attack_power, armor, bonus=0: 12 + bonus,
+            _spell_damage=lambda spell_power, armor, bonus=0: 12 + bonus,
+            _get_participant_state=lambda character: states.setdefault(str(character.id), {"guard": 0}),
+            _record_participant_contribution=lambda character, **kwargs: None,
+            _defeat_character=lambda character: None,
+            _emit_combat_fx=lambda **kwargs: None,
+            _save_enemy=lambda current_enemy: None,
+            _damage_enemy=damage_enemy,
+        )
+        encounter._enemy_reaction_state = lambda current_enemy: BraveEncounter._enemy_reaction_state(encounter, current_enemy)
+
+        original_randint = random.randint
+        random.randint = lambda a, b: 100
+        try:
+            BraveEncounter._execute_enemy_turn(encounter, enemy)
+        finally:
+            random.randint = original_randint
+
+        self.assertLess(enemy["hp"], 20)
+        self.assertTrue(any("Ser Jorin retaliates" in message for message in messages))
 
 
 if __name__ == "__main__":

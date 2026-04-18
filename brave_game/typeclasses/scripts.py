@@ -57,6 +57,17 @@ get_relative_threat_label = ENCOUNTER_CONTENT.get_relative_threat_label
 from world.data.items import ITEM_TEMPLATES, get_item_use_profile, match_inventory_item
 from world.questing import advance_enemy_defeat, pop_recent_quest_updates
 from world.resonance import get_ability_display_name, get_resource_label, resolve_ability_query
+from world.race_perks import (
+    adjust_effect_damage,
+    adjust_effect_penalty,
+    adjust_effect_turns,
+    get_atb_fill_rate_bonus,
+    get_flee_chance_bonus,
+    get_incoming_damage_reduction,
+    get_interrupt_recovery_bonus,
+    get_wounded_atb_fill_rate_bonus,
+    get_wounded_damage_bonus,
+)
 from world.rewards import format_reward_summary, merge_reward_entries, roll_enemy_rewards
 from world.tutorial import get_tutorial_defeat_room, record_encounter_victory
 
@@ -1267,7 +1278,8 @@ class BraveEncounter(Script):
         reaction = self._enemy_reaction_state(enemy)
         if reaction["phase"] != "winding" or not reaction["telegraphed"] or not reaction["interruptible"]:
             return False
-        self._set_enemy_recovery_state(enemy, ticks=1)
+        recovery_ticks = 1 + get_interrupt_recovery_bonus(character)
+        self._set_enemy_recovery_state(enemy, ticks=recovery_ticks)
         self.obj.msg_contents(
             f"|g{character.key}'s {tool_label} breaks {enemy['key']}'s {reaction['label']}.|n"
         )
@@ -1410,7 +1422,13 @@ class BraveEncounter(Script):
             }.get(getattr(character.db, "brave_class", ""), 84)
             primary = dict(getattr(character.db, "brave_primary_stats", {}) or {})
             agility = int(primary.get("agility", 0) or 0)
-            return max(68, min(168, class_base + (agility * 8)))
+            fill_rate = (
+                class_base
+                + (agility * 8)
+                + get_atb_fill_rate_bonus(character)
+                + get_wounded_atb_fill_rate_bonus(character)
+            )
+            return max(68, min(168, fill_rate))
         if enemy is not None:
             fill_rate = 78 + (int(enemy.get("dodge", 0) or 0) * 5) + (int(enemy.get("accuracy", 0) or 0) // 20)
             tags = set(enemy.get("tags", []) or [])
@@ -1714,6 +1732,12 @@ class BraveEncounter(Script):
                 "reaction_guard_source": None,
                 "reaction_label": None,
                 "reaction_redirect_to": None,
+                "sacred_aegis_turns": 0,
+                "sacred_aegis_source": None,
+                "sacred_aegis_power": 0,
+                "grove_turns": 0,
+                "primal_form": None,
+                "primal_form_turns": 0,
                 "bleed_turns": 0,
                 "bleed_damage": 0,
                 "poison_turns": 0,
@@ -1824,7 +1848,7 @@ class BraveEncounter(Script):
         derived = self._get_effective_derived(character)
         state = self._get_participant_state(character)
         enemy_count = len(self.get_active_enemies())
-        chance = 52 + derived.get("dodge", 0) - max(0, enemy_count - 1) * 6
+        chance = 52 + derived.get("dodge", 0) - max(0, enemy_count - 1) * 6 + get_flee_chance_bonus(character)
         if state.get("snare_turns", 0) > 0:
             chance -= 20
         if state.get("bleed_turns", 0) > 0:
@@ -1902,6 +1926,12 @@ class BraveEncounter(Script):
                 "reaction_guard_source": None,
                 "reaction_label": None,
                 "reaction_redirect_to": None,
+                "sacred_aegis_turns": 0,
+                "sacred_aegis_source": None,
+                "sacred_aegis_power": 0,
+                "grove_turns": 0,
+                "primal_form": None,
+                "primal_form_turns": 0,
                 "bleed_turns": 0,
                 "bleed_damage": 0,
                 "poison_turns": 0,
@@ -1954,6 +1984,7 @@ class BraveEncounter(Script):
             "target_strategy": template.get("target_strategy", "highest_threat"),
             "special": template.get("special"),
             "marked_turns": 0,
+            "judged_turns": 0,
             "bound_turns": 0,
             "bleed_turns": 0,
             "bleed_damage": 0,
@@ -2021,6 +2052,23 @@ class BraveEncounter(Script):
         if state.get("feint_turns", 0) > 0:
             derived["accuracy"] = derived.get("accuracy", 0) + state.get("feint_accuracy_bonus", 0)
             derived["dodge"] = derived.get("dodge", 0) + state.get("feint_dodge_bonus", 0)
+        form = state.get("primal_form")
+        if state.get("primal_form_turns", 0) > 0 and form == "bear":
+            derived["armor"] = derived.get("armor", 0) + 3
+            derived["attack_power"] = derived.get("attack_power", 0) + 2
+            derived["dodge"] = max(0, derived.get("dodge", 0) - 1)
+        elif state.get("primal_form_turns", 0) > 0 and form == "wolf":
+            derived["accuracy"] = derived.get("accuracy", 0) + 3
+            derived["dodge"] = derived.get("dodge", 0) + 4
+            derived["attack_power"] = derived.get("attack_power", 0) + 1
+        elif state.get("primal_form_turns", 0) > 0 and form == "crow":
+            derived["accuracy"] = derived.get("accuracy", 0) + 4
+            derived["dodge"] = derived.get("dodge", 0) + 3
+            derived["spell_power"] = derived.get("spell_power", 0) + 1
+        elif state.get("primal_form_turns", 0) > 0 and form == "serpent":
+            derived["attack_power"] = derived.get("attack_power", 0) + 1
+            derived["spell_power"] = derived.get("spell_power", 0) + 2
+            derived["accuracy"] = derived.get("accuracy", 0) + 2
         return derived
 
     def _consume_feint_bonus(self, character):
@@ -2054,6 +2102,10 @@ class BraveEncounter(Script):
         return 6
 
     def _damage_enemy(self, attacker, enemy, damage, extra_text="", damage_type="physical"):
+        race_bonus = get_wounded_damage_bonus(attacker)
+        if race_bonus > 0:
+            damage += race_bonus
+            extra_text = " Battle Hunger drives the blow harder." + extra_text
         if enemy["marked_turns"] > 0:
             damage += 4
         if enemy.get("shielded"):
@@ -2122,6 +2174,11 @@ class BraveEncounter(Script):
         return True
 
     def _apply_bleed(self, target, turns, damage):
+        turns = adjust_effect_turns(target, "bleed", turns)
+        damage = adjust_effect_damage(target, "bleed", damage)
+        if turns <= 0 or damage <= 0:
+            self.obj.msg_contents(f"{target.key} shrugs off the bleeding cut.")
+            return
         state = self._get_participant_state(target)
         state["bleed_turns"] = max(state.get("bleed_turns", 0), turns)
         state["bleed_damage"] = max(state.get("bleed_damage", 0), damage)
@@ -2136,6 +2193,12 @@ class BraveEncounter(Script):
         self.obj.msg_contents(message or f"|m{target.key} is cursed!|n")
 
     def _apply_poison(self, target, turns, damage, accuracy_penalty, message=None):
+        turns = adjust_effect_turns(target, "poison", turns)
+        damage = adjust_effect_damage(target, "poison", damage)
+        accuracy_penalty = adjust_effect_penalty(target, "poison", "accuracy_penalty", accuracy_penalty)
+        if turns <= 0:
+            self.obj.msg_contents(f"{target.key} shrugs off the poison.")
+            return
         state = self._get_participant_state(target)
         state["poison_turns"] = max(state.get("poison_turns", 0), turns)
         state["poison_damage"] = max(state.get("poison_damage", 0), damage)
@@ -2156,6 +2219,12 @@ class BraveEncounter(Script):
         self.obj.msg_contents(message or f"|g{enemy['key']} is poisoned!|n")
 
     def _apply_snare(self, target, turns, accuracy_penalty, dodge_penalty):
+        turns = adjust_effect_turns(target, "snare", turns)
+        accuracy_penalty = adjust_effect_penalty(target, "snare", "accuracy_penalty", accuracy_penalty)
+        dodge_penalty = adjust_effect_penalty(target, "snare", "dodge_penalty", dodge_penalty)
+        if turns <= 0:
+            self.obj.msg_contents(f"{target.key} slips clear before the snare can hold.")
+            return
         state = self._get_participant_state(target)
         state["snare_turns"] = max(state.get("snare_turns", 0), turns)
         state["snare_accuracy_penalty"] = max(state.get("snare_accuracy_penalty", 0), accuracy_penalty)
@@ -2870,6 +2939,7 @@ class BraveEncounter(Script):
                 )
             else:
                 self.obj.msg_contents(f"|r{enemy['key']}'s {action_label} lands clean.|n")
+        damage = max(1, damage - get_incoming_damage_reduction(target))
         resources = dict(target.db.brave_resources or {})
         resources["hp"] = max(0, resources["hp"] - damage)
         target.db.brave_resources = resources
@@ -2890,6 +2960,30 @@ class BraveEncounter(Script):
             element=_enemy_damage_type(enemy),
             lunge=True,
         )
+        sacred_turns = int(state.get("sacred_aegis_turns", 0) or 0)
+        sacred_source = self._get_character(state.get("sacred_aegis_source")) if state.get("sacred_aegis_source") else None
+        if (
+            damage > 0
+            and sacred_turns > 0
+            and sacred_source
+            and sacred_source in self.get_active_participants()
+            and enemy.get("hp", 0) > 0
+        ):
+            source_derived = self._get_effective_derived(sacred_source)
+            retaliation = max(
+                1,
+                int(state.get("sacred_aegis_power", 0) or 0) + max(1, source_derived.get("spell_power", 0) // 4) - 1,
+            )
+            if enemy.get("judged_turns", 0) > 0:
+                retaliation += 1
+            self._damage_enemy(
+                sacred_source,
+                enemy,
+                retaliation,
+                extra_text=f" {sacred_source.key}'s ward answers the blow.",
+                damage_type="holy",
+            )
+            self._record_participant_contribution(sacred_source, meaningful=True, utility=1)
 
         if enemy["template_key"] == "ruk_fence_cutter" and resources["hp"] > 0 and random.randint(1, 100) <= 55:
             self._apply_bleed(target, turns=2, damage=4)
@@ -2964,6 +3058,17 @@ class BraveEncounter(Script):
         for participant_key, state in states.items():
             state["guard"] = 0
             self._clear_reaction_state(state)
+            if state.get("sacred_aegis_turns", 0) > 0:
+                state["sacred_aegis_turns"] = max(0, state["sacred_aegis_turns"] - 1)
+                if state["sacred_aegis_turns"] <= 0:
+                    state["sacred_aegis_source"] = None
+                    state["sacred_aegis_power"] = 0
+            if state.get("grove_turns", 0) > 0:
+                state["grove_turns"] = max(0, state["grove_turns"] - 1)
+            if state.get("primal_form_turns", 0) > 0:
+                state["primal_form_turns"] = max(0, state["primal_form_turns"] - 1)
+                if state["primal_form_turns"] <= 0:
+                    state["primal_form"] = None
             if state.get("feint_turns", 0) > 0:
                 state["feint_turns"] = max(0, state["feint_turns"] - 1)
                 if state["feint_turns"] <= 0:
@@ -2976,6 +3081,7 @@ class BraveEncounter(Script):
         enemies = []
         for enemy in self.db.enemies or []:
             enemy["marked_turns"] = max(0, enemy["marked_turns"] - 1)
+            enemy["judged_turns"] = max(0, enemy.get("judged_turns", 0) - 1)
             enemies.append(enemy)
         self.db.enemies = enemies
 

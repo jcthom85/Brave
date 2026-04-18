@@ -14,9 +14,11 @@ from world.data.items import (
     get_item_use_profile,
     match_inventory_item,
 )
+from world.race_world_hooks import adjust_fishing_weight, get_fishing_suffix
 from world.screen_text import format_entry, render_screen
 
 CONTENT = get_content_registry()
+CHARACTER_CONTENT = CONTENT.characters
 SYSTEMS_CONTENT = CONTENT.systems
 COOKING_RECIPES = SYSTEMS_CONTENT.cooking_recipes
 COZY_BONUS = SYSTEMS_CONTENT.cozy_bonus
@@ -263,12 +265,14 @@ def reel_line(character):
 
     template_id = fish_entry["item"]
     weight = round(uniform(*fish_entry["weight"]), 1)
+    weight = adjust_fishing_weight(character, weight)
     character.add_item_to_inventory(template_id, 1)
     record = _award_catch_record(character, template_id, weight)
 
     message = (
         f"You land a |w{ITEM_TEMPLATES[template_id]['name']}|n weighing |w{_format_weight(weight)}|n."
     )
+    message += get_fishing_suffix(character)
     if record:
         message += " It is your new best catch on the log."
     return True, message
@@ -452,6 +456,7 @@ def _consume_item_by_template(character, template_id, *, context="explore", cozy
     cleanse_result = None
     guard_amount = 0
     restore_total = 0
+    learned_ability_name = None
     target_type = use.get("target", "self")
     if target_type == "enemy":
         resolved_target = target if isinstance(target, Mapping) else None
@@ -469,6 +474,55 @@ def _consume_item_by_template(character, template_id, *, context="explore", cozy
 
     if effect_type == "damage" and (not encounter or not isinstance(resolved_target, Mapping)):
         return False, "That item can't be used meaningfully here right now.", None
+
+    if effect_type == "teach_spell":
+        required_class = str(use.get("required_class") or "mage").lower()
+        if str(getattr(getattr(character, "db", None), "brave_class", "") or "").lower() != required_class:
+            return False, f"Only a {required_class.title()} can make sense of that spellbook.", None
+        ability_key = CHARACTER_CONTENT.ability_key(use.get("learn_ability"))
+        ability = CHARACTER_CONTENT.ability_library.get(ability_key) or {}
+        if not ability:
+            return False, "The spellbook's notation is incomplete.", None
+        learn = getattr(character, "learn_ability", None)
+        if callable(learn):
+            ok, learn_message = learn(ability_key)
+            if not ok:
+                return False, learn_message, None
+        else:
+            learned = [str(key).lower() for key in (getattr(getattr(character, "db", None), "brave_learned_abilities", None) or [])]
+            if ability_key in learned:
+                return False, f"You already know {ability.get('name', 'that technique')}.", None
+            learned.append(ability_key)
+            character.db.brave_learned_abilities = learned
+        learned_ability_name = ability.get("name", ability_key.replace("_", " ").title())
+
+    if effect_type == "unlock_companion":
+        required_class = str(use.get("required_class") or "ranger").lower()
+        if str(getattr(getattr(character, "db", None), "brave_class", "") or "").lower() != required_class:
+            return False, f"Only a {required_class.title()} can forge that companion bond.", None
+        companion_key = str(use.get("unlock_companion") or "").lower()
+        unlock = getattr(character, "unlock_companion", None)
+        if callable(unlock):
+            ok, unlock_message = unlock(companion_key)
+            if not ok:
+                return False, unlock_message, None
+            learned_ability_name = unlock_message
+        else:
+            return False, "That bond cannot be formed right now.", None
+
+    if effect_type == "unlock_oath":
+        required_class = str(use.get("required_class") or "paladin").lower()
+        if str(getattr(getattr(character, "db", None), "brave_class", "") or "").lower() != required_class:
+            return False, f"Only a {required_class.title()} can swear that oath.", None
+        oath_key = str(use.get("unlock_oath") or "").lower()
+        unlock = getattr(character, "unlock_oath", None)
+        if callable(unlock):
+            ok, unlock_message = unlock(oath_key)
+            if not ok:
+                return False, unlock_message, None
+            learned_ability_name = unlock_message
+        else:
+            return False, "That vow cannot be taken right now.", None
 
     if target_type == "self" and resolved_target != character:
         return False, "That item can only be used on yourself.", None
@@ -556,6 +610,10 @@ def _consume_item_by_template(character, template_id, *, context="explore", cozy
         public_message = f"{character.key} uses {item['name']}."
     if bonus_text:
         player_message += f" Bonus: {bonus_text}."
+    if effect_type in {"unlock_companion", "unlock_oath"}:
+        player_message += " " + learned_ability_name
+    elif learned_ability_name:
+        player_message += f" You commit |w{learned_ability_name}|n to memory."
     if cleanse_result:
         player_message += f" It clears {cleanse_result}."
     if guard_amount:
@@ -570,6 +628,7 @@ def _consume_item_by_template(character, template_id, *, context="explore", cozy
         "public_message": public_message,
         "cleanse_result": cleanse_result,
         "guard_amount": guard_amount,
+        "learned_ability_name": learned_ability_name,
         "restore_total": restore_total,
     }
 

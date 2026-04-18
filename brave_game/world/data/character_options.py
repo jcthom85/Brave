@@ -39,16 +39,16 @@ RACES = {
         "summary": "Hardy, disciplined, and stubborn.",
         "bonuses": {"strength": 1, "spirit": 1, "vitality": 3},
     },
-    "halfling": {
-        "name": "Halfling",
+    "mosskin": {
+        "name": "Mosskin",
         "perk": "Fortune's Step",
-        "summary": "Quick, lucky, and easy to underestimate.",
+        "summary": "Marsh-touched wanderers who move lightly and survive what should hold them.",
         "bonuses": {"agility": 2, "intellect": 1, "vitality": 1},
     },
-    "half_orc": {
-        "name": "Half-Orc",
+    "ashborn": {
+        "name": "Ashborn",
         "perk": "Battle Hunger",
-        "summary": "Fierce, intimidating, and strong.",
+        "summary": "Cinder-marked folk who press harder when the fight turns cruel.",
         "bonuses": {"strength": 3, "vitality": 2},
     },
 }

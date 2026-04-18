@@ -4,6 +4,7 @@ from world.activities import format_catch_log, format_kitchen_hearth_text, forma
 from world.commerce import format_shop_bonus, get_sellable_entries, get_shop_bonus
 from world.content import get_content_registry
 from world.forging import get_forge_entries
+from world.race_world_hooks import get_extra_read_insight
 from world.resonance import format_portal_plaque_text
 from world.trophies import format_trophy_case_text
 from world.tutorial import get_tutorial_entity_response
@@ -244,8 +245,15 @@ def get_entity_response(character, entity, action):
 
     if action == "read":
         handler = DYNAMIC_READ_HANDLERS.get(entity_id)
+        extra = get_extra_read_insight(character, entity_id)
         if handler:
-            return handler(character)
-        return STATIC_READ_RESPONSES.get(entity_id)
+            response = handler(character)
+            if extra:
+                response += "\n\n" + extra
+            return response
+        response = STATIC_READ_RESPONSES.get(entity_id)
+        if response and extra:
+            response += "\n\n" + extra
+        return response
 
     return None

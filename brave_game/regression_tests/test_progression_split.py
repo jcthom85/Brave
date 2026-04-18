@@ -204,9 +204,10 @@ class ProgressionSplitTests(unittest.TestCase):
         actions, passives, unknown = split_unlocked_abilities("druid", 10)
 
         self.assertIn("Entangling Roots", actions)
+        self.assertIn("Wolf Form", actions)
+        self.assertIn("Bear Form", actions)
         self.assertIn("Wrath of the Grove", actions)
-        self.assertIn("Wild Grace", passives)
-        self.assertIn("Nature's Memory", passives)
+        self.assertEqual([], passives)
         self.assertEqual([], unknown)
 
     def test_passive_bonuses_apply_during_stat_recalculation(self):
@@ -214,7 +215,7 @@ class ProgressionSplitTests(unittest.TestCase):
 
         _primary, derived = Character.recalculate_stats(character, restore=True)
 
-        self.assertEqual(221, derived["max_hp"])
+        self.assertEqual(229, derived["max_hp"])
         self.assertEqual(35, derived["armor"])
         self.assertEqual(21, derived["threat"])
 

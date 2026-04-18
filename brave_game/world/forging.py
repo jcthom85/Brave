@@ -2,6 +2,7 @@
 
 from world.content import get_content_registry
 from world.data.items import EQUIPMENT_SLOTS, ITEM_TEMPLATES, format_bonus_summary
+from world.race_world_hooks import get_forge_silver_discount
 
 CONTENT = get_content_registry()
 SYSTEMS_CONTENT = CONTENT.systems
@@ -233,7 +234,8 @@ def get_forge_entries(character):
         result_template_id = recipe["result"]
         result_item = ITEM_TEMPLATES.get(result_template_id, {})
         materials = []
-        ready = (character.db.brave_silver or 0) >= recipe["silver"]
+        silver_cost = max(0, int(recipe["silver"] or 0) - get_forge_silver_discount(character))
+        ready = (character.db.brave_silver or 0) >= silver_cost
 
         for material_id, required in recipe.get("materials", {}).items():
             owned = character.get_inventory_quantity(material_id)
@@ -256,7 +258,7 @@ def get_forge_entries(character):
                 "source_name": source_item.get("name", template_id),
                 "result_template_id": result_template_id,
                 "result_name": result_item.get("name", result_template_id),
-                "silver_cost": recipe["silver"],
+                "silver_cost": silver_cost,
                 "silver_on_hand": character.db.brave_silver or 0,
                 "materials": materials,
                 "ready": ready,
@@ -281,7 +283,7 @@ def apply_forge_upgrade(character, source_template_id):
     if equipped != source_template_id:
         return False, "You need to be wearing the piece you want Torren to rework."
 
-    silver_cost = recipe["silver"]
+    silver_cost = max(0, int(recipe["silver"] or 0) - get_forge_silver_discount(character))
     if (character.db.brave_silver or 0) < silver_cost:
         return False, f"You need {silver_cost} silver for that rework."
 

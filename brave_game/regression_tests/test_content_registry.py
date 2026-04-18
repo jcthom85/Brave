@@ -78,6 +78,22 @@ class ContentRegistryTests(unittest.TestCase):
         self.assertEqual(payload["quest_regions"], registry.quests.quest_regions)
         self.assertEqual(payload["quests"]["practice_makes_heroes"]["title"], registry.quests.get("practice_makes_heroes")["title"])
 
+    def test_class_progression_rewards_are_anchored_in_live_quest_content(self):
+        registry = get_content_registry()
+        expected_rewards = {
+            "roadside_howls": "hawkcaller_whistle",
+            "ruk_the_fence_cutter": "boar_keeper_charm",
+            "bridgework_for_joss": "stormlance_codex",
+            "herbs_for_sister_maybelle": "crowfeather_rite",
+            "lanterns_at_dusk": "mercy_votive",
+            "the_knight_without_rest": "cinder_vigil_tablet",
+            "miretooths_claim": "serpent_scale_manual",
+        }
+
+        for quest_key, item_id in expected_rewards.items():
+            rewards = registry.quests.get(quest_key).get("rewards", {}).get("items", [])
+            self.assertIn(item_id, [reward.get("item") for reward in rewards], msg=quest_key)
+
     def test_world_registry_loads_from_pack_file(self):
         registry = get_content_registry()
         pack_path = Path(registry.world.source_path)

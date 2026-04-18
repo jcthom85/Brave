@@ -33,6 +33,7 @@ from world.commerce import (
 from world.data.items import ITEM_TEMPLATES
 from world.forging import apply_forge_upgrade, get_forge_entries, is_forge_room
 from world.interactions import get_entity_response
+from world.rogue_ops import attempt_theft, get_available_steal_targets
 from world.screen_text import format_entry, render_screen, wrap_text
 
 CONTENT = get_content_registry()
@@ -418,12 +419,17 @@ class CmdPray(BraveCharacterCommand):
             applied = True
 
         bonus_text = _format_context_bonus_summary(blessing.get("bonuses", {}), character)
+        rite = dict(blessing.get("rite") or {})
         lines = [
             *wrap_text("The Dawn Bell answers with a steadier note than sound alone should manage.", indent="  "),
             *wrap_text(blessing.get("duration", "Until your next encounter ends."), indent="  "),
         ]
         if bonus_text:
             lines.extend(wrap_text("Bonuses: " + bonus_text, indent="  "))
+        if rite.get("name"):
+            lines.extend(wrap_text(f"Class rite: {rite['name']}.", indent="  "))
+        if rite.get("summary"):
+            lines.extend(wrap_text(rite["summary"], indent="  "))
 
         screen = render_screen(
             "Dawn Bell",
@@ -498,6 +504,88 @@ class CmdTalk(BraveCharacterCommand):
             sections=[("What They Say", _wrap_paragraphs(response))],
         )
         self.scene_msg(screen, panel=build_talk_panel(target), view=build_talk_view(target, response))
+
+
+class CmdSteal(BraveCharacterCommand):
+    """
+    Work a Rogue-only theft angle on a local NPC.
+
+    Usage:
+      steal
+      steal <name>
+
+    Lists authored local marks or works one clean lift from a nearby NPC. Each authored target can only be worked once.
+    """
+
+    key = "steal"
+    aliases = ["pickpocket", "lift"]
+    help_category = "Brave"
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+        if getattr(character.db, "brave_class", None) != "rogue":
+            self.msg("Only a Rogue knows how to work a clean lift here.")
+            return
+
+        encounter = self.get_encounter(character, require=False)
+        if encounter and encounter.is_participant(character):
+            self.msg("This is not the moment for fine finger work.")
+            return
+
+        npcs = self.get_local_entities(character, kind="npc")
+        marks = get_available_steal_targets(npcs)
+        theft_log = dict(getattr(character.db, "brave_rogue_theft_log", None) or {})
+
+        if not self.args:
+            if not marks:
+                self.msg("No one here offers an obvious clean lift.")
+                return
+            mark_blocks = []
+            for entity, target in marks:
+                entity_id = getattr(getattr(entity, "db", None), "brave_entity_id", None)
+                details = ["Already worked" if theft_log.get(entity_id) else "Open angle"]
+                mark_blocks.append(format_entry(entity.key, details=details, summary=target.get("summary")))
+            screen = render_screen(
+                "Illicit Access",
+                subtitle="You size up the room for easy hands, bad habits, and anyone carrying more than they guard.",
+                meta=[f"Worked marks: {len(theft_log)}"],
+                sections=[
+                    ("Possible Marks", _stack_blocks(mark_blocks)),
+                    ("How To Lift", wrap_text("Use |wsteal <name>|n to work one authored theft angle.", indent="  ")),
+                ],
+            )
+            self.scene_msg(screen)
+            return
+
+        target, _npcs = self.find_local_entity(character, self.args.strip(), kind="npc")
+        if isinstance(target, list):
+            self.msg("Be more specific. That could mean: " + ", ".join(obj.key for obj in target))
+            return
+        if not target:
+            if marks:
+                self.msg("No authored mark here matches that name. You can work: " + ", ".join(entity.key for entity, _ in marks))
+            else:
+                self.msg("No one here offers an obvious clean lift.")
+            return
+
+        ok, message, result = attempt_theft(character, target)
+        if not ok:
+            self.msg(message)
+            return
+
+        reward_lines = [message]
+        rewards = list((result or {}).get("rewards", []) or [])
+        if rewards:
+            reward_lines.append("Take: " + ", ".join(rewards))
+        screen = render_screen(
+            result.get("target_name", target.key),
+            subtitle="Clean Lift",
+            meta=[f"Worked marks: {len(character.db.brave_rogue_theft_log or {})}"],
+            sections=[("Haul", _wrap_paragraphs("\n".join(reward_lines)))],
+        )
+        self.scene_msg(screen)
 
 
 class CmdRead(BraveCharacterCommand):

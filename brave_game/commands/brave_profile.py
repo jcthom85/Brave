@@ -4,6 +4,7 @@ from world.browser_panels import build_build_panel, build_gear_panel, build_pack
 from world.browser_views import build_gear_view, build_pack_view, build_quests_view, build_sheet_view
 from world.chapel import get_active_blessing
 from world.content import get_content_registry
+from world.ranger_companions import get_companion_name
 
 
 from world.questing import clear_tracked_quest, get_tracked_quest, resolve_active_quest_query, set_tracked_quest
@@ -602,6 +603,126 @@ class CmdPack(BraveCharacterCommand):
         )
         self.scene_msg(screen, panel=build_pack_panel(character), view=build_pack_view(character))
         record_command_event(character, "pack")
+
+
+class CmdCompanion(BraveCharacterCommand):
+    """
+    Review or change your active ranger companion.
+
+    Usage:
+      companion
+      companion <name>
+
+    Rangers can review bonded companions and choose which one is active.
+    """
+
+    key = "companion"
+    aliases = ["pet", "bond"]
+    help_category = "Brave"
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+        if character.db.brave_class != "ranger":
+            self.msg("Only Rangers manage an active battle companion.")
+            return
+
+        if not self.args:
+            active = dict(getattr(character, "get_active_companion", lambda: {})() or {})
+            unlocked = list(getattr(character, "get_unlocked_companions", lambda: [])() or [])
+            blocks = []
+            for companion in unlocked:
+                details = ["Active" if companion.get("key") == active.get("key") else "Bonded"]
+                blocks.append(
+                    format_entry(
+                        companion.get("name", "Companion"),
+                        details=details,
+                        summary=companion.get("summary"),
+                    )
+                )
+            screen = render_screen(
+                "Ranger Companion",
+                subtitle="Your bonded companion shapes how the hunt feels in battle.",
+                sections=[("Bonded Companions", _stack_blocks(blocks) if blocks else ["  No bonded companions yet."])],
+            )
+            self.scene_msg(screen, view=build_sheet_view(character), panel=build_sheet_panel(character))
+            return
+
+        query = _normalize_query(self.args)
+        match_key = None
+        for companion in getattr(character, "get_unlocked_companions", lambda: [])():
+            companion_key = _normalize_query(companion.get("key"))
+            name_key = _normalize_query(companion.get("name"))
+            if query in {companion_key, name_key}:
+                match_key = companion.get("key")
+                break
+        if not match_key:
+            self.msg("No bonded companion matches that name.")
+            return
+
+        ok, message = character.set_active_companion(match_key)
+        self.msg(message)
+
+
+class CmdOath(BraveCharacterCommand):
+    """
+    Review or change your active Paladin oath.
+
+    Usage:
+      oath
+      oath <name>
+
+    Paladins can review sworn oaths and choose which one currently guides their chapel vigil.
+    """
+
+    key = "oath"
+    aliases = ["vow", "vigil"]
+    help_category = "Brave"
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+        if character.db.brave_class != "paladin":
+            self.msg("Only Paladins keep a sworn active oath.")
+            return
+
+        if not self.args:
+            active = dict(getattr(character, "get_active_oath", lambda: {})() or {})
+            unlocked = list(getattr(character, "get_unlocked_oaths", lambda: [])() or [])
+            blocks = []
+            for oath in unlocked:
+                details = ["Active" if oath.get("key") == active.get("key") else "Sworn"]
+                blocks.append(
+                    format_entry(
+                        oath.get("name", "Oath"),
+                        details=details,
+                        summary=oath.get("summary"),
+                    )
+                )
+            screen = render_screen(
+                "Sacred Oath",
+                subtitle="Your active oath changes how the Dawn Bell and future holy relics answer your vigil.",
+                sections=[("Sworn Oaths", _stack_blocks(blocks) if blocks else ["  No sworn oaths yet."])],
+            )
+            self.scene_msg(screen, view=build_sheet_view(character), panel=build_sheet_panel(character))
+            return
+
+        query = _normalize_query(self.args)
+        match_key = None
+        for oath in getattr(character, "get_unlocked_oaths", lambda: [])():
+            oath_key = _normalize_query(oath.get("key"))
+            name_key = _normalize_query(oath.get("name"))
+            if query in {oath_key, name_key}:
+                match_key = oath.get("key")
+                break
+        if not match_key:
+            self.msg("No sworn oath matches that name.")
+            return
+
+        ok, message = character.set_active_oath(match_key)
+        self.msg(message)
 
 
 class CmdQuests(BraveCharacterCommand):
