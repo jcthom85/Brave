@@ -1,6 +1,7 @@
 import os
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import django
 
@@ -17,7 +18,7 @@ class DummyFighter:
     def __init__(self, char_id, key, class_key):
         self.id = char_id
         self.key = key
-        self.location = object()
+        self.location = SimpleNamespace(db=SimpleNamespace(brave_resonance="fantasy"))
         self.db = SimpleNamespace(
             brave_class=class_key,
             brave_level=10,
@@ -32,12 +33,84 @@ class DummyFighter:
             },
             brave_active_companion="marsh_hound" if class_key == "ranger" else "",
         )
+        self._mastery = {}
 
     def get_active_companion(self):
         return get_companion(self.db.brave_active_companion)
 
+    def get_ability_mastery_rank(self, ability_key):
+        return int(self._mastery.get(ability_key, 1) or 1)
+
+    def award_companion_bond_xp(self, companion_key, amount):
+        awards = list(getattr(self, "_bond_awards", []))
+        awards.append((companion_key, amount))
+        self._bond_awards = awards
+        return [f"{companion_key} +{amount}"]
+
 
 class ClassExecutionTests(unittest.TestCase):
+    def test_player_ability_announces_name_before_resolution(self):
+        messages = []
+        cleric = DummyFighter(1, "Tamsin", "cleric")
+        ally = DummyFighter(2, "Peep", "warrior")
+        encounter = SimpleNamespace(
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: messages.append(message)),
+            _announce_combat_action=lambda actor, label: BraveEncounter._announce_combat_action(encounter, actor, label),
+            _get_participant_target=lambda target_id: ally if target_id == ally.id else None,
+            _spend_resource=lambda character, resource, amount: None,
+            _get_effective_derived=lambda character: dict(character.db.brave_derived_stats),
+            get_active_participants=lambda: [cleric, ally],
+            get_active_enemies=lambda: [],
+        )
+
+        with patch("typeclasses.scripts.execute_combat_ability") as execute_mock:
+            BraveEncounter._execute_ability(encounter, cleric, {"ability": "heal", "target": ally.id})
+
+        self.assertTrue(execute_mock.called)
+        self.assertTrue(messages[0].startswith("|cTamsin uses Heal!|n"))
+
+    def test_companion_turn_announces_named_move(self):
+        messages = []
+        companion = {"id": "c1", "key": "Marsh Hound", "companion_key": "marsh_hound"}
+        enemy = {"id": "e1", "key": "Raider", "dodge": 0, "armor": 0, "hp": 20, "marked_turns": 0}
+        encounter = SimpleNamespace(
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: messages.append(message)),
+            _announce_combat_action=lambda actor, label: BraveEncounter._announce_combat_action(encounter, actor, label),
+            _choose_companion_target=lambda current: enemy,
+            _get_effective_derived=lambda current: {"accuracy": 10, "attack_power": 10},
+            _roll_hit=lambda accuracy, dodge: False,
+            _emit_miss_fx=lambda source, target: None,
+            _add_threat=lambda actor, amount: None,
+        )
+
+        BraveEncounter._execute_companion_turn(encounter, companion)
+
+        self.assertTrue(messages[0].startswith("|cMarsh Hound uses Hamstring Bite!|n"))
+        self.assertEqual("Marsh Hound misses Raider.", messages[1])
+
+    def test_enemy_special_announces_move_name(self):
+        messages = []
+        target = DummyFighter(2, "Peep", "warrior")
+        enemy = {"id": "e1", "template_key": "tower_archer", "key": "Tower Archer", "accuracy": 10, "attack_power": 8}
+        encounter = SimpleNamespace(
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: messages.append(message)),
+            _announce_combat_action=lambda actor, label: BraveEncounter._announce_combat_action(encounter, actor, label),
+            _enemy_reaction_state=lambda current: {"telegraphed": True, "label": "Aimed Shot"},
+            _handle_enemy_specials=lambda current: current,
+            get_active_enemies=lambda: [enemy],
+            _choose_enemy_target=lambda current=None: target,
+            _get_participant_state=lambda actor: {"reaction_redirect_to": None, "reaction_label": None, "reaction_guard": 0, "guard": 0, "sacred_aegis_turns": 0},
+            _get_participant_target=lambda target_id: None,
+            _get_effective_derived=lambda actor: dict(actor.db.brave_derived_stats),
+            _roll_hit=lambda accuracy, dodge: False,
+            _emit_miss_fx=lambda source, target: None,
+        )
+
+        BraveEncounter._execute_enemy_turn(encounter, enemy)
+
+        self.assertTrue(messages[0].startswith("|cTower Archer uses Aimed Shot!|n"))
+        self.assertEqual("Tower Archer misses Peep.", messages[1])
+
     def test_warrior_strike_gains_control_bonus_on_marked_target(self):
         warrior = DummyFighter(1, "Rook", "warrior")
         enemy = {"id": "e1", "key": "Raider", "armor": 2, "dodge": 0, "hp": 40, "marked_turns": 2, "bound_turns": 0}
@@ -54,6 +127,24 @@ class ClassExecutionTests(unittest.TestCase):
 
         self.assertEqual(6, recorded["damage"])
         self.assertIn("controlled target", recorded["extra_text"])
+
+    def test_mastered_firebolt_hits_harder_than_base_rank(self):
+        mage = DummyFighter(1, "Nyra", "mage")
+        enemy = {"id": "e1", "key": "Raider", "armor": 0, "dodge": 0, "hp": 30, "marked_turns": 0, "bound_turns": 0}
+        hits = []
+        encounter = SimpleNamespace(
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: None),
+            _roll_hit=lambda accuracy, dodge: True,
+            _spell_damage=lambda spell_power, armor, bonus=0: spell_power + bonus,
+            _damage_enemy=lambda attacker, target, damage, extra_text="", damage_type="fire": hits.append(damage),
+            _add_threat=lambda character, amount: None,
+        )
+
+        execute_combat_ability(encounter, mage, "firebolt", "Firebolt", enemy, {"accuracy": 10, "spell_power": 12}, 10, [mage], [enemy])
+        mage._mastery["firebolt"] = 3
+        execute_combat_ability(encounter, mage, "firebolt", "Firebolt", enemy, {"accuracy": 10, "spell_power": 12}, 10, [mage], [enemy])
+
+        self.assertGreater(hits[1], hits[0])
 
     def test_cleric_heal_scales_up_for_low_hp_target(self):
         cleric = DummyFighter(1, "Tamsin", "cleric")
@@ -120,6 +211,30 @@ class ClassExecutionTests(unittest.TestCase):
 
         self.assertEqual(2, enemy["bound_turns"])
         self.assertEqual(3, recorded["damage"])
+
+    def test_companion_bond_progress_is_awarded_from_meaningful_companion_fight(self):
+        ranger = DummyFighter(1, "Kest", "ranger")
+        encounter = SimpleNamespace(
+            db=SimpleNamespace(
+                participant_contributions={
+                    "c1": {
+                        "owner_id": 1,
+                        "companion_key": "marsh_hound",
+                        "companion_name": "Marsh Hound",
+                        "meaningful_actions": 2,
+                        "damage_done": 12,
+                        "utility_points": 0,
+                    }
+                }
+            ),
+            _get_character=lambda dbref: ranger if dbref == 1 else None,
+            _participant_reward_eligible=lambda character: True,
+        )
+
+        progress = BraveEncounter._award_companion_bond_progress(encounter)
+
+        self.assertEqual([("marsh_hound", 3)], getattr(ranger, "_bond_awards", []))
+        self.assertIn("Marsh Hound bond +3 XP.", progress[1][0])
 
     def test_rogue_backstab_gains_openings_from_bleed_and_poison(self):
         rogue = DummyFighter(1, "Vale", "rogue")

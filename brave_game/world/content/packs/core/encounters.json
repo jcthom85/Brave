@@ -55,6 +55,10 @@
         {
           "chance": 0.3,
           "item": "tower_arrowhead"
+        },
+        {
+          "chance": 0.14,
+          "item": "latchwire_ward_pattern"
         }
       ],
       "max_hp": 58,
@@ -86,6 +90,10 @@
         {
           "chance": 0.7,
           "item": "barrow_relic"
+        },
+        {
+          "chance": 0.16,
+          "item": "purity_salts_formula"
         }
       ],
       "max_hp": 40,
@@ -115,6 +123,10 @@
         {
           "chance": 0.85,
           "item": "fen_resin_clot"
+        },
+        {
+          "chance": 0.55,
+          "item": "marsh_root"
         }
       ],
       "max_hp": 104,
@@ -185,6 +197,7 @@
         }
       ],
       "max_hp": 188,
+      "gender": "male",
       "name": "Captain Varn Blackreed",
       "silver": [
         18,
@@ -301,6 +314,10 @@
         {
           "chance": 0.35,
           "item": "silt_hook"
+        },
+        {
+          "chance": 0.12,
+          "item": "fenlight_talisman_pattern"
         }
       ],
       "max_hp": 114,
@@ -371,6 +388,7 @@
         }
       ],
       "max_hp": 146,
+      "gender": "male",
       "name": "Foreman Coilback",
       "silver": [
         14,
@@ -465,6 +483,10 @@
         {
           "chance": 0.25,
           "item": "road_charm"
+        },
+        {
+          "chance": 0.2,
+          "item": "latchwire_ward_pattern"
         }
       ],
       "max_hp": 34,
@@ -494,6 +516,10 @@
         {
           "chance": 0.35,
           "item": "goblin_knife"
+        },
+        {
+          "chance": 0.16,
+          "item": "veskas_pitchfire_pattern"
         }
       ],
       "max_hp": 60,
@@ -619,9 +645,14 @@
         {
           "chance": 1.0,
           "item": "hexbone_charm"
+        },
+        {
+          "chance": 1.0,
+          "item": "grease_stained_supper_note"
         }
       ],
       "max_hp": 226,
+      "gender": "male",
       "name": "Grubnak the Pot-King",
       "silver": [
         22,
@@ -695,6 +726,10 @@
         {
           "chance": 0.2,
           "item": "ward_iron_rivet"
+        },
+        {
+          "chance": 0.14,
+          "item": "lockfin_skillet_note"
         }
       ],
       "max_hp": 72,
@@ -831,6 +866,10 @@
         {
           "chance": 0.2,
           "item": "briar_heart"
+        },
+        {
+          "chance": 0.5,
+          "item": "hedge_mushroom"
         }
       ],
       "max_hp": 44,
@@ -1025,6 +1064,7 @@
         }
       ],
       "max_hp": 84,
+      "gender": "male",
       "name": "Ruk the Fence-Cutter",
       "silver": [
         10,
@@ -1175,6 +1215,7 @@
         }
       ],
       "max_hp": 168,
+      "gender": "male",
       "name": "Sir Edric the Restless",
       "silver": [
         14,

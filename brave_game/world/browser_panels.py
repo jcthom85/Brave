@@ -1,7 +1,9 @@
 """Browser-only companion panel helpers for the Brave webclient."""
 
 import time
+from collections.abc import Mapping
 
+from evennia.utils.ansi import strip_ansi
 from world.ability_icons import get_ability_icon_name, get_passive_icon_name
 from world.combat_atb import render_atb_state
 from world.character_icons import get_class_icon, get_race_icon
@@ -59,15 +61,7 @@ CHARGEN_STEP_META = {
         "title_icon": "person_add",
         "guidance": [
             ("review your draft and open slots", "overview"),
-            ("pick a name, race, and class", "checklist"),
-        ],
-    },
-    "menunode_choose_name": {
-        "title": "Choose a Name",
-        "title_icon": "badge",
-        "guidance": [
-            ("enter a unique name", "edit_note"),
-            ("letters, spaces, apostrophes, and hyphens only", "rule"),
+            ("pick a race, class, and name", "checklist"),
         ],
     },
     "menunode_choose_race": {
@@ -86,6 +80,14 @@ CHARGEN_STEP_META = {
             ("class sets your starter role and kit", "shield"),
         ],
     },
+    "menunode_choose_name": {
+        "title": "Choose a Name",
+        "title_icon": "badge",
+        "guidance": [
+            ("enter a unique name for this finished build", "edit_note"),
+            ("letters, spaces, apostrophes, and hyphens only", "rule"),
+        ],
+    },
     "menunode_confirm": {
         "title": "Confirm Character",
         "title_icon": "task_alt",
@@ -100,6 +102,29 @@ CHARGEN_STEP_META = {
 def _is_web_session(session):
     protocol = (getattr(session, "protocol_key", "") or "").lower()
     return protocol in WEB_PROTOCOLS
+
+
+def _plain_notice_text(text):
+    return strip_ansi(str(text or "")).replace("||", "|").strip()
+
+
+def _get_available_sessions(target):
+    sessions = getattr(target, "sessions", None)
+    if not sessions:
+        return []
+    if hasattr(sessions, "get"):
+        return list(sessions.get())
+    if hasattr(sessions, "all"):
+        return list(sessions.all())
+    return []
+
+
+def _get_non_web_sessions(target):
+    return [candidate for candidate in _get_available_sessions(target) if not _is_web_session(candidate)]
+
+
+def _get_web_sessions(target):
+    return [candidate for candidate in _get_available_sessions(target) if _is_web_session(candidate)]
 
 
 def send_webclient_event(target, session=None, **payload):
@@ -127,6 +152,110 @@ def send_webclient_event(target, session=None, **payload):
     web_sessions = [candidate for candidate in available if _is_web_session(candidate)]
     if web_sessions and hasattr(target, "msg"):
         target.msg(session=web_sessions, **payload)
+
+
+def send_browser_notice_event(
+    target,
+    message,
+    *,
+    title="Notice",
+    tone="muted",
+    icon=None,
+    duration_ms=None,
+    sticky=False,
+):
+    """Send a browser notice to web sessions and plain text to non-web sessions."""
+
+    plain_message = _plain_notice_text(message)
+    lines = [line for line in plain_message.splitlines() if line.strip()]
+    if lines:
+        payload = {
+            "title": title or "Notice",
+            "tone": tone or "muted",
+            "lines": lines,
+        }
+        if icon:
+            payload["icon"] = icon
+        if duration_ms is not None:
+            payload["duration_ms"] = max(0, int(duration_ms))
+        if sticky:
+            payload["sticky"] = True
+        web_sessions = _get_web_sessions(target)
+        if web_sessions and hasattr(target, "msg"):
+            target.msg(session=web_sessions, brave_notice=payload)
+
+    available = _get_available_sessions(target)
+    if not available:
+        if hasattr(target, "msg"):
+            target.msg(message)
+        return
+
+    non_web_sessions = _get_non_web_sessions(target)
+    if non_web_sessions and hasattr(target, "msg"):
+        target.msg(message, session=non_web_sessions)
+
+
+def send_text_to_non_web_sessions(target, text):
+    """Deliver plain text only to non-web sessions attached to a target."""
+
+    if not text:
+        return
+
+    available = _get_available_sessions(target)
+    if not available:
+        if hasattr(target, "msg"):
+            target.msg(text)
+        return
+
+    non_web_sessions = _get_non_web_sessions(target)
+    if non_web_sessions and hasattr(target, "msg"):
+        target.msg(text, session=non_web_sessions)
+
+
+def send_room_activity_event(target, text, *, cls="out"):
+    """Send exploration activity to web sessions and plain room text elsewhere."""
+
+    plain_text = _plain_notice_text(text)
+    if plain_text:
+        web_sessions = _get_web_sessions(target)
+        if web_sessions and hasattr(target, "msg"):
+            target.msg(session=web_sessions, brave_room_activity={"text": plain_text, "cls": cls or "out"})
+
+    non_web_sessions = _get_non_web_sessions(target)
+    if non_web_sessions and hasattr(target, "msg"):
+        target.msg(text, session=non_web_sessions)
+
+
+def broadcast_room_activity(room, text, *, exclude=None, cls="out"):
+    """Broadcast room activity without leaking raw text into the web scene pane."""
+
+    if not room or not text:
+        return
+
+    excluded = set(exclude or [])
+    for obj in getattr(room, "contents", []) or []:
+        if obj in excluded or not hasattr(obj, "msg") or not hasattr(obj, "sessions"):
+            continue
+        send_room_activity_event(obj, text, cls=cls)
+
+
+def broadcast_room_text_non_web(room, text, *, exclude=None):
+    """Broadcast plain room text only to non-web sessions."""
+
+    if not room or not text:
+        return
+
+    excluded = set(exclude or [])
+    contents = list(getattr(room, "contents", []) or [])
+    if not contents and hasattr(room, "msg_contents"):
+        kwargs = {"exclude": list(excluded)} if excluded else {}
+        room.msg_contents(text, **kwargs)
+        return
+
+    for obj in contents:
+        if obj in excluded or not hasattr(obj, "msg"):
+            continue
+        send_text_to_non_web_sessions(obj, text)
 
 
 def _chip(label, icon, tone=None):
@@ -669,6 +798,68 @@ def build_cook_panel(character):
     )
 
 
+def build_fishing_panel(character):
+    """Build the browser-side companion panel for the fishing view."""
+
+    from world.activities import get_selected_fishing_lure, get_selected_fishing_rod
+
+    rod = get_selected_fishing_rod(character)
+    lure = get_selected_fishing_lure(character)
+    chips = []
+    if rod:
+        chips.append(_chip(rod.get("name", "Rod"), "phishing", "accent"))
+    if lure:
+        chips.append(_chip(lure.get("name", "Lure"), "tune", "muted"))
+
+    return _make_panel(
+        "Town Activity",
+        "Tackle Roll",
+        eyebrow_icon="phishing",
+        title_icon="waves",
+        chips=chips,
+        sections=[
+            _section(
+                "Actions",
+                "menu",
+                [
+                    _item("fish cast", icon="phishing"),
+                    _item("fish borrow kit", icon="inventory_2"),
+                    _item("fish log", icon="menu_book"),
+                    _item("fish rod <rod>", icon="straighten"),
+                    _item("fish lure <lure>", icon="tune"),
+                    _item("reel", icon="hook"),
+                ],
+            )
+        ],
+    )
+
+
+def build_tinker_panel(character):
+    """Build the browser-side companion panel for the tinkering view."""
+
+    chips = []
+    if getattr(character, "db", None):
+        chips.append(_chip(f"{character.db.brave_silver or 0} silver", "payments", "muted"))
+
+    return _make_panel(
+        "Town Service",
+        "Workbench Ledger",
+        eyebrow_icon="build",
+        title_icon="handyman",
+        chips=chips,
+        sections=[
+            _section(
+                "Actions",
+                "menu",
+                [
+                    _item("tinker <design>", icon="build"),
+                    _item("pack", icon="inventory_2"),
+                ],
+            )
+        ],
+    )
+
+
 def build_party_panel(character, mode="status"):
     """Build the browser-side companion panel for party views."""
 
@@ -831,12 +1022,20 @@ def build_combat_panel(encounter):
     render_now_ms = int(round(time.time() * 1000))
     render_tick_ms = max(1, int(round(float(getattr(encounter, "interval", 1) or 1) * 1000)))
 
+    def participant_name(participant):
+        return str(participant.get("key") if isinstance(participant, Mapping) else participant.key)
+
+    def participant_icon(participant):
+        return str(participant.get("icon", "pets") if isinstance(participant, Mapping) else "person")
+
     def actor_atb_state(*, participant=None, enemy=None):
         getter = getattr(encounter, "_get_actor_atb_state", None)
         if not callable(getter):
             return {}
         try:
             if participant is not None:
+                if isinstance(participant, Mapping):
+                    return render_atb_state(getter(companion=participant) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
                 return render_atb_state(getter(character=participant) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
             if enemy is not None:
                 return render_atb_state(getter(enemy=enemy) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
@@ -864,8 +1063,8 @@ def build_combat_panel(encounter):
             "groups",
             [
                 _item(
-                    participant.key,
-                    icon="person",
+                    participant_name(participant),
+                    icon=participant_icon(participant),
                     badge=atb_badge(actor_atb_state(participant=participant)),
                     meta=(
                         "ready"

@@ -22,6 +22,14 @@ class ContentValidationTests(unittest.TestCase):
         broken_items = replace(
             registry.items,
             starter_consumables=(("missing_item", 1),),
+            item_templates={
+                **registry.items.item_templates,
+                "broken_recipe_note": {
+                    "kind": "consumable",
+                    "name": "Broken Recipe Note",
+                    "use": {"effect_type": "unlock_recipe", "recipe_domain": "cooking", "unlock_recipe": "missing_recipe"},
+                },
+            },
         )
         broken_quests = replace(
             registry.quests,
@@ -80,8 +88,11 @@ class ContentValidationTests(unittest.TestCase):
         )
         broken_systems = replace(
             registry.systems,
+            fishing_rods={**registry.systems.fishing_rods, "bad_rod": {"unlock_completed_quests": ["missing_quest"]}},
+            fishing_lures={**registry.systems.fishing_lures, "bad_lure": {"attracts": ["missing_item"], "unlock_completed_quests": ["missing_quest"]}},
             fishing_spots={**registry.systems.fishing_spots, "missing_room": {"fish": [{"item": "missing_item"}]},},
             cooking_recipes={**registry.systems.cooking_recipes, "broken_recipe": {"result": "missing_item", "ingredients": {"missing_item": 1}}},
+            tinkering_recipes={**registry.systems.tinkering_recipes, "broken_tinker": {"base": "missing_item", "result": "missing_item", "components": {"missing_item": 1}}},
             outfitters_room_id="missing_room",
             forge_room_id="missing_room",
             forge_recipes={**registry.systems.forge_recipes, "missing_source": {"result": "missing_item", "materials": {"missing_item": 1}}},
@@ -93,6 +104,7 @@ class ContentValidationTests(unittest.TestCase):
         errors = validate_content_registry(broken_registry)
 
         self.assertTrue(any("Starter consumable references unknown item" in error for error in errors))
+        self.assertTrue(any("unlocks unknown cooking recipe" in error for error in errors))
         self.assertTrue(any("has unknown prerequisite" in error for error in errors))
         self.assertTrue(any("collects unknown item" in error for error in errors))
         self.assertTrue(any("rewards unknown item" in error for error in errors))
@@ -111,8 +123,15 @@ class ContentValidationTests(unittest.TestCase):
         self.assertTrue(any("Dialogue references unknown readable entity" in error for error in errors))
         self.assertTrue(any("Fishing spot references unknown room" in error for error in errors))
         self.assertTrue(any("references unknown fish item" in error for error in errors))
+        self.assertTrue(any("Fishing rod bad_rod is missing a name" in error for error in errors))
+        self.assertTrue(any("references unknown unlock quest" in error for error in errors))
+        self.assertTrue(any("Fishing lure bad_lure is missing a name" in error for error in errors))
+        self.assertTrue(any("references unknown attract item" in error for error in errors))
         self.assertTrue(any("Cooking recipe broken_recipe yields unknown item" in error for error in errors))
         self.assertTrue(any("references unknown ingredient" in error for error in errors))
+        self.assertTrue(any("Tinkering recipe broken_tinker yields unknown item" in error for error in errors))
+        self.assertTrue(any("references unknown base item" in error for error in errors))
+        self.assertTrue(any("references unknown component" in error for error in errors))
         self.assertTrue(any("Commerce references unknown outfitters room" in error for error in errors))
         self.assertTrue(any("Forging references unknown forge room" in error for error in errors))
         self.assertTrue(any("Forge recipe references unknown source item" in error for error in errors))

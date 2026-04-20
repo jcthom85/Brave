@@ -3,7 +3,17 @@
 import time
 
 from world.arcade import format_arcade_score, get_personal_best, get_reward_definition, has_arcade_reward
-from world.activities import get_targetable_consumable_characters, room_supports_activity
+from world.activities import (
+    can_borrow_fishing_tackle,
+    format_fishing_screen,
+    get_cooking_entries,
+    get_catch_log_entries,
+    get_available_fishing_lures,
+    get_available_fishing_rods,
+    get_fishing_spot_summary,
+    get_targetable_consumable_characters,
+    room_supports_activity,
+)
 from world.combat_atb import render_atb_state
 from world.combat_actions import build_combat_action_payload
 from world.ability_icons import get_ability_icon_name, get_passive_icon_name
@@ -18,6 +28,7 @@ from world.character_icons import get_class_icon, get_race_icon
 from world.class_features import get_class_features
 from world.druid_forms import get_druid_form
 from world.forging import get_forge_entries
+from world.genders import BRAVE_GENDER_LABELS, get_brave_gender_label
 from world.navigation import (
     build_map_snapshot,
     format_exit_summary,
@@ -26,6 +37,7 @@ from world.navigation import (
     get_exit_label,
     sort_exits,
 )
+from world.mastery import format_mastery_name
 from world.party import get_character_by_id, get_follow_target, get_party_leader, get_party_members
 from world.questing import get_tracked_quest
 from world.resonance import (
@@ -37,6 +49,7 @@ from world.resonance import (
     get_stat_label,
     resolve_ability_query,
 )
+from world.tinkering import get_tinkering_entries
 from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
 
 CONTENT = get_content_registry()
@@ -131,7 +144,7 @@ def _chip(label, icon, tone="muted"):
     return {"label": label, "icon": icon, "tone": tone}
 
 
-def _action(label, command, icon, *, tone=None, confirm=None, icon_only=False, aria_label=None, picker=None):
+def _action(label, command, icon, *, tone=None, confirm=None, icon_only=False, aria_label=None, picker=None, no_icon=False):
     action = {"label": label, "icon": icon}
     if command:
         action["command"] = command
@@ -145,6 +158,8 @@ def _action(label, command, icon, *, tone=None, confirm=None, icon_only=False, a
         action["aria_label"] = aria_label
     if picker:
         action["picker"] = picker
+    if no_icon:
+        action["no_icon"] = True
     return action
 
 
@@ -268,6 +283,9 @@ def _entry(
     combat_state=None,
     entry_ref=None,
     hide_icon=False,
+    attachments=None,
+    sidecars=None,
+    cluster_ref=None,
 ):
     entry = {
         "title": title,
@@ -305,6 +323,12 @@ def _entry(
         entry["tooltip"] = tooltip
     if size_class:
         entry["size_class"] = size_class
+    if attachments:
+        entry["attachments"] = list(attachments)
+    if sidecars:
+        entry["sidecars"] = list(sidecars)
+    if cluster_ref:
+        entry["cluster_ref"] = str(cluster_ref)
     return entry
 
 
@@ -420,6 +444,10 @@ def _build_talk_actions(target):
         actions.append(_action("Open Shop", "shop", "storefront", tone="accent"))
     elif entity_id == "torren_ironroot":
         actions.append(_action("Open Forge", "forge", "construction", tone="accent"))
+    elif entity_id == "mistress_elira_thorne":
+        actions.append(_action("Open Mastery", "mastery", "school", tone="accent"))
+    elif entity_id == "mender_veska_flint":
+        actions.append(_action("Open Tinkering", "tinker", "handyman", tone="accent"))
 
     return actions
 
@@ -435,6 +463,8 @@ def _sheet_detail_tooltip(title, subtitle=None, lines=None):
 def _build_sheet_ability_item(character, ability_name):
     display_name = format_ability_display(ability_name, character)
     key = ability_key(ability_name)
+    rank = getattr(character, "get_ability_mastery_rank", lambda _key: 1)(key)
+    display_name = format_mastery_name(display_name, rank)
     ability = ABILITY_LIBRARY.get(key, {})
     target_label = {
         "enemy": "Targets one enemy",
@@ -674,9 +704,9 @@ def _movement_command(direction, fallback):
 
 CHARGEN_STEP_ORDER = (
     "menunode_welcome",
-    "menunode_choose_name",
     "menunode_choose_race",
     "menunode_choose_class",
+    "menunode_choose_name",
     "menunode_confirm",
 )
 
@@ -688,25 +718,25 @@ CHARGEN_STEP_META = {
         "subtitle": "Before the road ahead, we define the soul who walks it.",
         "step_index": 0,
     },
-    "menunode_choose_name": {
-        "eyebrow": "Identity",
-        "title": "Claim A Name",
-        "title_icon": "badge",
-        "subtitle": "How will the songs and stories remember you?",
-        "step_index": 1,
-    },
     "menunode_choose_race": {
         "eyebrow": "Ancestry",
         "title": "Choose Your Origin",
         "title_icon": "diversity_3",
         "subtitle": "Your blood carries the weight of history and ancient perks.",
-        "step_index": 2,
+        "step_index": 1,
     },
     "menunode_choose_class": {
         "eyebrow": "Calling",
         "title": "Choose A Class",
         "title_icon": "swords",
         "subtitle": "How do you face the world when it bites back?",
+        "step_index": 2,
+    },
+    "menunode_choose_name": {
+        "eyebrow": "Identity",
+        "title": "Name And Gender",
+        "title_icon": "badge",
+        "subtitle": "Set the name and gender this character will carry into the world.",
         "step_index": 3,
     },
     "menunode_confirm": {
@@ -730,6 +760,7 @@ def build_chargen_view(account, state, *, error=None):
     slot_text = "Unlimited" if slots_left is None else str(slots_left)
     race_name = RACES.get(state.get("race"), {}).get("name", "Not set")
     class_name = CLASSES.get(state.get("class"), {}).get("name", "Not set")
+    gender_label = get_brave_gender_label(state.get("gender"))
 
     chips = [
         _chip(f"Step {step_meta['step_index'] + 1} / 5", "steps", "accent"),
@@ -747,6 +778,7 @@ def build_chargen_view(account, state, *, error=None):
             "pairs",
             items=[
                 _pair("Name", state.get("name") or "Not set", "badge"),
+                _pair("Gender", gender_label, "person"),
                 _pair("Race", race_name, get_race_icon(state.get("race"), RACES.get(state.get("race")))),
                 _pair("Class", class_name, get_class_icon(state.get("class"), CLASSES.get(state.get("class")))),
             ],
@@ -756,25 +788,60 @@ def build_chargen_view(account, state, *, error=None):
 
     actions = []
 
+    def _race_feel(race_key, race_data):
+        if race_key == "human":
+            return ("Steady start", "bolt")
+        if race_key == "elf":
+            return ("Precision", "visibility")
+        if race_key == "dwarf":
+            return ("Durable", "shield")
+        if race_key == "mosskin":
+            return ("Evasive", "footprint")
+        if race_key == "ashborn":
+            return ("Aggressive", "local_fire_department")
+        return (race_data.get("perk", "Trait"), "star")
+
+    def _class_style(class_key, class_data):
+        role = (class_data.get("role") or "").lower()
+        if class_key == "warrior":
+            return ("Low upkeep", "Frontline anchor", "security")
+        if class_key == "cleric":
+            return ("Medium upkeep", "Recovery and rescue", "healing")
+        if class_key == "ranger":
+            return ("Medium upkeep", "Mark and pick targets", "ads_click")
+        if class_key == "mage":
+            return ("High upkeep", "Burst and control", "auto_awesome")
+        if class_key == "rogue":
+            return ("High upkeep", "Exploit openings", "bolt")
+        if class_key == "paladin":
+            return ("Medium upkeep", "Guard and support", "shield")
+        if class_key == "druid":
+            return ("High upkeep", "Control and adapt", "forest")
+        if "tank" in role:
+            return ("Medium upkeep", "Hold pressure", "shield")
+        if "healer" in role or "support" in role:
+            return ("Medium upkeep", "Keep allies stable", "healing")
+        return ("Medium upkeep", "Flexible pressure", "star")
+
     if step_key == "menunode_welcome":
         next_step = get_next_chargen_step(state)
         next_step_entry = {
-            "menunode_choose_name": _entry(
-                "Choose Name",
-                meta="Step 1",
-                icon="badge",
-                command="continue",
-            ),
             "menunode_choose_race": _entry(
                 "Choose Race",
-                meta="Step 2",
+                meta="Step 1",
                 icon="diversity_3",
                 command="continue",
             ),
             "menunode_choose_class": _entry(
                 "Choose Class",
-                meta="Step 3",
+                meta="Step 2",
                 icon="swords",
+                command="continue",
+            ),
+            "menunode_choose_name": _entry(
+                "Choose Name",
+                meta="Step 3",
+                icon="badge",
                 command="continue",
             ),
             "menunode_confirm": _entry(
@@ -791,7 +858,7 @@ def build_chargen_view(account, state, *, error=None):
         if error:
             sections.append(
                 _section(
-                    "Name Issue",
+                    "Identity Issue",
                     "warning",
                     "lines",
                     lines=[error.replace("|r", "").replace("|n", "")],
@@ -800,28 +867,45 @@ def build_chargen_view(account, state, *, error=None):
         )
         sections.append(
             _section(
-                "Character Name",
+                "Identity",
                 "badge",
                 "form",
                 span="wide",
                 hide_label=True,
-                field_label="Character Name",
-                field_name="character_name",
-                value=state.get("name") or "",
-                placeholder="Type your character name here",
+                fields=[
+                    {
+                        "field_label": "Character Name",
+                        "field_name": "character_name",
+                        "value": state.get("name") or "",
+                        "placeholder": "Type your character name here",
+                        "maxlength": 24,
+                        "minlength": 2,
+                        "autocapitalize": "words",
+                        "autocomplete": "off",
+                        "spellcheck": False,
+                        "enterkeyhint": "done",
+                        "autofocus": True,
+                    }
+                ],
                 submit_label="Save And Continue",
                 submit_icon="arrow_forward",
                 submit_tone="accent",
                 submit_mode="raw",
-                maxlength=24,
-                minlength=2,
-                autocapitalize="words",
-                autocomplete="off",
-                spellcheck=False,
-                enterkeyhint="done",
-                autofocus=True,
             )
         )
+        gender_entries = []
+        for gender_key, label in BRAVE_GENDER_LABELS.items():
+            gender_entries.append(
+                _entry(
+                    label,
+                    meta="Selected" if state.get("gender") == gender_key else None,
+                    lines=[],
+                    icon="person",
+                    command=label.lower(),
+                    chips=[_chip("Current", "check_circle", "good")] if state.get("gender") == gender_key else [],
+                )
+            )
+        sections.append(_section("Gender", "person", "entries", items=gender_entries))
         sections.append(
             _section(
                 "Rules",
@@ -831,6 +915,7 @@ def build_chargen_view(account, state, *, error=None):
                     _item("2 to 24 characters", icon="straighten"),
                     _item("Letters, spaces, apostrophes, and hyphens only", icon="spellcheck"),
                     _item("Must be unique across all characters", icon="shield"),
+                    _item("Select gender before continuing.", icon="person"),
                 ],
             )
         )
@@ -841,6 +926,7 @@ def build_chargen_view(account, state, *, error=None):
                 "pairs",
                 items=[
                     _pair("Name", state.get("name") or "Not set", "badge"),
+                    _pair("Gender", gender_label, "person"),
                     _pair("Race", race_name, get_race_icon(state.get("race"), RACES.get(state.get("race")))),
                     _pair("Class", class_name, get_class_icon(state.get("class"), CLASSES.get(state.get("class")))),
                 ],
@@ -852,14 +938,23 @@ def build_chargen_view(account, state, *, error=None):
         actions.append(_action("Back", "back", "arrow_back", tone="muted"))
         race_entries = []
         for race_key, race_data in RACES.items():
+            feel_label, feel_icon = _race_feel(race_key, race_data)
             race_entries.append(
                 _entry(
                     race_data["name"],
-                    meta="Selected" if state.get("race") == race_key else "Available",
-                    lines=[race_data["summary"], f"Perk: {race_data['perk']}"],
-                    icon=get_race_icon(race_key, race_data),
+                    meta="Selected" if state.get("race") == race_key else "Origin",
+                    lines=[
+                        race_data["summary"],
+                        f"Perk: {race_data['perk']}",
+                        f"Feel: {feel_label}",
+                    ],
+                    background_icon=get_race_icon(race_key, race_data),
                     command=race_key,
-                    chips=[_chip("Current", "check_circle", "good")] if state.get("race") == race_key else [],
+                    hide_icon=True,
+                    chips=[
+                        *([_chip("Current", "check_circle", "good")] if state.get("race") == race_key else []),
+                        _chip(feel_label, feel_icon, "muted"),
+                    ],
                 )
             )
         sections.append(_section("Races", "forest", "entries", items=race_entries, span="wide"))
@@ -869,15 +964,23 @@ def build_chargen_view(account, state, *, error=None):
         for class_key in VERTICAL_SLICE_CLASSES:
             class_data = CLASSES[class_key]
             features = get_class_features(class_key)
+            upkeep_label, style_label, style_icon = _class_style(class_key, class_data)
             class_entries.append(
                 _entry(
                     class_data["name"],
                     meta=class_data["role"],
-                    lines=[class_data["summary"], *[feature["summary"] for feature in features[:1]]],
-                    icon=get_class_icon(class_key, class_data),
+                    lines=[
+                        class_data["summary"],
+                        f"Approach: {style_label}",
+                        *[feature["summary"] for feature in features[:1]],
+                    ],
+                    background_icon=get_class_icon(class_key, class_data),
                     command=class_key,
+                    hide_icon=True,
                     chips=[
                         *([_chip("Current", "check_circle", "good")] if state.get("class") == class_key else []),
+                        _chip(upkeep_label, "tune", "muted"),
+                        _chip(style_label, style_icon, "muted"),
                         *[_chip(feature["name"], feature.get("icon", "star"), "muted") for feature in features[:2]],
                     ],
                 )
@@ -886,6 +989,7 @@ def build_chargen_view(account, state, *, error=None):
     elif step_key == "menunode_confirm":
         actions.extend(
             [
+                _action("Create And Play", "finish play", "play_arrow", tone="accent"),
                 _action("Create Character", "finish", "play_arrow", tone="good"),
                 _action("Back", "back", "arrow_back", tone="muted"),
             ]
@@ -909,15 +1013,24 @@ def build_chargen_view(account, state, *, error=None):
                 "entries",
                 items=[
                     _entry(
+                        get_brave_gender_label(state.get("gender")),
+                        meta="Identity",
+                        lines=["Gender selection locked in for this character."],
+                        icon="person",
+                    ),
+                    _entry(
                         race_data.get("name", "Race"),
                         meta="Race Perk",
-                        lines=[race_data.get("perk", "No perk found.")],
+                        lines=[race_data.get("perk", "No perk found."), race_data.get("summary", "")],
                         icon=get_race_icon(state.get("race"), race_data),
                     ),
                     _entry(
                         class_data.get("name", "Class"),
                         meta=class_data.get("role", "Role"),
-                        lines=[class_data.get("summary", "No class summary found.")],
+                        lines=[
+                            class_data.get("summary", "No class summary found."),
+                            f"Approach: {_class_style(state.get('class'), class_data)[1]}",
+                        ],
                         icon=get_class_icon(state.get("class"), class_data),
                     ),
                 ],
@@ -930,12 +1043,20 @@ def build_chargen_view(account, state, *, error=None):
                 "entries",
                 items=[
                     _entry(
+                        "Create And Play",
+                        meta="Fastest Start",
+                        lines=["Create this character and enter the world immediately."],
+                        icon="login",
+                        command="finish play",
+                        chips=[_chip("Recommended", "bolt", "accent")],
+                    ),
+                    _entry(
                         "Create Character",
                         meta="Final Step",
                         lines=["Create and return to your character list."],
                         icon="play_arrow",
                         command="finish",
-                        chips=[_chip("Ready", "check_circle", "good")],
+                        chips=[_chip("Roster", "groups", "good")],
                     )
                 ],
                 span="wide",
@@ -1150,6 +1271,8 @@ def _format_room_context_action_items(room, viewer):
             items.append(_item("Line in the water", icon="waves", detail="Wait for a bite."))
         else:
             items.append(_item("Fish", icon="phishing", command="fish"))
+    if room_supports_activity(room, "tinkering"):
+        items.append(_item("Tinker", icon="handyman", command="tinker"))
 
     if is_chapel_room(room):
         blessing = get_active_blessing(viewer)
@@ -1331,6 +1454,15 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         ),
         "layout": "explore",
         "mobile_pack": _build_mobile_pack_payload(looker),
+        "mobile_panels": _build_mobile_room_payload(
+            room,
+            looker,
+            nav_items,
+            vertical_exits,
+            special_exits,
+            vicinity_items,
+            room_action_items,
+        ),
         "variant": "room",
         "tone": "safe" if room.db.brave_safe else "danger",
         "guidance": tutorial_guidance,
@@ -1468,6 +1600,8 @@ def _build_mobile_pack_payload(character):
     consumables = 0
     ingredients = 0
     preview = []
+    grouped = {kind: [] for kind in PACK_KIND_ORDER}
+    other_items = []
 
     for entry in inventory:
         template_id = entry.get("template")
@@ -1503,6 +1637,40 @@ def _build_mobile_pack_payload(character):
                     "icon": icon_name,
                 }
             )
+        packed_item = {
+            "label": template.get("name", template_id.replace("_", " ").title()),
+            "quantity": quantity,
+            "icon": icon_name,
+            "meta": _pack_item_subtitle(template),
+        }
+        if category in grouped:
+            grouped[category].append(packed_item)
+        else:
+            other_items.append(packed_item)
+
+    sections = []
+    for kind in PACK_KIND_ORDER:
+        if grouped[kind]:
+            label, icon = PACK_KIND_LABELS[kind]
+            sections.append(
+                {
+                    "label": label,
+                    "icon": icon,
+                    "count": sum(item["quantity"] for item in grouped[kind]),
+                    "items": grouped[kind][:8],
+                    "overflow": max(0, len(grouped[kind]) - 8),
+                }
+            )
+    if other_items:
+        sections.append(
+            {
+                "label": "Other",
+                "icon": "backpack",
+                "count": sum(item["quantity"] for item in other_items),
+                "items": other_items[:8],
+                "overflow": max(0, len(other_items) - 8),
+            }
+        )
 
     return {
         "silver": character.db.brave_silver or 0,
@@ -1512,6 +1680,197 @@ def _build_mobile_pack_payload(character):
         "preview": [{"label": entry["label"], "quantity": entry["quantity"]} for entry in preview[:4]],
         "items": preview,
         "overflow": max(0, item_types - len(preview)),
+        "sections": sections,
+    }
+
+
+def _build_mobile_character_payload(character):
+    race_key = str(getattr(character.db, "brave_race", "human") or "human").lower()
+    class_key = str(getattr(character.db, "brave_class", "warrior") or "warrior").lower()
+    race = RACES.get(race_key, RACES["human"])
+    class_data = CLASSES.get(class_key, CLASSES["warrior"])
+    level = int(getattr(character.db, "brave_level", 1) or 1)
+    primary = getattr(character.db, "brave_primary_stats", None) or {}
+    derived = getattr(character.db, "brave_derived_stats", None) or {}
+    resources = getattr(character.db, "brave_resources", None) or {}
+    blessing = get_active_blessing(character)
+    features = list(get_class_features(class_key) or [])
+
+    stats = [
+        {"label": get_stat_label("attack_power", character), "value": str(derived.get("attack_power", 0))},
+        {"label": get_stat_label("armor", character), "value": str(derived.get("armor", 0))},
+        {"label": get_stat_label("accuracy", character), "value": str(derived.get("accuracy", 0))},
+        {"label": get_stat_label("dodge", character), "value": str(derived.get("dodge", 0))},
+    ]
+    if derived.get("spell_power", 0):
+        stats.insert(1, {"label": get_stat_label("spell_power", character), "value": str(derived.get("spell_power", 0))})
+
+    effects = []
+    if blessing:
+        effects.append(blessing.get("name", "Blessing"))
+    if race.get("perk"):
+        effects.append(race["perk"])
+
+    return {
+        "name": character.key,
+        "identity": f"{race['name']} {class_data['name']} · Level {level}",
+        "summary": class_data["summary"],
+        "resources": [
+            {"label": get_resource_label("hp", character), "value": f"{resources.get('hp', 0)} / {derived.get('max_hp', 0)}"},
+            {"label": get_resource_label("mana", character), "value": f"{resources.get('mana', 0)} / {derived.get('max_mana', 0)}"},
+            {"label": get_resource_label("stamina", character), "value": f"{resources.get('stamina', 0)} / {derived.get('max_stamina', 0)}"},
+        ],
+        "attributes": [
+            {"label": get_stat_label("strength", character), "value": str(primary.get("strength", 0))},
+            {"label": get_stat_label("agility", character), "value": str(primary.get("agility", 0))},
+            {"label": get_stat_label("intellect", character), "value": str(primary.get("intellect", 0))},
+            {"label": get_stat_label("spirit", character), "value": str(primary.get("spirit", 0))},
+            {"label": get_stat_label("vitality", character), "value": str(primary.get("vitality", 0))},
+        ],
+        "stats": stats,
+        "feature": (features[0] if features else {}),
+        "effects": effects,
+    }
+
+
+def _build_mobile_quests_payload(character):
+    quest_state = getattr(character.db, "brave_quests", None) or {}
+    tracked_key = get_tracked_quest(character)
+    active_keys = [
+        quest_key
+        for quest_key in STARTING_QUESTS
+        if quest_state.get(quest_key, {}).get("status") == "active"
+    ]
+    completed_keys = [
+        quest_key
+        for quest_key in STARTING_QUESTS
+        if quest_state.get(quest_key, {}).get("status") == "completed"
+    ]
+
+    def summarize(quest_key):
+        definition = QUESTS.get(quest_key, {})
+        state = quest_state.get(quest_key, {})
+        objectives = list(state.get("objectives", []))
+        remaining = [objective for objective in objectives if not objective.get("completed")]
+        next_objective = remaining[0] if remaining else None
+        return {
+            "title": definition.get("title", quest_key.replace("_", " ").title()),
+            "meta": f"{get_quest_region(quest_key)} · {definition.get('giver', '')}".strip(" ·"),
+            "line": _format_objective_progress(next_objective) if next_objective else definition.get("summary", ""),
+        }
+
+    tracked = summarize(tracked_key) if tracked_key else None
+    if tracked:
+        tracked["objectives"] = [
+            {
+                "text": _format_objective_progress(objective),
+                "completed": bool(objective.get("completed")),
+            }
+            for objective in list(quest_state.get(tracked_key, {}).get("objectives", []))[:5]
+        ]
+
+    return {
+        "tracked": tracked,
+        "active_count": len(active_keys),
+        "completed_count": len(completed_keys),
+        "active": [summarize(quest_key) for quest_key in active_keys[:5]],
+        "completed": [summarize(quest_key) for quest_key in completed_keys[:3]],
+    }
+
+
+def _build_mobile_party_payload(character):
+    try:
+        members = list(get_party_members(character) or [])
+        leader = get_party_leader(character)
+        follow_target = get_follow_target(character)
+        invites = [
+            leader_obj
+            for leader_obj in (
+                get_character_by_id(invite_id) for invite_id in (getattr(character.db, "brave_party_invites", None) or [])
+            )
+            if leader_obj
+        ]
+    except Exception:
+        members = []
+        leader = None
+        follow_target = None
+        invites = []
+
+    member_entries = []
+    for member in members[:5]:
+        resources = member.db.brave_resources or {}
+        derived = member.db.brave_derived_stats or {}
+        member_entries.append(
+            {
+                "name": member.key,
+                "meta": "Leader" if leader and member.id == leader.id else "Member",
+                "line": member.location.key if member.location else "Nowhere",
+                "resource": f"HP {resources.get('hp', 0)} / {derived.get('max_hp', 0)}",
+            }
+        )
+
+    return {
+        "in_party": bool(members),
+        "leader_name": getattr(leader, "key", "") if leader else "",
+        "member_count": len(members),
+        "follow_target": getattr(follow_target, "key", "") if follow_target else "",
+        "members": member_entries,
+        "invites": [invite.key for invite in invites[:4]],
+    }
+
+
+def _build_mobile_room_payload(room, looker, nav_items, vertical_exits, special_exits, vicinity_items, room_action_items):
+    route_items = []
+    for entry in list(nav_items) + list(vertical_exits):
+        route_items.append(
+            {
+                "label": entry.get("label") or entry.get("direction", "").title(),
+                "badge": entry.get("badge", ""),
+                "command": entry.get("command"),
+            }
+        )
+    for entry in special_exits[:6]:
+        route_items.append(
+            {
+                "label": entry.get("text", ""),
+                "badge": entry.get("badge", ""),
+                "command": entry.get("command"),
+            }
+        )
+
+    vicinity = []
+    for item in vicinity_items[:8]:
+        vicinity.append(
+            {
+                "text": item.get("text", ""),
+                "detail": item.get("detail", ""),
+                "badge": item.get("badge", ""),
+                "icon": item.get("marker_icon") or item.get("icon") or "chevron_right",
+                "command": item.get("command"),
+            }
+        )
+
+    return {
+        "title": room.key,
+        "description": room.db.desc or "A place of mystery and potential.",
+        "status_label": "Danger" if not room.db.brave_safe else "Safe",
+        "status_copy": "Stay ready for a fight." if not room.db.brave_safe else "No immediate threats nearby.",
+        "route_count": len(route_items),
+        "routes": route_items,
+        "vicinity": vicinity,
+        "actions": [
+            {
+                "label": action.get("label", ""),
+                "command": action.get("command"),
+                "icon": action.get("icon") or "chevron_right",
+            }
+            for action in room_action_items[:6]
+            if action.get("command")
+        ],
+        "character": _build_mobile_character_payload(looker),
+        "pack": _build_mobile_pack_payload(looker),
+        "quests": _build_mobile_quests_payload(looker),
+        "party": _build_mobile_party_payload(looker),
     }
 
 
@@ -1573,7 +1932,7 @@ def build_account_view(account):
                 _action(
                     "Discard draft",
                     "create discard",
-                    "delete",
+                    "trash",
                     tone="danger",
                     confirm="Discard this saved character draft?",
                     icon_only=True,
@@ -1612,7 +1971,7 @@ def build_account_view(account):
         roster_entries.append(
             _entry(
                 character.key,
-                meta=f"Slot {index}",
+                meta=None,
                 lines=lines,
                 icon=get_class_icon(character.db.brave_class, CLASSES.get(character.db.brave_class)),
                 badge=str(index),
@@ -1622,7 +1981,7 @@ def build_account_view(account):
                     _action(
                         "Delete",
                         f"delete {index} --force",
-                        "delete",
+                        "trash",
                         tone="danger",
                         confirm=f"Delete {character.key} permanently?",
                         icon_only=True,
@@ -1642,6 +2001,8 @@ def build_account_view(account):
         ),
     ]
 
+    actions = [_action("Logout", "logout", "logout", tone="muted")]
+
     return {
         **_make_view(
             account.key,
@@ -1652,10 +2013,188 @@ def build_account_view(account):
             subtitle="",
             chips=[],
             sections=sections,
-            actions=[_action("Logout", "logout", "logout", tone="muted")],
+            actions=actions,
             reactive=_reactive_view(scene="account"),
         ),
         "variant": "account",
+    }
+
+
+def build_connection_view(*, screen="menu", error=None, username="", registration_enabled=True):
+    """Return a browser-native login/account-creation view."""
+
+    normalized_screen = (screen or "menu").strip().lower()
+    if normalized_screen not in {"menu", "signin", "create"}:
+        normalized_screen = "menu"
+
+    chips = []
+    if normalized_screen == "create":
+        chips.append(_chip("Character creation happens after login", "arrow_forward", "muted"))
+    sections = []
+    actions = []
+    clean_error = (error or "").strip()
+    if clean_error:
+        sections.append(
+            _section(
+                "Issue",
+                "warning",
+                "lines",
+                lines=[clean_error],
+                span="wide",
+            )
+        )
+
+    if normalized_screen == "signin":
+        actions.append(_action("Back", "", "arrow_back", tone="muted"))
+        actions[-1]["connection_screen"] = "menu"
+        sections.append(
+            _section(
+                "Sign In",
+                "login",
+                "form",
+                span="wide",
+                fields=[
+                    {
+                        "field_name": "username",
+                        "field_label": "Username",
+                        "placeholder": "Username",
+                        "value": username,
+                        "autocomplete": "username",
+                        "autocapitalize": "none",
+                        "spellcheck": False,
+                        "autofocus": True,
+                    },
+                    {
+                        "field_name": "password",
+                        "field_label": "Password",
+                        "input_type": "password",
+                        "placeholder": "Password",
+                        "autocomplete": "current-password",
+                        "autocapitalize": "none",
+                        "spellcheck": False,
+                        "enterkeyhint": "go",
+                    },
+                ],
+                submit_template="connect {username} {password}",
+                submit_label="Sign In",
+                submit_icon="login",
+                submit_tone="accent",
+            )
+        )
+        sections.append(
+            _section(
+                "What Happens Next",
+                "explore",
+                "list",
+                items=[
+                    _item("Choose a character or resume a draft after login.", icon="groups"),
+                    _item("Your last played character will be ready to continue.", icon="history"),
+                    _item("If sign-in fails, you stay here with the username preserved.", icon="sync_problem"),
+                ],
+            )
+        )
+        eyebrow = "Sign In"
+        eyebrow_icon = "login"
+        subtitle = "Enter your account username and password."
+    elif normalized_screen == "create":
+        actions.append(_action("Back", "", "arrow_back", tone="muted"))
+        actions[-1]["connection_screen"] = "menu"
+        sections.append(
+            _section(
+                "Create Account",
+                "person_add",
+                "form",
+                span="wide",
+                fields=[
+                    {
+                        "field_name": "username",
+                        "field_label": "Username",
+                        "placeholder": "Choose a username",
+                        "value": username,
+                        "autocomplete": "username",
+                        "autocapitalize": "none",
+                        "spellcheck": False,
+                        "autofocus": True,
+                    },
+                    {
+                        "field_name": "password",
+                        "field_label": "Password",
+                        "input_type": "password",
+                        "placeholder": "Choose a password",
+                        "autocomplete": "new-password",
+                        "autocapitalize": "none",
+                        "spellcheck": False,
+                    },
+                    {
+                        "field_name": "password_confirm",
+                        "field_label": "Confirm Password",
+                        "input_type": "password",
+                        "placeholder": "Repeat your password",
+                        "autocomplete": "new-password",
+                        "autocapitalize": "none",
+                        "spellcheck": False,
+                        "enterkeyhint": "go",
+                    },
+                ],
+                submit_template="create {username} {password} {password_confirm}",
+                submit_label="Create Account",
+                submit_icon="person_add",
+                submit_tone="accent",
+            )
+        )
+        sections.append(
+            _section(
+                "Account Rules",
+                "rule",
+                "list",
+                items=[
+                    _item("Use a stable username you can remember.", icon="badge"),
+                    _item("Pick a password you have not reused elsewhere.", icon="shield"),
+                    _item(
+                        "After the account is created, you will continue into character setup."
+                        if registration_enabled
+                        else "New account registration is currently disabled.",
+                        icon="arrow_forward" if registration_enabled else "block",
+                    ),
+                    _item("Use the same account for multiple characters instead of creating multiple logins.", icon="groups"),
+                ],
+            )
+        )
+        eyebrow = "Create Account"
+        eyebrow_icon = "person_add"
+        subtitle = "Make an account, then build your first adventurer."
+    else:
+        sections.append(
+            _section(
+                "Enter Brave",
+                "login",
+                "list",
+                items=[
+                    _item("Sign In", badge="IN", icon="login"),
+                    _item("Create Account", badge="NEW", icon="person_add"),
+                ],
+            )
+        )
+        sections[0]["items"][0]["connection_screen"] = "signin"
+        sections[0]["items"][1]["connection_screen"] = "create"
+        eyebrow = "Welcome."
+        eyebrow_icon = None
+        subtitle = ""
+
+    return {
+        **_make_view(
+            eyebrow,
+            "",
+            eyebrow_icon=eyebrow_icon,
+            title_icon=None,
+            wordmark="BRAVE",
+            subtitle=subtitle,
+            chips=chips,
+            sections=sections,
+            actions=actions,
+            reactive=_reactive_view(scene="account"),
+        ),
+        "variant": "connection",
     }
 
 
@@ -2391,32 +2930,28 @@ def build_forge_view(character):
 def build_cook_view(character, *, status_message=None, status_tone="muted"):
     """Return a browser-first main view for the hearth and meal loop."""
 
-    inventory = _inventory_totals(character)
     ready_entries = []
-    missing_entries = []
+    known_entries = []
+    locked_entries = []
     meal_entries = []
 
-    for recipe in COOKING_RECIPES.values():
-        ingredient_text = format_ingredient_list(recipe["ingredients"], ITEM_TEMPLATES)
-        missing = []
-        for template_id, quantity in recipe["ingredients"].items():
-            have = inventory.get(template_id, 0)
-            if have < quantity:
-                missing.append(f"{ITEM_TEMPLATES[template_id]['name']} {have}/{quantity}")
-
-        lines = [ingredient_text, "Ready to cook" if not missing else "Missing: " + ", ".join(missing)]
+    for recipe in get_cooking_entries(character):
+        missing = list(recipe["missing"])
+        lines = [recipe["ingredient_text"], "Ready to cook" if recipe["ready"] else ("Missing: " + ", ".join(missing) if recipe["known"] else "Locked recipe")]
         formatted = _entry(
             recipe["name"],
             lines=lines,
-            summary=recipe["summary"],
-            icon="restaurant" if not missing else "kitchen",
-            command=f"cook {recipe['name']}" if not missing else None,
-            actions=[_action("Cook", f"cook {recipe['name']}", "restaurant", tone="accent")] if not missing else [],
+            summary=recipe["summary"] if recipe["known"] else (recipe["unlock_text"] or "You have not learned this recipe yet."),
+            icon="restaurant" if recipe["ready"] else ("kitchen" if recipe["known"] else "lock"),
+            command=f"cook {recipe['name']}" if recipe["ready"] else None,
+            actions=[_action("Cook", f"cook {recipe['name']}", "restaurant", tone="accent")] if recipe["ready"] else [],
         )
-        if missing:
-            missing_entries.append(formatted)
-        else:
+        if not recipe["known"]:
+            locked_entries.append(formatted)
+        elif recipe["ready"]:
             ready_entries.append(formatted)
+        else:
+            known_entries.append(formatted)
 
     for entry in (character.db.brave_inventory or []):
         template_id = entry.get("template")
@@ -2461,7 +2996,8 @@ def build_cook_view(character, *, status_message=None, status_tone="muted"):
     sections.extend(
         [
             _section("Ready", "restaurant", "entries", items=ready_entries or [_entry("Nothing is ready from your current ingredients.", icon="schedule")]),
-            _section("Missing", "grocery", "entries", items=missing_entries or [_entry("No missing recipes right now.", icon="task_alt")]),
+            _section("Known", "grocery", "entries", items=known_entries or [_entry("No other known recipes are waiting on ingredients.", icon="task_alt")]),
+            _section("Locked", "lock", "entries", items=locked_entries or [_entry("No locked recipes right now.", icon="task_alt")]),
             _section("Meals", "lunch_dining", "entries", items=meal_entries or [_entry("You are not carrying any prepared meals.", icon="backpack")]),
         ]
     )
@@ -2472,6 +3008,198 @@ def build_cook_view(character, *, status_message=None, status_tone="muted"):
         eyebrow_icon="restaurant",
         title_icon="soup_kitchen",
         subtitle="Simple inn recipes you can turn out without wasting the room or the pan.",
+        chips=chips,
+        sections=sections,
+        back=True,
+        reactive=_reactive_from_character(character, scene="service"),
+    )
+
+
+def build_fishing_view(character, *, status_message=None, status_tone="muted"):
+    """Return a browser-first main view for fishing tackle and catches."""
+
+    summary = get_fishing_spot_summary(character)
+    spot = summary["spot"] or {}
+    rod = summary["rod"] or {}
+    lure = summary["lure"] or {}
+    room = getattr(character, "location", None)
+    fishing_state = getattr(getattr(character, "ndb", None), "brave_fishing", None) or {}
+    catch_log_entries = get_catch_log_entries(limit=3)
+
+    rod_entries = []
+    for rod in get_available_fishing_rods(character, include_locked=True):
+        rod_key = rod["key"]
+        rod_data = rod
+        selected = rod_key == rod.get("key")
+        rod_entries.append(
+            _entry(
+                rod_data.get("name", rod_key.replace("_", " ").title()),
+                lines=[
+                    f"Power {int(rod_data.get('power', 0) or 0)}",
+                    f"Stability {rod_data.get('stability', 0)}",
+                ],
+                summary=rod_data.get("summary") if rod_data.get("available", True) else (rod_data.get("unlock_text") or "Locked until you prove yourself further."),
+                icon="straighten",
+                command=None if selected or not rod_data.get("available", True) else f"fish rod {rod_data.get('name', rod_key)}",
+                actions=[] if selected or not rod_data.get("available", True) else [_action("Select", f"fish rod {rod_data.get('name', rod_key)}", "straighten", tone="accent")],
+                badge="Selected" if selected else (None if rod_data.get("available", True) else "Locked"),
+            )
+        )
+
+    lure_entries = []
+    for lure in get_available_fishing_lures(character, include_locked=True):
+        lure_key = lure["key"]
+        lure_data = lure
+        selected = lure_key == lure.get("key")
+        favored = ", ".join(ITEM_TEMPLATES[item_id]["name"] for item_id in lure_data.get("attracts", []) if item_id in ITEM_TEMPLATES)
+        lines = []
+        if favored:
+            lines.append("Favored: " + favored)
+        zone_bonus = (lure_data.get("zone_bonus", {}) or {}).get(getattr(getattr(room, "db", None), "brave_room_id", None), 0)
+        if zone_bonus:
+            lines.append(f"Water bonus {zone_bonus}")
+        lure_entries.append(
+            _entry(
+                lure_data.get("name", lure_key.replace("_", " ").title()),
+                lines=lines,
+                summary=lure_data.get("summary") if lure_data.get("available", True) else (lure_data.get("unlock_text") or "Locked until you prove yourself further."),
+                icon="tune",
+                command=None if selected or not lure_data.get("available", True) else f"fish lure {lure_data.get('name', lure_key)}",
+                actions=[] if selected or not lure_data.get("available", True) else [_action("Select", f"fish lure {lure_data.get('name', lure_key)}", "tune", tone="accent")],
+                badge="Selected" if selected else (None if lure_data.get("available", True) else "Locked"),
+            )
+        )
+
+    catch_entries = []
+    for catch in summary["catches"]:
+        catch_entries.append(
+            _entry(
+                catch["name"],
+                lines=[catch["rarity"] + (" · favored by lure" if catch["boosted"] else "")],
+                icon="set_meal" if catch["rarity"] == "Common" else "stars",
+            )
+        )
+
+    chips = []
+    if rod:
+        chips.append(_chip(rod.get("name", "Rod"), "straighten", "accent"))
+    if lure:
+        chips.append(_chip(lure.get("name", "Lure"), "tune", "muted"))
+    if fishing_state.get("phase") == "waiting":
+        chips.append(_chip("Line In Water", "waves", "good"))
+    elif fishing_state.get("phase") == "bite":
+        chips.append(_chip("Bite", "phishing", "warn"))
+
+    sections = []
+    if status_message:
+        sections.append(_section("River Notes", "info", "lines", lines=[status_message], span="wide"))
+    sections.append(
+        _section(
+            "Current Water",
+            "waves",
+            "entries",
+            items=[
+                _entry(
+                    spot.get("name", room.key if room else "Fishing Water"),
+                    lines=[spot.get("cast_text", "The water looks workable.")],
+                    icon="waves",
+                    actions=(
+                        ([_action("Borrow Kit", "fish borrow kit", "inventory_2", tone="muted")] if can_borrow_fishing_tackle(character) else [])
+                        + ([_action("Cast", "fish cast", "phishing", tone="accent")] if fishing_state.get("phase") not in {"waiting", "bite"} else [])
+                    ),
+                )
+            ],
+        )
+    )
+    sections.append(_section("Rods", "straighten", "entries", items=rod_entries or [_entry("No rods are available.", icon="block")]))
+    sections.append(_section("Lures", "tune", "entries", items=lure_entries or [_entry("No lures are available.", icon="block")]))
+    sections.append(_section("Likely Catches", "set_meal", "entries", items=catch_entries or [_entry("Nothing obvious is moving here.", icon="waves")]))
+    sections.append(
+        _section(
+            "Great Catch Log",
+            "menu_book",
+            "entries",
+            items=[
+                _entry(
+                    f"{entry['fish']} · {entry['weight']:.1f} lb",
+                    lines=[f"{entry['account']} ({entry['character']})"],
+                    icon="military_tech" if index == 0 else "menu_book",
+                )
+                for index, entry in enumerate(catch_log_entries)
+            ]
+            or [_entry("No one has posted a proper river triumph yet.", icon="menu_book")],
+        )
+    )
+
+    return _make_view(
+        "Town Activity",
+        "Tackle Roll",
+        eyebrow_icon="phishing",
+        title_icon="waves",
+        subtitle="Set your tackle, read the water, and cast when the river looks ready to answer.",
+        chips=chips,
+        sections=sections,
+        back=True,
+        reactive=_reactive_from_character(character, scene="service"),
+    )
+
+
+def build_tinker_view(character, *, status_message=None, status_tone="muted"):
+    """Return a browser-first main view for tinkering recipes."""
+
+    ready_entries = []
+    known_entries = []
+    locked_entries = []
+    for entry in get_tinkering_entries(character):
+        lines = []
+        if entry["base_name"]:
+            lines.append(f"Base: {entry['base_name']} {entry['base_owned']}/1")
+        if entry["components"]:
+            lines.append(
+                "Parts: "
+                + ", ".join(f"{row['name']} {row['owned']}/{row['required']}" for row in entry["components"])
+            )
+        if entry["silver_cost"]:
+            lines.append(f"Silver: {entry['silver_cost']}")
+        if entry["result_bonuses"]:
+            lines.append("Result: " + entry["result_bonuses"])
+        payload = _entry(
+            entry["name"],
+            lines=lines,
+            summary=entry["summary"] or entry["result_summary"],
+            icon="handyman" if entry["ready"] else "inventory_2",
+            command=f"tinker {entry['name']}" if entry["ready"] else None,
+            actions=[_action("Build", f"tinker {entry['name']}", "build", tone="accent")] if entry["ready"] else [],
+            badge="Ready" if entry["ready"] else ("Known" if entry["known"] else "Locked"),
+        )
+        if not entry["known"]:
+            locked_entries.append(payload)
+        elif entry["ready"]:
+            ready_entries.append(payload)
+        else:
+            known_entries.append(payload)
+
+    chips = [_chip(f"{character.db.brave_silver or 0} silver", "payments", "muted")]
+    if ready_entries:
+        chips.append(_chip(f"{len(ready_entries)} ready", "task_alt", "good"))
+
+    sections = []
+    if status_message:
+        sections.append(_section("Bench Notes", "task_alt" if status_tone == "good" else "info", "lines", lines=[status_message], span="wide"))
+    sections.extend(
+        [
+            _section("Ready Now", "build", "entries", items=ready_entries or [_entry("Nothing is ready from your current pack.", icon="schedule")]),
+            _section("Known Designs", "inventory_2", "entries", items=known_entries or [_entry("No other known designs are close to completion.", icon="construction")]),
+            _section("Locked Designs", "lock", "entries", items=locked_entries or [_entry("No locked tinkering designs yet.", icon="task_alt")]),
+        ]
+    )
+
+    return _make_view(
+        "Town Service",
+        "Workbench Ledger",
+        eyebrow_icon="build",
+        title_icon="handyman",
+        subtitle="Small frontier repairs, field fixes, and rough bench work that keeps a pack useful.",
         chips=chips,
         sections=sections,
         back=True,
@@ -2802,12 +3530,39 @@ def build_combat_view(encounter, character):
     render_now_ms = int(round(time.time() * 1000))
     render_tick_ms = max(1, int(round(float(getattr(encounter, "interval", 1) or 1) * 1000)))
 
+    def participant_id(participant):
+        return participant.get("id") if isinstance(participant, dict) else participant.id
+
+    def participant_name(participant):
+        return str(participant.get("key") if isinstance(participant, dict) else participant.key)
+
+    def participant_resources(participant):
+        if isinstance(participant, dict):
+            return {"hp": int(participant.get("hp", 0) or 0)}
+        return participant.db.brave_resources or {}
+
+    def participant_derived(participant):
+        if isinstance(participant, dict):
+            return {
+                "max_hp": int(participant.get("max_hp", 1) or 1),
+                "max_mana": 0,
+                "max_stamina": 0,
+            }
+        return participant.db.brave_derived_stats or {}
+
+    def participant_background_icon(participant):
+        if isinstance(participant, dict):
+            return participant.get("icon", "pets")
+        return get_class_icon(participant.db.brave_class, CLASSES.get(participant.db.brave_class))
+
     def actor_atb_state(*, participant=None, enemy=None):
         getter = getattr(encounter, "_get_actor_atb_state", None)
         if not callable(getter):
             return {}
         try:
             if participant is not None:
+                if isinstance(participant, dict):
+                    return render_atb_state(getter(companion=participant) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
                 return render_atb_state(getter(character=participant) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
             if enemy is not None:
                 return render_atb_state(getter(enemy=enemy) or {}, tick_ms=render_tick_ms, now_ms=render_now_ms)
@@ -2892,6 +3647,9 @@ def build_combat_view(encounter, character):
         if phase == "winding":
             ticks = display_atb_ticks((state or {}).get("ticks_remaining", 0))
             return _chip(f"Winding {ticks}", "hourglass_top", "danger")
+        if phase == "recovering":
+            ticks = display_atb_ticks((state or {}).get("ticks_remaining", 0))
+            return _chip(f"Recovering {ticks}", "timer", "muted")
         if phase == "cooldown":
             ticks = display_atb_ticks((state or {}).get("ticks_remaining", 0))
             return _chip(f"Cooldown {ticks}", "timer", "muted")
@@ -3005,11 +3763,28 @@ def build_combat_view(encounter, character):
 
     ordered_participants = sorted(
         participants,
-        key=lambda participant: (0 if participant.id == character.id else 1, participant.key.lower()),
+        key=lambda participant: (
+            0 if not isinstance(participant, dict) and participant.id == character.id else 1,
+            participant_name(participant).lower(),
+        ),
     )
-    ally_count = len(ordered_participants)
+    player_participants = [participant for participant in ordered_participants if not isinstance(participant, dict)]
+    companion_participants = [participant for participant in ordered_participants if isinstance(participant, dict)]
+    ally_count = len(player_participants)
+    companion_count = len(companion_participants)
+    companion_by_owner = {}
+    default_owner_id = player_participants[0].id if len(player_participants) == 1 else None
+    for companion in companion_participants:
+        owner_id = companion.get("owner_id")
+        if owner_id is None:
+            owner_id = default_owner_id
+        companion_by_owner.setdefault(owner_id, []).append(companion)
+    for owner_companions in companion_by_owner.values():
+        owner_companions.sort(key=lambda companion: participant_name(companion).lower())
+
     foe_count = len(enemies)
     ally_label = "Ally" if ally_count == 1 else "Allies"
+    companion_label = "Pet" if companion_count == 1 else "Pets"
     foe_label = "Foe" if foe_count == 1 else "Foes"
     pending_action = dict(getattr(encounter.db, "pending_actions", {}) or {}).get(str(character.id), {}) or {}
     selected_target_id = pending_action.get("target")
@@ -3027,12 +3802,47 @@ def build_combat_view(encounter, character):
 
     combat_actions = build_combat_action_payload(encounter, character)
 
+    def build_companion_sidecar(companion):
+        resources = participant_resources(companion)
+        derived = participant_derived(companion)
+        state = encounter._get_participant_state(companion)
+        status_chips = build_participant_status_chips(state)
+        atb_state = actor_atb_state(participant=companion)
+        atb_status = atb_chip(atb_state)
+        if atb_status:
+            status_chips = [atb_status] + list(status_chips)
+        combat_state = []
+        phase = (atb_state or {}).get("phase")
+        if phase == "ready":
+            combat_state.append("ready")
+        if state.get("reaction_guard", 0) > 0 or state.get("reaction_redirect_to"):
+            combat_state.append("guarding")
+        if selected_target_kind == "ally" and selected_target_id == participant_id(companion):
+            status_chips = list(status_chips) + [_chip("Targeted", "my_location", "good")]
+            combat_state.append("selected")
+        return _entry(
+            participant_name(companion),
+            meta="Companion",
+            icon="pets",
+            background_icon=participant_background_icon(companion),
+            chips=status_chips[:2],
+            meters=[
+                atb_meter(atb_state),
+                hp_meter(resources.get("hp", 0), derived.get("max_hp", 0)),
+            ],
+            selected=bool(selected_target_kind == "ally" and selected_target_id == participant_id(companion)),
+            combat_state=combat_state,
+            entry_ref=f"c:{participant_id(companion)}",
+            size_class="compact",
+        )
+
     party_entries = []
-    party_count = len(ordered_participants)
-    for participant in ordered_participants:
-        participant.ensure_brave_character()
-        resources = participant.db.brave_resources or {}
-        derived = participant.db.brave_derived_stats or {}
+    party_count = len(player_participants)
+    for participant in player_participants:
+        if not isinstance(participant, dict):
+            participant.ensure_brave_character()
+        resources = participant_resources(participant)
+        derived = participant_derived(participant)
         state = encounter._get_participant_state(participant)
         status_chips = build_participant_status_chips(state)
         atb_state = actor_atb_state(participant=participant)
@@ -3050,22 +3860,26 @@ def build_combat_view(encounter, character):
             max_value = derived.get(f"max_{resource_key}", 0)
             if max_value > 0:
                 meters.append(resource_meter(resource_key, resources.get(resource_key, 0), max_value))
-        if selected_target_kind == "ally" and selected_target_id == participant.id:
+        if selected_target_kind == "ally" and selected_target_id == participant_id(participant):
             status_chips = list(status_chips) + [_chip("Targeted", "my_location", "good")]
             combat_state.append("selected")
 
+        sidecars = [build_companion_sidecar(companion) for companion in companion_by_owner.get(participant.id, [])[:1]]
+
         party_entries.append(
             _entry(
-                participant.key,
+                participant_name(participant),
                 meta=None,
                 icon="person",
-                background_icon=get_class_icon(participant.db.brave_class, CLASSES.get(participant.db.brave_class)),
+                background_icon=participant_background_icon(participant),
                 size_class=_combat_card_size_class(participant),
                 chips=status_chips,
                 meters=meters,
-                selected=bool(selected_target_kind == "ally" and selected_target_id == participant.id),
+                selected=bool(selected_target_kind == "ally" and selected_target_id == participant_id(participant)),
                 combat_state=combat_state,
                 entry_ref=f"p:{participant.id}",
+                sidecars=sidecars,
+                cluster_ref=f"p:{participant.id}",
             )
         )
 
@@ -3125,14 +3939,22 @@ def build_combat_view(encounter, character):
             encounter_title,
             eyebrow_icon="swords",
             title_icon="warning",
-            subtitle=f"{ally_count} {ally_label} • {foe_count} {foe_label}",
+            subtitle=" • ".join(
+                bit
+                for bit in (
+                    f"{ally_count} {ally_label}",
+                    f"{companion_count} {companion_label}" if companion_count else "",
+                    f"{foe_count} {foe_label}",
+                )
+                if bit
+            ),
             actions=[
                 build_combat_action_picker("Abilities", "bolt", combat_actions.get("abilities", []), "No usable combat abilities."),
                 build_combat_action_picker("Items", "lunch_dining", combat_actions.get("items", []), "No combat consumables packed."),
                 _action("Flee", "flee", "logout", tone="danger"),
             ],
             sections=[
-                _section("Party", "groups", "entries", items=party_entries or [_entry("No active party members.", icon="person_off")], variant="party", span="compact" if party_count >= 4 else None),
+                _section("Party", "groups", "entries", items=party_entries or [_entry("No active party members.", icon="person_off")], variant="party", span="compact" if party_count >= 3 else None),
                 _section("Enemies", "warning", "entries", items=enemy_entries or [_entry("No enemies remain.", icon="task_alt")], variant="targets"),
             ],
             reactive=_reactive_view(encounter.obj, scene="combat", danger="combat"),
@@ -3233,7 +4055,7 @@ def build_combat_victory_view(
             eyebrow_icon=None,
             title_icon=None,
             sections=sections,
-            actions=[_action("Continue", "look", "north_east", tone="accent")],
+            actions=[_action("Continue", "look", None, tone="accent", no_icon=True)],
             reactive=_reactive_view(
                 encounter.obj,
                 scene="victory",
@@ -3297,6 +4119,7 @@ def build_sheet_view(character):
         lines=[class_data["summary"]],
         icon=get_class_icon(character.db.brave_class, class_data),
         chips=[
+            _chip(get_brave_gender_label(getattr(character.db, "brave_gender", None), default="Non-binary"), "person", "muted"),
             _chip(race["name"], get_race_icon(character.db.brave_race, race), "muted"),
             _chip(xp_text, "timeline", "accent"),
             *(
@@ -3391,6 +4214,12 @@ def build_sheet_view(character):
                         meta="Active Bond",
                         lines=[
                             active_companion.get("summary", "No bonded companion is currently set."),
+                            active_companion.get("bond_label", "Bond 1"),
+                            (
+                                "Bond XP capped"
+                                if (active_companion.get("bond", {}) or {}).get("at_cap")
+                                else f"{(active_companion.get('bond', {}) or {}).get('xp_to_next', 0)} XP to next bond"
+                            ),
                             f"Unlocked companions: {len(unlocked_companions)}",
                         ],
                         icon=active_companion.get("icon", "pets"),
@@ -3641,6 +4470,8 @@ def _pack_item_subtitle(item):
     use = get_item_use_profile(item)
     if (use or {}).get("effect_type") == "teach_spell":
         return "Spellbook"
+    if (use or {}).get("effect_type") == "unlock_recipe":
+        return "Recipe Note"
     if (use or {}).get("effect_type") == "unlock_companion":
         return "Bond Item"
     if (use or {}).get("effect_type") == "unlock_oath":
@@ -3689,6 +4520,18 @@ def _pack_item_body(character, item, quantity):
             required_class = use.get("required_class")
             if required_class:
                 body.append("Study: " + str(required_class).title() + " only")
+        if use.get("effect_type") == "unlock_recipe":
+            recipe_key = str(use.get("unlock_recipe", "")).lower()
+            domain = str(use.get("recipe_domain", "cooking")).lower()
+            if domain == "cooking":
+                recipe = SYSTEMS_CONTENT.cooking_recipes.get(recipe_key) or {}
+            elif domain == "tinkering":
+                recipe = SYSTEMS_CONTENT.tinkering_recipes.get(recipe_key) or {}
+            else:
+                recipe = {}
+            if recipe:
+                body.append("Teaches: " + recipe.get("name", recipe_key.replace("_", " ").title()))
+            body.append("Pattern: " + domain.title())
         if use.get("effect_type") == "unlock_companion":
             body.append("Unlocks: " + str(use.get("unlock_companion", "")).replace("_", " ").title())
             required_class = use.get("required_class")

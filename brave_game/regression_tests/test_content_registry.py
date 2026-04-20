@@ -131,5 +131,26 @@ class ContentRegistryTests(unittest.TestCase):
         self.assertEqual(payload["portals"]["portals"]["junkyard_planet"]["name"], registry.systems.get_portal("junkyard_planet")["name"])
         self.assertEqual("Stable", registry.systems.get_portal_status_label("stable"))
         self.assertIn("brambleford_hobbyists_wharf", registry.systems.fishing_spots)
+        self.assertIn("drowned_weir_drowned_causeway", registry.systems.fishing_spots)
+        self.assertIn("loaner_pole", registry.systems.fishing_rods)
+        self.assertIn("glass_spinner", registry.systems.fishing_lures)
+        self.assertIn("plain_hook", registry.systems.fishing_lures)
+        self.assertIn("field_bandage_roll", registry.systems.tinkering_recipes)
         self.assertIn("militia_blade", registry.systems.forge_recipes)
         self.assertIn("junkyard_beacon_core", registry.systems.trophies)
+
+    def test_recipe_unlock_items_are_distributed_beyond_fishing(self):
+        registry = get_content_registry()
+        goblin_hexer_loot = [entry["item"] for entry in registry.encounters.get_enemy_template("goblin_hexer")["loot"]]
+        pot_king_loot = [entry["item"] for entry in registry.encounters.get_enemy_template("grubnak_the_pot_king")["loot"]]
+        barrow_wisp_loot = [entry["item"] for entry in registry.encounters.get_enemy_template("barrow_wisp")["loot"]]
+        goblin_cutter_loot = [entry["item"] for entry in registry.encounters.get_enemy_template("goblin_cutter")["loot"]]
+        hollow_wisp_loot = [entry["item"] for entry in registry.encounters.get_enemy_template("hollow_wisp")["loot"]]
+        drowned_warder_loot = [entry["item"] for entry in registry.encounters.get_enemy_template("drowned_warder")["loot"]]
+
+        self.assertIn("veskas_pitchfire_pattern", goblin_hexer_loot)
+        self.assertIn("grease_stained_supper_note", pot_king_loot)
+        self.assertIn("purity_salts_formula", barrow_wisp_loot)
+        self.assertIn("latchwire_ward_pattern", goblin_cutter_loot)
+        self.assertIn("lockfin_skillet_note", hollow_wisp_loot)
+        self.assertIn("fenlight_talisman_pattern", drowned_warder_loot)

@@ -7,6 +7,7 @@ from world.browser_panels import (
     build_read_panel,
     build_shop_panel,
     build_talk_panel,
+    build_tinker_panel,
 )
 from world.browser_views import (
     build_cook_view,
@@ -17,6 +18,7 @@ from world.browser_views import (
     build_shop_view,
     build_talk_list_view,
     build_talk_view,
+    build_tinker_view,
 )
 from world.activities import format_recipe_list
 from world.content import get_content_registry
@@ -35,6 +37,7 @@ from world.forging import apply_forge_upgrade, get_forge_entries, is_forge_room
 from world.interactions import get_entity_response
 from world.rogue_ops import attempt_theft, get_available_steal_targets
 from world.screen_text import format_entry, render_screen, wrap_text
+from world.tinkering import describe_tinkering_recipe, get_tinkering_entries, is_tinkering_room, perform_tinkering
 
 CONTENT = get_content_registry()
 PORTALS = CONTENT.systems.portals
@@ -336,6 +339,94 @@ class CmdForge(BraveCharacterCommand):
             f"Torren hands over your new |w{result['item_name']}|n{bonus_suffix}. The order cost |w{result['silver_cost']}|n silver."
         )
         self.msg("\n".join(lines))
+
+
+class CmdTinker(BraveCharacterCommand):
+    """
+    Review or assemble workbench designs.
+
+    Usage:
+      tinker
+      tinker inspect <design>
+      tinker <design>
+
+    Shows current tinkering options at a proper workbench, or builds one design if
+    you have the parts and silver.
+    """
+
+    key = "tinker"
+    aliases = ["tinkering"]
+    help_category = "Brave"
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+        if not is_tinkering_room(character.location):
+            self.msg("You need a proper workbench before you can spread out your parts and start tinkering.")
+            return
+        if character.get_active_encounter():
+            self.msg("This is not the moment to start bench work.")
+            return
+
+        entries = get_tinkering_entries(character)
+        if not self.args:
+            ready_blocks = []
+            known_blocks = []
+            locked_blocks = []
+            for entry in entries:
+                details = []
+                if entry["base_name"]:
+                    details.append(f"Base: {entry['base_name']} {entry['base_owned']}/1")
+                if entry["components"]:
+                    details.append(
+                        "Parts: " + ", ".join(f"{row['name']} {row['owned']}/{row['required']}" for row in entry["components"])
+                    )
+                if entry["silver_cost"]:
+                    details.append(f"Silver: {entry['silver_cost']}")
+                if entry["result_bonuses"]:
+                    details.append("Result: " + entry["result_bonuses"])
+                block = format_entry(
+                    f"{entry['name']} -> {entry['result_name']}",
+                    details=details,
+                    summary=entry["summary"] or entry["result_summary"],
+                )
+                if not entry["known"]:
+                    locked_blocks.append(block)
+                elif entry["ready"]:
+                    ready_blocks.append(block)
+                else:
+                    known_blocks.append(block)
+
+            screen = render_screen(
+                "Workbench Ledger",
+                subtitle="Small frontier repairs, rough bench work, and field fixes that keep a pack useful.",
+                meta=[
+                    f"{character.db.brave_silver or 0} silver on hand",
+                    f"{sum(1 for entry in entries if entry['ready'])} ready designs",
+                ],
+                sections=[
+                    ("Ready Now", ready_blocks or ["  Nothing is ready from your current pack."]),
+                    ("Known Designs", known_blocks or ["  No other known designs are close to completion."]),
+                    ("Locked Designs", locked_blocks or ["  No locked tinkering designs yet."]),
+                    ("How To Work", wrap_text("Use |wtinker inspect <design>|n to review one design, or |wtinker <design>|n to assemble it.", indent="  ")),
+                ],
+            )
+            self.scene_msg(screen, panel=build_tinker_panel(character), view=build_tinker_view(character))
+            return
+
+        raw = self.args.strip()
+        lowered = raw.lower()
+        if lowered.startswith("inspect "):
+            ok, message = describe_tinkering_recipe(character, raw[8:].strip())
+            self.msg(message)
+            return
+
+        ok, message = perform_tinkering(character, raw)
+        if self.get_web_session():
+            self.scene_msg(message, panel=build_tinker_panel(character), view=build_tinker_view(character, status_message=message, status_tone="good" if ok else "muted"))
+            return
+        self.msg(message)
 
 
 class CmdPortals(BraveCharacterCommand):

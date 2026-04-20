@@ -4,6 +4,14 @@ from world.browser_panels import build_build_panel, build_gear_panel, build_pack
 from world.browser_views import build_gear_view, build_pack_view, build_quests_view, build_sheet_view
 from world.chapel import get_active_blessing
 from world.content import get_content_registry
+from world.mastery import (
+    MASTERY_RESPEC_SILVER_COST,
+    can_train_ability,
+    format_mastery_name,
+    get_next_mastery_text,
+    is_mastery_room,
+    mastery_rank_label,
+)
 from world.ranger_companions import get_companion_name
 
 
@@ -344,7 +352,14 @@ class CmdSheet(BraveCharacterCommand):
             ("Combat Stats", format_pairs(combat_pairs)),
             (
                 "Combat Actions",
-                [f"  {format_ability_display(ability, character)}" for ability in active_abilities]
+                [
+                    "  "
+                    + format_mastery_name(
+                        format_ability_display(ability, character),
+                        getattr(character, "get_ability_mastery_rank", lambda _key: 1)(CHARACTER_CONTENT.ability_key(ability)),
+                    )
+                    for ability in active_abilities
+                ]
                 if active_abilities
                 else ["  None yet"],
             ),
@@ -399,6 +414,137 @@ class CmdSheet(BraveCharacterCommand):
             subtitle=f"{race['name']} {class_data['name']} · Level {character.db.brave_level}",
             meta=[class_data["summary"]],
             sections=sections,
+        )
+        self.scene_msg(screen, panel=build_sheet_panel(character), view=build_sheet_view(character))
+
+
+class CmdMastery(BraveCharacterCommand):
+    """
+    Review or train combat ability mastery.
+
+    Usage:
+      mastery
+      mastery <ability>
+      mastery respec
+
+    Shows your current combat-ability mastery ranks anywhere. Training and respec
+    require the Brambleford mastery trainer.
+    """
+
+    key = "mastery"
+    aliases = ["train", "master"]
+    help_category = "Brave"
+
+    def _resolve_ability(self, character, query):
+        token = _normalize_query(query)
+        if not token:
+            return None
+        exact = []
+        partial = []
+        for ability_name in getattr(character, "get_unlocked_combat_abilities", lambda: [])():
+            ability_key = CHARACTER_CONTENT.ability_key(ability_name)
+            display = format_ability_display(ability_name, character)
+            candidates = {
+                _normalize_query(ability_name),
+                _normalize_query(display),
+                _normalize_query(ability_key),
+            }
+            if token in candidates:
+                exact.append((ability_key, ability_name))
+            elif any(token in candidate for candidate in candidates):
+                partial.append((ability_key, ability_name))
+        matches = exact or partial
+        if len(matches) == 1:
+            return matches[0]
+        return matches
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+
+        in_mastery_room = is_mastery_room(character.location)
+        earned = getattr(character, "get_earned_mastery_points", lambda: 0)()
+        spent = getattr(character, "get_spent_mastery_points", lambda: 0)()
+        available = getattr(character, "get_available_mastery_points", lambda: 0)()
+
+        if self.args:
+            token = _normalize_query(self.args)
+            if token in {"respec", "reset"}:
+                if not in_mastery_room:
+                    self.msg("You need to visit the mastery trainer in Brambleford before you can reset your focus.")
+                    return
+                ok, message = character.reset_ability_mastery()
+                self.msg(message)
+                return
+
+            match = self._resolve_ability(character, self.args)
+            if isinstance(match, list):
+                self.msg("Be more specific. That could mean: " + ", ".join(name for _key, name in match))
+                return
+            if not match:
+                self.msg("No unlocked combat ability matches that name.")
+                return
+            ability_key, ability_name = match
+            if not in_mastery_room:
+                self.msg("You need to be in Brambleford's Mastery Hall to train an ability.")
+                return
+            if not can_train_ability(character, ability_key):
+                self.msg("That technique cannot be refined here yet.")
+                return
+            ok, message = character.train_ability_mastery(ability_key)
+            if ok:
+                rank = getattr(character, "get_ability_mastery_rank", lambda _key: 1)(ability_key)
+                label = mastery_rank_label(rank)
+                self.msg(f"{message} {format_mastery_name(ability_name, rank)} is now {label.lower()}.")
+            else:
+                self.msg(message)
+            return
+
+        blocks = []
+        for ability_name in getattr(character, "get_unlocked_combat_abilities", lambda: [])():
+            ability_key = CHARACTER_CONTENT.ability_key(ability_name)
+            rank = getattr(character, "get_ability_mastery_rank", lambda _key: 1)(ability_key)
+            details = [f"Rank {rank} · {mastery_rank_label(rank)}"]
+            next_text = get_next_mastery_text(ability_key, rank)
+            if next_text:
+                details.append(next_text)
+            elif can_train_ability(character, ability_key):
+                details.append("This technique is already mastered.")
+            blocks.append(
+                format_entry(
+                    format_mastery_name(format_ability_display(ability_name, character), rank),
+                    details=details,
+                    summary=(CHARACTER_CONTENT.ability_library.get(ability_key) or {}).get("summary"),
+                )
+            )
+
+        if in_mastery_room:
+            tips = [
+                *wrap_text(f"Use |wmastery <ability>|n to raise one technique by one rank.", indent="  "),
+                *wrap_text(
+                    f"Use |wmastery respec|n to reset your mastery for |w{MASTERY_RESPEC_SILVER_COST}|n silver.",
+                    indent="  ",
+                ),
+            ]
+        else:
+            tips = wrap_text(
+                "Training requires Mistress Elira Thorne in the Mastery Hall just inside the Brambleford Training Yard.",
+                indent="  ",
+            )
+
+        screen = render_screen(
+            "Ability Mastery",
+            subtitle="Known techniques use I / II / III in menus while trained ranks are described in prose as trained or mastered.",
+            meta=[
+                f"{available} mastery point{'s' if available != 1 else ''} available",
+                f"{spent} spent / {earned} earned",
+                f"{character.db.brave_silver or 0} silver on hand",
+            ],
+            sections=[
+                ("Techniques", _stack_blocks(blocks) if blocks else ["  No trainable combat techniques unlocked yet."]),
+                ("Mastery Hall", tips),
+            ],
         )
         self.scene_msg(screen, panel=build_sheet_panel(character), view=build_sheet_view(character))
 
@@ -633,7 +779,15 @@ class CmdCompanion(BraveCharacterCommand):
             unlocked = list(getattr(character, "get_unlocked_companions", lambda: [])() or [])
             blocks = []
             for companion in unlocked:
-                details = ["Active" if companion.get("key") == active.get("key") else "Bonded"]
+                bond = dict(companion.get("bond", {}) or {})
+                details = [
+                    "Active" if companion.get("key") == active.get("key") else "Bonded",
+                    companion.get("bond_label", f"Bond {bond.get('level', 1)}"),
+                ]
+                if bond.get("at_cap"):
+                    details.append("Bond XP capped")
+                else:
+                    details.append(f"{bond.get('xp_to_next', 0)} XP to next bond")
                 blocks.append(
                     format_entry(
                         companion.get("name", "Companion"),

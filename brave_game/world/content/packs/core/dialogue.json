@@ -130,6 +130,19 @@
         "text": "You look steadier now. Let the toughest one take the first hit, let the sharpest one pick the target, and come back alive enough for supper."
       }
     ],
+    "mistress_elira_thorne": [
+      {
+        "text": "Technique is what survives after panic burns off. If you want to refine what you already know, use `mastery` here and pick a combat technique to sharpen. If you want your whole focus back, I can break the pattern cleanly for `mastery respec`, but I do not do it for free."
+      }
+    ],
+    "mender_veska_flint": [
+      {
+        "text": "Torren makes things meant to last. I make things meant to solve the next ugly problem before it solves you. If you want trapwork, field fixes, or something useful built out of what the road coughed up, use `tinker` here and work from the bench ledger."
+      },
+      {
+        "text": "If you're hunting better patterns, keep your eyes open. Goblin hexers steal anything not nailed down, fence-cutters and ridge scouts lift ward notes off dead caravans, barrow lights cough old formula sheets back into the dark, and half the marsh seems determined to return my work only after someone else bleeds for it. Use `study` when you find one worth keeping."
+      }
+    ],
     "joss_veller": [
       {
         "active": "the_hollow_lantern",

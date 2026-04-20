@@ -10,7 +10,15 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
 chargen_stub = types.ModuleType("world.chargen")
-chargen_stub.get_next_chargen_step = lambda state: "menunode_choose_name"
+chargen_stub.get_next_chargen_step = lambda state: (
+    "menunode_choose_race"
+    if not state.get("race")
+    else "menunode_choose_class"
+    if not state.get("class")
+    else "menunode_choose_name"
+    if not state.get("name") or not state.get("gender")
+    else "menunode_confirm"
+)
 chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules["world.chargen"] = chargen_stub
 
@@ -37,18 +45,20 @@ class ChargenViewTests(unittest.TestCase):
         view = build_chargen_view(DummyAccount(), {"step": "menunode_choose_name", "name": "Aria"})
 
         self.assertEqual("chargen", view.get("variant"))
-        form = _section(view, "Character Name")
+        form = _section(view, "Identity")
         self.assertEqual("form", form.get("kind"))
-        self.assertEqual("character_name", form.get("field_name"))
-        self.assertEqual("Aria", form.get("value"))
+        self.assertEqual("character_name", form.get("fields", [])[0].get("field_name"))
+        self.assertEqual("Aria", form.get("fields", [])[0].get("value"))
         self.assertEqual("Save And Continue", form.get("submit_label"))
         self.assertEqual("raw", form.get("submit_mode"))
+        genders = _section(view, "Gender")
+        self.assertEqual({"Male", "Female", "Non-binary"}, {entry.get("title") for entry in genders.get("items", [])})
 
-    def test_class_step_uses_distinct_class_icons(self):
+    def test_class_step_uses_distinct_class_background_icons(self):
         view = build_chargen_view(DummyAccount(), {"step": "menunode_choose_class", "name": "Aria"})
         classes = _section(view, "Classes")
         entries = classes.get("items", [])
-        icons_by_title = {entry.get("title"): entry.get("icon") for entry in entries}
+        icons_by_title = {entry.get("title"): entry.get("background_icon") for entry in entries}
 
         self.assertEqual(
             {
@@ -62,15 +72,16 @@ class ChargenViewTests(unittest.TestCase):
             },
             icons_by_title,
         )
-        self.assertEqual(len(entries), len({entry.get("icon") for entry in entries}))
+        self.assertEqual(len(entries), len({entry.get("background_icon") for entry in entries}))
+        self.assertTrue(all(entry.get("hide_icon") for entry in entries))
         ranger_entry = next(entry for entry in entries if entry.get("title") == "Ranger")
         self.assertIn("Companion Bond", [chip.get("label") for chip in ranger_entry.get("chips", [])])
 
-    def test_race_step_uses_distinct_race_icons(self):
+    def test_race_step_uses_distinct_race_background_icons(self):
         view = build_chargen_view(DummyAccount(), {"step": "menunode_choose_race", "name": "Aria"})
         races = _section(view, "Races")
         entries = races.get("items", [])
-        icons_by_title = {entry.get("title"): entry.get("icon") for entry in entries}
+        icons_by_title = {entry.get("title"): entry.get("background_icon") for entry in entries}
 
         self.assertEqual(
             {
@@ -82,7 +93,8 @@ class ChargenViewTests(unittest.TestCase):
             },
             icons_by_title,
         )
-        self.assertEqual(len(entries), len({entry.get("icon") for entry in entries}))
+        self.assertEqual(len(entries), len({entry.get("background_icon") for entry in entries}))
+        self.assertTrue(all(entry.get("hide_icon") for entry in entries))
 
 
 if __name__ == "__main__":

@@ -23,15 +23,17 @@ from .account import (
     CmdBraveOOCLook,
     CmdBravePlay,
     CmdBraveTheme,
+    CmdBraveUnconnectedConnect,
+    CmdBraveUnconnectedCreate,
     CmdBraveUnconnectedLook,
 )
 from .brave_arcade import CmdArcade, CmdArcadeSubmit
-from .brave_combat import CmdAttack, CmdEnemies, CmdFight, CmdFlee, CmdUse
+from .brave_combat import CmdAttack, CmdCombatPreview, CmdEnemies, CmdFight, CmdFlee, CmdUse
 from .brave_creator import CmdContent
 from .brave_explore import CmdCook, CmdEat, CmdEmote, CmdFish, CmdItem, CmdMap, CmdReel, CmdRest, CmdTravel
 from .brave_party import CmdParty
-from .brave_profile import CmdBuild, CmdClass, CmdCompanion, CmdGear, CmdOath, CmdPack, CmdQuests, CmdRace, CmdSheet
-from .brave_town import CmdForge, CmdPortals, CmdPray, CmdRead, CmdSell, CmdShift, CmdShop, CmdSteal, CmdTalk
+from .brave_profile import CmdBuild, CmdClass, CmdCompanion, CmdGear, CmdMastery, CmdOath, CmdPack, CmdQuests, CmdRace, CmdSheet
+from .brave_town import CmdForge, CmdPortals, CmdPray, CmdRead, CmdSell, CmdShift, CmdShop, CmdSteal, CmdTalk, CmdTinker
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -55,6 +57,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdRace())
         self.add(CmdClass())
         self.add(CmdSheet())
+        self.add(CmdMastery())
         self.add(CmdGear())
         self.add(CmdPack())
         self.add(CmdCompanion())
@@ -63,6 +66,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSell())
         self.add(CmdShift())
         self.add(CmdForge())
+        self.add(CmdTinker())
         self.add(CmdMap())
         self.add(CmdFish())
         self.add(CmdReel())
@@ -80,6 +84,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdAttack())
         self.add(CmdUse())
         self.add(CmdFlee())
+        self.add(CmdCombatPreview())
         self.add(CmdRest())
         self.add(CmdArcade())
         self.add(CmdArcadeSubmit())
@@ -132,6 +137,8 @@ class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
         # any commands you add below will overload the default ones.
         #
         self.remove("look")
+        self.add(CmdBraveUnconnectedConnect())
+        self.add(CmdBraveUnconnectedCreate())
         self.add(CmdBraveUnconnectedLook())
 
 

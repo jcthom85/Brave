@@ -7,6 +7,7 @@ migration safe before broader creator tooling is introduced.
 
 from world.ability_icons import ALLOWED_ABILITY_ICON_ROLES, ALLOWED_PASSIVE_ICON_ROLES
 from world.content import get_content_registry
+from world.genders import VALID_BRAVE_GENDERS, normalize_brave_gender
 
 
 def validate_content_registry(registry=None):
@@ -77,6 +78,18 @@ def _validate_item_content(registry, errors):
         slot = item_data.get("slot")
         if slot and slot not in items.equipment_slots:
             errors.append(f"Item {template_id} uses unknown equipment slot: {slot}")
+        use = dict(item_data.get("use") or {})
+        if use.get("effect_type") == "unlock_recipe":
+            recipe_domain = str(use.get("recipe_domain") or "cooking").lower()
+            recipe_key = str(use.get("unlock_recipe") or "").lower()
+            if recipe_domain == "cooking":
+                if recipe_key not in registry.systems.cooking_recipes:
+                    errors.append(f"Item {template_id} unlocks unknown cooking recipe: {recipe_key}")
+            elif recipe_domain == "tinkering":
+                if recipe_key not in registry.systems.tinkering_recipes:
+                    errors.append(f"Item {template_id} unlocks unknown tinkering recipe: {recipe_key}")
+            else:
+                errors.append(f"Item {template_id} uses unknown recipe domain: {recipe_domain}")
 
     for template_id, _quantity in items.starter_consumables:
         if template_id not in items.item_templates:
@@ -131,6 +144,8 @@ def _validate_encounter_content(registry, errors):
     room_ids = {room.get("id") for room in world.rooms}
 
     for template_key, template in encounters.enemy_templates.items():
+        if template.get("gender") and normalize_brave_gender(template.get("gender")) not in VALID_BRAVE_GENDERS:
+            errors.append(f"Enemy {template_key} uses an invalid gender: {template.get('gender')}")
         for drop in template.get("loot", []):
             item_id = drop.get("item")
             if item_id and item_id not in items.item_templates:
@@ -186,6 +201,13 @@ def _validate_dialogue_content(registry, errors):
     entity_by_id = {entity.get("id"): entity for entity in world.entities}
     known_resonances = {"fantasy", "tech"}
 
+    for entity in world.entities:
+        if entity.get("kind") != "npc":
+            continue
+        gender = normalize_brave_gender(entity.get("gender"))
+        if gender not in VALID_BRAVE_GENDERS:
+            errors.append(f"NPC entity is missing a valid gender: {entity.get('id')}")
+
     for entity_id, rules in dialogue.talk_rules.items():
         entity = entity_by_id.get(entity_id)
         if not entity:
@@ -215,13 +237,37 @@ def _validate_dialogue_content(registry, errors):
 
 def _validate_systems_content(registry, errors):
     items = registry.items
+    quests = registry.quests
     world = registry.world
     systems = registry.systems
     room_ids = {room.get("id") for room in world.rooms}
 
+    for rod_key, rod in systems.fishing_rods.items():
+        if not rod.get("name"):
+            errors.append(f"Fishing rod {rod_key} is missing a name")
+        for quest_key in rod.get("unlock_completed_quests", []) or []:
+            if quest_key not in quests.quests:
+                errors.append(f"Fishing rod {rod_key} references unknown unlock quest: {quest_key}")
+
+    for lure_key, lure in systems.fishing_lures.items():
+        if not lure.get("name"):
+            errors.append(f"Fishing lure {lure_key} is missing a name")
+        for item_id in lure.get("attracts", []):
+            if item_id not in items.item_templates:
+                errors.append(f"Fishing lure {lure_key} references unknown attract item: {item_id}")
+        for quest_key in lure.get("unlock_completed_quests", []) or []:
+            if quest_key not in quests.quests:
+                errors.append(f"Fishing lure {lure_key} references unknown unlock quest: {quest_key}")
+
     for room_id, spot in systems.fishing_spots.items():
         if room_id not in room_ids:
             errors.append(f"Fishing spot references unknown room: {room_id}")
+        for rod_key in spot.get("recommended_rods", []):
+            if rod_key not in systems.fishing_rods:
+                errors.append(f"Fishing spot {room_id} references unknown rod: {rod_key}")
+        for lure_key in spot.get("recommended_lures", []):
+            if lure_key not in systems.fishing_lures:
+                errors.append(f"Fishing spot {room_id} references unknown lure: {lure_key}")
         for fish in spot.get("fish", []):
             item_id = fish.get("item")
             if item_id and item_id not in items.item_templates:
@@ -234,6 +280,17 @@ def _validate_systems_content(registry, errors):
         for item_id in recipe.get("ingredients", {}):
             if item_id not in items.item_templates:
                 errors.append(f"Cooking recipe {recipe_key} references unknown ingredient: {item_id}")
+
+    for recipe_key, recipe in systems.tinkering_recipes.items():
+        result_id = recipe.get("result")
+        if result_id and result_id not in items.item_templates:
+            errors.append(f"Tinkering recipe {recipe_key} yields unknown item: {result_id}")
+        base_id = recipe.get("base")
+        if base_id and base_id not in items.item_templates:
+            errors.append(f"Tinkering recipe {recipe_key} references unknown base item: {base_id}")
+        for item_id in recipe.get("components", {}):
+            if item_id not in items.item_templates:
+                errors.append(f"Tinkering recipe {recipe_key} references unknown component: {item_id}")
 
     if systems.outfitters_room_id and systems.outfitters_room_id not in room_ids:
         errors.append(f"Commerce references unknown outfitters room: {systems.outfitters_room_id}")

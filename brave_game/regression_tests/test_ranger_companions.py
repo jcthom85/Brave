@@ -18,6 +18,7 @@ sys.modules.setdefault("world.chargen", chargen_stub)
 from typeclasses.characters import Character
 from world.activities import use_consumable_template
 from world.browser_views import build_sheet_view
+from world.ranger_companions import get_companion
 
 
 class DummyRanger:
@@ -34,6 +35,7 @@ class DummyRanger:
             brave_inventory=list(inventory or []),
             brave_companions=["marsh_hound"] if class_key == "ranger" else [],
             brave_active_companion="marsh_hound" if class_key == "ranger" else "",
+            brave_companion_bonds={},
             brave_primary_stats={"strength": 4, "agility": 8, "intellect": 2, "spirit": 2, "vitality": 5},
             brave_derived_stats={
                 "max_hp": 50,
@@ -79,6 +81,12 @@ class DummyRanger:
     def set_active_companion(self, companion_key):
         return Character.set_active_companion(self, companion_key)
 
+    def get_companion_bond_state(self, companion_key):
+        return Character.get_companion_bond_state(self, companion_key)
+
+    def award_companion_bond_xp(self, companion_key, amount):
+        return Character.award_companion_bond_xp(self, companion_key, amount)
+
     def get_unlocked_abilities(self):
         return ["Quick Shot", "Mark Prey", "Aimed Shot", "Snare Trap"]
 
@@ -91,6 +99,11 @@ def _section(view, label):
 
 
 class RangerCompanionTests(unittest.TestCase):
+    def test_companions_use_rpg_awesome_icons(self):
+        self.assertEqual("wolf-howl", get_companion("marsh_hound").get("icon"))
+        self.assertEqual("bird-claw", get_companion("ash_hawk").get("icon"))
+        self.assertEqual("tooth", get_companion("briar_boar").get("icon"))
+
     def test_ranger_can_unlock_hawk_companion_from_bond_item(self):
         character = DummyRanger(inventory=[{"template": "hawkcaller_whistle", "quantity": 1}])
 
@@ -120,6 +133,15 @@ class RangerCompanionTests(unittest.TestCase):
         self.assertIn("Marsh Hound", message)
         self.assertEqual("marsh_hound", character.db.brave_active_companion)
 
+    def test_companion_bond_xp_levels_up_bond_state(self):
+        character = DummyRanger()
+
+        messages = character.award_companion_bond_xp("marsh_hound", 3)
+        state = character.get_companion_bond_state("marsh_hound")
+
+        self.assertEqual(2, state["level"])
+        self.assertIn("Bond 2", messages[0])
+
     def test_sheet_view_shows_active_ranger_companion(self):
         character = DummyRanger()
         character.unlock_companion("ash_hawk")
@@ -129,6 +151,7 @@ class RangerCompanionTests(unittest.TestCase):
 
         self.assertEqual("Ash Hawk", companion.get("items", [])[0].get("title"))
         self.assertIn("Unlocked companions: 2", companion.get("items", [])[0].get("lines", []))
+        self.assertIn("Bond 1", companion.get("items", [])[0].get("lines", [])[1])
 
 
 if __name__ == "__main__":

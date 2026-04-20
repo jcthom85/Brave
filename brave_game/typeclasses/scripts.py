@@ -35,6 +35,7 @@ from world.combat_atb import (
 from world.combat_execution import execute_combat_ability
 from world.content import get_content_registry
 from world.enemy_icons import get_enemy_icon_name
+from world.genders import get_brave_pronoun, resolve_brave_gender
 from world.roaming import (
     advance_roaming_parties,
     build_roaming_room_preview,
@@ -56,6 +57,7 @@ get_enemy_temperament_label = ENCOUNTER_CONTENT.get_enemy_temperament_label
 get_relative_threat_label = ENCOUNTER_CONTENT.get_relative_threat_label
 from world.data.items import ITEM_TEMPLATES, get_item_use_profile, match_inventory_item
 from world.questing import advance_enemy_defeat, pop_recent_quest_updates
+from world.ranger_companions import get_companion
 from world.resonance import get_ability_display_name, get_resource_label, resolve_ability_query
 from world.race_perks import (
     adjust_effect_damage,
@@ -75,6 +77,9 @@ COMBAT_BOSS_CREDIT_RATIO = (2, 3)
 COMBAT_ACTION_SCORE_CAP = 3.0
 COMBAT_UTILITY_WEIGHT = 6
 COMBAT_HITS_TAKEN_WEIGHT = 2
+COMBAT_MAX_PLAYER_CHARACTERS = 4
+COMBAT_MAX_ENEMIES = 4
+COMBAT_MAX_BOSS_ENEMIES = 3
 # The browser serializes lunge/impact before the 860ms defeat fall. Leave
 # headroom for network/render latency plus a brief beat before victory.
 COMBAT_FINISH_FX_DELAY = 1.6
@@ -117,9 +122,34 @@ def _combat_entry_ref(target):
 
     if isinstance(target, Mapping):
         target_id = target.get("id")
+        if target.get("kind") == "companion":
+            return f"c:{target_id}" if target_id is not None else None
         return f"e:{target_id}" if target_id is not None else None
     target_id = getattr(target, "id", None)
     return f"p:{target_id}" if target_id is not None else None
+
+
+def _enemy_gender(enemy):
+    """Resolve the authored gender for one enemy mapping."""
+
+    if not isinstance(enemy, Mapping):
+        return resolve_brave_gender(enemy)
+    template = ENEMY_TEMPLATES.get(enemy.get("template_key")) or {}
+    return resolve_brave_gender(
+        enemy.get("gender") or enemy.get("brave_gender") or template.get("gender")
+    )
+
+
+def _is_companion_actor(target):
+    """Return whether the allied combatant is a ranger companion mapping."""
+
+    return isinstance(target, Mapping) and target.get("kind") == "companion"
+
+
+def _ally_actor_id(target):
+    """Return a stable ally actor id for characters or companion mappings."""
+
+    return _combat_target_id(target)
 
 
 def _combat_fx_marker(**fields):
@@ -133,6 +163,27 @@ def _combat_fx_marker(**fields):
     if not payload:
         return ""
     return f" [[BRAVEFX {urlencode(payload)}]]"
+
+
+def _limit_encounter_enemies(template_keys):
+    """Clamp encounter enemy templates to the supported combat presentation cap."""
+
+    normalized = [str(template_key or "").strip() for template_key in (template_keys or []) if str(template_key or "").strip()]
+    if len(normalized) <= COMBAT_MAX_ENEMIES:
+        return normalized
+
+    bosses = []
+    others = []
+    for template_key in normalized:
+        tags = set((ENEMY_TEMPLATES.get(template_key) or {}).get("tags", []) or [])
+        if "boss" in tags:
+            bosses.append(template_key)
+        else:
+            others.append(template_key)
+
+    if bosses:
+        return bosses[:1] + others[: max(0, COMBAT_MAX_BOSS_ENEMIES - 1)]
+    return normalized[:COMBAT_MAX_ENEMIES]
 
 
 def _enemy_damage_type(enemy):
@@ -524,6 +575,7 @@ class BraveEncounter(Script):
             "room_id": getattr(room.db, "brave_room_id", None),
             "encounter_data": encounter_data,
             "encounter_key": encounter_data["key"],
+            "threat_query": str(encounter_data.get("key") or "").strip(),
             "encounter_title": encounter_title,
             "encounter_intro": encounter_intro,
             "party_name": party_name,
@@ -759,13 +811,18 @@ class BraveEncounter(Script):
             "key": display_name,
             "display_name": display_name,
             "party_name": str(preview.get("party_name") or display_name).strip() or display_name,
+            "threat_query": str(preview.get("threat_query") or preview.get("encounter_key") or "").strip(),
             "composition": composition,
             "count": count,
             "members": list(preview.get("members") or []),
             "detail": f"Engaged · {composition}" if engaged else composition,
             "badge": str(count),
             "tooltip": " · ".join(bit for bit in tooltip_bits if bit),
-            "command": "fight",
+            "command": (
+                f"fight {str(preview.get('threat_query') or preview.get('encounter_key') or '').strip()}".strip()
+                if str(preview.get("threat_query") or preview.get("encounter_key") or "").strip()
+                else "fight"
+            ),
             "engaged": engaged,
             "marker_icon": "swords" if engaged else ("skull" if overpowering else None),
             "icon": preview.get("icon") or "monster-skull",
@@ -784,7 +841,7 @@ class BraveEncounter(Script):
         cards = []
         for party in preview.get("roaming_parties") or []:
             encounter_data = dict(party.get("encounter") or {})
-            encounter_data.setdefault("key", party.get("key") or "roaming_party")
+            encounter_data["key"] = party.get("key") or encounter_data.get("key") or "roaming_party"
             encounter_data.setdefault("title", encounter_data.get("key") or "Hostile Party")
             encounter_data.setdefault("intro", "")
             encounter_data.setdefault("enemies", list(encounter_data.get("enemies") or []))
@@ -845,6 +902,79 @@ class BraveEncounter(Script):
         return matches[0] if len(matches) == 1 else matches
 
     @classmethod
+    def get_room_threat_options(cls, room):
+        """Return concrete selectable room-threat previews for engagement commands."""
+
+        preview = cls.get_room_threat_preview(room)
+        if not preview:
+            return []
+
+        if preview.get("roaming_parties"):
+            options = []
+            for party in preview.get("roaming_parties") or []:
+                encounter_data = dict(party.get("encounter") or {})
+                encounter_data.setdefault("key", party.get("key") or "roaming_party")
+                encounter_data.setdefault("title", encounter_data.get("key") or "Hostile Party")
+                encounter_data.setdefault("intro", "")
+                encounter_data.setdefault("enemies", list(encounter_data.get("enemies") or []))
+                if not encounter_data["enemies"]:
+                    continue
+                party_preview = cls._build_preview_data(room, encounter_data)
+                party_preview["source"] = "roaming"
+                party_preview["engagement_scope"] = "room"
+                party_preview["roaming_party_keys"] = [party.get("key")] if party.get("key") else []
+                party_preview["threat_query"] = str(party.get("key") or encounter_data.get("key") or "").strip()
+                options.append(party_preview)
+            return options
+
+        return [preview]
+
+    @classmethod
+    def resolve_room_threat_preview(cls, room, query=None):
+        """Resolve a room threat preview for explicit combat selection."""
+
+        options = cls.get_room_threat_options(room)
+        if not options:
+            return None
+        if len(options) == 1 and not query:
+            return options[0]
+
+        query_norm = _normalize_token(query)
+        if not query_norm:
+            return options
+
+        matches = []
+        for preview in options:
+            tokens = {
+                _normalize_token(preview.get("threat_query")),
+                _normalize_token(preview.get("encounter_key")),
+                _normalize_token(preview.get("display_name")),
+                _normalize_token(preview.get("party_name")),
+                _normalize_token(preview.get("encounter_title")),
+            }
+            tokens.update(_normalize_token(enemy.get("key")) for enemy in (preview.get("enemies") or []))
+            tokens.discard("")
+            if query_norm in tokens:
+                matches.append(preview)
+        if matches:
+            return matches[0] if len(matches) == 1 else matches
+
+        partial_matches = []
+        for preview in options:
+            haystacks = [
+                preview.get("threat_query"),
+                preview.get("encounter_key"),
+                preview.get("display_name"),
+                preview.get("party_name"),
+                preview.get("encounter_title"),
+            ] + [enemy.get("key") for enemy in (preview.get("enemies") or [])]
+            if any(query_norm and query_norm in _normalize_token(value) for value in haystacks):
+                partial_matches.append(preview)
+        if not partial_matches:
+            return None
+        return partial_matches[0] if len(partial_matches) == 1 else partial_matches
+
+    @classmethod
     def _should_auto_aggro(cls, room, character):
         """Return whether visible room threats should auto-engage this party."""
 
@@ -887,18 +1017,31 @@ class BraveEncounter(Script):
             joined = joined or ok
 
         if joined:
-            character.msg("|rThe room turns before you can set your feet.|n")
+            from world.browser_panels import send_browser_notice_event
+
+            send_browser_notice_event(
+                character,
+                "|rThe room turns before you can set your feet.|n",
+                title="Combat",
+                tone="danger",
+                icon="warning",
+                duration_ms=2600,
+            )
         return encounter
 
     @classmethod
-    def start_for_room(cls, room, expected_party_size=1):
+    def start_for_room(cls, room, expected_party_size=1, threat_query=None):
         """Create a new encounter for a room if encounter data exists."""
 
         encounter = cls.get_for_room(room)
         if encounter:
             return encounter, False
 
-        preview = cls.get_room_threat_preview(room)
+        preview = cls.resolve_room_threat_preview(room, threat_query)
+        if isinstance(preview, list):
+            if threat_query:
+                return None, False
+            preview = preview[0] if preview else None
         if not preview:
             return None, False
 
@@ -932,7 +1075,7 @@ class BraveEncounter(Script):
         self.db.encounter_key = encounter_data["key"]
         self.db.encounter_title = encounter_data["title"]
         self.db.encounter_intro = encounter_data["intro"]
-        self.db.expected_party_size = max(1, min(4, int(expected_party_size or 1)))
+        self.db.expected_party_size = max(1, min(COMBAT_MAX_PLAYER_CHARACTERS, int(expected_party_size or 1)))
         self.db.pending_actions = {}
         self.db.participants = []
         self.db.defeated_participants = []
@@ -943,13 +1086,16 @@ class BraveEncounter(Script):
         self.db.round = 0
         self.db.enemies = []
         self.db.enemy_counter = 0
+        self.db.companions = []
+        self.db.companion_counter = 0
 
         template_totals = {}
-        for template_key in encounter_data["enemies"]:
+        enemy_templates = _limit_encounter_enemies(encounter_data.get("enemies") or [])
+        for template_key in enemy_templates:
             template_totals[template_key] = template_totals.get(template_key, 0) + 1
 
         template_seen = {}
-        for template_key in encounter_data["enemies"]:
+        for template_key in enemy_templates:
             template_seen[template_key] = template_seen.get(template_key, 0) + 1
             display_key = None
             if template_totals[template_key] > 1:
@@ -959,15 +1105,10 @@ class BraveEncounter(Script):
     def at_start(self):
         if self.obj:
             self.obj.ndb.brave_encounter = self
-            intro = (self.db.encounter_intro or "").strip()
-            if intro:
-                self.obj.msg_contents(f"|r{intro}|n")
-            else:
-                self.obj.msg_contents(f"|r{self.db.encounter_title}!|n")
         self._refresh_browser_combat_views()
 
     def at_stop(self):
-        participants = list(self.get_participants())
+        participants = list(self.get_player_participants())
         self._clear_browser_combat_views(participants)
         if self.obj:
             self.obj.ndb.brave_encounter = None
@@ -989,11 +1130,11 @@ class BraveEncounter(Script):
     def _get_character(self, dbref):
         try:
             return ObjectDB.objects.get(id=dbref)
-        except ObjectDB.DoesNotExist:
+        except (ObjectDB.DoesNotExist, TypeError, ValueError):
             return None
 
-    def get_participants(self):
-        """Resolve all participant dbrefs into characters."""
+    def get_player_participants(self):
+        """Resolve encounter participant dbrefs into character objects."""
 
         participants = []
         for participant_id in self.db.participants or []:
@@ -1001,6 +1142,11 @@ class BraveEncounter(Script):
             if participant:
                 participants.append(participant)
         return participants
+
+    def get_participants(self):
+        """Return all active allied combatants, including companions."""
+
+        return list(self.get_player_participants()) + list(self.get_active_companions())
 
     def get_defeated_participants(self):
         """Resolve defeated participant dbrefs into characters."""
@@ -1017,12 +1163,148 @@ class BraveEncounter(Script):
 
         seen = set()
         participants = []
-        for participant in self.get_participants() + self.get_defeated_participants():
+        for participant in self.get_player_participants() + self.get_defeated_participants():
             if not participant or participant.id in seen:
                 continue
             seen.add(participant.id)
             participants.append(participant)
         return participants
+
+    def get_active_player_participants(self):
+        """Return conscious player characters still present in the fight."""
+
+        active = []
+        for participant in self.get_player_participants():
+            resources = participant.db.brave_resources or {}
+            if participant.location == self.obj and resources.get("hp", 0) > 0:
+                active.append(participant)
+        return active
+
+    def _companion_state_template(self):
+        """Return the default effect state for a ranger companion."""
+
+        return {
+            "guard": 0,
+            "reaction_guard": 0,
+            "reaction_guard_source": None,
+            "reaction_label": None,
+            "reaction_redirect_to": None,
+            "sacred_aegis_turns": 0,
+            "sacred_aegis_source": None,
+            "sacred_aegis_power": 0,
+            "grove_turns": 0,
+            "primal_form": None,
+            "primal_form_turns": 0,
+            "bleed_turns": 0,
+            "bleed_damage": 0,
+            "poison_turns": 0,
+            "poison_damage": 0,
+            "poison_accuracy_penalty": 0,
+            "curse_turns": 0,
+            "curse_armor_penalty": 0,
+            "snare_turns": 0,
+            "snare_accuracy_penalty": 0,
+            "snare_dodge_penalty": 0,
+            "feint_turns": 0,
+            "feint_accuracy_bonus": 0,
+            "feint_dodge_bonus": 0,
+            "stealth_turns": 0,
+        }
+
+    def _get_companion(self, companion_id):
+        """Return one active encounter companion by id."""
+
+        for companion in self.db.companions or []:
+            if str(companion.get("id")) == str(companion_id):
+                return dict(companion)
+        return None
+
+    def get_active_companions(self, owner=None):
+        """Return living encounter companions still fighting."""
+
+        owner_id = getattr(owner, "id", owner)
+        companions = []
+        for companion in self.db.companions or []:
+            if owner_id is not None and companion.get("owner_id") != owner_id:
+                continue
+            if companion.get("present", True) and int(companion.get("hp", 0) or 0) > 0:
+                companions.append(dict(companion))
+        return companions
+
+    def _save_companion(self, companion):
+        """Persist one encounter companion mapping."""
+
+        companions = []
+        for current in self.db.companions or []:
+            companions.append(dict(companion) if current.get("id") == companion.get("id") else current)
+        self.db.companions = companions
+
+    def _spawn_ranger_companion(self, owner, announce=True):
+        """Create the ranger's active bonded companion as an allied combat actor."""
+
+        if not owner or getattr(getattr(owner, "db", None), "brave_class", "") != "ranger":
+            return None
+        existing = self.get_active_companions(owner=owner.id)
+        if existing:
+            return existing[0]
+        definition = dict(getattr(owner, "get_active_companion", lambda: {})() or {})
+        if not definition:
+            return None
+        combat = dict(definition.get("combat", {}))
+        derived = dict(owner.db.brave_derived_stats or {})
+        counter = int(self.db.companion_counter or 0) + 1
+        self.db.companion_counter = counter
+        companion = {
+            "kind": "companion",
+            "id": f"c{counter}",
+            "owner_id": owner.id,
+            "companion_key": str(getattr(owner.db, "brave_active_companion", "") or "").lower(),
+            "key": definition.get("name", "Companion"),
+            "icon": definition.get("icon", "pets"),
+            "summary": definition.get("summary", "A bonded ranger companion joins the line."),
+            "bond": dict(definition.get("bond", {}) or {}),
+            "bond_label": definition.get("bond_label", "Bond 1"),
+            "max_hp": max(12, int(round(derived.get("max_hp", 24) * float(combat.get("hp_ratio", 0.5) or 0.5)))),
+            "hp": 0,
+            "attack_power": max(4, int(round(derived.get("attack_power", 8) * float(combat.get("attack_ratio", 0.5) or 0.5)))),
+            "armor": max(0, int(round(derived.get("armor", 4) * float(combat.get("armor_ratio", 0.7) or 0.7)))),
+            "accuracy": max(40, int(derived.get("accuracy", 55) + int(combat.get("accuracy_bonus", 0) or 0))),
+            "dodge": max(0, int(round(derived.get("dodge", 4) * 0.8)) + int(combat.get("dodge_bonus", 0) or 0)),
+            "fill_rate": max(70, int(combat.get("fill_rate_bonus", 0) or 0) + 92),
+            "present": True,
+        }
+        companion["hp"] = companion["max_hp"]
+        companions = list(self.db.companions or [])
+        companions.append(companion)
+        self.db.companions = companions
+        states = dict(self.db.participant_states or {})
+        states[str(companion["id"])] = self._companion_state_template()
+        self.db.participant_states = states
+        self._save_actor_atb_state(
+            create_atb_state(fill_rate=companion["fill_rate"], tick_ms=self._atb_tick_ms()),
+            companion=companion,
+        )
+        threat = dict(self.db.threat or {})
+        threat[str(companion["id"])] = 0
+        self.db.threat = threat
+        if announce and self.obj:
+            self.obj.msg_contents(f"|g{companion['key']} bounds into the fight beside {owner.key}.|n")
+        return companion
+
+    def _remove_companion(self, companion, *, refresh=True):
+        """Remove a ranger companion from the encounter."""
+
+        companion_id = str(companion.get("id"))
+        self.db.companions = [entry for entry in (self.db.companions or []) if str(entry.get("id")) != companion_id]
+        states = dict(self.db.participant_states or {})
+        states.pop(companion_id, None)
+        self.db.participant_states = states
+        self._clear_actor_atb_state(companion=companion)
+        threat = dict(self.db.threat or {})
+        threat.pop(companion_id, None)
+        self.db.threat = threat
+        if refresh:
+            self._refresh_browser_combat_views()
 
     def _boss_credit_open(self):
         """Return whether boss/quest credit is still open for new joiners."""
@@ -1039,7 +1321,7 @@ class BraveEncounter(Script):
         """Return or create contribution tracking for a participant."""
 
         contributions = dict(self.db.participant_contributions or {})
-        key = str(character.id)
+        key = str(_ally_actor_id(character))
         contribution = dict(contributions.get(key) or {})
         if not contribution:
             contribution = {
@@ -1052,6 +1334,10 @@ class BraveEncounter(Script):
                 "hits_taken": 0,
                 "boss_credit_eligible": bool(self._boss_credit_open()),
             }
+            if _is_companion_actor(character):
+                contribution["owner_id"] = character.get("owner_id")
+                contribution["companion_key"] = str(character.get("companion_key") or "").lower()
+                contribution["companion_name"] = character.get("key", "Companion")
             contributions[key] = contribution
             self.db.participant_contributions = contributions
         return contribution
@@ -1060,7 +1346,7 @@ class BraveEncounter(Script):
         """Persist contribution tracking for a participant."""
 
         contributions = dict(self.db.participant_contributions or {})
-        contributions[str(character.id)] = dict(contribution or {})
+        contributions[str(_ally_actor_id(character))] = dict(contribution or {})
         self.db.participant_contributions = contributions
 
     def _record_participant_contribution(
@@ -1076,7 +1362,7 @@ class BraveEncounter(Script):
     ):
         """Add a contribution event for a participant."""
 
-        if not character or getattr(character, "id", None) is None:
+        if not character or _ally_actor_id(character) is None:
             return
         contribution = self._get_participant_contribution(character)
         if meaningful:
@@ -1298,10 +1584,11 @@ class BraveEncounter(Script):
         """Return participants still present and standing."""
 
         active = []
-        for participant in self.get_participants():
+        for participant in self.get_player_participants():
             resources = participant.db.brave_resources or {}
             if participant.location == self.obj and resources.get("hp", 0) > 0:
                 active.append(participant)
+        active.extend(self.get_active_companions())
         return active
 
     def _refresh_browser_combat_views(self, participants=None):
@@ -1310,7 +1597,7 @@ class BraveEncounter(Script):
         from world.browser_panels import build_combat_panel, send_webclient_event
         from world.browser_views import build_combat_view
 
-        targets = participants if participants is not None else self.get_active_participants()
+        targets = participants if participants is not None else self.get_active_player_participants()
         for participant in targets:
             if not participant or participant.location != self.obj:
                 continue
@@ -1325,7 +1612,7 @@ class BraveEncounter(Script):
 
         from world.browser_panels import send_webclient_event
 
-        for participant in self.get_active_participants():
+        for participant in self.get_active_player_participants():
             if participant and participant.location == self.obj:
                 send_webclient_event(participant, brave_combat_fx=event)
 
@@ -1364,6 +1651,15 @@ class BraveEncounter(Script):
             defeat=True,
         )
 
+    def _announce_combat_action(self, actor, label):
+        """Emit a short JRPG-style action banner into the battle feed."""
+
+        if not self.obj or not label:
+            return
+        actor_name = _combat_target_name(actor, "Companion")
+        marker = _combat_fx_marker(kind="action", actor=actor_name, label=label)
+        self.obj.msg_contents(f"|c{actor_name} uses {label}!|n{marker}")
+
     def _clear_browser_combat_views(self, participants=None):
         """Remove any sticky browser combat UI for participants."""
 
@@ -1372,7 +1668,7 @@ class BraveEncounter(Script):
         if getattr(getattr(self, "ndb", None), "brave_skip_combat_done", False):
             return
 
-        targets = participants if participants is not None else self.get_participants()
+        targets = participants if participants is not None else self.get_player_participants()
         for participant in targets:
             if participant:
                 send_webclient_event(participant, brave_combat_done={})
@@ -1399,17 +1695,19 @@ class BraveEncounter(Script):
             return "mana"
         return "stamina"
 
-    def _actor_atb_key(self, character=None, enemy=None):
+    def _actor_atb_key(self, character=None, enemy=None, companion=None):
         if character is not None:
             return f"p:{character.id}"
         if enemy is not None:
             return f"e:{enemy['id']}"
+        if companion is not None:
+            return f"c:{companion['id']}"
         raise ValueError("ATB actor key requires a character or enemy.")
 
     def _atb_tick_ms(self):
         return max(1, int(round(float(getattr(self, "interval", 0.25) or 0.25) * 1000)))
 
-    def _default_atb_fill_rate(self, *, character=None, enemy=None):
+    def _default_atb_fill_rate(self, *, character=None, enemy=None, companion=None):
         if character is not None:
             class_base = {
                 "rogue": 104,
@@ -1439,28 +1737,30 @@ class BraveEncounter(Script):
             if {"armored", "undead", "slime"} & tags:
                 fill_rate -= 6
             return max(70, min(170, fill_rate))
+        if companion is not None:
+            return max(70, min(176, int(companion.get("fill_rate", 96) or 96)))
         return 84
 
-    def _get_actor_atb_state(self, character=None, enemy=None):
+    def _get_actor_atb_state(self, character=None, enemy=None, companion=None):
         states = dict(self.db.atb_states or {})
-        key = self._actor_atb_key(character=character, enemy=enemy)
+        key = self._actor_atb_key(character=character, enemy=enemy, companion=companion)
         if key not in states:
             states[key] = create_atb_state(
-                fill_rate=self._default_atb_fill_rate(character=character, enemy=enemy),
+                fill_rate=self._default_atb_fill_rate(character=character, enemy=enemy, companion=companion),
                 tick_ms=self._atb_tick_ms(),
             )
             self.db.atb_states = states
         return states[key]
 
-    def _save_actor_atb_state(self, state, *, character=None, enemy=None):
+    def _save_actor_atb_state(self, state, *, character=None, enemy=None, companion=None):
         states = dict(self.db.atb_states or {})
-        key = self._actor_atb_key(character=character, enemy=enemy)
+        key = self._actor_atb_key(character=character, enemy=enemy, companion=companion)
         states[key] = create_atb_state(**dict(state or {}), tick_ms=self._atb_tick_ms())
         self.db.atb_states = states
 
-    def _clear_actor_atb_state(self, *, character=None, enemy=None):
+    def _clear_actor_atb_state(self, *, character=None, enemy=None, companion=None):
         states = dict(self.db.atb_states or {})
-        states.pop(self._actor_atb_key(character=character, enemy=enemy), None)
+        states.pop(self._actor_atb_key(character=character, enemy=enemy, companion=companion), None)
         self.db.atb_states = states
 
     def _player_action_timing(self, action):
@@ -1499,27 +1799,33 @@ class BraveEncounter(Script):
 
     def _enemy_telegraph_message(self, enemy):
         label = self._enemy_action_label(enemy)
+        possessive = get_brave_pronoun(_enemy_gender(enemy), "possessive_adjective")
         return {
             "old_greymaw": f"|y{enemy['key']} lowers into the brush, gathering for {label}.|n",
             "miretooth": f"|y{enemy['key']} disappears into the reeds and lines up {label}.|n",
             "tower_archer": f"|y{enemy['key']} draws a careful bead for {label}.|n",
             "mag_clamp_drone": f"|y{enemy['key']} locks its rig and charges {label}.|n",
-            "sir_edric_restless": f"|y{enemy['key']} raises his blade for {label}.|n",
+            "sir_edric_restless": f"|y{enemy['key']} raises {possessive} blade for {label}.|n",
             "foreman_coilback": f"|y{enemy['key']} routes static through the frame for {label}.|n",
-            "captain_varn_blackreed": f"|y{enemy['key']} shifts his stance and sets up {label}.|n",
+            "captain_varn_blackreed": f"|y{enemy['key']} shifts {possessive} stance and sets up {label}.|n",
             "grubnak_the_pot_king": f"|y{enemy['key']} heaves the cauldron high for {label}.|n",
             "hollow_lantern": f"|y{enemy['key']} swells with drowned light and prepares {label}.|n",
         }.get((enemy or {}).get("template_key"), f"|y{enemy['key']} prepares an attack.|n")
 
     def _describe_pending_action(self, character, action_override=None):
         if action_override is None:
-            atb_state = self._get_actor_atb_state(character=character)
+            if _is_companion_actor(character):
+                atb_state = self._get_actor_atb_state(companion=character)
+            else:
+                atb_state = self._get_actor_atb_state(character=character)
             active_action = atb_state.get("current_action")
             if active_action and atb_state.get("phase") == "winding":
                 action_text = self._describe_pending_action(character, action_override=active_action)
                 return f"winding -> {action_text}"
             if atb_state.get("phase") in {"recovering", "cooldown"}:
                 return "recovering"
+        if _is_companion_actor(character):
+            return "harry nearest prey"
         pending = dict(self.db.pending_actions or {})
         action = action_override or pending.get(str(character.id))
         if not action:
@@ -1538,8 +1844,8 @@ class BraveEncounter(Script):
                 target = self.get_enemy(action["target"]) if action.get("target") else self._default_enemy_target()
                 target_name = _combat_target_name(target, "nearest enemy")
             elif ability["target"] == "ally":
-                target = self._get_character(action.get("target")) if action.get("target") else character
-                target_name = target.key if target else character.key
+                target = self._get_participant_target(action.get("target")) if action.get("target") else character
+                target_name = _combat_target_name(target, character.key)
             return f"{ability_name} -> {target_name}"
 
         if action["kind"] == "flee":
@@ -1555,8 +1861,8 @@ class BraveEncounter(Script):
                 target = self.get_enemy(action.get("target")) if action.get("target") else self._default_enemy_target()
                 target_name = _combat_target_name(target, target_name)
             elif use.get("target") == "ally":
-                target = self._get_character(action.get("target")) if action.get("target") else character
-                target_name = target.key if target else character.key
+                target = self._get_participant_target(action.get("target")) if action.get("target") else character
+                target_name = _combat_target_name(target, character.key)
             return f"{verb} -> {target_name}"
 
         return "action queued"
@@ -1621,11 +1927,17 @@ class BraveEncounter(Script):
 
         lines = []
         for participant in participants:
-            participant.ensure_brave_character()
-            resources = participant.db.brave_resources or {}
-            derived = participant.db.brave_derived_stats or {}
-            primary_resource = self._primary_resource_key(participant)
-            primary_label = get_resource_label(primary_resource, participant)
+            if _is_companion_actor(participant):
+                resources = {"hp": int(participant.get("hp", 0) or 0)}
+                derived = {"max_hp": int(participant.get("max_hp", 1) or 1)}
+                primary_resource = "stamina"
+                primary_label = "Bond"
+            else:
+                participant.ensure_brave_character()
+                resources = participant.db.brave_resources or {}
+                derived = participant.db.brave_derived_stats or {}
+                primary_resource = self._primary_resource_key(participant)
+                primary_label = get_resource_label(primary_resource, participant)
             state = self._get_participant_state(participant)
             
             # Health and Resource Bars
@@ -1644,7 +1956,7 @@ class BraveEncounter(Script):
             action_text = self._describe_pending_action(participant)
 
             lines.append(
-                f"  |w{participant.key.ljust(10)}|n {hp_bar} |wHP|n  {res_bar} |w{primary_label[:3].upper()}|n {cond_str}\n"
+                f"  |w{_combat_target_name(participant, 'Companion').ljust(10)}|n {hp_bar} |wHP|n  {res_bar} |w{primary_label[:3].upper()}|n {cond_str}\n"
                 f"    |x└─ NEXT:|n |c{action_text}|n"
             )
         return "\n".join(lines)
@@ -1701,12 +2013,24 @@ class BraveEncounter(Script):
 
         query_norm = _normalize_token(query)
         for participant in participants:
-            if query_norm == _normalize_token(participant.key):
+            if query_norm == _normalize_token(_combat_target_name(participant)):
+                return participant
+            if query_norm == _normalize_token(str(_ally_actor_id(participant))):
                 return participant
         for participant in participants:
-            if query_norm in _normalize_token(participant.key):
+            if query_norm in _normalize_token(_combat_target_name(participant)):
                 return participant
         return None
+
+    def _get_participant_target(self, target_id):
+        """Resolve an allied target id into a character or companion actor."""
+
+        if target_id in (None, ""):
+            return None
+        target = self._get_character(target_id)
+        if target:
+            return target
+        return self._get_companion(target_id)
 
     def find_consumable(self, character, query, *, context="combat", verb=None):
         """Find a carried combat-usable consumable by fuzzy name."""
@@ -1722,37 +2046,13 @@ class BraveEncounter(Script):
         character.ensure_brave_character()
         if (character.db.brave_resources or {}).get("hp", 0) <= 0:
             return False, "You can't join a fight while down."
+        if character.id not in (self.db.participants or []) and len(self.get_registered_participants()) >= COMBAT_MAX_PLAYER_CHARACTERS:
+            return False, "The ally line is already full."
 
         if character.id not in self.db.participants:
             self.db.participants = list(self.db.participants or []) + [character.id]
             participant_states = dict(self.db.participant_states or {})
-            participant_states[str(character.id)] = {
-                "guard": 0,
-                "reaction_guard": 0,
-                "reaction_guard_source": None,
-                "reaction_label": None,
-                "reaction_redirect_to": None,
-                "sacred_aegis_turns": 0,
-                "sacred_aegis_source": None,
-                "sacred_aegis_power": 0,
-                "grove_turns": 0,
-                "primal_form": None,
-                "primal_form_turns": 0,
-                "bleed_turns": 0,
-                "bleed_damage": 0,
-                "poison_turns": 0,
-                "poison_damage": 0,
-                "poison_accuracy_penalty": 0,
-                "curse_turns": 0,
-                "curse_armor_penalty": 0,
-                "snare_turns": 0,
-                "snare_accuracy_penalty": 0,
-                "snare_dodge_penalty": 0,
-                "feint_turns": 0,
-                "feint_accuracy_bonus": 0,
-                "feint_dodge_bonus": 0,
-                "stealth_turns": 0,
-            }
+            participant_states[str(character.id)] = self._companion_state_template()
             self.db.participant_states = participant_states
             self._save_actor_atb_state(
                 create_atb_state(fill_rate=self._default_atb_fill_rate(character=character), tick_ms=self._atb_tick_ms()),
@@ -1762,14 +2062,27 @@ class BraveEncounter(Script):
             threat[str(character.id)] = threat.get(str(character.id), 0)
             self.db.threat = threat
             self._get_participant_contribution(character)
+            self._spawn_ranger_companion(character)
             character.ndb.brave_encounter = self
-            self.obj.msg_contents(f"{character.key} joins the fight.", exclude=[character])
-            character.msg("You join the fight.")
+            from world.browser_panels import send_browser_notice_event
+
+            send_browser_notice_event(
+                character,
+                "You join the fight.",
+                title="Combat",
+                tone="danger",
+                icon="swords",
+                duration_ms=2600,
+            )
         else:
             character.ndb.brave_encounter = self
             self._get_participant_contribution(character)
+            self._spawn_ranger_companion(character, announce=False)
 
         self._refresh_browser_combat_views()
+        if character.location == self.obj:
+            intro = (self.db.encounter_intro or "").strip()
+            character.msg(f"|r{intro}|n" if intro else f"|r{self.db.encounter_title}!|n")
 
         return True, None
 
@@ -1918,9 +2231,10 @@ class BraveEncounter(Script):
 
     def _get_participant_state(self, character):
         states = dict(self.db.participant_states or {})
-        key = str(character.id)
+        key = str(_ally_actor_id(character))
         if key not in states:
-            states[key] = {
+            template = getattr(self, "_companion_state_template", None)
+            states[key] = template() if callable(template) else {
                 "guard": 0,
                 "reaction_guard": 0,
                 "reaction_guard_source": None,
@@ -1952,7 +2266,7 @@ class BraveEncounter(Script):
 
     def _save_participant_state(self, character, state):
         states = dict(self.db.participant_states or {})
-        states[str(character.id)] = state
+        states[str(_ally_actor_id(character))] = state
         self.db.participant_states = states
 
     def _save_enemy(self, enemy):
@@ -2020,7 +2334,7 @@ class BraveEncounter(Script):
 
     def _add_threat(self, character, amount):
         threat = dict(self.db.threat or {})
-        key = str(character.id)
+        key = str(_ally_actor_id(character))
         threat[key] = threat.get(key, 0) + max(0, amount)
         self.db.threat = threat
 
@@ -2035,11 +2349,32 @@ class BraveEncounter(Script):
         return max(1, spell_power // 2 + random.randint(3, 7) + bonus - armor // 5)
 
     def _spend_resource(self, character, resource, amount):
+        if _is_companion_actor(character):
+            return
         resources = dict(character.db.brave_resources or {})
         resources[resource] = max(0, resources[resource] - amount)
         character.db.brave_resources = resources
 
     def _get_effective_derived(self, character):
+        if _is_companion_actor(character):
+            derived = {
+                "max_hp": int(character.get("max_hp", 1) or 1),
+                "attack_power": int(character.get("attack_power", 0) or 0),
+                "armor": int(character.get("armor", 0) or 0),
+                "accuracy": int(character.get("accuracy", 0) or 0),
+                "dodge": int(character.get("dodge", 0) or 0),
+                "spell_power": 0,
+                "healing_power": 0,
+            }
+            state = self._get_participant_state(character)
+            if state.get("curse_turns", 0) > 0:
+                derived["armor"] = max(0, derived.get("armor", 0) - state.get("curse_armor_penalty", 0))
+            if state.get("snare_turns", 0) > 0:
+                derived["accuracy"] = max(0, derived.get("accuracy", 0) - state.get("snare_accuracy_penalty", 0))
+                derived["dodge"] = max(0, derived.get("dodge", 0) - state.get("snare_dodge_penalty", 0))
+            if state.get("poison_turns", 0) > 0:
+                derived["accuracy"] = max(0, derived.get("accuracy", 0) - state.get("poison_accuracy_penalty", 0))
+            return derived
         derived = dict(character.db.brave_derived_stats or {})
         state = self._get_participant_state(character)
         if state.get("curse_turns", 0) > 0:
@@ -2114,13 +2449,15 @@ class BraveEncounter(Script):
         enemy["hp"] = max(0, enemy["hp"] - damage)
         defeated = enemy["hp"] <= 0
         self._save_enemy(enemy)
-        self._add_threat(attacker, damage + (8 if attacker.db.brave_class == "warrior" else 0))
+        attacker_class = getattr(getattr(attacker, "db", None), "brave_class", "")
+        self._add_threat(attacker, damage + (8 if attacker_class == "warrior" else 0))
         self._record_participant_contribution(attacker, meaningful=True, damage=damage)
         marked_text = " The mark flares." if enemy["marked_turns"] > 0 else ""
-        self.obj.msg_contents(f"{attacker.key} hits {enemy['key']} for {damage} damage.{marked_text}{extra_text}")
+        attacker_name = _combat_target_name(attacker, "Companion")
+        self.obj.msg_contents(f"{attacker_name} hits {enemy['key']} for {damage} damage.{marked_text}{extra_text}")
         self._emit_combat_fx(
             kind="damage",
-            source=attacker.key,
+            source=attacker_name,
             source_ref=_combat_entry_ref(attacker),
             target=enemy["key"],
             target_ref=_combat_entry_ref(enemy),
@@ -2140,21 +2477,30 @@ class BraveEncounter(Script):
                 self._schedule_victory_sequence("|gThe encounter is over. The road is clear for now.|n")
 
     def _heal_character(self, source, target, amount, heal_type="healing"):
-        resources = dict(target.db.brave_resources or {})
-        max_hp = target.db.brave_derived_stats["max_hp"]
-        before = resources["hp"]
-        resources["hp"] = min(max_hp, resources["hp"] + amount)
-        target.db.brave_resources = resources
-        healed = resources["hp"] - before
+        if _is_companion_actor(target):
+            before = int(target.get("hp", 0) or 0)
+            max_hp = int(target.get("max_hp", 1) or 1)
+            target["hp"] = min(max_hp, before + amount)
+            healed = target["hp"] - before
+            self._save_companion(target)
+        else:
+            resources = dict(target.db.brave_resources or {})
+            max_hp = target.db.brave_derived_stats["max_hp"]
+            before = resources["hp"]
+            resources["hp"] = min(max_hp, resources["hp"] + amount)
+            target.db.brave_resources = resources
+            healed = resources["hp"] - before
         self._add_threat(source, max(1, healed // 2))
         if healed > 0:
             self._record_participant_contribution(source, meaningful=True, healing=healed)
-        self.obj.msg_contents(f"{source.key} restores {healed} HP to {target.key}.")
+        source_name = _combat_target_name(source, "Companion")
+        target_name = _combat_target_name(target, "Companion")
+        self.obj.msg_contents(f"{source_name} restores {healed} HP to {target_name}.")
         self._emit_combat_fx(
             kind="heal",
-            source=source.key,
+            source=source_name,
             source_ref=_combat_entry_ref(source),
-            target=target.key,
+            target=target_name,
             target_ref=_combat_entry_ref(target),
             amount=healed,
             text=str(healed),
@@ -2177,34 +2523,34 @@ class BraveEncounter(Script):
         turns = adjust_effect_turns(target, "bleed", turns)
         damage = adjust_effect_damage(target, "bleed", damage)
         if turns <= 0 or damage <= 0:
-            self.obj.msg_contents(f"{target.key} shrugs off the bleeding cut.")
+            self.obj.msg_contents(f"{_combat_target_name(target, 'Companion')} shrugs off the bleeding cut.")
             return
         state = self._get_participant_state(target)
         state["bleed_turns"] = max(state.get("bleed_turns", 0), turns)
         state["bleed_damage"] = max(state.get("bleed_damage", 0), damage)
         self._save_participant_state(target, state)
-        self.obj.msg_contents(f"|r{target.key} starts bleeding!|n")
+        self.obj.msg_contents(f"|r{_combat_target_name(target, 'Companion')} starts bleeding!|n")
 
     def _apply_curse(self, target, turns, armor_penalty, message=None):
         state = self._get_participant_state(target)
         state["curse_turns"] = max(state.get("curse_turns", 0), turns)
         state["curse_armor_penalty"] = max(state.get("curse_armor_penalty", 0), armor_penalty)
         self._save_participant_state(target, state)
-        self.obj.msg_contents(message or f"|m{target.key} is cursed!|n")
+        self.obj.msg_contents(message or f"|m{_combat_target_name(target, 'Companion')} is cursed!|n")
 
     def _apply_poison(self, target, turns, damage, accuracy_penalty, message=None):
         turns = adjust_effect_turns(target, "poison", turns)
         damage = adjust_effect_damage(target, "poison", damage)
         accuracy_penalty = adjust_effect_penalty(target, "poison", "accuracy_penalty", accuracy_penalty)
         if turns <= 0:
-            self.obj.msg_contents(f"{target.key} shrugs off the poison.")
+            self.obj.msg_contents(f"{_combat_target_name(target, 'Companion')} shrugs off the poison.")
             return
         state = self._get_participant_state(target)
         state["poison_turns"] = max(state.get("poison_turns", 0), turns)
         state["poison_damage"] = max(state.get("poison_damage", 0), damage)
         state["poison_accuracy_penalty"] = max(state.get("poison_accuracy_penalty", 0), accuracy_penalty)
         self._save_participant_state(target, state)
-        self.obj.msg_contents(message or f"|g{target.key} is poisoned!|n")
+        self.obj.msg_contents(message or f"|g{_combat_target_name(target, 'Companion')} is poisoned!|n")
 
     def _apply_enemy_bleed(self, enemy, turns, damage, message=None):
         enemy["bleed_turns"] = max(enemy.get("bleed_turns", 0), turns)
@@ -2223,14 +2569,14 @@ class BraveEncounter(Script):
         accuracy_penalty = adjust_effect_penalty(target, "snare", "accuracy_penalty", accuracy_penalty)
         dodge_penalty = adjust_effect_penalty(target, "snare", "dodge_penalty", dodge_penalty)
         if turns <= 0:
-            self.obj.msg_contents(f"{target.key} slips clear before the snare can hold.")
+            self.obj.msg_contents(f"{_combat_target_name(target, 'Companion')} slips clear before the snare can hold.")
             return
         state = self._get_participant_state(target)
         state["snare_turns"] = max(state.get("snare_turns", 0), turns)
         state["snare_accuracy_penalty"] = max(state.get("snare_accuracy_penalty", 0), accuracy_penalty)
         state["snare_dodge_penalty"] = max(state.get("snare_dodge_penalty", 0), dodge_penalty)
         self._save_participant_state(target, state)
-        self.obj.msg_contents(f"|y{target.key} is tangled in webbing!|n")
+        self.obj.msg_contents(f"|y{_combat_target_name(target, 'Companion')} is tangled in webbing!|n")
 
     def _clear_one_harmful_effect(self, target):
         """Clear one harmful participant effect if present."""
@@ -2265,16 +2611,23 @@ class BraveEncounter(Script):
         for participant in list(self.get_active_participants()):
             state = self._get_participant_state(participant)
             bleed_turns = state.get("bleed_turns", 0)
-            resources = dict(participant.db.brave_resources or {})
+            if _is_companion_actor(participant):
+                resources = {"hp": int(participant.get("hp", 0) or 0)}
+            else:
+                resources = dict(participant.db.brave_resources or {})
 
             if bleed_turns > 0:
                 damage = max(1, state.get("bleed_damage", 1))
                 resources["hp"] = max(0, resources["hp"] - damage)
-                participant.db.brave_resources = resources
-                self.obj.msg_contents(f"|r{participant.key} bleeds for {damage} damage.|n")
+                if _is_companion_actor(participant):
+                    participant["hp"] = resources["hp"]
+                    self._save_companion(participant)
+                else:
+                    participant.db.brave_resources = resources
+                self.obj.msg_contents(f"|r{_combat_target_name(participant, 'Companion')} bleeds for {damage} damage.|n")
                 self._emit_combat_fx(
                     kind="damage",
-                    target=participant.key,
+                    target=_combat_target_name(participant, "Companion"),
                     target_ref=_combat_entry_ref(participant),
                     amount=damage,
                     text=str(damage),
@@ -2288,18 +2641,25 @@ class BraveEncounter(Script):
 
                 if resources["hp"] <= 0:
                     self._save_participant_state(participant, state)
-                    self._defeat_character(participant)
+                    if _is_companion_actor(participant):
+                        self._defeat_companion(participant)
+                    else:
+                        self._defeat_character(participant)
                     continue
 
             poison_turns = state.get("poison_turns", 0)
             if poison_turns > 0:
                 damage = max(1, state.get("poison_damage", 1))
                 resources["hp"] = max(0, resources["hp"] - damage)
-                participant.db.brave_resources = resources
-                self.obj.msg_contents(f"|g{participant.key} suffers {damage} poison damage.|n")
+                if _is_companion_actor(participant):
+                    participant["hp"] = resources["hp"]
+                    self._save_companion(participant)
+                else:
+                    participant.db.brave_resources = resources
+                self.obj.msg_contents(f"|g{_combat_target_name(participant, 'Companion')} suffers {damage} poison damage.|n")
                 self._emit_combat_fx(
                     kind="damage",
-                    target=participant.key,
+                    target=_combat_target_name(participant, "Companion"),
                     target_ref=_combat_entry_ref(participant),
                     amount=damage,
                     text=str(damage),
@@ -2311,25 +2671,28 @@ class BraveEncounter(Script):
                 if state["poison_turns"] <= 0:
                     state["poison_damage"] = 0
                     state["poison_accuracy_penalty"] = 0
-                    self.obj.msg_contents(f"{participant.key} fights the poison clear.")
+                    self.obj.msg_contents(f"{_combat_target_name(participant, 'Companion')} fights the poison clear.")
 
                 if resources["hp"] <= 0:
                     self._save_participant_state(participant, state)
-                    self._defeat_character(participant)
+                    if _is_companion_actor(participant):
+                        self._defeat_companion(participant)
+                    else:
+                        self._defeat_character(participant)
                     continue
 
             if state.get("curse_turns", 0) > 0:
                 state["curse_turns"] = max(0, state["curse_turns"] - 1)
                 if state["curse_turns"] <= 0 and state.get("curse_armor_penalty", 0):
                     state["curse_armor_penalty"] = 0
-                    self.obj.msg_contents(f"{participant.key} shakes off the curse.")
+                    self.obj.msg_contents(f"{_combat_target_name(participant, 'Companion')} shakes off the curse.")
 
             if state.get("snare_turns", 0) > 0:
                 state["snare_turns"] = max(0, state["snare_turns"] - 1)
                 if state["snare_turns"] <= 0:
                     state["snare_accuracy_penalty"] = 0
                     state["snare_dodge_penalty"] = 0
-                    self.obj.msg_contents(f"{participant.key} tears free of the webbing.")
+                    self.obj.msg_contents(f"{_combat_target_name(participant, 'Companion')} tears free of the webbing.")
 
             self._save_participant_state(participant, state)
 
@@ -2429,13 +2792,15 @@ class BraveEncounter(Script):
                 changed = True
 
         if enemy["template_key"] == "sir_edric_restless":
+            possessive = get_brave_pronoun(_enemy_gender(enemy), "possessive_adjective")
+            objective = get_brave_pronoun(_enemy_gender(enemy), "object")
             if enemy["hp"] <= (enemy["max_hp"] * 2) // 3 and not enemy.get("called_help"):
                 self._spawn_enemy("restless_shade", display_key="Edric's Grave Shade")
                 self._spawn_enemy("barrow_wisp", display_key="Edric's Grave-Light")
                 enemy["called_help"] = True
                 enemy["shielded"] = True
                 self.obj.msg_contents(
-                    "|rSir Edric raises his blade and the barrow answers. Grave-light coils around him as lesser dead rise to his call!|n"
+                    f"|rSir Edric raises {possessive} blade and the barrow answers. Grave-light coils around {objective} as lesser dead rise to {possessive} call!|n"
                 )
                 changed = True
 
@@ -2456,7 +2821,7 @@ class BraveEncounter(Script):
                 enemy["attack_power"] += 4
                 enemy["spell_power"] += 4
                 enemy["accuracy"] += 5
-                self.obj.msg_contents("|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n")
+                self.obj.msg_contents(f"|rSir Edric lowers the last of {possessive} restraint and advances with funeral wrath.|n")
                 changed = True
 
         if enemy["template_key"] == "captain_varn_blackreed":
@@ -2548,7 +2913,7 @@ class BraveEncounter(Script):
         return enemy
 
     def _defeat_character(self, character):
-        from world.browser_panels import send_webclient_event
+        from world.browser_panels import send_browser_notice_event, send_text_to_non_web_sessions, send_webclient_event
 
         self._emit_defeat_fx(character)
         start_room = get_tutorial_defeat_room(character) or get_room("brambleford_town_green")
@@ -2560,18 +2925,34 @@ class BraveEncounter(Script):
             character.move_to(start_room, quiet=True, move_type="defeat")
         send_webclient_event(character, brave_combat_done={})
         if character.location:
-            character.msg(character.at_look(character.location))
+            send_text_to_non_web_sessions(character, character.at_look(character.location))
         delay(COMBAT_DEFEAT_REFRESH_DELAY, self._refresh_browser_combat_views, persistent=False)
         if get_tutorial_defeat_room(character):
-            character.msg("|rThe lesson lands hard, but not fatally. You are hauled back to Wayfarer's Yard to catch your breath and try again.|n")
+            send_browser_notice_event(
+                character,
+                "|rThe lesson lands hard, but not fatally. You are hauled back to Wayfarer's Yard to catch your breath and try again.|n",
+                title="Defeat",
+                tone="danger",
+                icon="warning",
+                duration_ms=5200,
+            )
         else:
-            character.msg("|rYou are overwhelmed and carried back to Brambleford to recover.|n")
+            send_browser_notice_event(
+                character,
+                "|rYou are overwhelmed and carried back to Brambleford to recover.|n",
+                title="Defeat",
+                tone="danger",
+                icon="warning",
+                duration_ms=5200,
+            )
 
     def remove_participant(self, character, *, refresh=True):
         """Remove a participant from the fight."""
 
         participants = [pid for pid in (self.db.participants or []) if pid != character.id]
         self.db.participants = participants
+        for companion in list(self.get_active_companions(owner=character.id)):
+            self._remove_companion(companion, refresh=False)
         pending = dict(self.db.pending_actions or {})
         pending.pop(str(character.id), None)
         self.db.pending_actions = pending
@@ -2607,12 +2988,12 @@ class BraveEncounter(Script):
 
         derived = self._get_effective_derived(character)
         if not self._roll_hit(derived["accuracy"], target["dodge"]):
-            self.obj.msg_contents(f"{character.key} misses {target['key']}.")
+            self.obj.msg_contents(f"{_combat_target_name(character, 'Companion')} misses {target['key']}.")
             self._emit_miss_fx(character, target)
             self._add_threat(character, 2)
             return
 
-        bonus = self._consume_feint_bonus(character) if character.db.brave_class == "rogue" else 0
+        bonus = self._consume_feint_bonus(character) if getattr(getattr(character, "db", None), "brave_class", "") == "rogue" else 0
         extra_text = " The feint opens a clean line." if bonus else ""
         damage = self._weapon_damage(derived["attack_power"], target["armor"], bonus=bonus)
         self._damage_enemy(character, target, damage, extra_text=extra_text)
@@ -2624,7 +3005,7 @@ class BraveEncounter(Script):
         if ability["target"] == "enemy":
             target = self.get_enemy(action["target"])
         elif ability["target"] == "ally":
-            target = self._get_character(action["target"])
+            target = self._get_participant_target(action["target"])
         if ability["target"] == "enemy" and (not target or target["hp"] <= 0):
             target = self._default_enemy_target()
         if ability["target"] == "ally" and not target:
@@ -2632,6 +3013,7 @@ class BraveEncounter(Script):
         if ability["target"] != "none" and not target:
             return
 
+        self._announce_combat_action(character, ability_name)
         self._spend_resource(character, ability["resource"], ability["cost"])
         derived = self._get_effective_derived(character)
         level = max(1, int(character.db.brave_level or 1))
@@ -2650,7 +3032,7 @@ class BraveEncounter(Script):
         )
 
     def _execute_flee(self, character):
-        from world.browser_panels import send_webclient_event
+        from world.browser_panels import send_browser_notice_event, send_text_to_non_web_sessions, send_webclient_event
 
         destination = self._get_flee_destination(character)
         if not destination:
@@ -2670,8 +3052,15 @@ class BraveEncounter(Script):
         self.obj.msg_contents(f"{character.key} breaks away and falls back to {destination.key}.")
         send_webclient_event(character, brave_combat_done={})
         if character.location:
-            character.msg(character.at_look(character.location))
-        character.msg(f"|yYou break away from the fight and fall back to {destination.key}.|n")
+            send_text_to_non_web_sessions(character, character.at_look(character.location))
+        send_browser_notice_event(
+            character,
+            f"|yYou break away from the fight and fall back to {destination.key}.|n",
+            title="Flee",
+            tone="warn",
+            icon="directions_run",
+            duration_ms=4200,
+        )
 
     def _execute_item(self, character, action):
         from world.activities import _consume_item_by_template
@@ -2683,7 +3072,7 @@ class BraveEncounter(Script):
         if use.get("target") == "enemy":
             target = self.get_enemy(action.get("target")) if action.get("target") else self._default_enemy_target()
         elif use.get("target") == "ally":
-            target = self._get_character(action.get("target")) if action.get("target") else character
+            target = self._get_participant_target(action.get("target")) if action.get("target") else character
             if not target:
                 target = character
 
@@ -2767,6 +3156,103 @@ class BraveEncounter(Script):
             state = finish_atb_action(state, tick_ms=tick_ms)
         self._save_actor_atb_state(state, character=character)
 
+    def _choose_companion_target(self, companion):
+        """Return the best enemy target for an auto-battling ranger companion."""
+
+        enemies = list(self.get_active_enemies())
+        if not enemies:
+            return None
+        companion_key = str(companion.get("companion_key") or "").lower()
+        if companion_key == "ash_hawk":
+            marked = [enemy for enemy in enemies if enemy.get("marked_turns", 0) > 0]
+            if marked:
+                return min(marked, key=lambda enemy: (enemy.get("hp", 0), enemy.get("id")))
+        if companion_key == "briar_boar":
+            unbound = [enemy for enemy in enemies if enemy.get("bound_turns", 0) <= 0]
+            if unbound:
+                return min(unbound, key=lambda enemy: (enemy.get("hp", 0), enemy.get("id")))
+        marked = [enemy for enemy in enemies if enemy.get("marked_turns", 0) > 0]
+        if marked:
+            return min(marked, key=lambda enemy: (enemy.get("hp", 0), enemy.get("id")))
+        return min(enemies, key=lambda enemy: (enemy.get("hp", 0), enemy.get("id")))
+
+    def _execute_companion_turn(self, companion):
+        """Resolve one ranger companion auto-battle turn."""
+
+        enemy = self._choose_companion_target(companion)
+        if not enemy:
+            return
+        companion_definition = get_companion(companion.get("companion_key"))
+        action_label = (
+            dict((companion_definition or {}).get("combat") or {}).get("label")
+            or companion.get("key")
+            or "Companion Attack"
+        )
+        self._announce_combat_action(companion, action_label)
+        derived = self._get_effective_derived(companion)
+        if not self._roll_hit(derived["accuracy"], enemy["dodge"]):
+            self.obj.msg_contents(f"{companion['key']} misses {enemy['key']}.")
+            self._emit_miss_fx(companion, enemy)
+            self._add_threat(companion, 1)
+            return
+
+        companion_key = str(companion.get("companion_key") or "").lower()
+        bonus = 1
+        extra_text = ""
+        if companion_key == "marsh_hound":
+            if enemy.get("marked_turns", 0) > 0:
+                bonus += 3
+                extra_text = " The hound worries the marked prey without letting it settle."
+            damage = self._weapon_damage(derived["attack_power"], enemy["armor"], bonus=bonus)
+            self._damage_enemy(companion, enemy, damage, extra_text=extra_text)
+            if enemy.get("hp", 0) > 0 and enemy.get("marked_turns", 0) > 0:
+                self._apply_enemy_bleed(enemy, turns=2, damage=2, message=f"|r{companion['key']} opens fresh cuts across {enemy['key']}!|n")
+            return
+        if companion_key == "ash_hawk":
+            if enemy.get("marked_turns", 0) <= 0:
+                enemy["marked_turns"] = max(enemy.get("marked_turns", 0), 2)
+                self._save_enemy(enemy)
+                extra_text = " The hawk wheels overhead and opens the line."
+            else:
+                enemy["marked_turns"] = max(enemy.get("marked_turns", 0), 3)
+                self._save_enemy(enemy)
+                bonus += 2
+                extra_text = " The hawk keeps the quarry cleanly marked from above."
+            damage = self._weapon_damage(derived["attack_power"], enemy["armor"], bonus=bonus)
+            self._damage_enemy(companion, enemy, damage, extra_text=extra_text)
+            return
+        if companion_key == "briar_boar":
+            if enemy.get("bound_turns", 0) <= 0:
+                enemy["bound_turns"] = max(enemy.get("bound_turns", 0), 1)
+                self._save_enemy(enemy)
+                bonus += 2
+                extra_text = " The boar crashes through the line and pins the target in bad footing."
+            elif enemy.get("marked_turns", 0) > 0:
+                bonus += 3
+                extra_text = " The boar drives straight through the marked gap."
+            damage = self._weapon_damage(derived["attack_power"], enemy["armor"], bonus=bonus)
+            self._damage_enemy(companion, enemy, damage, extra_text=extra_text)
+            return
+        damage = self._weapon_damage(derived["attack_power"], enemy["armor"], bonus=bonus)
+        self._damage_enemy(companion, enemy, damage)
+
+    def _advance_companion_atb(self, companion):
+        """Tick and resolve ATB for one ranger companion."""
+
+        tick_ms = self._atb_tick_ms()
+        state = tick_atb_state(self._get_actor_atb_state(companion=companion), tick_ms=tick_ms)
+        if state.get("phase") == "ready":
+            state = start_atb_action(
+                state,
+                {"kind": "companion_attack", "companion_id": companion["id"], "label": companion["key"]},
+                normalize_atb_profile({"windup_ticks": 0, "recovery_ticks": 1, "interruptible": False}),
+                tick_ms=tick_ms,
+            )
+        if state.get("phase") == "resolving":
+            self._execute_companion_turn(companion)
+            state = finish_atb_action(state, tick_ms=tick_ms)
+        self._save_actor_atb_state(state, companion=companion)
+
     def _choose_enemy_target(self, enemy=None):
         participants = self.get_active_participants()
         if not participants:
@@ -2784,17 +3270,17 @@ class BraveEncounter(Script):
             return min(
                 participants,
                 key=lambda participant: (
-                    (participant.db.brave_resources or {}).get("hp", 0),
-                    participant.key.lower(),
+                    (participant.get("hp", 0) if _is_companion_actor(participant) else (participant.db.brave_resources or {}).get("hp", 0)),
+                    _combat_target_name(participant).lower(),
                 ),
             )
 
         threat = self.db.threat or {}
-        highest = max(threat.get(str(participant.id), 0) for participant in participants)
+        highest = max(threat.get(str(_ally_actor_id(participant)), 0) for participant in participants)
         candidates = [
             participant
             for participant in participants
-            if threat.get(str(participant.id), 0) == highest
+            if threat.get(str(_ally_actor_id(participant)), 0) == highest
         ]
         return random.choice(candidates) if candidates else participants[0]
 
@@ -2815,6 +3301,7 @@ class BraveEncounter(Script):
         if enemy["template_key"] == "mossling":
             ally = self._find_wounded_enemy(exclude_id=enemy["id"])
             if ally and ally["hp"] <= (ally["max_hp"] * 3) // 4:
+                self._announce_combat_action(enemy, "Mend Spores")
                 heal_amount = random.randint(8, 12)
                 if self._heal_enemy(enemy, ally, heal_amount):
                     return
@@ -2822,6 +3309,7 @@ class BraveEncounter(Script):
             if enemy["template_key"] == "barrow_wisp":
                 ally = self._find_wounded_enemy(exclude_id=enemy["id"])
                 if ally and ally["hp"] <= (ally["max_hp"] * 3) // 4:
+                    self._announce_combat_action(enemy, "Grave Light")
                     heal_amount = random.randint(7, 11)
                     if self._heal_enemy(enemy, ally, heal_amount):
                         self.obj.msg_contents(f"|m{enemy['key']} feeds cold grave-light into {ally['key']}.|n")
@@ -2830,6 +3318,7 @@ class BraveEncounter(Script):
             if enemy["template_key"] == "fen_wisp":
                 ally = self._find_wounded_enemy(exclude_id=enemy["id"])
                 if ally and ally["hp"] <= (ally["max_hp"] * 3) // 4:
+                    self._announce_combat_action(enemy, "Marsh Light")
                     heal_amount = random.randint(8, 12)
                     if self._heal_enemy(enemy, ally, heal_amount):
                         self.obj.msg_contents(f"|g{enemy['key']} sheds sick marsh light over {ally['key']}.|n")
@@ -2838,6 +3327,7 @@ class BraveEncounter(Script):
             if enemy["template_key"] == "hollow_wisp":
                 ally = self._find_wounded_enemy(exclude_id=enemy["id"])
                 if ally and ally["hp"] <= (ally["max_hp"] * 3) // 4:
+                    self._announce_combat_action(enemy, "Lamp Light")
                     heal_amount = random.randint(9, 13)
                     if self._heal_enemy(enemy, ally, heal_amount):
                         self.obj.msg_contents(f"|y{enemy['key']} spills drowned lamp-light into {ally['key']}.|n")
@@ -2852,12 +3342,15 @@ class BraveEncounter(Script):
         redirected_by = None
         if telegraphed:
             redirect_to = original_target_state.get("reaction_redirect_to")
-            redirect_target = self._get_character(redirect_to) if redirect_to else None
+            redirect_target = self._get_participant_target(redirect_to) if redirect_to else None
             if redirect_target and redirect_target in self.get_active_participants():
                 redirected_by = redirect_target
                 target = redirect_target
 
         derived = self._get_effective_derived(target)
+        target_name = _combat_target_name(target, "Companion")
+        target_hp = target.get("hp", 0) if _is_companion_actor(target) else (target.db.brave_resources or {}).get("hp", 0)
+        target_max_hp = target.get("max_hp", 1) if _is_companion_actor(target) else target.db.brave_derived_stats["max_hp"]
 
         if enemy.get("bound_turns", 0) > 0:
             enemy["bound_turns"] = max(0, enemy["bound_turns"] - 1)
@@ -2865,15 +3358,18 @@ class BraveEncounter(Script):
             self.obj.msg_contents(f"{enemy['key']} struggles against the frost and loses the moment.")
             return
 
+        if telegraphed or action_label != "Attack":
+            self._announce_combat_action(enemy, action_label)
+
         damage_bonus = 0
-        hit_text = f"{enemy['key']} hits {target.key} for {{damage}} damage."
-        if enemy["template_key"] == "forest_wolf" and (target.db.brave_resources or {}).get("hp", 0) <= target.db.brave_derived_stats["max_hp"] // 2:
+        hit_text = f"{enemy['key']} hits {target_name} for {{damage}} damage."
+        if enemy["template_key"] == "forest_wolf" and target_hp <= target_max_hp // 2:
             damage_bonus += 3
-            hit_text = f"{enemy['key']} lunges at {target.key} for {{damage}} damage."
+            hit_text = f"{enemy['key']} lunges at {target_name} for {{damage}} damage."
 
         if enemy["template_key"] == "old_greymaw" and enemy.get("reposition_ready"):
             damage_bonus += 6
-            hit_text = f"|rOld Greymaw bursts from the brush and tears into {target.key} for {{damage}} damage!|n"
+            hit_text = f"|rOld Greymaw bursts from the brush and tears into {target_name} for {{damage}} damage!|n"
             enemy["reposition_ready"] = False
             self._save_enemy(enemy)
 
@@ -2885,28 +3381,28 @@ class BraveEncounter(Script):
             ]
             if bandit_support:
                 damage_bonus += 2
-                hit_text = f"{enemy['key']} shoots through the melee and drills {target.key} for {{damage}} damage."
+                hit_text = f"{enemy['key']} shoots through the melee and drills {target_name} for {{damage}} damage."
 
-        if enemy["template_key"] == "captain_varn_blackreed" and (target.db.brave_resources or {}).get("hp", 0) <= target.db.brave_derived_stats["max_hp"] // 2:
+        if enemy["template_key"] == "captain_varn_blackreed" and target_hp <= target_max_hp // 2:
             damage_bonus += 5
-            hit_text = f"|rBlackreed spots the weakness and drives into {target.key} for {{damage}} damage!|n"
+            hit_text = f"|rBlackreed spots the weakness and drives into {target_name} for {{damage}} damage!|n"
 
         if enemy["template_key"] == "grubnak_the_pot_king" and enemy.get("enraged"):
             damage_bonus += 3
-            hit_text = f"|rGrubnak slams through the steam and batters {target.key} for {{damage}} damage!|n"
+            hit_text = f"|rGrubnak slams through the steam and batters {target_name} for {{damage}} damage!|n"
 
         if enemy["template_key"] == "miretooth" and enemy.get("reposition_ready"):
             damage_bonus += 7
-            hit_text = f"|rMiretooth erupts out of the black reeds and mauls {target.key} for {{damage}} damage!|n"
+            hit_text = f"|rMiretooth erupts out of the black reeds and mauls {target_name} for {{damage}} damage!|n"
             enemy["reposition_ready"] = False
             self._save_enemy(enemy)
 
         if enemy["template_key"] == "hollow_lantern" and enemy.get("enraged"):
             damage_bonus += 4
-            hit_text = f"|rThe Hollow Lantern floods the chamber with white-black fire and sears {target.key} for {{damage}} damage!|n"
+            hit_text = f"|rThe Hollow Lantern floods the chamber with white-black fire and sears {target_name} for {{damage}} damage!|n"
 
         if not self._roll_hit(enemy["accuracy"], derived["dodge"]):
-            self.obj.msg_contents(f"{enemy['key']} misses {target.key}.")
+            self.obj.msg_contents(f"{enemy['key']} misses {target_name}.")
             self._emit_miss_fx(enemy, target)
             return
 
@@ -2920,7 +3416,7 @@ class BraveEncounter(Script):
         reaction_label = state.get("reaction_label") or "guard"
         if telegraphed and state.get("reaction_guard", 0):
             reaction_prevented = min(max(0, damage - 1), int(state.get("reaction_guard", 0) or 0))
-            reaction_source = self._get_character(state.get("reaction_guard_source")) if state.get("reaction_guard_source") else None
+            reaction_source = self._get_participant_target(state.get("reaction_guard_source")) if state.get("reaction_guard_source") else None
             damage = max(1, damage - reaction_prevented)
         if state.get("guard", 0):
             prevented = min(damage - 1, state["guard"])
@@ -2930,19 +3426,24 @@ class BraveEncounter(Script):
         if telegraphed:
             if redirected_by:
                 self.obj.msg_contents(
-                    f"|y{redirected_by.key} cuts in front of {enemy['key']}'s {action_label}, pulling it off {original_target.key}.|n"
+                    f"|y{_combat_target_name(redirected_by, 'Companion')} cuts in front of {enemy['key']}'s {action_label}, pulling it off {_combat_target_name(original_target, 'Companion')}.|n"
                 )
             elif reaction_prevented > 0:
-                source_name = reaction_source.key if reaction_source else target.key
+                source_name = _combat_target_name(reaction_source or target, "Companion")
                 self.obj.msg_contents(
                     f"|y{source_name}'s {reaction_label} takes the edge off {enemy['key']}'s {action_label}.|n"
                 )
             else:
                 self.obj.msg_contents(f"|r{enemy['key']}'s {action_label} lands clean.|n")
         damage = max(1, damage - get_incoming_damage_reduction(target))
-        resources = dict(target.db.brave_resources or {})
-        resources["hp"] = max(0, resources["hp"] - damage)
-        target.db.brave_resources = resources
+        if _is_companion_actor(target):
+            resources = {"hp": max(0, int(target.get("hp", 0) or 0) - damage)}
+            target["hp"] = resources["hp"]
+            self._save_companion(target)
+        else:
+            resources = dict(target.db.brave_resources or {})
+            resources["hp"] = max(0, resources["hp"] - damage)
+            target.db.brave_resources = resources
         if telegraphed and reaction_prevented > 0:
             self._record_participant_contribution(reaction_source or target, mitigation=reaction_prevented, utility=1)
         self._record_participant_contribution(target, hits_taken=damage)
@@ -2951,7 +3452,7 @@ class BraveEncounter(Script):
             kind="damage",
             source=enemy["key"],
             source_ref=_combat_entry_ref(enemy),
-            target=target.key,
+            target=target_name,
             target_ref=_combat_entry_ref(target),
             amount=damage,
             text=str(damage),
@@ -2961,7 +3462,7 @@ class BraveEncounter(Script):
             lunge=True,
         )
         sacred_turns = int(state.get("sacred_aegis_turns", 0) or 0)
-        sacred_source = self._get_character(state.get("sacred_aegis_source")) if state.get("sacred_aegis_source") else None
+        sacred_source = self._get_participant_target(state.get("sacred_aegis_source")) if state.get("sacred_aegis_source") else None
         if (
             damage > 0
             and sacred_turns > 0
@@ -2980,7 +3481,7 @@ class BraveEncounter(Script):
                 sacred_source,
                 enemy,
                 retaliation,
-                extra_text=f" {sacred_source.key}'s ward answers the blow.",
+                extra_text=f" {_combat_target_name(sacred_source, 'Companion')}'s ward answers the blow.",
                 damage_type="holy",
             )
             self._record_participant_contribution(sacred_source, meaningful=True, utility=1)
@@ -2996,15 +3497,15 @@ class BraveEncounter(Script):
         elif enemy["template_key"] == "cave_spider" and resources["hp"] > 0 and random.randint(1, 100) <= 45:
             self._apply_snare(target, turns=2, accuracy_penalty=6, dodge_penalty=6)
         elif enemy["template_key"] == "briar_imp" and resources["hp"] > 0 and random.randint(1, 100) <= 50:
-            self._apply_curse(target, turns=2, armor_penalty=4, message=f"|m{target.key} is wrapped in a briar curse!|n")
+            self._apply_curse(target, turns=2, armor_penalty=4, message=f"|m{target_name} is wrapped in a briar curse!|n")
         elif enemy["template_key"] == "goblin_hexer" and resources["hp"] > 0 and random.randint(1, 100) <= 50:
-            self._apply_curse(target, turns=2, armor_penalty=4, message=f"|m{target.key} is knotted up in goblin hex-thread!|n")
+            self._apply_curse(target, turns=2, armor_penalty=4, message=f"|m{target_name} is knotted up in goblin hex-thread!|n")
         elif enemy["template_key"] == "cave_bat_swarm" and resources["hp"] > 0 and random.randint(1, 100) <= 40:
             self._apply_bleed(target, turns=2, damage=3)
         elif enemy["template_key"] == "sludge_slime" and resources["hp"] > 0 and random.randint(1, 100) <= 50:
             self._apply_snare(target, turns=2, accuracy_penalty=5, dodge_penalty=5)
         elif enemy["template_key"] in {"restless_shade", "barrow_wisp", "sir_edric_restless"} and resources["hp"] > 0 and random.randint(1, 100) <= 50:
-            self._apply_curse(target, turns=2, armor_penalty=4, message=f"|m{target.key} shudders under a grave-cold curse!|n")
+            self._apply_curse(target, turns=2, armor_penalty=4, message=f"|m{target_name} shudders under a grave-cold curse!|n")
         elif enemy["template_key"] in {"mag_clamp_drone", "foreman_coilback"} and resources["hp"] > 0 and random.randint(1, 100) <= 50:
             self._apply_snare(target, turns=2, accuracy_penalty=5, dodge_penalty=5)
         elif enemy["template_key"] == "grubnak_the_pot_king" and resources["hp"] > 0 and random.randint(1, 100) <= 55:
@@ -3012,24 +3513,27 @@ class BraveEncounter(Script):
         elif enemy["template_key"] == "bog_creeper" and resources["hp"] > 0 and random.randint(1, 100) <= 50:
             self._apply_snare(target, turns=2, accuracy_penalty=6, dodge_penalty=6)
         elif enemy["template_key"] == "fen_wisp" and resources["hp"] > 0 and random.randint(1, 100) <= 50:
-            self._apply_curse(target, turns=2, armor_penalty=5, message=f"|m{target.key} shudders under a marsh-light curse!|n")
+            self._apply_curse(target, turns=2, armor_penalty=5, message=f"|m{target_name} shudders under a marsh-light curse!|n")
         elif enemy["template_key"] == "rot_crow" and resources["hp"] > 0 and random.randint(1, 100) <= 45:
             self._apply_bleed(target, turns=2, damage=4)
         elif enemy["template_key"] == "mire_hound" and resources["hp"] > 0 and random.randint(1, 100) <= 45:
-            self._apply_poison(target, turns=2, damage=4, accuracy_penalty=5, message=f"|g{target.key} reels under a swamp-sick bite!|n")
+            self._apply_poison(target, turns=2, damage=4, accuracy_penalty=5, message=f"|g{target_name} reels under a swamp-sick bite!|n")
         elif enemy["template_key"] == "miretooth" and resources["hp"] > 0 and random.randint(1, 100) <= 60:
-            self._apply_poison(target, turns=3, damage=5, accuracy_penalty=6, message=f"|gMiretooth's bite leaves black fen venom burning through {target.key}!|n")
+            self._apply_poison(target, turns=3, damage=5, accuracy_penalty=6, message=f"|gMiretooth's bite leaves black fen venom burning through {target_name}!|n")
         elif enemy["template_key"] == "drowned_warder" and resources["hp"] > 0 and random.randint(1, 100) <= 45:
             self._apply_snare(target, turns=2, accuracy_penalty=5, dodge_penalty=5)
         elif enemy["template_key"] == "silt_stalker" and resources["hp"] > 0 and random.randint(1, 100) <= 45:
             self._apply_bleed(target, turns=2, damage=4)
         elif enemy["template_key"] == "hollow_wisp" and resources["hp"] > 0 and random.randint(1, 100) <= 50:
-            self._apply_curse(target, turns=2, armor_penalty=5, message=f"|m{target.key} shudders under a hollow-light curse!|n")
+            self._apply_curse(target, turns=2, armor_penalty=5, message=f"|m{target_name} shudders under a hollow-light curse!|n")
         elif enemy["template_key"] == "hollow_lantern" and resources["hp"] > 0 and random.randint(1, 100) <= 60:
-            self._apply_curse(target, turns=3, armor_penalty=6, message=f"|mThe Hollow Lantern brands {target.key} in wrong light!|n")
+            self._apply_curse(target, turns=3, armor_penalty=6, message=f"|mThe Hollow Lantern brands {target_name} in wrong light!|n")
 
         if resources["hp"] <= 0:
-            self._defeat_character(target)
+            if _is_companion_actor(target):
+                self._defeat_companion(target)
+            else:
+                self._defeat_character(target)
 
     def _advance_enemy_atb(self, enemy):
         tick_ms = self._atb_tick_ms()
@@ -3052,6 +3556,13 @@ class BraveEncounter(Script):
             self._execute_enemy_turn(enemy)
             state = finish_atb_action(state, tick_ms=tick_ms)
         self._save_actor_atb_state(state, enemy=enemy)
+
+    def _defeat_companion(self, companion):
+        """Drop a ranger companion out of the current fight."""
+
+        self._emit_defeat_fx(companion)
+        self.obj.msg_contents(f"{companion['key']} is driven out of the fight.")
+        self._remove_companion(companion, refresh=False)
 
     def _clear_round_states(self):
         states = dict(self.db.participant_states or {})
@@ -3085,6 +3596,32 @@ class BraveEncounter(Script):
             enemies.append(enemy)
         self.db.enemies = enemies
 
+    def _award_companion_bond_progress(self):
+        """Award persistent bond XP to companions that meaningfully fought."""
+
+        progress = {}
+        contributions = dict(self.db.participant_contributions or {})
+        for contribution in contributions.values():
+            owner_id = contribution.get("owner_id")
+            companion_key = str(contribution.get("companion_key") or "").lower()
+            meaningful = int(contribution.get("meaningful_actions", 0) or 0)
+            if not owner_id or not companion_key or meaningful <= 0:
+                continue
+            owner = self._get_character(owner_id)
+            if not owner or not hasattr(owner, "award_companion_bond_xp"):
+                continue
+            if not self._participant_reward_eligible(owner):
+                continue
+            damage_done = int(contribution.get("damage_done", 0) or 0)
+            utility_points = int(contribution.get("utility_points", 0) or 0)
+            xp_gain = min(3, max(1, meaningful) + (1 if damage_done >= 10 else 0) + (1 if utility_points >= 2 else 0))
+            messages = owner.award_companion_bond_xp(companion_key, xp_gain)
+            owner_messages = progress.setdefault(owner.id, [])
+            companion_name = contribution.get("companion_name") or companion_key.replace("_", " ").title()
+            owner_messages.append(f"{companion_name} bond +{xp_gain} XP.")
+            owner_messages.extend(messages)
+        return progress
+
     def _reward_victory(self):
         from world.browser_panels import send_webclient_event
         from world.browser_views import build_combat_victory_view
@@ -3112,6 +3649,7 @@ class BraveEncounter(Script):
         for bundle in reward_bundles:
             reward_items.extend(bundle["items"])
         item_shares = self._distribute_reward_items(reward_items, weighted_entries)
+        companion_progress = self._award_companion_bond_progress()
 
         for participant in participants:
             remote_victory = participant not in active_participants
@@ -3135,6 +3673,7 @@ class BraveEncounter(Script):
                     progress_messages.append(strip_ansi(message))
             if reward_eligible:
                 record_encounter_victory(participant, self.obj)
+            progress_messages.extend(companion_progress.get(participant.id, []))
 
             if participant_silver:
                 participant.db.brave_silver = (participant.db.brave_silver or 0) + participant_silver
@@ -3179,8 +3718,10 @@ class BraveEncounter(Script):
             self.ndb.brave_victory_pending = False
         rewarded = self._reward_victory()
         if self.obj and room_message:
+            from world.browser_panels import broadcast_room_text_non_web
+
             kwargs = {"exclude": rewarded} if exclude_rewarded else {}
-            self.obj.msg_contents(room_message, **kwargs)
+            broadcast_room_text_non_web(self.obj, room_message, **kwargs)
         if hasattr(self, "ndb"):
             self.ndb.brave_skip_combat_done = True
         self.stop()
@@ -3202,7 +3743,7 @@ class BraveEncounter(Script):
 
     def at_repeat(self):
         self.db.round += 1
-        active_participants = self.get_active_participants()
+        active_participants = self.get_active_player_participants()
         active_enemies = self.get_active_enemies()
 
         if not active_participants:
@@ -3214,7 +3755,7 @@ class BraveEncounter(Script):
             return
 
         self._apply_participant_effects()
-        if not self.get_active_participants():
+        if not self.get_active_player_participants():
             self.obj.msg_contents("|rThe line breaks and the party is driven back toward town.|n")
             self.stop()
             return
@@ -3223,10 +3764,10 @@ class BraveEncounter(Script):
             self._schedule_victory_sequence("|gThe last of them falls. The way is clear for now.|n")
             return
 
-        active_participants = self.get_active_participants()
+        active_participants = self.get_active_player_participants()
         for participant in active_participants:
             self._advance_player_atb(participant)
-        if not self.get_active_participants():
+        if not self.get_active_player_participants():
             self.obj.msg_contents("The fight ends with the road still dangerous.")
             self.stop()
             return
@@ -3234,9 +3775,15 @@ class BraveEncounter(Script):
             self._schedule_victory_sequence("|gThe encounter is over. The road is clear for now.|n")
             return
 
+        for companion in self.get_active_companions():
+            self._advance_companion_atb(companion)
+        if not self.get_active_enemies():
+            self._schedule_victory_sequence("|gThe encounter is over. The road is clear for now.|n")
+            return
+
         for enemy in self.get_active_enemies():
             self._advance_enemy_atb(enemy)
-        if not self.get_active_participants():
+        if not self.get_active_player_participants():
             self.obj.msg_contents("|rThe party is driven back toward town.|n")
             self.stop()
             return

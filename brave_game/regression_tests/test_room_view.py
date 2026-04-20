@@ -153,6 +153,14 @@ class RoomViewTests(unittest.TestCase):
             ],
             view.get("mobile_pack", {}).get("preview"),
         )
+        mobile_panels = view.get("mobile_panels", {})
+        self.assertEqual("Lantern Rest", mobile_panels.get("title"))
+        self.assertEqual("Safe", mobile_panels.get("status_label"))
+        self.assertEqual(3, mobile_panels.get("route_count"))
+        self.assertEqual("Dad", mobile_panels.get("character", {}).get("name"))
+        self.assertEqual(18, mobile_panels.get("pack", {}).get("silver"))
+        self.assertEqual(0, mobile_panels.get("quests", {}).get("active_count"))
+        self.assertFalse(mobile_panels.get("party", {}).get("in_party"))
 
         ways_forward = view.get("sections", [])[0]
         self.assertTrue(ways_forward.get("hide_label"))
@@ -206,7 +214,7 @@ class RoomViewTests(unittest.TestCase):
         self.assertIsNone(threat_item.get("detail"))
         self.assertEqual("3", threat_item.get("badge"))
         self.assertEqual("skull", threat_item.get("marker_icon"))
-        self.assertEqual("fight", threat_item.get("command"))
+        self.assertEqual("fight", threat_item.get("actions", [])[1].get("command"))
         self.assertEqual("Inspect", threat_item.get("actions", [])[0].get("label"))
         inspect_picker = threat_item.get("actions", [])[0].get("picker", {})
         self.assertEqual("Red Wyrm Retinue", inspect_picker.get("title"))
@@ -312,6 +320,7 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual(2, len(threats))
         self.assertEqual(["Road Wolves", "Road Wolves"], [threat.get("key") for threat in threats])
         self.assertEqual(["2", "2"], [threat.get("badge") for threat in threats])
+        self.assertEqual(["fight road_wolves_a", "fight road_wolves_b"], [threat.get("command") for threat in threats])
 
     def test_map_view_uses_map_icon_and_region_card_label(self):
         character = DummyCharacter()

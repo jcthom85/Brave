@@ -14,6 +14,7 @@ from world.data.items import (
     get_item_use_profile,
     match_inventory_item,
 )
+from world.questing import get_completed_quests
 from world.race_world_hooks import adjust_fishing_weight, get_fishing_suffix
 from world.screen_text import format_entry, render_screen
 
@@ -23,7 +24,13 @@ SYSTEMS_CONTENT = CONTENT.systems
 COOKING_RECIPES = SYSTEMS_CONTENT.cooking_recipes
 COZY_BONUS = SYSTEMS_CONTENT.cozy_bonus
 FISHING_SPOTS = SYSTEMS_CONTENT.fishing_spots
+FISHING_RODS = SYSTEMS_CONTENT.fishing_rods
+FISHING_LURES = SYSTEMS_CONTENT.fishing_lures
 format_ingredient_list = SYSTEMS_CONTENT.format_ingredient_list
+
+STARTER_FISHING_ROOM_ID = "brambleford_hobbyists_wharf"
+STARTER_FISHING_ROD = "loaner_pole"
+STARTER_FISHING_LURE = "plain_hook"
 
 
 def room_supports_activity(room, activity_name):
@@ -142,6 +149,210 @@ def _pick_fish(spot_data):
     return spot_data["fish"][-1]
 
 
+def _is_tackle_unlocked(character, payload):
+    required = [str(key).lower() for key in (payload.get("unlock_completed_quests") or []) if key]
+    if not required:
+        return True
+    completed = {str(key).lower() for key in get_completed_quests(character)}
+    return all(key in completed for key in required)
+
+
+def get_available_fishing_rods(character=None, *, include_locked=False):
+    """Return all currently available fishing rod payloads."""
+
+    rods = []
+    for rod_key, rod in FISHING_RODS.items():
+        payload = dict(rod)
+        payload["key"] = rod_key
+        payload["available"] = _is_tackle_unlocked(character, payload) if character else True
+        if not payload["available"] and not include_locked:
+            continue
+        rods.append(payload)
+    rods.sort(key=lambda entry: (0 if entry.get("available", True) else 1, int(entry.get("power", 0) or 0), entry.get("name", "").lower()))
+    return rods
+
+
+def get_available_fishing_lures(character=None, *, include_locked=False):
+    """Return all currently available fishing lure payloads."""
+
+    lures = []
+    for lure_key, lure in FISHING_LURES.items():
+        payload = dict(lure)
+        payload["key"] = lure_key
+        payload["available"] = _is_tackle_unlocked(character, payload) if character else True
+        if not payload["available"] and not include_locked:
+            continue
+        lures.append(payload)
+    lures.sort(key=lambda entry: (0 if entry.get("available", True) else 1, int(entry.get("rarity_bonus", 0) or 0), entry.get("name", "").lower()))
+    return lures
+
+
+def get_selected_fishing_rod(character):
+    """Return the active fishing rod payload, falling back to the first defined rod."""
+
+    selected = str(getattr(getattr(character, "db", None), "brave_active_fishing_rod", "") or "").lower()
+    if selected in FISHING_RODS:
+        payload = dict(FISHING_RODS[selected])
+        payload["key"] = selected
+        payload["available"] = _is_tackle_unlocked(character, payload)
+        if payload["available"]:
+            return payload
+    rods = get_available_fishing_rods(character)
+    return rods[0] if rods else {}
+
+
+def get_selected_fishing_lure(character):
+    """Return the active fishing lure payload, falling back to the first defined lure."""
+
+    selected = str(getattr(getattr(character, "db", None), "brave_active_fishing_lure", "") or "").lower()
+    if selected in FISHING_LURES:
+        payload = dict(FISHING_LURES[selected])
+        payload["key"] = selected
+        payload["available"] = _is_tackle_unlocked(character, payload)
+        if payload["available"]:
+            return payload
+    lures = get_available_fishing_lures(character)
+    return lures[0] if lures else {}
+
+
+def can_borrow_fishing_tackle(character):
+    """Return whether starter tackle can be borrowed in the current room."""
+
+    room = getattr(character, "location", None)
+    room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+    return room_id == STARTER_FISHING_ROOM_ID
+
+
+def borrow_fishing_tackle(character, selection="kit"):
+    """Issue starter tackle from the Brambleford wharf and select it."""
+
+    if not can_borrow_fishing_tackle(character):
+        return False, "You need the Brambleford wharf's loaner rack before anyone will issue tackle."
+
+    choice = str(selection or "kit").strip().lower()
+    if choice in {"", "kit", "gear", "all"}:
+        character.db.brave_active_fishing_rod = STARTER_FISHING_ROD
+        character.db.brave_active_fishing_lure = STARTER_FISHING_LURE
+        return True, "You borrow a |wLoaner Pole|n and a |wPlain Hook|n from the wharf rack and set them as your tackle."
+    if choice in {"rod", "pole"}:
+        character.db.brave_active_fishing_rod = STARTER_FISHING_ROD
+        return True, "You borrow a |wLoaner Pole|n from the wharf rack and set it as your active rod."
+    if choice in {"lure", "hook", "bait"}:
+        character.db.brave_active_fishing_lure = STARTER_FISHING_LURE
+        return True, "You borrow a |wPlain Hook|n from the wharf rack and set it as your active lure."
+    return False, "Borrow `fish borrow kit`, `fish borrow rod`, or `fish borrow lure`."
+
+
+def set_selected_fishing_rod(character, query):
+    """Select one fishing rod by fuzzy name."""
+
+    token = _normalize_target_token(query)
+    exact = []
+    partial = []
+    for rod in get_available_fishing_rods(character):
+        values = [rod["key"], rod.get("name", "")]
+        normalized = [_normalize_target_token(value) for value in values]
+        if any(token == value for value in normalized):
+            exact.append(rod)
+        elif any(token in value for value in normalized):
+            partial.append(rod)
+    matches = exact or partial
+    if not matches:
+        return False, "No fishing rod matches that name."
+    if len(matches) > 1:
+        return False, "Be more specific. That could mean: " + ", ".join(match["name"] for match in matches)
+    character.db.brave_active_fishing_rod = matches[0]["key"]
+    return True, f"You set out the |w{matches[0]['name']}|n."
+
+
+def set_selected_fishing_lure(character, query):
+    """Select one fishing lure by fuzzy name."""
+
+    token = _normalize_target_token(query)
+    exact = []
+    partial = []
+    for lure in get_available_fishing_lures(character):
+        values = [lure["key"], lure.get("name", "")]
+        normalized = [_normalize_target_token(value) for value in values]
+        if any(token == value for value in normalized):
+            exact.append(lure)
+        elif any(token in value for value in normalized):
+            partial.append(lure)
+    matches = exact or partial
+    if not matches:
+        return False, "No fishing lure matches that name."
+    if len(matches) > 1:
+        return False, "Be more specific. That could mean: " + ", ".join(match["name"] for match in matches)
+    character.db.brave_active_fishing_lure = matches[0]["key"]
+    return True, f"You swap over to |w{matches[0]['name']}|n."
+
+
+def _fishing_weight_for_entry(room_id, fish_entry, rod, lure):
+    rarity_rank = {
+        "junk": -1,
+        "common": 0,
+        "uncommon": 1,
+        "rare": 2,
+        "epic": 3,
+    }.get(str(fish_entry.get("rarity") or "common").lower(), 0)
+    weight = max(1, int(fish_entry.get("chance", 1) or 1))
+    if rarity_rank > 0:
+        weight += int(rod.get("power", 0) or 0) * rarity_rank
+        weight += int(lure.get("rarity_bonus", 0) or 0) * rarity_rank
+    if fish_entry.get("item") in set(lure.get("attracts", []) or []):
+        weight += 6
+    weight += int((lure.get("zone_bonus", {}) or {}).get(room_id, 0) or 0)
+    return max(1, weight)
+
+
+def _pick_fish_for_setup(room_id, spot_data, rod, lure):
+    weighted_entries = []
+    total = 0
+    for fish_entry in spot_data.get("fish", []):
+        chance = _fishing_weight_for_entry(room_id, fish_entry, rod, lure)
+        total += chance
+        weighted_entries.append((total, fish_entry))
+    if not weighted_entries:
+        return None
+    roll = randint(1, total)
+    for threshold, fish_entry in weighted_entries:
+        if roll <= threshold:
+            return dict(fish_entry)
+    return dict(weighted_entries[-1][1])
+
+
+def get_fishing_spot_summary(character):
+    """Return current fishing setup and likely catches for the active room."""
+
+    room = getattr(character, "location", None)
+    room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+    spot = FISHING_SPOTS.get(room_id, {})
+    rod = get_selected_fishing_rod(character)
+    lure = get_selected_fishing_lure(character)
+    catches = []
+    for fish_entry in sorted(
+        spot.get("fish", []),
+        key=lambda entry: (
+            {"junk": 0, "common": 1, "uncommon": 2, "rare": 3, "epic": 4}.get(str(entry.get("rarity") or "common").lower(), 1),
+            -int(entry.get("chance", 0) or 0),
+        ),
+    ):
+        catches.append(
+            {
+                "item": fish_entry.get("item"),
+                "name": ITEM_TEMPLATES.get(fish_entry.get("item"), {}).get("name", fish_entry.get("item")),
+                "rarity": str(fish_entry.get("rarity") or "common").title(),
+                "boosted": fish_entry.get("item") in set(lure.get("attracts", []) or []),
+            }
+        )
+    return {
+        "spot": spot,
+        "rod": rod,
+        "lure": lure,
+        "catches": catches,
+    }
+
+
 def _format_weight(weight):
     return f"{weight:.1f} lb"
 
@@ -165,6 +376,17 @@ def _award_catch_record(character, template_id, weight):
     }
     board.db.brave_catch_records = records
     return records[account_name]
+
+
+def get_catch_log_entries(limit=None):
+    """Return Great Catch log rows sorted from heaviest to lightest."""
+
+    board = get_entity("great_catch_log")
+    records = dict(board.db.brave_catch_records or {}) if board else {}
+    entries = sorted(records.values(), key=lambda entry: (-float(entry.get("weight", 0) or 0), str(entry.get("account", "")).lower()))
+    if limit is not None:
+        entries = entries[: max(0, int(limit or 0))]
+    return entries
 
 
 def start_fishing(character):
@@ -191,16 +413,24 @@ def start_fishing(character):
         if phase == "bite":
             return False, "Something is already biting. Use |wreel|n now."
 
-    fish_entry = _pick_fish(spot)
+    rod = get_selected_fishing_rod(character)
+    lure = get_selected_fishing_lure(character)
+    fish_entry = _pick_fish_for_setup(room_id, spot, rod, lure)
+    if not fish_entry:
+        return False, "The water here looks empty for the moment."
     character.ndb.brave_fishing = {
         "phase": "waiting",
         "room_id": room_id,
         "started_at": time(),
         "fish": fish_entry,
+        "rod_key": rod.get("key"),
+        "lure_key": lure.get("key"),
     }
     bite_delay = randint(*spot["bite_delay"])
     delay(bite_delay, _trigger_bite, character, persistent=False)
-    return True, spot["cast_text"]
+    return True, (
+        f"{spot['cast_text']} You work with |w{rod.get('name', 'a borrowed rod')}|n and |w{lure.get('name', 'a plain lure')}|n."
+    )
 
 
 def _trigger_bite(character):
@@ -223,7 +453,19 @@ def _trigger_bite(character):
     state["phase"] = "bite"
     state["expires_at"] = expires_at
     character.ndb.brave_fishing = state
-    character.msg("|yA sharp tug runs through the line.|n Use |wreel|n before the fish gets away.")
+    try:
+        from world.browser_panels import send_browser_notice_event
+    except Exception:
+        character.msg("|yA sharp tug runs through the line.|n Use |wreel|n before the fish gets away.")
+    else:
+        send_browser_notice_event(
+            character,
+            "|yA sharp tug runs through the line.|n Use |wreel|n before the fish gets away.",
+            title="Fishing",
+            tone="warn",
+            icon="phishing",
+            duration_ms=3200,
+        )
     delay(spot["reaction_window"], _expire_bite, character, persistent=False)
 
 
@@ -234,7 +476,19 @@ def _expire_bite(character):
     if time() <= state.get("expires_at", 0):
         return
     _clear_fishing_state(character)
-    character.msg("The water settles. Whatever was there slips free before you can set the hook.")
+    try:
+        from world.browser_panels import send_browser_notice_event
+    except Exception:
+        character.msg("The water settles. Whatever was there slips free before you can set the hook.")
+    else:
+        send_browser_notice_event(
+            character,
+            "The water settles. Whatever was there slips free before you can set the hook.",
+            title="Fishing",
+            tone="muted",
+            icon="waves",
+            duration_ms=3200,
+        )
 
 
 def reel_line(character):
@@ -260,7 +514,13 @@ def reel_line(character):
     fish_entry = state["fish"]
     _clear_fishing_state(character)
 
-    if random() > fish_entry.get("hook_chance", 1.0):
+    rod = FISHING_RODS.get(str(state.get("rod_key") or "").lower(), {})
+    lure = FISHING_LURES.get(str(state.get("lure_key") or "").lower(), {})
+    hook_chance = float(fish_entry.get("hook_chance", 1.0) or 1.0)
+    hook_chance = min(0.98, hook_chance + (float(rod.get("stability", 0) or 0) * 0.08))
+    if fish_entry.get("item") in set(lure.get("attracts", []) or []):
+        hook_chance = min(0.98, hook_chance + 0.04)
+    if random() > hook_chance:
         return False, "The line jerks, the hook bites, and then the fish twists free at the last second."
 
     template_id = fish_entry["item"]
@@ -269,9 +529,11 @@ def reel_line(character):
     character.add_item_to_inventory(template_id, 1)
     record = _award_catch_record(character, template_id, weight)
 
-    message = (
-        f"You land a |w{ITEM_TEMPLATES[template_id]['name']}|n weighing |w{_format_weight(weight)}|n."
-    )
+    rarity = str(fish_entry.get("rarity") or "common").lower()
+    rarity_text = ""
+    if rarity in {"rare", "epic"}:
+        rarity_text = f" |y({rarity.title()})|n"
+    message = f"You land a |w{ITEM_TEMPLATES[template_id]['name']}|n{rarity_text} weighing |w{_format_weight(weight)}|n."
     message += get_fishing_suffix(character)
     if record:
         message += " It is your new best catch on the log."
@@ -281,18 +543,17 @@ def reel_line(character):
 def format_catch_log():
     """Return the current shared Great Catch log text."""
 
-    board = get_entity("great_catch_log")
-    records = dict(board.db.brave_catch_records or {}) if board else {}
+    entries = get_catch_log_entries()
     lines = [
         "The ledger pages are crowded with fish stories, half-legible boasting, and weights Uncle Pib insists are honest.",
         "",
     ]
 
-    if not records:
+    if not entries:
         lines.append("No one has posted a proper river triumph yet. The first name is still waiting.")
         return "\n".join(lines)
 
-    overall = max(records.values(), key=lambda entry: entry.get("weight", 0))
+    overall = entries[0]
     lines.append(
         "Town best: "
         f"{overall['fish']} at {_format_weight(overall['weight'])} by {overall['account']} ({overall['character']})."
@@ -300,8 +561,7 @@ def format_catch_log():
     lines.append("")
     lines.append("Family catches:")
 
-    for account_name in sorted(records):
-        entry = records[account_name]
+    for entry in sorted(entries, key=lambda current: str(current["account"]).lower()):
         lines.append(
             f"- {entry['account']}: {entry['fish']} at {_format_weight(entry['weight'])} "
             f"({entry['character']})"
@@ -323,9 +583,14 @@ def format_kitchen_hearth_text(character=None):
         lines.append("Use |weat <meal>|n once you are ready to take the buff with you.")
 
     lines.append("")
-    for recipe in COOKING_RECIPES.values():
-        ingredient_text = format_ingredient_list(recipe["ingredients"], ITEM_TEMPLATES)
-        lines.append(f"- {recipe['name']}: {ingredient_text}")
+    if character:
+        for entry in get_cooking_entries(character):
+            status = "known" if entry["known"] else "locked"
+            lines.append(f"- {entry['name']}: {entry['ingredient_text']} ({status})")
+    else:
+        for recipe in COOKING_RECIPES.values():
+            ingredient_text = format_ingredient_list(recipe["ingredients"], ITEM_TEMPLATES)
+            lines.append(f"- {recipe['name']}: {ingredient_text}")
 
     return "\n".join(lines)
 
@@ -334,18 +599,67 @@ def format_pole_rack_text():
     """Return fishing instructions for the wharf."""
 
     return (
-        "A hand-painted note reads: TAKE A POLE, MIND THE HOOKS, AND USE `fish` WHEN THE RIVER LOOKS "
-        "LIKE IT MIGHT BE FEELING GENEROUS. WHEN IT TUGS, USE `reel`."
+        "A hand-painted note reads: CHECK YOUR TACKLE WITH `fish tackle`, BORROW STARTER GEAR WITH "
+        "`fish borrow kit`, CAST WITH `fish` OR `fish cast`, AND WHEN THE LINE TUGS BACK USE `reel` "
+        "BEFORE THE RIVER CHANGES ITS MIND."
     )
 
 
-def format_recipe_list(character):
-    """Return a readable recipe list showing what the player can make."""
+def format_fishing_screen(character):
+    """Return a readable fishing guide for the active room and tackle."""
+
+    room = getattr(character, "location", None)
+    room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+    spot = FISHING_SPOTS.get(room_id)
+    if not spot:
+        return "There is no proper place to fish here."
+
+    summary = get_fishing_spot_summary(character)
+    rod = summary["rod"]
+    lure = summary["lure"]
+    catch_lines = []
+    for catch in summary["catches"]:
+        boosted = " · favored by lure" if catch["boosted"] else ""
+        catch_lines.append(f"  {catch['name']} · {catch['rarity']}{boosted}")
+
+    return render_screen(
+        "Tackle Roll",
+        subtitle=spot.get("name", room.key if room else "Fishing Water"),
+        meta=[
+            f"Rod: {rod.get('name', 'None selected')}",
+            f"Lure: {lure.get('name', 'None selected')}",
+        ],
+        sections=[
+            ("Current Water", [f"  {spot.get('cast_text', '')}"]),
+            ("Likely Catches", catch_lines or ["  Nothing obvious is moving here."]),
+            (
+                "How To Fish",
+                [
+                    "  Use |wfish|n or |wfish cast|n to put a line in the water.",
+                    "  Use |wfish rod <rod>|n or |wfish lure <lure>|n to change your setup.",
+                    "  Use |wfish borrow kit|n at the Brambleford wharf for starter tackle.",
+                    "  Use |wfish log|n to review the Great Catch ledger.",
+                ],
+            ),
+        ],
+    )
+
+
+def _is_cooking_recipe_known(character, recipe_key, recipe):
+    """Return whether one recipe is currently known to the character."""
+
+    unlock_type = str(recipe.get("unlock_type") or "auto").lower()
+    if unlock_type in {"", "auto", "none"}:
+        return True
+    known = {str(key).lower() for key in (getattr(getattr(character, "db", None), "brave_known_cooking_recipes", None) or [])}
+    return str(recipe_key).lower() in known
+
+
+def get_cooking_entries(character):
+    """Return normalized cooking entries for one character."""
 
     inventory = _count_inventory(character)
-    recipe_blocks = []
-    ready_count = 0
-
+    entries = []
     for recipe_key, recipe in COOKING_RECIPES.items():
         ingredient_text = format_ingredient_list(recipe["ingredients"], ITEM_TEMPLATES)
         missing = []
@@ -353,22 +667,54 @@ def format_recipe_list(character):
             have = inventory.get(template_id, 0)
             if have < quantity:
                 missing.append(f"{ITEM_TEMPLATES[template_id]['name']} {have}/{quantity}")
-        if not missing:
-            ready_count += 1
-        status = "Ready to cook" if not missing else "Missing: " + ", ".join(missing)
-        recipe_blocks.append(
-            format_entry(
-                recipe["name"],
-                details=[ingredient_text, status],
-                summary=recipe["summary"],
-            )
+        known = _is_cooking_recipe_known(character, recipe_key, recipe)
+        entries.append(
+            {
+                "key": recipe_key,
+                "name": recipe["name"],
+                "ingredient_text": ingredient_text,
+                "summary": recipe.get("summary", ""),
+                "known": known,
+                "ready": known and not missing,
+                "missing": missing,
+                "unlock_text": recipe.get("unlock_text", ""),
+                "result": recipe.get("result"),
+            }
         )
+    entries.sort(key=lambda entry: (0 if entry["ready"] else 1, 0 if entry["known"] else 1, entry["name"].lower()))
+    return entries
+
+
+def format_recipe_list(character):
+    """Return a readable recipe list showing what the player can make."""
+
+    ready_blocks = []
+    known_blocks = []
+    locked_blocks = []
+    entries = get_cooking_entries(character)
+    for entry in entries:
+        status = "Ready to cook" if entry["ready"] else ("Missing: " + ", ".join(entry["missing"]) if entry["known"] else "Locked recipe")
+        block = format_entry(
+            entry["name"],
+            details=[entry["ingredient_text"], status],
+            summary=entry["summary"] if entry["known"] else (entry["unlock_text"] or "You have not learned this recipe yet."),
+        )
+        if not entry["known"]:
+            locked_blocks.append(block)
+        elif entry["ready"]:
+            ready_blocks.append(block)
+        else:
+            known_blocks.append(block)
 
     return render_screen(
         "Kitchen Hearth",
         subtitle="Simple inn recipes you can turn out without wasting the room or the pan.",
-        meta=[f"{ready_count} ready recipes", f"{len(COOKING_RECIPES)} total recipes"],
-        sections=[("Tonight's Menu", ["  No recipes are posted here."] if not recipe_blocks else _stack_recipe_blocks(recipe_blocks))],
+        meta=[f"{sum(1 for entry in entries if entry['ready'])} ready recipes", f"{len(entries)} total recipes"],
+        sections=[
+            ("Ready Tonight", ready_blocks or ["  Nothing is ready from your current pantry."]),
+            ("Known Recipes", known_blocks or ["  No other known recipes are close to ready."]),
+            ("Locked Recipes", locked_blocks or ["  No locked recipes right now."]),
+        ],
     )
 
 
@@ -400,6 +746,49 @@ def _match_recipe(query):
     return matches[0] if len(matches) == 1 else matches
 
 
+def describe_cooking_recipe(character, query):
+    """Return a readable breakdown for one cooking recipe."""
+
+    match = _match_recipe(query)
+    if isinstance(match, list):
+        return False, "Be more specific. That could mean: " + ", ".join(COOKING_RECIPES[key]["name"] for key in match)
+    if not match:
+        return False, "Unknown recipe. Use |wcook|n to review the current hearth menu."
+
+    recipe = COOKING_RECIPES[match]
+    meal = ITEM_TEMPLATES.get(recipe["result"], {})
+    known = _is_cooking_recipe_known(character, match, recipe)
+    ingredient_text = format_ingredient_list(recipe["ingredients"], ITEM_TEMPLATES)
+    restore = meal.get("restore", {})
+    restore_bits = [f"{pool.upper()} +{value}" for pool, value in restore.items() if value]
+    bonus_text = format_bonus_summary({"bonuses": meal.get("meal_bonuses", {})})
+    status = "Ready to cook"
+    missing = []
+    for template_id, quantity in recipe["ingredients"].items():
+        have = character.get_inventory_quantity(template_id)
+        if have < quantity:
+            missing.append(f"{ITEM_TEMPLATES[template_id]['name']} {have}/{quantity}")
+    if not known:
+        status = "Locked recipe"
+    elif missing:
+        status = "Missing: " + ", ".join(missing)
+
+    lines = [
+        f"|w{recipe['name']}|n",
+        f"Ingredients: {ingredient_text}",
+        f"Status: {status}",
+    ]
+    if recipe.get("summary"):
+        lines.append(recipe["summary"])
+    if not known and recipe.get("unlock_text"):
+        lines.append(recipe["unlock_text"])
+    if restore_bits:
+        lines.append("Restore: " + ", ".join(restore_bits))
+    if bonus_text:
+        lines.append("Meal bonus: " + bonus_text)
+    return True, "\n".join(lines)
+
+
 def cook_recipe(character, query):
     """Cook a meal from ingredients at the Lantern Rest hearth."""
 
@@ -418,6 +807,8 @@ def cook_recipe(character, query):
         return False, "Unknown recipe. Use |wcook|n to review the current hearth menu."
 
     recipe = COOKING_RECIPES[match]
+    if not _is_cooking_recipe_known(character, match, recipe):
+        return False, recipe.get("unlock_text") or "You have not learned that recipe yet."
     for template_id, quantity in recipe["ingredients"].items():
         if character.get_inventory_quantity(template_id) < quantity:
             return False, (
@@ -523,6 +914,23 @@ def _consume_item_by_template(character, template_id, *, context="explore", cozy
             learned_ability_name = unlock_message
         else:
             return False, "That vow cannot be taken right now.", None
+
+    if effect_type == "unlock_recipe":
+        recipe_domain = str(use.get("recipe_domain") or "cooking").lower()
+        recipe_key = str(use.get("unlock_recipe") or "").lower()
+        if recipe_domain == "cooking":
+            unlock = getattr(character, "unlock_cooking_recipe", None)
+        elif recipe_domain == "tinkering":
+            unlock = getattr(character, "unlock_tinkering_recipe", None)
+        else:
+            unlock = None
+        if callable(unlock):
+            ok, unlock_message = unlock(recipe_key)
+            if not ok:
+                return False, unlock_message, None
+            learned_ability_name = unlock_message
+        else:
+            return False, "That pattern cannot be learned right now.", None
 
     if target_type == "self" and resolved_target != character:
         return False, "That item can only be used on yourself.", None

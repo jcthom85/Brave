@@ -3,14 +3,22 @@
 import re
 
 from world.activities import (
+    borrow_fishing_tackle,
+    format_catch_log,
     cook_recipe,
+    describe_cooking_recipe,
+    format_fishing_screen,
     format_recipe_list,
+    get_selected_fishing_lure,
+    get_selected_fishing_rod,
     reel_line,
     room_supports_activity,
+    set_selected_fishing_lure,
+    set_selected_fishing_rod,
     start_fishing,
 )
-from world.browser_panels import build_cook_panel, build_map_panel, build_travel_panel
-from world.browser_views import build_cook_view, build_map_view, build_travel_view
+from world.browser_panels import build_cook_panel, build_fishing_panel, build_map_panel, build_travel_panel
+from world.browser_views import build_cook_view, build_fishing_view, build_map_view, build_travel_view
 from world.navigation import render_map, render_minimap, sort_exits
 from world.screen_text import format_entry, render_screen, wrap_text
 
@@ -46,14 +54,42 @@ def _refresh_cook_scene(command, character, message, *, success=False):
     return True
 
 
+def _refresh_fishing_scene(command, character, message=None, *, success=False):
+    """Keep browser-based fishing actions inside the tackle screen."""
+
+    if not command.get_web_session() or not room_supports_activity(character.location, "fishing"):
+        return False
+
+    command.clear_scene()
+    command.send_browser_view(
+        build_fishing_view(
+            character,
+            status_message=_strip_evennia_markup(message) if message else None,
+            status_tone="good" if success else "muted",
+        )
+    )
+    if message:
+        command.msg(message)
+        command.send_other_sessions(message)
+    return True
+
+
 class CmdFish(BraveCharacterCommand):
     """
     Cast a line where fishing is available.
 
     Usage:
       fish
+      fish cast
+      fish tackle
+      fish log
+      fish borrow kit
+      fish borrow rod
+      fish borrow lure
+      fish rod <rod>
+      fish lure <lure>
 
-    Starts a simple fishing attempt. When the river tugs back, use `reel`.
+    Review your tackle, swap rod or lure, or cast a line where fishing is available.
     """
 
     key = "fish"
@@ -65,8 +101,54 @@ class CmdFish(BraveCharacterCommand):
         if not character:
             return
 
-        _ok, message = start_fishing(character)
-        self.msg(message)
+        raw = self.args.strip()
+        lowered = raw.lower()
+
+        if lowered in {"", "tackle", "kit", "gear"}:
+            if not raw:
+                if self.get_web_session() and room_supports_activity(character.location, "fishing"):
+                    self.scene_msg(format_fishing_screen(character), panel=build_fishing_panel(character), view=build_fishing_view(character))
+                    return
+                ok, message = start_fishing(character)
+                self.msg(message)
+                return
+            self.scene_msg(format_fishing_screen(character), panel=build_fishing_panel(character), view=build_fishing_view(character))
+            return
+
+        if lowered == "log":
+            self.scene_msg(format_catch_log(), panel=build_fishing_panel(character), view=build_fishing_view(character, status_message="Great Catch log opened.", status_tone="muted"))
+            return
+
+        if lowered == "cast":
+            ok, message = start_fishing(character)
+            if _refresh_fishing_scene(self, character, message, success=ok):
+                return
+            self.msg(message)
+            return
+
+        if lowered.startswith("borrow"):
+            selection = raw[6:].strip() or "kit"
+            ok, message = borrow_fishing_tackle(character, selection)
+            if _refresh_fishing_scene(self, character, message, success=ok):
+                return
+            self.msg(message)
+            return
+
+        if lowered.startswith("rod "):
+            ok, message = set_selected_fishing_rod(character, raw[4:].strip())
+            if _refresh_fishing_scene(self, character, message, success=ok):
+                return
+            self.msg(message)
+            return
+
+        if lowered.startswith("lure "):
+            ok, message = set_selected_fishing_lure(character, raw[5:].strip())
+            if _refresh_fishing_scene(self, character, message, success=ok):
+                return
+            self.msg(message)
+            return
+
+        self.msg("Usage: fish, fish cast, fish tackle, fish log, fish borrow <kit|rod|lure>, fish rod <rod>, or fish lure <lure>")
 
 
 class CmdReel(BraveCharacterCommand):
@@ -88,7 +170,9 @@ class CmdReel(BraveCharacterCommand):
         if not character:
             return
 
-        _ok, message = reel_line(character)
+        ok, message = reel_line(character)
+        if _refresh_fishing_scene(self, character, message, success=ok):
+            return
         self.msg(message)
 
 
@@ -98,6 +182,7 @@ class CmdCook(BraveCharacterCommand):
 
     Usage:
       cook
+      cook inspect <recipe>
       cook <recipe>
 
     Shows what you can make at the Lantern Rest hearth, or cooks a named recipe.
@@ -116,7 +201,14 @@ class CmdCook(BraveCharacterCommand):
             self.scene_msg(format_recipe_list(character), panel=build_cook_panel(character), view=build_cook_view(character))
             return
 
-        ok, message = cook_recipe(character, self.args.strip())
+        raw = self.args.strip()
+        lowered = raw.lower()
+        if lowered.startswith("inspect "):
+            ok, message = describe_cooking_recipe(character, raw[8:].strip())
+            self.msg(message)
+            return
+
+        ok, message = cook_recipe(character, raw)
         if _refresh_cook_scene(self, character, message, success=ok):
             return
         self.msg(message)

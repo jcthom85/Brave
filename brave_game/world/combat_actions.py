@@ -1,9 +1,12 @@
 """Shared combat action payload helpers for browser combat views."""
 
+from collections.abc import Mapping
+
 from world.content import get_content_registry
 from world.combat_atb import get_ability_atb_profile, get_item_atb_profile
 from world.enemy_icons import get_enemy_icon_name
 from world.data.items import ITEM_TEMPLATES, get_item_use_profile
+from world.mastery import format_mastery_name
 
 CONTENT = get_content_registry()
 CHARACTER_CONTENT = CONTENT.characters
@@ -40,8 +43,23 @@ def _ordered_participants(encounter, character):
     participants = encounter.get_active_participants()
     return sorted(
         participants,
-        key=lambda participant: (0 if participant.id == character.id else 1, participant.key.lower()),
+        key=lambda participant: (
+            0 if not isinstance(participant, Mapping) and participant.id == character.id else 1,
+            str(participant.get("key") if isinstance(participant, Mapping) else participant.key).lower(),
+        ),
     )
+
+
+def _participant_id(participant):
+    return participant.get("id") if isinstance(participant, Mapping) else participant.id
+
+
+def _participant_name(participant):
+    return str(participant.get("key") if isinstance(participant, Mapping) else participant.key)
+
+
+def _participant_icon(participant):
+    return str(participant.get("icon", "pets") if isinstance(participant, Mapping) else "person")
 
 
 def _short_resource_label(resource_key, character):
@@ -94,11 +112,19 @@ def _ally_picker(title, command_prefix, ordered_participants, character):
         "subtitle": "Choose an ally.",
         "options": [
             {
-                "label": participant.key,
-                "command": command_prefix if participant.id == character.id else f"{command_prefix} = {participant.key}",
-                "icon": "person",
-                "meta": "You" if participant.id == character.id else "Ally",
-                "tone": "accent" if participant.id == character.id else "good",
+                "label": _participant_name(participant),
+                "command": (
+                    command_prefix
+                    if not isinstance(participant, Mapping) and participant.id == character.id
+                    else f"{command_prefix} = {(_participant_id(participant) if isinstance(participant, Mapping) else _participant_name(participant))}"
+                ),
+                "icon": _participant_icon(participant),
+                "meta": (
+                    "You"
+                    if not isinstance(participant, Mapping) and participant.id == character.id
+                    else ("Companion" if isinstance(participant, Mapping) else "Ally")
+                ),
+                "tone": "accent" if not isinstance(participant, Mapping) and participant.id == character.id else "good",
             }
             for participant in ordered_participants
         ],
@@ -180,6 +206,7 @@ def build_combat_ability_actions(encounter, character):
         resource_current = (character.db.brave_resources or {}).get(resource_key, 0)
         command_prefix = f"use {unlocked_name}"
         display_name = format_ability_display(unlocked_name, character)
+        display_name = format_mastery_name(display_name, getattr(character, "get_ability_mastery_rank", lambda _key: 1)(ability_key))
         text = f"{display_name} · {ability['cost']} {_short_resource_label(resource_key, character)}"
         timing = get_ability_atb_profile(ability_key, ability)
         reaction_role = _reaction_role_for_ability(ability_key)

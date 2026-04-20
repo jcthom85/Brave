@@ -20,6 +20,56 @@ class _DummySessions:
 
 
 class BraveCharacterCommandTests(unittest.TestCase):
+    def test_send_room_emote_uses_gendered_head_phrase(self):
+        web_session = SimpleNamespace(protocol_key="websocket")
+        command = object.__new__(BraveCharacterCommand)
+        room = object()
+        character = SimpleNamespace(key="Jackson", location=room, db=SimpleNamespace(brave_gender="male"))
+        character.ensure_brave_character = lambda: character
+        command.session = web_session
+        command.caller = character
+
+        sent = []
+        command.msg = lambda *args, **kwargs: sent.append({"args": args, "kwargs": kwargs})
+
+        recorded = []
+        from world import browser_panels
+        original = browser_panels.broadcast_room_activity
+        browser_panels.broadcast_room_activity = lambda location, line, exclude=None, cls=None: recorded.append((location, line, exclude, cls))
+        try:
+            ok = command.send_room_emote("shake head")
+        finally:
+            browser_panels.broadcast_room_activity = original
+
+        self.assertTrue(ok)
+        self.assertEqual("Jackson shakes his head.", recorded[0][1])
+        self.assertEqual(("You shake your head.",), sent[0]["args"])
+
+    def test_send_room_emote_uses_their_for_nonbinary_character(self):
+        web_session = SimpleNamespace(protocol_key="websocket")
+        command = object.__new__(BraveCharacterCommand)
+        room = object()
+        character = SimpleNamespace(key="Ash", location=room, db=SimpleNamespace(brave_gender="nonbinary"))
+        character.ensure_brave_character = lambda: character
+        command.session = web_session
+        command.caller = character
+
+        sent = []
+        command.msg = lambda *args, **kwargs: sent.append({"args": args, "kwargs": kwargs})
+
+        from world import browser_panels
+        recorded = []
+        original = browser_panels.broadcast_room_activity
+        browser_panels.broadcast_room_activity = lambda location, line, exclude=None, cls=None: recorded.append((location, line, exclude, cls))
+        try:
+            ok = command.send_room_emote("shrug")
+        finally:
+            browser_panels.broadcast_room_activity = original
+
+        self.assertTrue(ok)
+        self.assertEqual("Ash shrugs their shoulders.", recorded[0][1])
+        self.assertEqual(("You shrug.",), sent[0]["args"])
+
     def test_scene_msg_skips_browser_clear_when_view_is_present(self):
         web_session = SimpleNamespace(protocol_key="websocket")
         other_session = SimpleNamespace(protocol_key="telnet")

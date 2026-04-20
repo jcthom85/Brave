@@ -300,7 +300,10 @@ class DialogueContentRegistry:
 class SystemsContentRegistry:
     source_path: str
     fishing_spots: dict
+    fishing_rods: dict
+    fishing_lures: dict
     cooking_recipes: dict
+    tinkering_recipes: dict
     cozy_bonus: dict
     outfitters_room_id: str
     shift_outcomes: tuple
@@ -432,7 +435,10 @@ def _build_systems_registry():
     return SystemsContentRegistry(
         source_path=str(SYSTEMS_PACK_PATH),
         fishing_spots=dict(activities.get("fishing_spots", {})),
+        fishing_rods=dict(activities.get("fishing_rods", {})),
+        fishing_lures=dict(activities.get("fishing_lures", {})),
         cooking_recipes=dict(activities.get("cooking_recipes", {})),
+        tinkering_recipes=dict(activities.get("tinkering_recipes", {})),
         cozy_bonus=dict(activities.get("cozy_bonus", {})),
         outfitters_room_id=str(commerce.get("outfitters_room_id", "")),
         shift_outcomes=tuple(commerce.get("shift_outcomes", [])),

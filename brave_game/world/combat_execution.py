@@ -3,6 +3,7 @@
 import random
 
 from world.content import get_content_registry
+from world.mastery import get_ability_mastery_bonuses
 from world.ranger_companions import get_companion_name
 
 CONTENT = get_content_registry()
@@ -57,6 +58,28 @@ def _set_primal_form(encounter, character, form, *, turns=2):
     return state
 
 
+def _mastery_bonuses(character, ability_key):
+    """Return normalized mastery bonuses for one ability."""
+
+    getter = getattr(character, "get_ability_mastery_rank", None)
+    rank = getter(ability_key) if callable(getter) else 1
+    return get_ability_mastery_bonuses(ability_key, rank)
+
+
+def _apply_mastery_to_derived(derived, bonuses, *, magical=False):
+    """Return one derived-stat snapshot adjusted by mastery bonuses."""
+
+    adjusted = dict(derived or {})
+    adjusted["accuracy"] = int(adjusted.get("accuracy", 0) or 0) + int(bonuses.get("accuracy", 0) or 0)
+    power_key = "spell_power" if magical else "attack_power"
+    adjusted[power_key] = int(adjusted.get(power_key, 0) or 0) + int(bonuses.get("power", 0) or 0)
+    adjusted["healing_power"] = int(adjusted.get("healing_power", 0) or 0) + int(bonuses.get("heal", 0) or 0)
+    adjusted["mastery_guard_bonus"] = int(bonuses.get("guard", 0) or 0)
+    adjusted["mastery_turn_bonus"] = int(bonuses.get("turn", 0) or 0)
+    adjusted["mastery_rank"] = int(bonuses.get("rank", 1) or 1)
+    return adjusted
+
+
 def execute_combat_ability(encounter, character, ability_key, ability_name, target, derived, level, allies, enemies):
     """Execute one queued combat ability. Returns True when a handler ran."""
 
@@ -72,6 +95,12 @@ def execute_combat_ability(encounter, character, ability_key, ability_name, targ
     }.get(ability_class)
     if not handler:
         return False
+    bonuses = _mastery_bonuses(character, ability_key)
+    derived = _apply_mastery_to_derived(
+        derived,
+        bonuses,
+        magical=ability_class in {"cleric", "paladin", "mage", "druid"},
+    )
     handler(encounter, character, ability_key, ability_name, target, derived, level, allies, enemies)
     return True
 
@@ -93,9 +122,9 @@ def _execute_warrior_ability(encounter, character, ability_key, ability_name, ta
 
     if ability_key == "defend":
         state = encounter._get_participant_state(character)
-        state["guard"] = 7 + level * 2
+        state["guard"] = 7 + level * 2 + derived.get("mastery_guard_bonus", 0)
         encounter._save_participant_state(character, state)
-        encounter._apply_reaction_guard(character, character, amount=6 + level, label="Defend")
+        encounter._apply_reaction_guard(character, character, amount=6 + level + derived.get("mastery_guard_bonus", 0), label="Defend")
         encounter.obj.msg_contents(f"{character.key} braces for the next exchange.")
         encounter._record_participant_contribution(character, meaningful=True, mitigation=state["guard"], utility=1)
         encounter._add_threat(character, 5)
@@ -109,7 +138,7 @@ def _execute_warrior_ability(encounter, character, ability_key, ability_name, ta
         damage = encounter._weapon_damage(derived["attack_power"], target["armor"], bonus=2)
         encounter._damage_enemy(character, target, damage, extra_text=" The impact staggers the target.", damage_type="physical")
         if target["hp"] > 0:
-            target["bound_turns"] = max(target.get("bound_turns", 0), 1)
+            target["bound_turns"] = max(target.get("bound_turns", 0), 1 + derived.get("mastery_turn_bonus", 0))
             encounter._save_enemy(target)
             encounter.obj.msg_contents(f"{target['key']} is knocked off-balance.")
             encounter._try_interrupt_enemy_action(character, target, ability_name)
@@ -117,7 +146,7 @@ def _execute_warrior_ability(encounter, character, ability_key, ability_name, ta
         return
 
     if ability_key == "battlecry":
-        guard_value = 3 + level
+        guard_value = 3 + level + derived.get("mastery_guard_bonus", 0)
         for ally in allies:
             state = encounter._get_participant_state(ally)
             state["guard"] = max(state.get("guard", 0), guard_value)
@@ -129,13 +158,13 @@ def _execute_warrior_ability(encounter, character, ability_key, ability_name, ta
         return
 
     if ability_key == "intercept":
-        primary_guard = 8 + level * 2
+        primary_guard = 8 + level * 2 + derived.get("mastery_guard_bonus", 0)
         target_state = encounter._get_participant_state(target)
         target_state["guard"] = max(target_state.get("guard", 0), primary_guard)
         encounter._save_participant_state(target, target_state)
         if target.id != character.id:
             self_state = encounter._get_participant_state(character)
-            self_state["guard"] = max(self_state.get("guard", 0), 4 + level)
+            self_state["guard"] = max(self_state.get("guard", 0), 4 + level + derived.get("mastery_guard_bonus", 0))
             encounter._save_participant_state(character, self_state)
             encounter._apply_reaction_guard(character, character, amount=primary_guard, label="Intercept")
             encounter._apply_reaction_guard(character, target, amount=0, label="Intercept", redirect_to=character.id)
@@ -155,20 +184,20 @@ def _execute_warrior_ability(encounter, character, ability_key, ability_name, ta
         damage = encounter._weapon_damage(derived["attack_power"], target["armor"], bonus=3)
         encounter._damage_enemy(character, target, damage, extra_text=" The taunt lands as hard as the steel.", damage_type="physical")
         if target["hp"] > 0:
-            target["marked_turns"] = max(target.get("marked_turns", 0), 3)
+            target["marked_turns"] = max(target.get("marked_turns", 0), 3 + derived.get("mastery_turn_bonus", 0))
             encounter._save_enemy(target)
         encounter._add_threat(character, 14)
         return
 
     if ability_key == "brace":
         state = encounter._get_participant_state(character)
-        state["guard"] = max(state.get("guard", 0), 10 + level * 2)
+        state["guard"] = max(state.get("guard", 0), 10 + level * 2 + derived.get("mastery_guard_bonus", 0))
         if state.get("snare_turns", 0) > 0:
             state["snare_turns"] = 0
             state["snare_accuracy_penalty"] = 0
             state["snare_dodge_penalty"] = 0
         encounter._save_participant_state(character, state)
-        encounter._apply_reaction_guard(character, character, amount=8 + level * 2, label="Brace")
+        encounter._apply_reaction_guard(character, character, amount=8 + level * 2 + derived.get("mastery_guard_bonus", 0), label="Brace")
         encounter.obj.msg_contents(f"{character.key} locks into a braced stance and refuses to yield ground.")
         encounter._record_participant_contribution(character, meaningful=True, mitigation=state["guard"], utility=1)
         encounter._add_threat(character, 8)
@@ -179,8 +208,8 @@ def _execute_warrior_ability(encounter, character, ability_key, ability_name, ta
         amount = max(18, max_hp // 3)
         encounter._heal_character(character, character, amount, heal_type="valor")
         state = encounter._get_participant_state(character)
-        state["guard"] = max(state.get("guard", 0), 8 + level)
-        encounter._apply_reaction_guard(character, character, amount=6 + level, label="Last Stand")
+        state["guard"] = max(state.get("guard", 0), 8 + level + derived.get("mastery_guard_bonus", 0))
+        encounter._apply_reaction_guard(character, character, amount=6 + level + derived.get("mastery_guard_bonus", 0), label="Last Stand")
         encounter._save_participant_state(character, state)
         encounter.obj.msg_contents(f"{character.key} digs in and refuses to fall.")
         encounter._add_threat(character, 12)
@@ -202,7 +231,7 @@ def _execute_ranger_ability(encounter, character, ability_key, ability_name, tar
         return
 
     if ability_key == "markprey":
-        target["marked_turns"] = 3 + int(combat.get("mark_turn_bonus", 0))
+        target["marked_turns"] = 3 + int(combat.get("mark_turn_bonus", 0)) + derived.get("mastery_turn_bonus", 0)
         encounter._save_enemy(target)
         encounter.obj.msg_contents(f"{character.key} fixes {target['key']} as the quarry and {companion_name.lower()} immediately picks up the line.")
         encounter._record_participant_contribution(character, meaningful=True, utility=1)
@@ -242,9 +271,9 @@ def _execute_ranger_ability(encounter, character, ability_key, ability_name, tar
         if target["hp"] > 0:
             target["bound_turns"] = max(
                 target.get("bound_turns", 0),
-                (2 if target.get("marked_turns", 0) > 0 else 1) + int(combat.get("snare_turn_bonus", 0)),
+                (2 if target.get("marked_turns", 0) > 0 else 1) + int(combat.get("snare_turn_bonus", 0)) + derived.get("mastery_turn_bonus", 0),
             )
-            target["marked_turns"] = max(target.get("marked_turns", 0), 2)
+            target["marked_turns"] = max(target.get("marked_turns", 0), 2 + derived.get("mastery_turn_bonus", 0))
             encounter._save_enemy(target)
         return
 
@@ -263,9 +292,9 @@ def _execute_ranger_ability(encounter, character, ability_key, ability_name, tar
 
     if ability_key == "evasiveroll":
         state = encounter._get_participant_state(character)
-        state["guard"] = max(state.get("guard", 0), 3 + level + int(combat.get("evasion_guard_bonus", 0)))
-        state["feint_turns"] = max(state.get("feint_turns", 0), 1)
-        state["feint_accuracy_bonus"] = max(state.get("feint_accuracy_bonus", 0), 2)
+        state["guard"] = max(state.get("guard", 0), 3 + level + int(combat.get("evasion_guard_bonus", 0)) + derived.get("mastery_guard_bonus", 0))
+        state["feint_turns"] = max(state.get("feint_turns", 0), 1 + derived.get("mastery_turn_bonus", 0))
+        state["feint_accuracy_bonus"] = max(state.get("feint_accuracy_bonus", 0), 2 + derived.get("mastery_turn_bonus", 0))
         state["feint_dodge_bonus"] = max(state.get("feint_dodge_bonus", 0), 12)
         encounter._save_participant_state(character, state)
         encounter.obj.msg_contents(f"{character.key} rolls clear and resets the angle of the fight with {companion_name.lower()} staying tight to the new line.")
@@ -288,8 +317,8 @@ def _execute_ranger_ability(encounter, character, ability_key, ability_name, tar
         if target["hp"] > 0:
             encounter._apply_enemy_bleed(
                 target,
-                turns=2,
-                damage=(4 if target.get("marked_turns", 0) > 0 else 3) + int(combat.get("bleed_bonus", 0)),
+                turns=2 + derived.get("mastery_turn_bonus", 0),
+                damage=(4 if target.get("marked_turns", 0) > 0 else 3) + int(combat.get("bleed_bonus", 0)) + max(0, derived.get("mastery_rank", 1) - 1),
                 message=f"|rBarbs tear into {target['key']} and leave it bleeding!|n",
             )
         return
@@ -304,7 +333,7 @@ def _execute_ranger_ability(encounter, character, ability_key, ability_name, tar
                 continue
             encounter._damage_enemy(character, enemy, encounter._weapon_damage(derived["attack_power"], enemy["armor"], bonus=4), damage_type="physical")
             if enemy["hp"] > 0:
-                enemy["marked_turns"] = max(enemy.get("marked_turns", 0), 1 + int(combat.get("rain_mark_turn_bonus", 0)))
+                enemy["marked_turns"] = max(enemy.get("marked_turns", 0), 1 + int(combat.get("rain_mark_turn_bonus", 0)) + derived.get("mastery_turn_bonus", 0))
                 encounter._save_enemy(enemy)
                 if first_marked is None:
                     first_marked = enemy
@@ -341,7 +370,7 @@ def _execute_cleric_ability(encounter, character, ability_key, ability_name, tar
     if ability_key == "blessing":
         encounter._heal_character(character, target, encounter._scaled_heal_amount(derived, 6, variance=2, divisor=4), heal_type="holy")
         state = encounter._get_participant_state(target)
-        state["guard"] = max(state.get("guard", 0), 4 + level + derived.get("healing_power", 0))
+        state["guard"] = max(state.get("guard", 0), 4 + level + derived.get("healing_power", 0) + derived.get("mastery_guard_bonus", 0))
         encounter._save_participant_state(target, state)
         if encounter._get_participant_state(target).get("bleed_turns", 0) > 0 or encounter._get_participant_state(target).get("poison_turns", 0) > 0:
             cleared = encounter._clear_one_harmful_effect(target)
@@ -360,7 +389,7 @@ def _execute_cleric_ability(encounter, character, ability_key, ability_name, tar
         return
 
     if ability_key == "sanctuary":
-        guard_value = 4 + level + max(1, derived.get("spell_power", 0) // 4)
+        guard_value = 4 + level + max(1, derived.get("spell_power", 0) // 4) + derived.get("mastery_guard_bonus", 0)
         heal_amount = max(1, 4 + derived.get("healing_power", 0) // 2)
         for ally in allies:
             state = encounter._get_participant_state(ally)
@@ -397,7 +426,7 @@ def _execute_cleric_ability(encounter, character, ability_key, ability_name, tar
     if ability_key == "guardianlight":
         encounter._heal_character(character, target, encounter._scaled_heal_amount(derived, 22, variance=5, divisor=2), heal_type="holy")
         target_state = encounter._get_participant_state(target)
-        target_state["guard"] = max(target_state.get("guard", 0), 6 + level + max(1, derived.get("healing_power", 0)))
+        target_state["guard"] = max(target_state.get("guard", 0), 6 + level + max(1, derived.get("healing_power", 0)) + derived.get("mastery_guard_bonus", 0))
         encounter._save_participant_state(target, target_state)
         encounter._apply_reaction_guard(character, target, amount=max(1, target_state["guard"] // 2), label="Guardian Light")
         encounter.obj.msg_contents(f"{character.key} leaves a guardian light hanging over {target.key}.")
@@ -430,10 +459,10 @@ def _execute_paladin_ability(encounter, character, ability_key, ability_name, ta
             character,
             target,
             power=max(2, 2 + derived.get("spell_power", 0) // 4),
-            turns=2,
+            turns=2 + derived.get("mastery_turn_bonus", 0),
             label="Guarding Aura",
         )
-        state["guard"] = max(state.get("guard", 0), guard_value)
+        state["guard"] = max(state.get("guard", 0), guard_value + derived.get("mastery_guard_bonus", 0))
         encounter._save_participant_state(target, state)
         if target.id == character.id:
             encounter.obj.msg_contents(f"{character.key} gathers a guarding aura around themself.")
@@ -451,7 +480,7 @@ def _execute_paladin_ability(encounter, character, ability_key, ability_name, ta
         bonus = 2 + max(1, derived.get("spell_power", 0) // 4)
         if target.get("marked_turns", 0) > 0 or target.get("bound_turns", 0) > 0:
             bonus += 2
-        target["judged_turns"] = max(target.get("judged_turns", 0), 3)
+        target["judged_turns"] = max(target.get("judged_turns", 0), 3 + derived.get("mastery_turn_bonus", 0))
         encounter._save_enemy(target)
         encounter._damage_enemy(
             character,
@@ -487,10 +516,10 @@ def _execute_paladin_ability(encounter, character, ability_key, ability_name, ta
                 character,
                 ally,
                 power=max(1, 1 + derived.get("spell_power", 0) // 5),
-                turns=1,
+                turns=1 + derived.get("mastery_turn_bonus", 0),
                 label="Consecrate",
             )
-            state["guard"] = max(state.get("guard", 0), 2 + max(1, derived.get("spell_power", 0) // 5))
+            state["guard"] = max(state.get("guard", 0), 2 + max(1, derived.get("spell_power", 0) // 5) + derived.get("mastery_guard_bonus", 0))
             encounter._save_participant_state(ally, state)
         encounter._add_threat(character, 9)
         return
@@ -501,10 +530,10 @@ def _execute_paladin_ability(encounter, character, ability_key, ability_name, ta
             character,
             target,
             power=max(3, 3 + derived.get("spell_power", 0) // 3),
-            turns=2,
+            turns=2 + derived.get("mastery_turn_bonus", 0),
             label="Shield of Dawn",
         )
-        state["guard"] = max(state.get("guard", 0), 8 + level + max(1, derived.get("spell_power", 0) // 3))
+        state["guard"] = max(state.get("guard", 0), 8 + level + max(1, derived.get("spell_power", 0) // 3) + derived.get("mastery_guard_bonus", 0))
         encounter._save_participant_state(target, state)
         encounter.obj.msg_contents(f"{character.key} turns a shield of dawn toward {target.key}.")
         encounter._record_participant_contribution(character, meaningful=True, mitigation=state["guard"], utility=1)
@@ -518,7 +547,7 @@ def _execute_paladin_ability(encounter, character, ability_key, ability_name, ta
         bonus = 3 + (6 if "undead" in target.get("tags", []) else 0) + (3 if target.get("judged_turns", 0) > 0 else 0)
         encounter._damage_enemy(character, target, encounter._spell_damage(derived["spell_power"], target["armor"], bonus=bonus), damage_type="holy")
         if target["hp"] > 0 and "undead" in target.get("tags", []):
-            target["bound_turns"] = max(target.get("bound_turns", 0), 1)
+            target["bound_turns"] = max(target.get("bound_turns", 0), 1 + derived.get("mastery_turn_bonus", 0))
             encounter._save_enemy(target)
         encounter._add_threat(character, 7)
         return
@@ -566,8 +595,8 @@ def _execute_mage_ability(encounter, character, ability_key, ability_name, targe
         damage = encounter._spell_damage(derived["spell_power"], target["armor"], bonus=1)
         encounter._damage_enemy(character, target, damage, extra_text=" Frost locks around its limbs.", damage_type="frost")
         if target["hp"] > 0:
-            target["bound_turns"] = max(target.get("bound_turns", 0), 1)
-            target["marked_turns"] = max(target.get("marked_turns", 0), 1)
+            target["bound_turns"] = max(target.get("bound_turns", 0), 1 + derived.get("mastery_turn_bonus", 0))
+            target["marked_turns"] = max(target.get("marked_turns", 0), 1 + derived.get("mastery_turn_bonus", 0))
             encounter._save_enemy(target)
             encounter.obj.msg_contents(f"{target['key']} is bound in frost.")
             encounter._try_interrupt_enemy_action(character, target, ability_name)
@@ -602,7 +631,7 @@ def _execute_mage_ability(encounter, character, ability_key, ability_name, targe
 
     if ability_key == "manashield":
         state = encounter._get_participant_state(character)
-        state["guard"] = max(state.get("guard", 0), 6 + max(1, derived.get("spell_power", 0) // 2))
+        state["guard"] = max(state.get("guard", 0), 6 + max(1, derived.get("spell_power", 0) // 2) + derived.get("mastery_guard_bonus", 0))
         encounter._save_participant_state(character, state)
         encounter.obj.msg_contents(f"{character.key} draws mana tight into a shimmering shield.")
         encounter._record_participant_contribution(character, meaningful=True, mitigation=state["guard"], utility=1)
@@ -612,7 +641,7 @@ def _execute_mage_ability(encounter, character, ability_key, ability_name, targe
         for enemy in enemies:
             encounter._damage_enemy(character, enemy, encounter._spell_damage(derived["spell_power"], enemy["armor"], bonus=1), damage_type="lightning")
             if enemy["hp"] > 0:
-                enemy["marked_turns"] = max(enemy.get("marked_turns", 0), 2)
+                enemy["marked_turns"] = max(enemy.get("marked_turns", 0), 2 + derived.get("mastery_turn_bonus", 0))
                 if enemy.get("bound_turns", 0) > 0:
                     encounter._try_interrupt_enemy_action(character, enemy, ability_name)
                 encounter._save_enemy(enemy)
@@ -652,8 +681,8 @@ def _execute_mage_ability(encounter, character, ability_key, ability_name, targe
 
     if ability_key == "mirrorveil":
         state = encounter._get_participant_state(character)
-        state["guard"] = max(state.get("guard", 0), 5 + max(1, derived.get("spell_power", 0) // 2))
-        state["feint_turns"] = max(state.get("feint_turns", 0), 1)
+        state["guard"] = max(state.get("guard", 0), 5 + max(1, derived.get("spell_power", 0) // 2) + derived.get("mastery_guard_bonus", 0))
+        state["feint_turns"] = max(state.get("feint_turns", 0), 1 + derived.get("mastery_turn_bonus", 0))
         state["feint_dodge_bonus"] = max(state.get("feint_dodge_bonus", 0), 10)
         encounter._save_participant_state(character, state)
         encounter.obj.msg_contents(f"{character.key} folds mirrored light around themselves and blurs the next opening.")
@@ -715,9 +744,9 @@ def _execute_rogue_ability(encounter, character, ability_key, ability_name, targ
 
     if ability_key == "feint":
         state = encounter._get_participant_state(character)
-        state["guard"] = max(state.get("guard", 0), 4 + character.db.brave_level)
-        state["feint_turns"] = 2
-        state["feint_accuracy_bonus"] = 6
+        state["guard"] = max(state.get("guard", 0), 4 + character.db.brave_level + derived.get("mastery_guard_bonus", 0))
+        state["feint_turns"] = 2 + derived.get("mastery_turn_bonus", 0)
+        state["feint_accuracy_bonus"] = 6 + derived.get("mastery_turn_bonus", 0)
         state["feint_dodge_bonus"] = 10
         encounter._save_participant_state(character, state)
         encounter.obj.msg_contents(f"{character.key} slips into a false opening, ready to punish the first bad reaction.")
@@ -753,16 +782,16 @@ def _execute_rogue_ability(encounter, character, ability_key, ability_name, targ
         if target["hp"] > 0:
             encounter._apply_enemy_poison(
                 target,
-                turns=2 + (1 if target.get("marked_turns", 0) > 0 else 0),
-                damage=4,
+                turns=2 + (1 if target.get("marked_turns", 0) > 0 else 0) + derived.get("mastery_turn_bonus", 0),
+                damage=4 + max(0, derived.get("mastery_rank", 1) - 1),
                 message=f"|gVenom spreads through {target['key']} from the poisoned strike!|n",
             )
         return
 
     if ability_key == "vanish":
         state = encounter._get_participant_state(character)
-        state["stealth_turns"] = max(state.get("stealth_turns", 0), 1)
-        state["feint_turns"] = max(state.get("feint_turns", 0), 1)
+        state["stealth_turns"] = max(state.get("stealth_turns", 0), 1 + derived.get("mastery_turn_bonus", 0))
+        state["feint_turns"] = max(state.get("feint_turns", 0), 1 + derived.get("mastery_turn_bonus", 0))
         state["feint_dodge_bonus"] = max(state.get("feint_dodge_bonus", 0), 8)
         encounter._save_participant_state(character, state)
         encounter.obj.msg_contents(f"{character.key} drops from sight and waits for the line to break.")
@@ -777,7 +806,7 @@ def _execute_rogue_ability(encounter, character, ability_key, ability_name, targ
         bonus = 4 + (3 if target.get("marked_turns", 0) > 0 or target.get("bound_turns", 0) > 0 else 0)
         encounter._damage_enemy(character, target, encounter._weapon_damage(derived["attack_power"], target["armor"], bonus=bonus), damage_type="physical")
         if target["hp"] > 0:
-            target["bound_turns"] = max(target.get("bound_turns", 0), 1)
+            target["bound_turns"] = max(target.get("bound_turns", 0), 1 + derived.get("mastery_turn_bonus", 0))
             encounter._save_enemy(target)
             encounter._try_interrupt_enemy_action(character, target, ability_name)
         return
@@ -790,9 +819,9 @@ def _execute_rogue_ability(encounter, character, ability_key, ability_name, targ
         bonus = 5 + encounter._consume_stealth_bonus(character)
         encounter._damage_enemy(character, target, encounter._weapon_damage(derived["attack_power"], target["armor"], bonus=bonus), damage_type="physical")
         state = encounter._get_participant_state(character)
-        state["guard"] = max(state.get("guard", 0), 3 + level)
+        state["guard"] = max(state.get("guard", 0), 3 + level + derived.get("mastery_guard_bonus", 0))
         if target.get("marked_turns", 0) > 0 or target.get("bound_turns", 0) > 0:
-            state["stealth_turns"] = max(state.get("stealth_turns", 0), 1)
+            state["stealth_turns"] = max(state.get("stealth_turns", 0), 1 + derived.get("mastery_turn_bonus", 0))
         encounter._save_participant_state(character, state)
         return
 
@@ -832,7 +861,7 @@ def _execute_druid_ability(encounter, character, ability_key, ability_name, targ
         damage = encounter._spell_damage(derived["spell_power"], target["armor"], bonus=lash_bonus)
         encounter._damage_enemy(character, target, damage, extra_text=" Thorned force drags across the target.", damage_type="nature")
         if target["hp"] > 0:
-            target["marked_turns"] = max(target.get("marked_turns", 0), 2)
+            target["marked_turns"] = max(target.get("marked_turns", 0), 2 + derived.get("mastery_turn_bonus", 0))
             encounter._save_enemy(target)
             encounter.obj.msg_contents(f"{target['key']} is left exposed by the thorn lash.")
         return
@@ -858,21 +887,21 @@ def _execute_druid_ability(encounter, character, ability_key, ability_name, targ
             damage_type="nature",
         )
         if target["hp"] > 0:
-            target["bound_turns"] = max(target.get("bound_turns", 0), 2 if field_score >= 2 else 1)
+            target["bound_turns"] = max(target.get("bound_turns", 0), (2 if field_score >= 2 else 1) + derived.get("mastery_turn_bonus", 0))
             if encounter._get_participant_state(character).get("primal_form") == "crow":
-                target["marked_turns"] = max(target.get("marked_turns", 0), 2)
+                target["marked_turns"] = max(target.get("marked_turns", 0), 2 + derived.get("mastery_turn_bonus", 0))
             encounter._save_enemy(target)
             encounter._try_interrupt_enemy_action(character, target, ability_name)
         return
 
     if ability_key == "wolfform":
-        _set_primal_form(encounter, character, "wolf", turns=2)
+        _set_primal_form(encounter, character, "wolf", turns=2 + derived.get("mastery_turn_bonus", 0))
         encounter.obj.msg_contents(f"{character.key} slips into a lean wolf form and starts circling for an opening.")
         encounter._record_participant_contribution(character, meaningful=True, utility=1)
         return
 
     if ability_key == "crowform":
-        _set_primal_form(encounter, character, "crow", turns=2)
+        _set_primal_form(encounter, character, "crow", turns=2 + derived.get("mastery_turn_bonus", 0))
         encounter.obj.msg_contents(f"{character.key} scatters upward into a crow form and starts reading the whole field at once.")
         encounter._record_participant_contribution(character, meaningful=True, utility=1)
         return
@@ -891,14 +920,14 @@ def _execute_druid_ability(encounter, character, ability_key, ability_name, targ
             bonus += 2
         encounter._damage_enemy(character, target, encounter._spell_damage(derived["spell_power"], target["armor"], bonus=bonus), damage_type="nature")
         if target["hp"] > 0:
-            target["marked_turns"] = max(target.get("marked_turns", 0), 1)
+            target["marked_turns"] = max(target.get("marked_turns", 0), 1 + derived.get("mastery_turn_bonus", 0))
             encounter._save_enemy(target)
         return
 
     if ability_key == "barkskin":
         state = encounter._get_participant_state(target)
-        state["guard"] = max(state.get("guard", 0), 7 + level + max(1, derived.get("spell_power", 0) // 3) + min(3, field_score))
-        state["grove_turns"] = max(state.get("grove_turns", 0), 2)
+        state["guard"] = max(state.get("guard", 0), 7 + level + max(1, derived.get("spell_power", 0) // 3) + min(3, field_score) + derived.get("mastery_guard_bonus", 0))
+        state["grove_turns"] = max(state.get("grove_turns", 0), 2 + derived.get("mastery_turn_bonus", 0))
         encounter._save_participant_state(target, state)
         encounter.obj.msg_contents(f"{character.key} wraps {target.key} in a hard barkskin ward.")
         encounter._record_participant_contribution(character, meaningful=True, mitigation=state["guard"], utility=1)
@@ -940,7 +969,7 @@ def _execute_druid_ability(encounter, character, ability_key, ability_name, targ
                 damage_type="nature",
             )
             if enemy["hp"] > 0:
-                enemy["marked_turns"] = max(enemy.get("marked_turns", 0), 2)
+                enemy["marked_turns"] = max(enemy.get("marked_turns", 0), 2 + derived.get("mastery_turn_bonus", 0))
                 encounter._save_enemy(enemy)
         return
 
@@ -953,7 +982,7 @@ def _execute_druid_ability(encounter, character, ability_key, ability_name, targ
                 heal_type="nature",
             )
             state = encounter._get_participant_state(ally)
-            state["grove_turns"] = max(state.get("grove_turns", 0), 2)
+            state["grove_turns"] = max(state.get("grove_turns", 0), 2 + derived.get("mastery_turn_bonus", 0))
             encounter._save_participant_state(ally, state)
             cleared = encounter._clear_one_harmful_effect(ally)
             if cleared:
@@ -962,15 +991,15 @@ def _execute_druid_ability(encounter, character, ability_key, ability_name, targ
         return
 
     if ability_key == "bearform":
-        state = _set_primal_form(encounter, character, "bear", turns=2)
-        state["guard"] = max(state.get("guard", 0), 5 + level)
+        state = _set_primal_form(encounter, character, "bear", turns=2 + derived.get("mastery_turn_bonus", 0))
+        state["guard"] = max(state.get("guard", 0), 5 + level + derived.get("mastery_guard_bonus", 0))
         encounter._save_participant_state(character, state)
         encounter.obj.msg_contents(f"{character.key} swells into a bear form and squares up inside the living field.")
         encounter._record_participant_contribution(character, meaningful=True, mitigation=state["guard"], utility=1)
         return
 
     if ability_key == "serpentform":
-        _set_primal_form(encounter, character, "serpent", turns=2)
+        _set_primal_form(encounter, character, "serpent", turns=2 + derived.get("mastery_turn_bonus", 0))
         encounter.obj.msg_contents(f"{character.key} coils down into a serpent form and lets the field turn mean around the edges.")
         encounter._record_participant_contribution(character, meaningful=True, utility=1)
         return
@@ -995,7 +1024,7 @@ def _execute_druid_ability(encounter, character, ability_key, ability_name, targ
         if encounter._get_participant_state(character).get("primal_form") == "serpent" and target["hp"] > 0:
             encounter._apply_enemy_poison(
                 target,
-                turns=2,
-                damage=3,
+                turns=2 + derived.get("mastery_turn_bonus", 0),
+                damage=3 + max(0, derived.get("mastery_rank", 1) - 1),
                 message=f"|gVenomous force seeps through {target['key']} and leaves it poisoned!|n",
             )

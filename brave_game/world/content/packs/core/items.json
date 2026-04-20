@@ -242,6 +242,22 @@
         "verb": "study"
       }
     },
+    "dawnscale_supper_note": {
+      "kind": "consumable",
+      "name": "Dawnscale Supper Note",
+      "stackable": true,
+      "summary": "An inn note stained with butter and lantern soot, detailing how to handle rare trout without ruining the flesh or your pride.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_recipe",
+        "recipe_domain": "cooking",
+        "target": "self",
+        "unlock_recipe": "dawnscale_supper",
+        "verb": "study"
+      }
+    },
     "crisped_perch_plate": {
       "kind": "meal",
       "meal_bonuses": {
@@ -255,6 +271,22 @@
       },
       "stackable": true,
       "summary": "Two pan-crisped perch with herbs and browned butter."
+    },
+    "dawnscale_supper": {
+      "kind": "meal",
+      "meal_bonuses": {
+        "accuracy": 3,
+        "precision": 2,
+        "max_stamina": 8
+      },
+      "name": "Dawnscale Supper",
+      "restore": {
+        "hp": 16,
+        "mana": 10,
+        "stamina": 20
+      },
+      "stackable": true,
+      "summary": "Rare trout seared hard at the skin and finished with bright herb butter."
     },
     "dawnbell_mace": {
       "bonuses": {
@@ -325,6 +357,22 @@
       "summary": "A dark clot of marsh resin and root sap that hardens into something halfway between lacquer and warning.",
       "value": 12
     },
+    "fenlight_talisman_pattern": {
+      "kind": "consumable",
+      "name": "Fenlight Talisman Pattern",
+      "stackable": true,
+      "summary": "A careful bench pattern on seating drowned glass in a ward-iron frame without letting the wrong light keep an opinion about it.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_recipe",
+        "recipe_domain": "tinkering",
+        "target": "self",
+        "unlock_recipe": "fenlight_talisman_setting",
+        "verb": "study"
+      }
+    },
     "fenlight_talisman": {
       "bonuses": {
         "max_hp": 6,
@@ -366,6 +414,37 @@
       "slot": "chest",
       "summary": "Light leather layers treated to turn rain, brush, and shallow cuts."
     },
+    "latchwire_ward": {
+      "kind": "consumable",
+      "name": "Latchwire Ward",
+      "stackable": true,
+      "summary": "A wrapped knot of bent nails, cord, and road-ward chalk meant to catch the first ugly hit on stubborn terms.",
+      "use": {
+        "contexts": [
+          "combat"
+        ],
+        "effect_type": "guard",
+        "guard": 18,
+        "target": "ally",
+        "verb": "cast"
+      }
+    },
+    "latchwire_ward_pattern": {
+      "kind": "consumable",
+      "name": "Latchwire Ward Pattern",
+      "stackable": true,
+      "summary": "A grubby note bundle in Veska's hand explaining how to lash scavenged nails into a ward that holds just long enough to matter.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_recipe",
+        "recipe_domain": "tinkering",
+        "target": "self",
+        "unlock_recipe": "latchwire_ward_bundle",
+        "verb": "study"
+      }
+    },
     "fireflask": {
       "kind": "consumable",
       "name": "Fire Flask",
@@ -384,6 +463,27 @@
         "target": "enemy",
         "verb": "throw"
       }
+    },
+    "hedge_mushroom": {
+      "kind": "ingredient",
+      "name": "Hedge Mushroom",
+      "stackable": true,
+      "summary": "A firm brown cap from shaded roots and damp hedgerows, good in a pan if you know what you're doing.",
+      "value": 5
+    },
+    "hedgeroot_hash": {
+      "kind": "meal",
+      "meal_bonuses": {
+        "max_hp": 10,
+        "max_stamina": 8
+      },
+      "name": "Hedgeroot Hash",
+      "restore": {
+        "hp": 18,
+        "stamina": 16
+      },
+      "stackable": true,
+      "summary": "A hot pan hash of chopped marsh root, hedge mushroom, and enough browned fat to count as frontier optimism."
     },
     "flux_coil": {
       "kind": "loot",
@@ -411,6 +511,22 @@
         "verb": "drink"
       }
     },
+    "grease_stained_supper_note": {
+      "kind": "consumable",
+      "name": "Grease-Stained Supper Note",
+      "stackable": true,
+      "summary": "A cook's folded note about getting eel and moonleaf to work together instead of arguing in the pan.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_recipe",
+        "recipe_domain": "cooking",
+        "target": "self",
+        "unlock_recipe": "moonleaf_eel_skillet",
+        "verb": "study"
+      }
+    },
     "mirror_veil_primer": {
       "kind": "consumable",
       "name": "Mirror Veil Primer",
@@ -426,6 +542,45 @@
         "target": "self",
         "verb": "study"
       }
+    },
+    "marsh_root": {
+      "kind": "ingredient",
+      "name": "Marsh Root",
+      "stackable": true,
+      "summary": "A pale knuckled root pulled from wet ground, bitter raw and far more useful once cooked down.",
+      "value": 5
+    },
+    "moonleaf_eel_skillet": {
+      "kind": "meal",
+      "meal_bonuses": {
+        "max_mana": 12,
+        "spell_power": 3,
+        "spirit": 1
+      },
+      "name": "Moonleaf Eel Skillet",
+      "restore": {
+        "hp": 18,
+        "mana": 18,
+        "stamina": 10
+      },
+      "stackable": true,
+      "summary": "Silver eel fried in a black pan with moonleaf, pepper, and enough butter to make the smell carry."
+    },
+    "moonleaf_root_broth": {
+      "kind": "meal",
+      "meal_bonuses": {
+        "max_hp": 4,
+        "max_mana": 10,
+        "spirit": 1
+      },
+      "name": "Moonleaf Root Broth",
+      "restore": {
+        "hp": 16,
+        "mana": 14,
+        "stamina": 10
+      },
+      "stackable": true,
+      "summary": "A clear root broth with moonleaf and pepper that warms the gut and quiets the hands."
     },
     "mercy_votive": {
       "kind": "consumable",
@@ -558,6 +713,44 @@
       },
       "stackable": true,
       "summary": "A deep savory pie Uncle Pib approves of on principle."
+    },
+    "lockfin_pike": {
+      "kind": "ingredient",
+      "name": "Lockfin Pike",
+      "stackable": true,
+      "summary": "A hard-jawed pike from drowned lock water, all scarred scales and bad attitude.",
+      "value": 10
+    },
+    "lockfin_skillet_note": {
+      "kind": "consumable",
+      "name": "Lockfin Skillet Note",
+      "stackable": true,
+      "summary": "A damp kitchen scrap on searing lockfin hard, resting the flesh, and not letting marsh root bully the pan.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_recipe",
+        "recipe_domain": "cooking",
+        "target": "self",
+        "unlock_recipe": "lockfin_skillet",
+        "verb": "study"
+      }
+    },
+    "lockfin_skillet": {
+      "kind": "meal",
+      "meal_bonuses": {
+        "armor": 2,
+        "attack_power": 2,
+        "max_hp": 8
+      },
+      "name": "Lockfin Skillet",
+      "restore": {
+        "hp": 20,
+        "stamina": 14
+      },
+      "stackable": true,
+      "summary": "A blackened pike skillet with marsh root and pepper, dense enough to make cold weather reconsider."
     },
     "ironroot_longblade": {
       "bonuses": {
@@ -804,6 +997,22 @@
         "verb": "apply"
       }
     },
+    "purity_salts_formula": {
+      "kind": "consumable",
+      "name": "Purity Salts Formula",
+      "stackable": true,
+      "summary": "A sharp little formula sheet on ash salts, herb ratios, and how not to poison the patient while trying to save them.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_recipe",
+        "recipe_domain": "tinkering",
+        "target": "self",
+        "unlock_recipe": "purity_salts_satchel",
+        "verb": "study"
+      }
+    },
     "reedwoven_raiment": {
       "bonuses": {
         "armor": 3,
@@ -860,6 +1069,22 @@
       },
       "stackable": true,
       "summary": "A creamy chowder bright with carp, eel, and a peppery finish."
+    },
+    "veskas_pitchfire_pattern": {
+      "kind": "consumable",
+      "name": "Veska's Pitchfire Pattern",
+      "stackable": true,
+      "summary": "A workbench pattern in Veska's hand explaining how to bottle resin, spite, and bad intentions into something you should only throw away from yourself.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_recipe",
+        "recipe_domain": "tinkering",
+        "target": "self",
+        "unlock_recipe": "pitchfire_flask",
+        "verb": "study"
+      }
     },
     "rivetmail_coat": {
       "bonuses": {
@@ -1096,6 +1321,25 @@
         "verb": "study"
       }
     },
+    "stitchleaf_salve": {
+      "kind": "consumable",
+      "name": "Stitchleaf Salve",
+      "stackable": true,
+      "summary": "A thick resin salve with hedge mushroom and bitter herbs worked in until it smells like a treatment plan rather than a meal.",
+      "use": {
+        "contexts": [
+          "explore",
+          "combat"
+        ],
+        "effect_type": "restore",
+        "restore": {
+          "hp": 24,
+          "stamina": 8
+        },
+        "target": "ally",
+        "verb": "apply"
+      }
+    },
     "ward_dust": {
       "kind": "consumable",
       "name": "Ward Dust",
@@ -1110,6 +1354,13 @@
         "target": "ally",
         "verb": "cast"
       }
+    },
+    "weirglass_eel": {
+      "kind": "ingredient",
+      "name": "Weirglass Eel",
+      "stackable": true,
+      "summary": "A pale eel from the drowned line whose skin catches bad light like cracked glass.",
+      "value": 12
     },
     "ward_iron_rivet": {
       "kind": "loot",

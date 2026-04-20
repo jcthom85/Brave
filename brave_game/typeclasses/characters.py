@@ -18,10 +18,21 @@ from world.data.items import (
     format_allowed_class_summary,
     is_equipment_allowed_for_class,
 )
+from world.mastery import (
+    MASTERY_RESPEC_SILVER_COST,
+    can_train_ability,
+    mastery_points_earned,
+)
+from world.genders import DEFAULT_BRAVE_GENDER, get_brave_gender_label, normalize_brave_gender
 from world.party import ensure_party_state
 from world.paladin_oaths import DEFAULT_PALADIN_OATH, get_oath, get_oath_name
 from world.questing import advance_item_collection, advance_room_visit, ensure_starter_quests
-from world.ranger_companions import DEFAULT_RANGER_COMPANION, get_companion, get_companion_name
+from world.ranger_companions import (
+    DEFAULT_RANGER_COMPANION,
+    get_companion,
+    get_companion_name,
+    normalize_companion_bond_state,
+)
 from world.tutorial import ensure_tutorial_state, handle_room_enter, is_tutorial_active
 
 from evennia.objects.objects import DefaultCharacter
@@ -84,11 +95,17 @@ class Character(ObjectParent, DefaultCharacter):
     def at_post_puppet(self, **kwargs):
         sessions = self.sessions.get()
         latest_session = sessions[-1] if sessions else None
-        self.msg(brave_clear={}, session=latest_session)
-        super().at_post_puppet(**kwargs)
+        protocol = (getattr(latest_session, "protocol_key", "") or "").lower() if latest_session else ""
+        if self.account:
+            self.account.db._last_puppet = self
         self.ensure_brave_character()
         if not self.db.brave_seen_welcome:
             self.db.brave_seen_welcome = True
+        if protocol in {"websocket", "ajax/comet", "webclient"}:
+            if self.location:
+                self.location.return_appearance(self)
+            return
+        super().at_post_puppet(**kwargs)
 
     def ensure_brave_character(self):
         """Initialize Brave-specific state if missing."""
@@ -99,6 +116,9 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.brave_race = self._canonicalize_race_key(self.db.brave_race)
         if not self.db.brave_class:
             self.db.brave_class = CHARACTER_CONTENT.starting_class
+        normalized_gender = normalize_brave_gender(self.db.brave_gender, default=DEFAULT_BRAVE_GENDER)
+        self.db.brave_gender = normalized_gender
+        self.db.gender = normalized_gender
         if not self.db.brave_level:
             self.db.brave_level = 1
         if self.db.brave_xp is None:
@@ -118,16 +138,28 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.brave_shop_bonus = {}
         if self.db.brave_meal_buff is None:
             self.db.brave_meal_buff = {}
+        if self.db.brave_known_tinkering_recipes is None:
+            self.db.brave_known_tinkering_recipes = []
+        if self.db.brave_known_cooking_recipes is None:
+            self.db.brave_known_cooking_recipes = []
+        if self.db.brave_active_fishing_rod is None:
+            self.db.brave_active_fishing_rod = ""
+        if self.db.brave_active_fishing_lure is None:
+            self.db.brave_active_fishing_lure = ""
         if self.db.brave_chapel_blessing is None:
             self.db.brave_chapel_blessing = {}
         if self.db.brave_learned_abilities is None:
             self.db.brave_learned_abilities = []
+        if getattr(self.db, "brave_ability_mastery", None) is None:
+            self.db.brave_ability_mastery = {}
         if self.db.brave_class_feature_items_class is None:
             self.db.brave_class_feature_items_class = ""
         if self.db.brave_companions is None:
             self.db.brave_companions = []
         if self.db.brave_active_companion is None:
             self.db.brave_active_companion = ""
+        if getattr(self.db, "brave_companion_bonds", None) is None:
+            self.db.brave_companion_bonds = {}
         if self.db.brave_paladin_oaths is None:
             self.db.brave_paladin_oaths = []
         if self.db.brave_active_oath is None:
@@ -293,6 +325,19 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_paladin_oath()
         self.recalculate_stats(restore=True)
 
+    def set_brave_gender(self, gender_key):
+        """Set the Brave gender key for this character."""
+
+        normalized = normalize_brave_gender(gender_key, default=DEFAULT_BRAVE_GENDER)
+        self.db.brave_gender = normalized
+        self.db.gender = normalized
+        return normalized
+
+    def get_brave_gender_label(self):
+        """Return the display label for the current Brave gender."""
+
+        return get_brave_gender_label(self.db.brave_gender)
+
     def get_unlocked_abilities(self):
         """Return class abilities unlocked at the current level."""
 
@@ -340,6 +385,77 @@ class Character(ObjectParent, DefaultCharacter):
 
         actions, _passives, _unknown = CHARACTER_CONTENT.split_unlocked_abilities(self.db.brave_class, self.db.brave_level)
         return actions
+
+    def get_ability_mastery_rank(self, ability_key):
+        """Return current mastery rank for one combat ability."""
+
+        normalized = CHARACTER_CONTENT.ability_key(ability_key)
+        if not can_train_ability(self, normalized):
+            return 1
+        mastery = dict(getattr(self.db, "brave_ability_mastery", None) or {})
+        return max(1, min(int(mastery.get(normalized, 1) or 1), 3))
+
+    def get_ability_mastery_map(self):
+        """Return normalized mastery mapping for unlocked combat abilities."""
+
+        mastery = {}
+        for ability_name in self.get_unlocked_combat_abilities():
+            normalized = CHARACTER_CONTENT.ability_key(ability_name)
+            mastery[normalized] = self.get_ability_mastery_rank(normalized)
+        return mastery
+
+    def get_earned_mastery_points(self):
+        """Return total mastery points earned from level milestones."""
+
+        return mastery_points_earned(self.db.brave_level)
+
+    def get_spent_mastery_points(self):
+        """Return currently spent mastery points."""
+
+        return sum(max(0, rank - 1) for rank in self.get_ability_mastery_map().values())
+
+    def get_available_mastery_points(self):
+        """Return unspent mastery points."""
+
+        return max(0, self.get_earned_mastery_points() - self.get_spent_mastery_points())
+
+    def set_ability_mastery_rank(self, ability_key, rank):
+        """Persist one mastery rank if the ability is trainable."""
+
+        normalized = CHARACTER_CONTENT.ability_key(ability_key)
+        if not can_train_ability(self, normalized):
+            return False
+        mastery = dict(getattr(self.db, "brave_ability_mastery", None) or {})
+        mastery[normalized] = max(1, min(int(rank or 1), 3))
+        self.db.brave_ability_mastery = mastery
+        return True
+
+    def train_ability_mastery(self, ability_key):
+        """Advance one combat ability by one mastery tier."""
+
+        normalized = CHARACTER_CONTENT.ability_key(ability_key)
+        ability = CHARACTER_CONTENT.ability_library.get(normalized)
+        if not ability or not can_train_ability(self, normalized):
+            return False, "You cannot refine that technique right now."
+        current = self.get_ability_mastery_rank(normalized)
+        if current >= 3:
+            return False, f"{ability.get('name', 'That ability')} is already mastered."
+        if self.get_available_mastery_points() <= 0:
+            return False, "You do not have an unspent mastery point."
+        self.set_ability_mastery_rank(normalized, current + 1)
+        return True, f"{ability.get('name', 'That ability')} rises to rank {current + 1}."
+
+    def reset_ability_mastery(self):
+        """Reset all spent ability mastery for a silver fee."""
+
+        spent = self.get_spent_mastery_points()
+        if spent <= 0:
+            return False, "You have no spent mastery to reset."
+        if (self.db.brave_silver or 0) < MASTERY_RESPEC_SILVER_COST:
+            return False, f"You need {MASTERY_RESPEC_SILVER_COST} silver to reset your mastery."
+        self.db.brave_silver = max(0, int(self.db.brave_silver or 0) - MASTERY_RESPEC_SILVER_COST)
+        self.db.brave_ability_mastery = {}
+        return True, "Your mastery focus is reset."
 
     def get_unlocked_passive_abilities(self):
         """Return unlocked passive traits that apply automatically."""
@@ -397,15 +513,54 @@ class Character(ObjectParent, DefaultCharacter):
         if DEFAULT_RANGER_COMPANION not in companions:
             companions.append(DEFAULT_RANGER_COMPANION)
             self.db.brave_companions = companions
+        Character._ensure_companion_bond(self, DEFAULT_RANGER_COMPANION)
         if not self.db.brave_active_companion:
             self.db.brave_active_companion = DEFAULT_RANGER_COMPANION
+
+    def _ensure_companion_bond(self, companion_key):
+        """Ensure one companion has persisted bond progress state."""
+
+        companion_key = str(companion_key or "").lower()
+        if not companion_key:
+            return {}
+        bonds = dict(getattr(self.db, "brave_companion_bonds", None) or {})
+        state = normalize_companion_bond_state(bonds.get(companion_key))
+        bonds[companion_key] = {"xp": state["xp"]}
+        self.db.brave_companion_bonds = bonds
+        return state
+
+    def get_companion_bond_state(self, companion_key):
+        """Return normalized bond progression for one companion."""
+
+        companion_key = str(companion_key or "").lower()
+        if not companion_key:
+            return normalize_companion_bond_state({})
+        return Character._ensure_companion_bond(self, companion_key)
+
+    def award_companion_bond_xp(self, companion_key, amount):
+        """Award companion bond XP and report any tier-ups."""
+
+        if self.db.brave_class != "ranger":
+            return []
+        companion_key = str(companion_key or "").lower()
+        if not companion_key:
+            return []
+        previous = Character.get_companion_bond_state(self, companion_key)
+        bonds = dict(getattr(self.db, "brave_companion_bonds", None) or {})
+        bonds[companion_key] = {"xp": previous["xp"] + max(0, int(amount or 0))}
+        self.db.brave_companion_bonds = bonds
+        current = Character.get_companion_bond_state(self, companion_key)
+        if current["level"] <= previous["level"]:
+            return []
+        companion_name = get_companion_name(companion_key)
+        return [f"{companion_name} reaches Bond {current['level']} ({current['title']})."]
 
     def get_unlocked_companions(self):
         """Return unlocked ranger companion payloads."""
 
         unlocked = []
         for companion_key in (self.db.brave_companions or []):
-            companion = get_companion(companion_key)
+            companion = get_companion(companion_key, self.get_companion_bond_state(companion_key))
             if not companion:
                 continue
             payload = dict(companion)
@@ -419,7 +574,7 @@ class Character(ObjectParent, DefaultCharacter):
         companion_key = str(self.db.brave_active_companion or "").lower()
         if not companion_key:
             return {}
-        companion = get_companion(companion_key)
+        companion = get_companion(companion_key, self.get_companion_bond_state(companion_key))
         if not companion:
             return {}
         payload = dict(companion)
@@ -440,6 +595,7 @@ class Character(ObjectParent, DefaultCharacter):
             return False, f"You have already bonded with {companion.get('name', 'that companion')}."
         companions.append(companion_key)
         self.db.brave_companions = companions
+        Character._ensure_companion_bond(self, companion_key)
         self.db.brave_active_companion = companion_key
         return True, f"{companion.get('name', 'A new companion')} answers your bond and joins your hunt."
 
@@ -578,6 +734,34 @@ class Character(ObjectParent, DefaultCharacter):
         }
         self.recalculate_stats()
         return self.db.brave_meal_buff
+
+    def unlock_cooking_recipe(self, recipe_key):
+        """Learn one authored cooking recipe."""
+
+        recipe_key = str(recipe_key or "").lower()
+        recipe = CONTENT.systems.cooking_recipes.get(recipe_key)
+        if not recipe:
+            return False, "That recipe is unknown."
+        known = [str(key).lower() for key in (self.db.brave_known_cooking_recipes or [])]
+        if recipe_key in known:
+            return False, f"You already know how to cook {recipe.get('name', 'that recipe')}."
+        known.append(recipe_key)
+        self.db.brave_known_cooking_recipes = known
+        return True, f"You learn the recipe for {recipe.get('name', 'that meal')}."
+
+    def unlock_tinkering_recipe(self, recipe_key):
+        """Learn one authored tinkering design."""
+
+        recipe_key = str(recipe_key or "").lower()
+        recipe = CONTENT.systems.tinkering_recipes.get(recipe_key)
+        if not recipe:
+            return False, "That design is unknown."
+        known = [str(key).lower() for key in (self.db.brave_known_tinkering_recipes or [])]
+        if recipe_key in known:
+            return False, f"You already know the {recipe.get('name', 'that design')} pattern."
+        known.append(recipe_key)
+        self.db.brave_known_tinkering_recipes = known
+        return True, f"You learn the design for {recipe.get('name', 'that pattern')}."
 
     def clear_chapel_blessing(self):
         """Clear the active chapel blessing if present."""
