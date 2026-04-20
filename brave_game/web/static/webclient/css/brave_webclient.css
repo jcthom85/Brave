@@ -6977,6 +6977,19 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: #ebb3a4;
 }
 
+.brave-view__mini-action--danger .brave-view__mini-action-icon {
+    color: #d86f57;
+}
+
+.brave-view__mini-action--danger .brave-icon--trash,
+.brave-view__mini-action--danger .brave-icon--trash::before {
+    color: #d86f57;
+}
+
+.brave-view__mini-action--danger .brave-view__mini-action-icon.ra {
+    display: none;
+}
+
 .brave-view__mini-action--icon-only,
 .brave-view__action--icon-only {
     justify-content: center;
@@ -7506,6 +7519,42 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     border-right: 2px solid color-mix(in srgb, var(--brave-accent) 62%, var(--brave-text-bright));
     border-bottom: 2px solid color-mix(in srgb, var(--brave-accent) 62%, var(--brave-text-bright));
     transform: rotate(40deg) translate(-0.03rem, -0.03rem);
+}
+
+.brave-icon--trash {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.96rem;
+    height: 1rem;
+    flex: 0 0 0.96rem;
+    line-height: 1;
+    color: inherit;
+}
+
+.brave-icon--trash::before {
+    content: "";
+    position: absolute;
+    left: 0.2rem;
+    right: 0.2rem;
+    top: 0.3rem;
+    bottom: 0.08rem;
+    border: 2px solid currentColor;
+    border-top: 0;
+    border-radius: 0 0 0.12rem 0.12rem;
+}
+
+.brave-icon--trash::after {
+    content: "";
+    position: absolute;
+    left: 0.12rem;
+    right: 0.12rem;
+    top: 0.12rem;
+    height: 0.1rem;
+    background: currentColor;
+    border-radius: 999px;
+    box-shadow: 0 -0.11rem 0 -0.03rem currentColor;
 }
 
 .brave-view--map .brave-view__badge {

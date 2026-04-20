@@ -2504,6 +2504,13 @@ let defaultout_plugin = (function () {
             }
             return "<span class='" + checkClasses + "' aria-hidden='true'></span>";
         }
+        if (name === "trash") {
+            var trashClasses = "brave-icon brave-icon--trash";
+            if (extraClass) {
+                trashClasses += " " + extraClass;
+            }
+            return "<span class='" + trashClasses + "' aria-hidden='true'></span>";
+        }
         var raName = ICON_MAP[name] || name.replace(/_/g, "-");
         var classes = "ra ra-" + raName;
         if (extraClass) {
