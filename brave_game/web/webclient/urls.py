@@ -9,11 +9,11 @@ The main web/urls.py includes these routes for all urls starting with `webclient
 from django.urls import path
 
 from evennia.web.webclient.urls import urlpatterns as evennia_webclient_urlpatterns
+from .views import webclient_test_login
 
 # add patterns here
 urlpatterns = [
-    # path("url-pattern", imported_python_view),
-    # path("url-pattern", imported_python_view),
+    path("test", webclient_test_login),
 ]
 
 # read by Django

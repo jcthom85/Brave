@@ -21,19 +21,19 @@ CLASS_FEATURES = {
         },
         {
             "name": "Holy Recovery",
-            "icon": "healing",
+            "icon": "favorite",
             "summary": "They remain the best direct healer and cleanser in the roster, strongest when the party is close to collapse.",
         },
     ),
     "ranger": (
         {
             "name": "Companion Bond",
-            "icon": "pets",
+            "icon": "travel_explore",
             "summary": "Rangers hunt with a bonded companion that reinforces marks, chase pressure, and target control.",
         },
         {
             "name": "Quarry Focus",
-            "icon": "ads_click",
+            "icon": "visibility",
             "summary": "They are built around choosing one prey, holding the angle, and bringing it down methodically.",
         },
     ),
@@ -64,7 +64,7 @@ CLASS_FEATURES = {
     "paladin": (
         {
             "name": "Sacred Oaths",
-            "icon": "workspace_premium",
+            "icon": "military_tech",
             "summary": "Paladins swear authored sacred oaths that change how the Dawn Bell and later holy relics answer their vigil.",
         },
         {
@@ -81,7 +81,7 @@ CLASS_FEATURES = {
         },
         {
             "name": "Grove Trials",
-            "icon": "park",
+            "icon": "eco",
             "summary": "New forms are meant to come from sacred groves, primal trials, and deeper contact with the wild world.",
         },
     ),

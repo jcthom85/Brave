@@ -41,6 +41,7 @@ let defaultout_plugin = (function () {
     var currentViewData = null;
     var currentRoomViewData = null;
     var currentSceneData = null;
+    var currentRoomSceneData = null;
     var currentRoomFeedEntries = [];
     var roomActivityRailPinnedToBottom = true;
     var roomActivityRailScrollTop = 0;
@@ -2551,6 +2552,61 @@ let defaultout_plugin = (function () {
         );
     };
 
+    var isMenuPickerData = function (pickerData) {
+        if (!pickerData || typeof pickerData !== "object") {
+            return false;
+        }
+        if (pickerData.picker_kind === "menu" || pickerData.picker_id === "main-menu") {
+            return true;
+        }
+        if (pickerData.title !== "Menu" || !Array.isArray(pickerData.options)) {
+            return false;
+        }
+        var commands = pickerData.options.map(function (option) {
+            return String(option && option.command ? option.command : "").trim().toLowerCase();
+        });
+        return commands.indexOf("sheet") !== -1
+            && commands.indexOf("gear") !== -1
+            && commands.indexOf("pack") !== -1
+            && commands.indexOf("quests") !== -1
+            && commands.indexOf("map") !== -1
+            && commands.indexOf("party") !== -1
+            && commands.indexOf("theme") !== -1;
+    };
+
+    var shouldPreservePickerOnViewRefresh = function (viewData) {
+        if (preserveCombatPickerOnViewRefresh(viewData)) {
+            return true;
+        }
+        return !!(
+            currentPickerData
+            && isRoomLikeView(viewData)
+        );
+    };
+
+    var isRoomRefreshContextActive = function () {
+        return !!(
+            isRoomLikeView(currentViewData)
+            || isRoomLikeView(currentRoomViewData)
+            || (document.body && document.body.getAttribute("data-brave-scene") === "explore")
+        );
+    };
+
+    var getRoomRefreshPopupPreservationOptions = function () {
+        var roomRefreshActive = isRoomRefreshContextActive();
+        return {
+            preservePicker: !!(roomRefreshActive && currentPickerData),
+            preserveMobileSheet: !!(roomRefreshActive && currentMobileUtilityTab)
+        };
+    };
+
+    var shouldPreserveMenuPickerDuringRoomClear = function () {
+        return !!(
+            currentPickerData
+            && getRoomRefreshPopupPreservationOptions().preservePicker
+        );
+    };
+
     var syncOpenCombatPickerFromDom = function () {
         if (!currentPickerData || !currentViewData || currentViewData.variant !== "combat") {
             return;
@@ -2664,6 +2720,8 @@ let defaultout_plugin = (function () {
 
     var buildDesktopMenuPicker = function () {
         return {
+            picker_id: "main-menu",
+            picker_kind: "menu",
             title: "Menu",
             options: [
                 { label: "Character Sheet", icon: "person", command: "sheet" },
@@ -2946,6 +3004,7 @@ let defaultout_plugin = (function () {
         "straighten": "arrow-cluster",
         "north_east": "forward",
         "military_tech": "trophy",
+        "leaderboard": "trophy",
 
         // Combat & Adventure
         "swords": "crossed-swords",
@@ -4801,32 +4860,138 @@ let defaultout_plugin = (function () {
         currentViewData = null;
     };
 
+    var classifyRoomActivity = function (text, cls, meta) {
+        var explicit = meta && typeof meta.category === "string" ? meta.category.trim().toLowerCase() : "";
+        if (explicit) {
+            return explicit.replace(/[^a-z0-9_-]+/g, "-");
+        }
+        var raw = String(text || "").trim();
+        var lowered = raw.toLowerCase();
+        if (!raw) {
+            return "ambient";
+        }
+        if (/\b(says?|asks?|exclaims?|whispers?|shouts?|yells?)\b/.test(lowered) || /".+"/.test(raw)) {
+            return "speech";
+        }
+        if (/\b(arrives?|enters?|moves into|comes into|steps into|appears|joins)\b/.test(lowered)) {
+            if (/\b(hostile|enemy|enemies|goblin|bandit|wolf|rat|warren|blackreed|miretooth|greymaw|weir|undead)\b/.test(lowered)) {
+                return "threat";
+            }
+            return "arrival";
+        }
+        if (/\b(leaves?|departs?|heads|moves on|moves away|slips away|walks away)\b/.test(lowered)) {
+            return "departure";
+        }
+        if (/\b(emotes?|smiles?|nods?|waves?|shrugs?|laughs?|frowns?|bows?)\b/.test(lowered)) {
+            return "emote";
+        }
+        if (/\b(picks up|drops|takes|receives|gains|loses)\b/.test(lowered)) {
+            return "loot";
+        }
+        return "ambient";
+    };
+
+    var getRoomActivityIcon = function (category) {
+        return {
+            speech: "forum",
+            emote: "waving_hand",
+            arrival: "login",
+            departure: "logout",
+            threat: "warning",
+            loot: "inventory_2",
+            quest: "menu_book",
+            system: "info",
+            crafting: "construction",
+            combat: "swords",
+            ambient: "timeline"
+        }[category || "ambient"] || "timeline";
+    };
+
+    var shouldToastActivity = function (entry) {
+        if (!entry) {
+            return false;
+        }
+        if (
+            currentPickerData
+            || isCombatUiActive()
+            || currentMobileUtilityTab
+            || (document.body && document.body.classList.contains("brave-notice-active"))
+            || document.getElementById("brave-activity-overlay")
+            || document.getElementById("brave-fishing-minigame")
+            || document.getElementById("brave-arcade-overlay")
+        ) {
+            return false;
+        }
+        if (entry.category === "threat") {
+            return true;
+        }
+        if (!isMobileViewport() || currentMobileUtilityTab === "activity") {
+            return false;
+        }
+        return entry.category === "speech" || entry.category === "arrival";
+    };
+
+    var getActivityToastTitle = function (entry) {
+        if (!entry) {
+            return "Activity";
+        }
+        if (entry.category === "speech") {
+            return "Voices";
+        }
+        if (entry.category === "threat") {
+            return "Danger";
+        }
+        if (entry.category === "arrival") {
+            return "Arrival";
+        }
+        return "Activity";
+    };
+
+    var renderActivityToast = function (entry) {
+        if (!shouldToastActivity(entry)) {
+            return;
+        }
+        renderBrowserNotice({
+            title: getActivityToastTitle(entry),
+            lines: [entry.text],
+            tone: entry.category === "threat" ? "warn" : "muted",
+            icon: getRoomActivityIcon(entry.category),
+            duration_ms: entry.category === "threat" ? 3600 : 2800
+        });
+    };
+
     var renderRoomFeedEntryMarkup = function (entry) {
         if (!entry || !entry.text) {
             return "";
         }
         var cls = entry.cls || "out";
-        return "<div class='" + cls + "'>" + escapeHtml(entry.text) + "</div>";
+        var category = entry.category || classifyRoomActivity(entry.text, cls, entry);
+        return "<div class='" + cls + " brave-room-log__entry brave-room-log__entry--" + escapeHtml(category) + "' data-brave-activity-category='" + escapeHtml(category) + "'>"
+            + "<span class='brave-room-log__entry-icon'>" + icon(getRoomActivityIcon(category)) + "</span>"
+            + "<span class='brave-room-log__entry-text'>" + escapeHtml(entry.text) + "</span>"
+            + "</div>";
     };
 
-    var addRoomFeedEntry = function (cls, rawContent) {
+    var addRoomFeedEntry = function (cls, rawContent, meta) {
         if (typeof rawContent !== "string" || !rawContent.trim()) {
-            return false;
+            return null;
         }
         var text = rawContent.replace(/\s+/g, " ").trim();
         if (!text) {
-            return false;
+            return null;
         }
         var normalizedCls = cls || "out";
+        var category = classifyRoomActivity(text, normalizedCls, meta);
         var lastEntry = currentRoomFeedEntries.length ? currentRoomFeedEntries[currentRoomFeedEntries.length - 1] : null;
         if (lastEntry && lastEntry.cls === normalizedCls && lastEntry.text === text) {
-            return false;
+            return null;
         }
-        currentRoomFeedEntries.push({ cls: normalizedCls, text: text });
+        var entry = { cls: normalizedCls, text: text, category: category };
+        currentRoomFeedEntries.push(entry);
         if (currentRoomFeedEntries.length > 24) {
             currentRoomFeedEntries = currentRoomFeedEntries.slice(currentRoomFeedEntries.length - 24);
         }
-        return true;
+        return entry;
     };
 
     var isRoomActivityScrolledToBottom = function (body) {
@@ -5134,11 +5299,11 @@ let defaultout_plugin = (function () {
         return railBody || mobileBody || body;
     };
 
-    var pushRoomFeedEntry = function (cls, rawText) {
+    var pushRoomFeedEntry = function (cls, rawText, meta) {
         if (isCombatUiActive()) {
             return;
         }
-        var added = addRoomFeedEntry(cls, rawText);
+        var added = addRoomFeedEntry(cls, rawText, meta);
         if (added) {
             noteRoomActivityEntriesAdded(1);
         }
@@ -5151,6 +5316,7 @@ let defaultout_plugin = (function () {
                 mobileRoomActivityUnreadCount += 1;
                 renderMobileNavDock();
             }
+            renderActivityToast(added);
         }
     };
 
@@ -5657,6 +5823,7 @@ let defaultout_plugin = (function () {
     };
 
     var renderSceneCard = function (sceneData) {
+        currentRoomSceneData = (sceneData && typeof sceneData === "object") ? sceneData : {};
         setMainViewMode(false);
         if (!sceneData || typeof sceneData !== "object" || !sceneData.tracked_quest) {
             clearSceneCard();
@@ -5769,7 +5936,9 @@ let defaultout_plugin = (function () {
             pendingCombatPanelData = null;
         }
         syncInputContextForView(viewData);
-        if (!preserveCombatPickerOnViewRefresh(viewData)) {
+        var preservePickerOnRefresh = shouldPreservePickerOnViewRefresh(viewData);
+        var preserveMobileSheetOnRefresh = !!(isRoomLikeView(viewData) && currentMobileUtilityTab);
+        if (!preservePickerOnRefresh) {
             clearPickerSheet();
         }
 
@@ -6714,7 +6883,11 @@ let defaultout_plugin = (function () {
         }
 
         var applyStandardMarkup = function () {
-            clearTextOutput({ preserveCombatTransition: !!options.skipCombatTransition });
+            clearTextOutput({
+                preserveCombatTransition: !!options.skipCombatTransition,
+                preservePicker: preservePickerOnRefresh,
+                preserveMobileSheet: preserveMobileSheetOnRefresh
+            });
             if (!preserveRail) {
                 clearSceneRail();
             }
@@ -6761,7 +6934,8 @@ let defaultout_plugin = (function () {
         applyStandardMarkup();
     };
 
-    var clearMobileNavDock = function () {
+    var clearMobileNavDock = function (options) {
+        options = options || {};
         var dock = document.getElementById("mobile-nav-dock");
         if (dock) {
             dock.innerHTML = "";
@@ -6771,7 +6945,9 @@ let defaultout_plugin = (function () {
         }
         document.body.classList.remove("brave-mobile-nav-active");
         document.body.classList.remove("brave-mobile-command-dock-active");
-        clearMobileUtilitySheet();
+        if (!options.preserveMobileSheet) {
+            clearMobileUtilitySheet();
+        }
     };
 
     var updateMobileDockClearance = function () {
@@ -7309,6 +7485,9 @@ let defaultout_plugin = (function () {
                 skipCombatTransition: true,
                 skipRoomPreserve: true,
             });
+            if (currentRoomSceneData !== null) {
+                renderSceneCard(currentRoomSceneData);
+            }
             return true;
         }
         pendingArcadeRoomRestore = true;
@@ -8705,10 +8884,12 @@ let defaultout_plugin = (function () {
         currentViewData = null;
         currentRoomViewData = null;
         syncInputContextForView(null);
-        clearPickerSheet();
+        if (!options.preservePicker) {
+            clearPickerSheet();
+        }
         $("#messagewindow").empty();
         $(".prompt").empty().css({ height: "" });
-        clearMobileNavDock();
+        clearMobileNavDock({ preserveMobileSheet: !!options.preserveMobileSheet });
         resetAllScrollPositions();
     };
 
@@ -8786,7 +8967,7 @@ let defaultout_plugin = (function () {
                 && !isRoomLikeView(currentViewData))
                 || ((kwargs && kwargs.type === "look") && !currentViewData))
         ) {
-            clearTextOutput();
+            clearTextOutput(getRoomRefreshPopupPreservationOptions());
         }
         var combatFx = null;
         var shouldRouteToCombatLog = combatActiveAtTextStart || isCombatUiActive();
@@ -8869,6 +9050,7 @@ let defaultout_plugin = (function () {
 
         if (cmdname === "brave_scene") {
             var scenePayload = getOobPayload(args, kwargs, "brave_scene", {});
+            currentRoomSceneData = (scenePayload && typeof scenePayload === "object") ? scenePayload : {};
             if (isCombatUiActive()) {
                 return true;
             }
@@ -8945,7 +9127,7 @@ let defaultout_plugin = (function () {
 
         if (cmdname === "brave_room_activity") {
             var activityPayload = getOobPayload(args, kwargs, "brave_room_activity", {}) || {};
-            pushRoomFeedEntry(activityPayload.cls || "out", activityPayload.text || "");
+            pushRoomFeedEntry(activityPayload.cls || "out", activityPayload.text || "", activityPayload);
             return true;
         }
 
@@ -8957,7 +9139,7 @@ let defaultout_plugin = (function () {
                 return true;
             }
             allowNextRoomRefreshNavigationUntil = 0;
-            clearTextOutput();
+            clearTextOutput(getRoomRefreshPopupPreservationOptions());
             clearSceneRail();
             return true;
         }

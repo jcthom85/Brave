@@ -54,7 +54,6 @@ MAP_MARKERS = {
     "current": {"icon": "player", "label": "You", "tone": "current"},
     "quest": {"icon": "castle-flag", "label": "Tracked Quest", "tone": "quest"},
     "boss": {"icon": "skull-trophy", "label": "Boss", "tone": "danger"},
-    "threat": {"icon": "crossed-swords", "label": "Threat", "tone": "danger"},
     "portal": {"icon": "spawn-node", "label": "Portal", "tone": "portal"},
     "forge": {"icon": "anvil", "label": "Forge", "tone": "service"},
     "shop": {"icon": "wooden-sign", "label": "Shop", "tone": "service"},
@@ -69,7 +68,6 @@ MAP_MARKER_PRIORITY = (
     "current",
     "quest",
     "boss",
-    "threat",
     "portal",
     "forge",
     "shop",
@@ -263,8 +261,6 @@ def _map_marker_keys(room, *, current=False, party=False, tracked_room_ids=None)
         keys.add("quest")
     if room_id and _room_has_boss_encounter(room_id):
         keys.add("boss")
-    elif room_id and ENCOUNTER_CONTENT.get_room_encounters(room_id):
-        keys.add("threat")
     if getattr(room.db, "brave_portal_hub", False) or (
         room_id and any(portal.get("entry_room") == room_id for portal in SYSTEMS_CONTENT.portals.values())
     ):
@@ -293,7 +289,7 @@ def _micromap_symbol_name(*, current=False, party=False):
         return "player"
     if party:
         return "double-team"
-    return "guarded-tower"
+    return "radio_button_unchecked"
 
 
 def build_map_snapshot(room, radius=None, character=None):
@@ -382,7 +378,7 @@ def build_map_snapshot(room, radius=None, character=None):
         )
         markers = [_map_marker(marker_key) for marker_key in marker_keys]
         primary_marker = markers[0] if markers else None
-        symbol = primary_marker["icon"] if primary_marker else "guarded-tower"
+        symbol = primary_marker["icon"] if primary_marker else "radio_button_unchecked"
         members_here = party_names_by_room.get(candidate.id, [])
         tooltip = candidate.key
         if markers:

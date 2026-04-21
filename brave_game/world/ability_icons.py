@@ -136,4 +136,4 @@ def get_passive_icon_name(passive_key, passive=None):
     if passive.get("icon"):
         return str(passive["icon"])
     role = str(passive.get("icon_role") or infer_passive_icon_role(passive_key, passive))
-    return PASSIVE_ROLE_ICON.get(role, "stars")
+    return PASSIVE_ROLE_ICON.get(role, "star_outline")

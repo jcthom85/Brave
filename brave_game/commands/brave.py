@@ -8,6 +8,7 @@ from world.activities import match_targetable_consumable_character, use_consumab
 from world.data.items import ITEM_TEMPLATES, get_item_category, get_item_use_profile, match_inventory_item
 from world.party import get_present_party_members
 from world.data.quests import QUESTS
+from world.genders import get_brave_pronoun
 from world.resonance import get_resource_label, get_stat_label
 from world.screen_text import format_entry, wrap_text
 from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
@@ -20,6 +21,7 @@ def _normalize_token(value):
 
 
 _EVENNIA_MARKUP_RE = re.compile(r"\|[A-Za-z]")
+_BODY_PART_EMOTE_RE = re.compile(r"^(?P<verb>[a-z]+)(?:\s+(?P<body>(?:my|their|his|her)\s+)?(?P<part>head|hands?|shoulders?|arms?|brow|brows|fists?))?$")
 
 
 def _strip_evennia_markup(text):
@@ -27,6 +29,73 @@ def _strip_evennia_markup(text):
 
     clean = str(text or "").replace("||", "|")
     return _EVENNIA_MARKUP_RE.sub("", clean)
+
+
+def _third_person_verb(verb):
+    """Return the simple third-person singular form of one verb."""
+
+    verb = str(verb or "").strip().lower()
+    if not verb:
+        return ""
+    if verb.endswith("y") and len(verb) > 1 and verb[-2] not in "aeiou":
+        return verb[:-1] + "ies"
+    if verb.endswith(("s", "x", "z", "ch", "sh")):
+        return verb + "es"
+    return verb + "s"
+
+
+def _format_social_emote(character, text):
+    """Return self/room emote lines with gender-aware body-part phrasing."""
+
+    raw = str(text or "").strip()
+    if not raw:
+        return None, None
+
+    punctuation = raw[-1] if raw[-1] in ".!?" else "."
+    base = raw.rstrip(".!?").strip()
+    lowered = base.lower()
+    pronoun = get_brave_pronoun(character, "possessive_adjective")
+
+    gesture_map = {
+        "nod": ("nods", "nod"),
+        "smile": ("smiles", "smile"),
+        "laugh": ("laughs", "laugh"),
+        "wave": ("waves", "wave"),
+        "shrug": (f"shrugs {pronoun} shoulders", "shrug"),
+        "bow": ("bows", "bow"),
+        "frown": ("frowns", "frown"),
+        "grin": ("grins", "grin"),
+        "kneel": ("kneels", "kneel"),
+        "sigh": ("sighs", "sigh"),
+        "shake head": (f"shakes {pronoun} head", "shake your head"),
+        "shake my head": (f"shakes {pronoun} head", "shake your head"),
+        "lower head": (f"lowers {pronoun} head", "lower your head"),
+        "raise fist": (f"raises {pronoun} fist", "raise your fist"),
+        "cross arms": (f"crosses {pronoun} arms", "cross your arms"),
+        "fold arms": (f"folds {pronoun} arms", "fold your arms"),
+        "rub hands": (f"rubs {pronoun} hands together", "rub your hands together"),
+    }
+    if lowered in gesture_map:
+        room_text, self_text = gesture_map[lowered]
+        return f"{character.key} {room_text}{punctuation}", f"You {self_text}{punctuation}"
+
+    match = _BODY_PART_EMOTE_RE.match(lowered)
+    if match and match.group("body") is None and match.group("part"):
+        verb = match.group("verb")
+        part = match.group("part")
+        room_text = f"{_third_person_verb(verb)} {pronoun} {part}"
+        self_text = f"{verb} your {part}"
+        return f"{character.key} {room_text}{punctuation}", f"You {self_text}{punctuation}"
+
+    words = base.split()
+    if len(words) == 1:
+        verb = words[0]
+        room_text = _third_person_verb(verb)
+        self_text = verb
+    else:
+        room_text = base
+        self_text = base
+    return f"{character.key} {room_text}{punctuation}", f"You {self_text}{punctuation}"
 
 
 def _format_context_bonus_summary(bonuses, context):
@@ -414,28 +483,15 @@ class BraveCharacterCommand(MuxCommand):
             self.msg("Usage: emote <message>")
             return False
 
-        words = text.split()
-        if len(words) == 1:
-            verb = words[0].rstrip(".!?")
-            if verb.endswith("y") and len(verb) > 1 and verb[-2] not in "aeiou":
-                room_verb = verb[:-1] + "ies"
-            elif verb.endswith(("s", "x", "z", "ch", "sh")):
-                room_verb = verb + "es"
-            else:
-                room_verb = verb + "s"
-            room_text = room_verb
-            self_text = verb
-        else:
-            room_text = text.rstrip(".!?")
-            self_text = room_text
+        room_line, self_line = _format_social_emote(character, text)
+        if not room_line or not self_line:
+            self.msg("Usage: emote <message>")
+            return False
 
-        if text.endswith((".", "!", "?")):
-            room_line = f"{character.key} {room_text}{text[-1]}"
-        else:
-            room_line = f"{character.key} {room_text}."
+        from world.browser_panels import broadcast_room_activity
 
-        character.location.msg_contents(room_line, exclude=[character])
-        self.msg(f"You {self_text}.")
+        broadcast_room_activity(character.location, room_line, exclude=[character], cls="out", category="emote")
+        self.msg(self_line)
         return True
 
     def get_character(self):

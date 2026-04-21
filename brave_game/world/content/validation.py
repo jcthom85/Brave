@@ -259,6 +259,10 @@ def _validate_systems_content(registry, errors):
             if quest_key not in quests.quests:
                 errors.append(f"Fishing lure {lure_key} references unknown unlock quest: {quest_key}")
 
+    for behavior_key, behavior in systems.fishing_behaviors.items():
+        if behavior.get("pattern") not in {"sine", "linear", "burst", "dart", "drag", "snag"}:
+            errors.append(f"Fish behavior {behavior_key} has an unknown pattern: {behavior.get('pattern')}")
+
     for room_id, spot in systems.fishing_spots.items():
         if room_id not in room_ids:
             errors.append(f"Fishing spot references unknown room: {room_id}")
@@ -272,6 +276,9 @@ def _validate_systems_content(registry, errors):
             item_id = fish.get("item")
             if item_id and item_id not in items.item_templates:
                 errors.append(f"Fishing spot {room_id} references unknown fish item: {item_id}")
+            behavior_id = fish.get("behavior_id")
+            if behavior_id and behavior_id not in systems.fishing_behaviors:
+                errors.append(f"Fishing spot {room_id} references unknown fish behavior: {behavior_id}")
 
     for recipe_key, recipe in systems.cooking_recipes.items():
         result_id = recipe.get("result")

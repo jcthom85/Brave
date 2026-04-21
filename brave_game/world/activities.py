@@ -3,6 +3,7 @@
 from collections.abc import Mapping
 from random import randint, random, uniform
 from time import time
+from uuid import uuid4
 
 from evennia.utils import delay
 
@@ -16,6 +17,7 @@ from world.data.items import (
 )
 from world.questing import get_completed_quests
 from world.race_world_hooks import adjust_fishing_weight, get_fishing_suffix
+from world.resonance import get_resource_label, get_stat_label
 from world.screen_text import format_entry, render_screen
 
 CONTENT = get_content_registry()
@@ -26,11 +28,19 @@ COZY_BONUS = SYSTEMS_CONTENT.cozy_bonus
 FISHING_SPOTS = SYSTEMS_CONTENT.fishing_spots
 FISHING_RODS = SYSTEMS_CONTENT.fishing_rods
 FISHING_LURES = SYSTEMS_CONTENT.fishing_lures
+FISHING_BEHAVIORS = SYSTEMS_CONTENT.fishing_behaviors
 format_ingredient_list = SYSTEMS_CONTENT.format_ingredient_list
 
 STARTER_FISHING_ROOM_ID = "brambleford_hobbyists_wharf"
 STARTER_FISHING_ROD = "loaner_pole"
 STARTER_FISHING_LURE = "plain_hook"
+FISHING_MINIGAME_EXPIRES_SECONDS = 90
+DEFAULT_FISHING_BEHAVIOR = {
+    "pattern": "sine",
+    "base_pull": 0.3,
+    "burst_pull": 0.08,
+    "stamina": 10,
+}
 
 
 def room_supports_activity(room, activity_name):
@@ -353,6 +363,77 @@ def get_fishing_spot_summary(character):
     }
 
 
+def _fishing_rod_setup_payload(rod, *, selected=False):
+    return {
+        "key": rod.get("key"),
+        "name": rod.get("name", "Rod"),
+        "power": int(rod.get("power", 0) or 0),
+        "stability": float(rod.get("stability", 0) or 0),
+        "summary": rod.get("summary", ""),
+        "available": bool(rod.get("available", True)),
+        "selected": bool(selected),
+        "unlock_text": rod.get("unlock_text", ""),
+    }
+
+
+def _fishing_lure_setup_payload(lure, *, selected=False, room_id=None):
+    favored = [
+        ITEM_TEMPLATES[item_id]["name"]
+        for item_id in lure.get("attracts", [])
+        if item_id in ITEM_TEMPLATES
+    ]
+    return {
+        "key": lure.get("key"),
+        "name": lure.get("name", "Lure"),
+        "rarity_bonus": int(lure.get("rarity_bonus", 0) or 0),
+        "favored": favored,
+        "summary": lure.get("summary", ""),
+        "zone_bonus": int((lure.get("zone_bonus", {}) or {}).get(room_id, 0) or 0),
+        "available": bool(lure.get("available", True)),
+        "selected": bool(selected),
+        "unlock_text": lure.get("unlock_text", ""),
+    }
+
+
+def build_fishing_setup_payload(character, *, status_message=None, status_tone="muted"):
+    """Return a browser overlay payload for fishing setup and tackle selection."""
+
+    summary = get_fishing_spot_summary(character)
+    room = getattr(character, "location", None)
+    room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+    spot = summary["spot"] or {}
+    current_rod = summary["rod"] or {}
+    current_lure = summary["lure"] or {}
+    active_rod_key = current_rod.get("key")
+    active_lure_key = current_lure.get("key")
+    fishing_state = getattr(getattr(character, "ndb", None), "brave_fishing", None) or {}
+    fishing_phase = fishing_state.get("phase")
+
+    rods = [
+        _fishing_rod_setup_payload(rod, selected=rod.get("key") == active_rod_key)
+        for rod in get_available_fishing_rods(character, include_locked=True)
+    ]
+    lures = [
+        _fishing_lure_setup_payload(lure, selected=lure.get("key") == active_lure_key, room_id=room_id)
+        for lure in get_available_fishing_lures(character, include_locked=True)
+    ]
+
+    return {
+        "phase": "setup",
+        "spot": spot.get("name", getattr(room, "key", None) or "Fishing Water"),
+        "cast_text": spot.get("cast_text", "The water looks workable."),
+        "message": status_message or "",
+        "message_tone": status_tone or "muted",
+        "can_borrow": can_borrow_fishing_tackle(character),
+        "can_cast": bool(spot) and fishing_phase not in {"waiting", "bite", "minigame"},
+        "active_phase": fishing_phase or "setup",
+        "rod": _fishing_rod_setup_payload(current_rod, selected=True) if current_rod else {},
+        "lure": _fishing_lure_setup_payload(current_lure, selected=True, room_id=room_id) if current_lure else {},
+        "rods": rods,
+        "lures": lures,
+    }
+
+
 def _format_weight(weight):
     return f"{weight:.1f} lb"
 
@@ -389,6 +470,180 @@ def get_catch_log_entries(limit=None):
     return entries
 
 
+def _fishing_behavior_for_entry(fish_entry):
+    behavior_key = str(fish_entry.get("behavior_id") or "").strip().lower()
+    behavior = dict(FISHING_BEHAVIORS.get(behavior_key, {}) or DEFAULT_FISHING_BEHAVIOR)
+    behavior["key"] = behavior_key or "default"
+    behavior["pattern"] = str(behavior.get("pattern") or "sine").lower()
+    behavior["base_pull"] = float(behavior.get("base_pull", DEFAULT_FISHING_BEHAVIOR["base_pull"]) or 0)
+    behavior["burst_pull"] = float(behavior.get("burst_pull", DEFAULT_FISHING_BEHAVIOR["burst_pull"]) or 0)
+    behavior["stamina"] = float(behavior.get("stamina", DEFAULT_FISHING_BEHAVIOR["stamina"]) or 1)
+    return behavior
+
+
+def _award_fishing_catch(character, fish_entry, *, perfect=False):
+    template_id = fish_entry["item"]
+    weight = round(uniform(*fish_entry["weight"]), 1)
+    weight = adjust_fishing_weight(character, weight)
+    character.add_item_to_inventory(template_id, 1)
+    record = _award_catch_record(character, template_id, weight)
+
+    rarity = str(fish_entry.get("rarity") or "common").lower()
+    rarity_text = ""
+    if rarity in {"rare", "epic"}:
+        rarity_text = f" |y({rarity.title()})|n"
+    lead = "Perfect catch! You land" if perfect else "You land"
+    message = f"{lead} a |w{ITEM_TEMPLATES[template_id]['name']}|n{rarity_text} weighing |w{_format_weight(weight)}|n."
+    message += get_fishing_suffix(character)
+    if record:
+        message += " It is your new best catch on the log."
+    return True, message
+
+
+def build_fishing_minigame_payload(character, state=None):
+    """Return a browser minigame payload for the current fishing encounter."""
+
+    state = state or getattr(getattr(character, "ndb", None), "brave_fishing", None) or {}
+    room_id = state.get("room_id")
+    spot = FISHING_SPOTS.get(room_id, {})
+    fish_entry = dict(state.get("fish") or {})
+    rod = FISHING_RODS.get(str(state.get("rod_key") or "").lower(), {})
+    lure = FISHING_LURES.get(str(state.get("lure_key") or "").lower(), {})
+    behavior = _fishing_behavior_for_entry(fish_entry)
+    template_id = fish_entry.get("item")
+    item = ITEM_TEMPLATES.get(template_id, {})
+    rarity = str(fish_entry.get("rarity") or "common").lower()
+    wait_ms = int(state.get("wait_ms") or 1800)
+    reaction_window = float(spot.get("reaction_window", 4) or 4)
+    hook_ms = max(900, min(2200, int(reaction_window * 350)))
+    duration_ms = max(9000, min(24000, int(9000 + (behavior.get("stamina", 10) * 700))))
+    lure_attracts = {str(item_id).lower() for item_id in lure.get("attracts", []) or []}
+    return {
+        "phase": "start",
+        "encounter_id": state.get("encounter_id"),
+        "spot": spot.get("name", "Fishing Water"),
+        "cast_text": spot.get("cast_text", "You cast a line into the water."),
+        "wait_ms": wait_ms,
+        "hook_ms": hook_ms,
+        "duration_ms": duration_ms,
+        "fish": {
+            "item": template_id,
+            "name": item.get("name", template_id or "Fish"),
+            "rarity": rarity.title(),
+        },
+        "rod": {
+            "key": state.get("rod_key"),
+            "name": rod.get("name", "Rod"),
+            "power": float(rod.get("power", 1) or 1),
+            "stability": float(rod.get("stability", 1) or 1),
+        },
+        "lure": {
+            "key": state.get("lure_key"),
+            "name": lure.get("name", "Lure"),
+            "favored": str(template_id or "").lower() in lure_attracts,
+        },
+        "behavior": behavior,
+    }
+
+
+def start_fishing_minigame(character):
+    """Begin a browser-driven fishing minigame encounter."""
+
+    room = character.location
+    if not room or not room_supports_activity(room, "fishing"):
+        return False, "You need open water and a proper spot before you can fish.", None
+
+    encounter = character.get_active_encounter()
+    if encounter and encounter.is_participant(character):
+        return False, "You are a little too busy surviving to fish right now.", None
+
+    room_id = getattr(room.db, "brave_room_id", None)
+    spot = FISHING_SPOTS.get(room_id)
+    if not spot:
+        return False, "This stretch of water is not set up for fishing yet.", None
+
+    state = getattr(character.ndb, "brave_fishing", None)
+    if state:
+        phase = state.get("phase")
+        if phase == "minigame":
+            return False, "Your line is already in the water.", build_fishing_minigame_payload(character, state)
+        if phase == "waiting":
+            return False, "Your line is already in the water. Give it a moment.", None
+        if phase == "bite":
+            return False, "Something is already biting. Use |wreel|n now.", None
+
+    rod = get_selected_fishing_rod(character)
+    lure = get_selected_fishing_lure(character)
+    fish_entry = _pick_fish_for_setup(room_id, spot, rod, lure)
+    if not fish_entry:
+        return False, "The water here looks empty for the moment.", None
+
+    bite_delay = randint(*spot.get("bite_delay", [2, 4]))
+    state = {
+        "phase": "minigame",
+        "room_id": room_id,
+        "started_at": time(),
+        "expires_at": time() + FISHING_MINIGAME_EXPIRES_SECONDS,
+        "encounter_id": uuid4().hex,
+        "fish": fish_entry,
+        "rod_key": rod.get("key"),
+        "lure_key": lure.get("key"),
+        "wait_ms": max(900, int(bite_delay * 1000)),
+    }
+    character.ndb.brave_fishing = state
+    payload = build_fishing_minigame_payload(character, state)
+    return True, (
+        f"{spot['cast_text']} You work with |w{rod.get('name', 'a borrowed rod')}|n and |w{lure.get('name', 'a plain lure')}|n."
+    ), payload
+
+
+def resolve_fishing_minigame(character, encounter_id, result):
+    """Resolve a browser-driven fishing minigame encounter."""
+
+    state = getattr(character.ndb, "brave_fishing", None)
+    if not state or state.get("phase") != "minigame":
+        return False, "You do not have an active fishing run.", {
+            "phase": "result",
+            "success": False,
+            "message": "You do not have an active fishing run.",
+        }
+
+    if str(state.get("encounter_id") or "") != str(encounter_id or ""):
+        return False, "That fishing run is no longer active.", {
+            "phase": "result",
+            "success": False,
+            "message": "That fishing run is no longer active.",
+        }
+
+    room = character.location
+    room_id = getattr(room.db, "brave_room_id", None) if room else None
+    if room_id != state.get("room_id"):
+        _clear_fishing_state(character)
+        return False, "You have moved away from the line.", {
+            "phase": "result",
+            "success": False,
+            "message": "You have moved away from the line.",
+        }
+
+    if time() > state.get("expires_at", 0):
+        _clear_fishing_state(character)
+        return False, "The line goes slack. The fish is gone.", {
+            "phase": "result",
+            "success": False,
+            "message": "The line goes slack. The fish is gone.",
+        }
+
+    fish_entry = state["fish"]
+    _clear_fishing_state(character)
+    outcome = str(result or "").strip().lower()
+    if outcome not in {"success", "perfect"}:
+        message = "The line goes slack before you can land it."
+        return False, message, {"phase": "result", "success": False, "message": message}
+
+    ok, message = _award_fishing_catch(character, fish_entry, perfect=outcome == "perfect")
+    return ok, message, {"phase": "result", "success": ok, "message": message}
+
+
 def start_fishing(character):
     """Begin a fishing attempt in a valid fishing room."""
 
@@ -408,6 +663,8 @@ def start_fishing(character):
     state = getattr(character.ndb, "brave_fishing", None)
     if state:
         phase = state.get("phase")
+        if phase == "minigame":
+            return False, "Your line is already in the water."
         if phase == "waiting":
             return False, "Your line is already in the water. Give it a moment."
         if phase == "bite":
@@ -498,6 +755,9 @@ def reel_line(character):
     if not state:
         return False, "You do not have a line in the water. Use |wfish|n first."
 
+    if state.get("phase") == "minigame":
+        return False, "Use the fishing popup to work that line."
+
     if state.get("phase") == "waiting":
         return False, "You tug too soon and only stir up the water. Wait for a real bite."
 
@@ -523,21 +783,7 @@ def reel_line(character):
     if random() > hook_chance:
         return False, "The line jerks, the hook bites, and then the fish twists free at the last second."
 
-    template_id = fish_entry["item"]
-    weight = round(uniform(*fish_entry["weight"]), 1)
-    weight = adjust_fishing_weight(character, weight)
-    character.add_item_to_inventory(template_id, 1)
-    record = _award_catch_record(character, template_id, weight)
-
-    rarity = str(fish_entry.get("rarity") or "common").lower()
-    rarity_text = ""
-    if rarity in {"rare", "epic"}:
-        rarity_text = f" |y({rarity.title()})|n"
-    message = f"You land a |w{ITEM_TEMPLATES[template_id]['name']}|n{rarity_text} weighing |w{_format_weight(weight)}|n."
-    message += get_fishing_suffix(character)
-    if record:
-        message += " It is your new best catch on the log."
-    return True, message
+    return _award_fishing_catch(character, fish_entry)
 
 
 def format_catch_log():
@@ -571,28 +817,13 @@ def format_catch_log():
 
 
 def format_kitchen_hearth_text(character=None):
-    """Return recipe guidance for the Lantern Rest hearth."""
+    """Return descriptive text for the Lantern Rest hearth."""
 
-    lines = [
-        "A chalkboard beside the firepot lists a few dependable inn recipes.",
-        "",
-        "Use |wcook|n to review recipes you can make here and |wcook <recipe>|n to prepare one.",
-    ]
-
-    if character:
-        lines.append("Use |weat <meal>|n once you are ready to take the buff with you.")
-
-    lines.append("")
-    if character:
-        for entry in get_cooking_entries(character):
-            status = "known" if entry["known"] else "locked"
-            lines.append(f"- {entry['name']}: {entry['ingredient_text']} ({status})")
-    else:
-        for recipe in COOKING_RECIPES.values():
-            ingredient_text = format_ingredient_list(recipe["ingredients"], ITEM_TEMPLATES)
-            lines.append(f"- {recipe['name']}: {ingredient_text}")
-
-    return "\n".join(lines)
+    return "\n".join(
+        [
+            "The Lantern Rest hearth is a broad brick firepit blackened by years of soup pots, scorched pans, and late-night road meals. Iron hooks hang above the coals, a scarred prep board leans nearby, and the whole corner carries the deep kitchen smell of ash, onion, and river oil worked into old stone. Everything about it looks built for steady inn work rather than show: practical heat, heavy cookware, and just enough room to turn a rough haul into something worth serving.",
+        ]
+    )
 
 
 def format_pole_rack_text():
@@ -685,6 +916,111 @@ def get_cooking_entries(character):
     return entries
 
 
+def _format_meal_restore(restore, character):
+    """Return browser-friendly restore text for a meal."""
+
+    restore = dict(restore or {})
+    bits = [
+        f"{get_resource_label(resource, character)} +{amount}"
+        for resource, amount in restore.items()
+        if amount
+    ]
+    return ", ".join(bits)
+
+
+def _format_meal_bonuses(bonuses, character):
+    """Return browser-friendly meal bonus text."""
+
+    bonuses = dict(bonuses or {})
+    bits = [
+        f"{get_stat_label(stat, character)} +{amount}"
+        for stat, amount in bonuses.items()
+        if amount
+    ]
+    return ", ".join(bits)
+
+
+def _build_cooking_recipe_payload(entry, character):
+    meal = ITEM_TEMPLATES.get(entry["result"], {})
+    if entry["ready"]:
+        status = "Ready to cook"
+    elif entry["known"]:
+        status = "Missing: " + ", ".join(entry["missing"])
+    else:
+        status = "Locked recipe"
+
+    return {
+        "key": entry["key"],
+        "name": entry["name"],
+        "ingredient_text": entry["ingredient_text"],
+        "known": bool(entry["known"]),
+        "ready": bool(entry["ready"]),
+        "missing": list(entry["missing"]),
+        "status": status,
+        "summary": entry["summary"] if entry["known"] else (entry["unlock_text"] or "You have not learned this recipe yet."),
+        "result": entry["result"],
+        "result_name": meal.get("name", entry["result"]),
+        "result_summary": meal.get("summary", ""),
+        "restore_text": _format_meal_restore(meal.get("restore", {}), character),
+        "bonus_text": _format_meal_bonuses(meal.get("meal_bonuses", {}), character),
+        "command": f"cook {entry['name']}" if entry["ready"] else "",
+    }
+
+
+def build_cooking_payload(character, *, status_message=None, status_tone="muted"):
+    """Return a browser overlay payload for hearth cooking."""
+
+    ready = []
+    known = []
+    locked = []
+    entries = get_cooking_entries(character)
+    for entry in entries:
+        payload = _build_cooking_recipe_payload(entry, character)
+        if not entry["known"]:
+            locked.append(payload)
+        elif entry["ready"]:
+            ready.append(payload)
+        else:
+            known.append(payload)
+
+    meals = []
+    for inventory_entry in (getattr(getattr(character, "db", None), "brave_inventory", None) or []):
+        template_id = inventory_entry.get("template")
+        item = ITEM_TEMPLATES.get(template_id, {})
+        quantity = int(inventory_entry.get("quantity", 0) or 0)
+        if quantity <= 0 or item.get("kind") != "meal":
+            continue
+        meals.append(
+            {
+                "template": template_id,
+                "name": item.get("name", template_id),
+                "quantity": quantity,
+                "summary": item.get("summary", ""),
+                "restore_text": _format_meal_restore(item.get("restore", {}), character),
+                "bonus_text": _format_meal_bonuses(item.get("meal_bonuses", {}), character),
+                "command": f"eat {item.get('name', template_id)}",
+            }
+        )
+    meals.sort(key=lambda entry: entry["name"].lower())
+
+    room = getattr(character, "location", None)
+    return {
+        "phase": "setup",
+        "title": "Kitchen Hearth",
+        "spot": getattr(room, "key", None) or "Kitchen Hearth",
+        "message": status_message or "",
+        "message_tone": status_tone or "muted",
+        "ready": ready,
+        "known": known,
+        "locked": locked,
+        "meals": meals,
+        "ready_count": len(ready),
+        "total_count": len(entries),
+        "meal_count": len(meals),
+        "can_cook": room_supports_activity(room, "cooking"),
+    }
+
+
 def format_recipe_list(character):
     """Return a readable recipe list showing what the player can make."""
 
@@ -711,9 +1047,9 @@ def format_recipe_list(character):
         subtitle="Simple inn recipes you can turn out without wasting the room or the pan.",
         meta=[f"{sum(1 for entry in entries if entry['ready'])} ready recipes", f"{len(entries)} total recipes"],
         sections=[
-            ("Ready Tonight", ready_blocks or ["  Nothing is ready from your current pantry."]),
-            ("Known Recipes", known_blocks or ["  No other known recipes are close to ready."]),
-            ("Locked Recipes", locked_blocks or ["  No locked recipes right now."]),
+            ("Ready Tonight", _stack_recipe_blocks(ready_blocks) if ready_blocks else ["  Nothing is ready from your current pantry."]),
+            ("Known Recipes", _stack_recipe_blocks(known_blocks) if known_blocks else ["  No other known recipes are close to ready."]),
+            ("Locked Recipes", _stack_recipe_blocks(locked_blocks) if locked_blocks else ["  No locked recipes right now."]),
         ],
     )
 

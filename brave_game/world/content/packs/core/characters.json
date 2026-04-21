@@ -634,6 +634,10 @@
         ],
         [
           3,
+          "Wild Grace"
+        ],
+        [
+          3,
           "Wolf Form"
         ],
         [
@@ -646,6 +650,10 @@
         ],
         [
           6,
+          "Groveheart"
+        ],
+        [
+          6,
           "Living Current"
         ],
         [
@@ -655,6 +663,10 @@
         [
           8,
           "Rejuvenation Grove"
+        ],
+        [
+          9,
+          "Nature's Memory"
         ],
         [
           9,
@@ -1096,6 +1108,15 @@
       "icon_role": "healing",
       "name": "Graceful Hands"
     },
+    "groveheart": {
+      "bonuses": {
+        "healing_power": 2,
+        "max_hp": 10
+      },
+      "icon_role": "nature",
+      "name": "Groveheart",
+      "summary": "A settled bond with the living field lets you hold together under pressure while your healing takes firmer root."
+    },
     "ironwill": {
       "bonuses": {
         "max_hp": 12,
@@ -1114,10 +1135,20 @@
     },
     "lightfeet": {
       "bonuses": {
+        "accuracy": 2,
         "dodge": 3
       },
       "icon_role": "mobility",
       "name": "Light Feet"
+    },
+    "naturesmemory": {
+      "bonuses": {
+        "max_mana": 12,
+        "spell_power": 2
+      },
+      "icon_role": "nature",
+      "name": "Nature's Memory",
+      "summary": "Old green instincts return without effort, giving your magic deeper reserves and a steadier hand over the whole field."
     },
     "predatorseye": {
       "bonuses": {
@@ -1146,6 +1177,7 @@
     },
     "serenesoul": {
       "bonuses": {
+        "accuracy": 2,
         "max_mana": 12,
         "spell_power": 2
       },
@@ -1182,6 +1214,15 @@
       "icon_role": "utility",
       "name": "Trailwise",
       "summary": "Fieldcraft and steady footing help you keep the angle, the trail, and the distance you need."
+    },
+    "wildgrace": {
+      "bonuses": {
+        "accuracy": 2,
+        "dodge": 2
+      },
+      "icon_role": "nature",
+      "name": "Wild Grace",
+      "summary": "Primal motion stays with you even at rest, keeping your footing loose and your strikes better placed as the field shifts."
     }
   },
   "primary_stats": [
@@ -1248,9 +1289,9 @@
       "perk_effects": {
         "wounded_damage_bonus": 4,
         "wounded_atb_fill_rate": 10,
-        "wounded_threshold": 0.5
+        "wounded_threshold": 0.6
       },
-      "perk_summary": "Battle Hunger turns pain into momentum, driving Ashborn to hit harder and act faster once the fight has already gone bad.",
+      "perk_summary": "Battle Hunger turns first blood into momentum, driving Ashborn to hit harder and act faster as soon as a fight starts to turn rough.",
       "summary": "Cinder-marked survivors of furnace, war, and old ruin who grow more dangerous once the fight has already turned ugly."
     },
     "mosskin": {
@@ -1289,6 +1330,7 @@
       "name": "Human",
       "perk": "Resolve",
       "perk_bonuses": {
+        "accuracy": 2,
         "max_hp": 8,
         "max_mana": 8,
         "max_stamina": 8
@@ -1297,7 +1339,7 @@
         "flee_chance": 6,
         "harmful_effect_turn_reduction": 1
       },
-      "perk_summary": "Resolve broadens every reserve and helps humans steady themselves faster when pressure, fear, or bad luck try to drag them off balance.",
+      "perk_summary": "Resolve broadens every reserve, steadies the hand, and helps humans shake off pressure, fear, or bad luck faster.",
       "summary": "Adaptable frontier folk who stay steady under pressure and keep moving when other people start to break."
     }
   },

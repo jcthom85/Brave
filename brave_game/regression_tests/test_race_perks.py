@@ -31,7 +31,7 @@ class DummyCharacter:
 
 
 class RacePerkTests(unittest.TestCase):
-    def test_human_resolve_adds_all_resource_caps(self):
+    def test_human_resolve_adds_all_resource_caps_and_accuracy(self):
         character = DummyCharacter(race_key="human")
 
         _primary, derived = Character.recalculate_stats(character, restore=True)
@@ -39,6 +39,7 @@ class RacePerkTests(unittest.TestCase):
         self.assertEqual(141, derived["max_hp"])
         self.assertEqual(49, derived["max_mana"])
         self.assertEqual(85, derived["max_stamina"])
+        self.assertEqual(74, derived["accuracy"])
 
     def test_elf_keen_senses_adds_accuracy_and_precision(self):
         character = DummyCharacter(race_key="elf", class_key="mage")

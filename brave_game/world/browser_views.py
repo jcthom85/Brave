@@ -7,7 +7,6 @@ from world.activities import (
     can_borrow_fishing_tackle,
     format_fishing_screen,
     get_cooking_entries,
-    get_catch_log_entries,
     get_available_fishing_lures,
     get_available_fishing_rods,
     get_fishing_spot_summary,
@@ -38,6 +37,7 @@ from world.navigation import (
     sort_exits,
 )
 from world.mastery import format_mastery_name
+from world.interactions import get_entity_response
 from world.party import get_character_by_id, get_follow_target, get_party_leader, get_party_members
 from world.questing import get_tracked_quest
 from world.resonance import (
@@ -213,13 +213,13 @@ def _pair(label, value, icon=None):
     return {"label": label, "value": str(value), "icon": icon}
 
 
-def _meter(label, current, maximum, *, tone="accent", meta=None):
+def _meter(label, current, maximum, *, tone="accent", meta=None, value=None):
     current_value = max(0, int(current or 0))
     maximum_value = max(1, int(maximum or 0))
     percent = max(0, min(100, int(round((current_value / maximum_value) * 100))))
     meter = {
         "label": label,
-        "value": f"{current_value} / {maximum_value}",
+        "value": value or f"{current_value} / {maximum_value}",
         "percent": percent,
         "tone": tone,
     }
@@ -235,6 +235,17 @@ def _resource_meter_tone(current, maximum):
     if percent <= 0.25:
         return "danger"
     if percent <= 0.6:
+        return "warn"
+    return "good"
+
+
+def _hp_meter_tone(current, maximum):
+    maximum_value = max(1, int(maximum or 0))
+    current_value = max(0, int(current or 0))
+    percent = current_value / maximum_value
+    if percent <= 0.25:
+        return "danger"
+    if percent <= 0.5:
         return "warn"
     return "good"
 
@@ -347,13 +358,15 @@ def _picker_option(label, *, command=None, prefill=None, icon=None, meta=None, t
     return option
 
 
-def _picker(title, *, subtitle=None, options=None, body=None, picker_id=None):
+def _picker(title, *, subtitle=None, options=None, body=None, picker_id=None, title_icon=None):
     picker = {
         "title": title,
         "options": [option for option in (options or []) if option],
     }
     if picker_id:
         picker["picker_id"] = picker_id
+    if title_icon:
+        picker["title_icon"] = title_icon
     if subtitle:
         picker["subtitle"] = subtitle
     if body:
@@ -414,6 +427,9 @@ def _reactive_view(source=None, *, scene="system", danger=None, boss=False):
         "scene": scene,
         "world_tone": get_world_tone_key(source),
     }
+    source_id = getattr(source, "id", None)
+    if source_id is not None:
+        reactive["source_id"] = str(source_id)
     if danger:
         reactive["danger"] = danger
     if boss:
@@ -445,11 +461,57 @@ def _build_talk_actions(target):
     elif entity_id == "torren_ironroot":
         actions.append(_action("Open Forge", "forge", "construction", tone="accent"))
     elif entity_id == "mistress_elira_thorne":
-        actions.append(_action("Open Mastery", "mastery", "school", tone="accent"))
+        actions.append(_action("Mastery", "mastery", "school", tone="accent"))
     elif entity_id == "mender_veska_flint":
         actions.append(_action("Open Tinkering", "tinker", "handyman", tone="accent"))
 
     return actions
+
+
+def _build_world_interaction_picker(viewer, target):
+    kind = getattr(getattr(target, "db", None), "brave_entity_kind", None)
+    entity_id = getattr(getattr(target, "db", None), "brave_entity_id", None)
+    title = _display_name(target) or getattr(target, "key", "Details")
+
+    if kind == "npc":
+        response = get_entity_response(viewer, target, "talk")
+        body = [line.strip() for line in str(response or "").splitlines() if line.strip()]
+        if not body:
+            body = ["They have nothing to say right now."]
+        options = [
+            _picker_option(
+                action["label"],
+                command=action.get("command"),
+                icon=action.get("icon"),
+                meta=action.get("confirm"),
+                tone=action.get("tone"),
+            )
+            for action in _build_talk_actions(target)
+        ]
+        return _picker(title, body=body, options=options, title_icon="forum")
+
+    if kind == "readable":
+        response = get_entity_response(viewer, target, "read")
+        body = [line.strip() for line in str(response or "").splitlines() if line.strip()]
+        if not body:
+            body = ["There is nothing legible here right now."]
+        options = []
+        if entity_id == "kitchen_hearth":
+            options.append(_picker_option("Cook", command="cook", icon="restaurant", tone="accent"))
+        return _picker(title, body=body, options=options, title_icon="menu_book")
+
+    if kind == "arcade":
+        description = [line.strip() for line in str(getattr(getattr(target, "db", None), "desc", "") or "").splitlines() if line.strip()]
+        if not description:
+            description = ["The cabinet hums softly, waiting for a coin and a steady hand."]
+        return _picker(
+            title,
+            body=description,
+            title_icon="sports_esports",
+            options=[_picker_option("Play", command=f"arcade open {target.key}", icon="sports_esports", tone="accent")],
+        )
+
+    return None
 
 
 def _sheet_detail_tooltip(title, subtitle=None, lines=None):
@@ -496,7 +558,7 @@ def _build_sheet_ability_item(character, ability_name):
     )
 
 
-def _build_sheet_passive_item(character, passive_name, *, icon_name="stars", summary_line=None, bonus_map=None):
+def _build_sheet_passive_item(character, passive_name, *, icon_name="passive", summary_line=None, bonus_map=None):
     display_name = format_ability_display(passive_name, character)
     passive_key = ability_key(passive_name)
     passive = PASSIVE_ABILITY_BONUSES.get(passive_key, {})
@@ -511,7 +573,7 @@ def _build_sheet_passive_item(character, passive_name, *, icon_name="stars", sum
     tooltip = _sheet_detail_tooltip(display_name, "Passive trait", body)
     return _item(
         display_name,
-        icon=get_passive_icon_name(passive_key, passive) if icon_name == "stars" else icon_name,
+        icon=get_passive_icon_name(passive_key, passive) if icon_name == "passive" else icon_name,
         picker=_picker(display_name, subtitle="Passive trait", body=body),
         tooltip=tooltip,
     )
@@ -859,7 +921,7 @@ def build_chargen_view(account, state, *, error=None):
             sections.append(
                 _section(
                     "Identity Issue",
-                    "warning",
+                    "trash",
                     "lines",
                     lines=[error.replace("|r", "").replace("|n", "")],
                     span="wide",
@@ -1000,7 +1062,7 @@ def build_chargen_view(account, state, *, error=None):
             sections.append(
                 _section(
                     "Issue",
-                    "warning",
+                    "trash",
                     "lines",
                     lines=[error.replace("|r", "").replace("|n", "")],
                     span="wide",
@@ -1211,17 +1273,22 @@ def _format_room_entity_items(viewer, visible_entities, visible_chars):
         entity_id = getattr(obj.db, "brave_entity_id", None)
         label = obj.key if kind == "npc" else _display_name(obj)
         command = None
+        picker = None
         if kind == "npc":
             command = f"talk {obj.key}"
+            picker = _build_world_interaction_picker(viewer, obj)
         elif kind == "readable":
-            command = "cook" if entity_id == "kitchen_hearth" else f"read {obj.key}"
+            command = f"read {obj.key}"
+            picker = _build_world_interaction_picker(viewer, obj)
         elif kind == "arcade":
-            command = f"arcade {obj.key}"
+            command = f"arcade inspect {obj.key}"
+            picker = _build_world_interaction_picker(viewer, obj)
         items.append(
             _item(
                 label,
                 icon=ROOM_ENTITY_ID_ICONS.get(entity_id, ROOM_ENTITY_KIND_ICONS.get(kind, "category")),
                 command=command,
+                picker=picker,
             )
         )
 
@@ -1259,9 +1326,19 @@ def _format_room_context_action_items(room, viewer):
     if not room or not viewer or _character_in_combat(viewer):
         return []
 
+    local_entities = list(getattr(room, "contents", []) or [])
+    local_arcades = [
+        obj
+        for obj in local_entities
+        if getattr(getattr(obj, "db", None), "brave_entity_kind", None) == "arcade"
+    ]
+
     items = []
     if getattr(room.db, "brave_safe", False):
-        items.append(_item("Rest", icon="hotel", command="rest"))
+        items.append(_item("Rest", icon="campfire", command="rest"))
+
+    if local_arcades:
+        items.append(_item("Play", icon="sports_esports", command="arcade"))
 
     if room_supports_activity(room, "fishing"):
         fishing_state = getattr(getattr(viewer, "ndb", None), "brave_fishing", None) or {}
@@ -1270,9 +1347,13 @@ def _format_room_context_action_items(room, viewer):
         elif fishing_state.get("phase") == "waiting":
             items.append(_item("Line in the water", icon="waves", detail="Wait for a bite."))
         else:
-            items.append(_item("Fish", icon="phishing", command="fish"))
+            items.append(_item("Fish", icon="fish", command="fish"))
+    if room_supports_activity(room, "cooking"):
+        items.append(_item("Cook", icon="restaurant", command="cook"))
     if room_supports_activity(room, "tinkering"):
-        items.append(_item("Tinker", icon="handyman", command="tinker"))
+        items.append(_item("Tinker", icon="build", command="tinker"))
+    if room_supports_activity(room, "mastery"):
+        items.append(_item("Mastery", icon="school", command="mastery"))
 
     if is_chapel_room(room):
         blessing = get_active_blessing(viewer)
@@ -2219,7 +2300,6 @@ def build_theme_view(current_theme_key=None):
             meta=None,
             summary="",
             lines=lines,
-            icon=theme["icon"],
             command=f"theme {theme['key']}",
             chips=chips_for_entry,
         )
@@ -2246,7 +2326,7 @@ def build_theme_view(current_theme_key=None):
     if view.get("back_action"):
         view["back_action"]["label"] = ""
         view["back_action"]["aria_label"] = "Close"
-    return view
+    return {**view, "variant": "theme"}
 
 
 def build_prayer_view(character, *, blessing=None, applied=False):
@@ -2781,7 +2861,7 @@ def build_party_view(character, mode="status"):
     if view.get("back_action"):
         view["back_action"]["label"] = ""
         view["back_action"]["aria_label"] = "Close"
-    return view
+    return {**view, "variant": "party"}
 
 
 def build_shop_view(character):
@@ -3016,21 +3096,22 @@ def build_cook_view(character, *, status_message=None, status_tone="muted"):
 
 
 def build_fishing_view(character, *, status_message=None, status_tone="muted"):
-    """Return a browser-first main view for fishing tackle and catches."""
+    """Return a browser-first main view for fishing tackle setup."""
 
     summary = get_fishing_spot_summary(character)
     spot = summary["spot"] or {}
-    rod = summary["rod"] or {}
-    lure = summary["lure"] or {}
+    current_rod = summary["rod"] or {}
+    current_lure = summary["lure"] or {}
     room = getattr(character, "location", None)
     fishing_state = getattr(getattr(character, "ndb", None), "brave_fishing", None) or {}
-    catch_log_entries = get_catch_log_entries(limit=3)
+    fishing_phase = fishing_state.get("phase")
+    active_rod_key = current_rod.get("key")
+    active_lure_key = current_lure.get("key")
 
     rod_entries = []
-    for rod in get_available_fishing_rods(character, include_locked=True):
-        rod_key = rod["key"]
-        rod_data = rod
-        selected = rod_key == rod.get("key")
+    for rod_data in get_available_fishing_rods(character, include_locked=True):
+        rod_key = rod_data["key"]
+        selected = rod_key == active_rod_key
         rod_entries.append(
             _entry(
                 rod_data.get("name", rod_key.replace("_", " ").title()),
@@ -3043,14 +3124,14 @@ def build_fishing_view(character, *, status_message=None, status_tone="muted"):
                 command=None if selected or not rod_data.get("available", True) else f"fish rod {rod_data.get('name', rod_key)}",
                 actions=[] if selected or not rod_data.get("available", True) else [_action("Select", f"fish rod {rod_data.get('name', rod_key)}", "straighten", tone="accent")],
                 badge="Selected" if selected else (None if rod_data.get("available", True) else "Locked"),
+                selected=selected,
             )
         )
 
     lure_entries = []
-    for lure in get_available_fishing_lures(character, include_locked=True):
-        lure_key = lure["key"]
-        lure_data = lure
-        selected = lure_key == lure.get("key")
+    for lure_data in get_available_fishing_lures(character, include_locked=True):
+        lure_key = lure_data["key"]
+        selected = lure_key == active_lure_key
         favored = ", ".join(ITEM_TEMPLATES[item_id]["name"] for item_id in lure_data.get("attracts", []) if item_id in ITEM_TEMPLATES)
         lines = []
         if favored:
@@ -3067,32 +3148,49 @@ def build_fishing_view(character, *, status_message=None, status_tone="muted"):
                 command=None if selected or not lure_data.get("available", True) else f"fish lure {lure_data.get('name', lure_key)}",
                 actions=[] if selected or not lure_data.get("available", True) else [_action("Select", f"fish lure {lure_data.get('name', lure_key)}", "tune", tone="accent")],
                 badge="Selected" if selected else (None if lure_data.get("available", True) else "Locked"),
-            )
-        )
-
-    catch_entries = []
-    for catch in summary["catches"]:
-        catch_entries.append(
-            _entry(
-                catch["name"],
-                lines=[catch["rarity"] + (" · favored by lure" if catch["boosted"] else "")],
-                icon="set_meal" if catch["rarity"] == "Common" else "stars",
+                selected=selected,
             )
         )
 
     chips = []
-    if rod:
-        chips.append(_chip(rod.get("name", "Rod"), "straighten", "accent"))
-    if lure:
-        chips.append(_chip(lure.get("name", "Lure"), "tune", "muted"))
-    if fishing_state.get("phase") == "waiting":
+    if current_rod:
+        chips.append(_chip(current_rod.get("name", "Rod"), "straighten", "accent"))
+    if current_lure:
+        chips.append(_chip(current_lure.get("name", "Lure"), "tune", "muted"))
+    if fishing_phase == "waiting":
         chips.append(_chip("Line In Water", "waves", "good"))
-    elif fishing_state.get("phase") == "bite":
+    elif fishing_phase == "bite":
         chips.append(_chip("Bite", "phishing", "warn"))
+    elif fishing_phase == "minigame":
+        chips.append(_chip("Line Active", "phishing", "good"))
+
+    actions = []
+    if can_borrow_fishing_tackle(character):
+        actions.append(_action("Borrow Kit", "fish borrow kit", "inventory_2", tone="muted"))
+    if fishing_phase == "bite":
+        actions.append(_action("Reel", "reel", "phishing", tone="accent"))
+    elif fishing_phase not in {"waiting", "minigame"}:
+        actions.append(_action("Cast Line", "fish cast", "phishing", tone="accent"))
+
+    water_lines = [spot.get("cast_text", "The water looks workable.")]
+    if fishing_phase == "waiting":
+        water_lines.append("Your line is in the water. Wait for a real bite.")
+    elif fishing_phase == "bite":
+        water_lines.append("Something is on the line. Reel now.")
+    elif fishing_phase == "minigame":
+        water_lines.append("Your line is active. Work the fishing popup to land it.")
 
     sections = []
     if status_message:
-        sections.append(_section("River Notes", "info", "lines", lines=[status_message], span="wide"))
+        sections.append(
+            _section(
+                "River Notes",
+                "task_alt" if status_tone == "good" else "info",
+                "lines",
+                lines=[status_message],
+                span="wide",
+            )
+        )
     sections.append(
         _section(
             "Current Water",
@@ -3101,44 +3199,50 @@ def build_fishing_view(character, *, status_message=None, status_tone="muted"):
             items=[
                 _entry(
                     spot.get("name", room.key if room else "Fishing Water"),
-                    lines=[spot.get("cast_text", "The water looks workable.")],
+                    lines=water_lines,
                     icon="waves",
                     actions=(
                         ([_action("Borrow Kit", "fish borrow kit", "inventory_2", tone="muted")] if can_borrow_fishing_tackle(character) else [])
-                        + ([_action("Cast", "fish cast", "phishing", tone="accent")] if fishing_state.get("phase") not in {"waiting", "bite"} else [])
+                        + ([_action("Reel", "reel", "phishing", tone="accent")] if fishing_phase == "bite" else [])
+                        + ([_action("Cast", "fish cast", "phishing", tone="accent")] if fishing_phase not in {"waiting", "bite", "minigame"} else [])
                     ),
                 )
             ],
         )
     )
-    sections.append(_section("Rods", "straighten", "entries", items=rod_entries or [_entry("No rods are available.", icon="block")]))
-    sections.append(_section("Lures", "tune", "entries", items=lure_entries or [_entry("No lures are available.", icon="block")]))
-    sections.append(_section("Likely Catches", "set_meal", "entries", items=catch_entries or [_entry("Nothing obvious is moving here.", icon="waves")]))
     sections.append(
         _section(
-            "Great Catch Log",
-            "menu_book",
+            "Active Tackle",
+            "inventory_2",
             "entries",
             items=[
                 _entry(
-                    f"{entry['fish']} · {entry['weight']:.1f} lb",
-                    lines=[f"{entry['account']} ({entry['character']})"],
-                    icon="military_tech" if index == 0 else "menu_book",
-                )
-                for index, entry in enumerate(catch_log_entries)
-            ]
-            or [_entry("No one has posted a proper river triumph yet.", icon="menu_book")],
+                    current_rod.get("name", "No rod selected"),
+                    meta="Rod",
+                    lines=[current_rod.get("summary", "")],
+                    icon="straighten",
+                ),
+                _entry(
+                    current_lure.get("name", "No lure selected"),
+                    meta="Lure",
+                    lines=[current_lure.get("summary", "")],
+                    icon="tune",
+                ),
+            ],
         )
     )
+    sections.append(_section("Rods", "straighten", "entries", items=rod_entries or [_entry("No rods are available.", icon="block")]))
+    sections.append(_section("Lures", "tune", "entries", items=lure_entries or [_entry("No lures are available.", icon="block")]))
 
     return _make_view(
         "Town Activity",
-        "Tackle Roll",
+        "Fishing",
         eyebrow_icon="phishing",
         title_icon="waves",
-        subtitle="Set your tackle, read the water, and cast when the river looks ready to answer.",
+        subtitle="Cast a line, read the water, and swap tackle when the catch calls for it.",
         chips=chips,
         sections=sections,
+        actions=actions,
         back=True,
         reactive=_reactive_from_character(character, scene="service"),
     )
@@ -3346,122 +3450,34 @@ def build_read_view(target, response):
     )
 
 
-def build_arcade_view(character, cabinet, *, focus_game=None):
-    """Return a browser-first view for one local arcade cabinet."""
+def build_arcade_detail_view(cabinet):
+    """Return a descriptive inspect view for one local arcade cabinet."""
 
-    available_games = [game_key for game_key in cabinet.get_available_games() if game_key in ARCADE_GAMES]
-    selected_game = focus_game if focus_game in available_games else (available_games[0] if available_games else None)
-    selected_definition = ARCADE_GAMES[selected_game] if selected_game else None
+    paragraphs = [line.strip() for line in str(getattr(getattr(cabinet, "db", None), "desc", "") or "").splitlines() if line.strip()]
+    if not paragraphs:
+        paragraphs = ["The cabinet hums softly, waiting for a coin and a steady hand."]
 
-    if selected_game and len(available_games) == 1:
-        reward = get_reward_definition(cabinet, selected_game)
-        best_score = format_arcade_score(get_personal_best(character, cabinet, selected_game))
-        leaderboard = cabinet.get_leaderboard(selected_game)
-        high_score = format_arcade_score((leaderboard[0] or {}).get("score", 0)) if leaderboard else None
-        info_lines = []
-        if selected_definition.get("summary"):
-            info_lines.append(selected_definition["summary"])
-
-        score_bits = []
-        if high_score:
-            score_bits.append(f"High {high_score}")
-        score_bits.append(f"Best {best_score}")
-        if score_bits:
-            info_lines.append(" · ".join(score_bits))
-
-        threshold = reward.get("threshold", 0)
-        if threshold and reward.get("item_name"):
-            if has_arcade_reward(character, cabinet, selected_game):
-                info_lines.append(f"Prize claimed: {reward['item_name']}")
-            else:
-                info_lines.append(f"Prize at {format_arcade_score(threshold)}: {reward['item_name']}")
-
-        return {
-            **_make_view(
-                _display_name(cabinet),
-                selected_definition["name"],
-                eyebrow_icon="sports_esports",
-                title_icon="sports_esports",
-                subtitle="",
-                chips=[],
-                sections=[
-                    _section(
-                        "",
-                        "sports_esports",
-                        "entries",
-                        items=[
-                            _entry(
-                                "Play",
-                                meta=f"{cabinet.get_game_price(selected_game)} silver",
-                                lines=[line for line in info_lines if line],
-                                icon="play_arrow",
-                                command=f"arcade play {selected_game}",
-                                actions=[_action("Play", f"arcade play {selected_game}", "play_arrow", tone="accent")],
-                            )
-                        ],
-                        span="wide",
-                        hide_label=True,
-                    ),
-                ],
-                back=True,
-                reactive=_reactive_from_character(character, scene="arcade"),
-            ),
-            "variant": "arcade",
-        }
-
-    game_entries = []
-    for game_key in available_games:
-        definition = ARCADE_GAMES[game_key]
-        reward = get_reward_definition(cabinet, game_key)
-        best_score = format_arcade_score(get_personal_best(character, cabinet, game_key))
-        leaderboard = cabinet.get_leaderboard(game_key)
-        high_score = format_arcade_score((leaderboard[0] or {}).get("score", 0)) if leaderboard else None
-        status_parts = []
-        if high_score:
-            status_parts.append(f"High {high_score}")
-        status_parts.append(f"Best {best_score}")
-
-        threshold = reward.get("threshold", 0)
-        if threshold and reward.get("item_name"):
-            if has_arcade_reward(character, cabinet, game_key):
-                status_parts.append(f"Prize claimed: {reward['item_name']}")
-            else:
-                status_parts.append(f"Prize {format_arcade_score(threshold)}: {reward['item_name']}")
-
-        lines = [definition.get("summary", ""), " · ".join(part for part in status_parts if part)]
-        game_entries.append(
-            _entry(
-                definition["name"],
-                meta=f"{cabinet.get_game_price(game_key)} silver",
-                lines=[line for line in lines if line],
-                icon="sports_esports",
-                command=f"arcade play {game_key}",
-                actions=[
-                    _action("Play", f"arcade play {game_key}", "play_arrow", tone="accent"),
-                ],
-            )
-        )
     return {
         **_make_view(
+            "",
             _display_name(cabinet),
-            "ARCADE",
-            eyebrow_icon="sports_esports",
+            eyebrow_icon=None,
             title_icon="sports_esports",
             subtitle="",
-            chips=[],
             sections=[
                 _section(
-                    "Games",
-                    "sports_esports",
-                    "entries",
-                    items=game_entries or [_entry("This cabinet is dark right now.", icon="power_off")],
-                    span="wide",
-                ),
+                    "",
+                    "menu_book",
+                    "lines",
+                    lines=paragraphs,
+                    hide_label=True,
+                )
             ],
+            actions=[_action("Play", f"arcade open {cabinet.key}", "sports_esports", tone="accent")],
             back=True,
-            reactive=_reactive_from_character(character, scene="arcade"),
+            reactive=_reactive_view(getattr(cabinet, "location", None), scene="read"),
         ),
-        "variant": "arcade",
+        "variant": "read",
     }
 
 
@@ -3983,7 +3999,16 @@ def build_combat_victory_view(
     reward_items = reward_items or []
     progress_messages = [message for message in (progress_messages or []) if message]
     level_up_messages = [message for message in progress_messages if "you are now level" in message.lower()]
-    other_progress_messages = [message for message in progress_messages if message not in level_up_messages]
+    companion_reward_messages = [
+        message
+        for message in progress_messages
+        if " bond +" in message.lower()
+    ]
+    other_progress_messages = [
+        message
+        for message in progress_messages
+        if message not in level_up_messages and message not in companion_reward_messages
+    ]
     is_capstone = (getattr(encounter.db, "encounter_title", "") or "").strip().lower() == "the hollow lantern"
 
     loot_items_list = []
@@ -3998,16 +4023,45 @@ def build_combat_victory_view(
         }.get(kind, "category")
         text = f"{item_name} x{quantity}" if quantity > 1 else item_name
         loot_items_list.append(_item(text, icon=icon))
+    reward_pairs = [
+        _pair("XP Earned", xp_total, "auto_awesome"),
+        _pair("Silver", reward_silver or 0, "savings"),
+    ]
+    for message in companion_reward_messages:
+        text = str(message or "").strip().rstrip(".")
+        lowered = text.lower()
+        split_index = lowered.find(" bond +")
+        if split_index > 0:
+            companion_name = text[:split_index].strip()
+            bond_gain = text[split_index + 6 :].strip()
+            reward_pairs.append(_pair(f"{companion_name} Bond", bond_gain, "pets"))
+        else:
+            reward_pairs.append(_pair("Companion Bond", text, "pets"))
+
+    def build_progress_entry(message):
+        text = str(message or "").strip()
+        lowered = text.lower()
+        if ":" in text:
+            prefix, detail = [part.strip() for part in text.split(":", 1)]
+        else:
+            prefix, detail = "", text
+
+        if lowered.startswith("quest updated:"):
+            return _entry(detail or "Quest updated", meta="Quest Updated", icon="assignment", lines=["Objective progress recorded."])
+        if lowered.startswith("new quest:"):
+            return _entry(detail or "New quest", meta="New Quest", icon="flag", lines=["A new thread is ready to follow."])
+        if lowered.startswith("tracked quest:"):
+            return _entry(detail or "Tracked quest", meta="Tracked Quest", icon="checklist", lines=["This is now your active lead."])
+        if lowered.startswith("lead:"):
+            return _entry("Next Lead", icon="travel_explore", lines=[detail or text])
+        return _entry(detail or text, meta=prefix.title() if prefix else "Progress", icon="task_alt")
 
     sections = [
         _section(
             "Rewards",
             "workspace_premium",
             "pairs",
-            items=[
-                _pair("XP Earned", xp_total, "timeline"),
-                _pair("Silver", reward_silver or 0, "savings"),
-            ],
+            items=reward_pairs,
             variant="receipt",
         )
     ]
@@ -4041,9 +4095,9 @@ def build_combat_victory_view(
         sections.append(
             _section(
                 "Chapter Progress" if is_capstone else "Progress",
-                "trending_up",
-                "lines",
-                lines=other_progress_messages,
+                "flag",
+                "entries",
+                items=[build_progress_entry(message) for message in other_progress_messages],
                 variant="receipt",
             )
         )
@@ -4053,7 +4107,7 @@ def build_combat_victory_view(
             "",
             "VICTORY",
             eyebrow_icon=None,
-            title_icon=None,
+            title_icon="military_tech",
             sections=sections,
             actions=[_action("Continue", "look", None, tone="accent", no_icon=True)],
             reactive=_reactive_view(
@@ -4090,11 +4144,9 @@ def build_sheet_view(character):
     else:
         actions = list(class_actions)
     next_level_xp = xp_needed_for_next_level(level)
-    xp_text = (
-        f"{character.db.brave_xp}/{next_level_xp} XP"
-        if next_level_xp
-        else f"{character.db.brave_xp} XP (cap)"
-    )
+    current_xp = character.db.brave_xp or 0
+    xp_meter_max = next_level_xp or max(1, current_xp)
+    xp_meter_value = min(current_xp, xp_meter_max)
     resonance_key = get_resonance_key(character)
     resonance_label = get_resonance_label(character)
 
@@ -4105,13 +4157,13 @@ def build_sheet_view(character):
         _pair(get_stat_label("attack_power", character), derived.get("attack_power", 0), "swords"),
         _pair(get_stat_label("spell_power", character), derived.get("spell_power", 0), "auto_awesome"),
         _pair(get_stat_label("armor", character), derived.get("armor", 0), "shield"),
-        _pair(get_stat_label("accuracy", character), derived.get("accuracy", 0), "my_location"),
+        _pair(get_stat_label("accuracy", character), derived.get("accuracy", 0), "near_me"),
         _pair(get_stat_label("dodge", character), derived.get("dodge", 0), "air"),
     ]
     if derived.get("precision", 0):
-        combat_pairs.append(_pair(get_stat_label("precision", character), derived["precision"], "target"))
+        combat_pairs.append(_pair(get_stat_label("precision", character), derived["precision"], "location_searching"))
     if derived.get("threat", 0):
-        combat_pairs.append(_pair(get_stat_label("threat", character), derived["threat"], "campaign"))
+        combat_pairs.append(_pair(get_stat_label("threat", character), derived["threat"], "warning"))
 
     status_entry = _entry(
         character.key,
@@ -4121,7 +4173,6 @@ def build_sheet_view(character):
         chips=[
             _chip(get_brave_gender_label(getattr(character.db, "brave_gender", None), default="Non-binary"), "person", "muted"),
             _chip(race["name"], get_race_icon(character.db.brave_race, race), "muted"),
-            _chip(xp_text, "timeline", "accent"),
             *(
                 [_chip(resonance_label, "travel_explore", "accent")]
                 if resonance_key != "fantasy"
@@ -4133,19 +4184,26 @@ def build_sheet_view(character):
                 get_resource_label("hp", character),
                 resources.get("hp", 0),
                 derived.get("max_hp", 0),
-                tone=_resource_meter_tone(resources.get("hp", 0), derived.get("max_hp", 0)),
+                tone=_hp_meter_tone(resources.get("hp", 0), derived.get("max_hp", 0)),
             ),
             _meter(
                 get_resource_label("mana", character),
                 resources.get("mana", 0),
                 derived.get("max_mana", 0),
-                tone=_resource_meter_tone(resources.get("mana", 0), derived.get("max_mana", 0)),
+                tone="mana",
             ),
             _meter(
                 get_resource_label("stamina", character),
                 resources.get("stamina", 0),
                 derived.get("max_stamina", 0),
-                tone=_resource_meter_tone(resources.get("stamina", 0), derived.get("max_stamina", 0)),
+                tone="stamina",
+            ),
+            _meter(
+                "XP",
+                xp_meter_value,
+                xp_meter_max,
+                tone="xp",
+                value="Level Cap" if not next_level_xp else f"{current_xp} / {next_level_xp}",
             ),
         ],
     )
@@ -4161,22 +4219,22 @@ def build_sheet_view(character):
             variant="status",
         ),
         _section(
-            "Attributes",
+            "Build",
             "bar_chart",
             "pairs",
             items=[
-                _pair(get_stat_label("strength", character), primary.get("strength", 0), "fitness_center"),
+                _pair(get_stat_label("strength", character), primary.get("strength", 0), "construction"),
                 _pair(get_stat_label("agility", character), primary.get("agility", 0), "air"),
-                _pair(get_stat_label("intellect", character), primary.get("intellect", 0), "psychology"),
+                _pair(get_stat_label("intellect", character), primary.get("intellect", 0), "school"),
                 _pair(get_stat_label("spirit", character), primary.get("spirit", 0), "auto_awesome"),
                 _pair(get_stat_label("vitality", character), primary.get("vitality", 0), "favorite"),
             ],
             variant="stats",
         ),
-        _section("Stats", "tune", "pairs", items=combat_pairs, variant="stats"),
+        _section("Combat", "tune", "pairs", items=combat_pairs, variant="stats"),
         _section(
-            "Class Features",
-            "workspace_premium",
+            "Class",
+            "military_tech",
             "entries",
             items=[
                 _entry(
@@ -4235,7 +4293,7 @@ def build_sheet_view(character):
             4,
             _section(
                 "Sacred Oath",
-                "workspace_premium",
+                "military_tech",
                 "entries",
                 items=[
                     _entry(
@@ -4245,7 +4303,7 @@ def build_sheet_view(character):
                             active_oath.get("summary", "No sacred oath is currently guiding your vigil."),
                             f"Sworn oaths: {len(unlocked_oaths)}",
                         ],
-                        icon="workspace_premium",
+                        icon="military_tech",
                     )
                 ],
                 variant="abilities",
@@ -4306,7 +4364,7 @@ def build_sheet_view(character):
         _build_sheet_passive_item(
             character,
             race["perk"],
-            icon_name="star",
+            icon_name="star_outline",
             summary_line=race.get("perk_summary") or race["summary"],
             bonus_map=race.get("perk_bonuses", {}),
         )
@@ -4315,7 +4373,7 @@ def build_sheet_view(character):
         _build_sheet_passive_item(
             character,
             ability,
-            icon_name="stars",
+            icon_name="passive",
             bonus_map=PASSIVE_ABILITY_BONUSES.get(ability_key(ability), {}).get("bonuses", {}),
         )
         for ability in passives
@@ -4324,8 +4382,8 @@ def build_sheet_view(character):
     if passive_items:
         sections.append(
             _section(
-                "Passive Traits",
-                "auto_fix_high",
+                "Traits",
+                "auto_awesome",
                 "list",
                 items=passive_items,
                 variant="abilities",
@@ -4390,7 +4448,7 @@ def build_sheet_view(character):
         sections.append(
             _section(
                 "Effects",
-                "auto_fix_high",
+                "wb_sunny",
                 "entries",
                 items=effect_entries,
                 span="wide",
@@ -4445,7 +4503,7 @@ def build_gear_view(character):
                 )
             ],
             back=True,
-            reactive=_reactive_from_character(character, scene="character"),
+            reactive=_reactive_from_character(character, scene="equipment"),
         ),
         "variant": "gear",
     }
@@ -4697,7 +4755,7 @@ def build_pack_view(character):
             chips=[],
             sections=sections,
             back=True,
-            reactive=_reactive_from_character(character, scene="character"),
+            reactive=_reactive_from_character(character, scene="pack"),
         ),
         "variant": "pack",
     }

@@ -1683,6 +1683,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     border-color: color-mix(in srgb, rgba(181, 86, 71, 0.72) 72%, rgba(var(--brave-accent-rgb), 0.18));
 }
 
+.brave-notice--warn {
+    border-color: color-mix(in srgb, rgba(216, 160, 82, 0.72) 72%, rgba(var(--brave-accent-rgb), 0.18));
+}
+
 .brave-notice__head,
 .brave-notice__titlebar {
     display: flex;
@@ -1743,6 +1747,14 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     display: grid;
     place-items: center;
     padding: 18px;
+    --brave-activity-primary-rgb: 116, 154, 176;
+    --brave-activity-secondary-rgb: 214, 186, 122;
+    --brave-activity-panel-top: rgba(24, 30, 37, 0.97);
+    --brave-activity-panel-bottom: rgba(7, 10, 14, 0.995);
+    --brave-activity-title-color: #eef5fa;
+    --brave-activity-copy-color: #d5e2ea;
+    --brave-activity-soft-color: #c2d1db;
+    --brave-activity-dim-color: #8ea1ae;
     pointer-events: auto;
 }
 
@@ -1762,11 +1774,12 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     grid-template-rows: auto minmax(0, 1fr) auto;
     gap: 14px;
     padding: 18px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.22));
+    border: 1px solid rgba(var(--brave-activity-primary-rgb), 0.24);
     border-radius: var(--brave-radius-panel);
     background:
-        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 96%, transparent), transparent 25%),
-        linear-gradient(180deg, var(--brave-surface-soft-top), var(--brave-surface-soft-bottom));
+        radial-gradient(circle at 0 0, rgba(var(--brave-activity-primary-rgb), 0.14), transparent 44%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-activity-secondary-rgb), 0.1), transparent 34%),
+        linear-gradient(180deg, var(--brave-activity-panel-top), var(--brave-activity-panel-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.05),
         0 30px 68px rgba(0, 0, 0, 0.44);
@@ -1796,8 +1809,9 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     width: 38px;
     height: 38px;
     border-radius: 999px;
-    color: var(--brave-text-bright);
-    background: rgba(var(--brave-accent-rgb), 0.14);
+    color: var(--brave-activity-title-color);
+    background: rgba(var(--brave-activity-primary-rgb), 0.16);
+    box-shadow: inset 0 0 0 1px rgba(var(--brave-activity-primary-rgb), 0.16);
     flex: 0 0 auto;
 }
 
@@ -1807,7 +1821,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .brave-activity-overlay__eyebrow {
-    color: var(--brave-text-dim);
+    color: var(--brave-activity-dim-color);
     font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.25;
     text-transform: uppercase;
@@ -1815,7 +1829,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .brave-activity-overlay__title {
-    color: var(--brave-text-bright);
+    color: var(--brave-activity-title-color);
     font-family: var(--brave-dialogue-font-family);
     letter-spacing: var(--brave-dialogue-letter-spacing);
     font-size: calc(1.22rem * var(--brave-text-scale) * var(--brave-font-size-scale));
@@ -1835,20 +1849,24 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     display: grid;
     gap: 2px;
     padding: 9px 10px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 58%, transparent);
+    border: 1px solid rgba(var(--brave-activity-primary-rgb), 0.16);
     border-radius: var(--brave-radius-card-tight);
-    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-activity-primary-rgb), 0.12), rgba(10, 13, 18, 0.96));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.01);
 }
 
 .brave-activity-overlay__stat span {
-    color: var(--brave-text-dim);
+    color: var(--brave-activity-dim-color);
     font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
     text-transform: uppercase;
 }
 
 .brave-activity-overlay__stat strong {
-    color: var(--brave-text-bright);
+    color: var(--brave-activity-title-color);
     font-size: calc(0.96rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
     overflow-wrap: anywhere;
@@ -1856,10 +1874,11 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .brave-activity-overlay__message {
     padding: 10px 11px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 58%, transparent);
+    border: 1px solid rgba(var(--brave-activity-primary-rgb), 0.16);
     border-radius: var(--brave-radius-card-tight);
-    color: var(--brave-text-bright);
-    background: color-mix(in srgb, var(--brave-world-line) 20%, transparent);
+    color: var(--brave-activity-title-color);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-activity-primary-rgb), 0.12), rgba(10, 13, 18, 0.9));
     font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.4;
     overflow-wrap: anywhere;
@@ -1877,7 +1896,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .brave-activity-overlay__bodyline {
-    color: var(--brave-text-soft);
+    color: var(--brave-activity-copy-color);
     font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.48;
     overflow-wrap: anywhere;
@@ -1890,7 +1909,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     gap: 14px;
     padding-right: 2px;
     scrollbar-width: thin;
-    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
+    scrollbar-color: rgba(var(--brave-activity-primary-rgb), 0.58) rgba(255, 255, 255, 0.06);
 }
 
 .brave-activity-overlay__section {
@@ -1904,7 +1923,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    color: var(--brave-text-dim);
+    color: var(--brave-activity-dim-color);
     font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
     text-transform: uppercase;
@@ -1913,6 +1932,18 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 .brave-activity-overlay__section-head span,
 .brave-activity-overlay__section-head strong {
     overflow-wrap: anywhere;
+}
+
+.brave-activity-overlay__section-head strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 0 8px;
+    border: 1px solid rgba(var(--brave-activity-secondary-rgb), 0.22);
+    border-radius: 999px;
+    color: var(--brave-activity-title-color);
+    background: rgba(var(--brave-activity-secondary-rgb), 0.1);
 }
 
 .brave-activity-overlay__cards {
@@ -1931,15 +1962,22 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     grid-template-rows: auto auto minmax(0, 1fr) auto auto;
     gap: 8px;
     padding: 12px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 62%, transparent);
+    border: 1px solid rgba(var(--brave-activity-primary-rgb), 0.14);
     border-radius: var(--brave-radius-card-tight);
-    background: color-mix(in srgb, var(--brave-panel-soft) 76%, transparent);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-activity-primary-rgb), 0.08), transparent 34%),
+        linear-gradient(180deg, rgba(16, 21, 28, 0.96), rgba(6, 9, 13, 0.99));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.01);
 }
 
 .brave-activity-card--ready {
-    border-color: color-mix(in srgb, var(--brave-accent) 44%, var(--brave-world-line));
-    background: color-mix(in srgb, var(--brave-panel-soft) 76%, transparent);
-    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brave-accent) 42%, transparent);
+    border-color: rgba(var(--brave-activity-primary-rgb), 0.28);
+    box-shadow:
+        inset 3px 0 0 rgba(var(--brave-activity-secondary-rgb), 0.52),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.01);
 }
 
 .brave-activity-card--locked {
@@ -1956,7 +1994,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .brave-activity-card__title {
     min-width: 0;
-    color: var(--brave-text-bright);
+    color: var(--brave-activity-title-color);
     font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
     overflow-wrap: anywhere;
@@ -1968,10 +2006,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     justify-content: center;
     max-width: 150px;
     padding: 3px 6px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 62%, transparent);
+    border: 1px solid rgba(var(--brave-activity-primary-rgb), 0.16);
     border-radius: 999px;
-    color: var(--brave-text-soft);
-    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
+    color: var(--brave-activity-soft-color);
+    background: rgba(var(--brave-activity-primary-rgb), 0.08);
     font-size: calc(0.64rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.15;
     text-transform: uppercase;
@@ -1980,22 +2018,22 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .brave-activity-card__badge--ready {
-    border-color: color-mix(in srgb, var(--brave-accent) 52%, var(--brave-world-line));
-    color: var(--brave-text-bright);
-    background: color-mix(in srgb, var(--brave-accent) 16%, rgba(255, 255, 255, 0.04));
+    border-color: rgba(var(--brave-activity-secondary-rgb), 0.28);
+    color: var(--brave-activity-title-color);
+    background: rgba(var(--brave-activity-secondary-rgb), 0.14);
 }
 
 .brave-activity-card__badge--locked {
-    color: var(--brave-text-dim);
-    background: color-mix(in srgb, var(--brave-world-line) 16%, transparent);
+    color: var(--brave-activity-dim-color);
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .brave-activity-card__badge--muted {
-    color: var(--brave-text-soft);
+    color: var(--brave-activity-soft-color);
 }
 
 .brave-activity-card__result {
-    color: var(--brave-text-soft);
+    color: var(--brave-activity-soft-color);
     font-size: calc(0.78rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.3;
     overflow-wrap: anywhere;
@@ -2004,7 +2042,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 .brave-activity-card__summary,
 .brave-activity-card__line,
 .brave-activity-overlay__empty {
-    color: var(--brave-text-soft);
+    color: var(--brave-activity-soft-color);
     font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.42;
     overflow-wrap: anywhere;
@@ -2017,7 +2055,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .brave-activity-card__line {
-    color: var(--brave-text-dim);
+    color: var(--brave-activity-dim-color);
 }
 
 .brave-activity-card__actions {
@@ -2033,14 +2071,16 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     justify-content: center;
     gap: 8px;
     padding: 9px 12px;
-    border: 1px solid color-mix(in srgb, var(--brave-accent) 68%, var(--brave-world-line));
+    border: 1px solid rgba(var(--brave-activity-primary-rgb), 0.44);
     border-radius: var(--brave-radius-card-tight);
-    color: var(--brave-text-bright);
+    color: var(--brave-activity-title-color);
     background:
-        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 35%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 46%, var(--brave-panel-deep)));
+        linear-gradient(180deg, rgba(var(--brave-activity-primary-rgb), 0.54), rgba(var(--brave-activity-primary-rgb), 0.32)),
+        linear-gradient(180deg, rgba(20, 25, 33, 0.96), rgba(9, 12, 17, 0.98));
     font: inherit;
     font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
 }
 
 .brave-activity-card__action:not(:disabled),
@@ -2061,9 +2101,42 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .brave-activity-overlay__empty {
     padding: 12px;
-    border: 1px dashed color-mix(in srgb, var(--brave-world-line) 62%, transparent);
+    border: 1px dashed rgba(var(--brave-activity-primary-rgb), 0.18);
     border-radius: var(--brave-radius-card-tight);
-    background: color-mix(in srgb, var(--brave-panel-soft) 58%, transparent);
+    background: rgba(var(--brave-activity-primary-rgb), 0.08);
+}
+
+.brave-activity-overlay--cooking {
+    --brave-activity-primary-rgb: 184, 92, 63;
+    --brave-activity-secondary-rgb: 236, 171, 86;
+    --brave-activity-panel-top: rgba(38, 17, 12, 0.97);
+    --brave-activity-panel-bottom: rgba(14, 7, 5, 0.995);
+    --brave-activity-title-color: #fff0e4;
+    --brave-activity-copy-color: #f1ddd0;
+    --brave-activity-soft-color: #e6cfc2;
+    --brave-activity-dim-color: #c88f74;
+}
+
+.brave-activity-overlay--tinkering {
+    --brave-activity-primary-rgb: 146, 154, 168;
+    --brave-activity-secondary-rgb: 194, 150, 86;
+    --brave-activity-panel-top: rgba(20, 23, 28, 0.97);
+    --brave-activity-panel-bottom: rgba(8, 10, 13, 0.995);
+    --brave-activity-title-color: #eef2f7;
+    --brave-activity-copy-color: #dde3ea;
+    --brave-activity-soft-color: #ccd4de;
+    --brave-activity-dim-color: #9ba6b5;
+}
+
+.brave-activity-overlay--mastery {
+    --brave-activity-primary-rgb: 104, 140, 201;
+    --brave-activity-secondary-rgb: 233, 196, 120;
+    --brave-activity-panel-top: rgba(14, 18, 31, 0.97);
+    --brave-activity-panel-bottom: rgba(6, 8, 16, 0.995);
+    --brave-activity-title-color: #f2f6ff;
+    --brave-activity-copy-color: #dde6f8;
+    --brave-activity-soft-color: #ced8ee;
+    --brave-activity-dim-color: #92a3c8;
 }
 
 .brave-activity-overlay__footer {
@@ -2080,23 +2153,24 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     width: min(640px, calc(100vw - 28px));
     max-height: min(680px, calc(100vh - 28px));
     grid-template-rows: auto minmax(0, 1fr) auto;
-    border-color: rgba(112, 220, 255, 0.22);
+    border-color: rgba(255, 86, 201, 0.26);
     background:
-        radial-gradient(circle at 0 0, rgba(94, 227, 255, 0.12), transparent 46%),
-        radial-gradient(circle at 100% 0, rgba(255, 215, 108, 0.1), transparent 38%),
-        linear-gradient(180deg, rgba(12, 15, 20, 0.985), rgba(3, 5, 8, 0.995));
+        radial-gradient(circle at 0 0, rgba(112, 229, 255, 0.16), transparent 46%),
+        radial-gradient(circle at 100% 0, rgba(255, 86, 201, 0.18), transparent 36%),
+        radial-gradient(circle at 50% 120%, rgba(128, 102, 255, 0.14), transparent 44%),
+        linear-gradient(180deg, rgba(18, 10, 28, 0.985), rgba(5, 4, 14, 0.995));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.05),
         0 34px 72px rgba(0, 0, 0, 0.48);
 }
 
 .brave-activity-overlay--arcade-result .brave-activity-overlay__icon {
-    background: rgba(112, 220, 255, 0.14);
+    background: rgba(255, 86, 201, 0.16);
     color: #eefbff;
 }
 
 .brave-activity-overlay--arcade-result .brave-activity-overlay__eyebrow {
-    color: #91dff8;
+    color: #ff9de4;
 }
 
 .brave-activity-overlay--arcade-result .brave-activity-overlay__title {
@@ -2124,11 +2198,11 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     justify-content: center;
     min-height: 34px;
     padding: 0 14px;
-    border: 1px solid rgba(255, 215, 108, 0.24);
+    border: 1px solid rgba(255, 108, 220, 0.28);
     border-radius: 999px;
     background:
-        linear-gradient(180deg, rgba(48, 34, 10, 0.94), rgba(18, 14, 7, 0.98));
-    color: #fff1b2;
+        linear-gradient(180deg, rgba(75, 25, 83, 0.94), rgba(30, 13, 46, 0.98));
+    color: #ffd2f4;
     font-size: 0.78rem;
     font-weight: 800;
 }
@@ -2143,14 +2217,14 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     display: grid;
     gap: 4px;
     padding: 12px 14px;
-    border: 1px solid rgba(112, 220, 255, 0.12);
+    border: 1px solid rgba(112, 229, 255, 0.16);
     border-radius: var(--brave-radius-card-tight);
     background:
-        linear-gradient(180deg, rgba(20, 28, 38, 0.92), rgba(7, 10, 14, 0.98));
+        linear-gradient(180deg, rgba(27, 19, 46, 0.92), rgba(10, 8, 20, 0.98));
 }
 
 .brave-arcade-result__summary-card span {
-    color: #83d3ec;
+    color: #86e7ff;
     font-size: 0.76rem;
     font-weight: 700;
 }
@@ -2163,25 +2237,25 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .brave-arcade-result__summary-card--score {
-    border-color: rgba(112, 220, 255, 0.22);
+    border-color: rgba(112, 229, 255, 0.28);
 }
 
 .brave-arcade-result__summary-card--rank {
-    border-color: rgba(255, 215, 108, 0.24);
+    border-color: rgba(255, 108, 220, 0.28);
 }
 
 .brave-arcade-result__summary-card--high {
-    border-color: rgba(181, 135, 255, 0.22);
+    border-color: rgba(137, 108, 255, 0.28);
 }
 
 .brave-arcade-result__board {
     display: grid;
     gap: 10px;
     padding: 14px;
-    border: 1px solid rgba(112, 220, 255, 0.16);
+    border: 1px solid rgba(255, 86, 201, 0.2);
     border-radius: var(--brave-radius-card-tight);
     background:
-        linear-gradient(180deg, rgba(19, 27, 38, 0.94), rgba(7, 10, 15, 0.99));
+        linear-gradient(180deg, rgba(23, 17, 42, 0.94), rgba(8, 7, 18, 0.99));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         inset 0 0 0 1px rgba(255, 255, 255, 0.01);
@@ -2199,10 +2273,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     justify-content: center;
     width: 32px;
     height: 32px;
-    border: 1px solid rgba(112, 220, 255, 0.18);
+    border: 1px solid rgba(255, 86, 201, 0.22);
     border-radius: 8px;
-    background: rgba(112, 220, 255, 0.08);
-    color: #d8f7ff;
+    background: rgba(255, 86, 201, 0.12);
+    color: #ffd1f5;
 }
 
 .brave-arcade-result__board-title {
@@ -2221,7 +2295,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .brave-arcade-result__table-head {
     padding: 0 12px;
-    color: #78cbe4;
+    color: #85e7ff;
     font-size: 0.72rem;
     font-weight: 700;
 }
@@ -2238,27 +2312,27 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 .brave-arcade-result__row {
     min-height: 48px;
     padding: 0 12px;
-    border: 1px solid rgba(112, 220, 255, 0.1);
+    border: 1px solid rgba(112, 229, 255, 0.12);
     border-radius: 8px;
     background:
-        linear-gradient(180deg, rgba(12, 17, 24, 0.94), rgba(6, 9, 13, 0.98));
+        linear-gradient(180deg, rgba(17, 14, 31, 0.94), rgba(7, 6, 16, 0.98));
 }
 
 .brave-arcade-result__row--top {
-    border-color: rgba(255, 215, 108, 0.24);
+    border-color: rgba(255, 108, 220, 0.3);
     background:
-        linear-gradient(180deg, rgba(42, 32, 14, 0.94), rgba(18, 12, 7, 0.98));
+        linear-gradient(180deg, rgba(67, 22, 78, 0.94), rgba(25, 11, 40, 0.98));
 }
 
 .brave-arcade-result__row--current {
-    border-color: rgba(112, 220, 255, 0.28);
-    box-shadow: inset 0 0 0 1px rgba(112, 220, 255, 0.12);
+    border-color: rgba(112, 229, 255, 0.32);
+    box-shadow: inset 0 0 0 1px rgba(112, 229, 255, 0.14);
 }
 
 .brave-arcade-result__row--standing {
-    border-color: rgba(181, 135, 255, 0.26);
+    border-color: rgba(137, 108, 255, 0.3);
     background:
-        linear-gradient(180deg, rgba(28, 19, 41, 0.94), rgba(12, 9, 18, 0.98));
+        linear-gradient(180deg, rgba(34, 22, 58, 0.94), rgba(13, 10, 28, 0.98));
 }
 
 .brave-arcade-result__row--empty {
@@ -2266,14 +2340,14 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .brave-arcade-result__rank {
-    color: #9fdff5;
+    color: #97ecff;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
 }
 
 .brave-arcade-result__row--top .brave-arcade-result__rank,
 .brave-arcade-result__row--top .brave-arcade-result__score {
-    color: #fff1b2;
+    color: #ffd2f4;
 }
 
 .brave-arcade-result__name {
@@ -2299,10 +2373,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     justify-content: center;
     min-height: 22px;
     padding: 0 8px;
-    border: 1px solid rgba(112, 220, 255, 0.24);
+    border: 1px solid rgba(112, 229, 255, 0.24);
     border-radius: 999px;
-    background: rgba(112, 220, 255, 0.12);
-    color: #d8f7ff;
+    background: rgba(112, 229, 255, 0.12);
+    color: #d8faff;
     font-size: 0.72rem;
     font-weight: 800;
 }
@@ -2318,11 +2392,11 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     display: grid;
     gap: 8px;
     padding-top: 8px;
-    border-top: 1px solid rgba(112, 220, 255, 0.12);
+    border-top: 1px solid rgba(255, 86, 201, 0.16);
 }
 
 .brave-arcade-result__standing-label {
-    color: #b48cff;
+    color: #b89bff;
     font-size: 0.72rem;
     font-weight: 700;
 }
@@ -2334,30 +2408,30 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .brave-arcade-result__note {
     padding: 11px 12px;
-    border: 1px solid rgba(112, 220, 255, 0.12);
+    border: 1px solid rgba(112, 229, 255, 0.14);
     border-radius: var(--brave-radius-card-tight);
     background:
-        linear-gradient(180deg, rgba(18, 25, 35, 0.88), rgba(7, 10, 14, 0.96));
-    color: #c6f5ff;
+        linear-gradient(180deg, rgba(21, 17, 37, 0.88), rgba(8, 7, 18, 0.96));
+    color: #cef6ff;
     font-weight: 600;
 }
 
 .brave-arcade-result__note--record {
-    border-color: rgba(255, 215, 108, 0.24);
+    border-color: rgba(255, 108, 220, 0.3);
     background:
-        linear-gradient(180deg, rgba(44, 33, 14, 0.9), rgba(17, 12, 7, 0.98));
-    color: #fff1b2;
+        linear-gradient(180deg, rgba(71, 24, 81, 0.9), rgba(24, 11, 39, 0.98));
+    color: #ffd5f6;
 }
 
 .brave-arcade-result__note--personal {
-    border-color: rgba(112, 220, 255, 0.2);
+    border-color: rgba(112, 229, 255, 0.24);
 }
 
 .brave-arcade-result__note--reward {
-    border-color: rgba(181, 135, 255, 0.24);
+    border-color: rgba(137, 108, 255, 0.3);
     background:
-        linear-gradient(180deg, rgba(28, 19, 41, 0.9), rgba(12, 9, 18, 0.98));
-    color: #f0e5ff;
+        linear-gradient(180deg, rgba(35, 22, 60, 0.9), rgba(13, 10, 28, 0.98));
+    color: #efe6ff;
 }
 
 @media (max-width: 640px) {
@@ -2400,6 +2474,14 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     display: grid;
     place-items: center;
     padding: 18px;
+    --brave-fishing-primary-rgb: 88, 188, 206;
+    --brave-fishing-secondary-rgb: 149, 224, 202;
+    --brave-fishing-panel-top: rgba(10, 23, 29, 0.97);
+    --brave-fishing-panel-bottom: rgba(4, 10, 14, 0.995);
+    --brave-fishing-title-color: #effcff;
+    --brave-fishing-copy-color: #d8f2f4;
+    --brave-fishing-soft-color: #c6e9ed;
+    --brave-fishing-dim-color: #87bbc3;
     pointer-events: auto;
 }
 
@@ -2419,11 +2501,12 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     grid-template-rows: auto minmax(0, 1fr) auto auto;
     gap: 14px;
     padding: 18px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.24));
+    border: 1px solid rgba(var(--brave-fishing-primary-rgb), 0.24);
     border-radius: var(--brave-radius-panel);
     background:
-        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 96%, transparent), transparent 26%),
-        linear-gradient(180deg, var(--brave-surface-soft-top), var(--brave-surface-soft-bottom));
+        radial-gradient(circle at 0 0, rgba(var(--brave-fishing-primary-rgb), 0.14), transparent 44%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-fishing-secondary-rgb), 0.1), transparent 34%),
+        linear-gradient(180deg, var(--brave-fishing-panel-top), var(--brave-fishing-panel-bottom));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.05),
         0 30px 68px rgba(0, 0, 0, 0.44);
@@ -2457,8 +2540,9 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     width: 38px;
     height: 38px;
     border-radius: 999px;
-    color: var(--brave-text-bright);
-    background: rgba(var(--brave-accent-rgb), 0.14);
+    color: var(--brave-fishing-title-color);
+    background: rgba(var(--brave-fishing-primary-rgb), 0.16);
+    box-shadow: inset 0 0 0 1px rgba(var(--brave-fishing-primary-rgb), 0.16);
     flex: 0 0 auto;
 }
 
@@ -2468,14 +2552,14 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .brave-fishing-minigame__eyebrow {
-    color: var(--brave-text-dim);
+    color: var(--brave-fishing-dim-color);
     font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.25;
     text-transform: uppercase;
 }
 
 .brave-fishing-minigame__title {
-    color: var(--brave-text-bright);
+    color: var(--brave-fishing-title-color);
     font-family: var(--brave-dialogue-font-family);
     letter-spacing: var(--brave-dialogue-letter-spacing);
     font-size: calc(1.2rem * var(--brave-text-scale) * var(--brave-font-size-scale));
@@ -2494,10 +2578,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     align-items: center;
     min-height: 28px;
     padding: 5px 9px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 68%, transparent);
+    border: 1px solid rgba(var(--brave-fishing-primary-rgb), 0.16);
     border-radius: 999px;
-    color: var(--brave-text-soft);
-    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
+    color: var(--brave-fishing-soft-color);
+    background: rgba(var(--brave-fishing-primary-rgb), 0.08);
     font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
 }
 
@@ -2509,15 +2593,17 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     gap: 14px;
     padding-right: 2px;
     scrollbar-width: thin;
-    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
+    scrollbar-color: rgba(var(--brave-fishing-primary-rgb), 0.58) rgba(255, 255, 255, 0.06);
 }
 
 .brave-fishing-minigame__setup-summary,
 .brave-fishing-minigame__gear-column {
     min-width: 0;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 64%, transparent);
+    border: 1px solid rgba(var(--brave-fishing-primary-rgb), 0.16);
     border-radius: var(--brave-radius-card);
-    background: color-mix(in srgb, var(--brave-panel-soft) 76%, transparent);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-fishing-primary-rgb), 0.09), transparent 34%),
+        linear-gradient(180deg, rgba(14, 20, 26, 0.96), rgba(6, 9, 13, 0.99));
 }
 
 .brave-fishing-minigame__setup-summary {
@@ -2528,14 +2614,14 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .brave-fishing-minigame__setup-label {
-    color: var(--brave-text-dim);
+    color: var(--brave-fishing-dim-color);
     font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
     text-transform: uppercase;
 }
 
 .brave-fishing-minigame__setup-title {
-    color: var(--brave-text-bright);
+    color: var(--brave-fishing-title-color);
     font-size: calc(1.02rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
 }
@@ -2543,17 +2629,18 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 .brave-fishing-minigame__setup-text,
 .brave-fishing-minigame__gear-summary,
 .brave-fishing-minigame__empty {
-    color: var(--brave-text-soft);
+    color: var(--brave-fishing-soft-color);
     font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.45;
 }
 
 .brave-fishing-minigame__setup-message {
     padding: 10px 11px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 58%, transparent);
+    border: 1px solid rgba(var(--brave-fishing-primary-rgb), 0.16);
     border-radius: var(--brave-radius-card-tight);
-    color: var(--brave-text-bright);
-    background: color-mix(in srgb, var(--brave-world-line) 20%, transparent);
+    color: var(--brave-fishing-title-color);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-fishing-primary-rgb), 0.12), rgba(8, 11, 15, 0.9));
     font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.4;
 }
@@ -2573,18 +2660,18 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     gap: 2px;
     padding: 9px 10px;
     border-radius: var(--brave-radius-card-tight);
-    background: rgba(255, 255, 255, 0.035);
+    background: rgba(var(--brave-fishing-primary-rgb), 0.08);
 }
 
 .brave-fishing-minigame__active-tackle span {
-    color: var(--brave-text-dim);
+    color: var(--brave-fishing-dim-color);
     font-size: calc(0.7rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     text-transform: uppercase;
 }
 
 .brave-fishing-minigame__active-tackle strong {
     min-width: 0;
-    color: var(--brave-text-bright);
+    color: var(--brave-fishing-title-color);
     font-size: calc(0.88rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     font-weight: 700;
     overflow-wrap: anywhere;
@@ -2612,10 +2699,12 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     gap: 10px;
     align-items: start;
     padding: 10px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 62%, transparent);
+    border: 1px solid rgba(var(--brave-fishing-primary-rgb), 0.14);
     border-radius: var(--brave-radius-card-tight);
-    color: var(--brave-text-soft);
-    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
+    color: var(--brave-fishing-soft-color);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-fishing-primary-rgb), 0.08), transparent 34%),
+        linear-gradient(180deg, rgba(16, 21, 28, 0.96), rgba(6, 9, 13, 0.99));
     font: inherit;
     text-align: left;
 }
@@ -2625,14 +2714,15 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 }
 
 .brave-fishing-minigame__gear-option:not(:disabled):hover {
-    border-color: color-mix(in srgb, var(--brave-accent) 58%, var(--brave-world-line));
-    background: color-mix(in srgb, var(--brave-accent) 9%, var(--brave-panel-soft));
+    border-color: rgba(var(--brave-fishing-primary-rgb), 0.28);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-fishing-primary-rgb), 0.16), transparent 34%),
+        linear-gradient(180deg, rgba(16, 21, 28, 0.96), rgba(6, 9, 13, 0.99));
 }
 
 .brave-fishing-minigame__gear-option--selected {
-    border-color: color-mix(in srgb, var(--brave-accent) 48%, var(--brave-world-line));
-    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
-    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brave-accent) 42%, transparent);
+    border-color: rgba(var(--brave-fishing-primary-rgb), 0.28);
+    box-shadow: inset 3px 0 0 rgba(var(--brave-fishing-secondary-rgb), 0.52);
 }
 
 .brave-fishing-minigame__gear-option--locked {
@@ -2646,8 +2736,8 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     width: 34px;
     height: 34px;
     border-radius: 999px;
-    color: var(--brave-text-bright);
-    background: rgba(var(--brave-accent-rgb), 0.12);
+    color: var(--brave-fishing-title-color);
+    background: rgba(var(--brave-fishing-primary-rgb), 0.14);
 }
 
 .brave-fishing-minigame__gear-copy,
@@ -2664,7 +2754,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .brave-fishing-minigame__gear-name {
     min-width: 0;
-    color: var(--brave-text-bright);
+    color: var(--brave-fishing-title-color);
     font-size: calc(0.9rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
     overflow-wrap: anywhere;
@@ -2675,28 +2765,28 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     align-items: center;
     justify-content: center;
     padding: 3px 6px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 62%, transparent);
+    border: 1px solid rgba(var(--brave-fishing-primary-rgb), 0.16);
     border-radius: 999px;
-    color: var(--brave-text-soft);
-    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
+    color: var(--brave-fishing-soft-color);
+    background: rgba(var(--brave-fishing-primary-rgb), 0.08);
     font-size: calc(0.64rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.1;
     text-transform: uppercase;
 }
 
 .brave-fishing-minigame__gear-badge--selected {
-    border-color: color-mix(in srgb, var(--brave-accent) 52%, var(--brave-world-line));
-    color: var(--brave-text-bright);
-    background: color-mix(in srgb, var(--brave-accent) 16%, rgba(255, 255, 255, 0.04));
+    border-color: rgba(var(--brave-fishing-secondary-rgb), 0.28);
+    color: var(--brave-fishing-title-color);
+    background: rgba(var(--brave-fishing-secondary-rgb), 0.14);
 }
 
 .brave-fishing-minigame__gear-badge--locked {
-    color: var(--brave-text-dim);
-    background: color-mix(in srgb, var(--brave-world-line) 16%, transparent);
+    color: var(--brave-fishing-dim-color);
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .brave-fishing-minigame__gear-meta {
-    color: var(--brave-text-dim);
+    color: var(--brave-fishing-dim-color);
     font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.3;
 }
@@ -2821,13 +2911,15 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     gap: 12px;
     min-width: 0;
     padding: 14px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 64%, transparent);
+    border: 1px solid rgba(var(--brave-fishing-primary-rgb), 0.16);
     border-radius: var(--brave-radius-card);
-    background: color-mix(in srgb, var(--brave-panel-soft) 76%, transparent);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-fishing-primary-rgb), 0.09), transparent 34%),
+        linear-gradient(180deg, rgba(14, 20, 26, 0.96), rgba(6, 9, 13, 0.99));
 }
 
 .brave-fishing-minigame__status {
-    color: var(--brave-text-bright);
+    color: var(--brave-fishing-title-color);
     font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
     text-transform: uppercase;
@@ -2836,13 +2928,13 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 .brave-fishing-minigame__fish,
 .brave-fishing-minigame__timer,
 .brave-fishing-minigame__result {
-    color: var(--brave-text-soft);
+    color: var(--brave-fishing-soft-color);
     font-size: calc(0.86rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.45;
 }
 
 .brave-fishing-minigame__result {
-    color: var(--brave-text-bright);
+    color: var(--brave-fishing-title-color);
 }
 
 .brave-fishing-minigame__controls,
@@ -2858,16 +2950,18 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     min-height: 58px;
     border-radius: var(--brave-radius-card-tight);
     font: inherit;
-    color: var(--brave-text-bright);
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 68%, transparent);
-    background: color-mix(in srgb, var(--brave-panel-soft) 82%, transparent);
+    color: var(--brave-fishing-title-color);
+    border: 1px solid rgba(var(--brave-fishing-primary-rgb), 0.16);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-fishing-primary-rgb), 0.12), rgba(9, 12, 17, 0.96));
     touch-action: none;
 }
 
 .brave-fishing-minigame__reel {
-    border-color: color-mix(in srgb, var(--brave-accent) 72%, var(--brave-world-line));
+    border-color: rgba(var(--brave-fishing-primary-rgb), 0.44);
     background:
-        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 44%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 50%, var(--brave-panel-deep)));
+        linear-gradient(180deg, rgba(var(--brave-fishing-primary-rgb), 0.54), rgba(var(--brave-fishing-primary-rgb), 0.34)),
+        linear-gradient(180deg, rgba(20, 25, 33, 0.96), rgba(9, 12, 17, 0.98));
     box-shadow: 0 14px 26px rgba(0, 0, 0, 0.28);
     text-transform: uppercase;
 }
@@ -5271,6 +5365,271 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     font-size: 1.14rem;
 }
 
+.brave-view--journal {
+    --brave-accent: #b68a57;
+    --brave-accent-rgb: 182, 138, 87;
+    --brave-link: #e0bf88;
+    --brave-menu-screen-primary-rgb: 170, 126, 74;
+    --brave-menu-screen-secondary-rgb: 225, 191, 133;
+    --brave-menu-screen-panel-top: rgba(35, 25, 16, 0.975);
+    --brave-menu-screen-panel-bottom: rgba(13, 9, 6, 0.995);
+    --brave-menu-screen-section-top: rgba(27, 20, 13, 0.955);
+    --brave-menu-screen-section-bottom: rgba(10, 7, 5, 0.99);
+    --brave-menu-screen-title-color: #f7ead6;
+    --brave-menu-screen-copy-color: #ddcab0;
+    --brave-menu-screen-dim-color: #bb9868;
+}
+
+.brave-view--map {
+    --brave-accent: #7cc6d6;
+    --brave-accent-rgb: 124, 198, 214;
+    --brave-link: #c9eee4;
+    --brave-menu-screen-primary-rgb: 92, 160, 180;
+    --brave-menu-screen-secondary-rgb: 176, 216, 198;
+    --brave-menu-screen-panel-top: rgba(12, 24, 31, 0.98);
+    --brave-menu-screen-panel-bottom: rgba(4, 10, 14, 0.995);
+    --brave-menu-screen-section-top: rgba(11, 18, 24, 0.955);
+    --brave-menu-screen-section-bottom: rgba(6, 9, 12, 0.99);
+    --brave-menu-screen-title-color: #eefbff;
+    --brave-menu-screen-copy-color: #d5e7eb;
+    --brave-menu-screen-dim-color: #8ebac5;
+}
+
+.brave-view--journal .brave-view__hero,
+.brave-view--map .brave-view__hero {
+    border-color: rgba(var(--brave-menu-screen-primary-rgb), 0.24);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-menu-screen-primary-rgb), 0.14), transparent 44%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-menu-screen-secondary-rgb), 0.1), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
+        linear-gradient(180deg, var(--brave-menu-screen-panel-top), var(--brave-menu-screen-panel-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 24px 46px rgba(0, 0, 0, 0.26);
+}
+
+.brave-view--journal .brave-view__title,
+.brave-view--map .brave-view__title {
+    color: var(--brave-menu-screen-title-color);
+}
+
+.brave-view--journal .brave-view__title-icon,
+.brave-view--map .brave-view__title-icon {
+    color: rgb(var(--brave-menu-screen-secondary-rgb));
+}
+
+.brave-view--journal .brave-view__subtitle,
+.brave-view--map .brave-view__subtitle {
+    color: var(--brave-menu-screen-copy-color);
+}
+
+.brave-view--journal .brave-view__eyebrow,
+.brave-view--journal .brave-view__section-label,
+.brave-view--map .brave-view__eyebrow,
+.brave-view--map .brave-view__section-label {
+    color: var(--brave-menu-screen-dim-color);
+}
+
+.brave-view--journal .brave-view__eyebrow-icon,
+.brave-view--journal .brave-view__section-icon,
+.brave-view--map .brave-view__eyebrow-icon,
+.brave-view--map .brave-view__section-icon {
+    color: rgb(var(--brave-menu-screen-secondary-rgb));
+}
+
+.brave-view--journal .brave-view__section,
+.brave-view--map .brave-view__section:not(.brave-view__section--pre) {
+    border-color: rgba(var(--brave-menu-screen-primary-rgb), 0.18);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-menu-screen-primary-rgb), 0.12), transparent 48%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-menu-screen-secondary-rgb), 0.08), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 20%),
+        linear-gradient(180deg, var(--brave-menu-screen-section-top), var(--brave-menu-screen-section-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035),
+        0 16px 30px rgba(0, 0, 0, 0.2);
+}
+
+.brave-view--journal .brave-view__entry,
+.brave-view--map .brave-view__entry,
+.brave-view--journal .brave-view__section--archive .brave-view__list-item,
+.brave-view--map .brave-view__section--list .brave-view__list-item {
+    border: 1px solid rgba(var(--brave-menu-screen-primary-rgb), 0.18);
+    border-radius: var(--brave-radius-card-tight);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-menu-screen-primary-rgb), 0.1), transparent 46%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-menu-screen-secondary-rgb), 0.06), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 22%),
+        linear-gradient(180deg, rgba(17, 21, 27, 0.94), rgba(7, 9, 13, 0.99));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 10px 20px rgba(0, 0, 0, 0.18);
+}
+
+.brave-view--journal .brave-view__entry-icon-wrap,
+.brave-view--journal .brave-view__entry-badge,
+.brave-view--journal .brave-view__bullet,
+.brave-view--journal .scene-card__chip,
+.brave-view--map .brave-view__entry-icon-wrap,
+.brave-view--map .brave-view__entry-badge,
+.brave-view--map .brave-view__bullet,
+.brave-view--map .scene-card__chip {
+    border-color: rgba(var(--brave-menu-screen-primary-rgb), 0.22);
+    background: rgba(var(--brave-menu-screen-primary-rgb), 0.14);
+    color: color-mix(in srgb, rgb(var(--brave-menu-screen-secondary-rgb)) 72%, var(--brave-menu-screen-title-color));
+}
+
+.brave-view--journal .brave-view__entry-meta,
+.brave-view--journal .brave-view__entry-line,
+.brave-view--journal .brave-view__list-text,
+.brave-view--map .brave-view__entry-meta,
+.brave-view--map .brave-view__entry-line,
+.brave-view--map .brave-view__list-text {
+    color: var(--brave-menu-screen-copy-color);
+}
+
+.brave-view--journal .brave-view__action,
+.brave-view--map .brave-view__action {
+    border-color: rgba(var(--brave-menu-screen-primary-rgb), 0.22);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-menu-screen-primary-rgb), 0.14), rgba(255, 255, 255, 0.02)),
+        linear-gradient(180deg, rgba(18, 22, 28, 0.94), rgba(8, 10, 14, 0.99));
+    color: var(--brave-menu-screen-copy-color);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 10px 20px rgba(0, 0, 0, 0.16);
+}
+
+.brave-view--journal .brave-view__action-icon,
+.brave-view--map .brave-view__action-icon {
+    color: rgb(var(--brave-menu-screen-secondary-rgb));
+}
+
+.brave-view--journal .brave-view__action--accent,
+.brave-view--map .brave-view__action--accent {
+    border-color: rgba(var(--brave-menu-screen-secondary-rgb), 0.28);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-menu-screen-secondary-rgb), 0.2), rgba(var(--brave-menu-screen-primary-rgb), 0.12)),
+        linear-gradient(180deg, rgba(25, 30, 38, 0.94), rgba(9, 11, 15, 0.99));
+    color: var(--brave-menu-screen-title-color);
+}
+
+.brave-view--journal .brave-view__action--muted,
+.brave-view--map .brave-view__action--muted {
+    border-color: rgba(var(--brave-menu-screen-primary-rgb), 0.14);
+    color: var(--brave-menu-screen-dim-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .brave-view--journal .brave-view__action:hover,
+    .brave-view--journal .brave-view__action:focus-visible,
+    .brave-view--map .brave-view__action:hover,
+    .brave-view--map .brave-view__action:focus-visible {
+        border-color: rgba(var(--brave-menu-screen-secondary-rgb), 0.26);
+        background:
+            linear-gradient(180deg, rgba(var(--brave-menu-screen-secondary-rgb), 0.12), rgba(255, 255, 255, 0.04)),
+            linear-gradient(180deg, rgba(22, 27, 34, 0.95), rgba(9, 11, 15, 0.99));
+    }
+}
+
+.brave-view--journal .brave-view__action:focus-visible,
+.brave-view--map .brave-view__action:focus-visible,
+.brave-view--journal .brave-click--row:focus-visible,
+.brave-view--map .brave-click--row:focus-visible {
+    border-color: rgba(var(--brave-menu-screen-secondary-rgb), 0.3);
+    box-shadow: 0 0 0 1px rgba(var(--brave-menu-screen-secondary-rgb), 0.14);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .brave-view--journal .brave-click--row:hover,
+    .brave-view--map .brave-click--row:hover {
+        border-color: rgba(var(--brave-menu-screen-secondary-rgb), 0.24);
+        background:
+            radial-gradient(circle at 0 0, rgba(var(--brave-menu-screen-primary-rgb), 0.14), transparent 46%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+        box-shadow:
+            0 0 0 1px rgba(var(--brave-menu-screen-secondary-rgb), 0.08),
+            0 12px 22px rgba(0, 0, 0, 0.16);
+    }
+}
+
+.brave-view--journal .brave-view__section--switcher .brave-view__actions {
+    border-color: rgba(var(--brave-menu-screen-primary-rgb), 0.24);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-menu-screen-primary-rgb), 0.12), rgba(255, 255, 255, 0.02)),
+        linear-gradient(180deg, rgba(18, 14, 10, 0.94), rgba(8, 6, 5, 0.98));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 12px 22px rgba(0, 0, 0, 0.14);
+}
+
+.brave-view--journal .brave-view__section--switcher .brave-view__action {
+    color: var(--brave-menu-screen-dim-color);
+}
+
+.brave-view--journal .brave-view__section--switcher .brave-view__action--accent {
+    background:
+        linear-gradient(180deg, rgba(var(--brave-menu-screen-secondary-rgb), 0.18), rgba(var(--brave-menu-screen-primary-rgb), 0.08)),
+        linear-gradient(180deg, rgba(34, 25, 16, 0.92), rgba(14, 10, 7, 0.98));
+    color: var(--brave-menu-screen-title-color);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.brave-view--journal .brave-view__section--tracked {
+    border-color: rgba(var(--brave-menu-screen-primary-rgb), 0.2);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-menu-screen-primary-rgb), 0.12), transparent 48%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-menu-screen-secondary-rgb), 0.08), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 24%),
+        linear-gradient(180deg, rgba(25, 18, 12, 0.95), rgba(10, 7, 5, 0.99));
+}
+
+.brave-view--journal .brave-view__section--tracked .brave-view__entry {
+    border-color: rgba(var(--brave-menu-screen-secondary-rgb), 0.24);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-menu-screen-primary-rgb), 0.18), transparent 46%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-menu-screen-secondary-rgb), 0.1), transparent 32%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 24%),
+        linear-gradient(180deg, rgba(31, 22, 14, 0.95), rgba(11, 8, 5, 0.99));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 14px 26px rgba(0, 0, 0, 0.18);
+}
+
+.brave-view--map .brave-view__section--pre .brave-view__section-label {
+    color: color-mix(in srgb, rgb(var(--brave-menu-screen-secondary-rgb)) 46%, var(--brave-menu-screen-copy-color));
+    text-shadow: 0 0 18px rgba(var(--brave-menu-screen-primary-rgb), 0.16);
+}
+
+.brave-view--map .brave-view__pre--map {
+    border-color: rgba(var(--brave-menu-screen-primary-rgb), 0.28);
+    background:
+        radial-gradient(circle at 50% 20%, rgba(var(--brave-menu-screen-primary-rgb), 0.14), transparent 42%),
+        radial-gradient(circle at 8% 0, rgba(var(--brave-menu-screen-secondary-rgb), 0.08), transparent 32%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 18%),
+        linear-gradient(180deg, rgba(10, 18, 24, 0.985), rgba(4, 8, 11, 0.995));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+        0 22px 36px rgba(0, 0, 0, 0.24);
+    color: color-mix(in srgb, rgb(var(--brave-menu-screen-secondary-rgb)) 28%, var(--brave-menu-screen-copy-color));
+    scrollbar-color: rgba(var(--brave-menu-screen-primary-rgb), 0.82) rgba(255, 255, 255, 0.06);
+}
+
+.brave-view--map .brave-view__pre--map::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(var(--brave-menu-screen-secondary-rgb), 0.86), rgba(var(--brave-menu-screen-primary-rgb), 0.64));
+    border: 2px solid rgba(var(--brave-menu-screen-primary-rgb), 0.14);
+}
+
+.brave-view--map .brave-view__section--list .brave-view__list {
+    gap: 8px;
+}
+
+.brave-view--map .brave-view__map-cell--party::before {
+    background: linear-gradient(180deg, rgba(var(--brave-menu-screen-secondary-rgb), 0.28), rgba(var(--brave-menu-screen-secondary-rgb), 0.14));
+    border-color: rgba(var(--brave-menu-screen-secondary-rgb), 0.42);
+}
+
 .brave-view--combat .brave-view__sections {
     grid-template-columns: minmax(184px, 0.54fr) minmax(0, 1.46fr);
     align-items: start;
@@ -5763,6 +6122,33 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-room-log__body > .err {
     border-color: rgba(213, 138, 118, 0.3);
+}
+
+.brave-room-log__entry {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+}
+
+.brave-room-log__entry-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    color: color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-bright));
+    background: rgba(var(--brave-accent-rgb), 0.1);
+}
+
+.brave-room-log__entry-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.brave-room-log__entry-text {
+    min-width: 0;
 }
 
 .brave-view--room .brave-view__section--list .brave-view__list-item {
@@ -7741,6 +8127,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: grid;
     place-items: center;
     padding: 10px;
+    --brave-arcade-overlay-primary: #7ce4ff;
+    --brave-arcade-overlay-secondary: #ff67d6;
+    --brave-arcade-overlay-tertiary: #8568ff;
+    --brave-arcade-overlay-title: #f8f1ff;
+    --brave-arcade-overlay-eyebrow: #ffa6e9;
     pointer-events: auto;
 }
 
@@ -7763,10 +8154,13 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     grid-template-rows: auto minmax(0, 1fr);
     gap: 8px;
     padding: 10px 10px 8px;
-    border: 1px solid rgba(112, 220, 255, 0.18);
+    border: 1px solid color-mix(in srgb, var(--brave-arcade-overlay-secondary) 40%, transparent);
     border-radius: 16px;
     background:
-        linear-gradient(180deg, rgba(12, 15, 20, 0.98), rgba(3, 5, 8, 0.995));
+        radial-gradient(circle at 0 0, color-mix(in srgb, var(--brave-arcade-overlay-primary) 18%, transparent), transparent 42%),
+        radial-gradient(circle at 100% 0, color-mix(in srgb, var(--brave-arcade-overlay-secondary) 18%, transparent), transparent 34%),
+        radial-gradient(circle at 50% 120%, color-mix(in srgb, var(--brave-arcade-overlay-tertiary) 14%, transparent), transparent 46%),
+        linear-gradient(180deg, rgba(23, 10, 34, 0.98), rgba(5, 4, 14, 0.995));
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         0 26px 72px rgba(0, 0, 0, 0.48);
@@ -7800,8 +8194,9 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     width: 34px;
     height: 34px;
     border-radius: 999px;
-    color: #ecfbff;
-    background: rgba(112, 220, 255, 0.12);
+    color: var(--brave-arcade-overlay-title);
+    background: color-mix(in srgb, var(--brave-arcade-overlay-secondary) 18%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brave-arcade-overlay-secondary) 16%, transparent);
     flex: 0 0 auto;
 }
 
@@ -7812,7 +8207,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-arcade-overlay__eyebrow {
-    color: #91dff8;
+    color: var(--brave-arcade-overlay-eyebrow);
     font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.2;
     text-transform: uppercase;
@@ -7820,7 +8215,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-arcade-overlay__title {
-    color: #eefbff;
+    color: var(--brave-arcade-overlay-title);
     font-family: var(--brave-dialogue-font-family);
     letter-spacing: var(--brave-dialogue-letter-spacing);
     font-size: calc(1.08rem * var(--brave-text-scale) * var(--brave-font-size-scale));
@@ -7863,11 +8258,11 @@ body.brave-arcade-overlay-active #messagewindow {
 
 .brave-view--arcade .brave-view__hero {
     background:
-        radial-gradient(circle at 0 0, rgba(98, 222, 255, 0.18), transparent 42%),
-        radial-gradient(circle at 100% 0, rgba(255, 112, 112, 0.14), transparent 34%),
-        radial-gradient(circle at 50% 120%, rgba(255, 201, 98, 0.14), transparent 48%),
-        linear-gradient(180deg, rgba(16, 18, 24, 0.98), rgba(7, 8, 11, 0.995));
-    border-color: rgba(112, 220, 255, 0.22);
+        radial-gradient(circle at 0 0, rgba(124, 228, 255, 0.2), transparent 42%),
+        radial-gradient(circle at 100% 0, rgba(255, 103, 214, 0.18), transparent 34%),
+        radial-gradient(circle at 50% 120%, rgba(133, 104, 255, 0.16), transparent 48%),
+        linear-gradient(180deg, rgba(20, 10, 33, 0.98), rgba(7, 6, 17, 0.995));
+    border-color: rgba(255, 103, 214, 0.24);
 }
 
 .brave-view__section--arcade {
@@ -7875,23 +8270,23 @@ body.brave-arcade-overlay-active #messagewindow {
 }
 
 .brave-view__arcade-shell {
-    --brave-arcade-shell-border: rgba(112, 220, 255, 0.18);
-    --brave-arcade-shell-left-glow: rgba(112, 220, 255, 0.1);
-    --brave-arcade-shell-right-glow: rgba(255, 109, 109, 0.1);
-    --brave-arcade-shell-bottom-glow: rgba(255, 195, 88, 0.1);
-    --brave-arcade-frame-border: rgba(112, 220, 255, 0.14);
-    --brave-arcade-frame-glow: rgba(112, 220, 255, 0.08);
-    --brave-arcade-wall: #4fd8ff;
-    --brave-arcade-dot: #f7eab9;
-    --brave-arcade-power: #fff8d2;
-    --brave-arcade-player: #ffd95d;
-    --brave-arcade-house: #8de2ff;
-    --brave-arcade-door: #ffbc77;
-    --brave-arcade-status-label: #93e3ff;
-    --brave-arcade-status-value: #fff1ab;
-    --brave-arcade-status-border: rgba(255, 219, 121, 0.24);
+    --brave-arcade-shell-border: rgba(255, 103, 214, 0.22);
+    --brave-arcade-shell-left-glow: rgba(124, 228, 255, 0.14);
+    --brave-arcade-shell-right-glow: rgba(255, 103, 214, 0.14);
+    --brave-arcade-shell-bottom-glow: rgba(133, 104, 255, 0.14);
+    --brave-arcade-frame-border: rgba(124, 228, 255, 0.18);
+    --brave-arcade-frame-glow: rgba(255, 103, 214, 0.1);
+    --brave-arcade-wall: #68deff;
+    --brave-arcade-dot: #ffd7fb;
+    --brave-arcade-power: #fff4a9;
+    --brave-arcade-player: #ffe271;
+    --brave-arcade-house: #a79aff;
+    --brave-arcade-door: #ff97d9;
+    --brave-arcade-status-label: #8feaff;
+    --brave-arcade-status-value: #ffd3f4;
+    --brave-arcade-status-border: rgba(255, 103, 214, 0.28);
     --brave-arcade-status-surface:
-        linear-gradient(180deg, rgba(55, 42, 18, 0.78), rgba(21, 15, 7, 0.94));
+        linear-gradient(180deg, rgba(65, 21, 74, 0.8), rgba(22, 10, 38, 0.94));
     position: relative;
     overflow: hidden;
     isolation: isolate;
@@ -10048,6 +10443,360 @@ body[data-brave-theme="atlas"] .brave-view__entry {
         0 10px 20px rgba(0, 0, 0, 0.22);
 }
 
+/* Screen-specific menu surfaces must come after theme shells so they win the cascade. */
+body[data-brave-scene="journal"]::after {
+    background:
+        radial-gradient(circle at 14% 8%, rgba(196, 151, 94, 0.16), transparent 20%),
+        radial-gradient(circle at 84% 10%, rgba(236, 208, 162, 0.1), transparent 22%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.26), transparent 34%),
+        linear-gradient(180deg, rgba(52, 36, 22, 0.96), rgba(16, 12, 8, 1));
+}
+
+body[data-brave-scene="map"]::after {
+    background:
+        radial-gradient(circle at 12% 8%, rgba(92, 160, 180, 0.18), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(176, 216, 198, 0.1), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.3), transparent 36%),
+        linear-gradient(180deg, rgba(11, 21, 28, 0.96), rgba(5, 9, 12, 1));
+}
+
+body[data-brave-scene="journal"] #clientwrapper,
+body[data-brave-scene="map"] #clientwrapper {
+    isolation: isolate;
+}
+
+body[data-brave-scene="journal"] #clientwrapper::before,
+body[data-brave-scene="map"] #clientwrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    backdrop-filter: blur(12px) saturate(0.62);
+    -webkit-backdrop-filter: blur(12px) saturate(0.62);
+}
+
+body[data-brave-scene="journal"] #clientwrapper::before {
+    background:
+        radial-gradient(circle at 16% 10%, rgba(182, 138, 87, 0.12), transparent 22%),
+        radial-gradient(circle at 84% 8%, rgba(228, 199, 145, 0.06), transparent 24%),
+        linear-gradient(180deg, rgba(14, 10, 7, 0.28), rgba(6, 4, 3, 0.52));
+}
+
+body[data-brave-scene="map"] #clientwrapper::before {
+    background:
+        radial-gradient(circle at 12% 8%, rgba(92, 160, 180, 0.12), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(176, 216, 198, 0.06), transparent 24%),
+        linear-gradient(180deg, rgba(7, 12, 16, 0.28), rgba(3, 5, 7, 0.52));
+}
+
+body[data-brave-scene="journal"] .content,
+body[data-brave-scene="journal"] #messagewindow,
+body[data-brave-scene="journal"] .inputwrap,
+body[data-brave-scene="journal"] .scene-rail,
+body[data-brave-scene="map"] .content,
+body[data-brave-scene="map"] #messagewindow,
+body[data-brave-scene="map"] .inputwrap,
+body[data-brave-scene="map"] .scene-rail {
+    position: relative;
+    z-index: 1;
+}
+
+body[data-brave-scene="journal"] .content,
+body[data-brave-scene="journal"] #messagewindow,
+body[data-brave-scene="journal"] .inputwrap {
+    border-color: color-mix(in srgb, rgba(182, 138, 87, 0.28) 64%, var(--brave-border));
+    background:
+        radial-gradient(circle at 14% 10%, rgba(182, 138, 87, 0.14), transparent 20%),
+        radial-gradient(circle at 84% 12%, rgba(228, 199, 145, 0.08), transparent 22%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.24), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 18%),
+        linear-gradient(180deg, rgba(48, 33, 21, 0.98), rgba(15, 11, 8, 1));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.012),
+        var(--brave-shadow);
+}
+
+body[data-brave-scene="map"] .content,
+body[data-brave-scene="map"] #messagewindow,
+body[data-brave-scene="map"] .inputwrap {
+    border-color: color-mix(in srgb, rgba(92, 160, 180, 0.28) 64%, var(--brave-border));
+    background:
+        radial-gradient(circle at 12% 8%, rgba(92, 160, 180, 0.14), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(176, 216, 198, 0.08), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.28), transparent 36%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.016), transparent 16%),
+        linear-gradient(180deg, rgba(13, 25, 33, 0.98), rgba(5, 9, 12, 1));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.012),
+        var(--brave-shadow);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal {
+    --brave-screen-primary-rgb: 182, 138, 87;
+    --brave-screen-secondary-rgb: 228, 199, 145;
+    --brave-screen-title-color: #fbf0de;
+    --brave-screen-copy-color: #e8d6bc;
+    --brave-screen-dim-color: #c39a67;
+    --brave-screen-panel-top: rgba(50, 34, 22, 0.97);
+    --brave-screen-panel-bottom: rgba(17, 12, 8, 0.995);
+    --brave-screen-section-top: rgba(37, 27, 18, 0.955);
+    --brave-screen-section-bottom: rgba(14, 10, 7, 0.99);
+    --brave-screen-entry-top: rgba(59, 42, 28, 0.92);
+    --brave-screen-entry-bottom: rgba(21, 15, 10, 0.985);
+}
+
+body[data-brave-scene="map"] .brave-view--map {
+    --brave-screen-primary-rgb: 92, 160, 180;
+    --brave-screen-secondary-rgb: 176, 216, 198;
+    --brave-screen-title-color: #eefbff;
+    --brave-screen-copy-color: #d5e7eb;
+    --brave-screen-dim-color: #8ebac5;
+    --brave-screen-panel-top: rgba(16, 30, 38, 0.97);
+    --brave-screen-panel-bottom: rgba(6, 11, 15, 0.995);
+    --brave-screen-section-top: rgba(13, 22, 28, 0.955);
+    --brave-screen-section-bottom: rgba(7, 11, 14, 0.99);
+    --brave-screen-entry-top: rgba(20, 33, 41, 0.92);
+    --brave-screen-entry-bottom: rgba(8, 12, 15, 0.985);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__hero,
+body[data-brave-scene="map"] .brave-view--map .brave-view__hero {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.28);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.16), transparent 44%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-screen-secondary-rgb), 0.1), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
+        linear-gradient(180deg, var(--brave-screen-panel-top), var(--brave-screen-panel-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 24px 46px rgba(0, 0, 0, 0.28);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__title,
+body[data-brave-scene="map"] .brave-view--map .brave-view__title {
+    color: var(--brave-screen-title-color);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__title-icon,
+body[data-brave-scene="map"] .brave-view--map .brave-view__title-icon {
+    color: rgb(var(--brave-screen-secondary-rgb));
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__subtitle,
+body[data-brave-scene="map"] .brave-view--map .brave-view__subtitle,
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__entry-line,
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__list-text,
+body[data-brave-scene="map"] .brave-view--map .brave-view__entry-line,
+body[data-brave-scene="map"] .brave-view--map .brave-view__list-text {
+    color: var(--brave-screen-copy-color);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__eyebrow,
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__section-label,
+body[data-brave-scene="map"] .brave-view--map .brave-view__eyebrow,
+body[data-brave-scene="map"] .brave-view--map .brave-view__section-label {
+    color: var(--brave-screen-dim-color);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__eyebrow-icon,
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__section-icon,
+body[data-brave-scene="map"] .brave-view--map .brave-view__eyebrow-icon,
+body[data-brave-scene="map"] .brave-view--map .brave-view__section-icon {
+    color: rgb(var(--brave-screen-secondary-rgb));
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__section,
+body[data-brave-scene="map"] .brave-view--map .brave-view__section:not(.brave-view__section--pre) {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.22);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.12), transparent 48%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-screen-secondary-rgb), 0.08), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.022), transparent 20%),
+        linear-gradient(180deg, var(--brave-screen-section-top), var(--brave-screen-section-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035),
+        0 16px 30px rgba(0, 0, 0, 0.22);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__entry,
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__section--archive .brave-view__list-item,
+body[data-brave-scene="map"] .brave-view--map .brave-view__entry,
+body[data-brave-scene="map"] .brave-view--map .brave-view__section--list .brave-view__list-item {
+    border: 1px solid rgba(var(--brave-screen-primary-rgb), 0.22);
+    border-radius: var(--brave-radius-card-tight);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.11), transparent 46%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-screen-secondary-rgb), 0.06), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 22%),
+        linear-gradient(180deg, var(--brave-screen-entry-top), var(--brave-screen-entry-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 10px 20px rgba(0, 0, 0, 0.18);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__entry-title,
+body[data-brave-scene="map"] .brave-view--map .brave-view__entry-title {
+    color: var(--brave-screen-title-color);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__entry-meta,
+body[data-brave-scene="map"] .brave-view--map .brave-view__entry-meta {
+    color: var(--brave-screen-dim-color);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__entry-icon-wrap,
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__entry-badge,
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__bullet,
+body[data-brave-scene="map"] .brave-view--map .brave-view__entry-icon-wrap,
+body[data-brave-scene="map"] .brave-view--map .brave-view__entry-badge,
+body[data-brave-scene="map"] .brave-view--map .brave-view__bullet,
+body[data-brave-scene="map"] .brave-view--map .scene-card__chip {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.22);
+    background: rgba(var(--brave-screen-primary-rgb), 0.14);
+    color: color-mix(in srgb, rgb(var(--brave-screen-secondary-rgb)) 74%, var(--brave-screen-title-color));
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__action,
+body[data-brave-scene="map"] .brave-view--map .brave-view__action {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.24);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-screen-primary-rgb), 0.14), rgba(255, 255, 255, 0.02)),
+        linear-gradient(180deg, rgba(20, 24, 29, 0.94), rgba(8, 10, 14, 0.99));
+    color: var(--brave-screen-copy-color);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 10px 20px rgba(0, 0, 0, 0.16);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__action-icon,
+body[data-brave-scene="map"] .brave-view--map .brave-view__action-icon {
+    color: rgb(var(--brave-screen-secondary-rgb));
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__action--accent,
+body[data-brave-scene="map"] .brave-view--map .brave-view__action--accent {
+    border-color: rgba(var(--brave-screen-secondary-rgb), 0.28);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-screen-secondary-rgb), 0.2), rgba(var(--brave-screen-primary-rgb), 0.12)),
+        linear-gradient(180deg, rgba(27, 31, 37, 0.94), rgba(9, 11, 15, 0.99));
+    color: var(--brave-screen-title-color);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__action--muted,
+body[data-brave-scene="map"] .brave-view--map .brave-view__action--muted {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.16);
+    color: var(--brave-screen-dim-color);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__action:focus-visible,
+body[data-brave-scene="journal"] .brave-view--journal .brave-click--row:focus-visible,
+body[data-brave-scene="map"] .brave-view--map .brave-view__action:focus-visible,
+body[data-brave-scene="map"] .brave-view--map .brave-click--row:focus-visible {
+    border-color: rgba(var(--brave-screen-secondary-rgb), 0.32);
+    box-shadow: 0 0 0 1px rgba(var(--brave-screen-secondary-rgb), 0.14);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body[data-brave-scene="journal"] .brave-view--journal .brave-view__action:hover,
+    body[data-brave-scene="journal"] .brave-view--journal .brave-click--row:hover,
+    body[data-brave-scene="map"] .brave-view--map .brave-view__action:hover,
+    body[data-brave-scene="map"] .brave-view--map .brave-click--row:hover {
+        border-color: rgba(var(--brave-screen-secondary-rgb), 0.28);
+        background:
+            radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.14), transparent 46%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+        box-shadow:
+            0 0 0 1px rgba(var(--brave-screen-secondary-rgb), 0.08),
+            0 12px 22px rgba(0, 0, 0, 0.16);
+    }
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__section--switcher .brave-view__actions {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.24);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-screen-primary-rgb), 0.14), rgba(255, 255, 255, 0.02)),
+        linear-gradient(180deg, rgba(38, 28, 18, 0.94), rgba(13, 10, 7, 0.98));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 12px 22px rgba(0, 0, 0, 0.14);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__section--switcher .brave-view__action {
+    color: var(--brave-screen-dim-color);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__section--switcher .brave-view__action--accent {
+    background:
+        linear-gradient(180deg, rgba(var(--brave-screen-secondary-rgb), 0.18), rgba(var(--brave-screen-primary-rgb), 0.08)),
+        linear-gradient(180deg, rgba(52, 37, 23, 0.92), rgba(16, 11, 8, 0.98));
+    color: var(--brave-screen-title-color);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__section--tracked {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.24);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.16), transparent 48%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-screen-secondary-rgb), 0.08), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 24%),
+        linear-gradient(180deg, rgba(42, 30, 20, 0.95), rgba(15, 11, 8, 0.99));
+}
+
+body[data-brave-scene="journal"] .brave-view--journal .brave-view__section--tracked .brave-view__entry {
+    border-color: rgba(var(--brave-screen-secondary-rgb), 0.26);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.18), transparent 46%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-screen-secondary-rgb), 0.1), transparent 32%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 24%),
+        linear-gradient(180deg, rgba(60, 43, 28, 0.94), rgba(21, 15, 10, 0.99));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 14px 26px rgba(0, 0, 0, 0.18);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__section--pre .brave-view__section-label {
+    color: color-mix(in srgb, rgb(var(--brave-screen-secondary-rgb)) 46%, var(--brave-screen-copy-color));
+    text-shadow: 0 0 18px rgba(var(--brave-screen-primary-rgb), 0.18);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__pre--map {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.3);
+    background:
+        radial-gradient(circle at 50% 18%, rgba(var(--brave-screen-primary-rgb), 0.16), transparent 42%),
+        radial-gradient(circle at 8% 0, rgba(var(--brave-screen-secondary-rgb), 0.08), transparent 32%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 18%),
+        linear-gradient(180deg, rgba(12, 23, 29, 0.985), rgba(5, 9, 12, 0.995));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+        0 22px 36px rgba(0, 0, 0, 0.28);
+    color: color-mix(in srgb, rgb(var(--brave-screen-secondary-rgb)) 30%, var(--brave-screen-copy-color));
+    scrollbar-color: rgba(var(--brave-screen-primary-rgb), 0.82) rgba(255, 255, 255, 0.06);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__pre--map::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(var(--brave-screen-secondary-rgb), 0.86), rgba(var(--brave-screen-primary-rgb), 0.64));
+    border: 2px solid rgba(var(--brave-screen-primary-rgb), 0.14);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-cell--room::before {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.22);
+    background: linear-gradient(180deg, rgba(var(--brave-screen-secondary-rgb), 0.1), rgba(var(--brave-screen-primary-rgb), 0.06));
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-cell--current::before {
+    background: linear-gradient(180deg, rgba(var(--brave-screen-primary-rgb), 0.4), rgba(var(--brave-screen-primary-rgb), 0.18));
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.46);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-cell--party::before {
+    background: linear-gradient(180deg, rgba(var(--brave-screen-secondary-rgb), 0.3), rgba(var(--brave-screen-secondary-rgb), 0.14));
+    border-color: rgba(var(--brave-screen-secondary-rgb), 0.42);
+}
+
 body[data-brave-scene="combat"] .content,
 body[data-brave-scene="combat"] #messagewindow,
 body[data-brave-scene="combat"] .inputwrap {
@@ -11184,11 +11933,11 @@ body.brave-combat-return-active .scene-card {
     .brave-picker-sheet__panel {
         left: 12px;
         right: 12px;
-        top: auto;
-        bottom: calc(var(--brave-mobile-dock-clearance) + 18px);
+        top: 50%;
+        bottom: auto;
         width: auto;
         max-height: min(64vh, 620px);
-        transform: translateY(2px);
+        transform: translateY(-50%);
         padding: 14px;
     }
 
@@ -11939,6 +12688,55 @@ body.brave-combat-return-active .scene-card {
         color: color-mix(in srgb, var(--brave-text-soft) 88%, var(--brave-text-bright));
         font-size: calc(0.74rem * var(--brave-text-scale) * var(--brave-font-size-scale));
         line-height: 1.45;
+    }
+
+    .brave-mobile-activity-log .brave-room-log__entry {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr);
+        gap: 8px;
+        align-items: start;
+        padding: 8px 0;
+        border-bottom: 1px solid color-mix(in srgb, var(--brave-world-line) 48%, transparent);
+    }
+
+    .brave-mobile-activity-log .brave-room-log__entry:last-child {
+        border-bottom: 0;
+    }
+
+    .brave-mobile-activity-log .brave-room-log__entry-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 999px;
+        color: color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-bright));
+        background: rgba(var(--brave-accent-rgb), 0.1);
+    }
+
+    .brave-mobile-activity-log .brave-room-log__entry-icon svg {
+        width: 13px;
+        height: 13px;
+    }
+
+    .brave-mobile-activity-log .brave-room-log__entry-text {
+        min-width: 0;
+    }
+
+    .brave-mobile-activity-log .brave-room-log__entry--speech .brave-room-log__entry-icon {
+        color: color-mix(in srgb, #a9d7ff 72%, var(--brave-text-bright));
+        background: rgba(104, 155, 204, 0.14);
+    }
+
+    .brave-mobile-activity-log .brave-room-log__entry--arrival .brave-room-log__entry-icon,
+    .brave-mobile-activity-log .brave-room-log__entry--departure .brave-room-log__entry-icon {
+        color: color-mix(in srgb, #d9c38a 72%, var(--brave-text-bright));
+        background: rgba(210, 174, 96, 0.13);
+    }
+
+    .brave-mobile-activity-log .brave-room-log__entry--threat .brave-room-log__entry-icon {
+        color: color-mix(in srgb, #ffb29f 78%, var(--brave-text-bright));
+        background: rgba(198, 82, 64, 0.16);
     }
 
     .brave-mobile-activity-log .brave-room-log__body > .err {
@@ -13408,6 +14206,748 @@ body.brave-combat-return-active .scene-card {
     font-family: "Brave Space Mono", monospace;
     background: linear-gradient(180deg, rgba(17, 21, 25, 0.98), rgba(7, 9, 11, 1));
     color: #edf1f5;
+}
+
+/* In-world menu screens keep exploration visually behind them and own the shell. */
+body[data-brave-scene="map"],
+body[data-brave-scene="journal"],
+body[data-brave-scene="character"],
+body[data-brave-scene="equipment"],
+body[data-brave-scene="pack"],
+body[data-brave-scene="party"],
+body[data-brave-scene="theme"] {
+    --brave-menu-primary-rgb: 132, 164, 182;
+    --brave-menu-secondary-rgb: 208, 224, 232;
+    --brave-menu-title-color: #eff8fc;
+    --brave-menu-copy-color: #d9e7ec;
+    --brave-menu-dim-color: #8fb1c0;
+    --brave-menu-panel-top: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 24%, rgba(8, 10, 12, 0.98));
+    --brave-menu-panel-bottom: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 8%, rgba(4, 5, 6, 1));
+    --brave-menu-section-top: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 18%, rgba(9, 11, 13, 0.955));
+    --brave-menu-section-bottom: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 7%, rgba(5, 6, 7, 0.99));
+    --brave-menu-entry-top: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 22%, rgba(12, 14, 16, 0.92));
+    --brave-menu-entry-bottom: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 8%, rgba(5, 6, 7, 0.985));
+    --brave-accent: rgb(var(--brave-menu-primary-rgb));
+    --brave-accent-rgb: var(--brave-menu-primary-rgb);
+    --brave-accent-mid: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 72%, rgb(var(--brave-menu-secondary-rgb)));
+    --brave-accent-dark: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 58%, #05080b);
+    --brave-link: color-mix(in srgb, rgb(var(--brave-menu-secondary-rgb)) 74%, var(--brave-menu-title-color));
+    --brave-world-line: rgba(var(--brave-menu-primary-rgb), 0.18);
+    --brave-world-surface-tint: rgba(var(--brave-menu-primary-rgb), 0.055);
+    --brave-world-surface-tint-soft: rgba(var(--brave-menu-primary-rgb), 0.032);
+    --brave-world-surface-tint-strong: rgba(var(--brave-menu-primary-rgb), 0.1);
+    --brave-state-surface-tint: rgba(var(--brave-menu-primary-rgb), 0.1);
+    --brave-state-surface-tint-soft: rgba(var(--brave-menu-primary-rgb), 0.06);
+    --brave-menu-scene-backdrop:
+        radial-gradient(circle at 12% 8%, rgba(var(--brave-menu-primary-rgb), 0.18), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(var(--brave-menu-secondary-rgb), 0.1), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.3), transparent 36%),
+        linear-gradient(180deg, rgba(11, 20, 26, 0.96), rgba(5, 8, 11, 1));
+    --brave-menu-veil-bg:
+        radial-gradient(circle at 12% 8%, rgba(var(--brave-menu-primary-rgb), 0.12), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(var(--brave-menu-secondary-rgb), 0.06), transparent 24%),
+        linear-gradient(180deg, rgba(7, 12, 16, 0.28), rgba(3, 5, 7, 0.52));
+    --brave-menu-shell-bg:
+        radial-gradient(circle at 12% 8%, rgba(var(--brave-menu-primary-rgb), 0.14), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(var(--brave-menu-secondary-rgb), 0.08), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.28), transparent 36%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.016), transparent 16%),
+        linear-gradient(180deg, var(--brave-menu-panel-top), var(--brave-menu-panel-bottom));
+}
+
+body[data-brave-scene="map"] {
+    --brave-menu-primary-rgb: 132, 164, 182;
+    --brave-menu-secondary-rgb: 208, 224, 232;
+    --brave-menu-title-color: #eff8fc;
+    --brave-menu-copy-color: #d9e7ec;
+    --brave-menu-dim-color: #8fb1c0;
+    --brave-menu-panel-top: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 24%, rgba(8, 10, 12, 0.98));
+    --brave-menu-panel-bottom: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 8%, rgba(4, 5, 6, 1));
+    --brave-menu-section-top: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 18%, rgba(9, 11, 13, 0.955));
+    --brave-menu-section-bottom: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 7%, rgba(5, 6, 7, 0.99));
+    --brave-menu-entry-top: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 22%, rgba(12, 14, 16, 0.92));
+    --brave-menu-entry-bottom: color-mix(in srgb, rgb(var(--brave-menu-primary-rgb)) 8%, rgba(5, 6, 7, 0.985));
+    --brave-menu-scene-backdrop:
+        radial-gradient(circle at 12% 8%, rgba(var(--brave-menu-primary-rgb), 0.16), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(var(--brave-menu-secondary-rgb), 0.08), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.3), transparent 36%),
+        linear-gradient(180deg, rgba(11, 20, 26, 0.96), rgba(5, 8, 11, 1));
+}
+
+body[data-brave-scene="map"][data-brave-world-tone="neutral"],
+body[data-brave-scene="map"][data-brave-world-tone="brambleford"] {
+    --brave-menu-primary-rgb: 224, 179, 113;
+    --brave-menu-secondary-rgb: 238, 211, 165;
+    --brave-menu-title-color: #fff1dd;
+    --brave-menu-copy-color: #ead7bd;
+    --brave-menu-dim-color: #cfaa73;
+    --brave-menu-panel-top: rgba(45, 31, 18, 0.98);
+    --brave-menu-panel-bottom: rgba(14, 10, 7, 1);
+    --brave-menu-section-top: rgba(36, 26, 17, 0.955);
+    --brave-menu-section-bottom: rgba(13, 9, 6, 0.99);
+    --brave-menu-entry-top: rgba(56, 39, 24, 0.92);
+    --brave-menu-entry-bottom: rgba(20, 14, 9, 0.985);
+    --brave-menu-scene-backdrop:
+        radial-gradient(circle at 14% 8%, rgba(var(--brave-menu-primary-rgb), 0.16), transparent 20%),
+        radial-gradient(circle at 84% 10%, rgba(var(--brave-menu-secondary-rgb), 0.1), transparent 22%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.26), transparent 34%),
+        linear-gradient(180deg, rgba(43, 30, 18, 0.96), rgba(13, 10, 7, 1));
+}
+
+body[data-brave-scene="map"][data-brave-world-tone="goblinroad"] {
+    --brave-menu-primary-rgb: 198, 122, 77;
+    --brave-menu-secondary-rgb: 228, 174, 118;
+    --brave-menu-title-color: #f8ece5;
+    --brave-menu-copy-color: #ebd7ce;
+    --brave-menu-dim-color: #cf9776;
+    --brave-menu-panel-top: rgba(43, 27, 19, 0.98);
+    --brave-menu-panel-bottom: rgba(13, 8, 6, 1);
+    --brave-menu-section-top: rgba(36, 24, 18, 0.955);
+    --brave-menu-section-bottom: rgba(13, 8, 6, 0.99);
+    --brave-menu-entry-top: rgba(58, 35, 24, 0.92);
+    --brave-menu-entry-bottom: rgba(20, 12, 8, 0.985);
+}
+
+body[data-brave-scene="map"][data-brave-world-tone="woods"] {
+    --brave-menu-primary-rgb: 120, 180, 154;
+    --brave-menu-secondary-rgb: 192, 221, 186;
+    --brave-menu-title-color: #eef9f1;
+    --brave-menu-copy-color: #d8e9dd;
+    --brave-menu-dim-color: #94baa5;
+    --brave-menu-panel-top: rgba(11, 28, 22, 0.98);
+    --brave-menu-panel-bottom: rgba(5, 11, 8, 1);
+    --brave-menu-section-top: rgba(11, 23, 19, 0.955);
+    --brave-menu-section-bottom: rgba(5, 10, 8, 0.99);
+    --brave-menu-entry-top: rgba(17, 36, 29, 0.92);
+    --brave-menu-entry-bottom: rgba(7, 14, 11, 0.985);
+}
+
+body[data-brave-scene="map"][data-brave-world-tone="oldbarrow"] {
+    --brave-menu-primary-rgb: 182, 176, 161;
+    --brave-menu-secondary-rgb: 223, 218, 204;
+    --brave-menu-title-color: #f2f0ec;
+    --brave-menu-copy-color: #ddd9d1;
+    --brave-menu-dim-color: #b4aea4;
+}
+
+body[data-brave-scene="map"][data-brave-world-tone="watchtower"] {
+    --brave-menu-primary-rgb: 176, 122, 87;
+    --brave-menu-secondary-rgb: 222, 184, 146;
+    --brave-menu-title-color: #f8ede8;
+    --brave-menu-copy-color: #e7d8d0;
+    --brave-menu-dim-color: #c89a7c;
+}
+
+body[data-brave-scene="map"][data-brave-world-tone="warrens"] {
+    --brave-menu-primary-rgb: 200, 141, 67;
+    --brave-menu-secondary-rgb: 236, 197, 121;
+    --brave-menu-title-color: #fbf0dc;
+    --brave-menu-copy-color: #ecdcc0;
+    --brave-menu-dim-color: #d0a562;
+}
+
+body[data-brave-scene="map"][data-brave-world-tone="blackfen"] {
+    --brave-menu-primary-rgb: 111, 162, 120;
+    --brave-menu-secondary-rgb: 181, 207, 164;
+    --brave-menu-title-color: #eef7ef;
+    --brave-menu-copy-color: #d7e4d8;
+    --brave-menu-dim-color: #8fb198;
+}
+
+body[data-brave-scene="map"][data-brave-world-tone="drownedweir"] {
+    --brave-menu-primary-rgb: 126, 187, 197;
+    --brave-menu-secondary-rgb: 180, 220, 227;
+    --brave-menu-title-color: #eefbff;
+    --brave-menu-copy-color: #d6e8ed;
+    --brave-menu-dim-color: #8fbeca;
+}
+
+body[data-brave-scene="map"][data-brave-world-tone="nexus"] {
+    --brave-menu-primary-rgb: 124, 183, 215;
+    --brave-menu-secondary-rgb: 173, 219, 246;
+    --brave-menu-title-color: #eef5ff;
+    --brave-menu-copy-color: #d9e6f2;
+    --brave-menu-dim-color: #93b8d7;
+}
+
+body[data-brave-scene="map"][data-brave-world-tone="junkyard"] {
+    --brave-menu-primary-rgb: 221, 143, 82;
+    --brave-menu-secondary-rgb: 236, 189, 132;
+    --brave-menu-title-color: #fbede2;
+    --brave-menu-copy-color: #ecd8ca;
+    --brave-menu-dim-color: #d3a06f;
+}
+
+body[data-brave-scene="map"][data-brave-world-tone="portal"] {
+    --brave-menu-primary-rgb: 154, 184, 218;
+    --brave-menu-secondary-rgb: 200, 223, 245;
+    --brave-menu-title-color: #eff5fb;
+    --brave-menu-copy-color: #dbe6f1;
+    --brave-menu-dim-color: #a0bdd7;
+}
+
+body[data-brave-scene="journal"] {
+    --brave-menu-primary-rgb: 182, 138, 87;
+    --brave-menu-secondary-rgb: 228, 199, 145;
+    --brave-menu-title-color: #fbf0de;
+    --brave-menu-copy-color: #e8d6bc;
+    --brave-menu-dim-color: #c39a67;
+    --brave-menu-panel-top: rgba(48, 33, 21, 0.98);
+    --brave-menu-panel-bottom: rgba(15, 11, 8, 1);
+    --brave-menu-section-top: rgba(37, 27, 18, 0.955);
+    --brave-menu-section-bottom: rgba(14, 10, 7, 0.99);
+    --brave-menu-entry-top: rgba(59, 42, 28, 0.92);
+    --brave-menu-entry-bottom: rgba(21, 15, 10, 0.985);
+    --brave-menu-scene-backdrop:
+        radial-gradient(circle at 14% 8%, rgba(var(--brave-menu-primary-rgb), 0.16), transparent 20%),
+        radial-gradient(circle at 84% 10%, rgba(var(--brave-menu-secondary-rgb), 0.1), transparent 22%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.26), transparent 34%),
+        linear-gradient(180deg, rgba(52, 36, 22, 0.96), rgba(16, 12, 8, 1));
+}
+
+body[data-brave-scene="character"] {
+    --brave-menu-primary-rgb: 110, 140, 176;
+    --brave-menu-secondary-rgb: 211, 190, 145;
+    --brave-menu-title-color: #f0f4fb;
+    --brave-menu-copy-color: #d7e0ea;
+    --brave-menu-dim-color: #92aac4;
+    --brave-menu-panel-top: rgba(16, 22, 31, 0.98);
+    --brave-menu-panel-bottom: rgba(7, 10, 15, 1);
+    --brave-menu-scene-backdrop:
+        radial-gradient(circle at 12% 8%, rgba(var(--brave-menu-primary-rgb), 0.16), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(var(--brave-menu-secondary-rgb), 0.08), transparent 22%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.28), transparent 36%),
+        linear-gradient(180deg, rgba(13, 18, 26, 0.96), rgba(6, 8, 12, 1));
+}
+
+body[data-brave-scene="equipment"] {
+    --brave-menu-primary-rgb: 154, 138, 118;
+    --brave-menu-secondary-rgb: 224, 188, 120;
+    --brave-menu-title-color: #f7efe4;
+    --brave-menu-copy-color: #e5d8c8;
+    --brave-menu-dim-color: #b9a58c;
+    --brave-menu-panel-top: rgba(30, 25, 22, 0.98);
+    --brave-menu-panel-bottom: rgba(12, 10, 9, 1);
+    --brave-menu-section-top: rgba(28, 23, 20, 0.955);
+    --brave-menu-section-bottom: rgba(12, 9, 8, 0.99);
+    --brave-menu-entry-top: rgba(43, 36, 30, 0.92);
+    --brave-menu-entry-bottom: rgba(17, 13, 11, 0.985);
+    --brave-menu-scene-backdrop:
+        radial-gradient(circle at 12% 8%, rgba(var(--brave-menu-primary-rgb), 0.16), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(var(--brave-menu-secondary-rgb), 0.1), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.3), transparent 36%),
+        linear-gradient(180deg, rgba(22, 18, 16, 0.96), rgba(7, 6, 5, 1));
+}
+
+body[data-brave-scene="pack"] {
+    --brave-menu-primary-rgb: 150, 83, 103;
+    --brave-menu-secondary-rgb: 222, 165, 116;
+    --brave-menu-title-color: #f8e9e8;
+    --brave-menu-copy-color: #e6d0d0;
+    --brave-menu-dim-color: #c2929a;
+    --brave-menu-panel-top: rgba(35, 18, 24, 0.98);
+    --brave-menu-panel-bottom: rgba(12, 7, 9, 1);
+    --brave-menu-section-top: rgba(30, 16, 21, 0.955);
+    --brave-menu-section-bottom: rgba(12, 7, 9, 0.99);
+    --brave-menu-entry-top: rgba(45, 24, 31, 0.92);
+    --brave-menu-entry-bottom: rgba(17, 9, 12, 0.985);
+    --brave-menu-scene-backdrop:
+        radial-gradient(circle at 12% 8%, rgba(var(--brave-menu-primary-rgb), 0.16), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(var(--brave-menu-secondary-rgb), 0.08), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.28), transparent 36%),
+        linear-gradient(180deg, rgba(24, 12, 17, 0.96), rgba(7, 4, 5, 1));
+}
+
+body[data-brave-scene="party"] {
+    --brave-menu-primary-rgb: 98, 148, 128;
+    --brave-menu-secondary-rgb: 202, 191, 144;
+    --brave-menu-title-color: #eef6ef;
+    --brave-menu-copy-color: #d6e6dc;
+    --brave-menu-dim-color: #8eb49f;
+    --brave-menu-panel-top: rgba(12, 22, 20, 0.98);
+    --brave-menu-panel-bottom: rgba(5, 10, 9, 1);
+    --brave-menu-scene-backdrop:
+        radial-gradient(circle at 12% 8%, rgba(var(--brave-menu-primary-rgb), 0.16), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(var(--brave-menu-secondary-rgb), 0.08), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.28), transparent 36%),
+        linear-gradient(180deg, rgba(9, 18, 16, 0.96), rgba(4, 8, 7, 1));
+}
+
+body[data-brave-scene="theme"] {
+    --brave-menu-primary-rgb: 165, 105, 178;
+    --brave-menu-secondary-rgb: 230, 176, 205;
+    --brave-menu-title-color: #fbedf8;
+    --brave-menu-copy-color: #ead5e6;
+    --brave-menu-dim-color: #c597c4;
+    --brave-menu-panel-top: rgba(31, 15, 34, 0.98);
+    --brave-menu-panel-bottom: rgba(12, 6, 14, 1);
+    --brave-menu-section-top: rgba(29, 15, 31, 0.955);
+    --brave-menu-section-bottom: rgba(12, 6, 13, 0.99);
+    --brave-menu-entry-top: rgba(43, 22, 47, 0.92);
+    --brave-menu-entry-bottom: rgba(17, 8, 19, 0.985);
+    --brave-menu-scene-backdrop:
+        radial-gradient(circle at 12% 8%, rgba(var(--brave-menu-primary-rgb), 0.16), transparent 22%),
+        radial-gradient(circle at 86% 10%, rgba(var(--brave-menu-secondary-rgb), 0.1), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.3), transparent 36%),
+        linear-gradient(180deg, rgba(24, 11, 27, 0.96), rgba(7, 3, 9, 1));
+}
+
+body[data-brave-scene="map"]::after,
+body[data-brave-scene="journal"]::after,
+body[data-brave-scene="character"]::after,
+body[data-brave-scene="equipment"]::after,
+body[data-brave-scene="pack"]::after,
+body[data-brave-scene="party"]::after,
+body[data-brave-scene="theme"]::after {
+    opacity: 0;
+    background: none;
+}
+
+body[data-brave-scene="map"] #clientwrapper,
+body[data-brave-scene="journal"] #clientwrapper,
+body[data-brave-scene="character"] #clientwrapper,
+body[data-brave-scene="equipment"] #clientwrapper,
+body[data-brave-scene="pack"] #clientwrapper,
+body[data-brave-scene="party"] #clientwrapper,
+body[data-brave-scene="theme"] #clientwrapper {
+    isolation: isolate;
+}
+
+body[data-brave-scene="map"] #clientwrapper::before,
+body[data-brave-scene="journal"] #clientwrapper::before,
+body[data-brave-scene="character"] #clientwrapper::before,
+body[data-brave-scene="equipment"] #clientwrapper::before,
+body[data-brave-scene="pack"] #clientwrapper::before,
+body[data-brave-scene="party"] #clientwrapper::before,
+body[data-brave-scene="theme"] #clientwrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    backdrop-filter: blur(12px) saturate(0.62);
+    -webkit-backdrop-filter: blur(12px) saturate(0.62);
+    background:
+        var(--brave-menu-veil-bg),
+        var(--brave-menu-scene-backdrop);
+}
+
+body[data-brave-scene="map"] .content,
+body[data-brave-scene="map"] #messagewindow,
+body[data-brave-scene="map"] .inputwrap,
+body[data-brave-scene="journal"] .content,
+body[data-brave-scene="journal"] #messagewindow,
+body[data-brave-scene="journal"] .inputwrap,
+body[data-brave-scene="character"] .content,
+body[data-brave-scene="character"] #messagewindow,
+body[data-brave-scene="character"] .inputwrap,
+body[data-brave-scene="equipment"] .content,
+body[data-brave-scene="equipment"] #messagewindow,
+body[data-brave-scene="equipment"] .inputwrap,
+body[data-brave-scene="pack"] .content,
+body[data-brave-scene="pack"] #messagewindow,
+body[data-brave-scene="pack"] .inputwrap,
+body[data-brave-scene="party"] .content,
+body[data-brave-scene="party"] #messagewindow,
+body[data-brave-scene="party"] .inputwrap,
+body[data-brave-scene="theme"] .content,
+body[data-brave-scene="theme"] #messagewindow,
+body[data-brave-scene="theme"] .inputwrap,
+body[data-brave-scene="map"] .scene-rail,
+body[data-brave-scene="journal"] .scene-rail,
+body[data-brave-scene="character"] .scene-rail,
+body[data-brave-scene="equipment"] .scene-rail,
+body[data-brave-scene="pack"] .scene-rail,
+body[data-brave-scene="party"] .scene-rail,
+body[data-brave-scene="theme"] .scene-rail {
+    position: relative;
+    z-index: 1;
+}
+
+body[data-brave-scene="map"] .content,
+body[data-brave-scene="map"] #messagewindow,
+body[data-brave-scene="map"] .inputwrap,
+body[data-brave-scene="journal"] .content,
+body[data-brave-scene="journal"] #messagewindow,
+body[data-brave-scene="journal"] .inputwrap,
+body[data-brave-scene="character"] .content,
+body[data-brave-scene="character"] #messagewindow,
+body[data-brave-scene="character"] .inputwrap,
+body[data-brave-scene="equipment"] .content,
+body[data-brave-scene="equipment"] #messagewindow,
+body[data-brave-scene="equipment"] .inputwrap,
+body[data-brave-scene="pack"] .content,
+body[data-brave-scene="pack"] #messagewindow,
+body[data-brave-scene="pack"] .inputwrap,
+body[data-brave-scene="party"] .content,
+body[data-brave-scene="party"] #messagewindow,
+body[data-brave-scene="party"] .inputwrap,
+body[data-brave-scene="theme"] .content,
+body[data-brave-scene="theme"] #messagewindow,
+body[data-brave-scene="theme"] .inputwrap {
+    border-color: color-mix(in srgb, rgba(var(--brave-menu-primary-rgb), 0.28) 64%, var(--brave-border));
+    background: var(--brave-menu-shell-bg);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.012),
+        var(--brave-shadow);
+}
+
+body[data-brave-scene="journal"] .brave-view--journal,
+body[data-brave-scene="map"] .brave-view--map {
+    --brave-screen-primary-rgb: var(--brave-menu-primary-rgb);
+    --brave-screen-secondary-rgb: var(--brave-menu-secondary-rgb);
+    --brave-screen-title-color: var(--brave-menu-title-color);
+    --brave-screen-copy-color: var(--brave-menu-copy-color);
+    --brave-screen-dim-color: var(--brave-menu-dim-color);
+    --brave-screen-panel-top: var(--brave-menu-panel-top);
+    --brave-screen-panel-bottom: var(--brave-menu-panel-bottom);
+    --brave-screen-section-top: var(--brave-menu-section-top);
+    --brave-screen-section-bottom: var(--brave-menu-section-bottom);
+    --brave-screen-entry-top: var(--brave-menu-entry-top);
+    --brave-screen-entry-bottom: var(--brave-menu-entry-bottom);
+}
+
+body[data-brave-scene="character"] .brave-view--sheet,
+body[data-brave-scene="equipment"] .brave-view--gear,
+body[data-brave-scene="pack"] .brave-view--pack,
+body[data-brave-scene="party"] .brave-view--party,
+body[data-brave-scene="theme"] .brave-view--theme {
+    --brave-screen-primary-rgb: var(--brave-menu-primary-rgb);
+    --brave-screen-secondary-rgb: var(--brave-menu-secondary-rgb);
+    --brave-screen-title-color: var(--brave-menu-title-color);
+    --brave-screen-copy-color: var(--brave-menu-copy-color);
+    --brave-screen-dim-color: var(--brave-menu-dim-color);
+    --brave-screen-panel-top: var(--brave-menu-panel-top);
+    --brave-screen-panel-bottom: var(--brave-menu-panel-bottom);
+    --brave-screen-section-top: var(--brave-menu-section-top);
+    --brave-screen-section-bottom: var(--brave-menu-section-bottom);
+    --brave-screen-entry-top: var(--brave-menu-entry-top);
+    --brave-screen-entry-bottom: var(--brave-menu-entry-bottom);
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__hero,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__hero,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__hero,
+body[data-brave-scene="party"] .brave-view--party .brave-view__hero,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__hero {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.28);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.16), transparent 44%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-screen-secondary-rgb), 0.1), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
+        linear-gradient(180deg, var(--brave-screen-panel-top), var(--brave-screen-panel-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 24px 46px rgba(0, 0, 0, 0.28);
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__title,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__title,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__title,
+body[data-brave-scene="party"] .brave-view--party .brave-view__title,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__title {
+    color: var(--brave-screen-title-color);
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__title-icon,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__title-icon,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__title-icon,
+body[data-brave-scene="party"] .brave-view--party .brave-view__title-icon,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__title-icon,
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__eyebrow-icon,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__eyebrow-icon,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__eyebrow-icon,
+body[data-brave-scene="party"] .brave-view--party .brave-view__eyebrow-icon,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__eyebrow-icon,
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__section-icon,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__section-icon,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__section-icon,
+body[data-brave-scene="party"] .brave-view--party .brave-view__section-icon,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__section-icon {
+    color: rgb(var(--brave-screen-secondary-rgb));
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__subtitle,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__subtitle,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__subtitle,
+body[data-brave-scene="party"] .brave-view--party .brave-view__subtitle,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__subtitle,
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__entry-line,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__entry-line,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__entry-line,
+body[data-brave-scene="party"] .brave-view--party .brave-view__entry-line,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__entry-line,
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__list-text,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__list-text,
+body[data-brave-scene="party"] .brave-view--party .brave-view__list-text,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__list-text,
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__pair-label,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__pair-label {
+    color: var(--brave-screen-copy-color);
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__eyebrow,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__eyebrow,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__eyebrow,
+body[data-brave-scene="party"] .brave-view--party .brave-view__eyebrow,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__eyebrow,
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__section-label,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__section-label,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__section-label,
+body[data-brave-scene="party"] .brave-view--party .brave-view__section-label,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__section-label,
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__entry-meta,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__entry-meta,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__entry-meta,
+body[data-brave-scene="party"] .brave-view--party .brave-view__entry-meta,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__entry-meta {
+    color: var(--brave-screen-dim-color);
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__section,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__section,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__section:not(.brave-view__section--money),
+body[data-brave-scene="party"] .brave-view--party .brave-view__section,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__section {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.22);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.12), transparent 48%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-screen-secondary-rgb), 0.08), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.022), transparent 20%),
+        linear-gradient(180deg, var(--brave-screen-section-top), var(--brave-screen-section-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035),
+        0 16px 30px rgba(0, 0, 0, 0.22);
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__entry,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__entry,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__list-item,
+body[data-brave-scene="party"] .brave-view--party .brave-view__entry,
+body[data-brave-scene="party"] .brave-view--party .brave-view__list-item,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__entry,
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__pair {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.22);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.11), transparent 46%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-screen-secondary-rgb), 0.06), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 22%),
+        linear-gradient(180deg, var(--brave-screen-entry-top), var(--brave-screen-entry-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 10px 20px rgba(0, 0, 0, 0.18);
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__entry-title,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__entry-title,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__entry-title,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__pair-value,
+body[data-brave-scene="party"] .brave-view--party .brave-view__entry-title,
+body[data-brave-scene="party"] .brave-view--party .brave-view__item-text,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__entry-title {
+    color: var(--brave-screen-title-color);
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__entry-icon-wrap,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__entry-icon-wrap,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__bullet,
+body[data-brave-scene="party"] .brave-view--party .brave-view__entry-icon-wrap,
+body[data-brave-scene="party"] .brave-view--party .brave-view__bullet,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__entry-icon-wrap,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__entry-badge,
+body[data-brave-scene="party"] .brave-view--party .scene-card__chip,
+body[data-brave-scene="theme"] .brave-view--theme .scene-card__chip,
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__bullet {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.22);
+    background: rgba(var(--brave-screen-primary-rgb), 0.14);
+    color: color-mix(in srgb, rgb(var(--brave-screen-secondary-rgb)) 74%, var(--brave-screen-title-color));
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__action,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__action,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__action,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__mini-action,
+body[data-brave-scene="party"] .brave-view--party .brave-view__action,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__action {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.24);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-screen-primary-rgb), 0.14), rgba(255, 255, 255, 0.02)),
+        linear-gradient(180deg, rgba(20, 24, 29, 0.94), rgba(8, 10, 14, 0.99));
+    color: var(--brave-screen-copy-color);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 10px 20px rgba(0, 0, 0, 0.16);
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__action-icon,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__action-icon,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__action-icon,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__mini-action-icon,
+body[data-brave-scene="party"] .brave-view--party .brave-view__action-icon,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__action-icon {
+    color: rgb(var(--brave-screen-secondary-rgb));
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__action--accent,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__action--accent,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__action--accent,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__mini-action--accent,
+body[data-brave-scene="party"] .brave-view--party .brave-view__action--accent,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__action--accent {
+    border-color: rgba(var(--brave-screen-secondary-rgb), 0.28);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-screen-secondary-rgb), 0.2), rgba(var(--brave-screen-primary-rgb), 0.12)),
+        linear-gradient(180deg, rgba(27, 31, 37, 0.94), rgba(9, 11, 15, 0.99));
+    color: var(--brave-screen-title-color);
+}
+
+body[data-brave-scene="character"] .brave-view--sheet .brave-view__action:focus-visible,
+body[data-brave-scene="character"] .brave-view--sheet .brave-click--row:focus-visible,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-view__action:focus-visible,
+body[data-brave-scene="equipment"] .brave-view--gear .brave-click--row:focus-visible,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__action:focus-visible,
+body[data-brave-scene="pack"] .brave-view--pack .brave-view__mini-action:focus-visible,
+body[data-brave-scene="pack"] .brave-view--pack .brave-click--row:focus-visible,
+body[data-brave-scene="party"] .brave-view--party .brave-view__action:focus-visible,
+body[data-brave-scene="party"] .brave-view--party .brave-click--row:focus-visible,
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__action:focus-visible,
+body[data-brave-scene="theme"] .brave-view--theme .brave-click--row:focus-visible {
+    border-color: rgba(var(--brave-screen-secondary-rgb), 0.32);
+    box-shadow: 0 0 0 1px rgba(var(--brave-screen-secondary-rgb), 0.14);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body[data-brave-scene="character"] .brave-view--sheet .brave-view__action:hover,
+    body[data-brave-scene="character"] .brave-view--sheet .brave-click--row:hover,
+    body[data-brave-scene="equipment"] .brave-view--gear .brave-view__action:hover,
+    body[data-brave-scene="equipment"] .brave-view--gear .brave-click--row:hover,
+    body[data-brave-scene="pack"] .brave-view--pack .brave-view__action:hover,
+    body[data-brave-scene="pack"] .brave-view--pack .brave-view__mini-action:hover,
+    body[data-brave-scene="pack"] .brave-view--pack .brave-click--row:hover,
+    body[data-brave-scene="party"] .brave-view--party .brave-view__action:hover,
+    body[data-brave-scene="party"] .brave-view--party .brave-click--row:hover,
+    body[data-brave-scene="theme"] .brave-view--theme .brave-view__action:hover,
+    body[data-brave-scene="theme"] .brave-view--theme .brave-click--row:hover {
+        border-color: rgba(var(--brave-screen-secondary-rgb), 0.28);
+        background:
+            radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.14), transparent 46%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+        box-shadow:
+            0 0 0 1px rgba(var(--brave-screen-secondary-rgb), 0.08),
+            0 12px 22px rgba(0, 0, 0, 0.16);
+    }
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__section--pre {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.24);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.12), transparent 48%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-screen-secondary-rgb), 0.08), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.022), transparent 20%),
+        linear-gradient(180deg, var(--brave-screen-section-top), var(--brave-screen-section-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035),
+        0 16px 30px rgba(0, 0, 0, 0.22);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__pre--map {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.3);
+    background:
+        radial-gradient(circle at 50% 18%, rgba(var(--brave-screen-primary-rgb), 0.16), transparent 42%),
+        radial-gradient(circle at 8% 0, rgba(var(--brave-screen-secondary-rgb), 0.08), transparent 32%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 18%),
+        linear-gradient(180deg, var(--brave-screen-entry-top), var(--brave-screen-entry-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+        0 22px 36px rgba(0, 0, 0, 0.28);
+    color: color-mix(in srgb, rgb(var(--brave-screen-secondary-rgb)) 30%, var(--brave-screen-copy-color));
+    scrollbar-color: rgba(var(--brave-screen-primary-rgb), 0.82) rgba(var(--brave-screen-primary-rgb), 0.08);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__pre--map::-webkit-scrollbar-track {
+    background: rgba(var(--brave-screen-primary-rgb), 0.08);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__pre--map::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(var(--brave-screen-secondary-rgb), 0.86), rgba(var(--brave-screen-primary-rgb), 0.64));
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.14);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-cell--connector .brave-view__map-connector,
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-cell--connector-horizontal .brave-view__map-connector,
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-cell--connector-vertical .brave-view__map-connector {
+    background: linear-gradient(90deg, rgba(var(--brave-screen-primary-rgb), 0.58), rgba(var(--brave-screen-secondary-rgb), 0.72));
+    box-shadow:
+        0 0 8px rgba(var(--brave-screen-primary-rgb), 0.18),
+        0 0 14px rgba(var(--brave-screen-secondary-rgb), 0.08);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-cell--room::before {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.28);
+    background:
+        radial-gradient(circle at 50% 20%, rgba(var(--brave-screen-secondary-rgb), 0.16), transparent 54%),
+        linear-gradient(180deg, rgba(var(--brave-screen-primary-rgb), 0.18), rgba(var(--brave-screen-primary-rgb), 0.08));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.045),
+        0 8px 14px rgba(0, 0, 0, 0.18),
+        0 0 12px rgba(var(--brave-screen-primary-rgb), 0.08);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-cell--current::before {
+    border-color: rgba(var(--brave-screen-secondary-rgb), 0.48);
+    background:
+        radial-gradient(circle at 50% 20%, rgba(var(--brave-screen-secondary-rgb), 0.34), transparent 55%),
+        linear-gradient(180deg, rgba(var(--brave-screen-primary-rgb), 0.44), rgba(var(--brave-screen-primary-rgb), 0.2));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 16px rgba(var(--brave-screen-primary-rgb), 0.2);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-cell--party::before {
+    border-color: rgba(var(--brave-screen-secondary-rgb), 0.46);
+    background:
+        radial-gradient(circle at 50% 20%, rgba(var(--brave-screen-secondary-rgb), 0.26), transparent 55%),
+        linear-gradient(180deg, rgba(var(--brave-screen-secondary-rgb), 0.26), rgba(var(--brave-screen-primary-rgb), 0.12));
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-room-icon {
+    color: color-mix(in srgb, rgb(var(--brave-screen-secondary-rgb)) 76%, var(--brave-screen-title-color));
+    filter: drop-shadow(0 0 6px rgba(var(--brave-screen-primary-rgb), 0.22));
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-cell--current .brave-view__map-room-icon,
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-cell--party .brave-view__map-room-icon {
+    color: var(--brave-screen-title-color);
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-badge {
+    color: var(--brave-screen-title-color);
+    border-color: rgba(var(--brave-screen-secondary-rgb), 0.3);
+    background: color-mix(in srgb, rgb(var(--brave-screen-primary-rgb)) 58%, rgba(18, 20, 22, 0.94));
+}
+
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-badge--current,
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-badge--quest,
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-badge--danger,
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-badge--portal,
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-badge--service,
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-badge--activity,
+body[data-brave-scene="map"] .brave-view--map .brave-view__map-badge--party {
+    background: linear-gradient(180deg, rgba(var(--brave-screen-secondary-rgb), 0.76), rgba(var(--brave-screen-primary-rgb), 0.58));
+}
+
+body[data-brave-scene="theme"] .brave-view--theme .brave-view__entry {
+    border-color: rgba(var(--brave-screen-primary-rgb), 0.26);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-screen-primary-rgb), 0.13), transparent 46%),
+        radial-gradient(circle at 100% 0, rgba(var(--brave-screen-secondary-rgb), 0.08), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 22%),
+        linear-gradient(180deg, var(--brave-screen-entry-top), var(--brave-screen-entry-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.032),
+        0 10px 20px rgba(0, 0, 0, 0.18);
 }
 
 @media (max-width: 900px) {

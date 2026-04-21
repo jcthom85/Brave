@@ -182,6 +182,62 @@
         "unlock_text": "Only anglers who've worked the drowned line get trusted with lampglass tackle."
       }
     },
+    "fish_behaviors": {
+      "gentle_wobble": {
+        "pattern": "sine",
+        "base_pull": 0.24,
+        "burst_pull": 0.04,
+        "stamina": 9
+      },
+      "steady_drag": {
+        "pattern": "linear",
+        "base_pull": 0.32,
+        "burst_pull": 0.08,
+        "stamina": 11
+      },
+      "bottom_heave": {
+        "pattern": "drag",
+        "base_pull": 0.42,
+        "burst_pull": 0.12,
+        "stamina": 14
+      },
+      "quick_slither": {
+        "pattern": "sine",
+        "base_pull": 0.36,
+        "burst_pull": 0.18,
+        "stamina": 12
+      },
+      "darting_runs": {
+        "pattern": "dart",
+        "base_pull": 0.38,
+        "burst_pull": 0.34,
+        "stamina": 15
+      },
+      "panic_burst": {
+        "pattern": "burst",
+        "base_pull": 0.44,
+        "burst_pull": 0.48,
+        "stamina": 17
+      },
+      "erratic_slither": {
+        "pattern": "dart",
+        "base_pull": 0.42,
+        "burst_pull": 0.42,
+        "stamina": 16
+      },
+      "snag_drag": {
+        "pattern": "snag",
+        "base_pull": 0.28,
+        "burst_pull": 0.22,
+        "stamina": 10
+      },
+      "dead_weight": {
+        "pattern": "drag",
+        "base_pull": 0.18,
+        "burst_pull": 0,
+        "stamina": 7
+      }
+    },
     "fishing_spots": {
       "brambleford_hobbyists_wharf": {
         "bite_delay": [
@@ -192,6 +248,7 @@
         "fish": [
           {
             "chance": 38,
+            "behavior_id": "gentle_wobble",
             "hook_chance": 0.9,
             "item": "bramble_perch",
             "rarity": "common",
@@ -202,6 +259,7 @@
           },
           {
             "chance": 26,
+            "behavior_id": "steady_drag",
             "hook_chance": 0.82,
             "item": "lantern_carp",
             "rarity": "common",
@@ -212,6 +270,7 @@
           },
           {
             "chance": 18,
+            "behavior_id": "bottom_heave",
             "hook_chance": 0.78,
             "item": "mudsnout_catfish",
             "rarity": "uncommon",
@@ -222,6 +281,7 @@
           },
           {
             "chance": 12,
+            "behavior_id": "quick_slither",
             "hook_chance": 0.7,
             "item": "silver_eel",
             "rarity": "rare",
@@ -232,6 +292,7 @@
           },
           {
             "chance": 6,
+            "behavior_id": "darting_runs",
             "hook_chance": 0.6,
             "item": "dawnscale_trout",
             "rarity": "rare",
@@ -261,6 +322,7 @@
         "fish": [
           {
             "chance": 28,
+            "behavior_id": "bottom_heave",
             "hook_chance": 0.86,
             "item": "mudsnout_catfish",
             "rarity": "common",
@@ -271,6 +333,7 @@
           },
           {
             "chance": 22,
+            "behavior_id": "quick_slither",
             "hook_chance": 0.8,
             "item": "silver_eel",
             "rarity": "uncommon",
@@ -281,6 +344,7 @@
           },
           {
             "chance": 16,
+            "behavior_id": "dead_weight",
             "hook_chance": 0.78,
             "item": "fen_resin_clot",
             "rarity": "uncommon",
@@ -291,6 +355,7 @@
           },
           {
             "chance": 14,
+            "behavior_id": "snag_drag",
             "hook_chance": 0.76,
             "item": "moonleaf_sprig",
             "rarity": "uncommon",
@@ -301,6 +366,7 @@
           },
           {
             "chance": 10,
+            "behavior_id": "dead_weight",
             "hook_chance": 0.64,
             "item": "grease_stained_supper_note",
             "rarity": "rare",
@@ -311,6 +377,7 @@
           },
           {
             "chance": 6,
+            "behavior_id": "dead_weight",
             "hook_chance": 0.58,
             "item": "veskas_pitchfire_pattern",
             "rarity": "rare",
@@ -321,6 +388,7 @@
           },
           {
             "chance": 4,
+            "behavior_id": "dead_weight",
             "hook_chance": 0.52,
             "item": "purity_salts_formula",
             "rarity": "rare",
@@ -350,6 +418,7 @@
         "fish": [
           {
             "chance": 30,
+            "behavior_id": "panic_burst",
             "hook_chance": 0.82,
             "item": "lockfin_pike",
             "rarity": "common",
@@ -360,6 +429,7 @@
           },
           {
             "chance": 20,
+            "behavior_id": "erratic_slither",
             "hook_chance": 0.72,
             "item": "weirglass_eel",
             "rarity": "uncommon",
@@ -370,6 +440,7 @@
           },
           {
             "chance": 18,
+            "behavior_id": "snag_drag",
             "hook_chance": 0.76,
             "item": "silt_hook",
             "rarity": "uncommon",
@@ -380,6 +451,7 @@
           },
           {
             "chance": 14,
+            "behavior_id": "dead_weight",
             "hook_chance": 0.7,
             "item": "ward_iron_rivet",
             "rarity": "uncommon",
@@ -390,6 +462,7 @@
           },
           {
             "chance": 10,
+            "behavior_id": "snag_drag",
             "hook_chance": 0.62,
             "item": "hollow_glass_shard",
             "rarity": "rare",
@@ -400,6 +473,7 @@
           },
           {
             "chance": 8,
+            "behavior_id": "dead_weight",
             "hook_chance": 0.56,
             "item": "dawnscale_supper_note",
             "rarity": "rare",

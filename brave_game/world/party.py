@@ -186,6 +186,8 @@ def disband_party(leader):
 def handle_party_follow(leader, source_location, move_type="move"):
     """Move present followers after their leader changes rooms."""
 
+    from world.browser_panels import send_browser_notice_event
+
     if move_type == "defeat" or not source_location or leader.location == source_location:
         return
     if not getattr(leader, "is_connected", False):
@@ -206,14 +208,35 @@ def handle_party_follow(leader, source_location, move_type="move"):
         if hasattr(follower, "get_active_encounter"):
             encounter = follower.get_active_encounter()
             if encounter and encounter.is_participant(follower):
-                follower.msg(f"You lose {leader.key} in the chaos of the fight.")
+                send_browser_notice_event(
+                    follower,
+                    f"You lose {leader.key} in the chaos of the fight.",
+                    title="Party",
+                    tone="warn",
+                    icon="groups",
+                    duration_ms=3200,
+                )
                 continue
 
         if exit_obj and exit_obj.access(follower, "traverse"):
-            follower.msg(f"You follow {leader.key}.")
+            send_browser_notice_event(
+                follower,
+                f"You follow {leader.key}.",
+                title="Party",
+                tone="muted",
+                icon="groups",
+                duration_ms=2400,
+            )
             exit_obj.at_traverse(follower, exit_obj.destination)
             continue
 
         if follower.move_to(leader.location, quiet=True, move_type="follow"):
-            follower.msg(f"You catch up with {leader.key}.")
+            send_browser_notice_event(
+                follower,
+                f"You catch up with {leader.key}.",
+                title="Party",
+                tone="muted",
+                icon="groups",
+                duration_ms=2400,
+            )
             follower.at_look(leader.location)

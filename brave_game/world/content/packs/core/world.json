@@ -832,6 +832,25 @@
     {
       "aliases": [
         "n",
+        "hall",
+        "mastery hall",
+        "study",
+        "gate walk",
+        "annex",
+        "tutorial yard",
+        "wayfarers yard",
+        "wayfarer's yard"
+      ],
+      "destination": "brambleford_mastery_hall",
+      "direction": "north",
+      "id": "training_yard_to_gate_walk",
+      "key": "north",
+      "label": "Mastery Hall",
+      "source": "brambleford_training_yard"
+    },
+    {
+      "aliases": [
+        "n",
         "gate walk",
         "annex",
         "tutorial yard",
@@ -840,51 +859,36 @@
       ],
       "destination": "tutorial_gate_walk",
       "direction": "north",
-      "id": "training_yard_to_gate_walk",
+      "id": "training_yard_to_mastery_hall",
       "key": "north",
       "label": "Gate Walk",
-      "source": "brambleford_training_yard"
-    },
-    {
-      "aliases": [
-        "in",
-        "hall",
-        "mastery hall",
-        "inside",
-        "study"
-      ],
-      "destination": "brambleford_mastery_hall",
-      "direction": "inside",
-      "id": "training_yard_to_mastery_hall",
-      "key": "inside",
-      "label": "Mastery Hall",
-      "source": "brambleford_training_yard"
-    },
-    {
-      "aliases": [
-        "out",
-        "yard",
-        "training yard"
-      ],
-      "destination": "brambleford_training_yard",
-      "direction": "out",
-      "id": "mastery_hall_to_training_yard",
-      "key": "out",
-      "label": "Training Yard",
       "source": "brambleford_mastery_hall"
     },
     {
       "aliases": [
         "s",
         "yard",
-        "training yard",
-        "town"
+        "training yard"
       ],
       "destination": "brambleford_training_yard",
       "direction": "south",
-      "id": "gate_walk_to_training_yard",
+      "id": "mastery_hall_to_training_yard",
       "key": "south",
       "label": "Training Yard",
+      "source": "brambleford_mastery_hall"
+    },
+    {
+      "aliases": [
+        "s",
+        "hall",
+        "mastery hall",
+        "study"
+      ],
+      "destination": "brambleford_mastery_hall",
+      "direction": "south",
+      "id": "gate_walk_to_training_yard",
+      "key": "south",
+      "label": "Mastery Hall",
       "source": "tutorial_gate_walk"
     },
     {
@@ -2526,6 +2530,9 @@
       "zone": "Brambleford"
     },
     {
+      "activities": [
+        "mastery"
+      ],
       "desc": "A narrow stone hall sits just off the main yard, lined with chalk boards, stance diagrams, blunted practice steel, and old field sketches marked over until only the useful lessons remain. Nothing here feels ornamental. It feels like a room built for turning raw technique into disciplined habit.",
       "id": "brambleford_mastery_hall",
       "key": "Mastery Hall",

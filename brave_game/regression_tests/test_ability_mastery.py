@@ -18,7 +18,7 @@ sys.modules.setdefault("world.chargen", chargen_stub)
 from typeclasses.characters import Character
 from world.browser_views import build_sheet_view
 from world.content import get_content_registry
-from world.mastery import ABILITY_MASTERY_DATA, get_ability_mastery_bonuses, get_ability_mastery_role, get_next_mastery_text
+from world.mastery import ABILITY_MASTERY_DATA, build_mastery_payload, get_ability_mastery_bonuses, get_ability_mastery_role, get_next_mastery_text
 
 
 def _section(view, label):
@@ -114,6 +114,11 @@ class DummyMasteryCharacter:
         return Character.reset_ability_mastery(self)
 
 
+class DummyRoom:
+    def __init__(self, room_id):
+        self.db = SimpleNamespace(brave_room_id=room_id)
+
+
 class AbilityMasteryTests(unittest.TestCase):
     def test_every_implemented_combat_ability_has_authored_mastery(self):
         registry = get_content_registry()
@@ -163,6 +168,28 @@ class AbilityMasteryTests(unittest.TestCase):
 
         labels = [item.get("text") for item in abilities.get("items", [])]
         self.assertIn("Firebolt II", labels)
+
+    def test_mastery_payload_drives_training_overlay_state(self):
+        character = DummyMasteryCharacter()
+
+        review_payload = build_mastery_payload(character)
+        review_firebolt = {entry["key"]: entry for entry in review_payload["techniques"]}["firebolt"]
+        self.assertFalse(review_payload["in_mastery_room"])
+        self.assertFalse(review_firebolt["can_train"])
+        self.assertEqual("Trainer required", review_firebolt["status"])
+
+        character.location = DummyRoom("brambleford_mastery_hall")
+        hall_payload = build_mastery_payload(character, status_message="Choose a technique.", status_tone="good")
+        hall_firebolt = {entry["key"]: entry for entry in hall_payload["techniques"]}["firebolt"]
+        self.assertTrue(hall_payload["in_mastery_room"])
+        self.assertEqual("Choose a technique.", hall_payload["message"])
+        self.assertTrue(hall_firebolt["can_train"])
+        self.assertEqual("mastery firebolt", hall_firebolt["command"])
+
+        character.set_ability_mastery_rank("firebolt", 2)
+        respec_payload = build_mastery_payload(character)
+        self.assertTrue(respec_payload["can_respec"])
+        self.assertEqual("mastery respec", respec_payload["respec_command"])
 
 
 if __name__ == "__main__":

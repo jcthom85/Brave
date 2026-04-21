@@ -16,7 +16,7 @@ chargen_stub.get_next_chargen_step = lambda *args, **kwargs: None
 chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
-from world.browser_views import WELCOME_PAGES, build_map_view, build_room_view
+from world.browser_views import WELCOME_PAGES, build_map_view, build_room_view, build_talk_view
 from world.navigation import build_map_snapshot, build_minimap_snapshot
 from typeclasses.scripts import BraveEncounter
 
@@ -50,6 +50,7 @@ class DummyRoom:
             desc="Warm light, steady conversation, and a clean path to the street.",
         )
         self.ndb = SimpleNamespace(brave_encounter=None)
+        self.contents = []
         self.exits = [
             DummyExit("north", "Town Green"),
             DummyExit("east", "Kitchen"),
@@ -63,6 +64,30 @@ class DummyCharacter:
         self.key = "Dad"
         self.location = None
         self.db = SimpleNamespace(
+            brave_race="human",
+            brave_class="warrior",
+            brave_level=3,
+            brave_primary_stats={
+                "strength": 5,
+                "agility": 4,
+                "intellect": 2,
+                "spirit": 2,
+                "vitality": 5,
+            },
+            brave_derived_stats={
+                "max_hp": 42,
+                "max_mana": 8,
+                "max_stamina": 18,
+                "attack_power": 9,
+                "armor": 4,
+                "accuracy": 8,
+                "dodge": 3,
+            },
+            brave_resources={
+                "hp": 37,
+                "mana": 6,
+                "stamina": 15,
+            },
             brave_inventory=[
                 {"template": "innkeepers_fishpie", "quantity": 2},
                 {"template": "lantern_carp", "quantity": 3},
@@ -80,6 +105,9 @@ class DummyCharacter:
     def get_active_encounter(self):
         return None
 
+    def get_active_companion(self):
+        return {}
+
 
 class DummyVisibleCharacter:
     def __init__(self, char_id, key, room):
@@ -96,6 +124,16 @@ class DummyMapRoom:
         self.db = SimpleNamespace(
             brave_zone="Brambleford",
             brave_safe=True,
+        )
+
+
+class DummyEntity:
+    def __init__(self, key, kind, *, entity_id=None):
+        self.key = key
+        self.location = None
+        self.db = SimpleNamespace(
+            brave_entity_kind=kind,
+            brave_entity_id=entity_id,
         )
 
 
@@ -133,6 +171,101 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual(
             ["Smile", "Nod", "Wave", "Shrug", "Laugh", "Frown", "Bow", "Think"],
             [option.get("label") for option in picker.get("options", [])],
+        )
+
+    def test_room_view_surfaces_cook_and_mastery_as_room_actions(self):
+        room = DummyRoom()
+        room.db.brave_activities = ["cooking", "mastery"]
+
+        view = build_room_view(room, DummyCharacter())
+        room_actions = view.get("room_actions", [])
+
+        self.assertEqual(
+            ["Rest", "Cook", "Mastery", "Emote"],
+            [item.get("text") for item in room_actions],
+        )
+        self.assertEqual(
+            ["rest", "cook", "mastery", None],
+            [item.get("command") for item in room_actions],
+        )
+
+    def test_room_view_surfaces_play_when_arcade_cabinet_is_present(self):
+        room = DummyRoom()
+        room.contents = [DummyEntity("Joss's Flashing Cabinet", "arcade", entity_id="lantern_rest_arcade_cabinet")]
+
+        view = build_room_view(room, DummyCharacter())
+        room_actions = view.get("room_actions", [])
+
+        self.assertEqual(
+            ["Rest", "Play", "Emote"],
+            [item.get("text") for item in room_actions],
+        )
+        self.assertEqual(
+            ["rest", "arcade", None],
+            [item.get("command") for item in room_actions],
+        )
+        self.assertEqual("sports_esports", room_actions[1].get("icon"))
+
+    def test_room_view_keeps_hearth_and_trainer_as_world_interactions(self):
+        room = DummyRoom()
+        viewer = DummyCharacter()
+        visible_entities = [
+            DummyEntity("Kitchen Hearth", "readable", entity_id="kitchen_hearth"),
+            DummyEntity("Mistress Elira Thorne", "npc", entity_id="mistress_elira_thorne"),
+        ]
+
+        view = build_room_view(room, viewer, visible_entities=visible_entities)
+        vicinity_items = _section(view, "The Vicinity").get("items", [])
+
+        self.assertEqual(
+            ["Mistress Elira Thorne", "Kitchen Hearth"],
+            [item.get("text") for item in vicinity_items],
+        )
+        self.assertEqual(
+            ["talk Mistress Elira Thorne", "read Kitchen Hearth"],
+            [item.get("command") for item in vicinity_items],
+        )
+        self.assertEqual("forum", vicinity_items[0].get("picker", {}).get("title_icon"))
+        self.assertEqual("menu_book", vicinity_items[1].get("picker", {}).get("title_icon"))
+        self.assertIsNone(vicinity_items[0].get("picker", {}).get("subtitle"))
+        self.assertIsNone(vicinity_items[1].get("picker", {}).get("subtitle"))
+        self.assertEqual(
+            ["Mastery"],
+            [option.get("label") for option in vicinity_items[0].get("picker", {}).get("options", [])],
+        )
+        self.assertEqual(
+            ["Cook"],
+            [option.get("label") for option in vicinity_items[1].get("picker", {}).get("options", [])],
+        )
+
+    def test_room_view_arcade_entity_opens_inspect_view(self):
+        room = DummyRoom()
+        viewer = DummyCharacter()
+        arcade = DummyEntity("Joss's Flashing Cabinet", "arcade", entity_id="lantern_rest_arcade_cabinet")
+
+        view = build_room_view(room, viewer, visible_entities=[arcade])
+        vicinity_items = _section(view, "The Vicinity").get("items", [])
+
+        self.assertEqual(1, len(vicinity_items))
+        self.assertIn("Flashing Cabinet", vicinity_items[0].get("text", ""))
+        self.assertEqual(["arcade inspect Joss's Flashing Cabinet"], [item.get("command") for item in vicinity_items])
+        self.assertEqual("sports_esports", vicinity_items[0].get("picker", {}).get("title_icon"))
+        self.assertEqual(
+            ["Play"],
+            [option.get("label") for option in vicinity_items[0].get("picker", {}).get("options", [])],
+        )
+        self.assertEqual(
+            ["arcade open Joss's Flashing Cabinet"],
+            [option.get("command") for option in vicinity_items[0].get("picker", {}).get("options", [])],
+        )
+
+    def test_talk_view_uses_short_mastery_action_label(self):
+        target = DummyEntity("Mistress Elira Thorne", "npc", entity_id="mistress_elira_thorne")
+        view = build_talk_view(target, "Focus your study.")
+
+        self.assertEqual(
+            ["Mastery"],
+            [action.get("label") for action in view.get("actions", [])],
         )
 
     def test_room_view_includes_mobile_pack_summary_and_navpad(self):

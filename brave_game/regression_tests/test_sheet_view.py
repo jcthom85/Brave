@@ -86,12 +86,12 @@ class SheetViewTests(unittest.TestCase):
             view = build_sheet_view(character)
 
         abilities = _section(view, "Abilities")
-        passives = _section(view, "Passive Traits")
+        passives = _section(view, "Traits")
         ability_items = {item.get("text"): item for item in abilities.get("items", [])}
         passive_items = {item.get("text"): item for item in passives.get("items", [])}
 
-        self.assertIn("Mark Prey", ability_items["Mark Prey"].get("tooltip", ""))
-        self.assertIn("Choose a quarry", ability_items["Mark Prey"].get("tooltip", ""))
+        self.assertIn("Mark Prey", ability_items["Mark Prey I"].get("tooltip", ""))
+        self.assertIn("Choose a quarry", ability_items["Mark Prey I"].get("tooltip", ""))
         self.assertIn("Trailwise", passive_items["Trailwise"].get("tooltip", ""))
         self.assertIn("Fieldcraft and steady footing", passive_items["Trailwise"].get("tooltip", ""))
 
@@ -131,25 +131,28 @@ class SheetViewTests(unittest.TestCase):
                 get_resource_label("hp", character),
                 get_resource_label("mana", character),
                 get_resource_label("stamina", character),
+                "XP",
             ],
             [meter.get("label") for meter in status_entry.get("meters", [])],
         )
+        self.assertEqual("120 / 675", status_entry.get("meters", [])[3].get("value"))
 
         status_chips = [chip.get("label") for chip in status_entry.get("chips", [])]
         self.assertIn("Human", status_chips)
-        self.assertEqual("player", status_entry.get("chips", [])[0].get("icon"))
+        self.assertEqual("person", status_entry.get("chips", [])[0].get("icon"))
         self.assertNotIn("34 silver", status_chips)
         self.assertNotIn("Resolve", status_chips)
+        self.assertFalse(any("XP" in chip for chip in status_chips))
 
-        attributes = _section(view, "Attributes")
-        stats = _section(view, "Stats")
-        class_features = _section(view, "Class Features")
+        attributes = _section(view, "Build")
+        stats = _section(view, "Combat")
+        class_features = _section(view, "Class")
         abilities = _section(view, "Abilities")
-        passives = _section(view, "Passive Traits")
+        passives = _section(view, "Traits")
         self.assertEqual("stats", attributes.get("variant"))
         self.assertEqual("stats", stats.get("variant"))
         self.assertEqual("Martial Mastery", class_features.get("items", [])[0].get("title"))
-        self.assertEqual(["Shield Bash", "War Cry"], [item.get("text") for item in abilities.get("items", [])])
+        self.assertEqual(["Shield Bash I", "War Cry I"], [item.get("text") for item in abilities.get("items", [])])
         self.assertEqual(["Resolve", "Iron Stance"], [item.get("text") for item in passives.get("items", [])])
         self.assertTrue(abilities.get("items", [])[0].get("picker"))
         self.assertIn("Costs", abilities.get("items", [])[0].get("tooltip", ""))
@@ -184,7 +187,7 @@ class SheetViewTests(unittest.TestCase):
             view = build_sheet_view(character)
 
         effects = _section(view, "Effects")
-        passives = _section(view, "Passive Traits")
+        passives = _section(view, "Traits")
         self.assertEqual("effects", effects.get("variant"))
         self.assertEqual("wide", effects.get("span"))
         self.assertEqual(["Resolve"], [item.get("text") for item in passives.get("items", [])])

@@ -3,6 +3,9 @@
 import re
 
 from world.activities import (
+    build_cooking_payload,
+    build_fishing_minigame_payload,
+    build_fishing_setup_payload,
     borrow_fishing_tackle,
     format_catch_log,
     cook_recipe,
@@ -12,12 +15,14 @@ from world.activities import (
     get_selected_fishing_lure,
     get_selected_fishing_rod,
     reel_line,
+    resolve_fishing_minigame,
     room_supports_activity,
     set_selected_fishing_lure,
     set_selected_fishing_rod,
     start_fishing,
+    start_fishing_minigame,
 )
-from world.browser_panels import build_cook_panel, build_fishing_panel, build_map_panel, build_travel_panel
+from world.browser_panels import build_cook_panel, build_fishing_panel, build_map_panel, build_travel_panel, send_webclient_event
 from world.browser_views import build_cook_view, build_fishing_view, build_map_view, build_travel_view
 from world.navigation import render_map, render_minimap, sort_exits
 from world.screen_text import format_entry, render_screen, wrap_text
@@ -35,42 +40,72 @@ def _strip_evennia_markup(text):
     return _EVENNIA_MARKUP_RE.sub("", clean)
 
 
+def _build_fishing_overlay_payload(character, *, message=None, success=False):
+    """Return the browser fishing overlay payload for the current fishing phase."""
+
+    fishing_state = getattr(getattr(character, "ndb", None), "brave_fishing", None) or {}
+    if fishing_state.get("phase") == "minigame":
+        return build_fishing_minigame_payload(character, fishing_state)
+    return build_fishing_setup_payload(
+        character,
+        status_message=_strip_evennia_markup(message) if message else None,
+        status_tone="good" if success else "muted",
+    )
+
+
 def _refresh_cook_scene(command, character, message, *, success=False):
-    """Keep browser-based hearth actions inside the cooking screen."""
+    """Keep browser-based hearth actions inside the cooking overlay."""
 
     if not command.get_web_session() or not room_supports_activity(character.location, "cooking"):
         return False
 
-    command.clear_scene()
-    command.send_browser_view(
-        build_cook_view(
+    _send_cooking_payload(
+        command,
+        character,
+        build_cooking_payload(
             character,
             status_message=_strip_evennia_markup(message),
             status_tone="good" if success else "muted",
-        )
+        ),
     )
-    command.msg(message)
-    command.send_other_sessions(message)
+    if message:
+        command.send_other_sessions(message)
     return True
 
 
 def _refresh_fishing_scene(command, character, message=None, *, success=False):
-    """Keep browser-based fishing actions inside the tackle screen."""
+    """Keep browser-based fishing actions inside the fishing overlay."""
 
     if not command.get_web_session() or not room_supports_activity(character.location, "fishing"):
         return False
 
-    command.clear_scene()
-    command.send_browser_view(
-        build_fishing_view(
-            character,
-            status_message=_strip_evennia_markup(message) if message else None,
-            status_tone="good" if success else "muted",
-        )
+    _send_fishing_payload(
+        command,
+        character,
+        _build_fishing_overlay_payload(character, message=message, success=success),
     )
     if message:
-        command.msg(message)
         command.send_other_sessions(message)
+    return True
+
+
+def _send_fishing_payload(command, character, payload):
+    """Send a fishing overlay payload to the current web session."""
+
+    session = command.get_web_session()
+    if not session or not payload:
+        return False
+    send_webclient_event(character, session=session, brave_fishing=payload)
+    return True
+
+
+def _send_cooking_payload(command, character, payload):
+    """Send a cooking overlay payload to the current web session."""
+
+    session = command.get_web_session()
+    if not session or not payload:
+        return False
+    send_webclient_event(character, session=session, brave_cooking=payload)
     return True
 
 
@@ -107,21 +142,52 @@ class CmdFish(BraveCharacterCommand):
         if lowered in {"", "tackle", "kit", "gear"}:
             if not raw:
                 if self.get_web_session() and room_supports_activity(character.location, "fishing"):
-                    self.scene_msg(format_fishing_screen(character), panel=build_fishing_panel(character), view=build_fishing_view(character))
+                    _send_fishing_payload(self, character, _build_fishing_overlay_payload(character))
                     return
                 ok, message = start_fishing(character)
                 self.msg(message)
+                return
+            if self.get_web_session() and room_supports_activity(character.location, "fishing"):
+                _send_fishing_payload(self, character, _build_fishing_overlay_payload(character))
                 return
             self.scene_msg(format_fishing_screen(character), panel=build_fishing_panel(character), view=build_fishing_view(character))
             return
 
         if lowered == "log":
+            if self.get_web_session() and room_supports_activity(character.location, "fishing"):
+                _refresh_fishing_scene(self, character, "The catch log is not part of the fishing overlay.", success=False)
+                return
             self.scene_msg(format_catch_log(), panel=build_fishing_panel(character), view=build_fishing_view(character, status_message="Great Catch log opened.", status_tone="muted"))
             return
 
         if lowered == "cast":
-            ok, message = start_fishing(character)
+            if self.get_web_session() and room_supports_activity(character.location, "fishing"):
+                ok, message, payload = start_fishing_minigame(character)
+                if ok:
+                    _send_fishing_payload(self, character, payload)
+                    self.send_other_sessions(message)
+                    return
+                if payload:
+                    _send_fishing_payload(self, character, payload)
+                    self.send_other_sessions(message)
+                    return
+                if _refresh_fishing_scene(self, character, message, success=False):
+                    return
+            else:
+                ok, message = start_fishing(character)
             if _refresh_fishing_scene(self, character, message, success=ok):
+                return
+            self.msg(message)
+            return
+
+        if lowered.startswith("resolve "):
+            parts = raw.split(maxsplit=2)
+            encounter_id = parts[1] if len(parts) >= 2 else ""
+            outcome = parts[2] if len(parts) >= 3 else "fail"
+            ok, message, payload = resolve_fishing_minigame(character, encounter_id, outcome)
+            if self.get_web_session():
+                _send_fishing_payload(self, character, payload)
+                self.send_other_sessions(message)
                 return
             self.msg(message)
             return
@@ -198,6 +264,9 @@ class CmdCook(BraveCharacterCommand):
             return
 
         if not self.args:
+            if self.get_web_session() and room_supports_activity(character.location, "cooking"):
+                _send_cooking_payload(self, character, build_cooking_payload(character))
+                return
             self.scene_msg(format_recipe_list(character), panel=build_cook_panel(character), view=build_cook_view(character))
             return
 
@@ -205,6 +274,8 @@ class CmdCook(BraveCharacterCommand):
         lowered = raw.lower()
         if lowered.startswith("inspect "):
             ok, message = describe_cooking_recipe(character, raw[8:].strip())
+            if _refresh_cook_scene(self, character, message, success=ok):
+                return
             self.msg(message)
             return
 

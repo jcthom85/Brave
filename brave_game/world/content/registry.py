@@ -302,6 +302,7 @@ class SystemsContentRegistry:
     fishing_spots: dict
     fishing_rods: dict
     fishing_lures: dict
+    fishing_behaviors: dict
     cooking_recipes: dict
     tinkering_recipes: dict
     cozy_bonus: dict
@@ -437,6 +438,7 @@ def _build_systems_registry():
         fishing_spots=dict(activities.get("fishing_spots", {})),
         fishing_rods=dict(activities.get("fishing_rods", {})),
         fishing_lures=dict(activities.get("fishing_lures", {})),
+        fishing_behaviors=dict(activities.get("fish_behaviors", {})),
         cooking_recipes=dict(activities.get("cooking_recipes", {})),
         tinkering_recipes=dict(activities.get("tinkering_recipes", {})),
         cozy_bonus=dict(activities.get("cozy_bonus", {})),

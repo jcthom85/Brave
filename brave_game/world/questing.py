@@ -72,6 +72,29 @@ def _refresh_tracked_quest_scene(character):
     send_webclient_event(character, brave_scene={"tracked_quest": tracked} if tracked else {})
 
 
+def _send_progress_notice(character, messages):
+    """Send quest progress through browser notices without dropping telnet text."""
+
+    if not messages:
+        return
+
+    try:
+        from world.browser_panels import send_browser_notice_event
+    except Exception:
+        for message in messages:
+            character.msg(message)
+        return
+
+    send_browser_notice_event(
+        character,
+        "\n".join(messages),
+        title="Quest Updated",
+        tone="good",
+        icon="task_alt",
+        duration_ms=4600,
+    )
+
+
 def pop_recent_quest_updates(character):
     """Return and clear recent quest/progression messages."""
 
@@ -476,8 +499,7 @@ def advance_room_visit(character, room):
 
     if messages:
         _record_recent_updates(character, messages)
-    for message in messages:
-        character.msg(message)
+    _send_progress_notice(character, messages)
 
 
 def advance_enemy_defeat(character, enemy_tags):
@@ -529,8 +551,7 @@ def advance_enemy_defeat(character, enemy_tags):
 
     if messages:
         _record_recent_updates(character, messages)
-    for message in messages:
-        character.msg(message)
+    _send_progress_notice(character, messages)
 
 
 def advance_item_collection(character):
@@ -546,5 +567,4 @@ def advance_item_collection(character):
 
     if messages:
         _record_recent_updates(character, messages)
-    for message in messages:
-        character.msg(message)
+    _send_progress_notice(character, messages)

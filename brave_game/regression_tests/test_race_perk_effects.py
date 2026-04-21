@@ -58,9 +58,11 @@ class RacePerkEffectTests(unittest.TestCase):
     def test_ashborn_gets_damage_bonus_while_wounded(self):
         ashborn = DummyCharacter("ashborn", hp=18, max_hp=40)
         healthy = DummyCharacter("ashborn", hp=30, max_hp=40)
+        threshold_edge = DummyCharacter("ashborn", hp=24, max_hp=40)
 
         self.assertEqual(4, get_wounded_damage_bonus(ashborn))
         self.assertEqual(0, get_wounded_damage_bonus(healthy))
+        self.assertEqual(4, get_wounded_damage_bonus(threshold_edge))
         self.assertEqual(10, get_wounded_atb_fill_rate_bonus(ashborn))
         self.assertEqual(0, get_wounded_atb_fill_rate_bonus(healthy))
 

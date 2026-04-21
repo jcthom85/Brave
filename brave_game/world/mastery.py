@@ -1,6 +1,7 @@
 """Ability mastery helpers for Brave."""
 
 from world.content import get_content_registry
+from world.resonance import format_ability_display
 
 CONTENT = get_content_registry()
 ABILITY_LIBRARY = CONTENT.characters.ability_library
@@ -302,3 +303,86 @@ def can_train_ability(character, ability_key):
         for name in (get_actions() or [])
     }
     return ability_key in unlocked_keys
+
+
+def _format_mastery_bonus_text(ability_key, rank):
+    bonuses = get_ability_mastery_bonuses(ability_key, rank)
+    labels = {
+        "accuracy": "Accuracy",
+        "power": "Power",
+        "heal": "Heal",
+        "guard": "Guard",
+        "turn": "Duration",
+    }
+    parts = [
+        f"{label} +{bonuses[key]}"
+        for key, label in labels.items()
+        if bonuses.get(key)
+    ]
+    return ", ".join(parts)
+
+
+def build_mastery_payload(character, *, status_message=None, status_tone="muted"):
+    """Return a browser overlay payload for ability mastery training."""
+
+    in_room = is_mastery_room(getattr(character, "location", None))
+    earned = getattr(character, "get_earned_mastery_points", lambda: 0)()
+    spent = getattr(character, "get_spent_mastery_points", lambda: 0)()
+    available = getattr(character, "get_available_mastery_points", lambda: 0)()
+    silver = int(getattr(getattr(character, "db", None), "brave_silver", 0) or 0)
+    techniques = []
+
+    for ability_name in getattr(character, "get_unlocked_combat_abilities", lambda: [])():
+        ability_key = CONTENT.characters.ability_key(ability_name)
+        ability = ABILITY_LIBRARY.get(ability_key) or {}
+        rank = getattr(character, "get_ability_mastery_rank", lambda _key: 1)(ability_key)
+        display_name = format_ability_display(ability_name, character)
+        next_text = get_next_mastery_text(ability_key, rank)
+        trainable = can_train_ability(character, ability_key)
+        can_train = bool(in_room and trainable and rank < 3 and available > 0)
+        role = get_ability_mastery_role(ability_key).replace("_", " ").title()
+        if rank >= 3:
+            status = "Mastered"
+        elif not in_room:
+            status = "Trainer required"
+        elif available <= 0:
+            status = "No mastery points"
+        else:
+            status = "Ready to train"
+
+        techniques.append(
+            {
+                "key": ability_key,
+                "name": display_name,
+                "display_name": format_mastery_name(display_name, rank),
+                "summary": ability.get("summary", ""),
+                "role": role,
+                "rank": rank,
+                "rank_label": mastery_rank_label(rank),
+                "current_bonus": _format_mastery_bonus_text(ability_key, rank),
+                "next_bonus": _format_mastery_bonus_text(ability_key, rank + 1) if rank < 3 else "",
+                "next_text": next_text or ("This technique is already mastered." if rank >= 3 else ""),
+                "can_train": can_train,
+                "status": status,
+                "command": f"mastery {ability_key}" if can_train else "",
+                "confirm": f"Train {display_name} to rank {rank + 1}?" if can_train else "",
+            }
+        )
+
+    techniques.sort(key=lambda entry: (0 if entry["can_train"] else 1, entry["name"].lower()))
+
+    return {
+        "phase": "setup",
+        "title": "Ability Mastery",
+        "message": status_message or "",
+        "message_tone": status_tone or "muted",
+        "in_mastery_room": bool(in_room),
+        "available": available,
+        "spent": spent,
+        "earned": earned,
+        "silver": silver,
+        "respec_cost": MASTERY_RESPEC_SILVER_COST,
+        "can_respec": bool(in_room and spent > 0 and silver >= MASTERY_RESPEC_SILVER_COST),
+        "respec_command": "mastery respec" if in_room and spent > 0 else "",
+        "techniques": techniques,
+    }

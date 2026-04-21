@@ -1,5 +1,7 @@
 """Town, hub, and local interaction commands extracted from Brave's main command module."""
 
+import re
+
 from world.browser_panels import (
     build_cook_panel,
     build_forge_panel,
@@ -8,6 +10,7 @@ from world.browser_panels import (
     build_shop_panel,
     build_talk_panel,
     build_tinker_panel,
+    send_webclient_event,
 )
 from world.browser_views import (
     build_cook_view,
@@ -37,7 +40,13 @@ from world.forging import apply_forge_upgrade, get_forge_entries, is_forge_room
 from world.interactions import get_entity_response
 from world.rogue_ops import attempt_theft, get_available_steal_targets
 from world.screen_text import format_entry, render_screen, wrap_text
-from world.tinkering import describe_tinkering_recipe, get_tinkering_entries, is_tinkering_room, perform_tinkering
+from world.tinkering import (
+    build_tinkering_payload,
+    describe_tinkering_recipe,
+    get_tinkering_entries,
+    is_tinkering_room,
+    perform_tinkering,
+)
 
 CONTENT = get_content_registry()
 PORTALS = CONTENT.systems.portals
@@ -49,6 +58,45 @@ from .brave import (
     _stack_blocks,
     _wrap_paragraphs,
 )
+
+
+_EVENNIA_MARKUP_RE = re.compile(r"\|[A-Za-z]")
+
+
+def _strip_evennia_markup(text):
+    """Remove lightweight Evennia color markup for browser overlay status text."""
+
+    clean = str(text or "").replace("||", "|")
+    return _EVENNIA_MARKUP_RE.sub("", clean)
+
+
+def _send_tinkering_payload(command, character, payload):
+    """Send a tinkering overlay payload to the current web session."""
+
+    session = command.get_web_session()
+    if not session or not payload:
+        return False
+    send_webclient_event(character, session=session, brave_tinkering=payload)
+    return True
+
+
+def _refresh_tinkering_scene(command, character, message=None, *, success=False):
+    """Keep browser-based workbench actions inside the tinkering overlay."""
+
+    if not command.get_web_session() or not is_tinkering_room(character.location):
+        return False
+    _send_tinkering_payload(
+        command,
+        character,
+        build_tinkering_payload(
+            character,
+            status_message=_strip_evennia_markup(message),
+            status_tone="good" if success else "muted",
+        ),
+    )
+    if message:
+        command.send_other_sessions(message)
+    return True
 
 
 class CmdShop(BraveCharacterCommand):
@@ -371,6 +419,9 @@ class CmdTinker(BraveCharacterCommand):
 
         entries = get_tinkering_entries(character)
         if not self.args:
+            if self.get_web_session():
+                _send_tinkering_payload(self, character, build_tinkering_payload(character))
+                return
             ready_blocks = []
             known_blocks = []
             locked_blocks = []
@@ -406,9 +457,9 @@ class CmdTinker(BraveCharacterCommand):
                     f"{sum(1 for entry in entries if entry['ready'])} ready designs",
                 ],
                 sections=[
-                    ("Ready Now", ready_blocks or ["  Nothing is ready from your current pack."]),
-                    ("Known Designs", known_blocks or ["  No other known designs are close to completion."]),
-                    ("Locked Designs", locked_blocks or ["  No locked tinkering designs yet."]),
+                    ("Ready Now", _stack_blocks(ready_blocks) if ready_blocks else ["  Nothing is ready from your current pack."]),
+                    ("Known Designs", _stack_blocks(known_blocks) if known_blocks else ["  No other known designs are close to completion."]),
+                    ("Locked Designs", _stack_blocks(locked_blocks) if locked_blocks else ["  No locked tinkering designs yet."]),
                     ("How To Work", wrap_text("Use |wtinker inspect <design>|n to review one design, or |wtinker <design>|n to assemble it.", indent="  ")),
                 ],
             )
@@ -419,12 +470,13 @@ class CmdTinker(BraveCharacterCommand):
         lowered = raw.lower()
         if lowered.startswith("inspect "):
             ok, message = describe_tinkering_recipe(character, raw[8:].strip())
+            if _refresh_tinkering_scene(self, character, message, success=ok):
+                return
             self.msg(message)
             return
 
         ok, message = perform_tinkering(character, raw)
-        if self.get_web_session():
-            self.scene_msg(message, panel=build_tinker_panel(character), view=build_tinker_view(character, status_message=message, status_tone="good" if ok else "muted"))
+        if _refresh_tinkering_scene(self, character, message, success=ok):
             return
         self.msg(message)
 

@@ -207,8 +207,36 @@ class ProgressionSplitTests(unittest.TestCase):
         self.assertIn("Wolf Form", actions)
         self.assertIn("Bear Form", actions)
         self.assertIn("Wrath of the Grove", actions)
-        self.assertEqual([], passives)
+        self.assertIn("Wild Grace", passives)
+        self.assertIn("Groveheart", passives)
+        self.assertIn("Nature's Memory", passives)
         self.assertEqual([], unknown)
+
+    def test_cleric_passives_keep_solo_offense_reliable(self):
+        character = DummyCharacter(class_key="cleric", level=10)
+
+        _primary, derived = Character.recalculate_stats(character, restore=True)
+
+        self.assertEqual(85, derived["accuracy"])
+
+    def test_rogue_passives_keep_solo_pressure_reliable(self):
+        character = DummyCharacter(class_key="rogue", level=10)
+
+        _primary, derived = Character.recalculate_stats(character, restore=True)
+
+        self.assertEqual(95, derived["accuracy"])
+
+    def test_druid_passives_now_apply_during_stat_recalculation(self):
+        character = DummyCharacter(class_key="druid", level=10)
+
+        _primary, derived = Character.recalculate_stats(character, restore=True)
+
+        self.assertEqual(203, derived["max_hp"])
+        self.assertEqual(87, derived["accuracy"])
+        self.assertEqual(14, derived["dodge"])
+        self.assertEqual(137, derived["max_mana"])
+        self.assertEqual(41, derived["spell_power"])
+        self.assertEqual(2, derived["healing_power"])
 
     def test_passive_bonuses_apply_during_stat_recalculation(self):
         character = DummyCharacter(class_key="warrior", level=9)

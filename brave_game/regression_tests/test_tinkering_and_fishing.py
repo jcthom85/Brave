@@ -18,18 +18,26 @@ sys.modules.setdefault("world.chargen", chargen_stub)
 from typeclasses.characters import Character
 from world.activities import (
     _consume_item_by_template,
+    build_cooking_payload,
+    build_fishing_setup_payload,
     borrow_fishing_tackle,
     describe_cooking_recipe,
+    format_recipe_list,
     format_catch_log,
     get_cooking_entries,
     get_catch_log_entries,
     get_fishing_spot_summary,
     get_selected_fishing_lure,
     get_selected_fishing_rod,
+    resolve_fishing_minigame,
     set_selected_fishing_lure,
     set_selected_fishing_rod,
+    start_fishing_minigame,
 )
-from world.tinkering import get_tinkering_entries, perform_tinkering
+from commands.brave_explore import _refresh_cook_scene, _refresh_fishing_scene
+from world.browser_views import build_fishing_view
+from world.screen_text import render_screen
+from world.tinkering import build_tinkering_payload, get_tinkering_entries, perform_tinkering
 from world.tinkering import describe_tinkering_recipe
 
 
@@ -43,6 +51,7 @@ class DummyCharacter:
     def __init__(self):
         self.id = 44
         self.key = "Nyra"
+        self.account = None
         self.location = None
         self.db = SimpleNamespace(
             brave_inventory=[],
@@ -136,6 +145,206 @@ class TinkeringAndFishingTests(unittest.TestCase):
         ok, _message = set_selected_fishing_lure(character, "glass")
         self.assertTrue(ok)
 
+    def test_fishing_view_marks_only_active_rod_and_lure_selected(self):
+        character = DummyCharacter()
+        character.location = DummyRoom("brambleford_hobbyists_wharf", activities=["fishing"])
+        character.db.brave_quests = {
+            "rats_in_the_kettle": {"status": "completed", "objectives": []},
+            "lights_in_the_reeds": {"status": "completed", "objectives": []},
+        }
+        character.db.brave_active_fishing_rod = "ashwood_rod"
+        character.db.brave_active_fishing_lure = "feather_jig"
+
+        view = build_fishing_view(character)
+        sections = {section["label"]: section for section in view["sections"]}
+        section_labels = list(sections)
+        selected_rods = [entry["title"] for entry in sections["Rods"]["items"] if entry.get("badge") == "Selected"]
+        selected_lures = [entry["title"] for entry in sections["Lures"]["items"] if entry.get("badge") == "Selected"]
+
+        self.assertEqual("Fishing", view["title"])
+        self.assertNotIn("Likely Catches", section_labels)
+        self.assertNotIn("Great Catch Log", section_labels)
+        self.assertEqual(["Ashwood Rod"], selected_rods)
+        self.assertEqual(["Feather Jig"], selected_lures)
+
+    def test_fishing_view_promotes_cast_or_reel_action(self):
+        character = DummyCharacter()
+        character.location = DummyRoom("brambleford_hobbyists_wharf", activities=["fishing"])
+
+        idle_view = build_fishing_view(character)
+        self.assertIn("fish cast", [action.get("command") for action in idle_view["actions"]])
+
+        character.ndb.brave_fishing = {"phase": "bite"}
+        bite_view = build_fishing_view(character)
+        self.assertIn("reel", [action.get("command") for action in bite_view["actions"]])
+        self.assertNotIn("fish cast", [action.get("command") for action in bite_view["actions"]])
+
+        character.ndb.brave_fishing = {"phase": "minigame"}
+        minigame_view = build_fishing_view(character)
+        self.assertNotIn("fish cast", [action.get("command") for action in minigame_view["actions"]])
+
+    def test_fishing_setup_payload_drives_browser_overlay(self):
+        character = DummyCharacter()
+        character.location = DummyRoom("brambleford_hobbyists_wharf", activities=["fishing"])
+        character.db.brave_quests = {
+            "rats_in_the_kettle": {"status": "completed", "objectives": []},
+            "lights_in_the_reeds": {"status": "completed", "objectives": []},
+        }
+        character.db.brave_active_fishing_rod = "ashwood_rod"
+        character.db.brave_active_fishing_lure = "feather_jig"
+
+        payload = build_fishing_setup_payload(character, status_message="Ready.", status_tone="good")
+        selected_rods = [entry["name"] for entry in payload["rods"] if entry["selected"]]
+        selected_lures = [entry["name"] for entry in payload["lures"] if entry["selected"]]
+
+        self.assertEqual("setup", payload["phase"])
+        self.assertTrue(payload["can_cast"])
+        self.assertTrue(payload["can_borrow"])
+        self.assertEqual("Ready.", payload["message"])
+        self.assertEqual(["Ashwood Rod"], selected_rods)
+        self.assertEqual(["Feather Jig"], selected_lures)
+        self.assertNotIn("catches", payload)
+
+    def test_start_fishing_minigame_sets_browser_encounter_payload(self):
+        character = DummyCharacter()
+        character.location = DummyRoom("brambleford_hobbyists_wharf", activities=["fishing"])
+
+        ok, message, payload = start_fishing_minigame(character)
+
+        self.assertTrue(ok)
+        self.assertIn("Bramble River", message)
+        self.assertEqual("minigame", character.ndb.brave_fishing["phase"])
+        self.assertEqual(character.ndb.brave_fishing["encounter_id"], payload["encounter_id"])
+        self.assertIn(payload["behavior"]["pattern"], {"sine", "linear", "burst", "dart", "drag", "snag"})
+        self.assertGreaterEqual(payload["wait_ms"], 900)
+        self.assertIn("power", payload["rod"])
+
+    def test_resolve_fishing_minigame_awards_success_and_clears_state(self):
+        from unittest.mock import patch
+
+        character = DummyCharacter()
+        character.location = DummyRoom("brambleford_hobbyists_wharf", activities=["fishing"])
+        character.ndb.brave_fishing = {
+            "phase": "minigame",
+            "room_id": "brambleford_hobbyists_wharf",
+            "encounter_id": "run-1",
+            "expires_at": 9999999999,
+            "fish": {
+                "item": "bramble_perch",
+                "rarity": "common",
+                "weight": [1.0, 1.0],
+                "behavior_id": "gentle_wobble",
+            },
+            "rod_key": "loaner_pole",
+            "lure_key": "plain_hook",
+        }
+
+        with patch("world.activities.get_entity", return_value=None):
+            ok, message, payload = resolve_fishing_minigame(character, "run-1", "success")
+
+        self.assertTrue(ok)
+        self.assertIn("Bramble Perch", message)
+        self.assertTrue(payload["success"])
+        self.assertFalse(hasattr(character.ndb, "brave_fishing"))
+        self.assertEqual(1, character.get_inventory_quantity("bramble_perch"))
+
+    def test_refresh_fishing_scene_keeps_web_feedback_in_overlay(self):
+        class DummyCommand:
+            def __init__(self):
+                self.sent = []
+                self.other = []
+                self.cleared = False
+
+            def get_web_session(self):
+                return object()
+
+            def clear_scene(self):
+                self.cleared = True
+
+            def send_browser_view(self, view):
+                self.sent.append(view)
+
+            def msg(self, message):
+                self.sent.append(("terminal", message))
+
+            def send_other_sessions(self, message):
+                self.other.append(message)
+
+        from unittest.mock import patch
+
+        character = DummyCharacter()
+        character.location = DummyRoom("brambleford_hobbyists_wharf", activities=["fishing"])
+        command = DummyCommand()
+
+        with patch("commands.brave_explore.send_webclient_event") as send_event:
+            refreshed = _refresh_fishing_scene(command, character, "You borrow a Loaner Pole.", success=True)
+
+        self.assertTrue(refreshed)
+        self.assertFalse(command.cleared)
+        self.assertEqual(["You borrow a Loaner Pole."], command.other)
+        self.assertFalse(any(entry == ("terminal", "You borrow a Loaner Pole.") for entry in command.sent))
+        payload = send_event.call_args.kwargs["brave_fishing"]
+        self.assertEqual("setup", payload["phase"])
+        self.assertEqual("You borrow a Loaner Pole.", payload["message"])
+
+    def test_cooking_payload_categorizes_recipes_and_meals(self):
+        character = DummyCharacter()
+        character.location = DummyRoom("lantern_rest_hearth", activities=["cooking"])
+        character.add_item_to_inventory("hedge_mushroom", 1)
+        character.add_item_to_inventory("marsh_root", 1)
+        character.add_item_to_inventory("hedgeroot_hash", 2)
+
+        payload = build_cooking_payload(character, status_message="Ready.", status_tone="good")
+        ready = {entry["key"]: entry for entry in payload["ready"]}
+        meals = {entry["template"]: entry for entry in payload["meals"]}
+        locked = {entry["key"] for entry in payload["locked"]}
+
+        self.assertEqual("setup", payload["phase"])
+        self.assertEqual("Ready.", payload["message"])
+        self.assertIn("hedgeroot_hash", ready)
+        self.assertEqual("cook Hedgeroot Hash", ready["hedgeroot_hash"]["command"])
+        self.assertIn("moonleaf_eel_skillet", locked)
+        self.assertEqual("eat Hedgeroot Hash", meals["hedgeroot_hash"]["command"])
+
+    def test_refresh_cook_scene_keeps_web_feedback_in_overlay(self):
+        class DummyCommand:
+            def __init__(self):
+                self.sent = []
+                self.other = []
+                self.cleared = False
+
+            def get_web_session(self):
+                return object()
+
+            def clear_scene(self):
+                self.cleared = True
+
+            def send_browser_view(self, view):
+                self.sent.append(view)
+
+            def msg(self, message):
+                self.sent.append(("terminal", message))
+
+            def send_other_sessions(self, message):
+                self.other.append(message)
+
+        from unittest.mock import patch
+
+        character = DummyCharacter()
+        character.location = DummyRoom("lantern_rest_hearth", activities=["cooking"])
+        command = DummyCommand()
+
+        with patch("commands.brave_explore.send_webclient_event") as send_event:
+            refreshed = _refresh_cook_scene(command, character, "You cook a meal.", success=True)
+
+        self.assertTrue(refreshed)
+        self.assertFalse(command.cleared)
+        self.assertEqual(["You cook a meal."], command.other)
+        self.assertFalse(any(entry == ("terminal", "You cook a meal.") for entry in command.sent))
+        payload = send_event.call_args.kwargs["brave_cooking"]
+        self.assertEqual("setup", payload["phase"])
+        self.assertEqual("You cook a meal.", payload["message"])
+
     def test_catch_log_entries_sort_heaviest_first(self):
         class DummyBoard:
             def __init__(self):
@@ -185,6 +394,22 @@ class TinkeringAndFishingTests(unittest.TestCase):
         ready = {entry["key"] for entry in entries if entry["ready"]}
 
         self.assertIn("pitchfire_flask", ready)
+
+    def test_tinkering_payload_categorizes_designs_for_overlay(self):
+        character = DummyCharacter()
+        character.location = DummyRoom("brambleford_menders_shed", activities=["tinkering"])
+        character.add_item_to_inventory("silk_bundle", 1)
+        character.add_item_to_inventory("moonleaf_sprig", 1)
+
+        payload = build_tinkering_payload(character, status_message="Bench ready.", status_tone="good")
+        ready = {entry["key"]: entry for entry in payload["ready"]}
+        locked = {entry["key"] for entry in payload["locked"]}
+
+        self.assertEqual("setup", payload["phase"])
+        self.assertEqual("Bench ready.", payload["message"])
+        self.assertIn("field_bandage_roll", ready)
+        self.assertEqual("tinker Field Bandage Roll", ready["field_bandage_roll"]["command"])
+        self.assertIn("pitchfire_flask", locked)
 
     def test_new_tinkering_entries_cover_auto_and_manual_progression(self):
         character = DummyCharacter()
@@ -279,6 +504,31 @@ class TinkeringAndFishingTests(unittest.TestCase):
 
         self.assertIn("hedgeroot_hash", ready)
         self.assertIn("moonleaf_root_broth", ready)
+
+    def test_format_recipe_list_returns_screen_text(self):
+        character = DummyCharacter()
+
+        text = format_recipe_list(character)
+
+        self.assertIsInstance(text, str)
+        self.assertIn("Kitchen Hearth", text)
+
+    def test_render_screen_flattens_nested_block_lists(self):
+        text = render_screen(
+            "Nested Screen",
+            sections=[
+                (
+                    "Nested",
+                    [
+                        ["  First block", "    detail"],
+                        ["  Second block"],
+                    ],
+                )
+            ],
+        )
+
+        self.assertIn("First block", text)
+        self.assertIn("Second block", text)
 
 
 if __name__ == "__main__":

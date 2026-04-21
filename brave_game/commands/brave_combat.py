@@ -1,10 +1,17 @@
 """Combat commands extracted from Brave's main command module."""
 
+from types import SimpleNamespace
+
 from world.browser_views import build_combat_view
 from world.browser_panels import build_combat_panel
 from world.party import get_present_party_members
+from world.content import get_content_registry
 
 from .brave import BraveCharacterCommand
+
+CONTENT = get_content_registry()
+ABILITY_LIBRARY = CONTENT.characters.ability_library
+ITEM_TEMPLATES = CONTENT.items.item_templates
 
 
 def _refresh_combat_scene(command, encounter, character):
@@ -17,15 +24,258 @@ def _refresh_combat_scene(command, encounter, character):
     command.msg(snapshot)
 
 
+class _PreviewCharacter:
+    """Lightweight combat-view participant used by the layout preview command."""
+
+    def __init__(self, char_id, key, room, class_key, resources, derived, abilities, inventory=None):
+        self.id = char_id
+        self.key = key
+        self.location = room
+        self.db = SimpleNamespace(
+            brave_class=class_key,
+            brave_resources=dict(resources or {}),
+            brave_derived_stats=dict(derived or {}),
+            brave_inventory=list(inventory or []),
+        )
+        self._abilities = list(abilities or [])
+
+    def ensure_brave_character(self):
+        return self
+
+    def get_unlocked_abilities(self):
+        return list(self._abilities)
+
+
+class _PreviewEncounter:
+    """Synthetic encounter payload for fast browser combat-layout previews."""
+
+    def __init__(self, room, participants, enemies, *, states=None, atb_states=None, title="Combat Layout Preview"):
+        self.obj = room
+        self.db = SimpleNamespace(round=2, encounter_title=title, pending_actions={})
+        self._participants = list(participants)
+        self._enemies = list(enemies)
+        self._states = dict(states or {})
+        self._atb_states = dict(atb_states or {})
+        self.interval = 1
+
+    def get_active_enemies(self):
+        return list(self._enemies)
+
+    def get_active_participants(self):
+        return list(self._participants)
+
+    def _get_participant_state(self, character):
+        actor_id = character["id"] if isinstance(character, dict) else character.id
+        return self._states.get(
+            actor_id,
+            {
+                "guard": 0,
+                "bleed_turns": 0,
+                "poison_turns": 0,
+                "curse_turns": 0,
+                "snare_turns": 0,
+                "feint_turns": 0,
+            },
+        )
+
+    def _get_actor_atb_state(self, character=None, enemy=None, companion=None):
+        if companion is not None:
+            return self._atb_states.get(f"c:{companion['id']}", {"phase": "charging", "gauge": 55, "ready_gauge": 100})
+        if character is not None:
+            return self._atb_states.get(f"p:{character.id}", {"phase": "charging", "gauge": 42, "ready_gauge": 100})
+        if enemy is not None:
+            return self._atb_states.get(f"e:{enemy['id']}", {"phase": "charging", "gauge": 68, "ready_gauge": 100})
+        return {"phase": "charging", "gauge": 0, "ready_gauge": 100}
+
+
+def _preview_ability_names(class_key):
+    """Return a small set of live ability display names for one class."""
+
+    desired = {
+        "warrior": ("Strike", "Defend"),
+        "mage": ("Firebolt", "Frostbind"),
+        "rogue": ("Feint", "Cheap Shot"),
+        "paladin": ("Smite", "Guarding Aura"),
+        "ranger": ("Quick Shot", "Mark Prey"),
+        "cleric": ("Heal", "Cleanse"),
+        "druid": ("Entangling Roots", "Living Current"),
+    }.get(class_key, ("Strike",))
+    names = []
+    for name in desired:
+        if any(str(ability.get("name") or "") == name for ability in ABILITY_LIBRARY.values()):
+            names.append(name)
+    return names or ["Strike"]
+
+
+def _preview_inventory():
+    """Return one lightweight combat-usable preview inventory."""
+
+    options = ("field_bandage", "sunrise_tonic", "throwing_knife")
+    inventory = []
+    for template_id in options:
+        if template_id in ITEM_TEMPLATES:
+            inventory.append({"template": template_id, "quantity": 2})
+    return inventory
+
+
+def _build_preview_encounter(character, ally_count, enemy_count, pet_count):
+    """Build a synthetic encounter object for browser combat previews."""
+
+    room = character.location
+    ally_count = max(1, min(4, int(ally_count)))
+    enemy_count = max(1, min(4, int(enemy_count)))
+    pet_count = max(0, min(ally_count, int(pet_count)))
+
+    ally_specs = [
+        ("warrior", "Dad", {"hp": 24, "mana": 0, "stamina": 12}, {"max_hp": 28, "max_mana": 0, "max_stamina": 14}),
+        ("mage", "Peep", {"hp": 17, "mana": 16, "stamina": 8}, {"max_hp": 20, "max_mana": 18, "max_stamina": 10}),
+        ("rogue", "Mara", {"hp": 19, "mana": 4, "stamina": 11}, {"max_hp": 22, "max_mana": 6, "max_stamina": 12}),
+        ("paladin", "Rook", {"hp": 23, "mana": 9, "stamina": 10}, {"max_hp": 28, "max_mana": 12, "max_stamina": 13}),
+    ]
+
+    participants = []
+    atb_states = {}
+
+    lead = _PreviewCharacter(
+        character.id,
+        character.key,
+        room,
+        getattr(character.db, "brave_class", "warrior"),
+        character.db.brave_resources or {},
+        character.db.brave_derived_stats or {},
+        list(getattr(character, "get_unlocked_abilities", lambda: [])() or _preview_ability_names(getattr(character.db, "brave_class", "warrior"))),
+        inventory=getattr(character.db, "brave_inventory", None) or _preview_inventory(),
+    )
+    participants.append(lead)
+    atb_states[f"p:{lead.id}"] = {"phase": "ready", "gauge": 100, "ready_gauge": 100}
+
+    next_id = 8000
+    for class_key, key, resources, derived in ally_specs:
+        if len(participants) >= ally_count:
+            break
+        while next_id == character.id:
+            next_id += 1
+        fake = _PreviewCharacter(
+            next_id,
+            key,
+            room,
+            class_key,
+            resources,
+            derived,
+            _preview_ability_names(class_key),
+            inventory=_preview_inventory(),
+        )
+        participants.append(fake)
+        atb_states[f"p:{fake.id}"] = {"phase": "charging", "gauge": 28 + (len(participants) * 11), "ready_gauge": 100}
+        next_id += 1
+
+    for index in range(pet_count):
+        owner = participants[index]
+        companion_id = f"pc{index + 1}"
+        companion_name = ("Marsh Hound", "Ash Hawk", "Briar Boar", "Marsh Hound")[index % 4]
+        companion_key = ("marsh_hound", "ash_hawk", "briar_boar", "marsh_hound")[index % 4]
+        participants.append(
+            {
+                "kind": "companion",
+                "id": companion_id,
+                "owner_id": owner.id,
+                "key": companion_name,
+                "icon": "pets",
+                "companion_key": companion_key,
+                "max_hp": 14 + index,
+                "hp": 11 + index,
+            }
+        )
+        atb_states[f"c:{companion_id}"] = {"phase": "charging", "gauge": 49 + (index * 8), "ready_gauge": 100}
+
+    enemy_templates = [
+        ("road_wolf", "Road Wolf", "wolf-head"),
+        ("bog_creeper", "Bog Creeper", "poison-cloud"),
+        ("tower_archer", "Tower Archer", "archer"),
+        ("bandit_raider", "Bandit Raider", "crossed-swords"),
+    ]
+    enemies = []
+    for index in range(enemy_count):
+        template_key, key, icon = enemy_templates[index % len(enemy_templates)]
+        enemy_id = f"e{index + 1}"
+        name = key if enemy_count == 1 else f"{key} {index + 1}"
+        enemies.append(
+            {
+                "id": enemy_id,
+                "template_key": template_key,
+                "key": name,
+                "icon": icon,
+                "hp": 12 + (index * 3),
+                "max_hp": 18 + (index * 4),
+            }
+        )
+        atb_states[f"e:{enemy_id}"] = {"phase": "charging", "gauge": 38 + (index * 13), "ready_gauge": 100}
+
+    return _PreviewEncounter(
+        room,
+        participants,
+        enemies,
+        atb_states=atb_states,
+        title=f"Combat Layout Preview · {ally_count}v{enemy_count}",
+    )
+
+
+class CmdCombatPreview(BraveCharacterCommand):
+    """
+    Preview combat layout states without a real fight.
+
+    Usage:
+      combatpreview
+      combatpreview <allies>
+      combatpreview <allies> <enemies>
+      combatpreview <allies> <enemies> <pets>
+
+    Opens a synthetic combat screen in the browser so you can inspect
+    1-4 ally layouts and optional ranger-style pet sidecars.
+    """
+
+    key = "combatpreview"
+    aliases = ["combattest", "combatlayout"]
+    locks = "cmd:perm(Builder)"
+    help_category = "Brave"
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+        if not character.location:
+            self.msg("You need to be in a room first.")
+            return
+
+        parts = [part for part in (self.args or "").split() if part]
+        try:
+            ally_count = int(parts[0]) if len(parts) >= 1 else 4
+            enemy_count = int(parts[1]) if len(parts) >= 2 else ally_count
+            pet_count = int(parts[2]) if len(parts) >= 3 else 0
+        except ValueError:
+            self.msg("Usage: combatpreview [allies 1-4] [enemies 1-4] [pets 0-4]")
+            return
+
+        encounter = _build_preview_encounter(character, ally_count, enemy_count, pet_count)
+        view = build_combat_view(encounter, encounter.get_active_participants()[0])
+        view["chips"] = list(view.get("chips", [])) + [{"label": "Preview", "icon": "visibility", "tone": "muted"}]
+        self.scene_msg(
+            "Combat layout preview.",
+            panel=build_combat_panel(encounter),
+            view=view,
+        )
+
+
 class CmdFight(BraveCharacterCommand):
     """
     Engage the threats in your current area.
 
     Usage:
       fight
+      fight <threat>
 
-    Starts or joins the current room encounter. If a battle is already underway here,
-    this joins it explicitly instead of auto-pulling you in.
+    Starts or joins the current room encounter. If multiple hostile parties are
+    present, specify which one to engage.
     """
 
     key = "fight"
@@ -45,9 +295,20 @@ class CmdFight(BraveCharacterCommand):
             self.msg("This is a safe place. No immediate fight is pressing in here.")
             return
 
+        threat_query = self.args.strip() or None
+        if not BraveEncounter.get_for_room(character.location):
+            preview = BraveEncounter.resolve_room_threat_preview(character.location, threat_query)
+            if isinstance(preview, list):
+                self.msg("Be more specific. That could mean: " + ", ".join(str(option.get("display_name") or option.get("party_name") or "threat") for option in preview))
+                return
+            if not preview:
+                self.msg("Nothing stirs here right now.")
+                return
+
         encounter, created = BraveEncounter.start_for_room(
             character.location,
             expected_party_size=self.get_present_party_size(character),
+            threat_query=threat_query,
         )
         if not encounter:
             self.msg("Nothing stirs here right now.")
@@ -150,18 +411,38 @@ class CmdAttack(BraveCharacterCommand):
                 self.msg("This is a safe place. No immediate fight is pressing in here.")
                 return
 
+            threat_query = None
             if self.args.strip():
-                preview_match = BraveEncounter.find_room_threat(character.location, self.args.strip())
-                if isinstance(preview_match, list):
-                    self.msg("Be more specific. That could mean: " + ", ".join(enemy["key"] for enemy in preview_match))
+                preview = BraveEncounter.resolve_room_threat_preview(character.location, self.args.strip())
+                if isinstance(preview, list):
+                    self.msg("Be more specific. That could mean: " + ", ".join(str(option.get("display_name") or option.get("party_name") or "threat") for option in preview))
                     return
-                if not preview_match:
-                    self.msg("No visible threat here matches that target.")
+                if preview:
+                    threat_query = preview.get("threat_query") or preview.get("encounter_key")
+                else:
+                    preview_match = BraveEncounter.find_room_threat(character.location, self.args.strip())
+                    if isinstance(preview_match, list):
+                        self.msg("Be more specific. That could mean: " + ", ".join(enemy["key"] for enemy in preview_match))
+                        return
+                    if not preview_match:
+                        self.msg("No visible threat here matches that target.")
+                        return
+                    preview = BraveEncounter.resolve_room_threat_preview(character.location, preview_match.get("key"))
+                    if isinstance(preview, list):
+                        self.msg("Be more specific. That could mean: " + ", ".join(str(option.get("display_name") or option.get("party_name") or "threat") for option in preview))
+                        return
+                    if preview:
+                        threat_query = preview.get("threat_query") or preview.get("encounter_key")
+            else:
+                preview = BraveEncounter.resolve_room_threat_preview(character.location)
+                if isinstance(preview, list):
+                    self.msg("Choose which threat to open on first: " + ", ".join(str(option.get("display_name") or option.get("party_name") or "threat") for option in preview))
                     return
 
             encounter, _created = BraveEncounter.start_for_room(
                 character.location,
                 expected_party_size=self.get_present_party_size(character),
+                threat_query=threat_query,
             )
             if not encounter:
                 self.msg("Nothing hostile stirs here right now.")

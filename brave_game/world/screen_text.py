@@ -73,6 +73,21 @@ def format_entry(title, *, details=None, summary=None, width=SCREEN_WIDTH, inden
     return lines
 
 
+def _flatten_screen_content(content):
+    """Yield individual display lines from nested screen content."""
+
+    if content is None:
+        return
+    if isinstance(content, str):
+        yield content
+        return
+    if isinstance(content, (list, tuple)):
+        for item in content:
+            yield from _flatten_screen_content(item)
+        return
+    yield str(content)
+
+
 def render_screen(title, *, subtitle=None, meta=None, sections=None, width=SCREEN_WIDTH):
     """Render a full text-screen with a shared Brave structure."""
 
@@ -97,6 +112,6 @@ def render_screen(title, *, subtitle=None, meta=None, sections=None, width=SCREE
         if isinstance(content, str):
             lines.extend(wrap_text(content, width=width, indent="  "))
             continue
-        lines.extend(content)
+        lines.extend(_flatten_screen_content(content))
 
     return "\n".join(lines)

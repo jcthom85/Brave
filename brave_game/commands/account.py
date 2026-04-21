@@ -1,8 +1,11 @@
 """Account-level startup and character-management commands for Brave."""
 
+import re
+
 from django.conf import settings
 
-from world.browser_views import build_theme_view
+from world.browser_panels import send_webclient_event
+from world.browser_views import build_connection_view, build_theme_view
 from world.chargen import clear_chargen_state, get_chargen_state, has_chargen_progress, start_brave_chargen
 from world.data.themes import THEMES, THEME_BY_KEY, normalize_theme_key
 
@@ -51,6 +54,22 @@ def _resolve_theme(query):
 def _is_web_session(session):
     protocol = (getattr(session, "protocol_key", "") or "").lower()
     return protocol in WEB_PROTOCOLS
+
+
+def _render_connection_screen(session, *, screen="menu", error=None, username=""):
+    if not _is_web_session(session):
+        return
+    send_webclient_event(session, session=session, brave_clear_all={})
+    send_webclient_event(
+        session,
+        session=session,
+        brave_view=build_connection_view(
+            screen=screen,
+            error=error,
+            username=username,
+            registration_enabled=settings.NEW_ACCOUNT_REGISTRATION_ENABLED,
+        ),
+    )
 
 
 def _theme_event_payload(theme_key):
@@ -174,7 +193,7 @@ class CmdBraveLogout(COMMAND_DEFAULT_CLASS):
             {session.sessid: {"logged_in": False, "uid": None}}
         )
 
-        self.msg(brave_connection={"screen": "menu"}, session=session)
+        _render_connection_screen(session, screen="menu")
 
 
 class CmdBraveCreate(COMMAND_DEFAULT_CLASS):
@@ -383,5 +402,127 @@ class CmdBraveUnconnectedLook(default_unloggedin.CmdUnconnectedLook):
 
     def func(self):
         if _is_web_session(self.caller):
+            _render_connection_screen(self.caller)
             return
         super().func()
+
+
+class CmdBraveUnconnectedConnect(default_unloggedin.CmdUnconnectedConnect):
+    """Connect to Brave while preserving browser-native login states."""
+
+    def func(self):
+        session = self.caller
+        address = session.address
+
+        parts = [part.strip() for part in re.split(r"\"", self.args) if part.strip()]
+        if len(parts) == 1:
+            parts = parts[0].split(None, 1)
+            if len(parts) == 1 and parts[0].lower() == "guest":
+                return super().func()
+
+        if len(parts) != 2:
+            if _is_web_session(session):
+                _render_connection_screen(
+                    session,
+                    screen="signin",
+                    error="Enter both your username and password to sign in.",
+                )
+                return
+            session.msg("\n\r Usage (without <>): connect <name> <password>")
+            return
+
+        account_class = utils.class_from_module(settings.BASE_ACCOUNT_TYPECLASS)
+        username, password = parts
+        account, errors = account_class.authenticate(
+            username=username,
+            password=password,
+            ip=address,
+            session=session,
+        )
+        if account:
+            session.sessionhandler.login(session, account)
+            return
+
+        error_text = "\n".join(errors) if errors else "Unable to sign in with those credentials."
+        if _is_web_session(session):
+            _render_connection_screen(session, screen="signin", error=error_text, username=username)
+            return
+        session.msg(f"|R{error_text}|n")
+
+
+class CmdBraveUnconnectedCreate(default_unloggedin.CmdUnconnectedCreate):
+    """Create an account with browser-native validation and auto-login."""
+
+    def at_pre_cmd(self):
+        if not settings.NEW_ACCOUNT_REGISTRATION_ENABLED:
+            if _is_web_session(self.caller):
+                _render_connection_screen(
+                    self.caller,
+                    screen="create",
+                    error="New account registration is currently disabled.",
+                )
+            else:
+                self.msg("Registration is currently disabled.")
+            return True
+        return super().at_pre_cmd()
+
+    def func(self):
+        session = self.caller
+        args = (self.args or "").strip()
+        address = session.address
+        account_class = utils.class_from_module(settings.BASE_ACCOUNT_TYPECLASS)
+
+        parts = [part.strip() for part in re.split(r"\"", args) if part.strip()]
+        if len(parts) == 1:
+            parts = parts[0].split(None)
+
+        if len(parts) not in {2, 3}:
+            error = "Enter a username, password, and matching confirmation password."
+            if _is_web_session(session):
+                _render_connection_screen(session, screen="create", error=error)
+                return
+            self.msg(
+                "\n Usage (without <>): create <name> <password> <confirm password>"
+                "\nIf <name> or <password> contains spaces, enclose it in double quotes."
+            )
+            return
+
+        username = parts[0]
+        password = parts[1]
+        password_confirm = parts[2] if len(parts) == 3 else parts[1]
+        normalized_username = account_class.normalize_username(username)
+
+        if password != password_confirm:
+            error = "Password confirmation did not match."
+            if _is_web_session(session):
+                _render_connection_screen(
+                    session,
+                    screen="create",
+                    error=error,
+                    username=normalized_username,
+                )
+                return
+            self.msg(error)
+            return
+
+        account, errors = account_class.create(
+            username=normalized_username,
+            password=password,
+            ip=address,
+            session=session,
+        )
+        if not account:
+            error_text = "\n".join(errors) if errors else "Unable to create that account right now."
+            if _is_web_session(session):
+                _render_connection_screen(
+                    session,
+                    screen="create",
+                    error=error_text,
+                    username=normalized_username,
+                )
+                return
+            self.msg(f"|R{error_text}|n")
+            return
+
+        session.msg(f"|gAccount created.|n Welcome, |c{account.key}|n.")
+        session.sessionhandler.login(session, account)

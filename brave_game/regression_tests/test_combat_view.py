@@ -68,8 +68,9 @@ class DummyEncounter:
         return self._pending.get(character.id, "basic attack")
 
     def _get_participant_state(self, character):
+        actor_id = character["id"] if isinstance(character, dict) else character.id
         return self._states.get(
-            character.id,
+            actor_id,
             {
                 "guard": 0,
                 "bleed_turns": 0,
@@ -80,7 +81,11 @@ class DummyEncounter:
             },
         )
 
-    def _get_actor_atb_state(self, character=None, enemy=None):
+    def _get_actor_atb_state(self, character=None, enemy=None, companion=None):
+        if companion is not None:
+            return self._atb_states.get(f"c:{companion['id']}", {"phase": "charging", "gauge": 0})
+        if isinstance(character, dict):
+            return self._atb_states.get(f"c:{character['id']}", {"phase": "charging", "gauge": 0})
         if character is not None:
             return self._atb_states.get(f"p:{character.id}", {"phase": "charging", "gauge": 0})
         if enemy is not None:
@@ -100,6 +105,13 @@ def _entry(section, title):
         if entry.get("title") == title:
             return entry
     raise AssertionError(f"Missing entry {title}")
+
+
+def _sidecar(entry, title):
+    for sidecar in entry.get("sidecars", []):
+        if sidecar.get("title") == title:
+            return sidecar
+    raise AssertionError(f"Missing attachment {title}")
 
 
 def _item(section, prefix):
@@ -239,6 +251,82 @@ class CombatViewTests(unittest.TestCase):
         self.assertEqual("compact", party_section.get("span"))
         self.assertEqual(4, len(party_section.get("items", [])))
         self.assertEqual(4, len(enemies_section.get("items", [])))
+
+    def test_ranger_companion_renders_as_sidecar_pet_and_ally_picker(self):
+        room = DummyRoom()
+        ranger = DummyCharacter(
+            7,
+            "Kest",
+            room,
+            "ranger",
+            {"hp": 22, "mana": 0, "stamina": 14},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 16},
+            ["Quick Shot", "Mark Prey"],
+        )
+        companion = {
+            "kind": "companion",
+            "id": "c1",
+            "key": "Marsh Hound",
+            "icon": "pets",
+            "max_hp": 14,
+            "hp": 11,
+        }
+        encounter = DummyEncounter(
+            room,
+            [ranger, companion],
+            [{"id": "e1", "template_key": "road_wolf", "key": "Bog Wolf", "hp": 11, "max_hp": 16}],
+            atb_states={
+                "p:7": {"phase": "ready", "gauge": 100, "ready_gauge": 100},
+                "c:c1": {"phase": "charging", "gauge": 55, "ready_gauge": 100},
+                "e:e1": {"phase": "charging", "gauge": 70, "ready_gauge": 100},
+            },
+        )
+
+        with patch("world.browser_views.build_combat_action_payload") as payload:
+            payload.return_value = {
+                "abilities": [
+                    {
+                        "label": "Bandage Ally",
+                        "text": "Bandage Ally · 4 STA",
+                        "kind": "ability",
+                        "key": "bandageally",
+                        "enabled": True,
+                        "picker": {
+                            "title": "Bandage Ally Target",
+                            "options": [
+                                {"label": "Kest", "command": "use Bandage Ally", "meta": "You"},
+                                {"label": "Marsh Hound", "command": "use Bandage Ally = c1", "meta": "Companion"},
+                            ],
+                        },
+                    }
+                ],
+                "items": [],
+            }
+            view = build_combat_view(encounter, ranger)
+
+        self.assertEqual("1 Ally • 1 Pet • 1 Foe", view.get("subtitle", ""))
+
+        party = _section(view, "Party")
+        ranger_entry = _entry(party, "Kest")
+        hound_entry = _sidecar(ranger_entry, "Marsh Hound")
+        self.assertEqual("pets", hound_entry.get("background_icon"))
+        self.assertEqual(
+            [("ATB", "55 / 100"), ("HP", "11 / 14")],
+            [(meter.get("label"), meter.get("value")) for meter in hound_entry.get("meters", [])],
+        )
+
+        abilities_action = _action(view, "Abilities")
+        ability_item = _picker_option(abilities_action.get("picker", {}), "Bandage Ally", meta="Bandage Ally · 4 STA")
+        self.assertEqual(
+            [
+                {"label": "Kest", "command": "use Bandage Ally", "meta": "You"},
+                {"label": "Marsh Hound", "command": "use Bandage Ally = c1", "meta": "Companion"},
+            ],
+            [
+                {"label": option.get("label"), "command": option.get("command"), "meta": option.get("meta")}
+                for option in ability_item.get("picker", {}).get("options", [])
+            ],
+        )
 
     def test_enemy_windup_surfaces_named_telegraph_in_view(self):
         room = DummyRoom()

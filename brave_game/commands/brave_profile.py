@@ -1,21 +1,34 @@
 """Profile, build, inventory, and journal commands extracted from Brave's helper module."""
 
-from world.browser_panels import build_build_panel, build_gear_panel, build_pack_panel, build_quests_panel, build_sheet_panel
+import re
+
+from world.browser_panels import (
+    build_build_panel,
+    build_gear_panel,
+    build_pack_panel,
+    build_quests_panel,
+    build_sheet_panel,
+    send_webclient_event,
+)
 from world.browser_views import build_gear_view, build_pack_view, build_quests_view, build_sheet_view
 from world.chapel import get_active_blessing
 from world.content import get_content_registry
 from world.mastery import (
     MASTERY_RESPEC_SILVER_COST,
+    build_mastery_payload,
     can_train_ability,
     format_mastery_name,
     get_next_mastery_text,
     is_mastery_room,
     mastery_rank_label,
 )
+from world.questing import (
+    clear_tracked_quest,
+    get_tracked_quest,
+    resolve_active_quest_query,
+    set_tracked_quest,
+)
 from world.ranger_companions import get_companion_name
-
-
-from world.questing import clear_tracked_quest, get_tracked_quest, resolve_active_quest_query, set_tracked_quest
 from world.resonance import (
     format_ability_display,
     get_resonance_key,
@@ -44,6 +57,45 @@ from .brave import (
     _stack_blocks,
     _wrap_paragraphs,
 )
+
+
+_EVENNIA_MARKUP_RE = re.compile(r"\|[A-Za-z]")
+
+
+def _strip_evennia_markup(text):
+    """Remove lightweight Evennia color markup for browser overlay status text."""
+
+    clean = str(text or "").replace("||", "|")
+    return _EVENNIA_MARKUP_RE.sub("", clean)
+
+
+def _send_mastery_payload(command, character, payload):
+    """Send a mastery overlay payload to the current web session."""
+
+    session = command.get_web_session()
+    if not session or not payload:
+        return False
+    send_webclient_event(character, session=session, brave_mastery=payload)
+    return True
+
+
+def _refresh_mastery_scene(command, character, message=None, *, success=False):
+    """Keep browser-based mastery actions inside the mastery overlay."""
+
+    if not command.get_web_session():
+        return False
+    _send_mastery_payload(
+        command,
+        character,
+        build_mastery_payload(
+            character,
+            status_message=_strip_evennia_markup(message),
+            status_tone="good" if success else "muted",
+        ),
+    )
+    if message:
+        command.send_other_sessions(message)
+    return True
 
 
 def _get_journal_mode(character):
@@ -472,33 +524,60 @@ class CmdMastery(BraveCharacterCommand):
             token = _normalize_query(self.args)
             if token in {"respec", "reset"}:
                 if not in_mastery_room:
-                    self.msg("You need to visit the mastery trainer in Brambleford before you can reset your focus.")
+                    message = "You need to visit the mastery trainer in Brambleford before you can reset your focus."
+                    if _refresh_mastery_scene(self, character, message, success=False):
+                        return
+                    self.msg(message)
                     return
                 ok, message = character.reset_ability_mastery()
+                if _refresh_mastery_scene(self, character, message, success=ok):
+                    return
                 self.msg(message)
                 return
 
             match = self._resolve_ability(character, self.args)
             if isinstance(match, list):
-                self.msg("Be more specific. That could mean: " + ", ".join(name for _key, name in match))
+                message = "Be more specific. That could mean: " + ", ".join(name for _key, name in match)
+                if _refresh_mastery_scene(self, character, message, success=False):
+                    return
+                self.msg(message)
                 return
             if not match:
-                self.msg("No unlocked combat ability matches that name.")
+                message = "No unlocked combat ability matches that name."
+                if _refresh_mastery_scene(self, character, message, success=False):
+                    return
+                self.msg(message)
                 return
             ability_key, ability_name = match
             if not in_mastery_room:
-                self.msg("You need to be in Brambleford's Mastery Hall to train an ability.")
+                message = "You need to be in Brambleford's Mastery Hall to train an ability."
+                if _refresh_mastery_scene(self, character, message, success=False):
+                    return
+                self.msg(message)
                 return
             if not can_train_ability(character, ability_key):
-                self.msg("That technique cannot be refined here yet.")
+                message = "That technique cannot be refined here yet."
+                if _refresh_mastery_scene(self, character, message, success=False):
+                    return
+                self.msg(message)
                 return
             ok, message = character.train_ability_mastery(ability_key)
             if ok:
                 rank = getattr(character, "get_ability_mastery_rank", lambda _key: 1)(ability_key)
                 label = mastery_rank_label(rank)
-                self.msg(f"{message} {format_mastery_name(ability_name, rank)} is now {label.lower()}.")
-            else:
+                display_name = format_ability_display(ability_name, character)
+                message = f"{message} {format_mastery_name(display_name, rank)} is now {label.lower()}."
+                if _refresh_mastery_scene(self, character, message, success=True):
+                    return
                 self.msg(message)
+            else:
+                if _refresh_mastery_scene(self, character, message, success=False):
+                    return
+                self.msg(message)
+            return
+
+        if self.get_web_session():
+            _send_mastery_payload(self, character, build_mastery_payload(character))
             return
 
         blocks = []
@@ -529,7 +608,7 @@ class CmdMastery(BraveCharacterCommand):
             ]
         else:
             tips = wrap_text(
-                "Training requires Mistress Elira Thorne in the Mastery Hall just inside the Brambleford Training Yard.",
+                "Training requires Mistress Elira Thorne in the Mastery Hall north of the Brambleford Training Yard.",
                 indent="  ",
             )
 

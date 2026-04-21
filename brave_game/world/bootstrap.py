@@ -3,6 +3,7 @@
 from evennia.utils import create, logger, search
 
 from world.content import get_content_registry
+from world.genders import DEFAULT_BRAVE_GENDER, normalize_brave_gender
 
 CONTENT = get_content_registry()
 WORLD_CONTENT = CONTENT.world
@@ -110,6 +111,10 @@ def _ensure_world_object(entity_data, rooms_by_id):
     obj.db.brave_display_name = entity_data.get("display_name", "")
     obj.db.brave_entity_id = entity_data["id"]
     obj.db.brave_entity_kind = entity_data.get("kind", "scenery")
+    if obj.db.brave_entity_kind == "npc" or entity_data.get("gender"):
+        gender = normalize_brave_gender(entity_data.get("gender"), default=DEFAULT_BRAVE_GENDER)
+        obj.db.brave_gender = gender
+        obj.db.gender = gender
     if obj.db.brave_entity_kind == "arcade":
         obj.db.brave_arcade_games = list(entity_data.get("arcade_games", []))
         obj.db.brave_arcade_price = entity_data.get("arcade_price", 1)

@@ -212,21 +212,24 @@ def send_text_to_non_web_sessions(target, text):
         target.msg(text, session=non_web_sessions)
 
 
-def send_room_activity_event(target, text, *, cls="out"):
+def send_room_activity_event(target, text, *, cls="out", category=None):
     """Send exploration activity to web sessions and plain room text elsewhere."""
 
     plain_text = _plain_notice_text(text)
     if plain_text:
         web_sessions = _get_web_sessions(target)
         if web_sessions and hasattr(target, "msg"):
-            target.msg(session=web_sessions, brave_room_activity={"text": plain_text, "cls": cls or "out"})
+            payload = {"text": plain_text, "cls": cls or "out"}
+            if category:
+                payload["category"] = category
+            target.msg(session=web_sessions, brave_room_activity=payload)
 
     non_web_sessions = _get_non_web_sessions(target)
     if non_web_sessions and hasattr(target, "msg"):
         target.msg(text, session=non_web_sessions)
 
 
-def broadcast_room_activity(room, text, *, exclude=None, cls="out"):
+def broadcast_room_activity(room, text, *, exclude=None, cls="out", category=None):
     """Broadcast room activity without leaking raw text into the web scene pane."""
 
     if not room or not text:
@@ -236,7 +239,7 @@ def broadcast_room_activity(room, text, *, exclude=None, cls="out"):
     for obj in getattr(room, "contents", []) or []:
         if obj in excluded or not hasattr(obj, "msg") or not hasattr(obj, "sessions"):
             continue
-        send_room_activity_event(obj, text, cls=cls)
+        send_room_activity_event(obj, text, cls=cls, category=category)
 
 
 def broadcast_room_text_non_web(room, text, *, exclude=None):

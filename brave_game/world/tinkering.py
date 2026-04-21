@@ -62,7 +62,8 @@ def get_tinkering_entries(character):
 
         result_id = recipe.get("result")
         result_item = ITEM_TEMPLATES.get(result_id, {})
-        ready = known and not missing and (character.db.brave_silver or 0) >= int(recipe.get("silver_cost", 0) or 0)
+        silver_have = int(character.db.brave_silver or 0)
+        ready = known and not missing and silver_have >= int(recipe.get("silver_cost", 0) or 0)
         entries.append(
             {
                 "key": recipe_key,
@@ -80,12 +81,96 @@ def get_tinkering_entries(character):
                 "result_summary": result_item.get("summary", ""),
                 "result_quantity": max(1, int(recipe.get("result_quantity", 1) or 1)),
                 "result_bonuses": format_bonus_summary(result_item),
+                "silver_have": silver_have,
                 "silver_cost": max(0, int(recipe.get("silver_cost", 0) or 0)),
                 "unlock_text": recipe.get("unlock_text", ""),
             }
         )
     entries.sort(key=lambda entry: (0 if entry["ready"] else 1, 0 if entry["known"] else 1, entry["name"].lower()))
     return entries
+
+
+def _build_tinkering_recipe_payload(entry):
+    if entry["ready"]:
+        status = "Ready to build"
+    elif entry["known"]:
+        missing = list(entry["missing"])
+        if entry["silver_cost"] and entry["silver_have"] < entry["silver_cost"]:
+            status = "Missing: " + ", ".join(missing) if missing else "Missing silver"
+        else:
+            status = "Missing: " + ", ".join(missing)
+    else:
+        status = "Locked design"
+
+    if entry["known"] and not entry["ready"]:
+        missing = list(entry["missing"])
+        if not missing and entry["silver_cost"] and entry["silver_have"] < entry["silver_cost"]:
+            status = f"Missing silver: {entry['silver_have']}/{entry['silver_cost']}"
+
+    result_meta = []
+    if entry["result_quantity"] > 1:
+        result_meta.append(f"x{entry['result_quantity']}")
+    if entry["result_bonuses"]:
+        result_meta.append(entry["result_bonuses"])
+
+    return {
+        "key": entry["key"],
+        "name": entry["name"],
+        "known": bool(entry["known"]),
+        "ready": bool(entry["ready"]),
+        "status": status,
+        "summary": entry["summary"] if entry["known"] else (entry["unlock_text"] or "You have not learned this design yet."),
+        "missing": list(entry["missing"]),
+        "base_id": entry["base_id"],
+        "base_name": entry["base_name"],
+        "base_owned": entry["base_owned"],
+        "components": list(entry["components"]),
+        "result_id": entry["result_id"],
+        "result_name": entry["result_name"],
+        "result_summary": entry["result_summary"],
+        "result_quantity": entry["result_quantity"],
+        "result_bonuses": entry["result_bonuses"],
+        "result_meta": " / ".join(result_meta),
+        "silver_have": entry["silver_have"],
+        "silver_cost": entry["silver_cost"],
+        "command": f"tinker {entry['name']}" if entry["ready"] else "",
+        "confirm": (
+            f"Build {entry['result_name']} for {entry['silver_cost']} silver?"
+            if entry["ready"] and entry["silver_cost"]
+            else f"Build {entry['result_name']}?" if entry["ready"] else ""
+        ),
+    }
+
+
+def build_tinkering_payload(character, *, status_message=None, status_tone="muted"):
+    """Return a browser overlay payload for workbench tinkering."""
+
+    ready = []
+    known = []
+    locked = []
+    entries = get_tinkering_entries(character)
+    for entry in entries:
+        payload = _build_tinkering_recipe_payload(entry)
+        if not entry["known"]:
+            locked.append(payload)
+        elif entry["ready"]:
+            ready.append(payload)
+        else:
+            known.append(payload)
+
+    return {
+        "phase": "setup",
+        "title": "Workbench Ledger",
+        "message": status_message or "",
+        "message_tone": status_tone or "muted",
+        "silver": int(getattr(getattr(character, "db", None), "brave_silver", 0) or 0),
+        "ready": ready,
+        "known": known,
+        "locked": locked,
+        "ready_count": len(ready),
+        "total_count": len(entries),
+        "can_tinker": is_tinkering_room(getattr(character, "location", None)),
+    }
 
 
 def match_tinkering_recipe(query):

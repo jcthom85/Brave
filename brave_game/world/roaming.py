@@ -222,11 +222,12 @@ def _opposite_direction(direction):
     return reverse.get(direction)
 
 
-def _notify_room_activity(room, text):
+def _notify_room_activity(room, text, *, category=None):
     if not room or not text:
         return
-    for character in _room_characters(room):
-        character.msg(text)
+    from world.browser_panels import broadcast_room_activity
+
+    broadcast_room_activity(room, text, cls="out", category=category)
 
 
 class BraveRoamingPartyManager(DefaultScript):
@@ -407,13 +408,13 @@ class BraveRoamingPartyManager(DefaultScript):
                 departure_line = f"|x{title} moves on from here.|n"
                 if travel_direction:
                     departure_line = f"|x{title} heads {travel_direction}.|n"
-                _notify_room_activity(source_room, departure_line)
+                _notify_room_activity(source_room, departure_line, category="departure")
 
             if destination_room:
                 arrival_line = f"|r{title} moves into the area.|n"
                 if arrival_direction:
                     arrival_line = f"|r{title} arrives from the {arrival_direction}.|n"
-                _notify_room_activity(destination_room, arrival_line)
+                _notify_room_activity(destination_room, arrival_line, category="threat")
 
             party["last_room_id"] = source_room_id
             party["room_id"] = destination_room_id
