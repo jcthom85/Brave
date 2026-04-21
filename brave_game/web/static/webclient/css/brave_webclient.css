@@ -1481,6 +1481,18 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     min-width: 0;
 }
 
+.brave-picker-sheet__title-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: rgba(var(--brave-accent-rgb), 0.12);
+    color: var(--brave-text-bright);
+    flex: 0 0 auto;
+}
+
 .brave-picker-sheet__option-meta {
     letter-spacing: calc(var(--brave-letter-spacing) + 0.08em);
     color: var(--brave-text-dim);
@@ -1516,6 +1528,37 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     display: grid;
     gap: 10px;
     overflow-y: auto;
+    padding-right: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
+}
+
+.brave-picker-sheet__options::-webkit-scrollbar {
+    width: 8px;
+}
+
+.brave-picker-sheet__options::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 42%, transparent), color-mix(in srgb, var(--brave-surface-deep-bottom) 64%, transparent));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brave-world-line) 34%, transparent);
+}
+
+.brave-picker-sheet__options::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-soft)), color-mix(in srgb, var(--brave-accent) 44%, var(--brave-world-line)));
+    background-clip: padding-box;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 0 0 1px rgba(var(--brave-accent-rgb), 0.12);
+}
+
+.brave-picker-sheet__options::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 84%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 56%, var(--brave-world-line)));
+    background-clip: padding-box;
 }
 
 .brave-picker-sheet__bodycopy {
@@ -1607,38 +1650,6 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 .brave-picker-sheet__panel--popover .brave-picker-sheet__options {
     gap: 8px;
-    overflow-y: auto;
-    padding-right: 2px;
-    scrollbar-width: thin;
-    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
-}
-
-.brave-picker-sheet__panel--popover .brave-picker-sheet__options::-webkit-scrollbar {
-    width: 8px;
-}
-
-.brave-picker-sheet__panel--popover .brave-picker-sheet__options::-webkit-scrollbar-track {
-    border-radius: 999px;
-    background:
-        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 42%, transparent), color-mix(in srgb, var(--brave-surface-deep-bottom) 64%, transparent));
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brave-world-line) 34%, transparent);
-}
-
-.brave-picker-sheet__panel--popover .brave-picker-sheet__options::-webkit-scrollbar-thumb {
-    border: 2px solid transparent;
-    border-radius: 999px;
-    background:
-        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-soft)), color-mix(in srgb, var(--brave-accent) 44%, var(--brave-world-line)));
-    background-clip: padding-box;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.16),
-        0 0 0 1px rgba(var(--brave-accent-rgb), 0.12);
-}
-
-.brave-picker-sheet__panel--popover .brave-picker-sheet__options::-webkit-scrollbar-thumb:hover {
-    background:
-        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 84%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 56%, var(--brave-world-line)));
-    background-clip: padding-box;
 }
 
 .brave-picker-sheet__panel--popover .brave-picker-sheet__option {
@@ -1723,6 +1734,1269 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     color: var(--brave-text-soft);
     font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.48;
+}
+
+.brave-activity-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1215;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    pointer-events: auto;
+}
+
+.brave-activity-overlay__backdrop {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, #020609 78%, transparent);
+    backdrop-filter: blur(10px);
+}
+
+.brave-activity-overlay__panel {
+    position: relative;
+    z-index: 1;
+    width: min(940px, calc(100vw - 28px));
+    max-height: min(860px, calc(100vh - 28px));
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.22));
+    border-radius: var(--brave-radius-panel);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 96%, transparent), transparent 25%),
+        linear-gradient(180deg, var(--brave-surface-soft-top), var(--brave-surface-soft-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 30px 68px rgba(0, 0, 0, 0.44);
+    overflow: hidden;
+}
+
+.brave-activity-overlay__panel:focus {
+    outline: none;
+}
+
+.brave-activity-overlay__head {
+    display: grid;
+    gap: 10px;
+}
+
+.brave-activity-overlay__titlebar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.brave-activity-overlay__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    color: var(--brave-text-bright);
+    background: rgba(var(--brave-accent-rgb), 0.14);
+    flex: 0 0 auto;
+}
+
+.brave-activity-overlay__titles {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.brave-activity-overlay__eyebrow {
+    color: var(--brave-text-dim);
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.25;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.brave-activity-overlay__title {
+    color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
+    letter-spacing: var(--brave-dialogue-letter-spacing);
+    font-size: calc(1.22rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.1;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.brave-activity-overlay__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.brave-activity-overlay__stat {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+    padding: 9px 10px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 58%, transparent);
+    border-radius: var(--brave-radius-card-tight);
+    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
+}
+
+.brave-activity-overlay__stat span {
+    color: var(--brave-text-dim);
+    font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.brave-activity-overlay__stat strong {
+    color: var(--brave-text-bright);
+    font-size: calc(0.96rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.brave-activity-overlay__message {
+    padding: 10px 11px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 58%, transparent);
+    border-radius: var(--brave-radius-card-tight);
+    color: var(--brave-text-bright);
+    background: color-mix(in srgb, var(--brave-world-line) 20%, transparent);
+    font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.brave-activity-overlay__message--good {
+    border-color: color-mix(in srgb, var(--brave-good) 46%, var(--brave-world-line));
+    background: color-mix(in srgb, var(--brave-good) 12%, transparent);
+}
+
+.brave-activity-overlay__bodycopy {
+    display: grid;
+    gap: 8px;
+    padding: 2px 2px 4px;
+}
+
+.brave-activity-overlay__bodyline {
+    color: var(--brave-text-soft);
+    font-size: calc(0.84rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.48;
+    overflow-wrap: anywhere;
+}
+
+.brave-activity-overlay__body {
+    min-height: 0;
+    overflow-y: auto;
+    display: grid;
+    gap: 14px;
+    padding-right: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
+}
+
+.brave-activity-overlay__section {
+    min-width: 0;
+    display: grid;
+    gap: 9px;
+}
+
+.brave-activity-overlay__section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--brave-text-dim);
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.brave-activity-overlay__section-head span,
+.brave-activity-overlay__section-head strong {
+    overflow-wrap: anywhere;
+}
+
+.brave-activity-overlay__cards {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.brave-activity-card {
+    min-width: 0;
+    min-height: 174px;
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 62%, transparent);
+    border-radius: var(--brave-radius-card-tight);
+    background: color-mix(in srgb, var(--brave-panel-soft) 76%, transparent);
+}
+
+.brave-activity-card--ready {
+    border-color: color-mix(in srgb, var(--brave-accent) 44%, var(--brave-world-line));
+    background: color-mix(in srgb, var(--brave-panel-soft) 76%, transparent);
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brave-accent) 42%, transparent);
+}
+
+.brave-activity-card--locked {
+    opacity: 0.72;
+}
+
+.brave-activity-card__head {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: start;
+}
+
+.brave-activity-card__title {
+    min-width: 0;
+    color: var(--brave-text-bright);
+    font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.brave-activity-card__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 150px;
+    padding: 3px 6px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 62%, transparent);
+    border-radius: 999px;
+    color: var(--brave-text-soft);
+    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
+    font-size: calc(0.64rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.15;
+    text-transform: uppercase;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.brave-activity-card__badge--ready {
+    border-color: color-mix(in srgb, var(--brave-accent) 52%, var(--brave-world-line));
+    color: var(--brave-text-bright);
+    background: color-mix(in srgb, var(--brave-accent) 16%, rgba(255, 255, 255, 0.04));
+}
+
+.brave-activity-card__badge--locked {
+    color: var(--brave-text-dim);
+    background: color-mix(in srgb, var(--brave-world-line) 16%, transparent);
+}
+
+.brave-activity-card__badge--muted {
+    color: var(--brave-text-soft);
+}
+
+.brave-activity-card__result {
+    color: var(--brave-text-soft);
+    font-size: calc(0.78rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.brave-activity-card__summary,
+.brave-activity-card__line,
+.brave-activity-overlay__empty {
+    color: var(--brave-text-soft);
+    font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.42;
+    overflow-wrap: anywhere;
+}
+
+.brave-activity-card__lines {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+}
+
+.brave-activity-card__line {
+    color: var(--brave-text-dim);
+}
+
+.brave-activity-card__actions {
+    align-self: end;
+}
+
+.brave-activity-card__action,
+.brave-activity-overlay__footer-action {
+    width: 100%;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border: 1px solid color-mix(in srgb, var(--brave-accent) 68%, var(--brave-world-line));
+    border-radius: var(--brave-radius-card-tight);
+    color: var(--brave-text-bright);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 35%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 46%, var(--brave-panel-deep)));
+    font: inherit;
+    font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+}
+
+.brave-activity-card__action:not(:disabled),
+.brave-activity-overlay__footer-action:not(:disabled) {
+    cursor: pointer;
+}
+
+.brave-activity-card__action:disabled,
+.brave-activity-overlay__footer-action:disabled {
+    opacity: 0.48;
+    filter: grayscale(0.35);
+}
+
+.brave-activity-card__action-icon,
+.brave-activity-overlay__footer-icon {
+    flex: 0 0 auto;
+}
+
+.brave-activity-overlay__empty {
+    padding: 12px;
+    border: 1px dashed color-mix(in srgb, var(--brave-world-line) 62%, transparent);
+    border-radius: var(--brave-radius-card-tight);
+    background: color-mix(in srgb, var(--brave-panel-soft) 58%, transparent);
+}
+
+.brave-activity-overlay__footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.brave-activity-overlay__footer-action {
+    width: auto;
+    min-width: 160px;
+}
+
+.brave-activity-overlay--arcade-result .brave-activity-overlay__panel {
+    width: min(640px, calc(100vw - 28px));
+    max-height: min(680px, calc(100vh - 28px));
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    border-color: rgba(112, 220, 255, 0.22);
+    background:
+        radial-gradient(circle at 0 0, rgba(94, 227, 255, 0.12), transparent 46%),
+        radial-gradient(circle at 100% 0, rgba(255, 215, 108, 0.1), transparent 38%),
+        linear-gradient(180deg, rgba(12, 15, 20, 0.985), rgba(3, 5, 8, 0.995));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 34px 72px rgba(0, 0, 0, 0.48);
+}
+
+.brave-activity-overlay--arcade-result .brave-activity-overlay__icon {
+    background: rgba(112, 220, 255, 0.14);
+    color: #eefbff;
+}
+
+.brave-activity-overlay--arcade-result .brave-activity-overlay__eyebrow {
+    color: #91dff8;
+}
+
+.brave-activity-overlay--arcade-result .brave-activity-overlay__title {
+    color: #eefbff;
+}
+
+.brave-activity-overlay--arcade-result .brave-activity-overlay__head {
+    gap: 16px;
+}
+
+.brave-activity-overlay--arcade-result .brave-activity-overlay__body {
+    display: grid;
+    gap: 14px;
+    padding-top: 0;
+}
+
+.brave-arcade-result__headline {
+    display: flex;
+    justify-content: center;
+}
+
+.brave-arcade-result__headline span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 215, 108, 0.24);
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, rgba(48, 34, 10, 0.94), rgba(18, 14, 7, 0.98));
+    color: #fff1b2;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.brave-arcade-result__summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.brave-arcade-result__summary-card {
+    display: grid;
+    gap: 4px;
+    padding: 12px 14px;
+    border: 1px solid rgba(112, 220, 255, 0.12);
+    border-radius: var(--brave-radius-card-tight);
+    background:
+        linear-gradient(180deg, rgba(20, 28, 38, 0.92), rgba(7, 10, 14, 0.98));
+}
+
+.brave-arcade-result__summary-card span {
+    color: #83d3ec;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.brave-arcade-result__summary-card strong {
+    color: #eefbff;
+    font-size: 1.22rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.brave-arcade-result__summary-card--score {
+    border-color: rgba(112, 220, 255, 0.22);
+}
+
+.brave-arcade-result__summary-card--rank {
+    border-color: rgba(255, 215, 108, 0.24);
+}
+
+.brave-arcade-result__summary-card--high {
+    border-color: rgba(181, 135, 255, 0.22);
+}
+
+.brave-arcade-result__board {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid rgba(112, 220, 255, 0.16);
+    border-radius: var(--brave-radius-card-tight);
+    background:
+        linear-gradient(180deg, rgba(19, 27, 38, 0.94), rgba(7, 10, 15, 0.99));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.01);
+}
+
+.brave-arcade-result__board-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brave-arcade-result__board-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(112, 220, 255, 0.18);
+    border-radius: 8px;
+    background: rgba(112, 220, 255, 0.08);
+    color: #d8f7ff;
+}
+
+.brave-arcade-result__board-title {
+    color: #eefbff;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.brave-arcade-result__table-head,
+.brave-arcade-result__row {
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr) minmax(72px, auto);
+    align-items: center;
+    gap: 10px;
+}
+
+.brave-arcade-result__table-head {
+    padding: 0 12px;
+    color: #78cbe4;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.brave-arcade-result__table-head span:last-child {
+    text-align: right;
+}
+
+.brave-arcade-result__table {
+    display: grid;
+    gap: 8px;
+}
+
+.brave-arcade-result__row {
+    min-height: 48px;
+    padding: 0 12px;
+    border: 1px solid rgba(112, 220, 255, 0.1);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(12, 17, 24, 0.94), rgba(6, 9, 13, 0.98));
+}
+
+.brave-arcade-result__row--top {
+    border-color: rgba(255, 215, 108, 0.24);
+    background:
+        linear-gradient(180deg, rgba(42, 32, 14, 0.94), rgba(18, 12, 7, 0.98));
+}
+
+.brave-arcade-result__row--current {
+    border-color: rgba(112, 220, 255, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(112, 220, 255, 0.12);
+}
+
+.brave-arcade-result__row--standing {
+    border-color: rgba(181, 135, 255, 0.26);
+    background:
+        linear-gradient(180deg, rgba(28, 19, 41, 0.94), rgba(12, 9, 18, 0.98));
+}
+
+.brave-arcade-result__row--empty {
+    opacity: 0.58;
+}
+
+.brave-arcade-result__rank {
+    color: #9fdff5;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.brave-arcade-result__row--top .brave-arcade-result__rank,
+.brave-arcade-result__row--top .brave-arcade-result__score {
+    color: #fff1b2;
+}
+
+.brave-arcade-result__name {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brave-arcade-result__name-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #eefbff;
+    font-weight: 700;
+}
+
+.brave-arcade-result__tag {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 22px;
+    padding: 0 8px;
+    border: 1px solid rgba(112, 220, 255, 0.24);
+    border-radius: 999px;
+    background: rgba(112, 220, 255, 0.12);
+    color: #d8f7ff;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.brave-arcade-result__score {
+    justify-self: end;
+    color: #eefbff;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.brave-arcade-result__standing {
+    display: grid;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(112, 220, 255, 0.12);
+}
+
+.brave-arcade-result__standing-label {
+    color: #b48cff;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.brave-arcade-result__notes {
+    display: grid;
+    gap: 8px;
+}
+
+.brave-arcade-result__note {
+    padding: 11px 12px;
+    border: 1px solid rgba(112, 220, 255, 0.12);
+    border-radius: var(--brave-radius-card-tight);
+    background:
+        linear-gradient(180deg, rgba(18, 25, 35, 0.88), rgba(7, 10, 14, 0.96));
+    color: #c6f5ff;
+    font-weight: 600;
+}
+
+.brave-arcade-result__note--record {
+    border-color: rgba(255, 215, 108, 0.24);
+    background:
+        linear-gradient(180deg, rgba(44, 33, 14, 0.9), rgba(17, 12, 7, 0.98));
+    color: #fff1b2;
+}
+
+.brave-arcade-result__note--personal {
+    border-color: rgba(112, 220, 255, 0.2);
+}
+
+.brave-arcade-result__note--reward {
+    border-color: rgba(181, 135, 255, 0.24);
+    background:
+        linear-gradient(180deg, rgba(28, 19, 41, 0.9), rgba(12, 9, 18, 0.98));
+    color: #f0e5ff;
+}
+
+@media (max-width: 640px) {
+    .brave-activity-overlay--arcade-result .brave-activity-overlay__panel {
+        width: calc(100vw - 18px);
+        max-height: calc(100vh - 18px);
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .brave-arcade-result__summary {
+        grid-template-columns: 1fr;
+    }
+
+    .brave-arcade-result__board {
+        padding: 12px;
+    }
+
+    .brave-arcade-result__table-head,
+    .brave-arcade-result__row {
+        grid-template-columns: 58px minmax(0, 1fr) minmax(64px, auto);
+        gap: 8px;
+    }
+
+    .brave-arcade-result__table-head {
+        padding: 0 10px;
+    }
+
+    .brave-arcade-result__row {
+        min-height: 44px;
+        padding: 0 10px;
+    }
+
+}
+
+.brave-fishing-minigame {
+    position: fixed;
+    inset: 0;
+    z-index: 1220;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    pointer-events: auto;
+}
+
+.brave-fishing-minigame__backdrop {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, #020609 78%, transparent);
+    backdrop-filter: blur(10px);
+}
+
+.brave-fishing-minigame__panel {
+    position: relative;
+    z-index: 1;
+    width: min(620px, calc(100vw - 28px));
+    max-height: min(840px, calc(100vh - 28px));
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.24));
+    border-radius: var(--brave-radius-panel);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 96%, transparent), transparent 26%),
+        linear-gradient(180deg, var(--brave-surface-soft-top), var(--brave-surface-soft-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 30px 68px rgba(0, 0, 0, 0.44);
+    overflow: hidden;
+}
+
+.brave-fishing-minigame__panel:focus {
+    outline: none;
+}
+
+.brave-fishing-minigame__panel--setup {
+    width: min(820px, calc(100vw - 28px));
+}
+
+.brave-fishing-minigame__head {
+    display: grid;
+    gap: 10px;
+}
+
+.brave-fishing-minigame__titlebar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.brave-fishing-minigame__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    color: var(--brave-text-bright);
+    background: rgba(var(--brave-accent-rgb), 0.14);
+    flex: 0 0 auto;
+}
+
+.brave-fishing-minigame__titles {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.brave-fishing-minigame__eyebrow {
+    color: var(--brave-text-dim);
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.brave-fishing-minigame__title {
+    color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
+    letter-spacing: var(--brave-dialogue-letter-spacing);
+    font-size: calc(1.2rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.brave-fishing-minigame__loadout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.brave-fishing-minigame__loadout span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 5px 9px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 68%, transparent);
+    border-radius: 999px;
+    color: var(--brave-text-soft);
+    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
+    font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-fishing-minigame__setup {
+    min-height: 0;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: minmax(190px, 0.35fr) minmax(0, 0.65fr);
+    gap: 14px;
+    padding-right: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--brave-accent) 54%, var(--brave-text-dim)) color-mix(in srgb, var(--brave-world-line) 38%, transparent);
+}
+
+.brave-fishing-minigame__setup-summary,
+.brave-fishing-minigame__gear-column {
+    min-width: 0;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 64%, transparent);
+    border-radius: var(--brave-radius-card);
+    background: color-mix(in srgb, var(--brave-panel-soft) 76%, transparent);
+}
+
+.brave-fishing-minigame__setup-summary {
+    align-self: start;
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+}
+
+.brave-fishing-minigame__setup-label {
+    color: var(--brave-text-dim);
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.brave-fishing-minigame__setup-title {
+    color: var(--brave-text-bright);
+    font-size: calc(1.02rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+}
+
+.brave-fishing-minigame__setup-text,
+.brave-fishing-minigame__gear-summary,
+.brave-fishing-minigame__empty {
+    color: var(--brave-text-soft);
+    font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.45;
+}
+
+.brave-fishing-minigame__setup-message {
+    padding: 10px 11px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 58%, transparent);
+    border-radius: var(--brave-radius-card-tight);
+    color: var(--brave-text-bright);
+    background: color-mix(in srgb, var(--brave-world-line) 20%, transparent);
+    font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.4;
+}
+
+.brave-fishing-minigame__setup-message--good {
+    border-color: color-mix(in srgb, var(--brave-good) 46%, var(--brave-world-line));
+    background: color-mix(in srgb, var(--brave-good) 12%, transparent);
+}
+
+.brave-fishing-minigame__active-tackle {
+    display: grid;
+    gap: 8px;
+}
+
+.brave-fishing-minigame__active-tackle div {
+    display: grid;
+    gap: 2px;
+    padding: 9px 10px;
+    border-radius: var(--brave-radius-card-tight);
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.brave-fishing-minigame__active-tackle span {
+    color: var(--brave-text-dim);
+    font-size: calc(0.7rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    text-transform: uppercase;
+}
+
+.brave-fishing-minigame__active-tackle strong {
+    min-width: 0;
+    color: var(--brave-text-bright);
+    font-size: calc(0.88rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.brave-fishing-minigame__gear {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.brave-fishing-minigame__gear-column {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    padding: 12px;
+}
+
+.brave-fishing-minigame__gear-option {
+    width: 100%;
+    min-height: 112px;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    padding: 10px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 62%, transparent);
+    border-radius: var(--brave-radius-card-tight);
+    color: var(--brave-text-soft);
+    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
+    font: inherit;
+    text-align: left;
+}
+
+.brave-fishing-minigame__gear-option:not(:disabled) {
+    cursor: pointer;
+}
+
+.brave-fishing-minigame__gear-option:not(:disabled):hover {
+    border-color: color-mix(in srgb, var(--brave-accent) 58%, var(--brave-world-line));
+    background: color-mix(in srgb, var(--brave-accent) 9%, var(--brave-panel-soft));
+}
+
+.brave-fishing-minigame__gear-option--selected {
+    border-color: color-mix(in srgb, var(--brave-accent) 48%, var(--brave-world-line));
+    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brave-accent) 42%, transparent);
+}
+
+.brave-fishing-minigame__gear-option--locked {
+    opacity: 0.58;
+}
+
+.brave-fishing-minigame__gear-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    color: var(--brave-text-bright);
+    background: rgba(var(--brave-accent-rgb), 0.12);
+}
+
+.brave-fishing-minigame__gear-copy,
+.brave-fishing-minigame__gear-head {
+    min-width: 0;
+    display: grid;
+    gap: 5px;
+}
+
+.brave-fishing-minigame__gear-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+}
+
+.brave-fishing-minigame__gear-name {
+    min-width: 0;
+    color: var(--brave-text-bright);
+    font-size: calc(0.9rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.brave-fishing-minigame__gear-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 6px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 62%, transparent);
+    border-radius: 999px;
+    color: var(--brave-text-soft);
+    background: color-mix(in srgb, var(--brave-panel-soft) 72%, transparent);
+    font-size: calc(0.64rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.brave-fishing-minigame__gear-badge--selected {
+    border-color: color-mix(in srgb, var(--brave-accent) 52%, var(--brave-world-line));
+    color: var(--brave-text-bright);
+    background: color-mix(in srgb, var(--brave-accent) 16%, rgba(255, 255, 255, 0.04));
+}
+
+.brave-fishing-minigame__gear-badge--locked {
+    color: var(--brave-text-dim);
+    background: color-mix(in srgb, var(--brave-world-line) 16%, transparent);
+}
+
+.brave-fishing-minigame__gear-meta {
+    color: var(--brave-text-dim);
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.3;
+}
+
+.brave-fishing-minigame__stage {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(180px, 0.64fr) minmax(0, 0.36fr);
+    gap: 14px;
+    align-items: stretch;
+}
+
+.brave-fishing-minigame__lane {
+    position: relative;
+    min-height: 390px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.18));
+    border-radius: var(--brave-radius-card);
+    overflow: hidden;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-danger) 22%, transparent) 0 10%,
+        transparent 10% 36%,
+        color-mix(in srgb, var(--brave-good) 24%, transparent) 36% 68%,
+        transparent 68% 90%,
+        color-mix(in srgb, var(--brave-danger) 22%, transparent) 90% 100%),
+        linear-gradient(180deg, color-mix(in srgb, #12364a 62%, var(--brave-panel-deep)), color-mix(in srgb, #071a22 72%, var(--brave-surface-deep-bottom)));
+    touch-action: none;
+    user-select: none;
+}
+
+.brave-fishing-minigame__water {
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0 2px, transparent 2px 30px),
+        linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.045), transparent);
+    opacity: 0.65;
+}
+
+.brave-fishing-minigame__progress {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    z-index: 1;
+    width: 8px;
+    max-height: calc(100% - 16px);
+    height: 0;
+    border-radius: 999px;
+    background: linear-gradient(0deg, color-mix(in srgb, var(--brave-good) 78%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-good) 38%, transparent));
+    box-shadow: 0 0 14px color-mix(in srgb, var(--brave-good) 28%, transparent);
+    transition: height 90ms linear;
+}
+
+.brave-fishing-minigame__marker {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    width: 54px;
+    height: 54px;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: var(--brave-text-bright);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 62%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 44%, var(--brave-panel-deep)));
+    box-shadow:
+        0 12px 24px rgba(0, 0, 0, 0.28),
+        0 0 0 8px rgba(var(--brave-accent-rgb), 0.1);
+    transition: top 90ms linear;
+}
+
+.brave-fishing-minigame[data-fishing-band="danger"] .brave-fishing-minigame__marker {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-danger) 64%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-danger) 46%, var(--brave-panel-deep)));
+    box-shadow:
+        0 12px 24px rgba(0, 0, 0, 0.32),
+        0 0 0 9px color-mix(in srgb, var(--brave-danger) 16%, transparent);
+}
+
+.brave-fishing-minigame__marker .material-symbols-outlined {
+    font-size: 1.8rem;
+}
+
+.brave-fishing-minigame__zone {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    z-index: 1;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brave-text-bright);
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    text-transform: uppercase;
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 999px;
+}
+
+.brave-fishing-minigame__zone--escape {
+    top: 10px;
+    color: color-mix(in srgb, var(--brave-danger) 48%, var(--brave-text-bright));
+}
+
+.brave-fishing-minigame__zone--catch {
+    bottom: 10px;
+    color: color-mix(in srgb, var(--brave-danger) 48%, var(--brave-text-bright));
+}
+
+.brave-fishing-minigame__zone--hold {
+    top: 50%;
+    transform: translateY(-50%);
+    color: color-mix(in srgb, var(--brave-good) 54%, var(--brave-text-bright));
+    background: color-mix(in srgb, var(--brave-good) 14%, rgba(0, 0, 0, 0.18));
+}
+
+.brave-fishing-minigame__readout {
+    display: grid;
+    align-content: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 64%, transparent);
+    border-radius: var(--brave-radius-card);
+    background: color-mix(in srgb, var(--brave-panel-soft) 76%, transparent);
+}
+
+.brave-fishing-minigame__status {
+    color: var(--brave-text-bright);
+    font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.brave-fishing-minigame__fish,
+.brave-fishing-minigame__timer,
+.brave-fishing-minigame__result {
+    color: var(--brave-text-soft);
+    font-size: calc(0.86rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.45;
+}
+
+.brave-fishing-minigame__result {
+    color: var(--brave-text-bright);
+}
+
+.brave-fishing-minigame__controls,
+.brave-fishing-minigame__result-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.brave-fishing-minigame__reel,
+.brave-fishing-minigame__secondary {
+    min-height: 58px;
+    border-radius: var(--brave-radius-card-tight);
+    font: inherit;
+    color: var(--brave-text-bright);
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 68%, transparent);
+    background: color-mix(in srgb, var(--brave-panel-soft) 82%, transparent);
+    touch-action: none;
+}
+
+.brave-fishing-minigame__reel {
+    border-color: color-mix(in srgb, var(--brave-accent) 72%, var(--brave-world-line));
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-accent) 44%, var(--brave-text-bright)), color-mix(in srgb, var(--brave-accent) 50%, var(--brave-panel-deep)));
+    box-shadow: 0 14px 26px rgba(0, 0, 0, 0.28);
+    text-transform: uppercase;
+}
+
+.brave-fishing-minigame__reel:disabled {
+    opacity: 0.48;
+    filter: grayscale(0.35);
+}
+
+.brave-fishing-minigame__secondary {
+    padding-inline: 16px;
+}
+
+.brave-fishing-minigame[data-fishing-phase="hook"] .brave-fishing-minigame__marker {
+    animation: brave-fishing-bite 320ms infinite alternate ease-in-out;
+}
+
+.brave-fishing-minigame[data-fishing-phase="result"] .brave-fishing-minigame__controls {
+    display: none;
+}
+
+@keyframes brave-fishing-bite {
+    from {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1.12);
+    }
+}
+
+@media (max-width: 720px) {
+    .brave-activity-overlay {
+        align-items: end;
+        padding: 10px;
+    }
+
+    .brave-activity-overlay__panel {
+        width: 100%;
+        max-height: calc(100vh - 20px);
+        padding: 14px;
+        border-radius: var(--brave-radius-panel) var(--brave-radius-panel) 0 0;
+    }
+
+    .brave-activity-overlay__stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .brave-activity-overlay__cards {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .brave-activity-card {
+        min-height: 0;
+    }
+
+    .brave-activity-card__head {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .brave-activity-card__badge {
+        max-width: none;
+        justify-self: start;
+        text-align: left;
+    }
+
+    .brave-activity-overlay__footer {
+        display: grid;
+    }
+
+    .brave-activity-overlay__footer-action {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    .brave-fishing-minigame {
+        align-items: end;
+        padding: 10px;
+    }
+
+    .brave-fishing-minigame__panel {
+        width: 100%;
+        max-height: calc(100vh - 20px);
+        padding: 14px;
+        border-radius: var(--brave-radius-panel) var(--brave-radius-panel) 0 0;
+        grid-template-rows: auto minmax(0, 1fr) auto auto;
+    }
+
+    .brave-fishing-minigame__stage {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    .brave-fishing-minigame__setup {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    .brave-fishing-minigame__gear {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .brave-fishing-minigame__gear-option {
+        min-height: 96px;
+    }
+
+    .brave-fishing-minigame__lane {
+        min-height: min(50vh, 430px);
+    }
+
+    .brave-fishing-minigame__readout {
+        align-content: start;
+        grid-template-columns: minmax(0, 1fr) auto;
+        padding: 10px 12px;
+    }
+
+    .brave-fishing-minigame__result {
+        grid-column: 1 / -1;
+    }
+
+    .brave-fishing-minigame__controls,
+    .brave-fishing-minigame__result-actions {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .brave-fishing-minigame__reel,
+    .brave-fishing-minigame__secondary {
+        min-height: 64px;
+        width: 100%;
+    }
 }
 
 .scene-rail {
@@ -3116,16 +4390,13 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--sheet .brave-view__section--status .brave-view__meters {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .brave-view--sheet .brave-view__section--status .brave-view__meter {
-    padding: 10px 10px 9px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 56%, rgba(var(--brave-accent-rgb), 0.1));
-    border-radius: var(--brave-radius-card-tight);
-    background: rgba(255, 255, 255, 0.02);
+    gap: 4px;
 }
 
 .brave-view--sheet .brave-view__section--status .brave-view__meter-track {
@@ -3287,11 +4558,29 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     padding: 14px 14px 12px;
 }
 
+.brave-view--chargen .brave-view__entry--ornamented {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.brave-view--chargen .brave-view__entry--ornamented .brave-view__entry-head,
+.brave-view--chargen .brave-view__entry--ornamented .brave-view__entry-chips,
+.brave-view--chargen .brave-view__entry--ornamented .brave-view__entry-body {
+    position: relative;
+    z-index: 1;
+}
+
 .brave-view--chargen .brave-view__entry-ornament {
-    --brave-entry-ornament-ratio: 0.42;
-    --brave-entry-ornament-fallback: 6rem;
-    --brave-entry-ornament-color: rgba(var(--brave-accent-rgb), 0.1);
-    --brave-entry-ornament-glow: rgba(var(--brave-accent-rgb), 0.12);
+    left: 50%;
+    right: auto;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    --brave-entry-ornament-ratio: 0.28;
+    --brave-entry-ornament-fallback: 3.75rem;
+    --brave-entry-ornament-color: rgba(var(--brave-accent-rgb), 0.14);
+    --brave-entry-ornament-glow: rgba(var(--brave-accent-rgb), 0.16);
+    opacity: 0.95;
 }
 
 .brave-view--connection .brave-view__entry {
@@ -3720,19 +5009,30 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__mobile-utility-side {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto auto;
     gap: 10px;
     min-width: 0;
 }
 
 .brave-view__mobile-map,
-.brave-view__mobile-quest {
+.brave-view__mobile-quest,
+.brave-view__mobile-status,
+.brave-view__mobile-quick {
     appearance: none;
     -webkit-appearance: none;
     color: var(--brave-text-soft);
     font-family: inherit;
     text-align: left;
     cursor: pointer;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 76%, rgba(var(--brave-accent-rgb), 0.14));
+    border-radius: var(--brave-radius-card);
+    background:
+        radial-gradient(circle at 0 0, var(--brave-state-surface-tint-soft), transparent 48%),
+        linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035),
+        0 10px 18px rgba(0, 0, 0, 0.16);
 }
 
 .brave-view__mobile-map {
@@ -3835,6 +5135,26 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: var(--brave-text-bright);
     font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     text-transform: uppercase;
+}
+
+.brave-view__mobile-quickrow {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.brave-view__mobile-quick {
+    display: grid;
+    gap: 5px;
+    min-height: 52px;
+    padding: 10px 12px;
+}
+
+.brave-view__mobile-quick strong {
+    color: var(--brave-text-bright);
+    font-size: calc(0.7rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.25;
+    font-weight: 600;
 }
 
 .brave-view__chips {
@@ -4799,6 +6119,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     min-height: 1.35em;
 }
 
+.brave-view__entry--ornamented {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
 .brave-view__entry--ornamented .brave-view__entry-head,
 .brave-view__entry--ornamented .brave-view__meters,
 .brave-view__entry--ornamented .brave-view__entry-chips,
@@ -4930,6 +6256,10 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__meter--stamina .brave-view__meter-fill {
     background: linear-gradient(90deg, rgba(242, 190, 102, 0.98), rgba(194, 128, 42, 0.9));
+}
+
+.brave-view__meter--xp .brave-view__meter-fill {
+    background: linear-gradient(90deg, rgba(190, 132, 255, 0.98), rgba(132, 79, 219, 0.9));
 }
 
 .brave-view__meter--atb .brave-view__meter-fill {
@@ -5123,7 +6453,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry {
-    height: 188px;
+    height: 164px;
 }
 
 .brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-icon-wrap {
@@ -5153,6 +6483,48 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__meter-track {
     height: 4px;
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-cluster {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 6px;
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-sidecars {
+    gap: 4px;
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-sidecar {
+    padding: 6px 6px 5px;
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-sidecar .brave-view__entry-head {
+    gap: 4px;
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-sidecar .brave-view__entry-icon-wrap {
+    min-width: 1rem;
+    min-height: 1rem;
+    padding: 1px 3px;
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-sidecar .brave-view__entry-title {
+    font-size: calc(0.52rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-sidecar .brave-view__entry-meta,
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-sidecar .brave-view__meter-label,
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-sidecar .brave-view__meter-value {
+    font-size: calc(0.37rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-sidecar .brave-view__meter-track {
+    height: 3px;
+}
+
+.brave-view--combat .brave-view__section--party.brave-view__section--compact .brave-view__entry-sidecar .brave-view__entry-chips .scene-card__chip {
+    font-size: calc(0.36rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    padding: 1px 4px;
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entries {
@@ -5348,8 +6720,105 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry {
-    height: 228px;
+    height: 208px;
     padding: 10px 10px 8px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-cluster {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 96px;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-cluster > .brave-view__entry {
+    min-width: 0;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecars {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    min-height: 100%;
+    height: 100%;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    gap: 4px;
+    min-height: 0;
+    height: 100%;
+    padding: 7px 7px 6px;
+    border: 1px solid rgba(98, 174, 156, 0.26);
+    border-radius: 14px;
+    background:
+        radial-gradient(circle at 0 0, rgba(120, 190, 175, 0.14), transparent 46%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 26%),
+        rgba(10, 22, 20, 0.78);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 10px 20px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+    box-sizing: border-box;
+    transition:
+        transform 150ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease,
+        background 180ms ease;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar .brave-view__entry-ornament {
+    --brave-entry-ornament-ratio: 0.28;
+    --brave-entry-ornament-fallback: 1.4rem;
+    --brave-entry-ornament-color: rgba(168, 223, 210, 0.12);
+    --brave-entry-ornament-glow: rgba(102, 166, 151, 0.1);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar .brave-view__entry-head {
+    gap: 6px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar .brave-view__entry-icon-wrap {
+    min-width: 1.2rem;
+    min-height: 1.2rem;
+    padding: 1px 4px;
+    background: rgba(102, 166, 151, 0.14);
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar .brave-view__entry-title {
+    font-size: calc(0.58rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.05;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar .brave-view__entry-meta,
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar .brave-view__meter-label,
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar .brave-view__meter-value {
+    font-size: calc(0.42rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar .brave-view__meter-track {
+    height: 4px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar .brave-view__entry-chips {
+    gap: 4px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar .brave-view__entry-chips .scene-card__chip {
+    font-size: calc(0.4rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    padding: 2px 5px;
+}
+
+.brave-view--combat .brave-view__section--party .brave-view__entry-sidecar.brave-view__entry--selected {
+    border-color: rgba(186, 232, 214, 0.54);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 0 1px rgba(186, 232, 214, 0.16),
+        0 12px 22px rgba(0, 0, 0, 0.22);
 }
 
 .brave-view--combat .brave-view__section--party .brave-view__entry--size-elite,
@@ -6265,6 +7734,133 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         rgba(255, 255, 255, 0.03);
 }
 
+.brave-arcade-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1230;
+    display: grid;
+    place-items: center;
+    padding: 10px;
+    pointer-events: auto;
+}
+
+.brave-arcade-overlay__backdrop {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, #020609 82%, transparent);
+    backdrop-filter: blur(12px);
+}
+
+.brave-arcade-overlay__panel {
+    position: relative;
+    z-index: 1;
+    width: min(1100px, calc(100vw - 20px));
+    max-width: calc(100dvw - 20px);
+    height: min(940px, calc(100vh - 20px));
+    height: min(940px, calc(100dvh - 20px));
+    max-height: calc(100dvh - 20px);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 8px;
+    padding: 10px 10px 8px;
+    border: 1px solid rgba(112, 220, 255, 0.18);
+    border-radius: 16px;
+    background:
+        linear-gradient(180deg, rgba(12, 15, 20, 0.98), rgba(3, 5, 8, 0.995));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 26px 72px rgba(0, 0, 0, 0.48);
+    overflow: hidden;
+}
+
+.brave-arcade-overlay__panel:focus {
+    outline: none;
+}
+
+.brave-arcade-overlay__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.brave-arcade-overlay__titlebar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.brave-arcade-overlay__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    color: #ecfbff;
+    background: rgba(112, 220, 255, 0.12);
+    flex: 0 0 auto;
+}
+
+.brave-arcade-overlay__titles {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.brave-arcade-overlay__eyebrow {
+    color: #91dff8;
+    font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.brave-arcade-overlay__title {
+    color: #eefbff;
+    font-family: var(--brave-dialogue-font-family);
+    letter-spacing: var(--brave-dialogue-letter-spacing);
+    font-size: calc(1.08rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.05;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.brave-arcade-overlay__body {
+    min-height: 0;
+    display: grid;
+    overflow: hidden;
+}
+
+.brave-arcade-overlay__body .brave-view__arcade-shell {
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+}
+
+.brave-arcade-overlay__close {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+body.brave-arcade-overlay-active {
+    overflow: hidden;
+}
+
+body.brave-arcade-overlay-active .content,
+body.brave-arcade-overlay-active #messagewindow {
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
 .brave-view--arcade .brave-view__hero {
     background:
         radial-gradient(circle at 0 0, rgba(98, 222, 255, 0.18), transparent 42%),
@@ -6310,8 +7906,78 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         0 18px 36px rgba(0, 0, 0, 0.34),
         0 0 0 1px rgba(255, 255, 255, 0.03);
-    padding: 12px;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    align-items: start;
+    gap: 8px;
+    padding: 10px;
     color: #eaf9ff;
+}
+
+.brave-view__arcade-shell[data-arcade-layout="compact"],
+.brave-view__arcade-shell[data-arcade-layout="tight"] {
+    gap: 6px;
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.brave-view__arcade-shell[data-arcade-layout="compact"] .brave-view__arcade-marquee,
+.brave-view__arcade-shell[data-arcade-layout="tight"] .brave-view__arcade-marquee {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+}
+
+.brave-view__arcade-shell[data-arcade-layout="compact"] .brave-view__arcade-scorecard,
+.brave-view__arcade-shell[data-arcade-layout="tight"] .brave-view__arcade-scorecard {
+    padding: 7px 9px 8px;
+}
+
+.brave-view__arcade-shell[data-arcade-layout="compact"] .brave-view__arcade-score-value,
+.brave-view__arcade-shell[data-arcade-layout="tight"] .brave-view__arcade-score-value {
+    font-size: calc(1.18rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view__arcade-shell[data-arcade-layout="compact"] .brave-view__arcade-hud,
+.brave-view__arcade-shell[data-arcade-layout="tight"] .brave-view__arcade-hud {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.brave-view__arcade-shell[data-arcade-layout="compact"] .brave-view__arcade-stat,
+.brave-view__arcade-shell[data-arcade-layout="tight"] .brave-view__arcade-stat {
+    display: grid;
+    min-width: 0;
+    justify-content: start;
+    padding: 5px 6px;
+    gap: 2px;
+    border-radius: 10px;
+    font-size: calc(0.74rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-view__arcade-shell[data-arcade-layout="compact"] .brave-view__arcade-stat-label,
+.brave-view__arcade-shell[data-arcade-layout="tight"] .brave-view__arcade-stat-label {
+    font-size: 0.66em;
+}
+
+.brave-view__arcade-shell[data-arcade-layout="compact"] .brave-view__arcade-stat-value,
+.brave-view__arcade-shell[data-arcade-layout="tight"] .brave-view__arcade-stat-value {
+    font-size: 0.84em;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+}
+
+.brave-view__arcade-shell[data-arcade-layout="compact"] .brave-view__arcade-footer,
+.brave-view__arcade-shell[data-arcade-layout="tight"] .brave-view__arcade-footer {
+    display: none;
+}
+
+.brave-view__arcade-shell[data-arcade-layout="tight"] .brave-view__arcade-frame {
+    padding: 6px;
+    border-radius: 10px;
+}
+
+.brave-view__arcade-shell[data-arcade-layout="tight"] .brave-view__arcade-screen {
+    min-height: 11em;
 }
 
 .brave-view__arcade-shell::before {
@@ -6401,29 +8067,74 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__arcade-marquee,
 .brave-view__arcade-footer {
-    display: flex;
     align-items: stretch;
     justify-content: flex-start;
-    gap: 10px 14px;
-    flex-wrap: wrap;
+    gap: 8px 10px;
 }
 
 .brave-view__arcade-marquee {
-    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 10px;
 }
 
 .brave-view__arcade-footer {
-    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.brave-view__arcade-footer-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.brave-view__arcade-scorecard {
+    min-width: 0;
+    display: grid;
+    align-content: center;
+    gap: 3px;
+    padding: 8px 12px 9px;
+    border: 1px solid rgba(255, 114, 114, 0.22);
+    border-radius: 12px;
+    background:
+        linear-gradient(180deg, rgba(74, 28, 28, 0.76), rgba(23, 10, 10, 0.94));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 0 0 1px rgba(255, 255, 255, 0.01);
+}
+
+.brave-view__arcade-score-label {
+    color: #ffb4b4;
+    font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.brave-view__arcade-score-value {
+    color: #ffe0b9;
+    font-size: calc(1.46rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.brave-view__arcade-hud {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
 }
 
 .brave-view__arcade-stat {
-    letter-spacing: 0.12em;
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    min-width: 112px;
-    padding: 7px 10px 6px;
+    letter-spacing: 0.08em;
+    display: grid;
+    align-content: center;
+    gap: 2px;
+    min-width: 0;
+    padding: 7px 9px 6px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 11px;
     background:
@@ -6435,39 +8146,19 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     text-transform: uppercase;
 }
 
-.brave-view__arcade-stat--score {
-    border-color: rgba(255, 114, 114, 0.2);
-    background: linear-gradient(180deg, rgba(72, 26, 26, 0.7), rgba(21, 9, 9, 0.9));
-}
-
 .brave-view__arcade-stat--high {
-    border-color: rgba(255, 151, 207, 0.2);
-    background: linear-gradient(180deg, rgba(66, 28, 48, 0.7), rgba(20, 10, 15, 0.9));
+    border-color: rgba(255, 151, 207, 0.18);
+    background: linear-gradient(180deg, rgba(66, 28, 48, 0.64), rgba(20, 10, 15, 0.88));
 }
 
 .brave-view__arcade-stat--lives {
-    border-color: rgba(255, 221, 115, 0.22);
-    background: linear-gradient(180deg, rgba(66, 47, 17, 0.7), rgba(21, 14, 6, 0.92));
+    border-color: rgba(255, 221, 115, 0.18);
+    background: linear-gradient(180deg, rgba(66, 47, 17, 0.64), rgba(21, 14, 6, 0.9));
 }
 
 .brave-view__arcade-stat--level {
-    border-color: rgba(131, 232, 255, 0.2);
-    background: linear-gradient(180deg, rgba(21, 50, 66, 0.72), rgba(8, 16, 24, 0.92));
-}
-
-.brave-view__arcade-stat--bonus {
-    border-color: rgba(255, 190, 110, 0.2);
-    background: linear-gradient(180deg, rgba(67, 43, 17, 0.72), rgba(20, 13, 6, 0.92));
-}
-
-.brave-view__arcade-stat--queue {
-    border-color: rgba(126, 232, 196, 0.2);
-    background: linear-gradient(180deg, rgba(18, 54, 43, 0.72), rgba(8, 18, 15, 0.92));
-}
-
-.brave-view__arcade-stat--status {
-    border-color: var(--brave-arcade-status-border);
-    background: var(--brave-arcade-status-surface);
+    border-color: rgba(131, 232, 255, 0.18);
+    background: linear-gradient(180deg, rgba(21, 50, 66, 0.64), rgba(8, 16, 24, 0.9));
 }
 
 .brave-view__arcade-stat-label,
@@ -6475,16 +8166,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: #84dfff;
 }
 
+.brave-view__arcade-stat-label {
+    font-size: 0.68em;
+    line-height: 1.12;
+}
+
 .brave-view__arcade-stat-value {
     font-weight: 700;
-}
-
-.brave-view__arcade-stat--score .brave-view__arcade-stat-label {
-    color: #ffaaaa;
-}
-
-.brave-view__arcade-stat--score .brave-view__arcade-stat-value {
-    color: #ffd0a8;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
 }
 
 .brave-view__arcade-stat--high .brave-view__arcade-stat-label {
@@ -6509,30 +8199,6 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__arcade-stat--level .brave-view__arcade-stat-value {
     color: #d7f8ff;
-}
-
-.brave-view__arcade-stat--bonus .brave-view__arcade-stat-label {
-    color: #ffcf93;
-}
-
-.brave-view__arcade-stat--bonus .brave-view__arcade-stat-value {
-    color: #ffe9c8;
-}
-
-.brave-view__arcade-stat--queue .brave-view__arcade-stat-label {
-    color: #aef2db;
-}
-
-.brave-view__arcade-stat--queue .brave-view__arcade-stat-value {
-    color: #d0ffef;
-}
-
-.brave-view__arcade-stat--status .brave-view__arcade-stat-label {
-    color: var(--brave-arcade-status-label);
-}
-
-.brave-view__arcade-stat--status .brave-view__arcade-stat-value {
-    color: var(--brave-arcade-status-value);
 }
 
 .brave-view__arcade-shell[data-arcade-status-tone="ready"] {
@@ -6624,10 +8290,13 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.02),
         inset 0 14px 26px rgba(255, 255, 255, 0.01);
-    padding: 12px;
+    min-height: 0;
+    align-self: stretch;
+    padding: 8px;
     overflow: auto;
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 .brave-view__arcade-screen {
@@ -6641,6 +8310,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: #eefbff;
     text-shadow: 0 0 1px rgba(255, 255, 255, 0.08);
     user-select: none;
+    flex: 0 0 auto;
 }
 
 .brave-view__arcade-char {
@@ -6778,25 +8448,25 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__arcade-dpad {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 72px));
+    grid-template-columns: repeat(3, minmax(0, 60px));
     grid-template-areas:
         ". up ."
         "left . right"
         ". down .";
-    gap: 8px;
+    gap: 6px;
     justify-content: center;
 }
 
 .brave-view__arcade-pad {
     font-family: "Brave VT323", "Brave DejaVu Sans Mono", monospace;
-    min-height: 64px;
+    min-height: 56px;
     border: 1px solid rgba(112, 220, 255, 0.22);
-    border-radius: 14px;
+    border-radius: 12px;
     background:
         linear-gradient(180deg, rgba(21, 27, 36, 0.98), rgba(7, 10, 14, 1)),
         radial-gradient(circle at 50% 0, rgba(112, 220, 255, 0.08), transparent 56%);
     color: #ecfbff;
-    font-size: 1.7rem;
+    font-size: 1.45rem;
     line-height: 1;
     touch-action: none;
     user-select: none;
@@ -6829,18 +8499,19 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__arcade-mobile-actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     justify-content: center;
 }
 
 .brave-view__arcade-hint {
     display: inline-flex;
     align-items: center;
-    padding: 6px 10px;
+    padding: 5px 8px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.03);
     color: #dff6ff;
+    font-size: calc(0.74rem * var(--brave-text-scale) * var(--brave-font-size-scale));
 }
 
 .brave-view__arcade-hint--move {
@@ -6855,16 +8526,100 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-view__arcade-utility {
     letter-spacing: 0.08em;
-    min-width: 118px;
-    min-height: 46px;
+    min-width: 98px;
+    min-height: 40px;
+    padding: 0 10px;
     border: 1px solid rgba(112, 220, 255, 0.18);
     border-radius: 999px;
     background:
         linear-gradient(180deg, rgba(18, 32, 42, 0.92), rgba(8, 14, 18, 0.98));
     color: #c6f5ff;
-    font-size: calc(0.88rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(0.8rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     text-transform: uppercase;
     touch-action: manipulation;
+}
+
+body[data-brave-scene="arcade"] .brave-view--arcade .brave-view__chips,
+body[data-brave-scene="arcade"] .brave-view--arcade .brave-view__actions {
+    display: none;
+}
+
+@media (max-height: 860px) {
+    body[data-brave-scene="arcade"] .brave-view__arcade-footer {
+        display: none;
+    }
+
+    body[data-brave-scene="arcade"] .brave-view__arcade-shell {
+        gap: 6px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 900px) {
+    .brave-arcade-overlay {
+        padding: 0;
+    }
+
+    .brave-arcade-overlay__panel {
+        width: 100vw;
+        width: 100dvw;
+        height: 100vh;
+        height: 100dvh;
+        gap: 8px;
+        padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+        max-width: 100dvw;
+        max-height: 100dvh;
+    }
+
+    .brave-arcade-overlay__icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    .brave-arcade-overlay__eyebrow {
+        font-size: calc(0.62rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    .brave-arcade-overlay__title {
+        font-size: calc(0.96rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    body.brave-arcade-mobile-active .brave-arcade-overlay .brave-view__arcade-mobile-controls {
+        position: sticky;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(112, 220, 255, 0.12);
+        background:
+            linear-gradient(180deg, rgba(8, 10, 14, 0), rgba(8, 10, 14, 0.86) 28%, rgba(8, 10, 14, 0.98)),
+            linear-gradient(180deg, rgba(8, 10, 14, 0.98), rgba(2, 3, 5, 1));
+    }
+
+    body.brave-arcade-mobile-active .brave-arcade-overlay .brave-view__arcade-dpad {
+        grid-template-columns: repeat(3, minmax(0, 56px));
+    }
+
+    body.brave-arcade-mobile-active .brave-arcade-overlay .brave-view__arcade-pad {
+        min-height: 52px;
+        font-size: 1.35rem;
+    }
+
+    body.brave-arcade-mobile-active .brave-arcade-overlay .brave-view__arcade-mobile-actions {
+        gap: 8px;
+    }
+
+    body.brave-arcade-mobile-active .brave-arcade-overlay .brave-view__arcade-utility {
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 38px;
+        padding: 0 10px;
+    }
 }
 
 .brave-view__arcade-utility--quit {
@@ -8369,16 +10124,43 @@ body[data-brave-scene="explore"] .minimap-overlay {
 
 body[data-brave-scene="combat"] #messagewindow {
     padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
 }
 
 body[data-brave-scene="combat"] #messagewindow > .brave-sticky-view {
     width: 100%;
     margin-bottom: 12px;
+    position: relative;
+    top: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-bottom: 0;
+}
+
+body[data-brave-scene="combat"] #messagewindow > .brave-sticky-view > .brave-view--combat {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body[data-brave-scene="combat"] .brave-view--combat .brave-view__sections {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-items: stretch;
+}
+
+body[data-brave-scene="combat"] .brave-view--combat .brave-view__section {
+    min-height: 0;
 }
 
 body[data-brave-scene="combat"] .brave-combat-log {
     display: flex;
     flex-direction: column;
+    flex: 0 0 auto;
     gap: 8px;
     padding: 10px 10px 8px;
     border: 1px solid rgba(169, 106, 92, 0.22);
@@ -8420,17 +10202,36 @@ body[data-brave-scene="combat"] .brave-combat-log__body {
     min-height: calc(1.62em * 2 + 1.2rem);
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding-right: 4px;
+    padding-right: 6px;
+    scrollbar-gutter: stable;
     scrollbar-width: thin;
+    scrollbar-color: rgba(221, 148, 119, 0.78) rgba(32, 22, 20, 0.5);
 }
 
 body[data-brave-scene="combat"] .brave-combat-log__body::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
+}
+
+body[data-brave-scene="combat"] .brave-combat-log__body::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background:
+        linear-gradient(180deg, rgba(77, 51, 42, 0.82), rgba(32, 22, 20, 0.7));
+    border: 1px solid rgba(172, 106, 82, 0.16);
 }
 
 body[data-brave-scene="combat"] .brave-combat-log__body::-webkit-scrollbar-thumb {
     border-radius: 999px;
-    background: rgba(var(--brave-accent-rgb), 0.28);
+    border: 1px solid rgba(255, 231, 214, 0.12);
+    background:
+        linear-gradient(180deg, rgba(239, 176, 141, 0.92), rgba(177, 97, 72, 0.88));
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 231, 214, 0.08),
+        0 0 10px rgba(138, 66, 44, 0.18);
+}
+
+body[data-brave-scene="combat"] .brave-combat-log__body::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg, rgba(247, 191, 159, 0.96), rgba(194, 108, 80, 0.92));
 }
 
 body[data-brave-scene="combat"] .brave-combat-log__body > .out,
@@ -8453,6 +10254,36 @@ body[data-brave-scene="combat"] .brave-combat-log__body > .err {
 
 body[data-brave-scene="combat"] .brave-combat-log__body > .err {
     border-color: rgba(213, 138, 118, 0.34);
+}
+
+body[data-brave-scene="combat"] .brave-combat-log__body > .brave-combat-log__entry--action {
+    position: relative;
+    padding: 9px 12px 9px 14px;
+    border-color: rgba(228, 177, 121, 0.34);
+    background:
+        linear-gradient(90deg, rgba(230, 168, 98, 0.2), rgba(230, 168, 98, 0.03) 22%, transparent 58%),
+        radial-gradient(circle at 100% 0, rgba(112, 151, 188, 0.14), transparent 42%),
+        linear-gradient(180deg, rgba(41, 27, 21, 0.96), rgba(19, 14, 12, 0.98));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 237, 214, 0.08),
+        inset 3px 0 0 rgba(232, 177, 110, 0.82),
+        0 14px 28px rgba(0, 0, 0, 0.24);
+    color: #f6ddc3;
+    font-weight: 700;
+    letter-spacing: 0.015em;
+}
+
+body[data-brave-scene="combat"] .brave-combat-log__body > .brave-combat-log__entry--action::before {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 214, 156, 0.98), rgba(230, 152, 74, 0.94));
+    box-shadow: 0 0 10px rgba(230, 152, 74, 0.36);
+    transform: translateY(-50%);
 }
 
 body[data-brave-scene="combat"] .scene-rail__panel,
@@ -9481,11 +11312,11 @@ body.brave-combat-return-active .scene-card {
     }
 
     .brave-view__arcade-shell {
-        padding: 10px;
+        padding: 8px;
     }
 
     .brave-view__arcade-frame {
-        padding: 10px;
+        padding: 8px;
     }
 
     .brave-view__arcade-screen {
@@ -9494,7 +11325,7 @@ body.brave-combat-return-active .scene-card {
 
     body[data-brave-scene="arcade"].brave-arcade-mobile-active .content,
     body[data-brave-scene="arcade"].brave-arcade-mobile-active #messagewindow {
-        overflow-y: auto;
+        overflow-y: hidden;
         overscroll-behavior: none;
     }
 
@@ -9510,24 +11341,40 @@ body.brave-combat-return-active .scene-card {
 
     body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-marquee {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px 10px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+    }
+
+    body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-scorecard {
+        padding: 7px 9px 8px;
+    }
+
+    body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-score-value {
+        font-size: calc(1.14rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-hud {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
     }
 
     body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-stat {
+        display: grid;
         min-width: 0;
-        justify-content: space-between;
-        padding: 6px 8px;
-        gap: 8px;
+        justify-content: start;
+        padding: 5px 6px;
+        gap: 2px;
         border-radius: 10px;
     }
 
     body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-stat-label {
-        font-size: 0.78em;
+        font-size: 0.66em;
     }
 
     body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-stat-value {
-        font-size: 0.9em;
+        font-size: 0.78em;
+        line-height: 1.05;
+        overflow-wrap: anywhere;
     }
 
     body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-footer {
@@ -9539,13 +11386,33 @@ body.brave-combat-return-active .scene-card {
         bottom: 0;
         display: flex;
         flex-direction: column;
-        gap: 12px;
-        margin-top: 12px;
-        padding-top: 12px;
+        gap: 8px;
+        margin-top: 8px;
+        padding-top: 8px;
         border-top: 1px solid rgba(112, 220, 255, 0.12);
         background:
             linear-gradient(180deg, rgba(8, 10, 14, 0), rgba(8, 10, 14, 0.86) 28%, rgba(8, 10, 14, 0.98)),
             linear-gradient(180deg, rgba(8, 10, 14, 0.98), rgba(2, 3, 5, 1));
+    }
+
+    body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-dpad {
+        grid-template-columns: repeat(3, minmax(0, 56px));
+    }
+
+    body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-pad {
+        min-height: 52px;
+        font-size: 1.35rem;
+    }
+
+    body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-mobile-actions {
+        gap: 8px;
+    }
+
+    body[data-brave-scene="arcade"].brave-arcade-mobile-active .brave-view__arcade-utility {
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 38px;
+        padding: 0 10px;
     }
 
     body.brave-mobile-nav-active {
@@ -9916,6 +11783,55 @@ body.brave-combat-return-active .scene-card {
         padding: 10px 12px 14px;
     }
 
+    .brave-mobile-sheet__subtabs {
+        display: flex;
+        gap: 8px;
+        padding: 8px 12px 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .brave-mobile-sheet__subtabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .brave-mobile-sheet__subtab {
+        font-family: inherit;
+        letter-spacing: calc(var(--brave-letter-spacing) + 0.04em);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex: 0 0 auto;
+        min-height: 34px;
+        padding: 6px 10px;
+        border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.14));
+        border-radius: var(--brave-radius-control);
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 40%),
+            linear-gradient(
+                180deg,
+                color-mix(in srgb, var(--brave-surface-deep-top) 92%, rgba(18, 16, 11, 0.98)),
+                color-mix(in srgb, var(--brave-surface-deep-bottom) 96%, rgba(8, 8, 6, 0.995))
+            );
+        color: color-mix(in srgb, var(--brave-text-soft) 88%, var(--brave-text-bright));
+        font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        text-transform: uppercase;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+
+    .brave-mobile-sheet__subtab--active {
+        border-color: rgba(var(--brave-accent-rgb), 0.34);
+        color: var(--brave-text-bright);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.045),
+            0 0 0 1px rgba(var(--brave-accent-rgb), 0.12);
+    }
+
+    .brave-mobile-sheet__subtab-icon {
+        font-size: 0.88rem;
+    }
+
     .brave-mobile-sheet__section {
         display: flex;
         flex-direction: column;
@@ -10114,6 +12030,51 @@ body.brave-combat-return-active .scene-card {
         align-items: baseline;
     }
 
+    .brave-mobile-sheet__row--action,
+    .brave-mobile-sheet__bullet--action {
+        width: 100%;
+        text-align: left;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+
+    .brave-mobile-sheet__bullet {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+    }
+
+    .brave-mobile-sheet__bullet-copy {
+        display: grid;
+        gap: 3px;
+        min-width: 0;
+    }
+
+    .brave-mobile-sheet__bullet-text {
+        color: var(--brave-text-bright);
+        line-height: 1.3;
+    }
+
+    .brave-mobile-sheet__bullet-detail {
+        color: var(--brave-text-dim);
+        font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        line-height: 1.28;
+    }
+
+    .brave-mobile-sheet__bullet-badge {
+        letter-spacing: calc(var(--brave-letter-spacing) + 0.04em);
+        color: var(--brave-text-bright);
+        font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        text-transform: uppercase;
+    }
+
+    .brave-mobile-sheet__empty--intro {
+        text-transform: none;
+        letter-spacing: normal;
+        line-height: 1.45;
+    }
+
     .brave-mobile-sheet__action {
         font-family: inherit;
         letter-spacing: calc(var(--brave-letter-spacing) + 0.06em);
@@ -10158,8 +12119,9 @@ body.brave-combat-return-active .scene-card {
         max-width: none;
         margin: 0;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        grid-template-rows: repeat(3, 82px);
-        gap: 6px;
+        grid-template-rows: 104px 78px 104px;
+        row-gap: 3px;
+        column-gap: 6px;
     }
 
     #mobile-nav-dock .brave-view__navcard,
@@ -10167,10 +12129,21 @@ body.brave-combat-return-active .scene-card {
         height: 100%;
     }
 
+    #mobile-nav-dock .brave-view__navcard--north,
+    #mobile-nav-dock .brave-view__navslot--north {
+        align-self: start;
+        margin-top: 6px;
+    }
+
+    #mobile-nav-dock .brave-view__navcard--south,
+    #mobile-nav-dock .brave-view__navslot--south {
+        align-self: end;
+    }
+
     #mobile-nav-dock .brave-view__navcard {
         flex-direction: column;
         gap: 4px;
-        padding: 6px 8px;
+        padding: 10px 9px;
     }
 
     #mobile-nav-dock .brave-view__navcard-badge {
@@ -10190,10 +12163,10 @@ body.brave-combat-return-active .scene-card {
 
     #mobile-nav-dock .brave-view__navcard-label {
         display: block;
-        padding: 3px 0 0;
-        transform: translateY(2px);
-        font-size: calc(0.49rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-        line-height: 1.0;
+        padding: 6px 0 0;
+        transform: none;
+        font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+        line-height: 1.14;
         white-space: normal;
         text-overflow: clip;
     }
@@ -11040,7 +13013,7 @@ body.brave-combat-return-active .scene-card {
 
     #mobile-nav-dock .brave-view__navcard,
     #mobile-nav-dock .brave-view__navslot {
-        height: 58px;
+        height: 86px;
     }
 
     .brave-mobile-tools {

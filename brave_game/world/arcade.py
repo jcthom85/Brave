@@ -161,9 +161,10 @@ def merge_arcade_leaderboard(entries, player_name, score, limit=LEADERBOARD_LIMI
     if improved_personal_best or player_token not in by_player:
         by_player[player_token] = {"name": player_name, "score": safe_score}
 
-    updated = sorted(by_player.values(), key=lambda entry: (-entry["score"], entry["name"].lower()))[:limit]
+    full_leaderboard = sorted(by_player.values(), key=lambda entry: (-entry["score"], entry["name"].lower()))
+    updated = full_leaderboard[:limit]
     rank = None
-    for index, entry in enumerate(updated, start=1):
+    for index, entry in enumerate(full_leaderboard, start=1):
         if _normalize_token(entry["name"]) == player_token:
             rank = index
             break
@@ -180,6 +181,7 @@ def merge_arcade_leaderboard(entries, player_name, score, limit=LEADERBOARD_LIMI
     return updated, {
         "rank": rank,
         "score": safe_score,
+        "leaderboard_limit": max(1, int(limit or LEADERBOARD_LIMIT)),
         "improved_personal_best": improved_personal_best,
         "new_top_score": new_top_score,
     }
@@ -200,5 +202,93 @@ def submit_arcade_score(character, cabinet, game_key, score):
     details["entries"] = updated_entries
     details["best_score"] = best_score
     details["improved_personal_best"] = improved_personal_best
+    details["player_name"] = character.key
     details["reward"] = reward
     return details
+
+
+def build_arcade_result_payload(cabinet, game_key, score, details):
+    """Return a browser-friendly result payload for one finished arcade run."""
+
+    safe_score = max(0, int(score or 0))
+    details = details or {}
+    entries = list(details.get("entries") or [])
+    limit = max(1, int(details.get("leaderboard_limit") or LEADERBOARD_LIMIT))
+    current_name = str(details.get("player_name") or "").strip()
+    current_token = _normalize_token(current_name)
+    high_score = 0
+    if entries:
+        try:
+            high_score = max(0, int((entries[0] or {}).get("score", 0) or 0))
+        except (TypeError, ValueError):
+            high_score = 0
+    rank = details.get("rank")
+    rank_value = f"#{rank}" if rank else "Off Board"
+
+    leaderboard = []
+    for index, entry in enumerate(entries[:limit], start=1):
+        name = str((entry or {}).get("name") or "").strip() or "Unknown"
+        try:
+            entry_score = max(0, int((entry or {}).get("score", 0) or 0))
+        except (TypeError, ValueError):
+            entry_score = 0
+        name_token = _normalize_token(name)
+        leaderboard.append(
+            {
+                "rank": index,
+                "name": name,
+                "score": format_arcade_score(entry_score),
+                "is_current": bool(current_token and name_token == current_token),
+                "is_top": index == 1,
+            }
+        )
+
+    player_row = None
+    if rank and rank > limit:
+        player_row = {
+            "rank": rank,
+            "name": current_name or "Unknown",
+            "score": format_arcade_score(safe_score),
+            "is_current": True,
+        }
+
+    notes = []
+    if details.get("new_top_score"):
+        notes.append({"tone": "record", "text": "New cabinet record."})
+    elif details.get("improved_personal_best"):
+        notes.append({"tone": "personal", "text": "New personal best on this cabinet."})
+    if details.get("reward") and details["reward"].get("item_name"):
+        notes.append({"tone": "reward", "text": f"Prize drawer opens: {details['reward']['item_name']}."})
+
+    if details.get("new_top_score"):
+        headline = "NEW HIGH SCORE"
+    elif details.get("reward"):
+        headline = "PRIZE UNLOCKED"
+    elif details.get("improved_personal_best"):
+        headline = "PERSONAL BEST"
+    else:
+        headline = "RUN COMPLETE"
+
+    tone = "good" if (details.get("new_top_score") or details.get("improved_personal_best") or details.get("reward")) else "muted"
+    return {
+        "cabinet": getattr(cabinet, "key", "Arcade Cabinet"),
+        "title": ARCADE_GAMES.get(game_key, {}).get("name", "Arcade"),
+        "headline": headline,
+        "tone": tone,
+        "summary_stats": [
+            {"label": "Your Score", "value": format_arcade_score(safe_score), "accent": "score"},
+            {"label": "Your Rank", "value": rank_value, "accent": "rank"},
+            {"label": "High Score", "value": format_arcade_score(high_score), "accent": "high"},
+        ],
+        "leaderboard_title": "Local Leaderboard",
+        "limit": limit,
+        "leaderboard": leaderboard,
+        "player_row": player_row,
+        "notes": notes,
+        "stats": [
+            {"label": "Your Score", "value": format_arcade_score(safe_score)},
+            {"label": "Your Rank", "value": rank_value},
+            {"label": "High Score", "value": format_arcade_score(high_score)},
+        ],
+        "lines": [note["text"] for note in notes],
+    }

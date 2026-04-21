@@ -50,6 +50,7 @@ let defaultout_plugin = (function () {
     var currentMapText = "";
     var currentMapGrid = null;
     var currentArcadeState = null;
+    var pendingArcadeRoomRestore = false;
     var currentMobileUtilityTab = null;
     var mobileRoomActivityUnreadCount = 0;
     var currentCombatActionTab = "abilities";
@@ -58,6 +59,8 @@ let defaultout_plugin = (function () {
     var currentPickerAnchorRect = null;
     var currentPickerSourceId = "";
     var currentNoticeTimer = null;
+    var currentFishingGame = null;
+    var currentFishingAnimationFrame = null;
     var currentConnectionScreen = "menu";
     var suppressBrowserClickUntil = 0;
     var allowNextRoomRefreshNavigationUntil = 0;
@@ -449,20 +452,25 @@ let defaultout_plugin = (function () {
             + " data-arcade-high='" + escapeHtml(highScore) + "'"
             + " data-arcade-best='" + escapeHtml(bestScore) + "'>"
             + "<div class='brave-view__arcade-marquee'>"
-            + "<div class='brave-view__arcade-stat brave-view__arcade-stat--score'><span class='brave-view__arcade-stat-label'>1UP</span><span class='brave-view__arcade-stat-value' data-arcade-score>0</span></div>"
-            + "<div class='brave-view__arcade-stat brave-view__arcade-stat--high'><span class='brave-view__arcade-stat-label'>High</span><span class='brave-view__arcade-stat-value' data-arcade-high-score>" + escapeHtml(highScore) + "</span></div>"
+            + "<div class='brave-view__arcade-scorecard'>"
+            + "<span class='brave-view__arcade-score-label'>Score</span>"
+            + "<span class='brave-view__arcade-score-value' data-arcade-score>0</span>"
+            + "</div>"
+            + "<div class='brave-view__arcade-hud'>"
+            + "<div class='brave-view__arcade-stat brave-view__arcade-stat--high'><span class='brave-view__arcade-stat-label'>High Score</span><span class='brave-view__arcade-stat-value' data-arcade-high-score>" + escapeHtml(highScore) + "</span></div>"
             + "<div class='brave-view__arcade-stat brave-view__arcade-stat--lives'><span class='brave-view__arcade-stat-label'>Lives</span><span class='brave-view__arcade-stat-value' data-arcade-lives>3</span></div>"
             + "<div class='brave-view__arcade-stat brave-view__arcade-stat--level'><span class='brave-view__arcade-stat-label'>Level</span><span class='brave-view__arcade-stat-value' data-arcade-level>1</span></div>"
-            + "<div class='brave-view__arcade-stat brave-view__arcade-stat--bonus'><span class='brave-view__arcade-stat-label'>Bonus</span><span class='brave-view__arcade-stat-value' data-arcade-bonus data-arcade-tone='pie'>PIE 100</span></div>"
-            + "<div class='brave-view__arcade-stat brave-view__arcade-stat--queue'><span class='brave-view__arcade-stat-label'>Queue</span><span class='brave-view__arcade-stat-value' data-arcade-queue>LEFT</span></div>"
-            + "<div class='brave-view__arcade-stat brave-view__arcade-stat--status'><span class='brave-view__arcade-stat-label'>State</span><span class='brave-view__arcade-stat-value' data-arcade-status data-arcade-tone='ready'>READY!</span></div>"
+            + "</div>"
             + "</div>"
             + "<div class='brave-view__arcade-frame'>"
             + "<pre class='brave-view__arcade-screen' aria-live='polite'></pre>"
             + "</div>"
             + "<div class='brave-view__arcade-footer'>"
             + "<span class='brave-view__arcade-hint brave-view__arcade-hint--move'>Arrows or WASD steer.</span>"
-            + "<span class='brave-view__arcade-hint brave-view__arcade-hint--pause'>P pauses. Q cashes out.</span>"
+            + "<div class='brave-view__arcade-footer-actions'>"
+            + "<button type='button' class='brave-view__arcade-utility' data-arcade-action='pause'>Pause</button>"
+            + "<button type='button' class='brave-view__arcade-utility brave-view__arcade-utility--quit' data-arcade-action='quit'>Quit</button>"
+            + "</div>"
             + "</div>"
             + "<div class='brave-view__arcade-mobile-controls' aria-label='Arcade controls'>"
             + "<div class='brave-view__arcade-dpad'>"
@@ -480,6 +488,85 @@ let defaultout_plugin = (function () {
         );
     };
 
+    var clearArcadeOverlay = function () {
+        var root = document.getElementById("brave-arcade-overlay");
+        if (root && root.parentNode) {
+            root.parentNode.removeChild(root);
+        }
+        if (document.body) {
+            document.body.classList.remove("brave-arcade-overlay-active");
+        }
+    };
+
+    var requestArcadeClose = function () {
+        if (currentArcadeState && typeof currentArcadeState.quit === "function") {
+            currentArcadeState.quit(true);
+            return;
+        }
+        teardownArcadeMode();
+    };
+
+    var bindArcadeOverlayControls = function (root) {
+        if (!root) {
+            return;
+        }
+        root.addEventListener("click", function (event) {
+            var closeTarget = event.target.closest("[data-brave-arcade-close]");
+            if (!closeTarget) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            requestArcadeClose();
+        }, true);
+    };
+
+    var renderArcadeOverlay = function (payload) {
+        payload = payload || {};
+        clearArcadeOverlay();
+        if (typeof clearActivityOverlay === "function") {
+            clearActivityOverlay({ suppressArcadeRestore: true });
+        }
+        if (typeof clearFishingMinigame === "function") {
+            clearFishingMinigame();
+        }
+        var root = document.createElement("div");
+        root.id = "brave-arcade-overlay";
+        root.className = "brave-arcade-overlay";
+        root.setAttribute("aria-hidden", "false");
+        root.innerHTML =
+            "<div class='brave-arcade-overlay__backdrop'></div>"
+            + "<section class='brave-arcade-overlay__panel' role='dialog' aria-modal='true' tabindex='0'>"
+            + "<div class='brave-arcade-overlay__head'>"
+            + "<div class='brave-arcade-overlay__titlebar'>"
+            + "<span class='brave-arcade-overlay__icon'>" + icon("sports_esports") + "</span>"
+            + "<div class='brave-arcade-overlay__titles'>"
+            + "<div class='brave-arcade-overlay__eyebrow'>" + escapeHtml(payload.cabinet || "Arcade Cabinet") + "</div>"
+            + "<div class='brave-arcade-overlay__title'>" + escapeHtml(payload.title || "Arcade") + "</div>"
+            + "</div>"
+            + "</div>"
+            + "<button type='button' class='brave-arcade-overlay__close brave-view__action brave-view__action--muted brave-view__back' data-brave-arcade-close='1' aria-label='Close arcade'>"
+            + icon("close")
+            + "</button>"
+            + "</div>"
+            + "<div class='brave-arcade-overlay__body'>"
+            + renderArcadeSurface({
+                game_key: payload.game || "",
+                high_score: payload.high_score || 0,
+                best_score: payload.best_score || 0,
+            })
+            + "</div>"
+            + "</section>";
+        document.body.appendChild(root);
+        document.body.classList.add("brave-arcade-overlay-active");
+        bindArcadeOverlayControls(root);
+        var panel = root.querySelector(".brave-arcade-overlay__panel");
+        if (panel && typeof panel.focus === "function") {
+            panel.focus();
+        }
+        return root.querySelector(".brave-view__arcade-shell");
+    };
+
     var syncArcadeBodyState = function () {
         var body = document.body;
         if (!body) {
@@ -493,6 +580,11 @@ let defaultout_plugin = (function () {
         if (currentArcadeState && currentArcadeState.frameHandle && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentArcadeState.frameHandle);
         }
+        if (currentArcadeState && currentArcadeState.host) {
+            currentArcadeState.host.style.removeProperty("height");
+            currentArcadeState.host.style.removeProperty("max-height");
+        }
+        clearArcadeOverlay();
         currentArcadeState = null;
         syncArcadeBodyState();
     };
@@ -527,7 +619,7 @@ let defaultout_plugin = (function () {
             "#......##....##....##......#",
             "#.##########.##.##########.#",
             "#.##########.##.##########.#",
-            "#..........................#",
+            "#.##########.##.##########.#",
             "#..........................#",
             "############################",
         ];
@@ -597,7 +689,7 @@ let defaultout_plugin = (function () {
         var bonusNode = host.querySelector("[data-arcade-bonus]");
         var queueNode = host.querySelector("[data-arcade-queue]");
         var statusNode = host.querySelector("[data-arcade-status]");
-        if (!screen || !frame || !scoreNode || !highScoreNode || !livesNode || !levelNode || !bonusNode || !queueNode || !statusNode) {
+        if (!screen || !frame || !scoreNode || !highScoreNode || !livesNode || !levelNode) {
             return null;
         }
 
@@ -664,6 +756,7 @@ let defaultout_plugin = (function () {
             dots: {},
             powerPellets: {},
             moveFrame: 0,
+            host: host,
         };
 
         var tileKey = function (x, y) {
@@ -961,32 +1054,83 @@ let defaultout_plugin = (function () {
         };
 
         var fitScreen = function () {
-            var shellTop = host.getBoundingClientRect().top;
-            var availableWidth = Math.max(220, frame.clientWidth - 18);
-            var reservedHeight = 26;
+            var overlayBody = host.closest(".brave-arcade-overlay__body");
+            var shellRect = host.getBoundingClientRect();
+            var shellTop = Math.max(0, shellRect.top);
+            var viewportHeight = window.visualViewport && window.visualViewport.height
+                ? Math.floor(window.visualViewport.height)
+                : window.innerHeight;
+            var viewportPadding = isMobileViewport() ? 8 : 18;
+            var shellHeight = overlayBody
+                ? Math.max(overlayBody.clientHeight || 0, isMobileViewport() ? 360 : 420)
+                : Math.max(
+                    isMobileViewport() ? 360 : 420,
+                    Math.floor(viewportHeight - shellTop - viewportPadding)
+                );
+            var shellWidth = Math.max(host.clientWidth || 0, Math.floor(shellRect.width || 0));
+            var layout = "default";
+            if (shellHeight <= 560 || shellWidth <= 500) {
+                layout = "tight";
+            } else if (shellHeight <= 720 || shellWidth <= 760) {
+                layout = "compact";
+            }
+            host.setAttribute("data-arcade-layout", layout);
+            host.classList.toggle("brave-view__arcade-shell--overlay", !!overlayBody);
+            host.style.height = shellHeight + "px";
+            host.style.maxHeight = shellHeight + "px";
+
+            var hostStyles = window.getComputedStyle(host);
+            var hostVerticalPadding = (parseFloat(hostStyles.paddingTop) || 0) + (parseFloat(hostStyles.paddingBottom) || 0);
+            var hostGap = parseFloat(hostStyles.rowGap || hostStyles.gap || 0) || 0;
+            var frameStyles = window.getComputedStyle(frame);
+            var frameVerticalPadding = (parseFloat(frameStyles.paddingTop) || 0) + (parseFloat(frameStyles.paddingBottom) || 0);
+            var availableWidth = Math.max(200, frame.clientWidth - 12);
+            var reservedHeight = hostVerticalPadding;
+            var visibleSections = 0;
             var footerVisible = footer && window.getComputedStyle(footer).display !== "none";
             var controlsVisible = mobileControls && window.getComputedStyle(mobileControls).display !== "none";
-            if (marquee) {
-                reservedHeight += marquee.offsetHeight + 10;
+            if (marquee && marquee.offsetHeight) {
+                reservedHeight += marquee.offsetHeight;
+                visibleSections += 1;
             }
-            if (footerVisible) {
-                reservedHeight += footer.offsetHeight + 10;
+            if (footerVisible && footer.offsetHeight) {
+                reservedHeight += footer.offsetHeight;
+                visibleSections += 1;
             }
-            if (controlsVisible) {
-                reservedHeight += mobileControls.offsetHeight + 10;
+            if (controlsVisible && mobileControls.offsetHeight) {
+                reservedHeight += mobileControls.offsetHeight;
+                visibleSections += 1;
             }
-            var availableHeight = Math.max(
-                180,
-                Math.floor(window.innerHeight - shellTop - reservedHeight - (isMobileViewport() ? 16 : 26))
-            );
+            reservedHeight += hostGap * visibleSections;
+            var frameOuterHeight = Math.max(148, Math.floor(shellHeight - reservedHeight));
+            var availableHeight = Math.max(132, Math.floor(frameOuterHeight - frameVerticalPadding));
             var widthFit = availableWidth / (width * 0.66);
             var heightFit = availableHeight / height;
-            var minimum = isMobileViewport() ? 7.2 : 8.8;
-            var maximum = isMobileViewport() ? 16 : 22;
+            var minimum = isMobileViewport() ? 5.6 : 6.8;
+            if (layout === "tight") {
+                minimum = isMobileViewport() ? 5.1 : 6.1;
+            }
+            var maximum = isMobileViewport() ? 13 : 19;
             var fontSize = Math.max(minimum, Math.min(maximum, Math.floor(Math.min(widthFit, heightFit) * 100) / 100));
+            var limitWidth = Math.max(0, frame.clientWidth - 2);
+            var limitHeight = Math.max(0, availableHeight - 2);
+            var guard = 0;
+
             frame.style.maxHeight = availableHeight + "px";
             frame.style.overflow = "hidden";
             screen.style.fontSize = fontSize + "px";
+
+            // The grid math gets us close; this loop makes the final board obey the
+            // actual rendered width/height so the full game stays in frame.
+            while (
+                guard < 24
+                && fontSize > minimum
+                && (screen.scrollWidth > limitWidth || screen.scrollHeight > limitHeight)
+            ) {
+                fontSize = Math.max(minimum, Math.floor((fontSize - 0.2) * 100) / 100);
+                screen.style.fontSize = fontSize + "px";
+                guard += 1;
+            }
         };
 
         var syncPadState = function () {
@@ -1080,13 +1224,23 @@ let defaultout_plugin = (function () {
             highScoreNode.textContent = formatNumber(Math.max(state.highScore, state.bestScore));
             livesNode.textContent = String(Math.max(0, state.lives));
             levelNode.textContent = String(state.level);
-            bonusNode.textContent = currentBonusLabel(now);
-            bonusNode.setAttribute("data-arcade-tone", bonusTone);
-            queueNode.textContent = dirDisplay(state.player && state.player.nextDir ? state.player.nextDir : state.player && state.player.dir ? state.player.dir : null);
-            statusNode.textContent = currentStatusLabel(now);
-            statusNode.setAttribute("data-arcade-tone", statusTone);
-            host.setAttribute("data-arcade-bonus-tone", bonusTone);
-            host.setAttribute("data-arcade-status-tone", statusTone);
+            if (bonusNode) {
+                bonusNode.textContent = currentBonusLabel(now);
+                bonusNode.setAttribute("data-arcade-tone", bonusTone);
+                host.setAttribute("data-arcade-bonus-tone", bonusTone);
+            } else {
+                host.removeAttribute("data-arcade-bonus-tone");
+            }
+            if (queueNode) {
+                queueNode.textContent = dirDisplay(state.player && state.player.nextDir ? state.player.nextDir : state.player && state.player.dir ? state.player.dir : null);
+            }
+            if (statusNode) {
+                statusNode.textContent = currentStatusLabel(now);
+                statusNode.setAttribute("data-arcade-tone", statusTone);
+                host.setAttribute("data-arcade-status-tone", statusTone);
+            } else {
+                host.removeAttribute("data-arcade-status-tone");
+            }
             syncPadState();
         };
 
@@ -1492,7 +1646,11 @@ let defaultout_plugin = (function () {
         };
 
         state.quit = function () {
+            var dismissNow = arguments.length ? !!arguments[0] : false;
             finishRun("quit");
+            if (dismissNow) {
+                teardownArcadeMode();
+            }
         };
 
         state.handleInput = function (key) {
@@ -1597,10 +1755,10 @@ let defaultout_plugin = (function () {
         attempt = attempt || 0;
         teardownArcadeMode();
 
-        var selector = payload && payload.game
-            ? ".brave-view__arcade-shell[data-arcade-game='" + payload.game + "']"
-            : ".brave-view__arcade-shell";
-        var host = document.querySelector(selector) || document.querySelector(".brave-view__arcade-shell");
+        var host = null;
+        if (document.body) {
+            host = renderArcadeOverlay(payload || {});
+        }
         if (!host) {
             if (attempt < 10) {
                 window.setTimeout(function () {
@@ -2161,6 +2319,18 @@ let defaultout_plugin = (function () {
         }
         if (document.body && document.body.classList.contains("brave-notice-active")) {
             clearBrowserNotice();
+            return true;
+        }
+        if (document.getElementById("brave-activity-overlay") && typeof clearActivityOverlay === "function") {
+            clearActivityOverlay();
+            return true;
+        }
+        if (document.getElementById("brave-fishing-minigame") && typeof clearFishingMinigame === "function") {
+            clearFishingMinigame();
+            return true;
+        }
+        if (document.getElementById("brave-arcade-overlay")) {
+            requestArcadeClose();
             return true;
         }
         if (
@@ -5555,9 +5725,16 @@ let defaultout_plugin = (function () {
             clearSceneCard();
             return;
         }
-        if (shouldPreserveCurrentViewOnRoomRefresh(viewData)) {
+        if (
+            !options.skipRoomPreserve
+            && !(pendingArcadeRoomRestore && isRoomLikeView(viewData))
+            && shouldPreserveCurrentViewOnRoomRefresh(viewData)
+        ) {
             currentRoomViewData = viewData;
             return;
+        }
+        if (pendingArcadeRoomRestore && isRoomLikeView(viewData)) {
+            pendingArcadeRoomRestore = false;
         }
         allowNextRoomRefreshNavigationUntil = 0;
         if (!options.skipCombatTransition && pendingCombatTransitionViewData) {
@@ -6761,6 +6938,1130 @@ let defaultout_plugin = (function () {
         plugin_handler.onSend(command);
     };
 
+    var clearActivityOverlay = function (options) {
+        options = options || {};
+        var root = document.getElementById("brave-activity-overlay");
+        var shouldRestoreArcadeRoom = !!(
+            root
+            && root.classList
+            && root.classList.contains("brave-activity-overlay--arcade-result")
+            && !options.suppressArcadeRestore
+        );
+        if (root && root.parentNode) {
+            root.parentNode.removeChild(root);
+        }
+        if (document.body) {
+            document.body.classList.remove("brave-activity-active");
+        }
+        if (shouldRestoreArcadeRoom) {
+            restoreArcadeRoomView();
+        }
+    };
+
+    var stripActivityMarkup = function (value) {
+        return String(value == null ? "" : value).replace(/\|\|/g, "|").replace(/\|[A-Za-z]/g, "");
+    };
+
+    var compactActivityLines = function (lines) {
+        return (Array.isArray(lines) ? lines : []).filter(function (line) {
+            return line !== undefined && line !== null && String(line).trim();
+        }).map(function (line) {
+            return String(line);
+        });
+    };
+
+    var buildActivityStats = function (stats) {
+        stats = Array.isArray(stats) ? stats : [];
+        if (!stats.length) {
+            return "";
+        }
+        return "<div class='brave-activity-overlay__stats'>"
+            + stats.map(function (stat) {
+                return "<div class='brave-activity-overlay__stat'>"
+                    + "<span>" + escapeHtml(stat.label || "") + "</span>"
+                    + "<strong>" + escapeHtml(stat.value == null ? "" : stat.value) + "</strong>"
+                    + "</div>";
+            }).join("")
+            + "</div>";
+    };
+
+    var buildActivityCard = function (entry) {
+        entry = entry || {};
+        var lines = compactActivityLines(entry.lines);
+        var toneClass = entry.tone ? " brave-activity-card--" + escapeHtml(entry.tone) : "";
+        var disabled = !!entry.disabled || !entry.command;
+        var actionLabel = entry.action_label || "";
+        var actionIcon = entry.action_icon || "chevron_right";
+        var badge = entry.badge || entry.status || "";
+        var badgeToneClass = entry.badge_tone ? " brave-activity-card__badge--" + escapeHtml(entry.badge_tone) : "";
+        var action = actionLabel
+            ? "<button type='button' class='brave-activity-card__action' data-brave-activity-command='" + escapeHtml(entry.command || "") + "'"
+                + (entry.confirm ? " data-brave-activity-confirm='" + escapeHtml(entry.confirm) + "'" : "")
+                + (disabled ? " disabled" : "")
+                + ">"
+                + icon(actionIcon, "brave-activity-card__action-icon")
+                + "<span>" + escapeHtml(actionLabel) + "</span>"
+                + "</button>"
+            : "";
+        return "<article class='brave-activity-card" + toneClass + "'>"
+            + "<div class='brave-activity-card__head'>"
+            + "<div class='brave-activity-card__title'>" + escapeHtml(entry.title || entry.name || "") + "</div>"
+            + (badge ? "<div class='brave-activity-card__badge" + badgeToneClass + "'>" + escapeHtml(badge) + "</div>" : "")
+            + "</div>"
+            + (entry.result ? "<div class='brave-activity-card__result'>" + escapeHtml(entry.result) + "</div>" : "")
+            + (entry.summary ? "<div class='brave-activity-card__summary'>" + escapeHtml(entry.summary) + "</div>" : "")
+            + (lines.length ? "<div class='brave-activity-card__lines'>"
+                + lines.map(function (line) {
+                    return "<div class='brave-activity-card__line'>" + escapeHtml(line) + "</div>";
+                }).join("")
+                + "</div>" : "")
+            + (action ? "<div class='brave-activity-card__actions'>" + action + "</div>" : "")
+            + "</article>";
+    };
+
+    var buildActivitySection = function (section) {
+        section = section || {};
+        var items = Array.isArray(section.items) ? section.items : [];
+        return "<section class='brave-activity-overlay__section'>"
+            + "<div class='brave-activity-overlay__section-head'>"
+            + "<span>" + escapeHtml(section.label || "") + "</span>"
+            + "<strong>" + escapeHtml(String(items.length)) + "</strong>"
+            + "</div>"
+            + (items.length
+                ? "<div class='brave-activity-overlay__cards'>" + items.map(buildActivityCard).join("") + "</div>"
+                : "<div class='brave-activity-overlay__empty'>" + escapeHtml(section.empty || "Nothing to show.") + "</div>")
+            + "</section>";
+    };
+
+    var buildActivityBodyCopy = function (lines) {
+        lines = compactActivityLines(lines);
+        if (!lines.length) {
+            return "";
+        }
+        return "<div class='brave-activity-overlay__bodycopy'>"
+            + lines.map(function (line) {
+                return "<div class='brave-activity-overlay__bodyline'>" + escapeHtml(line) + "</div>";
+            }).join("")
+            + "</div>";
+    };
+
+    var normalizeArcadeResultNotes = function (notes, fallbackLines) {
+        var normalized = [];
+        if (Array.isArray(notes)) {
+            notes.forEach(function (note) {
+                if (note === undefined || note === null) {
+                    return;
+                }
+                if (typeof note === "string") {
+                    if (note.trim()) {
+                        normalized.push({ tone: "muted", text: note });
+                    }
+                    return;
+                }
+                var text = String(note.text == null ? "" : note.text).trim();
+                if (!text) {
+                    return;
+                }
+                normalized.push({
+                    tone: note.tone || "muted",
+                    text: text,
+                });
+            });
+        }
+        if (normalized.length) {
+            return normalized;
+        }
+        return compactActivityLines(fallbackLines).map(function (line) {
+            return { tone: "muted", text: String(line) };
+        });
+    };
+
+    var buildArcadeResultSummary = function (stats) {
+        stats = Array.isArray(stats) ? stats : [];
+        if (!stats.length) {
+            return "";
+        }
+        return "<div class='brave-arcade-result__summary'>"
+            + stats.map(function (stat) {
+                var accentClass = stat && stat.accent ? " brave-arcade-result__summary-card--" + escapeHtml(stat.accent) : "";
+                return "<div class='brave-arcade-result__summary-card" + accentClass + "'>"
+                    + "<span>" + escapeHtml(stat.label || "") + "</span>"
+                    + "<strong>" + escapeHtml(stat.value == null ? "" : String(stat.value)) + "</strong>"
+                    + "</div>";
+            }).join("")
+            + "</div>";
+    };
+
+    var buildArcadeResultRow = function (row, options) {
+        row = row || {};
+        options = options || {};
+        var classes = ["brave-arcade-result__row"];
+        if (row.is_current) {
+            classes.push("brave-arcade-result__row--current");
+        }
+        if (row.is_top) {
+            classes.push("brave-arcade-result__row--top");
+        }
+        if (row.placeholder) {
+            classes.push("brave-arcade-result__row--empty");
+        }
+        if (options.standing) {
+            classes.push("brave-arcade-result__row--standing");
+        }
+        return "<div class='" + classes.join(" ") + "'>"
+            + "<span class='brave-arcade-result__rank'>" + escapeHtml("#" + String(row.rank || "")) + "</span>"
+            + "<span class='brave-arcade-result__name'>"
+                + "<span class='brave-arcade-result__name-text'>" + escapeHtml(row.placeholder ? "---" : (row.name || "Unknown")) + "</span>"
+                + (row.is_current ? "<span class='brave-arcade-result__tag'>YOU</span>" : "")
+            + "</span>"
+            + "<span class='brave-arcade-result__score'>" + escapeHtml(row.placeholder ? "0" : (row.score || "0")) + "</span>"
+            + "</div>";
+    };
+
+    var buildArcadeResultBoard = function (payload, leaderboard, playerRow) {
+        leaderboard = Array.isArray(leaderboard) ? leaderboard : [];
+        var limit = Math.max(1, parseInt(payload.limit, 10) || leaderboard.length || 5);
+        var rowsByRank = {};
+        leaderboard.forEach(function (row) {
+            var rank = parseInt(row && row.rank, 10);
+            if (rank > 0 && !rowsByRank[rank]) {
+                rowsByRank[rank] = row;
+            }
+        });
+        var rows = [];
+        for (var rank = 1; rank <= limit; rank += 1) {
+            rows.push(rowsByRank[rank] || {
+                rank: rank,
+                placeholder: true,
+                score: "0",
+            });
+        }
+        return "<section class='brave-arcade-result__board'>"
+            + "<div class='brave-arcade-result__board-head'>"
+            + "<span class='brave-arcade-result__board-icon'>" + icon("leaderboard") + "</span>"
+            + "<div class='brave-arcade-result__board-title'>" + escapeHtml(payload.leaderboard_title || "Local Leaderboard") + "</div>"
+            + "</div>"
+            + "<div class='brave-arcade-result__table-head'>"
+            + "<span>Rank</span>"
+            + "<span>Character</span>"
+            + "<span>Score</span>"
+            + "</div>"
+            + "<div class='brave-arcade-result__table'>"
+            + rows.map(function (row) {
+                return buildArcadeResultRow(row);
+            }).join("")
+            + "</div>"
+            + (
+                playerRow && parseInt(playerRow.rank, 10) > limit
+                    ? "<div class='brave-arcade-result__standing'>"
+                        + "<div class='brave-arcade-result__standing-label'>Your Standing</div>"
+                        + buildArcadeResultRow(playerRow, { standing: true })
+                        + "</div>"
+                    : ""
+            )
+            + "</section>";
+    };
+
+    var buildArcadeResultNotes = function (notes) {
+        notes = Array.isArray(notes) ? notes : [];
+        if (!notes.length) {
+            return "";
+        }
+        return "<div class='brave-arcade-result__notes'>"
+            + notes.map(function (note) {
+                var toneClass = note && note.tone ? " brave-arcade-result__note--" + escapeHtml(note.tone) : "";
+                return "<div class='brave-arcade-result__note" + toneClass + "'>" + escapeHtml(note.text || "") + "</div>";
+            }).join("")
+            + "</div>";
+    };
+
+    var bindActivityOverlayControls = function (root) {
+        root.addEventListener("click", function (event) {
+            var closeTarget = event.target.closest("[data-brave-activity-close]");
+            if (closeTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                clearActivityOverlay();
+                return;
+            }
+            var commandTarget = event.target.closest("[data-brave-activity-command]");
+            if (commandTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!commandTarget.disabled) {
+                    sendBrowserCommand(
+                        commandTarget.getAttribute("data-brave-activity-command"),
+                        commandTarget.getAttribute("data-brave-activity-confirm")
+                    );
+                }
+            }
+        }, true);
+    };
+
+    var renderActivityOverlay = function (kind, payload, options) {
+        payload = payload || {};
+        options = options || {};
+        clearActivityOverlay({ suppressArcadeRestore: true });
+        if (typeof clearFishingMinigame === "function") {
+            clearFishingMinigame();
+        }
+        var root = document.createElement("div");
+        root.id = "brave-activity-overlay";
+        root.className = "brave-activity-overlay brave-activity-overlay--" + String(kind || "default");
+        root.setAttribute("aria-hidden", "false");
+        var message = stripActivityMarkup(payload.message || "");
+        var messageTone = payload.message_tone || "muted";
+        var footerAction = options.footer_action || null;
+        var bodyMarkup = buildActivityBodyCopy(options.body_lines)
+            + (Array.isArray(options.sections) ? options.sections.map(buildActivitySection).join("") : "");
+        root.innerHTML =
+            "<div class='brave-activity-overlay__backdrop' data-brave-activity-close='1'></div>"
+            + "<section class='brave-activity-overlay__panel' role='dialog' aria-modal='true' tabindex='0'>"
+            + "<div class='brave-activity-overlay__head'>"
+            + "<div class='brave-activity-overlay__titlebar'>"
+            + "<span class='brave-activity-overlay__icon'>" + icon(options.icon || "widgets") + "</span>"
+            + "<div class='brave-activity-overlay__titles'>"
+            + "<div class='brave-activity-overlay__eyebrow'>" + escapeHtml(options.eyebrow || "") + "</div>"
+            + "<div class='brave-activity-overlay__title'>" + escapeHtml(options.title || payload.title || "Activity") + "</div>"
+            + "</div>"
+            + "<button type='button' class='brave-activity-overlay__close brave-view__action brave-view__action--muted brave-view__back' data-brave-activity-close='1' aria-label='Close'>"
+            + icon("close")
+            + "</button>"
+            + "</div>"
+            + buildActivityStats(options.stats)
+            + (message ? "<div class='brave-activity-overlay__message brave-activity-overlay__message--" + escapeHtml(messageTone) + "'>" + escapeHtml(message) + "</div>" : "")
+            + "</div>"
+            + "<div class='brave-activity-overlay__body'>"
+            + bodyMarkup
+            + "</div>"
+            + (footerAction
+                ? "<div class='brave-activity-overlay__footer'>"
+                    + "<button type='button' class='brave-activity-overlay__footer-action' data-brave-activity-command='" + escapeHtml(footerAction.command || "") + "'"
+                    + (footerAction.confirm ? " data-brave-activity-confirm='" + escapeHtml(footerAction.confirm) + "'" : "")
+                    + (footerAction.disabled ? " disabled" : "")
+                    + ">"
+                    + icon(footerAction.icon || "restart_alt", "brave-activity-overlay__footer-icon")
+                    + "<span>" + escapeHtml(footerAction.label || "Action") + "</span>"
+                    + "</button>"
+                    + "</div>"
+                : "")
+            + "</section>";
+        document.body.appendChild(root);
+        document.body.classList.add("brave-activity-active");
+        bindActivityOverlayControls(root);
+        var panel = root.querySelector(".brave-activity-overlay__panel");
+        if (panel && typeof panel.focus === "function") {
+            panel.focus();
+        }
+    };
+
+    var renderArcadeResultOverlay = function (payload) {
+        payload = payload || {};
+        var summaryStats = Array.isArray(payload.summary_stats) && payload.summary_stats.length
+            ? payload.summary_stats
+            : (Array.isArray(payload.stats) ? payload.stats : []);
+        var notes = normalizeArcadeResultNotes(payload.notes, payload.lines);
+        clearActivityOverlay({ suppressArcadeRestore: true });
+        if (typeof clearFishingMinigame === "function") {
+            clearFishingMinigame();
+        }
+        var root = document.createElement("div");
+        root.id = "brave-activity-overlay";
+        root.className = "brave-activity-overlay brave-activity-overlay--arcade-result";
+        root.setAttribute("aria-hidden", "false");
+        root.innerHTML =
+            "<div class='brave-activity-overlay__backdrop' data-brave-activity-close='1'></div>"
+            + "<section class='brave-activity-overlay__panel' role='dialog' aria-modal='true' tabindex='0'>"
+            + "<div class='brave-activity-overlay__head'>"
+            + "<div class='brave-activity-overlay__titlebar'>"
+            + "<span class='brave-activity-overlay__icon'>" + icon("sports_esports") + "</span>"
+            + "<div class='brave-activity-overlay__titles'>"
+            + "<div class='brave-activity-overlay__eyebrow'>" + escapeHtml(payload.cabinet || "Arcade Cabinet") + "</div>"
+            + "<div class='brave-activity-overlay__title'>" + escapeHtml(payload.title || "Run Complete") + "</div>"
+            + "</div>"
+            + "<button type='button' class='brave-activity-overlay__close brave-view__action brave-view__action--muted brave-view__back' data-brave-activity-close='1' aria-label='Close'>"
+            + icon("close")
+            + "</button>"
+            + "</div>"
+            + "<div class='brave-arcade-result__headline'>"
+            + "<span>" + escapeHtml(payload.headline || "RUN COMPLETE") + "</span>"
+            + "</div>"
+            + buildArcadeResultSummary(summaryStats)
+            + "</div>"
+            + "<div class='brave-activity-overlay__body brave-arcade-result__body'>"
+            + buildArcadeResultBoard(payload, payload.leaderboard, payload.player_row)
+            + buildArcadeResultNotes(notes)
+            + "</div>"
+            + "</section>";
+        document.body.appendChild(root);
+        document.body.classList.add("brave-activity-active");
+        bindActivityOverlayControls(root);
+        var panel = root.querySelector(".brave-activity-overlay__panel");
+        if (panel && typeof panel.focus === "function") {
+            panel.focus();
+        }
+    };
+
+    var restoreArcadeRoomView = function () {
+        if (isRoomLikeView(currentRoomViewData)) {
+            pendingArcadeRoomRestore = false;
+            renderMainView(currentRoomViewData, {
+                skipCombatTransition: true,
+                skipRoomPreserve: true,
+            });
+            return true;
+        }
+        pendingArcadeRoomRestore = true;
+        return false;
+    };
+
+    var cookingRecipeCard = function (entry, label, iconName) {
+        entry = entry || {};
+        return {
+            title: entry.name || "Recipe",
+            badge: entry.ready ? "Ready" : (entry.known ? "Missing" : "Locked"),
+            badge_tone: entry.ready ? "ready" : (entry.known ? "muted" : "locked"),
+            result: entry.result_name ? "Makes " + entry.result_name : "",
+            summary: entry.summary || entry.result_summary || "",
+            lines: [
+                entry.ingredient_text ? "Ingredients: " + entry.ingredient_text : "",
+                entry.restore_text ? "Restores: " + entry.restore_text : "",
+                entry.bonus_text ? "Meal: " + entry.bonus_text : ""
+            ],
+            command: entry.command || "",
+            action_label: entry.command ? label : "",
+            action_icon: iconName || "restaurant",
+            tone: entry.ready ? "ready" : (entry.known ? "known" : "locked"),
+        };
+    };
+
+    var cookingMealCard = function (entry) {
+        entry = entry || {};
+        return {
+            title: (entry.name || "Meal") + (entry.quantity > 1 ? " x" + String(entry.quantity) : ""),
+            badge: "In pack",
+            badge_tone: "muted",
+            summary: entry.summary || "",
+            lines: [
+                entry.restore_text ? "Restores: " + entry.restore_text : "",
+                entry.bonus_text ? "Meal: " + entry.bonus_text : ""
+            ],
+            command: entry.command || "",
+            action_label: entry.command ? "Eat" : "",
+            action_icon: "local_dining",
+            tone: "known",
+        };
+    };
+
+    var renderCookingOverlay = function (payload) {
+        payload = payload || {};
+        renderActivityOverlay("cooking", payload, {
+            icon: "restaurant",
+            eyebrow: payload.spot || "Kitchen Hearth",
+            title: "Cooking",
+            stats: [
+                { label: "Ready", value: String(payload.ready_count || 0) },
+                { label: "Meals", value: String(payload.meal_count || 0) },
+                { label: "Recipes", value: String(payload.total_count || 0) }
+            ],
+            sections: [
+                {
+                    label: "Ready Tonight",
+                    items: (payload.ready || []).map(function (entry) {
+                        return cookingRecipeCard(entry, "Cook", "skillet");
+                    }),
+                    empty: "Nothing is ready from your current pantry."
+                },
+                {
+                    label: "Meals In Pack",
+                    items: (payload.meals || []).map(cookingMealCard),
+                    empty: "No prepared meals in your pack."
+                },
+                {
+                    label: "Known Recipes",
+                    items: (payload.known || []).map(function (entry) {
+                        return cookingRecipeCard(entry, "", "restaurant");
+                    }),
+                    empty: "No other known recipes are close to ready."
+                },
+                {
+                    label: "Locked Recipes",
+                    items: (payload.locked || []).map(function (entry) {
+                        return cookingRecipeCard(entry, "", "lock");
+                    }),
+                    empty: "No locked recipes right now."
+                }
+            ]
+        });
+    };
+
+    var tinkeringRecipeCard = function (entry, label) {
+        entry = entry || {};
+        var components = Array.isArray(entry.components) ? entry.components : [];
+        var parts = components.map(function (row) {
+            return (row.name || row.template_id || "Part") + " " + String(row.owned || 0) + "/" + String(row.required || 0);
+        }).join(", ");
+        return {
+            title: entry.name || "Design",
+            badge: entry.ready ? "Ready" : (entry.known ? "Missing" : "Locked"),
+            badge_tone: entry.ready ? "ready" : (entry.known ? "muted" : "locked"),
+            result: entry.result_name ? "Builds " + entry.result_name + (entry.result_quantity > 1 ? " x" + String(entry.result_quantity) : "") : "",
+            summary: entry.summary || entry.result_summary || "",
+            lines: [
+                entry.base_name ? "Base: " + entry.base_name + " " + String(entry.base_owned || 0) + "/1" : "",
+                parts ? "Parts: " + parts : "",
+                entry.silver_cost ? "Silver: " + String(entry.silver_have || 0) + "/" + String(entry.silver_cost) : "",
+                entry.result_bonuses ? "Result: " + entry.result_bonuses : ""
+            ],
+            command: entry.command || "",
+            confirm: entry.confirm || "",
+            action_label: entry.command ? label : "",
+            action_icon: "construction",
+            tone: entry.ready ? "ready" : (entry.known ? "known" : "locked"),
+        };
+    };
+
+    var renderTinkeringOverlay = function (payload) {
+        payload = payload || {};
+        renderActivityOverlay("tinkering", payload, {
+            icon: "construction",
+            eyebrow: "Workbench",
+            title: "Tinkering",
+            stats: [
+                { label: "Silver", value: String(payload.silver || 0) },
+                { label: "Ready", value: String(payload.ready_count || 0) },
+                { label: "Designs", value: String(payload.total_count || 0) }
+            ],
+            sections: [
+                {
+                    label: "Ready Now",
+                    items: (payload.ready || []).map(function (entry) {
+                        return tinkeringRecipeCard(entry, "Build");
+                    }),
+                    empty: "Nothing is ready from your current pack."
+                },
+                {
+                    label: "Known Designs",
+                    items: (payload.known || []).map(function (entry) {
+                        return tinkeringRecipeCard(entry, "");
+                    }),
+                    empty: "No other known designs are close to completion."
+                },
+                {
+                    label: "Locked Designs",
+                    items: (payload.locked || []).map(function (entry) {
+                        return tinkeringRecipeCard(entry, "");
+                    }),
+                    empty: "No locked tinkering designs yet."
+                }
+            ]
+        });
+    };
+
+    var masteryCard = function (entry) {
+        entry = entry || {};
+        return {
+            title: entry.display_name || entry.name || "Technique",
+            badge: entry.can_train ? "Ready" : (entry.rank_label || ""),
+            badge_tone: entry.can_train ? "ready" : "muted",
+            result: entry.role || "",
+            summary: entry.summary || "",
+            lines: [
+                entry.current_bonus ? "Current: " + entry.current_bonus : "Current: Rank " + String(entry.rank || 1),
+                entry.next_text || "",
+                entry.next_bonus ? "Next: " + entry.next_bonus : "",
+                entry.can_train ? "" : (entry.status || "")
+            ],
+            command: entry.command || "",
+            confirm: entry.confirm || "",
+            action_label: entry.command ? "Train" : "",
+            action_icon: "workspace_premium",
+            tone: entry.can_train ? "ready" : (entry.rank >= 3 ? "known" : "locked"),
+        };
+    };
+
+    var renderMasteryOverlay = function (payload) {
+        payload = payload || {};
+        var respecCommand = payload.respec_command || "";
+        renderActivityOverlay("mastery", payload, {
+            icon: "workspace_premium",
+            eyebrow: payload.in_mastery_room ? "Mastery Hall" : "Training Review",
+            title: "Ability Mastery",
+            stats: [
+                { label: "Available", value: String(payload.available || 0) },
+                { label: "Spent", value: String(payload.spent || 0) + "/" + String(payload.earned || 0) },
+                { label: "Silver", value: String(payload.silver || 0) }
+            ],
+            sections: [
+                {
+                    label: "Techniques",
+                    items: (payload.techniques || []).map(masteryCard),
+                    empty: "No trainable combat techniques unlocked yet."
+                }
+            ],
+            footer_action: respecCommand
+                ? {
+                    label: "Respec",
+                    command: respecCommand,
+                    confirm: "Reset all mastery for " + String(payload.respec_cost || 0) + " silver?",
+                    disabled: !payload.can_respec,
+                    icon: "restart_alt"
+                }
+                : null
+        });
+    };
+
+    var clampFishingValue = function (value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    };
+
+    var clearFishingMinigame = function () {
+        if (currentFishingAnimationFrame) {
+            window.cancelAnimationFrame(currentFishingAnimationFrame);
+            currentFishingAnimationFrame = null;
+        }
+        currentFishingGame = null;
+        var root = document.getElementById("brave-fishing-minigame");
+        if (root && root.parentNode) {
+            root.parentNode.removeChild(root);
+        }
+        if (document.body) {
+            document.body.classList.remove("brave-fishing-active");
+        }
+    };
+
+    var getFishingRoot = function () {
+        return document.getElementById("brave-fishing-minigame");
+    };
+
+    var getFishingNumber = function (value, fallback) {
+        var parsed = parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : fallback;
+    };
+
+    var stripFishingMarkup = function (value) {
+        return String(value == null ? "" : value).replace(/\|\|/g, "|").replace(/\|[A-Za-z]/g, "");
+    };
+
+    var buildFishingSetupOption = function (item, type) {
+        item = item || {};
+        var available = item.available !== false;
+        var selected = !!item.selected;
+        var command = type === "rod" ? "fish rod " : "fish lure ";
+        command += item.key || item.name || "";
+        var iconName = type === "rod" ? "straighten" : "tune";
+        var meta = [];
+        if (type === "rod") {
+            meta.push("Power " + String(item.power || 0));
+            meta.push("Stability " + String(item.stability || 0));
+        } else {
+            meta.push("Rarity +" + String(item.rarity_bonus || 0));
+            if (item.zone_bonus) {
+                meta.push("Water +" + String(item.zone_bonus));
+            }
+        }
+        var favored = Array.isArray(item.favored) ? item.favored.join(", ") : "";
+        var summary = available ? (item.summary || "") : (item.unlock_text || "Locked.");
+        var classes = [
+            "brave-fishing-minigame__gear-option",
+            selected ? "brave-fishing-minigame__gear-option--selected" : "",
+            available ? "" : "brave-fishing-minigame__gear-option--locked"
+        ].join(" ");
+        var disabled = selected || !available || !command.trim() ? " disabled" : "";
+        var badge = selected ? "Selected" : (!available ? "Locked" : "");
+        var badgeToneClass = selected ? " brave-fishing-minigame__gear-badge--selected" : (!available ? " brave-fishing-minigame__gear-badge--locked" : "");
+        return ""
+            + "<button type='button' class='" + classes + "' data-brave-fishing-command='" + escapeHtml(command) + "'" + disabled + ">"
+            + "<span class='brave-fishing-minigame__gear-icon'>" + icon(iconName) + "</span>"
+            + "<span class='brave-fishing-minigame__gear-copy'>"
+            + "<span class='brave-fishing-minigame__gear-head'>"
+            + "<span class='brave-fishing-minigame__gear-name'>" + escapeHtml(item.name || "Tackle") + "</span>"
+            + (badge ? "<span class='brave-fishing-minigame__gear-badge" + badgeToneClass + "'>" + escapeHtml(badge) + "</span>" : "")
+            + "</span>"
+            + "<span class='brave-fishing-minigame__gear-meta'>" + escapeHtml(meta.join(" / ")) + "</span>"
+            + (favored ? "<span class='brave-fishing-minigame__gear-meta'>" + escapeHtml("Favored: " + favored) + "</span>" : "")
+            + (summary ? "<span class='brave-fishing-minigame__gear-summary'>" + escapeHtml(summary) + "</span>" : "")
+            + "</span>"
+            + "</button>";
+    };
+
+    var buildFishingSetupList = function (items, type) {
+        items = Array.isArray(items) ? items : [];
+        if (!items.length) {
+            return "<div class='brave-fishing-minigame__empty'>No " + (type === "rod" ? "rods" : "lures") + " available.</div>";
+        }
+        return items.map(function (item) {
+            return buildFishingSetupOption(item, type);
+        }).join("");
+    };
+
+    var renderFishingSetupOverlay = function (payload) {
+        if (typeof clearActivityOverlay === "function") {
+            clearActivityOverlay({ suppressArcadeRestore: true });
+        }
+        clearFishingMinigame();
+        var data = payload || {};
+        var root = document.createElement("div");
+        root.id = "brave-fishing-minigame";
+        root.className = "brave-fishing-minigame brave-fishing-minigame--setup";
+        root.setAttribute("aria-hidden", "false");
+        root.setAttribute("data-fishing-phase", "setup");
+        root.setAttribute("data-fishing-band", "neutral");
+        var rod = data.rod || {};
+        var lure = data.lure || {};
+        var message = stripFishingMarkup(data.message || "");
+        var canCast = data.can_cast !== false;
+        root.innerHTML =
+            "<div class='brave-fishing-minigame__backdrop'></div>"
+            + "<section class='brave-fishing-minigame__panel brave-fishing-minigame__panel--setup' role='dialog' aria-modal='true' tabindex='0'>"
+            + "<div class='brave-fishing-minigame__head'>"
+            + "<div class='brave-fishing-minigame__titlebar'>"
+            + "<span class='brave-fishing-minigame__icon'>" + icon("phishing") + "</span>"
+            + "<div class='brave-fishing-minigame__titles'>"
+            + "<div class='brave-fishing-minigame__eyebrow'>" + escapeHtml(data.spot || "Fishing Water") + "</div>"
+            + "<div class='brave-fishing-minigame__title'>Fishing</div>"
+            + "</div>"
+            + "<button type='button' class='brave-fishing-minigame__close brave-view__action brave-view__action--muted brave-view__back' data-brave-fishing-close='1' aria-label='Close fishing'>" + icon("close") + "</button>"
+            + "</div>"
+            + "<div class='brave-fishing-minigame__loadout'>"
+            + "<span>" + escapeHtml(rod.name || "Rod") + "</span>"
+            + "<span>" + escapeHtml(lure.name || "Lure") + "</span>"
+            + "</div>"
+            + "</div>"
+            + "<div class='brave-fishing-minigame__setup'>"
+            + "<div class='brave-fishing-minigame__setup-summary'>"
+            + "<div class='brave-fishing-minigame__setup-label'>Water</div>"
+            + "<div class='brave-fishing-minigame__setup-title'>" + escapeHtml(data.spot || "Fishing Water") + "</div>"
+            + "<div class='brave-fishing-minigame__setup-text'>" + escapeHtml(stripFishingMarkup(data.cast_text || "The water looks workable.")) + "</div>"
+            + (message ? "<div class='brave-fishing-minigame__setup-message brave-fishing-minigame__setup-message--" + escapeHtml(data.message_tone || "muted") + "'>" + escapeHtml(message) + "</div>" : "")
+            + "<div class='brave-fishing-minigame__active-tackle'>"
+            + "<div><span>Rod</span><strong>" + escapeHtml(rod.name || "None") + "</strong></div>"
+            + "<div><span>Lure</span><strong>" + escapeHtml(lure.name || "None") + "</strong></div>"
+            + "</div>"
+            + "</div>"
+            + "<div class='brave-fishing-minigame__gear'>"
+            + "<section class='brave-fishing-minigame__gear-column'>"
+            + "<div class='brave-fishing-minigame__setup-label'>Rods</div>"
+            + buildFishingSetupList(data.rods, "rod")
+            + "</section>"
+            + "<section class='brave-fishing-minigame__gear-column'>"
+            + "<div class='brave-fishing-minigame__setup-label'>Lures</div>"
+            + buildFishingSetupList(data.lures, "lure")
+            + "</section>"
+            + "</div>"
+            + "</div>"
+            + "<div class='brave-fishing-minigame__controls'>"
+            + "<button type='button' class='brave-fishing-minigame__reel' data-brave-fishing-command='fish cast'" + (canCast ? "" : " disabled") + ">Cast Line</button>"
+            + (data.can_borrow ? "<button type='button' class='brave-fishing-minigame__secondary' data-brave-fishing-command='fish borrow kit'>Borrow Kit</button>" : "<button type='button' class='brave-fishing-minigame__secondary' data-brave-fishing-close='1'>Close</button>")
+            + "</div>"
+            + "</section>";
+        document.body.appendChild(root);
+        document.body.classList.add("brave-fishing-active");
+        bindFishingMinigameControls(root);
+        currentFishingGame = {
+            data: data,
+            phase: "setup",
+            position: 0.5,
+            resolving: false,
+        };
+        var panel = root.querySelector(".brave-fishing-minigame__panel");
+        if (panel && typeof panel.focus === "function") {
+            panel.focus();
+        }
+    };
+
+    var fishingOutcomeCommand = function (outcome) {
+        if (!currentFishingGame || currentFishingGame.resolving) {
+            return;
+        }
+        currentFishingGame.resolving = true;
+        currentFishingGame.phase = "resolving";
+        updateFishingMinigameUi();
+        sendBrowserCommand(
+            "fish resolve "
+            + String(currentFishingGame.data.encounter_id || "")
+            + " "
+            + String(outcome || "fail")
+        );
+    };
+
+    var fishingPullForFrame = function (game, elapsedSeconds, now) {
+        var behavior = game.data.behavior || {};
+        var rod = game.data.rod || {};
+        var pattern = String(behavior.pattern || "sine").toLowerCase();
+        var basePull = getFishingNumber(behavior.base_pull, 0.3);
+        var burstPull = getFishingNumber(behavior.burst_pull, 0.08);
+        var stability = Math.max(0.45, getFishingNumber(rod.stability, 1));
+        var pull = basePull / stability;
+        if (pattern === "sine") {
+            pull += Math.sin(elapsedSeconds * 4.2) * 0.07;
+        } else if (pattern === "linear") {
+            pull += 0.04;
+        } else if (pattern === "drag") {
+            pull += Math.min(0.14, elapsedSeconds * 0.018);
+        } else if (pattern === "snag") {
+            pull += Math.sin(elapsedSeconds * 7.4) > 0.82 ? burstPull * 0.65 : 0;
+        } else if (pattern === "dart") {
+            pull += Math.max(0, Math.sin(elapsedSeconds * 8.2)) * burstPull * 0.55;
+        } else if (pattern === "burst") {
+            if (!game.nextBurstAt || now >= game.nextBurstAt) {
+                game.burstUntil = now + 280 + Math.random() * 260;
+                game.nextBurstAt = now + 1050 + Math.random() * 1500;
+            }
+            if (game.burstUntil && now <= game.burstUntil) {
+                pull += burstPull;
+            }
+        }
+        return Math.max(0.05, pull) * 0.22;
+    };
+
+    var startFishingReeling = function () {
+        if (!currentFishingGame || currentFishingGame.phase !== "hook") {
+            return;
+        }
+        var now = performance.now();
+        currentFishingGame.phase = "reeling";
+        currentFishingGame.phaseStartedAt = now;
+        currentFishingGame.lastFrameAt = now;
+        currentFishingGame.position = 0.5;
+        currentFishingGame.safeMs = 0;
+        currentFishingGame.strain = 0;
+        currentFishingGame.controlBand = "safe";
+        updateFishingMinigameUi();
+    };
+
+    var handleFishingReelStart = function () {
+        if (!currentFishingGame || currentFishingGame.resolving) {
+            return;
+        }
+        if (currentFishingGame.phase === "hook") {
+            startFishingReeling();
+            return;
+        }
+        if (currentFishingGame.phase !== "reeling") {
+            return;
+        }
+        var rod = currentFishingGame.data.rod || {};
+        var power = Math.max(1, getFishingNumber(rod.power, 1));
+        currentFishingGame.reeling = true;
+        currentFishingGame.inputImpulse = Math.min(
+            0.1,
+            (currentFishingGame.inputImpulse || 0) + 0.018 + power * 0.004
+        );
+    };
+
+    var handleFishingReelEnd = function () {
+        if (currentFishingGame) {
+            currentFishingGame.reeling = false;
+        }
+    };
+
+    var updateFishingMinigameUi = function () {
+        var game = currentFishingGame;
+        var root = getFishingRoot();
+        if (!game || !root) {
+            return;
+        }
+        var phase = game.phase || "waiting";
+        root.setAttribute("data-fishing-phase", phase);
+        var status = root.querySelector("[data-fishing-status]");
+        var reelButton = root.querySelector("[data-brave-fishing-reel]");
+        var marker = root.querySelector("[data-fishing-marker]");
+        var progress = root.querySelector("[data-fishing-progress]");
+        var timer = root.querySelector("[data-fishing-timer]");
+        var fishName = root.querySelector("[data-fishing-fish]");
+        var result = root.querySelector("[data-fishing-result]");
+        var resultActions = root.querySelector("[data-fishing-result-actions]");
+        root.setAttribute("data-fishing-band", phase === "reeling" ? (game.controlBand || "safe") : "neutral");
+        var position = clampFishingValue(typeof game.position === "number" ? game.position : 0.5, 0, 1);
+        if (marker) {
+            marker.style.top = (position * 100) + "%";
+        }
+        if (progress) {
+            var duration = Math.max(1, game.durationMs || 1);
+            var safeProgress = phase === "result" && game.resultSuccess ? 1 : clampFishingValue((game.safeMs || 0) / duration, 0, 1);
+            progress.style.height = (safeProgress * 100) + "%";
+        }
+        if (fishName) {
+            fishName.textContent = phase === "waiting" ? "Line cast" : (game.data.fish && game.data.fish.name ? game.data.fish.name : "Fish");
+        }
+        if (status) {
+            if (phase === "waiting") {
+                status.textContent = "Waiting for a bite";
+            } else if (phase === "hook") {
+                status.textContent = "Bite";
+            } else if (phase === "reeling") {
+                status.textContent = "Hold Center";
+            } else if (phase === "resolving") {
+                status.textContent = "Resolving";
+            } else if (phase === "result") {
+                status.textContent = game.resultSuccess ? "Caught" : "Lost";
+            }
+        }
+        if (timer) {
+            timer.textContent = game.timerText || "";
+        }
+        if (reelButton) {
+            reelButton.disabled = phase === "waiting" || phase === "resolving" || phase === "result";
+            reelButton.textContent = phase === "hook" ? "Set Hook" : "Pull";
+        }
+        if (result) {
+            result.textContent = game.resultMessage || "";
+        }
+        if (resultActions) {
+            resultActions.hidden = phase !== "result";
+        }
+    };
+
+    var tickFishingMinigame = function (now) {
+        var game = currentFishingGame;
+        if (!game) {
+            return;
+        }
+        var phaseElapsed = now - game.phaseStartedAt;
+        if (game.phase === "waiting") {
+            game.timerText = Math.max(0, Math.ceil((game.waitMs - phaseElapsed) / 1000)) + "s";
+            if (phaseElapsed >= game.waitMs) {
+                game.phase = "hook";
+                game.phaseStartedAt = now;
+                game.timerText = "";
+            }
+        } else if (game.phase === "hook") {
+            var hookRemaining = Math.max(0, game.hookMs - phaseElapsed);
+            game.timerText = (hookRemaining / 1000).toFixed(1) + "s";
+            if (hookRemaining <= 0) {
+                fishingOutcomeCommand("fail");
+                return;
+            }
+        } else if (game.phase === "reeling") {
+            var dt = game.lastFrameAt ? Math.min(0.05, (now - game.lastFrameAt) / 1000) : 0.016;
+            game.lastFrameAt = now;
+            var elapsedSeconds = (now - game.phaseStartedAt) / 1000;
+            var rod = game.data.rod || {};
+            var power = Math.max(1, getFishingNumber(rod.power, 1));
+            var duration = Math.max(1, game.durationMs || 14000);
+            var elapsedMs = now - game.phaseStartedAt;
+            var fatigue = clampFishingValue(1 - (elapsedMs / duration) * 0.32, 0.58, 1);
+            var fishPull = fishingPullForFrame(game, elapsedSeconds, now) * fatigue;
+            var playerPull = game.reeling ? (0.072 + power * 0.018) : 0;
+            var impulse = game.inputImpulse || 0;
+            game.inputImpulse = Math.max(0, impulse - dt * 0.38);
+            game.position = clampFishingValue((typeof game.position === "number" ? game.position : 0.5) - fishPull * dt + playerPull * dt + impulse, 0, 1);
+            var safeLow = getFishingNumber(game.safeLow, 0.38);
+            var safeHigh = getFishingNumber(game.safeHigh, 0.66);
+            var edgeLow = getFishingNumber(game.edgeLow, 0.04);
+            var edgeHigh = getFishingNumber(game.edgeHigh, 0.96);
+            var inControl = game.position >= safeLow && game.position <= safeHigh;
+            if (inControl) {
+                game.safeMs = (game.safeMs || 0) + dt * 1000;
+                game.strain = Math.max(0, (game.strain || 0) - dt * 0.55);
+            } else {
+                var distance = game.position < safeLow ? safeLow - game.position : game.position - safeHigh;
+                game.strain = Math.min(1.15, (game.strain || 0) + dt * (0.3 + distance * 2.2));
+            }
+            game.controlBand = inControl ? "safe" : "danger";
+            game.timerText = Math.max(0, Math.ceil((duration - elapsedMs) / 1000)) + "s / strain " + Math.round((game.strain || 0) * 100) + "%";
+            if (game.position <= edgeLow || game.position >= edgeHigh || game.strain >= 1) {
+                fishingOutcomeCommand("fail");
+                return;
+            }
+            if (elapsedMs >= duration) {
+                var safeRatio = (game.safeMs || 0) / duration;
+                if (safeRatio < 0.72 || (game.strain || 0) > 0.72) {
+                    fishingOutcomeCommand("fail");
+                    return;
+                }
+                var result = safeRatio >= 0.92 && (game.strain || 0) <= 0.18 ? "perfect" : "success";
+                fishingOutcomeCommand(result);
+                return;
+            }
+        }
+        updateFishingMinigameUi();
+        currentFishingAnimationFrame = window.requestAnimationFrame(tickFishingMinigame);
+    };
+
+    var bindFishingMinigameControls = function (root) {
+        root.addEventListener("click", function (event) {
+            var closeTarget = event.target.closest("[data-brave-fishing-close]");
+            if (closeTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                clearFishingMinigame();
+                return;
+            }
+            var commandTarget = event.target.closest("[data-brave-fishing-command]");
+            if (commandTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!commandTarget.disabled) {
+                    sendBrowserCommand(commandTarget.getAttribute("data-brave-fishing-command"));
+                }
+                return;
+            }
+            var giveUpTarget = event.target.closest("[data-brave-fishing-giveup]");
+            if (giveUpTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (currentFishingGame && currentFishingGame.phase === "result") {
+                    clearFishingMinigame();
+                } else {
+                    fishingOutcomeCommand("fail");
+                }
+                return;
+            }
+            var castAgainTarget = event.target.closest("[data-brave-fishing-cast-again]");
+            if (castAgainTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                sendBrowserCommand("fish cast");
+            }
+        }, true);
+        root.addEventListener("pointerdown", function (event) {
+            if (!event.target.closest("[data-brave-fishing-reel], [data-brave-fishing-lane]")) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            handleFishingReelStart();
+        }, true);
+        root.addEventListener("pointerup", handleFishingReelEnd, true);
+        root.addEventListener("pointercancel", handleFishingReelEnd, true);
+        root.addEventListener("pointerleave", handleFishingReelEnd, true);
+        root.addEventListener("keydown", function (event) {
+            if (event.key !== " " && event.key !== "Enter") {
+                return;
+            }
+            if (!currentFishingGame || (currentFishingGame.phase !== "hook" && currentFishingGame.phase !== "reeling")) {
+                return;
+            }
+            event.preventDefault();
+            handleFishingReelStart();
+        }, true);
+        root.addEventListener("keyup", function (event) {
+            if (event.key === " " || event.key === "Enter") {
+                handleFishingReelEnd();
+            }
+        }, true);
+    };
+
+    var startFishingMinigame = function (payload) {
+        if (typeof clearActivityOverlay === "function") {
+            clearActivityOverlay({ suppressArcadeRestore: true });
+        }
+        clearFishingMinigame();
+        var data = payload || {};
+        var root = document.createElement("div");
+        root.id = "brave-fishing-minigame";
+        root.className = "brave-fishing-minigame";
+        root.setAttribute("aria-hidden", "false");
+        var fish = data.fish || {};
+        var rod = data.rod || {};
+        var lure = data.lure || {};
+        root.innerHTML =
+            "<div class='brave-fishing-minigame__backdrop'></div>"
+            + "<section class='brave-fishing-minigame__panel' role='dialog' aria-modal='true' tabindex='0'>"
+            + "<div class='brave-fishing-minigame__head'>"
+            + "<div class='brave-fishing-minigame__titlebar'>"
+            + "<span class='brave-fishing-minigame__icon'>" + icon("phishing") + "</span>"
+            + "<div class='brave-fishing-minigame__titles'>"
+            + "<div class='brave-fishing-minigame__eyebrow'>" + escapeHtml(data.spot || "Fishing Water") + "</div>"
+            + "<div class='brave-fishing-minigame__title'>Fishing</div>"
+            + "</div>"
+            + "<button type='button' class='brave-fishing-minigame__close brave-view__action brave-view__action--muted brave-view__back' data-brave-fishing-close='1' aria-label='Close fishing'>" + icon("close") + "</button>"
+            + "</div>"
+            + "<div class='brave-fishing-minigame__loadout'>"
+            + "<span>" + escapeHtml(rod.name || "Rod") + "</span>"
+            + "<span>" + escapeHtml(lure.name || "Lure") + "</span>"
+            + "<span>" + escapeHtml(fish.rarity || "Common") + "</span>"
+            + "</div>"
+            + "</div>"
+            + "<div class='brave-fishing-minigame__stage'>"
+            + "<div class='brave-fishing-minigame__lane' data-brave-fishing-lane='1'>"
+            + "<div class='brave-fishing-minigame__zone brave-fishing-minigame__zone--escape'>Slip</div>"
+            + "<div class='brave-fishing-minigame__water'></div>"
+            + "<div class='brave-fishing-minigame__progress' data-fishing-progress></div>"
+            + "<div class='brave-fishing-minigame__marker' data-fishing-marker>" + icon("set_meal") + "</div>"
+            + "<div class='brave-fishing-minigame__zone brave-fishing-minigame__zone--hold'>Hold</div>"
+            + "<div class='brave-fishing-minigame__zone brave-fishing-minigame__zone--catch'>Snap</div>"
+            + "</div>"
+            + "<div class='brave-fishing-minigame__readout'>"
+            + "<div class='brave-fishing-minigame__status' data-fishing-status>Waiting</div>"
+            + "<div class='brave-fishing-minigame__fish' data-fishing-fish>" + escapeHtml(fish.name || "Fish") + "</div>"
+            + "<div class='brave-fishing-minigame__timer' data-fishing-timer></div>"
+            + "<div class='brave-fishing-minigame__result' data-fishing-result></div>"
+            + "</div>"
+            + "</div>"
+            + "<div class='brave-fishing-minigame__controls'>"
+            + "<button type='button' class='brave-fishing-minigame__reel' data-brave-fishing-reel='1'>Reel</button>"
+            + "<button type='button' class='brave-fishing-minigame__secondary' data-brave-fishing-giveup='1'>Give Up</button>"
+            + "</div>"
+            + "<div class='brave-fishing-minigame__result-actions' data-fishing-result-actions hidden>"
+            + "<button type='button' class='brave-fishing-minigame__secondary' data-brave-fishing-cast-again='1'>Cast Again</button>"
+            + "<button type='button' class='brave-fishing-minigame__secondary' data-brave-fishing-command='fish'>Back to Fishing</button>"
+            + "</div>"
+            + "</section>";
+        document.body.appendChild(root);
+        document.body.classList.add("brave-fishing-active");
+        bindFishingMinigameControls(root);
+        currentFishingGame = {
+            data: data,
+            phase: "waiting",
+            position: 0.5,
+            waitMs: Math.max(700, parseInt(data.wait_ms || 1600, 10) || 1600),
+            hookMs: Math.max(700, parseInt(data.hook_ms || 1500, 10) || 1500),
+            durationMs: Math.max(6000, parseInt(data.duration_ms || 14000, 10) || 14000),
+            safeLow: 0.38,
+            safeHigh: 0.66,
+            edgeLow: 0.04,
+            edgeHigh: 0.96,
+            phaseStartedAt: performance.now(),
+            lastFrameAt: null,
+            inputImpulse: 0,
+            safeMs: 0,
+            strain: 0,
+            controlBand: "safe",
+            reeling: false,
+            resolving: false,
+        };
+        updateFishingMinigameUi();
+        var panel = root.querySelector(".brave-fishing-minigame__panel");
+        if (panel && typeof panel.focus === "function") {
+            panel.focus();
+        }
+        currentFishingAnimationFrame = window.requestAnimationFrame(tickFishingMinigame);
+    };
+
+    var showFishingResult = function (payload) {
+        var root = getFishingRoot();
+        if (!root || !root.querySelector("[data-fishing-status]")) {
+            startFishingMinigame({ fish: {}, rod: {}, lure: {}, wait_ms: 999999, hook_ms: 999999 });
+        }
+        if (currentFishingAnimationFrame) {
+            window.cancelAnimationFrame(currentFishingAnimationFrame);
+            currentFishingAnimationFrame = null;
+        }
+        if (!currentFishingGame) {
+            currentFishingGame = { data: {}, position: 0.5 };
+        }
+        currentFishingGame.phase = "result";
+        currentFishingGame.resultSuccess = !!(payload && payload.success);
+        currentFishingGame.resultMessage = payload && payload.message ? String(payload.message).replace(/\|[A-Za-z]/g, "") : "";
+        updateFishingMinigameUi();
+    };
+
+    var handleFishingPayload = function (payload) {
+        payload = payload || {};
+        if (payload.phase === "setup") {
+            renderFishingSetupOverlay(payload);
+            return;
+        }
+        if (payload.phase === "result") {
+            showFishingResult(payload);
+            return;
+        }
+        startFishingMinigame(payload);
+    };
+
     var focusViewAutofocusField = function () {
         var field = document.querySelector(".brave-view [data-brave-autofocus='1']");
         if (!field || typeof field.focus !== "function") {
@@ -7622,6 +8923,26 @@ let defaultout_plugin = (function () {
             return true;
         }
 
+        if (cmdname === "brave_fishing") {
+            handleFishingPayload(getOobPayload(args, kwargs, "brave_fishing", {}) || {});
+            return true;
+        }
+
+        if (cmdname === "brave_cooking") {
+            renderCookingOverlay(getOobPayload(args, kwargs, "brave_cooking", {}) || {});
+            return true;
+        }
+
+        if (cmdname === "brave_tinkering") {
+            renderTinkeringOverlay(getOobPayload(args, kwargs, "brave_tinkering", {}) || {});
+            return true;
+        }
+
+        if (cmdname === "brave_mastery") {
+            renderMasteryOverlay(getOobPayload(args, kwargs, "brave_mastery", {}) || {});
+            return true;
+        }
+
         if (cmdname === "brave_room_activity") {
             var activityPayload = getOobPayload(args, kwargs, "brave_room_activity", {}) || {};
             pushRoomFeedEntry(activityPayload.cls || "out", activityPayload.text || "");
@@ -7670,7 +8991,20 @@ let defaultout_plugin = (function () {
         }
 
         if (cmdname === "brave_arcade_done") {
+            var arcadeDonePayload = getOobPayload(args, kwargs, "brave_arcade_done", {}) || {};
             teardownArcadeMode();
+            restoreArcadeRoomView();
+            if (
+                arcadeDonePayload
+                && ((Array.isArray(arcadeDonePayload.summary_stats) && arcadeDonePayload.summary_stats.length)
+                    || (Array.isArray(arcadeDonePayload.leaderboard) && arcadeDonePayload.leaderboard.length)
+                    || (Array.isArray(arcadeDonePayload.notes) && arcadeDonePayload.notes.length)
+                    || (Array.isArray(arcadeDonePayload.stats) && arcadeDonePayload.stats.length)
+                    || Array.isArray(arcadeDonePayload.lines) && arcadeDonePayload.lines.length
+                    || arcadeDonePayload.title)
+            ) {
+                renderArcadeResultOverlay(arcadeDonePayload);
+            }
             return true;
         }
 
