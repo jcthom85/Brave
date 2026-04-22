@@ -1295,6 +1295,197 @@ def _format_room_entity_items(viewer, visible_entities, visible_chars):
     return items
 
 
+def _build_room_social_presence(viewer, visible_chars):
+    chars = list(visible_chars or [])
+    if not chars:
+        return {
+            "nearby_total": 0,
+            "engaged_total": 0,
+            "party_total": 0,
+            "group_count": 0,
+            "overlay_sections": [],
+        }
+
+    viewer_party_id = getattr(getattr(viewer, "db", None), "brave_party_id", None)
+    follow_target = get_follow_target(viewer) if viewer and viewer_party_id else None
+    party_leader = get_party_leader(viewer) if viewer and viewer_party_id else None
+    room = getattr(viewer, "location", None)
+    encounter = getattr(getattr(room, "ndb", None), "brave_encounter", None) if room else None
+    engaged_participant_ids = set()
+    if encounter and getattr(encounter, "db", None):
+        engaged_participant_ids = {
+            int(participant_id)
+            for participant_id in (getattr(encounter.db, "participants", None) or [])
+            if participant_id is not None
+        }
+
+    people = []
+    grouped_party_ids = set()
+    nearby_total = 0
+    engaged_total = 0
+    party_total = 0
+
+    for obj in chars:
+        nearby_total += 1
+        party_id = getattr(getattr(obj, "db", None), "brave_party_id", None)
+        same_party = bool(viewer_party_id and viewer_party_id == party_id)
+        grouped = bool(party_id)
+        engaged = bool(getattr(obj, "id", None) in engaged_participant_ids)
+        following = bool(follow_target and follow_target.id == getattr(obj, "id", None))
+        leader = bool(party_leader and party_leader.id == getattr(obj, "id", None))
+
+        if grouped:
+            grouped_party_ids.add(party_id)
+        if engaged:
+            engaged_total += 1
+        if same_party:
+            party_total += 1
+
+        lines = []
+        if same_party:
+            lines.append("Party member")
+        elif grouped:
+            lines.append("Grouped nearby")
+        else:
+            lines.append("Nearby player")
+        if leader:
+            lines.append("Party leader")
+        if following:
+            lines.append("You are following them")
+        if engaged:
+            lines.append("Already in the current fight")
+
+        priority = 0
+        if same_party:
+            priority -= 40
+        if leader:
+            priority -= 30
+        if following:
+            priority -= 24
+        if engaged:
+            priority -= 18
+        if grouped:
+            priority -= 8
+
+        badge = "Engaged" if engaged else ("Party" if same_party else "")
+
+        people.append(
+            {
+                "name": obj.key,
+                "summary": lines[0],
+                "lines": lines[1:],
+                "badge": badge,
+                "badge_tone": "danger" if engaged else ("muted" if same_party else ""),
+                "priority": priority,
+            }
+        )
+
+    people.sort(key=lambda entry: (entry["priority"], entry["name"].lower()))
+
+    relevant_items = [
+        {
+            "title": entry["name"],
+            "summary": entry["summary"],
+            "lines": entry["lines"],
+            "badge": entry["badge"],
+            "badge_tone": entry["badge_tone"],
+        }
+        for entry in people[:8]
+    ]
+
+    nearby_items = []
+    for entry in people[8:20]:
+        nearby_items.append(
+            {
+                "title": entry["name"],
+                "summary": entry["summary"],
+                "lines": entry["lines"],
+                "badge": entry["badge"],
+                "badge_tone": entry["badge_tone"],
+            }
+        )
+
+    remaining = max(0, len(people) - 20)
+    if remaining:
+        nearby_items.append(
+            {
+                "title": f"{remaining} more adventurers",
+                "summary": "The room is busier than this quick list can show.",
+                "lines": ["A searchable people browser can expand this later."],
+                "badge": "Crowded",
+                "badge_tone": "muted",
+            }
+        )
+
+    crowd_items = []
+    if nearby_total:
+        crowd_items.append(
+            {
+                "title": "Nearby players",
+                "summary": f"{nearby_total} adventurer{'s' if nearby_total != 1 else ''} visible here.",
+                "badge": str(nearby_total),
+            }
+        )
+    if grouped_party_ids:
+        crowd_items.append(
+            {
+                "title": "Party groups",
+                "summary": f"{len(grouped_party_ids)} active group{'s' if len(grouped_party_ids) != 1 else ''} in view.",
+                "badge": str(len(grouped_party_ids)),
+            }
+        )
+    if engaged_total:
+        crowd_items.append(
+            {
+                "title": "Combatants",
+                "summary": f"{engaged_total} nearby player{'s are' if engaged_total != 1 else ' is'} already engaged.",
+                "badge": str(engaged_total),
+                "badge_tone": "danger",
+            }
+        )
+    if party_total:
+        crowd_items.append(
+            {
+                "title": "Your party",
+                "summary": f"{party_total} party member{'s are' if party_total != 1 else ' is'} nearby.",
+                "badge": str(party_total),
+                "badge_tone": "muted",
+            }
+        )
+
+    overlay_sections = [
+        {
+            "label": "Relevant Nearby",
+            "items": relevant_items,
+            "empty": "No players are nearby right now.",
+        }
+    ]
+    if nearby_items:
+        overlay_sections.append(
+            {
+                "label": "Nearby Players",
+                "items": nearby_items,
+                "empty": "No additional nearby players.",
+            }
+        )
+    if crowd_items:
+        overlay_sections.append(
+            {
+                "label": "Crowd Snapshot",
+                "items": crowd_items,
+                "empty": "Nothing to summarize.",
+            }
+        )
+
+    return {
+        "nearby_total": nearby_total,
+        "engaged_total": engaged_total,
+        "party_total": party_total,
+        "group_count": len(grouped_party_ids),
+        "overlay_sections": overlay_sections,
+    }
+
+
 def _character_in_combat(character):
     encounter_getter = getattr(character, "get_active_encounter", None)
     if not callable(encounter_getter):
@@ -1549,6 +1740,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         "guidance": tutorial_guidance,
         "welcome_pages": welcome_pages,
         "room_actions": room_action_items,
+        "social_presence": _build_room_social_presence(looker, visible_chars),
     }
 
 

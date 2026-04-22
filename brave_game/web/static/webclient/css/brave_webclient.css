@@ -5953,6 +5953,137 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     margin: 0;
 }
 
+.scene-rail__panel--vicinity .brave-room-social-host--empty {
+    display: none;
+}
+
+.brave-room-social {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 72%, rgba(var(--brave-accent-rgb), 0.14));
+    border-radius: 16px;
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-accent-rgb), 0.08), transparent 44%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012));
+}
+
+.brave-room-social__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.brave-room-social__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+
+.brave-room-social__pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    color: color-mix(in srgb, var(--brave-text) 88%, rgba(255, 255, 255, 0.74));
+    font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.brave-room-social__pill strong {
+    color: var(--brave-text);
+    font-size: calc(0.78rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-room-social__people {
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 7px 10px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 76%, rgba(var(--brave-accent-rgb), 0.18));
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--brave-text);
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    cursor: pointer;
+    transition:
+        border-color 120ms ease,
+        background 120ms ease,
+        transform 120ms ease;
+}
+
+.brave-room-social__people:hover,
+.brave-room-social__people:focus-visible {
+    border-color: rgba(var(--brave-accent-rgb), 0.32);
+    background: rgba(var(--brave-accent-rgb), 0.12);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.brave-room-social__people-icon {
+    color: var(--brave-room-safe-icon);
+    font-size: 0.95rem;
+}
+
+.brave-room-social__voices {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.brave-room-social__voices-label {
+    color: color-mix(in srgb, var(--brave-text) 64%, rgba(255, 255, 255, 0.72));
+    font-size: calc(0.62rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.brave-room-social__voice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.brave-room-social__voice {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.032);
+}
+
+.brave-room-social__voice--emote {
+    background: rgba(255, 255, 255, 0.022);
+}
+
+.brave-room-social__voice-speaker {
+    color: var(--brave-text);
+    font-size: calc(0.74rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 700;
+}
+
+.brave-room-social__voice-line {
+    color: color-mix(in srgb, var(--brave-text) 82%, rgba(255, 255, 255, 0.66));
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.35;
+}
+
+.brave-room-social__voice-more {
+    color: color-mix(in srgb, var(--brave-text) 62%, rgba(255, 255, 255, 0.7));
+    font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
 .scene-rail__panel--vicinity .brave-room-activity-card .brave-room-log--rail {
     flex: 1 1 auto;
     min-height: 0;
@@ -12580,6 +12711,24 @@ body.brave-combat-return-active .scene-card {
     .brave-mobile-sheet__section--room-actions {
         flex: 0 0 auto;
         gap: 8px;
+    }
+
+    .brave-mobile-social-presence {
+        gap: 0;
+    }
+
+    .brave-room-social--mobile {
+        padding: 10px;
+    }
+
+    .brave-room-social--mobile .brave-room-social__head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .brave-room-social--mobile .brave-room-social__people {
+        width: 100%;
+        justify-content: center;
     }
 
     .brave-mobile-sheet__section--room-actions .brave-room-actions {
