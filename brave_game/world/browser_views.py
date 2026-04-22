@@ -343,7 +343,7 @@ def _entry(
     return entry
 
 
-def _picker_option(label, *, command=None, prefill=None, icon=None, meta=None, tone=None):
+def _picker_option(label, *, command=None, prefill=None, icon=None, meta=None, tone=None, picker=None):
     option = {"label": label}
     if command:
         option["command"] = command
@@ -355,6 +355,8 @@ def _picker_option(label, *, command=None, prefill=None, icon=None, meta=None, t
         option["meta"] = meta
     if tone:
         option["tone"] = tone
+    if picker:
+        option["picker"] = picker
     return option
 
 
@@ -1295,6 +1297,79 @@ def _format_room_entity_items(viewer, visible_entities, visible_chars):
     return items
 
 
+def _build_targeted_room_emote_picker(target_name):
+    return _picker(
+        f"Emote At {target_name}",
+        subtitle="Choose a quick social emote aimed at this person.",
+        title_icon="sentiment_satisfied",
+        options=[
+            _picker_option("Smile", prefill=f"emote smiles at {target_name}", icon="sentiment_satisfied"),
+            _picker_option("Nod", prefill=f"emote nods to {target_name}", icon="how_to_reg"),
+            _picker_option("Wave", prefill=f"emote waves at {target_name}", icon="waving_hand"),
+            _picker_option("Laugh", prefill=f"emote laughs with {target_name}", icon="sentiment_very_satisfied"),
+            _picker_option("Bow", prefill=f"emote bows to {target_name}", icon="self_improvement"),
+            _picker_option("Custom", prefill=f"emote ", icon="edit_note", meta=f"Write your own emote mentioning {target_name}."),
+        ],
+    )
+
+
+def _build_room_character_picker(viewer, obj, *, same_party=False, engaged=False, following=False, leader=False, can_invite=False, can_kick=False):
+    target_name = obj.key
+    subtitle = "Choose how to interact with this person nearby."
+    options = [
+        _picker_option(
+            "Message",
+            prefill=f"/tell {target_name} = ",
+            icon="forum",
+            meta=f"Open a private message draft to {target_name}.",
+        ),
+        _picker_option(
+            "Emote At",
+            icon="sentiment_satisfied",
+            meta=f"Aim a social emote at {target_name}.",
+            picker=_build_targeted_room_emote_picker(target_name),
+        ),
+    ]
+    if same_party:
+        if following:
+            options.append(_picker_option("Stay", command="party stay", icon="do_not_disturb_on", meta="Stop following for now."))
+        else:
+            options.append(_picker_option("Follow", command=f"party follow {target_name}", icon="directions_walk", meta=f"Keep pace with {target_name}."))
+        options.append(_picker_option("Where", command="party where", icon="location_searching", meta="Check your party's current location."))
+        if can_kick:
+            options.append(
+                _picker_option(
+                    "Kick",
+                    command=f"party kick {target_name}",
+                    icon="person_remove",
+                    meta=f"Remove {target_name} from your party.",
+                    tone="danger",
+                )
+            )
+    elif can_invite:
+        options.append(_picker_option("Invite", command=f"party invite {target_name}", icon="person_add", meta=f"Invite {target_name} to join your party."))
+
+    body = []
+    if same_party:
+        body.append("Party member")
+    else:
+        body.append("Nearby player")
+    if leader:
+        body.append("Party leader")
+    if following:
+        body.append("You are following them")
+    if engaged:
+        body.append("Already engaged in the current fight")
+
+    return _picker(
+        target_name,
+        subtitle=subtitle,
+        title_icon="person",
+        body=body,
+        options=options,
+    )
+
+
 def _build_room_social_presence(viewer, visible_chars):
     chars = list(visible_chars or [])
     if not chars:
@@ -1303,7 +1378,7 @@ def _build_room_social_presence(viewer, visible_chars):
             "engaged_total": 0,
             "party_total": 0,
             "group_count": 0,
-            "overlay_sections": [],
+            "people": [],
         }
 
     viewer_party_id = getattr(getattr(viewer, "db", None), "brave_party_id", None)
@@ -1369,120 +1444,50 @@ def _build_room_social_presence(viewer, visible_chars):
 
         badge = "Engaged" if engaged else ("Party" if same_party else "")
 
+        can_invite = bool(
+            not party_id
+            and (not viewer_party_id or (party_leader and party_leader.id == viewer.id and len(get_party_members(viewer)) < 4))
+        )
+        can_kick = bool(same_party and party_leader and party_leader.id == viewer.id)
         people.append(
             {
                 "name": obj.key,
                 "summary": lines[0],
-                "lines": lines[1:],
+                "detail": " · ".join(lines[1:]),
                 "badge": badge,
                 "badge_tone": "danger" if engaged else ("muted" if same_party else ""),
                 "priority": priority,
+                "picker": _build_room_character_picker(
+                    viewer,
+                    obj,
+                    same_party=same_party,
+                    engaged=engaged,
+                    following=following,
+                    leader=leader,
+                    can_invite=can_invite,
+                    can_kick=can_kick,
+                ),
             }
         )
 
     people.sort(key=lambda entry: (entry["priority"], entry["name"].lower()))
-
-    relevant_items = [
-        {
-            "title": entry["name"],
-            "summary": entry["summary"],
-            "lines": entry["lines"],
-            "badge": entry["badge"],
-            "badge_tone": entry["badge_tone"],
-        }
-        for entry in people[:8]
-    ]
-
-    nearby_items = []
-    for entry in people[8:20]:
-        nearby_items.append(
-            {
-                "title": entry["name"],
-                "summary": entry["summary"],
-                "lines": entry["lines"],
-                "badge": entry["badge"],
-                "badge_tone": entry["badge_tone"],
-            }
-        )
-
-    remaining = max(0, len(people) - 20)
-    if remaining:
-        nearby_items.append(
-            {
-                "title": f"{remaining} more adventurers",
-                "summary": "The room is busier than this quick list can show.",
-                "lines": ["A searchable people browser can expand this later."],
-                "badge": "Crowded",
-                "badge_tone": "muted",
-            }
-        )
-
-    crowd_items = []
-    if nearby_total:
-        crowd_items.append(
-            {
-                "title": "Nearby players",
-                "summary": f"{nearby_total} adventurer{'s' if nearby_total != 1 else ''} visible here.",
-                "badge": str(nearby_total),
-            }
-        )
-    if grouped_party_ids:
-        crowd_items.append(
-            {
-                "title": "Party groups",
-                "summary": f"{len(grouped_party_ids)} active group{'s' if len(grouped_party_ids) != 1 else ''} in view.",
-                "badge": str(len(grouped_party_ids)),
-            }
-        )
-    if engaged_total:
-        crowd_items.append(
-            {
-                "title": "Combatants",
-                "summary": f"{engaged_total} nearby player{'s are' if engaged_total != 1 else ' is'} already engaged.",
-                "badge": str(engaged_total),
-                "badge_tone": "danger",
-            }
-        )
-    if party_total:
-        crowd_items.append(
-            {
-                "title": "Your party",
-                "summary": f"{party_total} party member{'s are' if party_total != 1 else ' is'} nearby.",
-                "badge": str(party_total),
-                "badge_tone": "muted",
-            }
-        )
-
-    overlay_sections = [
-        {
-            "label": "Relevant Nearby",
-            "items": relevant_items,
-            "empty": "No players are nearby right now.",
-        }
-    ]
-    if nearby_items:
-        overlay_sections.append(
-            {
-                "label": "Nearby Players",
-                "items": nearby_items,
-                "empty": "No additional nearby players.",
-            }
-        )
-    if crowd_items:
-        overlay_sections.append(
-            {
-                "label": "Crowd Snapshot",
-                "items": crowd_items,
-                "empty": "Nothing to summarize.",
-            }
-        )
 
     return {
         "nearby_total": nearby_total,
         "engaged_total": engaged_total,
         "party_total": party_total,
         "group_count": len(grouped_party_ids),
-        "overlay_sections": overlay_sections,
+        "people": [
+            {
+                "name": entry["name"],
+                "summary": entry["summary"],
+                "detail": entry["detail"],
+                "badge": entry["badge"],
+                "badge_tone": entry["badge_tone"],
+                "picker": entry["picker"],
+            }
+            for entry in people
+        ],
     }
 
 

@@ -5953,67 +5953,111 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     margin: 0;
 }
 
-.scene-rail__panel--vicinity .brave-room-social-host--empty {
+.brave-room-activity-card__tabs,
+.brave-room-activity-mobile-card__tabs {
+    flex: 0 0 auto;
+}
+
+.brave-room-activity-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.brave-room-activity-tabs__button {
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 34px;
+    padding: 7px 12px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.16));
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
+    color: color-mix(in srgb, var(--brave-text) 76%, rgba(255, 255, 255, 0.68));
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+        border-color 120ms ease,
+        background 120ms ease,
+        color 120ms ease;
+}
+
+.brave-room-activity-tabs__button strong {
+    color: var(--brave-text);
+    font-size: calc(0.7rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-room-activity-tabs__button:hover,
+.brave-room-activity-tabs__button:focus-visible {
+    border-color: rgba(var(--brave-accent-rgb), 0.3);
+    outline: none;
+}
+
+.brave-room-activity-tabs__button--active {
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-accent-rgb), 0.16), transparent 48%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+    border-color: rgba(var(--brave-accent-rgb), 0.34);
+    color: var(--brave-text);
+}
+
+.brave-room-activity-pane {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
+}
+
+.brave-room-activity-pane--hidden {
     display: none;
 }
 
-.brave-room-social {
+.brave-room-nearby {
     display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
     flex-direction: column;
     gap: 10px;
-    padding: 10px 12px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 72%, rgba(var(--brave-accent-rgb), 0.14));
-    border-radius: 16px;
-    background:
-        radial-gradient(circle at 0 0, rgba(var(--brave-accent-rgb), 0.08), transparent 44%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012));
 }
 
-.brave-room-social__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.brave-room-social__stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    min-width: 0;
-}
-
-.brave-room-social__pill {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 5px;
-    padding: 4px 9px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.05);
-    color: color-mix(in srgb, var(--brave-text) 88%, rgba(255, 255, 255, 0.74));
-    font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+.brave-room-nearby__summary {
+    color: color-mix(in srgb, var(--brave-text) 68%, rgba(255, 255, 255, 0.7));
+    font-size: calc(0.69rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
 
-.brave-room-social__pill strong {
-    color: var(--brave-text);
-    font-size: calc(0.78rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+.brave-room-nearby__list {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    padding-right: 2px;
+    scrollbar-width: thin;
 }
 
-.brave-room-social__people {
+.brave-room-nearby__entry {
     font-family: inherit;
-    display: inline-flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
     align-items: center;
-    gap: 7px;
-    flex: 0 0 auto;
-    min-height: 34px;
-    padding: 7px 10px;
-    border: 1px solid color-mix(in srgb, var(--brave-world-line) 76%, rgba(var(--brave-accent-rgb), 0.18));
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.04);
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 11px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 72%, rgba(var(--brave-accent-rgb), 0.14));
+    border-radius: 14px;
+    background:
+        radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.025), transparent 32%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0.012));
     color: var(--brave-text);
-    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    text-align: left;
     cursor: pointer;
     transition:
         border-color 120ms ease,
@@ -6021,67 +6065,75 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         transform 120ms ease;
 }
 
-.brave-room-social__people:hover,
-.brave-room-social__people:focus-visible {
-    border-color: rgba(var(--brave-accent-rgb), 0.32);
-    background: rgba(var(--brave-accent-rgb), 0.12);
+.brave-room-nearby__entry:hover,
+.brave-room-nearby__entry:focus-visible {
+    border-color: rgba(var(--brave-accent-rgb), 0.3);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-accent-rgb), 0.12), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.014));
     outline: none;
-    transform: translateY(-1px);
+    transform: translateX(1px);
 }
 
-.brave-room-social__people-icon {
+.brave-room-nearby__entry-icon,
+.brave-room-nearby__entry-chevron {
+    flex: 0 0 auto;
     color: var(--brave-room-safe-icon);
     font-size: 0.95rem;
 }
 
-.brave-room-social__voices {
+.brave-room-nearby__entry-body {
     display: flex;
+    min-width: 0;
     flex-direction: column;
-    gap: 6px;
+    gap: 2px;
+}
+
+.brave-room-nearby__entry-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     min-width: 0;
 }
 
-.brave-room-social__voices-label {
-    color: color-mix(in srgb, var(--brave-text) 64%, rgba(255, 255, 255, 0.72));
-    font-size: calc(0.62rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-}
-
-.brave-room-social__voice-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.brave-room-social__voice {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 8px 10px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.032);
-}
-
-.brave-room-social__voice--emote {
-    background: rgba(255, 255, 255, 0.022);
-}
-
-.brave-room-social__voice-speaker {
+.brave-room-nearby__entry-name {
+    min-width: 0;
     color: var(--brave-text);
-    font-size: calc(0.74rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(0.78rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     font-weight: 700;
 }
 
-.brave-room-social__voice-line {
-    color: color-mix(in srgb, var(--brave-text) 82%, rgba(255, 255, 255, 0.66));
-    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-    line-height: 1.35;
+.brave-room-nearby__entry-summary,
+.brave-room-nearby__entry-detail,
+.brave-room-nearby__empty {
+    color: color-mix(in srgb, var(--brave-text) 74%, rgba(255, 255, 255, 0.66));
+    font-size: calc(0.71rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.32;
 }
 
-.brave-room-social__voice-more {
-    color: color-mix(in srgb, var(--brave-text) 62%, rgba(255, 255, 255, 0.7));
-    font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+.brave-room-nearby__entry-detail {
+    color: color-mix(in srgb, var(--brave-text) 58%, rgba(255, 255, 255, 0.6));
+}
+
+.brave-room-nearby__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: color-mix(in srgb, var(--brave-text) 84%, rgba(255, 255, 255, 0.74));
+    font-size: calc(0.61rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.brave-room-nearby__badge--danger {
+    background: rgba(194, 73, 73, 0.18);
+    color: color-mix(in srgb, #ffddd7 84%, white);
+}
+
+.brave-room-nearby__badge--muted {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .scene-rail__panel--vicinity .brave-room-activity-card .brave-room-log--rail {
@@ -12713,22 +12765,27 @@ body.brave-combat-return-active .scene-card {
         gap: 8px;
     }
 
-    .brave-mobile-social-presence {
-        gap: 0;
+    .brave-room-activity-mobile-card {
+        flex: 1 1 auto;
+        min-height: 0;
+        gap: 10px;
     }
 
-    .brave-room-social--mobile {
-        padding: 10px;
+    .brave-room-activity-mobile-card .brave-room-activity-tabs {
+        flex-wrap: wrap;
     }
 
-    .brave-room-social--mobile .brave-room-social__head {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .brave-room-social--mobile .brave-room-social__people {
-        width: 100%;
+    .brave-room-activity-mobile-card .brave-room-activity-tabs__button {
+        flex: 1 1 calc(50% - 8px);
         justify-content: center;
+    }
+
+    .brave-room-activity-mobile-card .brave-room-nearby__entry {
+        min-height: 52px;
+    }
+
+    .brave-room-activity-mobile-card .brave-room-nearby__summary {
+        padding: 0 2px;
     }
 
     .brave-mobile-sheet__section--room-actions .brave-room-actions {
@@ -14119,6 +14176,11 @@ body.brave-combat-return-active .scene-card {
 
 .brave-room-log__jump--visible {
     display: inline-flex;
+}
+
+.brave-room-log__jump--hidden,
+.brave-room-log__jump--hidden.brave-room-log__jump--visible {
+    display: none;
 }
 
 .brave-room-log__jump:hover,

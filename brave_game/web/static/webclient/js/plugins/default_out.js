@@ -347,6 +347,12 @@ let defaultout_plugin = (function () {
         return null;
     };
 
+    var currentRoomActivityTab = "activity";
+
+    var normalizeRoomActivityTab = function (tab) {
+        return tab === "nearby" ? "nearby" : "activity";
+    };
+
     var getRoomSocialPresence = function (roomView) {
         var data = roomView && roomView.social_presence && typeof roomView.social_presence === "object"
             ? roomView.social_presence
@@ -360,7 +366,7 @@ let defaultout_plugin = (function () {
             engaged_total: isNaN(engagedTotal) ? 0 : Math.max(0, engagedTotal),
             party_total: isNaN(partyTotal) ? 0 : Math.max(0, partyTotal),
             group_count: isNaN(groupCount) ? 0 : Math.max(0, groupCount),
-            overlay_sections: Array.isArray(data.overlay_sections) ? data.overlay_sections : [],
+            people: Array.isArray(data.people) ? data.people : [],
         };
     };
 
@@ -419,77 +425,100 @@ let defaultout_plugin = (function () {
         return voices;
     };
 
-    var buildRoomSocialPresenceMarkup = function (roomView, options) {
+    var buildRoomActivityTabsMarkup = function (roomView) {
         var presence = getRoomSocialPresence(roomView);
-        var opts = options || {};
-        var mobile = !!opts.mobile;
-        var voices = getRoomActiveVoices(mobile ? 4 : 3);
-        var visibleVoices = voices.slice(0, 2);
-        var overflowVoices = Math.max(0, voices.length - visibleVoices.length);
-        if (!presence.nearby_total && !visibleVoices.length) {
-            return "";
-        }
-        var stats = [
-            "<span class='brave-room-social__pill'><strong>" + escapeHtml(String(presence.nearby_total)) + "</strong><span>nearby</span></span>",
-        ];
-        if (visibleVoices.length) {
-            stats.push("<span class='brave-room-social__pill'><strong>" + escapeHtml(String(visibleVoices.length)) + "</strong><span>speaking</span></span>");
-        }
-        if (presence.group_count) {
-            stats.push("<span class='brave-room-social__pill'><strong>" + escapeHtml(String(presence.group_count)) + "</strong><span>parties</span></span>");
-        }
-        if (presence.engaged_total) {
-            stats.push("<span class='brave-room-social__pill'><strong>" + escapeHtml(String(presence.engaged_total)) + "</strong><span>engaged</span></span>");
-        }
         return (
-            "<div class='brave-room-social" + (mobile ? " brave-room-social--mobile" : "") + "'>"
-            + "<div class='brave-room-social__head'>"
-            + "<div class='brave-room-social__stats'>" + stats.join("") + "</div>"
-            + "<button type='button' class='brave-room-social__people brave-click' data-brave-people-open='1'>"
-            + icon("groups", "brave-room-social__people-icon")
-            + "<span>People</span>"
-            + "</button>"
-            + "</div>"
-            + (visibleVoices.length
-                ? "<div class='brave-room-social__voices'>"
-                    + "<div class='brave-room-social__voices-label'>Active Voices</div>"
-                    + "<div class='brave-room-social__voice-list'>"
-                    + visibleVoices.map(function (voice) {
-                        return "<div class='brave-room-social__voice brave-room-social__voice--" + escapeHtml(voice.category || "speech") + "'>"
-                            + "<span class='brave-room-social__voice-speaker'>" + escapeHtml(voice.speaker || "Nearby") + "</span>"
-                            + "<span class='brave-room-social__voice-line'>" + escapeHtml(voice.line || "") + "</span>"
-                            + "</div>";
-                    }).join("")
-                    + (overflowVoices ? "<div class='brave-room-social__voice-more'>+" + escapeHtml(String(overflowVoices)) + " more in activity</div>" : "")
-                    + "</div>"
-                    + "</div>"
-                : "")
+            "<div class='brave-room-activity-tabs' data-brave-room-tabs='1'>"
+            + "<button type='button' class='brave-room-activity-tabs__button brave-click"
+                + (currentRoomActivityTab === "activity" ? " brave-room-activity-tabs__button--active" : "")
+                + "' data-brave-activity-tab='activity' aria-pressed='" + (currentRoomActivityTab === "activity" ? "true" : "false") + "'>"
+                + "<span>Activity</span>"
+                + "</button>"
+            + "<button type='button' class='brave-room-activity-tabs__button brave-click"
+                + (currentRoomActivityTab === "nearby" ? " brave-room-activity-tabs__button--active" : "")
+                + "' data-brave-activity-tab='nearby' aria-pressed='" + (currentRoomActivityTab === "nearby" ? "true" : "false") + "'>"
+                + "<span>Nearby</span>"
+                + (presence.nearby_total ? "<strong>" + escapeHtml(String(presence.nearby_total)) + "</strong>" : "")
+                + "</button>"
             + "</div>"
         );
     };
 
-    var syncRailSocialPresence = function (panel, roomView) {
-        if (!panel) {
-            return;
+    var buildRoomNearbyMarkup = function (roomView, options) {
+        var presence = getRoomSocialPresence(roomView);
+        var people = presence.people || [];
+        var opts = options || {};
+        var summaryBits = [];
+        if (presence.nearby_total) {
+            summaryBits.push(String(presence.nearby_total) + " nearby");
         }
-        var host = panel.querySelector(".brave-room-social-host");
-        if (!host) {
-            return;
+        if (presence.group_count) {
+            summaryBits.push(String(presence.group_count) + " group" + (presence.group_count === 1 ? "" : "s"));
         }
-        host.innerHTML = buildRoomSocialPresenceMarkup(roomView || getCurrentRoomView(), { mobile: false });
-        host.classList.toggle("brave-room-social-host--empty", !host.innerHTML.trim());
+        if (presence.engaged_total) {
+            summaryBits.push(String(presence.engaged_total) + " engaged");
+        }
+        return (
+            "<div class='brave-room-nearby" + (opts.mobile ? " brave-room-nearby--mobile" : "") + "'>"
+            + (summaryBits.length ? "<div class='brave-room-nearby__summary'>" + escapeHtml(summaryBits.join(" · ")) + "</div>" : "")
+            + (people.length
+                ? "<div class='brave-room-nearby__list'>"
+                    + people.map(function (person) {
+                        var badgeTone = person && person.badge_tone ? " brave-room-nearby__badge--" + escapeHtml(person.badge_tone) : "";
+                        return (
+                            "<button type='button' class='brave-room-nearby__entry brave-click'"
+                            + commandAttrs(person, false)
+                            + ">"
+                            + "<span class='brave-room-nearby__entry-icon'>" + icon("person") + "</span>"
+                            + "<span class='brave-room-nearby__entry-body'>"
+                            + "<span class='brave-room-nearby__entry-head'>"
+                            + "<span class='brave-room-nearby__entry-name'>" + escapeHtml(person && person.name ? person.name : "") + "</span>"
+                            + (person && person.badge ? "<span class='brave-room-nearby__badge" + badgeTone + "'>" + escapeHtml(person.badge) + "</span>" : "")
+                            + "</span>"
+                            + (person && person.summary ? "<span class='brave-room-nearby__entry-summary'>" + escapeHtml(person.summary) + "</span>" : "")
+                            + (person && person.detail ? "<span class='brave-room-nearby__entry-detail'>" + escapeHtml(person.detail) + "</span>" : "")
+                            + "</span>"
+                            + "<span class='brave-room-nearby__entry-chevron'>" + icon("chevron_right") + "</span>"
+                            + "</button>"
+                        );
+                    }).join("")
+                    + "</div>"
+                : "<div class='brave-room-nearby__empty'>No other players are visible here right now.</div>")
+            + "</div>"
+        );
     };
 
-    var syncMobileSocialPresence = function (host, roomView) {
-        if (!host) {
+    var syncRoomActivityCardSurface = function (root, roomView, options) {
+        if (!root) {
             return;
         }
-        var socialHost = host.querySelector(".brave-mobile-social-presence");
-        if (!socialHost) {
-            return;
+        var opts = options || {};
+        var tabsHost = root.querySelector("[data-brave-room-tabs-host]");
+        var activityPane = root.querySelector("[data-brave-room-pane='activity']");
+        var nearbyPane = root.querySelector("[data-brave-room-pane='nearby']");
+        var nearbyHost = root.querySelector("[data-brave-room-nearby]");
+        var jump = root.querySelector("[data-brave-activity-scroll='rail']");
+        if (tabsHost) {
+            tabsHost.innerHTML = buildRoomActivityTabsMarkup(roomView);
         }
-        socialHost.innerHTML = buildRoomSocialPresenceMarkup(roomView || getCurrentRoomView(), { mobile: true });
-        socialHost.classList.toggle("brave-room-social-host--empty", !socialHost.innerHTML.trim());
+        if (nearbyHost) {
+            nearbyHost.innerHTML = buildRoomNearbyMarkup(roomView, { mobile: !!opts.mobile });
+        }
+        if (activityPane) {
+            activityPane.classList.toggle("brave-room-activity-pane--hidden", currentRoomActivityTab !== "activity");
+        }
+        if (nearbyPane) {
+            nearbyPane.classList.toggle("brave-room-activity-pane--hidden", currentRoomActivityTab !== "nearby");
+        }
+        if (jump) {
+            jump.classList.toggle("brave-room-log__jump--hidden", currentRoomActivityTab !== "activity");
+        }
+    };
+
+    var setRoomActivityTab = function (tab) {
+        currentRoomActivityTab = normalizeRoomActivityTab(tab);
+        syncRoomActivityCardSurface(document.getElementById("scene-vicinity-panel"), getCurrentRoomView(), { mobile: false });
+        syncRoomActivityCardSurface(document.getElementById("mobile-utility-sheet"), getCurrentRoomView(), { mobile: true });
     };
 
     var getReactiveSourceId = function (viewData) {
@@ -2371,12 +2400,19 @@ let defaultout_plugin = (function () {
                         + roomActionsMarkup
                         + "</div>"
                     : "")
-                + "<div class='brave-mobile-sheet__section brave-mobile-social-presence brave-room-social-host'></div>"
+                + "<div class='brave-mobile-sheet__section brave-room-activity-mobile-card'>"
+                + "<div class='brave-room-activity-mobile-card__tabs' data-brave-room-tabs-host='1'></div>"
+                + "<div class='brave-room-activity-pane brave-room-activity-pane--activity' data-brave-room-pane='activity'>"
                 + "<div class='brave-mobile-sheet__section brave-mobile-sheet__section--activity'>"
                 + "<div class='brave-mobile-activity-log brave-room-log'>"
                 + "<div class='brave-room-log__body brave-room-log__body--mobile' role='log' aria-live='polite' aria-relevant='additions text'>"
                 + currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("")
                 + "</div>"
+                + "</div>"
+                + "</div>"
+                + "</div>"
+                + "<div class='brave-room-activity-pane brave-room-activity-pane--nearby brave-room-activity-pane--hidden' data-brave-room-pane='nearby'>"
+                + "<div class='brave-room-nearby-host' data-brave-room-nearby='1'></div>"
                 + "</div>"
                 + "</div>";
         } else if (tab === "room") {
@@ -2431,7 +2467,7 @@ let defaultout_plugin = (function () {
         host.innerHTML = buildMobileUtilitySheetMarkup(currentMobileUtilityTab, roomView);
         host.setAttribute("aria-hidden", "false");
         document.body.classList.add("brave-mobile-sheet-active");
-        syncMobileSocialPresence(host, roomView);
+        syncRoomActivityCardSurface(host, roomView, { mobile: true });
         if (currentMobileUtilityTab === "activity") {
             mobileRoomActivityUnreadCount = 0;
             renderMobileNavDock();
@@ -5292,8 +5328,8 @@ let defaultout_plugin = (function () {
             }
         }
         syncRailActivityLog();
-        syncRailSocialPresence(document.getElementById("scene-vicinity-panel"), getCurrentRoomView());
-        syncMobileSocialPresence(document.getElementById("mobile-utility-sheet"), getCurrentRoomView());
+        syncRoomActivityCardSurface(document.getElementById("scene-vicinity-panel"), getCurrentRoomView(), { mobile: false });
+        syncRoomActivityCardSurface(document.getElementById("mobile-utility-sheet"), getCurrentRoomView(), { mobile: true });
         return $(body);
     };
 
@@ -5390,7 +5426,7 @@ let defaultout_plugin = (function () {
         body.innerHTML = currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("");
         bindRailActivityScrollState(body);
         restoreRailActivityScroll(body, shouldStickToBottom);
-        syncRailSocialPresence(panel, getCurrentRoomView());
+        syncRoomActivityCardSurface(panel, getCurrentRoomView(), { mobile: false });
         return $(body);
     };
 
@@ -5426,7 +5462,7 @@ let defaultout_plugin = (function () {
         if (!body) {
             return null;
         }
-        syncMobileSocialPresence(host, getCurrentRoomView());
+        syncRoomActivityCardSurface(host, getCurrentRoomView(), { mobile: true });
         return syncRoomActivityLog(body);
     };
 
@@ -5934,9 +5970,14 @@ let defaultout_plugin = (function () {
                 + "<span>Activity</span>"
                 + "<button type='button' class='brave-room-log__jump' data-brave-activity-scroll='rail' aria-label='Activity is at the latest line' disabled>0</button>"
                 + "</div>"
-                + "<div class='brave-room-social-host'></div>"
+                + "<div class='brave-room-activity-card__tabs' data-brave-room-tabs-host='1'></div>"
+                + "<div class='brave-room-activity-pane brave-room-activity-pane--activity' data-brave-room-pane='activity'>"
                 + "<div class='brave-room-log brave-room-log--rail'>"
                 + "<div class='brave-room-log__body brave-room-log__body--rail' role='log' aria-live='polite' aria-relevant='additions text'></div>"
+                + "</div>"
+                + "</div>"
+                + "<div class='brave-room-activity-pane brave-room-activity-pane--nearby brave-room-activity-pane--hidden' data-brave-room-pane='nearby'>"
+                + "<div class='brave-room-nearby-host' data-brave-room-nearby='1'></div>"
                 + "</div>"
                 + "</div>"
                 + "</div>";
@@ -5961,7 +6002,7 @@ let defaultout_plugin = (function () {
         panel.removeAttribute("tabindex");
         panel.classList.remove("brave-click");
         syncRailActivityLog();
-        syncRailSocialPresence(panel, currentViewData);
+        syncRoomActivityCardSurface(panel, currentViewData, { mobile: false });
         updateRailActivityCue();
     };
 
@@ -7449,59 +7490,6 @@ let defaultout_plugin = (function () {
             + "</div>";
     };
 
-    var openRoomPeopleOverlay = function () {
-        var roomView = getCurrentRoomView();
-        var presence = getRoomSocialPresence(roomView);
-        var voices = getRoomActiveVoices(6);
-        var stats = [];
-        var sections = [];
-
-        if (!presence.nearby_total && !voices.length) {
-            return;
-        }
-
-        stats.push({ label: "Nearby", value: String(presence.nearby_total) });
-        if (voices.length) {
-            stats.push({ label: "Speaking", value: String(voices.length) });
-        }
-        if (presence.group_count) {
-            stats.push({ label: "Parties", value: String(presence.group_count) });
-        }
-        if (presence.engaged_total) {
-            stats.push({ label: "Engaged", value: String(presence.engaged_total) });
-        }
-
-        if (voices.length) {
-            sections.push({
-                label: "Active Voices",
-                items: voices.map(function (voice) {
-                    return {
-                        title: voice.speaker || "Nearby",
-                        summary: voice.line || "",
-                        badge: voice.category === "emote" ? "Emote" : "Speech",
-                        badge_tone: voice.category === "emote" ? "muted" : "",
-                    };
-                }),
-                empty: "No one is speaking right now.",
-            });
-        }
-
-        presence.overlay_sections.forEach(function (section) {
-            sections.push(section);
-        });
-
-        renderActivityOverlay("presence", {}, {
-            icon: "groups",
-            eyebrow: roomView && roomView.title ? roomView.title : "Room",
-            title: "People Nearby",
-            stats: stats,
-            body_lines: [
-                "This compact social layer keeps the rail readable while still surfacing who matters right now.",
-            ],
-            sections: sections,
-        });
-    };
-
     var normalizeArcadeResultNotes = function (notes, fallbackLines) {
         var normalized = [];
         if (Array.isArray(notes)) {
@@ -8724,11 +8712,11 @@ let defaultout_plugin = (function () {
                 focusCommandInput();
                 return;
             }
-            var peopleOpenTarget = event.target.closest("[data-brave-people-open]");
-            if (peopleOpenTarget) {
+            var activityTabTarget = event.target.closest("[data-brave-activity-tab]");
+            if (activityTabTarget) {
                 event.preventDefault();
                 event.stopPropagation();
-                openRoomPeopleOverlay();
+                setRoomActivityTab(activityTabTarget.getAttribute("data-brave-activity-tab"));
                 return;
             }
             var mobileTarget = event.target.closest("[data-brave-mobile-panel], [data-brave-mobile-action]");
