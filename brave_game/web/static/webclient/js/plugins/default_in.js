@@ -26,6 +26,7 @@ let defaultInPlugin = (function () {
     var inputContext = INPUT_CONTEXT_COMMAND;
     var isLoggedIn = false;
     var lastMobileInputOpenAt = 0;
+    var pendingOverlayFocusTimeout = null;
     var isMobileViewport = function () {
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
     };
@@ -37,27 +38,23 @@ let defaultInPlugin = (function () {
         return window.plugins.defaultout;
     };
 
-    var isGameplayBodyState = function () {
-        var body = document.body;
-        if (!body) {
-            return false;
-        }
-        var view = body.getAttribute("data-brave-view") || "";
-        var scene = body.getAttribute("data-brave-scene") || "";
-        if (view && view !== "connection" && view !== "chargen") {
-            return true;
-        }
-        if (scene && scene !== "account" && scene !== "system") {
-            return true;
-        }
-        return false;
+    var getResolvedInputContext = function () {
+        return inputContext;
     };
 
-    var getResolvedInputContext = function () {
-        if (inputContext === INPUT_CONTEXT_COMMAND && isGameplayBodyState()) {
-            return INPUT_CONTEXT_PLAY;
+    var syncOverlayBackdrop = function (open) {
+        var backdrop = document.getElementById("brave-chat-overlay-backdrop");
+        if (!backdrop) {
+            return;
         }
-        return inputContext;
+        backdrop.setAttribute("aria-hidden", open ? "false" : "true");
+    };
+
+    var clearPendingOverlayFocus = function () {
+        if (pendingOverlayFocusTimeout !== null) {
+            window.clearTimeout(pendingOverlayFocusTimeout);
+            pendingOverlayFocusTimeout = null;
+        }
     };
 
     var getEffectiveInputMode = function () {
@@ -95,6 +92,41 @@ let defaultInPlugin = (function () {
             return null;
         }
         return item.element[0] || item.element;
+    };
+
+    var collapseInputLayoutReservation = function (layout, inputComponent, sibling, inputElement, siblingElement) {
+        var needsUpdate = false;
+        if (inputComponent && inputComponent.config) {
+            if (inputComponent.config.height !== 0) {
+                inputComponent.config.height = 0;
+                needsUpdate = true;
+            }
+            if (inputComponent.config.minHeight !== 0) {
+                inputComponent.config.minHeight = 0;
+                needsUpdate = true;
+            }
+        }
+        if (sibling && sibling.config && sibling.config.height !== 100) {
+            sibling.config.height = 100;
+            needsUpdate = true;
+        }
+        if (inputElement) {
+            inputElement.style.height = "0px";
+            inputElement.style.minHeight = "0px";
+            inputElement.style.maxHeight = "0px";
+            inputElement.style.flexBasis = "0px";
+        }
+        if (siblingElement) {
+            siblingElement.style.height = "100%";
+            siblingElement.style.minHeight = "0px";
+            siblingElement.style.flexBasis = "auto";
+            siblingElement.style.flexGrow = "1";
+        }
+        if (needsUpdate && layout && typeof layout.updateSize === "function") {
+            window.requestAnimationFrame(function () {
+                layout.updateSize();
+            });
+        }
     };
 
     var decorateInputLayoutShells = function () {
@@ -144,6 +176,7 @@ let defaultInPlugin = (function () {
         if (siblingElement) {
             siblingElement.classList.add("brave-gl-main-item");
         }
+        collapseInputLayoutReservation(layout, inputComponent, sibling, inputElement, siblingElement);
     };
 
     var getCommandInput = function () {
@@ -186,19 +219,22 @@ let defaultInPlugin = (function () {
     };
 
     var setReadyState = function (activeOverride) {
-        var focused = $(".inputfield:focus, #inputfield:focus").length > 0;
+        var inputAvailable = getResolvedInputContext() === INPUT_CONTEXT_PLAY;
+        var focused = inputAvailable && $(".inputfield:focus, #inputfield:focus").length > 0;
         var active = activeOverride;
-        if (active === undefined || active === null) {
+        if (!inputAvailable) {
+            active = false;
+        } else if (active === undefined || active === null) {
             active = focused;
         }
 
-        var inputfield = getCommandInput();
-        var hasText = !!(inputfield.length && String(inputfield.val() || "").length);
+        var inputfield = inputAvailable ? getCommandInput() : $();
+        var hasText = !!(inputAvailable && inputfield.length && String(inputfield.val() || "").length);
 
         $("body").toggleClass("brave-command-ready", !!active);
         $("body").toggleClass("brave-command-armed", !!active && isMobileViewport() && !focused);
         $("body").toggleClass("brave-command-has-text", hasText);
-        $(".inputfield, #inputfield").toggleClass("focused", !!active);
+        $(".inputfield, #inputfield").toggleClass("focused", !!active && inputAvailable);
         syncInputModeBodyState();
     };
 
@@ -330,9 +366,6 @@ let defaultInPlugin = (function () {
                 isLoggedIn = true;
                 playInputMode = INPUT_MODE_CHAT;
                 persistPlayInputMode();
-                if (isMobileViewport()) {
-                    setMobileInputOpen(true, { focus: false, moveCaret: false });
-                }
             }
             refreshInputChrome();
             return inputContext;
@@ -346,13 +379,11 @@ let defaultInPlugin = (function () {
             if (document.body) {
                 document.body.classList.remove(MOBILE_INPUT_OPEN_CLASS);
             }
+            syncOverlayBackdrop(false);
             window.dispatchEvent(new CustomEvent("brave:mobile-input-state", { detail: { open: false } }));
         }
         inputContext = nextContext;
         refreshInputChrome();
-        if (nextContext === INPUT_CONTEXT_PLAY && isMobileViewport()) {
-            setMobileInputOpen(true, { focus: false, moveCaret: false });
-        }
         return inputContext;
     };
 
@@ -368,16 +399,12 @@ let defaultInPlugin = (function () {
             return $();
         }
 
-        if (isMobileViewport()) {
-            decorateInputLayoutShells();
-            if (document.body) {
-                var wasOpen = document.body.classList.contains(MOBILE_INPUT_OPEN_CLASS);
-                document.body.classList.add(MOBILE_INPUT_OPEN_CLASS);
-                lastMobileInputOpenAt = Date.now();
-                if (!wasOpen) {
-                    window.dispatchEvent(new CustomEvent("brave:mobile-input-state", { detail: { open: true } }));
-                }
+        decorateInputLayoutShells();
+        if (!isMobileInputOpen()) {
+            if (!options.openOverlay) {
+                return $();
             }
+            setMobileInputOpen(true, { focus: false, moveCaret: options.moveCaret !== false });
         }
 
         var inputfield = getCommandInput();
@@ -397,21 +424,24 @@ let defaultInPlugin = (function () {
     var setMobileInputOpen = function (open, options) {
         options = options || {};
         decorateInputLayoutShells();
+        clearPendingOverlayFocus();
+
+        if (getResolvedInputContext() === INPUT_CONTEXT_COMMAND) {
+            if (document.body) {
+                document.body.classList.remove(MOBILE_INPUT_OPEN_CLASS);
+            }
+            syncOverlayBackdrop(false);
+            window.dispatchEvent(new CustomEvent("brave:mobile-input-state", { detail: { open: false } }));
+            setReadyState(false);
+            return $();
+        }
 
         if (!document.body) {
             return getCommandInput();
         }
 
-        if (!isMobileViewport()) {
-            document.body.classList.remove(MOBILE_INPUT_OPEN_CLASS);
-            if (options.focus) {
-                return focusInput({ force: true, moveCaret: options.moveCaret !== false });
-            }
-            setReadyState();
-            return getCommandInput();
-        }
-
         document.body.classList.toggle(MOBILE_INPUT_OPEN_CLASS, !!open);
+        syncOverlayBackdrop(!!open);
         if (open) {
             lastMobileInputOpenAt = Date.now();
         }
@@ -421,7 +451,8 @@ let defaultInPlugin = (function () {
             decorateSendButton();
             setReadyState(true);
             if (options.focus) {
-                window.setTimeout(function () {
+                pendingOverlayFocusTimeout = window.setTimeout(function () {
+                    pendingOverlayFocusTimeout = null;
                     focusInput({ force: true, moveCaret: options.moveCaret !== false });
                 }, typeof options.delay === "number" ? options.delay : 0);
             }
@@ -439,15 +470,12 @@ let defaultInPlugin = (function () {
     };
 
     var primeInput = function () {
-        if (getResolvedInputContext() === INPUT_CONTEXT_COMMAND) {
+        if (getResolvedInputContext() === INPUT_CONTEXT_COMMAND || !isMobileInputOpen()) {
             return $();
         }
-        if (isMobileViewport()) {
-            decorateInputs();
-            decorateInputLayoutShells();
-            setReadyState(isMobileInputOpen());
-            return getCommandInput();
-        }
+        decorateInputs();
+        decorateInputLayoutShells();
+        setReadyState(isMobileInputOpen());
         return focusInput({ force: true });
     };
 
@@ -458,7 +486,7 @@ let defaultInPlugin = (function () {
         } else {
             setInputMode(INPUT_MODE_CHAT);
         }
-        var inputfield = focusInput({ force: true });
+        var inputfield = focusInput({ force: true, openOverlay: true });
         if (inputfield.length < 1) {
             return;
         }
@@ -539,7 +567,7 @@ let defaultInPlugin = (function () {
             plugin_handler.onSend(line);
         }
         inputfield.val("");
-        if (isMobileViewport()) {
+        if (isMobileInputOpen()) {
             setMobileInputOpen(false);
             event.preventDefault();
             return;
@@ -558,6 +586,7 @@ let defaultInPlugin = (function () {
 
     var onKeydown = function (event) {
         var inputfield = $(".inputfield:focus");
+        var overlayOpen = isMobileInputOpen();
         if (inputfield.length < 1) {
             inputfield = $("#inputfield:focus");
         }
@@ -580,10 +609,10 @@ let defaultInPlugin = (function () {
                 return true;
 
             case 13:
-                if (inputfield.length < 1) {
+                if (overlayOpen && inputfield.length < 1) {
                     inputfield = focusInput({ force: true });
                 }
-                if (!event.shiftKey) {
+                if (overlayOpen && !event.shiftKey && inputfield.length > 0) {
                     sendCurrentInput(inputfield, event);
                 }
                 return true;
@@ -605,15 +634,19 @@ let defaultInPlugin = (function () {
                 if (!event.ctrlKey && !event.metaKey && !event.altKey) {
                     if (getResolvedInputContext() === INPUT_CONTEXT_PLAY) {
                         setInputMode(INPUT_MODE_CHAT);
+                        if (overlayOpen) {
+                            setMobileInputOpen(false);
+                        } else {
+                            focusInput({ force: true, moveCaret: true, chatMode: true, openOverlay: true });
+                        }
+                        event.preventDefault();
                     }
-                    focusInput({ force: true, moveCaret: true, chatMode: true });
-                    event.preventDefault();
                 }
                 return true;
 
             case 8:
             case 46:
-                if (inputfield.length < 1 && focusOnKeydown) {
+                if (overlayOpen && inputfield.length < 1 && focusOnKeydown) {
                     inputfield = focusInput({ force: true });
                     if (inputfield.length > 0) {
                         handleUnfocusedDelete(inputfield, event.which === 8);
@@ -623,7 +656,7 @@ let defaultInPlugin = (function () {
                 return true;
 
             default:
-                if (focusOnKeydown && inputfield.length < 1) {
+                if (overlayOpen && focusOnKeydown && inputfield.length < 1) {
                     inputfield = focusInput({ force: true });
 
                     if (inputfield.length > 0 && shouldCapturePrintable(event)) {
@@ -636,40 +669,16 @@ let defaultInPlugin = (function () {
     };
 
     var installFocusBindings = function () {
-        $(window).on("focus.default_in", function () {
-            setTimeout(function () {
-                primeInput();
-            }, 25);
-        });
-
-        document.addEventListener("visibilitychange", function () {
-            if (!document.hidden) {
-                setTimeout(function () {
-                    primeInput();
-                }, 25);
-            }
-        });
-
         $(document)
             .on("click.default_in", "[data-brave-input-mode]", function (event) {
                 event.preventDefault();
                 setInputMode($(this).attr("data-brave-input-mode"));
-                if (!isMobileViewport()) {
-                    focusInput({ force: true, moveCaret: true });
-                }
+                focusInput({ force: true, moveCaret: true });
             })
             .on("focusin.default_in", ".inputfield, #inputfield", setReadyState)
             .on("focusout.default_in", ".inputfield, #inputfield", function () {
                 setTimeout(function () {
-                    if (isMobileViewport()) {
-                        if ($(".inputfield:focus, #inputfield:focus").length < 1) {
-                            setMobileInputOpen(false, { preserveFocus: true });
-                            return;
-                        }
-                        setReadyState(isMobileInputOpen());
-                        return;
-                    }
-                    setReadyState();
+                    setReadyState(isMobileInputOpen());
                 }, 0);
             })
             .on("input.default_in keyup.default_in", ".inputfield, #inputfield", function () {
@@ -679,13 +688,9 @@ let defaultInPlugin = (function () {
                 }
                 setReadyState();
             })
-            .on("click.default_in touchend.default_in", "#messagewindow, .content, .lm_content, #brave-chrome", function (event) {
-                if (isInteractiveTarget(event.target) || hasSelection()) {
-                    return;
-                }
-                setTimeout(function () {
-                    primeInput();
-                }, 0);
+            .on("click.default_in touchend.default_in", "#brave-chat-overlay-backdrop", function (event) {
+                event.preventDefault();
+                setMobileInputOpen(false);
             });
     };
 
@@ -723,10 +728,6 @@ let defaultInPlugin = (function () {
         installObserver();
         syncInputModeBodyState();
         dispatchInputModeChange();
-
-        setTimeout(function () {
-            primeInput();
-        }, 60);
     };
 
     var onLoggedIn = function () {
@@ -734,7 +735,6 @@ let defaultInPlugin = (function () {
         setInputContext(INPUT_CONTEXT_PLAY);
         setInputMode(INPUT_MODE_CHAT);
         decorateInputLayoutShells();
-        primeInput();
     };
 
     var onConnectionClose = function () {

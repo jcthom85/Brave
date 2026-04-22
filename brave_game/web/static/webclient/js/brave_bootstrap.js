@@ -77,10 +77,10 @@
         }
 
         if (node.type === "component" && node.id === "inputComponent") {
-            node.height = isMobileViewport() ? 1 : 12;
-            node.minHeight = 1;
+            node.height = 0;
+            node.minHeight = 0;
         } else if (node.type === "component" && node.componentName === "Main") {
-            node.height = isMobileViewport() ? 99 : 88;
+            node.height = 100;
         }
 
         if (Array.isArray(node.content)) {

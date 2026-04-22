@@ -1036,27 +1036,15 @@ body::-webkit-scrollbar,
 }
 
 @media screen and (min-width: 901px) {
-    body[data-brave-view="account"] .inputwrap,
-    body[data-brave-view="account"] .prompt,
-    body[data-brave-view="account"] .brave-input-modebar,
-    body[data-brave-view="connection"] .inputwrap,
-    body[data-brave-view="connection"] .prompt,
-    body[data-brave-view="connection"] .brave-input-modebar,
-    body[data-brave-view="chargen"] .inputwrap,
-    body[data-brave-view="chargen"] .prompt,
-    body[data-brave-view="chargen"] .brave-input-modebar {
+    body .inputwrap,
+    body .prompt,
+    body .brave-input-modebar {
         display: none !important;
     }
 
-    body[data-brave-view="account"] .brave-gl-input-item,
-    body[data-brave-view="account"] .brave-gl-input-item > .lm_content,
-    body[data-brave-view="account"] .brave-gl-input-item > .lm_content > div,
-    body[data-brave-view="connection"] .brave-gl-input-item,
-    body[data-brave-view="connection"] .brave-gl-input-item > .lm_content,
-    body[data-brave-view="connection"] .brave-gl-input-item > .lm_content > div,
-    body[data-brave-view="chargen"] .brave-gl-input-item,
-    body[data-brave-view="chargen"] .brave-gl-input-item > .lm_content,
-    body[data-brave-view="chargen"] .brave-gl-input-item > .lm_content > div {
+    body .brave-gl-input-item,
+    body .brave-gl-input-item > .lm_content,
+    body .brave-gl-input-item > .lm_content > div {
         height: 0 !important;
         min-height: 0 !important;
         max-height: 0 !important;
@@ -1064,47 +1052,18 @@ body::-webkit-scrollbar,
         margin: 0 !important;
         border: 0 !important;
         overflow: hidden !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
     }
 
-    body:not([data-brave-view="account"]):not([data-brave-view="connection"]):not([data-brave-view="chargen"]) .brave-gl-input-item,
-    body:not([data-brave-view="account"]):not([data-brave-view="connection"]):not([data-brave-view="chargen"]) .brave-gl-input-item > .lm_content,
-    body:not([data-brave-view="account"]):not([data-brave-view="connection"]):not([data-brave-view="chargen"]) .brave-gl-input-item > .lm_content > div {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
+    body .brave-gl-input-splitter {
+        display: none !important;
     }
 
-    body:not([data-brave-view="account"]):not([data-brave-view="connection"]):not([data-brave-view="chargen"]) .brave-gl-input-item {
-        position: relative !important;
-        top: auto !important;
-        bottom: auto !important;
-        left: auto !important;
-        right: auto !important;
-        transform: none !important;
-        pointer-events: auto !important;
-        height: 72px !important;
-        min-height: 72px !important;
-        max-height: 72px !important;
-        overflow: visible !important;
-    }
-
-    body:not([data-brave-view="account"]):not([data-brave-view="connection"]):not([data-brave-view="chargen"]) .brave-gl-main-item {
-        height: auto !important;
+    body .brave-gl-main-item {
+        height: 100% !important;
         width: auto !important;
-    }
-
-    body:not([data-brave-view="account"]):not([data-brave-view="connection"]):not([data-brave-view="chargen"]) .brave-gl-input-item > .lm_content,
-    body:not([data-brave-view="account"]):not([data-brave-view="connection"]):not([data-brave-view="chargen"]) .brave-gl-input-item > .lm_content > div {
-        height: 100% !important;
-        min-height: 100% !important;
-        max-height: 100% !important;
-        overflow: visible !important;
-    }
-
-    body:not([data-brave-view="account"]):not([data-brave-view="connection"]):not([data-brave-view="chargen"]) .brave-gl-input-item .inputwrap {
-        height: 100% !important;
-        margin: 0 16px 4px !important;
-        padding: 6px 8px 8px !important;
     }
 }
 
@@ -6125,26 +6084,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-room-log__entry {
-    display: grid;
-    grid-template-columns: 22px minmax(0, 1fr);
-    gap: 8px;
-    align-items: start;
-}
-
-.brave-room-log__entry-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 999px;
-    color: color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-bright));
-    background: rgba(var(--brave-accent-rgb), 0.1);
-}
-
-.brave-room-log__entry-icon svg {
-    width: 14px;
-    height: 14px;
+    display: block;
 }
 
 .brave-room-log__entry-text {
@@ -9671,6 +9611,45 @@ body[data-brave-scene="arcade"] .brave-view--arcade .brave-view__actions {
     transform: rotate(40deg) translate(-0.03rem, -0.03rem);
 }
 
+.brave-icon--smile {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.98rem;
+    height: 0.98rem;
+    flex: 0 0 0.98rem;
+    border: 1.8px solid currentColor;
+    border-radius: 999px;
+    line-height: 1;
+}
+
+.brave-icon--smile::before,
+.brave-icon--smile::after {
+    content: "";
+    position: absolute;
+}
+
+.brave-icon--smile::before {
+    top: 0.28rem;
+    left: 0.24rem;
+    width: 0.12rem;
+    height: 0.12rem;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: 0.34rem 0 0 currentColor;
+}
+
+.brave-icon--smile::after {
+    left: 50%;
+    bottom: 0.2rem;
+    width: 0.46rem;
+    height: 0.24rem;
+    border-bottom: 1.8px solid currentColor;
+    border-radius: 0 0 999px 999px;
+    transform: translateX(-50%);
+}
+
 .brave-icon--trash {
     position: relative;
     display: inline-flex;
@@ -12691,32 +12670,13 @@ body.brave-combat-return-active .scene-card {
     }
 
     .brave-mobile-activity-log .brave-room-log__entry {
-        display: grid;
-        grid-template-columns: 20px minmax(0, 1fr);
-        gap: 8px;
-        align-items: start;
+        display: block;
         padding: 8px 0;
         border-bottom: 1px solid color-mix(in srgb, var(--brave-world-line) 48%, transparent);
     }
 
     .brave-mobile-activity-log .brave-room-log__entry:last-child {
         border-bottom: 0;
-    }
-
-    .brave-mobile-activity-log .brave-room-log__entry-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 20px;
-        height: 20px;
-        border-radius: 999px;
-        color: color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-bright));
-        background: rgba(var(--brave-accent-rgb), 0.1);
-    }
-
-    .brave-mobile-activity-log .brave-room-log__entry-icon svg {
-        width: 13px;
-        height: 13px;
     }
 
     .brave-mobile-activity-log .brave-room-log__entry-text {
@@ -14953,5 +14913,143 @@ body[data-brave-scene="theme"] .brave-view--theme .brave-view__entry {
 @media (max-width: 900px) {
     #toolbar {
         display: none !important;
+    }
+}
+
+#brave-chat-overlay-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1208;
+    opacity: 0;
+    pointer-events: none;
+    background: color-mix(in srgb, #020609 80%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: opacity 160ms ease;
+}
+
+body.brave-mobile-input-open #brave-chat-overlay-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body.brave-mobile-input-open .prompt,
+body.brave-mobile-input-open .brave-input-modebar {
+    display: none !important;
+}
+
+body.brave-mobile-input-open .brave-gl-input-item,
+body.brave-mobile-input-open .brave-gl-input-item > .lm_content,
+body.brave-mobile-input-open .brave-gl-input-item > .lm_content > div {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-sizing: border-box !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
+}
+
+body.brave-mobile-input-open .brave-gl-input-item {
+    z-index: 1209 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    pointer-events: auto !important;
+}
+
+body.brave-mobile-input-open .brave-gl-input-item .lm_content {
+    overflow: visible !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+body.brave-mobile-input-open .brave-gl-input-item .inputwrap {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 12px 14px 14px !important;
+    border: 1px solid color-mix(in srgb, rgba(var(--brave-accent-rgb), 0.28) 66%, var(--brave-border));
+    border-radius: var(--brave-radius-panel);
+    background:
+        radial-gradient(circle at 0 0, color-mix(in srgb, var(--brave-accent) 8%, transparent), transparent 42%),
+        radial-gradient(circle at 100% 0, color-mix(in srgb, var(--brave-good) 6%, transparent), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 22%),
+        linear-gradient(180deg, var(--brave-surface-soft-top), var(--brave-surface-soft-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 24px 48px rgba(0, 0, 0, 0.36);
+}
+
+body.brave-mobile-input-open #inputfield {
+    min-height: 72px;
+    max-height: min(34vh, 240px);
+}
+
+body.brave-mobile-input-open #inputsend {
+    min-width: 76px;
+}
+
+.brave-mobile-sheet__section--room-actions [data-brave-chat-open] {
+    flex-basis: 100%;
+}
+
+@media screen and (min-width: 901px) {
+    body.brave-mobile-input-open .brave-gl-input-item {
+        position: fixed !important;
+        left: 24px !important;
+        right: 24px !important;
+        top: auto !important;
+        bottom: 24px !important;
+        width: min(760px, calc(100vw - 48px)) !important;
+        max-width: calc(100vw - 48px) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        transform: none !important;
+    }
+
+    body.brave-mobile-input-open .brave-gl-main-item {
+        height: 100% !important;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    body.brave-mobile-input-open .brave-gl-input-item {
+        position: fixed !important;
+        left: 12px !important;
+        right: 12px !important;
+        top: auto !important;
+        bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px)) !important;
+        width: auto !important;
+        transform: translateY(0) !important;
+    }
+
+    body.brave-mobile-nav-active.brave-mobile-input-open .brave-gl-input-item {
+        bottom: calc(var(--brave-mobile-dock-clearance) + env(safe-area-inset-bottom, 0px) + 12px) !important;
+    }
+
+    body.brave-mobile-input-open .brave-gl-main-item {
+        bottom: 0 !important;
+    }
+
+    body.brave-mobile-input-open .content,
+    body.brave-mobile-input-open #messagewindow {
+        padding-bottom: 20px;
+    }
+
+    body.brave-mobile-nav-active.brave-mobile-input-open .content,
+    body.brave-mobile-nav-active.brave-mobile-input-open #messagewindow {
+        padding-bottom: calc(var(--brave-mobile-dock-clearance) + 8px);
     }
 }

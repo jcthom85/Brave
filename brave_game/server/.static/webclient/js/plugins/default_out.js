@@ -136,21 +136,23 @@ let defaultout_plugin = (function () {
         return "chat";
     };
 
+    var viewSupportsBottomInput = function (viewData) {
+        return !!(
+            viewData
+            && (viewData.layout === "explore" || (viewData.reactive && viewData.reactive.scene === "explore"))
+        );
+    };
+
+    var isBottomInputSceneActive = function () {
+        return !!(document.body && document.body.getAttribute("data-brave-scene") === "explore");
+    };
+
     var syncInputContextForView = function (viewData) {
         var inputPlugin = getDefaultInPlugin();
         if (!inputPlugin || typeof inputPlugin.setInputContext !== "function") {
             return;
         }
-        var nextContext = "command";
-        if (
-            viewData
-            && viewData.variant !== "connection"
-            && viewData.variant !== "chargen"
-            && !(viewData.reactive && viewData.reactive.scene === "account")
-        ) {
-            nextContext = "play";
-        }
-        inputPlugin.setInputContext(nextContext);
+        inputPlugin.setInputContext(viewSupportsBottomInput(viewData) ? "play" : "command");
     };
 
     var isMobileCommandTrayOpen = function () {
@@ -163,8 +165,17 @@ let defaultout_plugin = (function () {
 
     var openMobileCommandTray = function () {
         var inputPlugin = getDefaultInPlugin();
-        if (inputPlugin && typeof inputPlugin.openMobileInput === "function") {
+        if (!inputPlugin) {
+            return false;
+        }
+        if (typeof inputPlugin.setInputMode === "function") {
+            inputPlugin.setInputMode("chat");
+        }
+        if (typeof inputPlugin.openMobileInput === "function") {
             inputPlugin.openMobileInput();
+            if (typeof inputPlugin.isMobileInputOpen === "function") {
+                return !!inputPlugin.isMobileInputOpen();
+            }
             return true;
         }
         return false;
@@ -2318,6 +2329,10 @@ let defaultout_plugin = (function () {
             clearPickerSheet();
             return true;
         }
+        if (isMobileCommandTrayOpen()) {
+            closeMobileCommandTray();
+            return true;
+        }
         if (document.body && document.body.classList.contains("brave-notice-active")) {
             clearBrowserNotice();
             return true;
@@ -2645,7 +2660,22 @@ let defaultout_plugin = (function () {
     };
 
     var focusCommandInput = function () {
-        if (isMobileViewport() && openMobileCommandTray()) {
+        var inputPlugin = getDefaultInPlugin();
+        var canOpenChat = !!(
+            (inputPlugin && typeof inputPlugin.getInputContext === "function" && inputPlugin.getInputContext() === "play")
+            || viewSupportsBottomInput(currentViewData)
+            || isBottomInputSceneActive()
+        );
+        if (!canOpenChat) {
+            return;
+        }
+        if (inputPlugin && typeof inputPlugin.setInputContext === "function" && viewSupportsBottomInput(currentViewData)) {
+            inputPlugin.setInputContext("play");
+        }
+        if (inputPlugin && typeof inputPlugin.setInputMode === "function") {
+            inputPlugin.setInputMode("chat");
+        }
+        if (openMobileCommandTray()) {
             return;
         }
         var inputfield = getCommandInput();
@@ -2761,7 +2791,7 @@ let defaultout_plugin = (function () {
 
     var positionDesktopToolbar = function () {
         var toolbar = document.getElementById("toolbar");
-        if (!toolbar || toolbar.getAttribute("aria-hidden") !== "false" || isMobileViewport()) {
+        if (!toolbar || toolbar.getAttribute("aria-hidden") !== "false" || isMobileViewport() || !isBottomInputSceneActive()) {
             return;
         }
         var inputWrap = document.querySelector(".inputwrap");
@@ -3078,6 +3108,13 @@ let defaultout_plugin = (function () {
                 checkboxClasses += " " + extraClass;
             }
             return "<span class='" + checkboxClasses + "' aria-hidden='true'></span>";
+        }
+        if (name === "sentiment_satisfied") {
+            var smileClasses = "brave-icon brave-icon--smile";
+            if (extraClass) {
+                smileClasses += " " + extraClass;
+            }
+            return "<span class='" + smileClasses + "' aria-hidden='true'></span>";
         }
         if (name === "check_circle" || name === "task_alt") {
             var checkClasses = "brave-icon brave-icon--check-circle";
@@ -4967,7 +5004,6 @@ let defaultout_plugin = (function () {
         var cls = entry.cls || "out";
         var category = entry.category || classifyRoomActivity(entry.text, cls, entry);
         return "<div class='" + cls + " brave-room-log__entry brave-room-log__entry--" + escapeHtml(category) + "' data-brave-activity-category='" + escapeHtml(category) + "'>"
-            + "<span class='brave-room-log__entry-icon'>" + icon(getRoomActivityIcon(category)) + "</span>"
             + "<span class='brave-room-log__entry-text'>" + escapeHtml(entry.text) + "</span>"
             + "</div>";
     };
@@ -5620,10 +5656,48 @@ let defaultout_plugin = (function () {
         if (!roomView || !Array.isArray(roomView.room_actions) || !roomView.room_actions.length) {
             return "";
         }
+        var orderedActions = [];
+        var chatAction = null;
+        var emoteAction = null;
+        roomView.room_actions.forEach(function (action) {
+            var label = String(action && (action.label || action.text) || "").trim().toLowerCase();
+            if (label === "chat") {
+                if (!chatAction) {
+                    chatAction = {
+                        label: action.label || action.text || "Chat",
+                        icon: action.icon && action.icon !== "chat" ? action.icon : "forum",
+                        detail: action.detail || action.tooltip || "Open nearby chat.",
+                        overlay: "chat",
+                        aria_label: action.aria_label || "Open nearby chat",
+                    };
+                }
+                return;
+            }
+            if (label === "emote") {
+                if (!emoteAction) {
+                    emoteAction = action;
+                }
+                return;
+            }
+            orderedActions.push(action);
+        });
+        if (!chatAction) {
+            chatAction = {
+                label: "Chat",
+                icon: "forum",
+                detail: "Open nearby chat.",
+                overlay: "chat",
+                aria_label: "Open nearby chat",
+            };
+        }
+        if (emoteAction) {
+            orderedActions.push(emoteAction);
+        }
+        orderedActions.push(chatAction);
         return (
             "<div class='brave-room-actions' aria-label='Room actions'>"
-            + roomView.room_actions.map(function (action) {
-                if (!action || (!action.command && !action.picker)) {
+            + orderedActions.map(function (action) {
+                if (!action || (!action.command && !action.picker && action.overlay !== "chat")) {
                     return "";
                 }
                 var ariaLabel = action.aria_label || action.label || action.text || "Action";
@@ -5638,6 +5712,7 @@ let defaultout_plugin = (function () {
                     "<button type='button' class='" + buttonClass + "'"
                     + (action.command ? " data-brave-command='" + escapeHtml(action.command) + "'" : "")
                     + (action.picker ? " data-brave-picker='" + escapeHtml(JSON.stringify(action.picker)) + "'" : "")
+                    + (action.overlay === "chat" ? " data-brave-chat-open='1'" : "")
                     + (title ? " title='" + escapeHtml(title) + "'" : "")
                     + " aria-label='" + escapeHtml(ariaLabel) + "'>"
                     + icon(iconName, "brave-room-actions__button-icon")
@@ -8434,6 +8509,13 @@ let defaultout_plugin = (function () {
                 event.preventDefault();
                 event.stopPropagation();
                 clearBrowserNotice();
+                return;
+            }
+            var chatOpenTarget = event.target.closest("[data-brave-chat-open]");
+            if (chatOpenTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                focusCommandInput();
                 return;
             }
             var mobileTarget = event.target.closest("[data-brave-mobile-panel], [data-brave-mobile-action]");
