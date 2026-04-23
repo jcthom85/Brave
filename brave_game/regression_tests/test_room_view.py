@@ -537,6 +537,8 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual("player", center_cell.get("symbol"))
         self.assertEqual([], center_cell.get("markers"))
         self.assertEqual("", center_cell.get("primary_marker"))
+        self.assertIn("@", snapshot.get("map_text", ""))
+        self.assertNotIn("R", snapshot.get("map_text", ""))
 
     def test_map_snapshot_hides_undiscovered_rooms_for_characters(self):
         character = DummyCharacter()

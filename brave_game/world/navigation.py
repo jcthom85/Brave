@@ -292,6 +292,34 @@ def _micromap_symbol_name(*, current=False, party=False):
     return "radio_button_unchecked"
 
 
+def _render_minimap_text(rows):
+    """Render compact minimap rows as aligned ASCII."""
+
+    symbol_by_icon = {
+        "player": "@",
+        "double-team": "P",
+        "radio_button_unchecked": "o",
+    }
+    connector_by_axis = {
+        "horizontal": "-",
+        "vertical": "|",
+    }
+
+    lines = []
+    for row in rows or []:
+        chars = []
+        for cell in row:
+            kind = cell.get("kind")
+            if kind == "room":
+                chars.append(symbol_by_icon.get(cell.get("symbol"), "o"))
+            elif kind == "connector":
+                chars.append(connector_by_axis.get(cell.get("axis"), " "))
+            else:
+                chars.append(" ")
+        lines.append("".join(chars).rstrip())
+    return "\n".join(lines).rstrip()
+
+
 def get_discovered_room_ids(character):
     """Return the set of room ids discovered by a character."""
 
@@ -553,7 +581,7 @@ def build_minimap_snapshot(room, radius=2, character=None):
             compact_row.append(compact_cell)
         compact_rows.append(compact_row)
     return {
-        "map_text": snapshot.get("map_text", ""),
+        "map_text": _render_minimap_text(compact_rows),
         "map_tiles": {
             "columns": map_tiles.get("columns", 0),
             "rows": compact_rows,

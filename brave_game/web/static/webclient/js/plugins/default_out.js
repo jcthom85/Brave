@@ -3673,6 +3673,49 @@ let defaultout_plugin = (function () {
         return "";
     };
 
+    var renderRoomCardMicromap = function (payload) {
+        var state = getMapPayloadState(payload);
+        if (!state.grid || !Array.isArray(state.grid.rows) || !state.grid.rows.length) {
+            return state.text ? escapeHtml(state.text) : "";
+        }
+        var columns = state.grid.columns || (Array.isArray(state.grid.rows[0]) ? state.grid.rows[0].length : 0);
+        if (!columns) {
+            return state.text ? escapeHtml(state.text) : "";
+        }
+        var cells = [];
+        state.grid.rows.forEach(function (row) {
+            (Array.isArray(row) ? row : []).forEach(function (cell) {
+                var tile = cell && typeof cell === "object" ? cell : {};
+                var kind = tile.kind || "empty";
+                var classes = "brave-view__room-micromap-cell brave-view__room-micromap-cell--" + escapeHtml(kind);
+                var body = "";
+                var title = tile.title ? " title='" + escapeHtml(tile.title) + "'" : "";
+
+                if (kind === "connector") {
+                    var axis = tile.axis === "vertical" ? "vertical" : "horizontal";
+                    classes += " brave-view__room-micromap-cell--connector-" + escapeHtml(axis);
+                    body = "<span class='brave-view__room-micromap-connector brave-view__room-micromap-connector--" + escapeHtml(axis) + "'></span>";
+                } else if (kind === "room") {
+                    var symbol = String(tile.symbol || "");
+                    if (symbol === "player") {
+                        classes += " brave-view__room-micromap-cell--player";
+                        body = "<span class='brave-view__room-micromap-node brave-view__room-micromap-node--player'>"
+                            + icon("player", "brave-view__room-micromap-player-icon")
+                            + "</span>";
+                    } else if (symbol === "double-team") {
+                        classes += " brave-view__room-micromap-cell--party";
+                        body = "<span class='brave-view__room-micromap-node brave-view__room-micromap-node--party'></span>";
+                    } else {
+                        body = "<span class='brave-view__room-micromap-node'></span>";
+                    }
+                }
+
+                cells.push("<span class='" + classes + "'" + title + ">" + body + "</span>");
+            });
+        });
+        return "<div class='brave-view__room-micromap-grid' style='--brave-room-micromap-columns: " + columns + ";'>" + cells.join("") + "</div>";
+    };
+
     var renderMap = function (payload) {
         var micromaps = document.querySelectorAll(".brave-view__micromap");
         var state = getMapPayloadState(payload);
@@ -3680,10 +3723,7 @@ let defaultout_plugin = (function () {
         currentMapGrid = state.grid;
         if (micromaps.length) {
             micromaps.forEach(function (micromap) {
-                var mapMarkup = currentMapText ? escapeHtml(currentMapText) : "";
-                if (!mapMarkup && currentMapGrid) {
-                    mapMarkup = renderMapGrid(currentMapGrid, "brave-view__map-grid--micro");
-                }
+                var mapMarkup = renderRoomCardMicromap(payload);
                 if (mapMarkup) {
                     micromap.innerHTML = mapMarkup;
                     micromap.setAttribute("aria-hidden", "false");
@@ -7786,7 +7826,7 @@ let defaultout_plugin = (function () {
             if (!isRoomLikeView(viewData)) {
                 return "";
             }
-            var mapMarkup = viewData.micromap ? renderMicromapMarkup(viewData.micromap) : "";
+            var mapMarkup = viewData.micromap ? renderRoomCardMicromap(viewData.micromap) : "";
             return (
                 "<div class='brave-view__micromap brave-click' data-brave-command='map' title='Open map' role='button' tabindex='0' aria-label='Open map'>"
                 + mapMarkup

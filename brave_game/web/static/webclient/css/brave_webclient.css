@@ -5067,6 +5067,75 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     display: none !important;
 }
 
+.brave-view--room .brave-view__room-micromap-grid {
+    --brave-room-micromap-cell-size: 10px;
+    display: grid;
+    grid-template-columns: repeat(var(--brave-room-micromap-columns), var(--brave-room-micromap-cell-size));
+    grid-auto-rows: var(--brave-room-micromap-cell-size);
+    width: max-content;
+    margin: 0 auto;
+}
+
+.brave-view--room .brave-view__room-micromap-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--brave-room-micromap-cell-size);
+    height: var(--brave-room-micromap-cell-size);
+}
+
+.brave-view--room .brave-view__room-micromap-connector {
+    display: block;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--brave-accent) 62%, rgba(255, 255, 255, 0.28));
+    box-shadow: 0 0 6px rgba(var(--brave-accent-rgb), 0.12);
+}
+
+.brave-view--room .brave-view__room-micromap-connector--horizontal {
+    width: 8px;
+    height: 1px;
+}
+
+.brave-view--room .brave-view__room-micromap-connector--vertical {
+    width: 1px;
+    height: 8px;
+}
+
+.brave-view--room .brave-view__room-micromap-node {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.34);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 1px 4px rgba(0, 0, 0, 0.16);
+}
+
+.brave-view--room .brave-view__room-micromap-node--party {
+    background: rgba(132, 218, 174, 0.28);
+    border-color: rgba(132, 218, 174, 0.56);
+}
+
+.brave-view--room .brave-view__room-micromap-node--player {
+    width: 8px;
+    height: 8px;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brave-view--room .brave-view__room-micromap-player-icon {
+    font-size: 0.54rem;
+    line-height: 1;
+    color: color-mix(in srgb, var(--brave-accent) 84%, var(--brave-text-bright));
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.28));
+}
+
 .brave-view__hero {
     display: flex;
     flex-direction: column;
