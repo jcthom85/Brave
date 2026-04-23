@@ -21,10 +21,10 @@
 {% endblock %}
 
 {% block scripts %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rpg-awesome@0.2.0/css/rpg-awesome.min.css"><link rel="stylesheet" href="{% static 'webclient/css/brave_webclient.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rpg-awesome@0.2.0/css/rpg-awesome.min.css"><link rel="stylesheet" href="{% static 'webclient/css/brave_webclient.css' %}?v=20260423f">
 <script>
 window.BRAVE_AUDIO_MANIFEST_URL = "{% static 'webclient/audio/manifest.json' %}";
 </script>
-<script src="{% static 'webclient/js/brave_audio.js' %}"></script>
-<script src="{% static 'webclient/js/brave_bootstrap.js' %}"></script>
+<script src="{% static 'webclient/js/brave_audio.js' %}?v=20260423f"></script>
+<script src="{% static 'webclient/js/brave_bootstrap.js' %}?v=20260423f"></script>
 {% endblock %}

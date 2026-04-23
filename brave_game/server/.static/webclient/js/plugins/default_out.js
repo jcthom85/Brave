@@ -86,6 +86,12 @@ let defaultout_plugin = (function () {
     var pendingCombatTransitionCleanupTimeout = null;
     var pendingCombatTransitionMode = "";
     var pendingCombatResultReturnTransition = false;
+    var pendingRegionTransitionViewData = null;
+    var pendingRegionTransitionTimeout = null;
+    var pendingRegionTransitionCleanupTimeout = null;
+    var roomSceneCardTransitionTimeout = null;
+    var pendingRegionTransitionMeta = null;
+    var lastRenderedRoomSceneMeta = null;
     var suppressedCombatEntryRefs = {};
     var combatViewTransitionActive = false;
     var currentVideoSettings = null;
@@ -5443,6 +5449,184 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var getRoomSceneMeta = function (viewData) {
+        if (!isRoomLikeView(viewData)) {
+            return null;
+        }
+        var explicitRegion = String(viewData && viewData.region_name ? viewData.region_name : "").trim();
+        var regionLabel = String(viewData && viewData.eyebrow ? viewData.eyebrow : "").trim();
+        var roomTitle = String(viewData && viewData.title ? viewData.title : "").trim();
+        return {
+            roomId: String(viewData && viewData.room_id ? viewData.room_id : getReactiveSourceId(viewData) || "").trim(),
+            regionLabel: regionLabel,
+            regionName: explicitRegion || regionLabel,
+            regionKey: (explicitRegion || regionLabel).toLowerCase(),
+            roomTitle: roomTitle,
+        };
+    };
+
+    var getRenderedRoomSceneMeta = function () {
+        var card = document.querySelector("#messagewindow > .brave-sticky-view > .brave-view--room .brave-view__room-scene-card")
+            || document.querySelector("#messagewindow > .brave-view--room .brave-view__room-scene-card");
+        if (!card) {
+            return getRoomSceneMeta(getCurrentRoomView());
+        }
+        var roomId = String(card.getAttribute("data-brave-room-id") || "").trim();
+        var regionName = String(card.getAttribute("data-brave-region") || "").trim();
+        var titleNode = card.querySelector(".brave-view__title span");
+        return {
+            roomId: roomId,
+            regionLabel: regionName,
+            regionName: regionName,
+            regionKey: regionName.toLowerCase(),
+            roomTitle: titleNode ? String(titleNode.textContent || "").trim() : "",
+        };
+    };
+
+    var rememberRenderedRoomSceneMeta = function (meta) {
+        if (!meta || !meta.roomId) {
+            return;
+        }
+        lastRenderedRoomSceneMeta = {
+            roomId: String(meta.roomId || "").trim(),
+            regionLabel: String(meta.regionLabel || "").trim(),
+            regionName: String(meta.regionName || "").trim(),
+            regionKey: String(meta.regionKey || "").trim(),
+            roomTitle: String(meta.roomTitle || "").trim(),
+        };
+    };
+
+    var clearRegionTransitionOverlay = function () {
+        var overlay = document.getElementById("brave-region-transition");
+        if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+        }
+    };
+
+    var clearRegionTransitionState = function () {
+        if (pendingRegionTransitionTimeout) {
+            window.clearTimeout(pendingRegionTransitionTimeout);
+            pendingRegionTransitionTimeout = null;
+        }
+        if (pendingRegionTransitionCleanupTimeout) {
+            window.clearTimeout(pendingRegionTransitionCleanupTimeout);
+            pendingRegionTransitionCleanupTimeout = null;
+        }
+        pendingRegionTransitionViewData = null;
+        pendingRegionTransitionMeta = null;
+        if (document.body) {
+            document.body.classList.remove("brave-region-transition-active");
+        }
+        clearRegionTransitionOverlay();
+    };
+
+    var showRegionTransitionOverlay = function (viewData, metaOverride) {
+        clearRegionTransitionOverlay();
+        var meta = metaOverride || getRoomSceneMeta(viewData) || {};
+        var overlay = document.createElement("div");
+        overlay.id = "brave-region-transition";
+        overlay.className = "brave-region-transition";
+        overlay.innerHTML =
+            "<div class='brave-region-transition__veil'></div>"
+            + "<div class='brave-region-transition__titlecard'>"
+                + "<div class='brave-region-transition__eyebrow'>Region</div>"
+                + "<div class='brave-region-transition__title'>"
+                + escapeHtml(meta.regionName || meta.regionLabel || meta.roomTitle || "Unknown Region")
+                + "</div>"
+            + "</div>";
+        document.body.appendChild(overlay);
+    };
+
+    var shouldStartRegionTransition = function (viewData) {
+        if (prefersReducedMotion() || !isRoomLikeView(viewData)) {
+            return false;
+        }
+        var nextMeta = getRoomSceneMeta(viewData);
+        if (!nextMeta || !nextMeta.regionKey) {
+            return false;
+        }
+        var candidates = [
+            getRenderedRoomSceneMeta(),
+            getRoomSceneMeta(currentViewData),
+            getRoomSceneMeta(currentRoomViewData),
+            getRoomSceneMeta(getCurrentRoomView()),
+        ].filter(function (meta) {
+            return !!(meta && meta.regionKey && meta.roomId);
+        });
+        for (var i = 0; i < candidates.length; i += 1) {
+            var previousMeta = candidates[i];
+            if (!previousMeta) {
+                continue;
+            }
+            if (previousMeta.roomId === nextMeta.roomId) {
+                continue;
+            }
+            if (previousMeta.regionKey !== nextMeta.regionKey) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    var startRegionTransition = function (viewData, options) {
+        if (!viewData || !shouldStartRegionTransition(viewData)) {
+            return false;
+        }
+        clearRegionTransitionState();
+        pendingRegionTransitionViewData = viewData;
+        pendingRegionTransitionMeta = getRoomSceneMeta(viewData);
+        if (document.body) {
+            document.body.classList.add("brave-region-transition-active");
+        }
+        showRegionTransitionOverlay(viewData, pendingRegionTransitionMeta);
+        pendingRegionTransitionTimeout = window.setTimeout(function () {
+            var queuedViewData = pendingRegionTransitionViewData;
+            var nextOptions = {};
+            Object.keys(options || {}).forEach(function (key) {
+                nextOptions[key] = options[key];
+            });
+            pendingRegionTransitionTimeout = null;
+            pendingRegionTransitionViewData = null;
+            nextOptions.skipRegionTransition = true;
+            nextOptions.skipRoomCardTransition = true;
+            if (!queuedViewData) {
+                clearRegionTransitionState();
+                return;
+            }
+            renderMainView(queuedViewData, nextOptions);
+        }, 360);
+        pendingRegionTransitionCleanupTimeout = window.setTimeout(function () {
+            clearRegionTransitionState();
+        }, 1320);
+        return true;
+    };
+
+    var triggerRoomSceneCardTransition = function () {
+        if (prefersReducedMotion()) {
+            return;
+        }
+        var roomView = document.querySelector("#messagewindow > .brave-sticky-view > .brave-view--room")
+            || document.querySelector("#messagewindow > .brave-view--room");
+        if (!roomView) {
+            return;
+        }
+        var card = roomView.querySelector(".brave-view__room-scene-card");
+        if (!card) {
+            return;
+        }
+        if (roomSceneCardTransitionTimeout) {
+            window.clearTimeout(roomSceneCardTransitionTimeout);
+            roomSceneCardTransitionTimeout = null;
+        }
+        card.classList.remove("brave-view__room-scene-card--transition");
+        void card.offsetWidth;
+        card.classList.add("brave-view__room-scene-card--transition");
+        roomSceneCardTransitionTimeout = window.setTimeout(function () {
+            card.classList.remove("brave-view__room-scene-card--transition");
+            roomSceneCardTransitionTimeout = null;
+        }, 280);
+    };
+
     var showCombatTransitionOverlay = function (viewData, mode) {
         if (!document.body) {
             return;
@@ -5647,6 +5831,7 @@ let defaultout_plugin = (function () {
         pendingCombatTransitionViewData = null;
         pendingCombatTransitionMode = "";
         combatViewTransitionActive = false;
+        clearRegionTransitionState();
         clearCombatTransitionOverlay();
         clearCombatFxOverlay();
         if (braveAudio && typeof braveAudio.clearReactiveState === "function") {
@@ -6833,6 +7018,27 @@ let defaultout_plugin = (function () {
             combatViewTransitionActive = true;
         }
         applyReactiveState(viewData.reactive || {});
+        var previousRoomSceneMeta = lastRenderedRoomSceneMeta || getRenderedRoomSceneMeta();
+        var nextRoomSceneMeta = getRoomSceneMeta(viewData);
+        var shouldAnimateRegionSceneCard = !!(
+            nextRoomSceneMeta
+            && previousRoomSceneMeta
+            && previousRoomSceneMeta.roomId
+            && nextRoomSceneMeta.roomId
+            && previousRoomSceneMeta.roomId !== nextRoomSceneMeta.roomId
+            && previousRoomSceneMeta.regionKey
+            && nextRoomSceneMeta.regionKey
+            && previousRoomSceneMeta.regionKey !== nextRoomSceneMeta.regionKey
+        );
+        var shouldAnimateRoomSceneCard = !!(
+            !options.skipRoomCardTransition
+            && previousRoomSceneMeta
+            && nextRoomSceneMeta
+            && previousRoomSceneMeta.roomId
+            && nextRoomSceneMeta.roomId
+            && previousRoomSceneMeta.roomId !== nextRoomSceneMeta.roomId
+            && previousRoomSceneMeta.regionKey === nextRoomSceneMeta.regionKey
+        );
 
         var renderChip = function (entry) {
             var tone = entry && entry.tone ? "scene-card__chip--" + escapeHtml(entry.tone) : "";
@@ -7588,14 +7794,11 @@ let defaultout_plugin = (function () {
             );
         };
 
-        var viewMarkup =
-            "<div class='brave-view" + variantClass + toneClass + "'>"
-            + "<div class='brave-view__hero'>"
-            + (viewData.wordmark ? "<div class='brave-view__wordmark' aria-label='" + escapeHtml(viewData.wordmark) + "'><span class='brave-view__wordmark-text'>" + escapeHtml(viewData.wordmark) + "</span></div>" : "")
-            + (((viewData.eyebrow_icon || viewData.eyebrow) || (!isMobileViewport() && isRoomLikeView(viewData)))
+        var heroSceneMarkup =
+            (((viewData.eyebrow_icon || viewData.eyebrow) || (!isMobileViewport() && isRoomLikeView(viewData)))
                 ? "<div class='brave-view__hero-topbar'>"
                     + ((viewData.eyebrow_icon || viewData.eyebrow)
-                        ? "<div class='brave-view__eyebrow'>"
+                        ? "<div class='brave-view__eyebrow" + (shouldAnimateRegionSceneCard ? " brave-view__eyebrow--region-change" : "") + "'>"
                             + (viewData.eyebrow_icon ? icon(viewData.eyebrow_icon, "brave-view__eyebrow-icon") : "")
                             + (viewData.eyebrow ? "<span>" + escapeHtml(viewData.eyebrow) + "</span>" : "")
                             + "</div>"
@@ -7615,7 +7818,15 @@ let defaultout_plugin = (function () {
                     + renderBackAction(viewData.back_action)
                     + "</div>"
                 : "")
-            + (viewData.subtitle ? "<div class='brave-view__subtitle'>" + escapeHtml(viewData.subtitle) + "</div>" : "")
+            + (viewData.subtitle ? "<div class='brave-view__subtitle'>" + escapeHtml(viewData.subtitle) + "</div>" : "");
+
+        var viewMarkup =
+            "<div class='brave-view" + variantClass + toneClass + "'>"
+            + "<div class='brave-view__hero'>"
+            + (viewData.wordmark ? "<div class='brave-view__wordmark' aria-label='" + escapeHtml(viewData.wordmark) + "'><span class='brave-view__wordmark-text'>" + escapeHtml(viewData.wordmark) + "</span></div>" : "")
+            + (isRoomLikeView(viewData)
+                ? "<div class='brave-view__room-scene-card brave-view__room-scene-card--enter" + (shouldAnimateRegionSceneCard ? " brave-view__room-scene-card--region-change" : "") + "' data-brave-room-id='" + escapeHtml((nextRoomSceneMeta && nextRoomSceneMeta.roomId) || "") + "' data-brave-region='" + escapeHtml((nextRoomSceneMeta && nextRoomSceneMeta.regionName) || "") + "'>" + heroSceneMarkup + "</div>"
+                : heroSceneMarkup)
             + renderMobileRoomUtility()
             + (Array.isArray(viewData.chips) && viewData.chips.length
                 ? "<div class='brave-view__chips'>" + viewData.chips.map(renderChip).join("") + "</div>"
@@ -7735,6 +7946,12 @@ let defaultout_plugin = (function () {
                 syncOpenCombatPickerFromDom();
                 combatViewTransitionActive = false;
                 pendingCombatResultReturnTransition = viewData.variant === "combat-result";
+                if (shouldAnimateRoomSceneCard) {
+                    triggerRoomSceneCardTransition();
+                }
+                if (isRoomLikeView(viewData)) {
+                    rememberRenderedRoomSceneMeta(getRenderedRoomSceneMeta() || nextRoomSceneMeta);
+                }
             };
 
             if (shouldDelayCombatSwap) {
@@ -7801,6 +8018,12 @@ let defaultout_plugin = (function () {
             syncOpenCombatPickerFromDom();
             combatViewTransitionActive = false;
             pendingCombatResultReturnTransition = viewData.variant === "combat-result";
+            if (shouldAnimateRoomSceneCard) {
+                triggerRoomSceneCardTransition();
+            }
+            if (isRoomLikeView(viewData)) {
+                rememberRenderedRoomSceneMeta(getRenderedRoomSceneMeta() || nextRoomSceneMeta);
+            }
             focusViewAutofocusField();
             resetAllScrollPositions();
             if (!options.skipCombatTransition && leavingCombatResult) {

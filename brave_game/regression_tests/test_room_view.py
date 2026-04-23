@@ -17,7 +17,7 @@ chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
 from world.browser_views import WELCOME_PAGES, build_map_view, build_room_view, build_talk_view
-from world.navigation import build_map_snapshot, build_minimap_snapshot
+from world.navigation import build_map_snapshot, build_minimap_snapshot, discover_room
 from typeclasses.scripts import BraveEncounter
 
 
@@ -99,6 +99,7 @@ class DummyCharacter:
             brave_follow_target_id=None,
             brave_tutorial={},
             brave_welcome_shown=False,
+            brave_discovered_rooms=[],
         )
         self.ndb = SimpleNamespace()
 
@@ -139,7 +140,7 @@ class DummyEntity:
 
 class DummyMappedRoom:
     def __init__(self, room_id, key="Blackreed's Roost", x=0, y=0):
-        self.id = 501
+        self.id = abs(hash((room_id, x, y))) % 1000000 + 1
         self.key = key
         self.db = SimpleNamespace(
             brave_map_region="Test Ridge",
@@ -532,6 +533,56 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual("player", center_cell.get("symbol"))
         self.assertEqual([], center_cell.get("markers"))
         self.assertEqual("", center_cell.get("primary_marker"))
+
+    def test_map_snapshot_hides_undiscovered_rooms_for_characters(self):
+        character = DummyCharacter()
+        current_room = DummyMappedRoom("current_room", key="Current Room", x=0, y=0)
+        discovered_room = DummyMappedRoom("discovered_room", key="Discovered Room", x=1, y=0)
+        hidden_room = DummyMappedRoom("hidden_room", key="Hidden Room", x=2, y=0)
+        character.db.brave_discovered_rooms = ["current_room", "discovered_room"]
+
+        with patch(
+            "world.navigation.get_rooms_in_map_region",
+            return_value=[current_room, discovered_room, hidden_room],
+        ):
+            snapshot = build_map_snapshot(current_room, character=character)
+
+        room_titles = [
+            cell.get("title")
+            for row in snapshot["map_tiles"]["rows"]
+            for cell in row
+            if cell.get("kind") == "room"
+        ]
+        self.assertTrue(any("Current Room" in title for title in room_titles))
+        self.assertTrue(any("Discovered Room" in title for title in room_titles))
+        self.assertFalse(any("Hidden Room" in title for title in room_titles))
+
+    def test_map_snapshot_still_shows_full_region_without_character(self):
+        current_room = DummyMappedRoom("current_room", key="Current Room", x=0, y=0)
+        hidden_room = DummyMappedRoom("hidden_room", key="Hidden Room", x=1, y=0)
+
+        with patch(
+            "world.navigation.get_rooms_in_map_region",
+            return_value=[current_room, hidden_room],
+        ):
+            snapshot = build_map_snapshot(current_room, character=None)
+
+        room_titles = [
+            cell.get("title")
+            for row in snapshot["map_tiles"]["rows"]
+            for cell in row
+            if cell.get("kind") == "room"
+        ]
+        self.assertTrue(any("Current Room" in title for title in room_titles))
+        self.assertTrue(any("Hidden Room" in title for title in room_titles))
+
+    def test_discover_room_records_room_once(self):
+        character = DummyCharacter()
+        room = DummyMappedRoom("goblin_warrens_entry")
+
+        self.assertTrue(discover_room(character, room))
+        self.assertFalse(discover_room(character, room))
+        self.assertEqual(["goblin_warrens_entry"], character.db.brave_discovered_rooms)
 
 
 if __name__ == "__main__":

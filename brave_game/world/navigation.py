@@ -292,6 +292,35 @@ def _micromap_symbol_name(*, current=False, party=False):
     return "radio_button_unchecked"
 
 
+def get_discovered_room_ids(character):
+    """Return the set of room ids discovered by a character."""
+
+    if not character:
+        return set()
+    discovered = getattr(character.db, "brave_discovered_rooms", None) or []
+    return {str(room_id) for room_id in discovered if room_id}
+
+
+def discover_room(character, room):
+    """Persist discovery for a room on the character."""
+
+    if not character or not room:
+        return False
+
+    room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+    if not room_id:
+        return False
+
+    discovered = list(getattr(character.db, "brave_discovered_rooms", None) or [])
+    room_id = str(room_id)
+    if room_id in discovered:
+        return False
+
+    discovered.append(room_id)
+    character.db.brave_discovered_rooms = discovered
+    return True
+
+
 def build_map_snapshot(room, radius=None, character=None):
     """Build structured regional-map data for text and browser renderers."""
 
@@ -302,6 +331,19 @@ def build_map_snapshot(room, radius=None, character=None):
     rooms = get_rooms_in_map_region(region)
     if not rooms:
         return None
+
+    discovered_room_ids = get_discovered_room_ids(character)
+    if character:
+        current_room_id = str(getattr(room.db, "brave_room_id", None) or "")
+        rooms = [
+            candidate
+            for candidate in rooms
+            if str(getattr(candidate.db, "brave_room_id", None) or "") in discovered_room_ids
+            or candidate.id == room.id
+            or (current_room_id and str(getattr(candidate.db, "brave_room_id", None) or "") == current_room_id)
+        ]
+        if not rooms:
+            rooms = [room]
 
     current_x = getattr(room.db, "brave_map_x", 0)
     current_y = getattr(room.db, "brave_map_y", 0)

@@ -4980,6 +4980,56 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     z-index: 1;
 }
 
+.brave-view--room .brave-view__room-scene-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 14px 16px;
+    border: 1px solid color-mix(in srgb, var(--brave-room-panel-border) 78%, rgba(var(--brave-accent-rgb), 0.08));
+    border-radius: 18px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012)),
+        linear-gradient(180deg, rgba(10, 12, 16, 0.22), rgba(10, 12, 16, 0.08));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.026),
+        0 12px 24px rgba(0, 0, 0, 0.12);
+    transform-origin: 50% 38%;
+    will-change: transform, opacity, filter;
+}
+
+.brave-view--room .brave-view__room-scene-card--transition {
+    animation: brave-room-scene-card-swap 320ms cubic-bezier(0.21, 0.88, 0.32, 1) both;
+}
+
+.brave-view--room .brave-view__room-scene-card--enter {
+    animation: brave-room-scene-card-swap 320ms cubic-bezier(0.21, 0.88, 0.32, 1) both;
+}
+
+.brave-view--room .brave-view__room-scene-card--region-change {
+    animation: brave-room-scene-card-region-swap 1040ms cubic-bezier(0.16, 0.84, 0.18, 1) both;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 0 0 1px rgba(var(--brave-accent-rgb), 0.18),
+        0 18px 42px rgba(0, 0, 0, 0.22),
+        0 0 48px rgba(var(--brave-accent-rgb), 0.14);
+}
+
+.brave-view--room .brave-view__room-scene-card--region-change .brave-view__eyebrow {
+    animation: brave-room-region-label-swap 1120ms cubic-bezier(0.16, 0.84, 0.18, 1) both;
+}
+
+.brave-view--room .brave-view__room-scene-card--region-change .brave-view__titlebar {
+    animation: brave-room-region-title-settle 1160ms cubic-bezier(0.16, 0.84, 0.18, 1) both;
+}
+
+.brave-view--room .brave-view__room-scene-card--region-change .brave-view__subtitle {
+    animation: brave-room-region-copy-settle 1240ms cubic-bezier(0.16, 0.84, 0.18, 1) both;
+}
+
+.brave-view--room .brave-view__room-scene-card--region-change .brave-view__micromap {
+    animation: brave-room-region-map-settle 1100ms cubic-bezier(0.16, 0.84, 0.18, 1) both;
+}
+
 .brave-view--room .brave-view__micromap {
     font-family: var(--brave-mono-font-family);
     letter-spacing: 0;
@@ -5166,6 +5216,122 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     height: 1px;
     margin-left: 14px;
     background: linear-gradient(90deg, rgba(var(--brave-accent-rgb), 0.24), rgba(var(--brave-accent-rgb), 0));
+}
+
+@keyframes brave-room-scene-card-swap {
+    0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.972);
+        filter: blur(9px);
+    }
+    45% {
+        opacity: 0.92;
+        transform: translateY(-2px) scale(1.008);
+        filter: blur(1px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes brave-room-scene-card-region-swap {
+    0% {
+        opacity: 0;
+        transform: translateY(42px) scale(0.93);
+        filter: blur(18px) saturate(0.72);
+    }
+    24% {
+        opacity: 0.72;
+        transform: translateY(8px) scale(0.976);
+        filter: blur(8px) saturate(0.92);
+    }
+    52% {
+        opacity: 1;
+        transform: translateY(-8px) scale(1.018);
+        filter: blur(1px) saturate(1.08);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0) saturate(1);
+    }
+}
+
+@keyframes brave-room-region-label-swap {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+        letter-spacing: calc(var(--brave-letter-spacing) + 0.34em);
+        filter: blur(12px);
+    }
+    32% {
+        opacity: 1;
+        transform: translateY(-3px);
+        letter-spacing: calc(var(--brave-letter-spacing) + 0.4em);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        letter-spacing: calc(var(--brave-letter-spacing) + 0.1em);
+        filter: blur(0);
+    }
+}
+
+@keyframes brave-room-region-title-settle {
+    0% {
+        opacity: 0;
+        transform: translateY(24px);
+        filter: blur(12px);
+    }
+    44% {
+        opacity: 0;
+        transform: translateY(24px);
+        filter: blur(12px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes brave-room-region-copy-settle {
+    0% {
+        opacity: 0;
+        transform: translateY(28px);
+        filter: blur(12px);
+    }
+    58% {
+        opacity: 0;
+        transform: translateY(28px);
+        filter: blur(12px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes brave-room-region-map-settle {
+    0% {
+        opacity: 0;
+        transform: scale(0.82) translateY(14px);
+        filter: blur(10px);
+    }
+    40% {
+        opacity: 0;
+        transform: scale(0.82) translateY(14px);
+        filter: blur(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
 }
 
 .brave-view__mobile-utility-host {
@@ -11683,6 +11849,55 @@ body.brave-scene-combat-enter .inputwrap {
     z-index: 1180;
 }
 
+#brave-region-transition {
+    position: fixed;
+    inset: 0;
+    z-index: 1190;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.brave-region-transition__veil {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 32%, rgba(var(--brave-accent-rgb), 0.08), transparent 34%),
+        linear-gradient(180deg, rgba(3, 4, 6, 0), rgba(3, 4, 6, 0.96) 26%, rgba(3, 4, 6, 0.98) 74%, rgba(3, 4, 6, 0));
+    animation: brave-region-transition-veil 1240ms cubic-bezier(0.16, 0.84, 0.18, 1) forwards;
+}
+
+.brave-region-transition__titlecard {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+    animation: brave-region-transition-title 1240ms cubic-bezier(0.16, 0.84, 0.18, 1) forwards;
+}
+
+.brave-region-transition__eyebrow {
+    letter-spacing: calc(var(--brave-letter-spacing) + 0.18em);
+    color: color-mix(in srgb, var(--brave-accent) 72%, var(--brave-text-soft));
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    text-transform: uppercase;
+}
+
+.brave-region-transition__title {
+    max-width: min(92vw, 22ch);
+    color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
+    font-size: clamp(1.8rem, 4vw, 3.4rem);
+    line-height: 0.98;
+    text-transform: uppercase;
+    text-shadow:
+        0 0 18px rgba(var(--brave-accent-rgb), 0.14),
+        0 10px 32px rgba(0, 0, 0, 0.46);
+}
+
 .brave-combat-transition__wash {
     position: absolute;
     inset: 0;
@@ -11868,6 +12083,46 @@ body.brave-scene-combat-enter .inputwrap {
     0% { opacity: 1; }
     48% { opacity: 1; }
     100% { opacity: 0; }
+}
+
+@keyframes brave-region-transition-veil {
+    0% { opacity: 0; }
+    22% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes brave-region-transition-title {
+    0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.98);
+        filter: blur(10px);
+    }
+    28% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.98);
+        filter: blur(10px);
+    }
+    42% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+    66% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+    82% {
+        opacity: 0;
+        transform: translateY(-8px) scale(1.01);
+        filter: blur(6px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-8px) scale(1.01);
+        filter: blur(6px);
+    }
 }
 
 @keyframes brave-combat-transition-flash {
@@ -12094,6 +12349,8 @@ body.brave-combat-return-active .scene-card {
     .brave-view__arcade-utility,
     #brave-combat-transition,
     #brave-combat-transition *,
+    #brave-region-transition,
+    #brave-region-transition *,
     .inputsend,
     #inputsend {
         animation: none !important;

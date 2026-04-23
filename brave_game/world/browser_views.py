@@ -1676,6 +1676,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
     """Return a browser-first room view for exploration and movement."""
 
     world_name = getattr(room.db, "brave_world", "Brave") or "Brave"
+    region_name = getattr(room.db, "brave_map_region", None) or room.db.brave_zone or world_name
     description = room.db.desc or "A place of mystery and potential."
     primary_exits = {}
     vertical_exits = []
@@ -1764,6 +1765,8 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
             ),
         ),
         "layout": "explore",
+        "room_id": str(getattr(room, "id", "") or ""),
+        "region_name": str(region_name or ""),
         "mobile_pack": _build_mobile_pack_payload(looker),
         "mobile_panels": _build_mobile_room_payload(
             room,
