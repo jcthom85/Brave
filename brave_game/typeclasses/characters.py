@@ -23,7 +23,7 @@ from world.mastery import (
     can_train_ability,
     mastery_points_earned,
 )
-from world.navigation import discover_room
+from world.navigation import discover_region, discover_room
 from world.genders import DEFAULT_BRAVE_GENDER, get_brave_gender_label, normalize_brave_gender
 from world.party import ensure_party_state
 from world.paladin_oaths import DEFAULT_PALADIN_OATH, get_oath, get_oath_name
@@ -76,6 +76,7 @@ class Character(ObjectParent, DefaultCharacter):
     def at_post_move(self, source_location, move_type="move", **kwargs):
         super().at_post_move(source_location, move_type=move_type, **kwargs)
         if self.location:
+            self.ndb.brave_first_region_discovery = bool(discover_region(self, self.location))
             discover_room(self, self.location)
             if source_location and source_location != self.location and move_type not in {"defeat", "flee"}:
                 self.ndb.brave_previous_location = source_location
@@ -105,6 +106,7 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.brave_seen_welcome = True
         if protocol in {"websocket", "ajax/comet", "webclient"}:
             if self.location:
+                self.ndb.brave_first_region_discovery = bool(discover_region(self, self.location))
                 discover_room(self, self.location)
                 self.location.return_appearance(self)
             return
@@ -171,6 +173,8 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.brave_rogue_theft_log = {}
         if getattr(self.db, "brave_discovered_rooms", None) is None:
             self.db.brave_discovered_rooms = []
+        if getattr(self.db, "brave_discovered_regions", None) is None:
+            self.db.brave_discovered_regions = []
         ensure_party_state(self)
         ensure_tutorial_state(self)
         if not self.db.desc:

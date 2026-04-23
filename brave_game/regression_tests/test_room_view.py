@@ -17,7 +17,7 @@ chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
 from world.browser_views import WELCOME_PAGES, build_map_view, build_room_view, build_talk_view
-from world.navigation import build_map_snapshot, build_minimap_snapshot, discover_room
+from world.navigation import build_map_snapshot, build_minimap_snapshot, discover_region, discover_room
 from typeclasses.scripts import BraveEncounter
 
 
@@ -100,6 +100,7 @@ class DummyCharacter:
             brave_tutorial={},
             brave_welcome_shown=False,
             brave_discovered_rooms=[],
+            brave_discovered_regions=[],
         )
         self.ndb = SimpleNamespace()
 
@@ -590,6 +591,15 @@ class RoomViewTests(unittest.TestCase):
         self.assertFalse(discover_room(character, room))
         self.assertEqual(["goblin_warrens_entry"], character.db.brave_discovered_rooms)
 
+    def test_discover_region_records_region_once(self):
+        character = DummyCharacter()
+        room = DummyMappedRoom("goblin_warrens_entry")
+        room.db.brave_map_region = "goblin_warrens"
+
+        self.assertTrue(discover_region(character, room))
+        self.assertFalse(discover_region(character, room))
+        self.assertEqual(["goblin_warrens"], character.db.brave_discovered_regions)
+
     def test_room_view_micromap_hides_undiscovered_rooms(self):
         character = DummyCharacter()
         current_room = DummyMappedRoom("current_room", key="Current Room", x=0, y=0)
@@ -616,6 +626,15 @@ class RoomViewTests(unittest.TestCase):
         self.assertTrue(any("Current Room" in title for title in room_titles))
         self.assertTrue(any("Discovered Room" in title for title in room_titles))
         self.assertFalse(any("Hidden Room" in title for title in room_titles))
+
+    def test_room_view_flags_first_region_discovery(self):
+        character = DummyCharacter()
+        character.ndb.brave_first_region_discovery = True
+        room = DummyMappedRoom("current_room", key="Current Room", x=0, y=0)
+
+        view = build_room_view(room, character)
+
+        self.assertTrue(view.get("first_region_discovery"))
 
 
 if __name__ == "__main__":

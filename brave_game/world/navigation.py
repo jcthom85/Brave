@@ -329,6 +329,35 @@ def get_discovered_room_ids(character):
     return {str(room_id) for room_id in discovered if room_id}
 
 
+def get_discovered_region_keys(character):
+    """Return the set of region keys discovered by a character."""
+
+    if not character:
+        return set()
+    discovered = getattr(character.db, "brave_discovered_regions", None) or []
+    return {str(region_key) for region_key in discovered if region_key}
+
+
+def discover_region(character, room):
+    """Persist discovery for a room's region on the character."""
+
+    if not character or not room:
+        return False
+
+    region_key = getattr(getattr(room, "db", None), "brave_map_region", None)
+    if not region_key:
+        return False
+
+    discovered = list(getattr(character.db, "brave_discovered_regions", None) or [])
+    region_key = str(region_key)
+    if region_key in discovered:
+        return False
+
+    discovered.append(region_key)
+    character.db.brave_discovered_regions = discovered
+    return True
+
+
 def discover_room(character, room):
     """Persist discovery for a room on the character."""
 

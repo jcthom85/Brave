@@ -1768,6 +1768,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         "layout": "explore",
         "room_id": str(getattr(room, "id", "") or ""),
         "region_name": str(region_name or ""),
+        "first_region_discovery": bool(getattr(getattr(looker, "ndb", None), "brave_first_region_discovery", False)),
         "micromap": build_minimap_snapshot(room, radius=2, character=looker),
         "mobile_pack": _build_mobile_pack_payload(looker),
         "mobile_panels": _build_mobile_room_payload(

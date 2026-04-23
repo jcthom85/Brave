@@ -10,6 +10,8 @@
     <div id="mobile-utility-sheet" aria-hidden="true"></div>
     <div id="brave-picker-sheet" aria-hidden="true"></div>
     <div id="brave-notice-stack" aria-hidden="true"></div>
+    <div id="brave-room-voice-overlay-desktop" aria-hidden="true"></div>
+    <div id="brave-room-voice-overlay-mobile" aria-hidden="true"></div>
     <div id="brave-chat-overlay-backdrop" aria-hidden="true"></div>
     <div id="scene-rail" class="scene-rail" aria-hidden="true">
       <section id="scene-pack-panel" class="scene-rail__panel scene-rail__panel--pack scene-rail__panel--hidden scene-rail__panel--clickable brave-click" aria-label="Pack" data-brave-command="pack" title="pack" role="button" tabindex="0"></section>
@@ -21,10 +23,10 @@
 {% endblock %}
 
 {% block scripts %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rpg-awesome@0.2.0/css/rpg-awesome.min.css"><link rel="stylesheet" href="{% static 'webclient/css/brave_webclient.css' %}?v=20260423i">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rpg-awesome@0.2.0/css/rpg-awesome.min.css"><link rel="stylesheet" href="{% static 'webclient/css/brave_webclient.css' %}?v=20260423l">
 <script>
-window.BRAVE_AUDIO_MANIFEST_URL = "{% static 'webclient/audio/manifest.json' %}";
+window.BRAVE_AUDIO_MANIFEST_URL = "{% static 'webclient/audio/manifest.json' %}?v=20260423j";
 </script>
-<script src="{% static 'webclient/js/brave_audio.js' %}?v=20260423i"></script>
-<script src="{% static 'webclient/js/brave_bootstrap.js' %}?v=20260423i"></script>
+<script src="{% static 'webclient/js/brave_audio.js' %}?v=20260423l"></script>
+<script src="{% static 'webclient/js/brave_bootstrap.js' %}?v=20260423l"></script>
 {% endblock %}

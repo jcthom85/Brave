@@ -150,16 +150,19 @@ class Room(ObjectParent, DefaultRoom):
         output.append(self.get_display_footer(looker, visible_entities=visible_entities, **kwargs))
 
         if looker:
+            room_view = build_room_view(
+                self,
+                looker,
+                visible_threats=visible_threats,
+                visible_entities=visible_entities,
+                visible_chars=visible_chars,
+            )
             _send_webclient_event(
                 looker,
-                brave_view=build_room_view(
-                    self,
-                    looker,
-                    visible_threats=visible_threats,
-                    visible_entities=visible_entities,
-                    visible_chars=visible_chars,
-                ),
+                brave_view=room_view,
             )
+            if hasattr(getattr(looker, "ndb", None), "brave_first_region_discovery"):
+                looker.ndb.brave_first_region_discovery = False
 
         if _only_web_sessions(looker):
             return ""
