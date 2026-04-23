@@ -1,0 +1,359 @@
+{
+  "telegraph_windows": [
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 5,
+      "round_ended": 6,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 5,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 6,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 13,
+      "round_ended": 14,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 13,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 hits Sir Edric the Restless for 20 damage.",
+            "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 9 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 21 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 14,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 hits Sir Edric the Restless for 20 damage.",
+            "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 9 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 21 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 21,
+      "round_ended": 22,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 21,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Edric's Grave-Light hits Ranger 1 for 6 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits Sir Edric the Restless for 12 damage. The ward absorbs part of the blow.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Edric's Grave Shade hits Ranger 1 for 9 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Edric's Grave-Light hits Ranger 1 for 6 damage."
+          ]
+        },
+        {
+          "round": 22,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Edric's Grave-Light hits Ranger 1 for 6 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits Sir Edric the Restless for 12 damage. The ward absorbs part of the blow.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Edric's Grave Shade hits Ranger 1 for 9 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Edric's Grave-Light hits Ranger 1 for 6 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 29,
+      "round_ended": 30,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 29,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "Edric's Grave Shade hits Ranger 1 for 8 damage.",
+            "Edric's Grave-Light hits Ranger 1 for 7 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
+            "Ranger 1 shakes off the curse.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 30,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "Edric's Grave Shade hits Ranger 1 for 8 damage.",
+            "Edric's Grave-Light hits Ranger 1 for 7 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
+            "Ranger 1 shakes off the curse.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 37,
+      "round_ended": 38,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 37,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Edric's Grave-Light hits Ranger 1 for 7 damage.",
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+            "Edric's Grave Shade hits Ranger 1 for 10 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Edric's Grave-Light hits Ranger 1 for 8 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 38,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+            "Edric's Grave Shade hits Ranger 1 for 10 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Edric's Grave-Light hits Ranger 1 for 8 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 shakes off the curse."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 45,
+      "round_ended": 46,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 45,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 shakes off the curse.",
+            "Edric's Grave Shade hits Ranger 1 for 7 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Edric's Grave-Light hits Ranger 1 for 9 damage.",
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 46,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Edric's Grave-Light hits Ranger 1 for 9 damage.",
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Edric's Grave Shade hits Ranger 1 for 9 damage.",
+            "Edric's Grave-Light hits Ranger 1 for 7 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n"
+          ]
+        }
+      ]
+    }
+  ],
+  "interrupt_windows": []
+}

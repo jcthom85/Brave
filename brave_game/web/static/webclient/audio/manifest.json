@@ -1,0 +1,259 @@
+{
+  "version": 1,
+  "buses": {
+    "master": { "default_volume": 0.9 },
+    "ambience": { "default_volume": 0.55 },
+    "music": { "default_volume": 0.45 },
+    "sfx": { "default_volume": 0.8 }
+  },
+  "cues": {
+    "ambience.brambleford": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.7,
+      "fade_in_sec": 1.4,
+      "fade_out_sec": 1.1,
+      "files": ["ambience/brambleford_outdoors.ogg"],
+      "voices": [
+        { "waveform": "triangle", "frequency": 176, "gain": 0.012, "lfo_rate": 0.12, "lfo_depth": 0.28, "filter_type": "lowpass", "filter_frequency": 720 },
+        { "waveform": "sine", "frequency": 264, "gain": 0.008, "lfo_rate": 0.18, "lfo_depth": 0.18, "filter_type": "lowpass", "filter_frequency": 980 }
+      ]
+    },
+    "ambience.goblinroad": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": ["ambience/forest_ambience.mp3"]
+    },
+    "ambience.whisperingwoods": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.66,
+      "fade_in_sec": 1.3,
+      "fade_out_sec": 1.0,
+      "files": ["ambience/forest_ambience.mp3"]
+    },
+    "ambience.oldbarrow": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.72,
+      "fade_in_sec": 1.5,
+      "fade_out_sec": 1.1,
+      "files": ["ambience/dark_cavern_loop.ogg"]
+    },
+    "ambience.portal": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.62,
+      "fade_in_sec": 1.4,
+      "fade_out_sec": 1.0,
+      "files": ["ambience/portal_forest_loop.ogg"]
+    },
+    "music.explore.safe": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.92,
+      "fade_in_sec": 1.8,
+      "fade_out_sec": 1.2,
+      "files": ["music/town_theme_rpg.mp3"],
+      "voices": [
+        { "waveform": "triangle", "frequency": 220, "gain": 0.02, "lfo_rate": 0.08, "lfo_depth": 0.08, "filter_type": "lowpass", "filter_frequency": 1100 },
+        { "waveform": "sine", "frequency": 330, "gain": 0.012, "lfo_rate": 0.11, "lfo_depth": 0.05, "filter_type": "lowpass", "filter_frequency": 1400 }
+      ]
+    },
+    "music.explore.danger": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.9,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 0.9,
+      "files": ["music/dark_place_loop.ogg"]
+    },
+    "music.combat.standard": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.9,
+      "fade_in_sec": 0.8,
+      "fade_out_sec": 0.7,
+      "files": ["music/medieval_battle.mp3"]
+    },
+    "music.combat.boss": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.88,
+      "fade_in_sec": 0.7,
+      "fade_out_sec": 0.6,
+      "files": ["music/boss_battle_theme.ogg"]
+    },
+    "music.portal": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.88,
+      "fade_in_sec": 1.0,
+      "fade_out_sec": 0.8,
+      "files": ["music/dark_place_loop.ogg"]
+    },
+    "sfx.ui.click": {
+      "bus": "sfx",
+      "gain": 0.85,
+      "duration_sec": 0.09,
+      "cooldown_ms": 45,
+      "files": ["sfx/ui_click.wav"],
+      "voices": [
+        { "waveform": "square", "frequency": 780, "gain": 0.028, "attack_sec": 0.003, "release_sec": 0.07, "filter_type": "lowpass", "filter_frequency": 1800 }
+      ]
+    },
+    "sfx.ui.error": {
+      "bus": "sfx",
+      "gain": 0.75,
+      "duration_sec": 0.2,
+      "cooldown_ms": 120,
+      "files": ["sfx/erase_escape.wav"],
+      "voices": [
+        { "waveform": "sawtooth", "frequency": 210, "gain": 0.03, "attack_sec": 0.005, "release_sec": 0.14, "filter_type": "lowpass", "filter_frequency": 920 }
+      ]
+    },
+    "sfx.travel.step": {
+      "bus": "sfx",
+      "gain": 0.78,
+      "duration_sec": 0.11,
+      "cooldown_ms": 160,
+      "files": ["sfx/footstep_01.ogg", "sfx/footstep_03.ogg"],
+      "voices": [
+        { "waveform": "triangle", "frequency": 280, "gain": 0.016, "attack_sec": 0.003, "release_sec": 0.09, "filter_type": "bandpass", "filter_frequency": 720 }
+      ]
+    },
+    "sfx.loot.reward": {
+      "bus": "sfx",
+      "gain": 0.9,
+      "duration_sec": 0.34,
+      "cooldown_ms": 180,
+      "files": ["sfx/coin_sounds.ogg"]
+    },
+    "sfx.notice.good": {
+      "bus": "sfx",
+      "gain": 0.82,
+      "duration_sec": 0.32,
+      "cooldown_ms": 180,
+      "files": ["sfx/magic_words.wav"],
+      "voices": [
+        { "waveform": "triangle", "frequency": 520, "gain": 0.02, "attack_sec": 0.004, "release_sec": 0.16, "filter_type": "lowpass", "filter_frequency": 1600 }
+      ]
+    },
+    "sfx.notice.warn": {
+      "bus": "sfx",
+      "gain": 0.72,
+      "duration_sec": 0.22,
+      "cooldown_ms": 180,
+      "files": ["sfx/erase_escape.wav"],
+      "voices": [
+        { "waveform": "triangle", "frequency": 360, "gain": 0.02, "attack_sec": 0.004, "release_sec": 0.14, "filter_type": "lowpass", "filter_frequency": 1400 }
+      ]
+    },
+    "sfx.notice.danger": {
+      "bus": "sfx",
+      "gain": 0.82,
+      "duration_sec": 0.28,
+      "cooldown_ms": 180,
+      "files": ["sfx/erase_escape.wav"],
+      "voices": [
+        { "waveform": "sawtooth", "frequency": 240, "gain": 0.022, "attack_sec": 0.004, "release_sec": 0.16, "filter_type": "lowpass", "filter_frequency": 1000 }
+      ]
+    },
+    "sfx.activity.arrival": {
+      "bus": "sfx",
+      "gain": 0.7,
+      "duration_sec": 0.12,
+      "cooldown_ms": 160,
+      "files": ["sfx/footstep_01.ogg"]
+    },
+    "sfx.activity.threat": {
+      "bus": "sfx",
+      "gain": 0.8,
+      "duration_sec": 0.2,
+      "cooldown_ms": 200,
+      "files": ["sfx/swish_preview.mp3"]
+    },
+    "sfx.activity.loot": {
+      "bus": "sfx",
+      "gain": 0.85,
+      "duration_sec": 0.28,
+      "cooldown_ms": 180,
+      "files": ["sfx/coin_sounds.ogg"]
+    },
+    "sfx.combat.hit.melee": {
+      "bus": "sfx",
+      "gain": 0.86,
+      "duration_sec": 0.18,
+      "cooldown_ms": 75,
+      "files": ["sfx/sword_swing.wav"],
+      "voices": [
+        { "waveform": "square", "frequency": 210, "gain": 0.028, "attack_sec": 0.003, "release_sec": 0.09, "filter_type": "bandpass", "filter_frequency": 760 }
+      ]
+    },
+    "sfx.combat.hit.magic": {
+      "bus": "sfx",
+      "gain": 0.82,
+      "duration_sec": 0.24,
+      "cooldown_ms": 90,
+      "files": ["sfx/magic_words.wav"],
+      "voices": [
+        { "waveform": "triangle", "frequency": 430, "gain": 0.02, "attack_sec": 0.004, "release_sec": 0.14, "filter_type": "lowpass", "filter_frequency": 1700 }
+      ]
+    },
+    "sfx.combat.hit.fire": {
+      "bus": "sfx",
+      "gain": 0.86,
+      "duration_sec": 0.18,
+      "cooldown_ms": 90,
+      "files": ["sfx/flame.ogg"],
+      "voices": [
+        { "waveform": "sawtooth", "frequency": 320, "gain": 0.024, "attack_sec": 0.004, "release_sec": 0.16, "filter_type": "lowpass", "filter_frequency": 1280 }
+      ]
+    },
+    "sfx.combat.heal": {
+      "bus": "sfx",
+      "gain": 0.84,
+      "duration_sec": 0.34,
+      "cooldown_ms": 100,
+      "files": ["sfx/health_restore.wav"],
+      "voices": [
+        { "waveform": "sine", "frequency": 520, "gain": 0.02, "attack_sec": 0.006, "release_sec": 0.18, "filter_type": "lowpass", "filter_frequency": 1700 },
+        { "waveform": "triangle", "frequency": 780, "gain": 0.01, "attack_sec": 0.008, "release_sec": 0.18, "filter_type": "lowpass", "filter_frequency": 2200 }
+      ]
+    },
+    "sfx.combat.miss": {
+      "bus": "sfx",
+      "gain": 0.72,
+      "duration_sec": 0.16,
+      "cooldown_ms": 80,
+      "files": ["sfx/swish_preview.mp3"],
+      "voices": [
+        { "waveform": "square", "frequency": 180, "gain": 0.016, "attack_sec": 0.002, "release_sec": 0.08, "filter_type": "lowpass", "filter_frequency": 720 }
+      ]
+    },
+    "sfx.combat.defeat": {
+      "bus": "sfx",
+      "gain": 0.82,
+      "duration_sec": 0.3,
+      "cooldown_ms": 160,
+      "files": ["sfx/erase_escape.wav"],
+      "voices": [
+        { "waveform": "triangle", "frequency": 150, "gain": 0.022, "attack_sec": 0.004, "release_sec": 0.22, "filter_type": "lowpass", "filter_frequency": 840 }
+      ]
+    },
+    "sfx.portal.warp": {
+      "bus": "sfx",
+      "gain": 0.86,
+      "duration_sec": 0.36,
+      "cooldown_ms": 240,
+      "files": ["sfx/erase_escape.wav"],
+      "voices": [
+        { "waveform": "triangle", "frequency": 260, "gain": 0.022, "attack_sec": 0.01, "release_sec": 0.26, "filter_type": "bandpass", "filter_frequency": 1200 },
+        { "waveform": "sine", "frequency": 520, "gain": 0.012, "attack_sec": 0.02, "release_sec": 0.24, "filter_type": "lowpass", "filter_frequency": 2200 }
+      ]
+    }
+  }
+}

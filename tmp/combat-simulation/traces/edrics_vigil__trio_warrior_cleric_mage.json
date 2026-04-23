@@ -1,0 +1,4284 @@
+[
+  {
+    "round": 0,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 181,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 0
+    },
+    "messages_tail": []
+  },
+  {
+    "round": 1,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 181,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 0
+    },
+    "messages_tail": []
+  },
+  {
+    "round": 2,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 181,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 0
+    },
+    "messages_tail": []
+  },
+  {
+    "round": 3,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 181,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 0
+    },
+    "messages_tail": []
+  },
+  {
+    "round": 4,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 144,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 2
+    },
+    "messages_tail": [
+      "Warrior 1 hits Sir Edric the Restless for 19 damage.",
+      "Mage 3 hits Sir Edric the Restless for 18 damage."
+    ]
+  },
+  {
+    "round": 5,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 128,
+        "max_hp": 181,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 3
+    },
+    "messages_tail": [
+      "Warrior 1 hits Sir Edric the Restless for 19 damage.",
+      "Mage 3 hits Sir Edric the Restless for 18 damage.",
+      "Cleric 2 hits Sir Edric the Restless for 16 damage.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+    ]
+  },
+  {
+    "round": 6,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      },
+      "3": {
+        "kind": "ability",
+        "ability": "frostbind",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "frostbind",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 128,
+        "max_hp": 181,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 3
+    },
+    "messages_tail": [
+      "Warrior 1 hits Sir Edric the Restless for 19 damage.",
+      "Mage 3 hits Sir Edric the Restless for 18 damage.",
+      "Cleric 2 hits Sir Edric the Restless for 16 damage.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+    ]
+  },
+  {
+    "round": 7,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      },
+      "3": {
+        "kind": "ability",
+        "ability": "frostbind",
+        "target": "e1"
+      },
+      "2": {
+        "kind": "ability",
+        "ability": "guardianlight",
+        "target": 1
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        }
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "frostbind",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 128,
+        "max_hp": 181,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 4
+    },
+    "messages_tail": [
+      "Warrior 1 hits Sir Edric the Restless for 19 damage.",
+      "Mage 3 hits Sir Edric the Restless for 18 damage.",
+      "Cleric 2 hits Sir Edric the Restless for 16 damage.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Warrior 1 for 8 damage."
+    ]
+  },
+  {
+    "round": 8,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      },
+      "3": {
+        "kind": "ability",
+        "ability": "frostbind",
+        "target": "e1"
+      },
+      "2": {
+        "kind": "ability",
+        "ability": "guardianlight",
+        "target": 1
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        }
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "frostbind",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 128,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 4
+    },
+    "messages_tail": [
+      "Warrior 1 hits Sir Edric the Restless for 19 damage.",
+      "Mage 3 hits Sir Edric the Restless for 18 damage.",
+      "Cleric 2 hits Sir Edric the Restless for 16 damage.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Warrior 1 for 8 damage."
+    ]
+  },
+  {
+    "round": 9,
+    "outcome": "active",
+    "pending_actions": {
+      "2": {
+        "kind": "ability",
+        "ability": "guardianlight",
+        "target": 1
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        }
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "frostbind",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 128,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 4
+    },
+    "messages_tail": [
+      "Warrior 1 hits Sir Edric the Restless for 19 damage.",
+      "Mage 3 hits Sir Edric the Restless for 18 damage.",
+      "Cleric 2 hits Sir Edric the Restless for 16 damage.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Warrior 1 for 8 damage."
+    ]
+  },
+  {
+    "round": 10,
+    "outcome": "active",
+    "pending_actions": {
+      "2": {
+        "kind": "ability",
+        "ability": "guardianlight",
+        "target": 1
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        }
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "frostbind",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 77,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 6
+    },
+    "messages_tail": [
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Warrior 1 for 8 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits Sir Edric the Restless for 22 damage. The impact staggers the target.",
+      "Sir Edric the Restless is knocked off-balance.",
+      "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+      "Mage 3 hits Sir Edric the Restless for 29 damage. Frost locks around its limbs.",
+      "Sir Edric the Restless is bound in frost."
+    ]
+  },
+  {
+    "round": 11,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 77,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 6
+    },
+    "messages_tail": [
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Warrior 1 for 8 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits Sir Edric the Restless for 22 damage. The impact staggers the target.",
+      "Sir Edric the Restless is knocked off-balance.",
+      "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+      "Mage 3 hits Sir Edric the Restless for 29 damage. Frost locks around its limbs.",
+      "Sir Edric the Restless is bound in frost."
+    ]
+  },
+  {
+    "round": 12,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "cooldown",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 77,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 7
+    },
+    "messages_tail": [
+      "Warrior 1 hits Sir Edric the Restless for 22 damage. The impact staggers the target.",
+      "Sir Edric the Restless is knocked off-balance.",
+      "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+      "Mage 3 hits Sir Edric the Restless for 29 damage. Frost locks around its limbs.",
+      "Sir Edric the Restless is bound in frost.",
+      "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
+      "Cleric 2 restores 8 HP to Warrior 1.",
+      "Cleric 2 leaves a guardian light hanging over Warrior 1."
+    ]
+  },
+  {
+    "round": 13,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 77,
+        "max_hp": 181,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 7
+    },
+    "messages_tail": [
+      "Sir Edric the Restless is knocked off-balance.",
+      "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+      "Mage 3 hits Sir Edric the Restless for 29 damage. Frost locks around its limbs.",
+      "Sir Edric the Restless is bound in frost.",
+      "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
+      "Cleric 2 restores 8 HP to Warrior 1.",
+      "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+    ]
+  },
+  {
+    "round": 14,
+    "outcome": "active",
+    "pending_actions": {
+      "2": {
+        "kind": "ability",
+        "ability": "guardianlight",
+        "target": 1
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        }
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 77,
+        "max_hp": 181,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 7
+    },
+    "messages_tail": [
+      "Sir Edric the Restless is knocked off-balance.",
+      "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+      "Mage 3 hits Sir Edric the Restless for 29 damage. Frost locks around its limbs.",
+      "Sir Edric the Restless is bound in frost.",
+      "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
+      "Cleric 2 restores 8 HP to Warrior 1.",
+      "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+    ]
+  },
+  {
+    "round": 15,
+    "outcome": "active",
+    "pending_actions": {
+      "2": {
+        "kind": "ability",
+        "ability": "guardianlight",
+        "target": 1
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        }
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 183,
+        "max_hp": 183,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 41,
+        "max_hp": 181,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 9
+    },
+    "messages_tail": [
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Warrior 1 hits Sir Edric the Restless for 18 damage.",
+      "Mage 3 hits Sir Edric the Restless for 18 damage.",
+      "|rEdric's Grave Shade joins the fight!|n",
+      "|rEdric's Grave-Light joins the fight!|n",
+      "|rSir Edric raises his blade and the barrow answers. Grave-light coils around him as lesser dead rise to his call!|n",
+      "|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n",
+      "Sir Edric the Restless struggles against the frost and loses the moment."
+    ]
+  },
+  {
+    "round": 16,
+    "outcome": "active",
+    "pending_actions": {
+      "2": {
+        "kind": "ability",
+        "ability": "guardianlight",
+        "target": 1
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        }
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 175,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 41,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 11
+    },
+    "messages_tail": [
+      "Mage 3 hits Sir Edric the Restless for 18 damage.",
+      "|rEdric's Grave Shade joins the fight!|n",
+      "|rEdric's Grave-Light joins the fight!|n",
+      "|rSir Edric raises his blade and the barrow answers. Grave-light coils around him as lesser dead rise to his call!|n",
+      "|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n",
+      "Sir Edric the Restless struggles against the frost and loses the moment.",
+      "Edric's Grave Shade misses Mage 3.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage."
+    ]
+  },
+  {
+    "round": 17,
+    "outcome": "active",
+    "pending_actions": {
+      "2": {
+        "kind": "ability",
+        "ability": "guardianlight",
+        "target": 1
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        }
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 175,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 41,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 11
+    },
+    "messages_tail": [
+      "Mage 3 hits Sir Edric the Restless for 18 damage.",
+      "|rEdric's Grave Shade joins the fight!|n",
+      "|rEdric's Grave-Light joins the fight!|n",
+      "|rSir Edric raises his blade and the barrow answers. Grave-light coils around him as lesser dead rise to his call!|n",
+      "|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n",
+      "Sir Edric the Restless struggles against the frost and loses the moment.",
+      "Edric's Grave Shade misses Mage 3.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage."
+    ]
+  },
+  {
+    "round": 18,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 175,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 41,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 11
+    },
+    "messages_tail": [
+      "Mage 3 hits Sir Edric the Restless for 18 damage.",
+      "|rEdric's Grave Shade joins the fight!|n",
+      "|rEdric's Grave-Light joins the fight!|n",
+      "|rSir Edric raises his blade and the barrow answers. Grave-light coils around him as lesser dead rise to his call!|n",
+      "|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n",
+      "Sir Edric the Restless struggles against the frost and loses the moment.",
+      "Edric's Grave Shade misses Mage 3.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage."
+    ]
+  },
+  {
+    "round": 19,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "cooldown",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "guardianlight",
+          "target": 1
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 175,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 41,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 12
+    },
+    "messages_tail": [
+      "|rSir Edric raises his blade and the barrow answers. Grave-light coils around him as lesser dead rise to his call!|n",
+      "|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n",
+      "Sir Edric the Restless struggles against the frost and loses the moment.",
+      "Edric's Grave Shade misses Mage 3.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage.",
+      "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
+      "Cleric 2 restores 0 HP to Warrior 1.",
+      "Cleric 2 leaves a guardian light hanging over Warrior 1."
+    ]
+  },
+  {
+    "round": 20,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 175,
+        "max_hp": 183,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 24,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 14
+    },
+    "messages_tail": [
+      "Sir Edric the Restless struggles against the frost and loses the moment.",
+      "Edric's Grave Shade misses Mage 3.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage.",
+      "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
+      "Cleric 2 restores 0 HP to Warrior 1.",
+      "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+      "Warrior 1 hits Sir Edric the Restless for 9 damage. The ward absorbs part of the blow.",
+      "Mage 3 hits Sir Edric the Restless for 8 damage. The ward absorbs part of the blow."
+    ]
+  },
+  {
+    "round": 21,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 156,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 24,
+        "max_hp": 181,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 16
+    },
+    "messages_tail": [
+      "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
+      "Cleric 2 restores 0 HP to Warrior 1.",
+      "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+      "Warrior 1 hits Sir Edric the Restless for 9 damage. The ward absorbs part of the blow.",
+      "Mage 3 hits Sir Edric the Restless for 8 damage. The ward absorbs part of the blow.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Edric's Grave Shade hits Mage 3 for 10 damage.",
+      "Edric's Grave-Light hits Mage 3 for 9 damage."
+    ]
+  },
+  {
+    "round": 22,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      },
+      "3": {
+        "kind": "ability",
+        "ability": "frostbind",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 156,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "frostbind",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 24,
+        "max_hp": 181,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 16
+    },
+    "messages_tail": [
+      "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
+      "Cleric 2 restores 0 HP to Warrior 1.",
+      "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+      "Warrior 1 hits Sir Edric the Restless for 9 damage. The ward absorbs part of the blow.",
+      "Mage 3 hits Sir Edric the Restless for 8 damage. The ward absorbs part of the blow.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Edric's Grave Shade hits Mage 3 for 10 damage.",
+      "Edric's Grave-Light hits Mage 3 for 9 damage."
+    ]
+  },
+  {
+    "round": 23,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      },
+      "3": {
+        "kind": "ability",
+        "ability": "frostbind",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 156,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "frostbind",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 24,
+        "max_hp": 181,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 17
+    },
+    "messages_tail": [
+      "Warrior 1 hits Sir Edric the Restless for 9 damage. The ward absorbs part of the blow.",
+      "Mage 3 hits Sir Edric the Restless for 8 damage. The ward absorbs part of the blow.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Edric's Grave Shade hits Mage 3 for 10 damage.",
+      "Edric's Grave-Light hits Mage 3 for 9 damage.",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Warrior 1 for 8 damage."
+    ]
+  },
+  {
+    "round": 24,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      },
+      "3": {
+        "kind": "ability",
+        "ability": "frostbind",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 156,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "frostbind",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 24,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 17
+    },
+    "messages_tail": [
+      "Warrior 1 hits Sir Edric the Restless for 9 damage. The ward absorbs part of the blow.",
+      "Mage 3 hits Sir Edric the Restless for 8 damage. The ward absorbs part of the blow.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Edric's Grave Shade hits Mage 3 for 10 damage.",
+      "Edric's Grave-Light hits Mage 3 for 9 damage.",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Warrior 1 for 8 damage."
+    ]
+  },
+  {
+    "round": 25,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 156,
+        "max_hp": 183,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "frostbind",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 16,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 18
+    },
+    "messages_tail": [
+      "Mage 3 hits Sir Edric the Restless for 8 damage. The ward absorbs part of the blow.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Edric's Grave Shade hits Mage 3 for 10 damage.",
+      "Edric's Grave-Light hits Mage 3 for 9 damage.",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Warrior 1 for 8 damage.",
+      "Cleric 2 hits Sir Edric the Restless for 8 damage. The ward absorbs part of the blow."
+    ]
+  },
+  {
+    "round": 26,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 141,
+        "max_hp": 183,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "frostbind",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 23
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "Sir Edric the Restless is knocked off-balance.",
+      "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+      "Mage 3 hits Sir Edric the Restless for 13 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+      "Sir Edric the Restless falls.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage."
+    ]
+  },
+  {
+    "round": 27,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 141,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 23
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "Sir Edric the Restless is knocked off-balance.",
+      "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+      "Mage 3 hits Sir Edric the Restless for 13 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+      "Sir Edric the Restless falls.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage."
+    ]
+  },
+  {
+    "round": 28,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 141,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 23
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "Sir Edric the Restless is knocked off-balance.",
+      "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+      "Mage 3 hits Sir Edric the Restless for 13 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+      "Sir Edric the Restless falls.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage."
+    ]
+  },
+  {
+    "round": 29,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 141,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 23
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "Sir Edric the Restless is knocked off-balance.",
+      "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+      "Mage 3 hits Sir Edric the Restless for 13 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+      "Sir Edric the Restless falls.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage."
+    ]
+  },
+  {
+    "round": 30,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 141,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 45,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 23
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "Sir Edric the Restless is knocked off-balance.",
+      "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+      "Mage 3 hits Sir Edric the Restless for 13 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+      "Sir Edric the Restless falls.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage."
+    ]
+  },
+  {
+    "round": 31,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 127,
+        "max_hp": 183,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 30,
+        "max_hp": 45,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 28
+    },
+    "messages_tail": [
+      "Sir Edric the Restless falls.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage.",
+      "Warrior 1 misses Edric's Grave Shade.",
+      "Cleric 2 misses Edric's Grave Shade.",
+      "Mage 3 hits Edric's Grave Shade for 15 damage.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 7 damage."
+    ]
+  },
+  {
+    "round": 32,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 127,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 30,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 28
+    },
+    "messages_tail": [
+      "Sir Edric the Restless falls.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage.",
+      "Warrior 1 misses Edric's Grave Shade.",
+      "Cleric 2 misses Edric's Grave Shade.",
+      "Mage 3 hits Edric's Grave Shade for 15 damage.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 7 damage."
+    ]
+  },
+  {
+    "round": 33,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 127,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 30,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 28
+    },
+    "messages_tail": [
+      "Sir Edric the Restless falls.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage.",
+      "Warrior 1 misses Edric's Grave Shade.",
+      "Cleric 2 misses Edric's Grave Shade.",
+      "Mage 3 hits Edric's Grave Shade for 15 damage.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 7 damage."
+    ]
+  },
+  {
+    "round": 34,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 127,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 30,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 28
+    },
+    "messages_tail": [
+      "Sir Edric the Restless falls.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage.",
+      "Warrior 1 misses Edric's Grave Shade.",
+      "Cleric 2 misses Edric's Grave Shade.",
+      "Mage 3 hits Edric's Grave Shade for 15 damage.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 7 damage."
+    ]
+  },
+  {
+    "round": 35,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 127,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 30,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 28
+    },
+    "messages_tail": [
+      "Sir Edric the Restless falls.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 8 damage.",
+      "Warrior 1 misses Edric's Grave Shade.",
+      "Cleric 2 misses Edric's Grave Shade.",
+      "Mage 3 hits Edric's Grave Shade for 15 damage.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 7 damage."
+    ]
+  },
+  {
+    "round": 36,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 116,
+        "max_hp": 183,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 32
+    },
+    "messages_tail": [
+      "Mage 3 hits Edric's Grave Shade for 15 damage.",
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 7 damage.",
+      "Warrior 1 hits Edric's Grave Shade for 19 damage.",
+      "Mage 3 hits Edric's Grave Shade for 17 damage.",
+      "Edric's Grave Shade falls.",
+      "Edric's Grave-Light hits Mage 3 for 11 damage.",
+      "|mMage 3 shudders under a grave-cold curse!|n"
+    ]
+  },
+  {
+    "round": 37,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 116,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 33
+    },
+    "messages_tail": [
+      "Edric's Grave Shade hits Mage 3 for 7 damage.",
+      "Edric's Grave-Light hits Mage 3 for 7 damage.",
+      "Warrior 1 hits Edric's Grave Shade for 19 damage.",
+      "Mage 3 hits Edric's Grave Shade for 17 damage.",
+      "Edric's Grave Shade falls.",
+      "Edric's Grave-Light hits Mage 3 for 11 damage.",
+      "|mMage 3 shudders under a grave-cold curse!|n",
+      "Cleric 2 misses Edric's Grave-Light."
+    ]
+  },
+  {
+    "round": 38,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 116,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 33
+    },
+    "messages_tail": [
+      "Edric's Grave-Light hits Mage 3 for 7 damage.",
+      "Warrior 1 hits Edric's Grave Shade for 19 damage.",
+      "Mage 3 hits Edric's Grave Shade for 17 damage.",
+      "Edric's Grave Shade falls.",
+      "Edric's Grave-Light hits Mage 3 for 11 damage.",
+      "|mMage 3 shudders under a grave-cold curse!|n",
+      "Cleric 2 misses Edric's Grave-Light.",
+      "Mage 3 shakes off the curse."
+    ]
+  },
+  {
+    "round": 39,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 116,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 33
+    },
+    "messages_tail": [
+      "Edric's Grave-Light hits Mage 3 for 7 damage.",
+      "Warrior 1 hits Edric's Grave Shade for 19 damage.",
+      "Mage 3 hits Edric's Grave Shade for 17 damage.",
+      "Edric's Grave Shade falls.",
+      "Edric's Grave-Light hits Mage 3 for 11 damage.",
+      "|mMage 3 shudders under a grave-cold curse!|n",
+      "Cleric 2 misses Edric's Grave-Light.",
+      "Mage 3 shakes off the curse."
+    ]
+  },
+  {
+    "round": 40,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 116,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 43,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 33
+    },
+    "messages_tail": [
+      "Edric's Grave-Light hits Mage 3 for 7 damage.",
+      "Warrior 1 hits Edric's Grave Shade for 19 damage.",
+      "Mage 3 hits Edric's Grave Shade for 17 damage.",
+      "Edric's Grave Shade falls.",
+      "Edric's Grave-Light hits Mage 3 for 11 damage.",
+      "|mMage 3 shudders under a grave-cold curse!|n",
+      "Cleric 2 misses Edric's Grave-Light.",
+      "Mage 3 shakes off the curse."
+    ]
+  },
+  {
+    "round": 41,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 109,
+        "max_hp": 183,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 3,
+        "max_hp": 43,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 36
+    },
+    "messages_tail": [
+      "Edric's Grave Shade falls.",
+      "Edric's Grave-Light hits Mage 3 for 11 damage.",
+      "|mMage 3 shudders under a grave-cold curse!|n",
+      "Cleric 2 misses Edric's Grave-Light.",
+      "Mage 3 shakes off the curse.",
+      "Warrior 1 hits Edric's Grave-Light for 21 damage.",
+      "Mage 3 hits Edric's Grave-Light for 19 damage.",
+      "Edric's Grave-Light hits Mage 3 for 7 damage."
+    ]
+  },
+  {
+    "round": 42,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 109,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 3,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 36
+    },
+    "messages_tail": [
+      "Edric's Grave Shade falls.",
+      "Edric's Grave-Light hits Mage 3 for 11 damage.",
+      "|mMage 3 shudders under a grave-cold curse!|n",
+      "Cleric 2 misses Edric's Grave-Light.",
+      "Mage 3 shakes off the curse.",
+      "Warrior 1 hits Edric's Grave-Light for 21 damage.",
+      "Mage 3 hits Edric's Grave-Light for 19 damage.",
+      "Edric's Grave-Light hits Mage 3 for 7 damage."
+    ]
+  },
+  {
+    "round": 43,
+    "outcome": "victory",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 229,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      },
+      {
+        "id": 2,
+        "key": "Cleric 2",
+        "class": "cleric",
+        "hp": 203,
+        "max_hp": 203,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      },
+      {
+        "id": 3,
+        "key": "Mage 3",
+        "class": "mage",
+        "hp": 109,
+        "max_hp": 183,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 181,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 45,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 43,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 38
+    },
+    "messages_tail": [
+      "|mMage 3 shudders under a grave-cold curse!|n",
+      "Cleric 2 misses Edric's Grave-Light.",
+      "Mage 3 shakes off the curse.",
+      "Warrior 1 hits Edric's Grave-Light for 21 damage.",
+      "Mage 3 hits Edric's Grave-Light for 19 damage.",
+      "Edric's Grave-Light hits Mage 3 for 7 damage.",
+      "Cleric 2 hits Edric's Grave-Light for 17 damage.",
+      "Edric's Grave-Light falls."
+    ]
+  }
+]

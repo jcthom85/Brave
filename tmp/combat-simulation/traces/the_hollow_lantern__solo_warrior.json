@@ -1,0 +1,6539 @@
+[
+  {
+    "round": 0,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 257,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 0
+    },
+    "messages_tail": []
+  },
+  {
+    "round": 1,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 257,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 0
+    },
+    "messages_tail": []
+  },
+  {
+    "round": 2,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 257,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 0
+    },
+    "messages_tail": []
+  },
+  {
+    "round": 3,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 257,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 0
+    },
+    "messages_tail": []
+  },
+  {
+    "round": 4,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 238,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 1
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 19 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 5,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 237,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 238,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 1
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 19 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 6,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 238,
+        "max_hp": 257,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 1,
+      "held_actions": 0,
+      "combat_fx_events": 2
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 19 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage."
+    ]
+  },
+  {
+    "round": 7,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 238,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 1,
+      "held_actions": 0,
+      "combat_fx_events": 2
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 19 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage."
+    ]
+  },
+  {
+    "round": 8,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 238,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 1,
+      "held_actions": 0,
+      "combat_fx_events": 2
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 19 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage."
+    ]
+  },
+  {
+    "round": 9,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 238,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 1,
+      "held_actions": 0,
+      "combat_fx_events": 2
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 19 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage."
+    ]
+  },
+  {
+    "round": 10,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 216,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 1,
+      "held_actions": 0,
+      "combat_fx_events": 3
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 19 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance."
+    ]
+  },
+  {
+    "round": 11,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 216,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 1,
+      "held_actions": 0,
+      "combat_fx_events": 3
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 12,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 216,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 3
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 13,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 216,
+        "max_hp": 257,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 3
+    },
+    "messages_tail": [
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment."
+    ]
+  },
+  {
+    "round": 14,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 216,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 3
+    },
+    "messages_tail": [
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment."
+    ]
+  },
+  {
+    "round": 15,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 216,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 3
+    },
+    "messages_tail": [
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment."
+    ]
+  },
+  {
+    "round": 16,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 195,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 4
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance."
+    ]
+  },
+  {
+    "round": 17,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 195,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 4
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance."
+    ]
+  },
+  {
+    "round": 18,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 195,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 4
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 19,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 195,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 4
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 20,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 195,
+        "max_hp": 257,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 4
+    },
+    "messages_tail": [
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment."
+    ]
+  },
+  {
+    "round": 21,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 178,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 5
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 17 damage."
+    ]
+  },
+  {
+    "round": 22,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 178,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 5
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 17 damage."
+    ]
+  },
+  {
+    "round": 23,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 178,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 5
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 17 damage."
+    ]
+  },
+  {
+    "round": 24,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 178,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 5
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 17 damage."
+    ]
+  },
+  {
+    "round": 25,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 178,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 2,
+      "held_actions": 0,
+      "combat_fx_events": 5
+    },
+    "messages_tail": [
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 17 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 26,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 225,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 178,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 5
+    },
+    "messages_tail": [
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 17 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 27,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 213,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 178,
+        "max_hp": 257,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 7
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 17 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1's Shield Bash slams wide of The Hollow Lantern.",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n"
+    ]
+  },
+  {
+    "round": 28,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 213,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 178,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 7
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 17 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1's Shield Bash slams wide of The Hollow Lantern.",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n"
+    ]
+  },
+  {
+    "round": 29,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 213,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 178,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 7
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 17 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1's Shield Bash slams wide of The Hollow Lantern.",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n"
+    ]
+  },
+  {
+    "round": 30,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 213,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 178,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 7
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1's Shield Bash slams wide of The Hollow Lantern.",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n",
+      "Warrior 1 shakes off the curse."
+    ]
+  },
+  {
+    "round": 31,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 213,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 178,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 7
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1's Shield Bash slams wide of The Hollow Lantern.",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n",
+      "Warrior 1 shakes off the curse."
+    ]
+  },
+  {
+    "round": 32,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 213,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 161,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 8
+    },
+    "messages_tail": [
+      "Warrior 1's Shield Bash slams wide of The Hollow Lantern.",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n",
+      "Warrior 1 shakes off the curse.",
+      "Warrior 1 hits The Hollow Lantern for 17 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 33,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 213,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 161,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 3,
+      "held_actions": 0,
+      "combat_fx_events": 8
+    },
+    "messages_tail": [
+      "Warrior 1's Shield Bash slams wide of The Hollow Lantern.",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 12 damage.",
+      "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n",
+      "Warrior 1 shakes off the curse.",
+      "Warrior 1 hits The Hollow Lantern for 17 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 34,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 202,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 161,
+        "max_hp": 257,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 9
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|rBlackwater Warder joins the fight!|n",
+      "|rLamp Wisp joins the fight!|n",
+      "|rThe Hollow Lantern flares through the drowned lenswork and the old line answers. A warder rises from the blackwater while a lamp wisp feeds the light around it.|n",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 11 damage.",
+      "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n"
+    ]
+  },
+  {
+    "round": 35,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 186,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 161,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 11
+    },
+    "messages_tail": [
+      "|rThe Hollow Lantern flares through the drowned lenswork and the old line answers. A warder rises from the blackwater while a lamp wisp feeds the light around it.|n",
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 11 damage.",
+      "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage."
+    ]
+  },
+  {
+    "round": 36,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 186,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 161,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 11
+    },
+    "messages_tail": [
+      "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 11 damage.",
+      "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "Warrior 1 tears free of the webbing."
+    ]
+  },
+  {
+    "round": 37,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 186,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 161,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 11
+    },
+    "messages_tail": [
+      "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+      "The Hollow Lantern hits Warrior 1 for 11 damage.",
+      "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "Warrior 1 tears free of the webbing.",
+      "Warrior 1 shakes off the curse."
+    ]
+  },
+  {
+    "round": 38,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 186,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 152,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 12
+    },
+    "messages_tail": [
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "Warrior 1 tears free of the webbing.",
+      "Warrior 1 shakes off the curse.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance."
+    ]
+  },
+  {
+    "round": 39,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 174,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 152,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 6,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 4,
+      "held_actions": 0,
+      "combat_fx_events": 13
+    },
+    "messages_tail": [
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "Warrior 1 tears free of the webbing.",
+      "Warrior 1 shakes off the curse.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 12 damage."
+    ]
+  },
+  {
+    "round": 40,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 168,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 152,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 6,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 14
+    },
+    "messages_tail": [
+      "Warrior 1 shakes off the curse.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 12 damage.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yWarrior 1 is tangled in webbing!|n"
+    ]
+  },
+  {
+    "round": 41,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 168,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 152,
+        "max_hp": 257,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 6,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 14
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 12 damage.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "The Hollow Lantern struggles against the frost and loses the moment."
+    ]
+  },
+  {
+    "round": 42,
+    "outcome": "active",
+    "pending_actions": {
+      "1": {
+        "kind": "ability",
+        "ability": "shieldbash",
+        "target": "e1"
+      }
+    },
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 168,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        }
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 152,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 6,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 14
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 12 damage.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "The Hollow Lantern struggles against the frost and loses the moment."
+    ]
+  },
+  {
+    "round": 43,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 159,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 152,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 6,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 15
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 12 damage.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n"
+    ]
+  },
+  {
+    "round": 44,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 159,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 141,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 6,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 16
+    },
+    "messages_tail": [
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance."
+    ]
+  },
+  {
+    "round": 45,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 153,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 141,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 6,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 17
+    },
+    "messages_tail": [
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "Warrior 1 shakes off the curse.",
+      "Blackwater Warder hits Warrior 1 for 6 damage."
+    ]
+  },
+  {
+    "round": 46,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 153,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 141,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 7,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 17
+    },
+    "messages_tail": [
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "Warrior 1 shakes off the curse.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 47,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 144,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 141,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 7,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 18
+    },
+    "messages_tail": [
+      "|mWarrior 1 shudders under a hollow-light curse!|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "Warrior 1 shakes off the curse.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage."
+    ]
+  },
+  {
+    "round": 48,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 144,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 141,
+        "max_hp": 257,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 7,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 18
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "Warrior 1 shakes off the curse.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "The Hollow Lantern struggles against the frost and loses the moment."
+    ]
+  },
+  {
+    "round": 49,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 144,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 133,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 7,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 19
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "Warrior 1 shakes off the curse.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 8 damage. The ward absorbs part of the blow."
+    ]
+  },
+  {
+    "round": 50,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 137,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 133,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 7,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 20
+    },
+    "messages_tail": [
+      "Warrior 1 shakes off the curse.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 8 damage. The ward absorbs part of the blow.",
+      "Blackwater Warder hits Warrior 1 for 7 damage.",
+      "|yWarrior 1 is tangled in webbing!|n"
+    ]
+  },
+  {
+    "round": 51,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 128,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 133,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 7,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 21
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 8 damage. The ward absorbs part of the blow.",
+      "Blackwater Warder hits Warrior 1 for 7 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "Lamp Wisp hits Warrior 1 for 9 damage."
+    ]
+  },
+  {
+    "round": 52,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 128,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 133,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 7,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 21
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 8 damage. The ward absorbs part of the blow.",
+      "Blackwater Warder hits Warrior 1 for 7 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "Lamp Wisp hits Warrior 1 for 9 damage."
+    ]
+  },
+  {
+    "round": 53,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 128,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 133,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 8,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 5,
+      "held_actions": 0,
+      "combat_fx_events": 21
+    },
+    "messages_tail": [
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 8 damage. The ward absorbs part of the blow.",
+      "Blackwater Warder hits Warrior 1 for 7 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 54,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 128,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 133,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 8,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 21
+    },
+    "messages_tail": [
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "The Hollow Lantern struggles against the frost and loses the moment.",
+      "Warrior 1 hits The Hollow Lantern for 8 damage. The ward absorbs part of the blow.",
+      "Blackwater Warder hits Warrior 1 for 7 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 55,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 114,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 122,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 8,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 24
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n"
+    ]
+  },
+  {
+    "round": 56,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 114,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 122,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 8,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 24
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n"
+    ]
+  },
+  {
+    "round": 57,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 114,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 122,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 8,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 24
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n",
+      "Warrior 1 shakes off the curse."
+    ]
+  },
+  {
+    "round": 58,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 114,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 122,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 8,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 24
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n",
+      "Warrior 1 shakes off the curse."
+    ]
+  },
+  {
+    "round": 59,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 104,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 122,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 9,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 6,
+      "held_actions": 0,
+      "combat_fx_events": 25
+    },
+    "messages_tail": [
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n",
+      "Warrior 1 shakes off the curse.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 10 damage."
+    ]
+  },
+  {
+    "round": 60,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 99,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 122,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 9,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 7,
+      "held_actions": 0,
+      "combat_fx_events": 26
+    },
+    "messages_tail": [
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n",
+      "Warrior 1 shakes off the curse.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 10 damage.",
+      "Blackwater Warder hits Warrior 1 for 5 damage."
+    ]
+  },
+  {
+    "round": 61,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 99,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 111,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 9,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 7,
+      "held_actions": 0,
+      "combat_fx_events": 27
+    },
+    "messages_tail": [
+      "Warrior 1 shakes off the curse.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 10 damage.",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 62,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 99,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 111,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 9,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 7,
+      "held_actions": 0,
+      "combat_fx_events": 27
+    },
+    "messages_tail": [
+      "Warrior 1 shakes off the curse.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 10 damage.",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 63,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 88,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 111,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 9,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 7,
+      "held_actions": 0,
+      "combat_fx_events": 28
+    },
+    "messages_tail": [
+      "Lamp Wisp hits Warrior 1 for 10 damage.",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n"
+    ]
+  },
+  {
+    "round": 64,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 88,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 111,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 9,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 7,
+      "held_actions": 0,
+      "combat_fx_events": 28
+    },
+    "messages_tail": [
+      "Lamp Wisp hits Warrior 1 for 10 damage.",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n"
+    ]
+  },
+  {
+    "round": 65,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 84,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 111,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 10,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 7,
+      "held_actions": 0,
+      "combat_fx_events": 29
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n",
+      "Warrior 1 shakes off the curse.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 4 damage."
+    ]
+  },
+  {
+    "round": 66,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 84,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 111,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 10,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 8,
+      "held_actions": 0,
+      "combat_fx_events": 29
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "|mWarrior 1 shudders under a hollow-light curse!|n",
+      "Warrior 1 shakes off the curse.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 4 damage."
+    ]
+  },
+  {
+    "round": 67,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 72,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 102,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 10,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 8,
+      "held_actions": 0,
+      "combat_fx_events": 31
+    },
+    "messages_tail": [
+      "Warrior 1 shakes off the curse.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 4 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 12 damage."
+    ]
+  },
+  {
+    "round": 68,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 72,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 102,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 10,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 8,
+      "held_actions": 0,
+      "combat_fx_events": 31
+    },
+    "messages_tail": [
+      "Warrior 1 shakes off the curse.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 4 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 12 damage."
+    ]
+  },
+  {
+    "round": 69,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 72,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 102,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 10,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 8,
+      "held_actions": 0,
+      "combat_fx_events": 31
+    },
+    "messages_tail": [
+      "Warrior 1 shakes off the curse.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 4 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 12 damage."
+    ]
+  },
+  {
+    "round": 70,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 66,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 102,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 10,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 8,
+      "held_actions": 0,
+      "combat_fx_events": 32
+    },
+    "messages_tail": [
+      "Blackwater Warder hits Warrior 1 for 4 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 12 damage.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yWarrior 1 is tangled in webbing!|n"
+    ]
+  },
+  {
+    "round": 71,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 57,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 102,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 11,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 8,
+      "held_actions": 0,
+      "combat_fx_events": 33
+    },
+    "messages_tail": [
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 12 damage.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage."
+    ]
+  },
+  {
+    "round": 72,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 57,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 102,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 11,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 9,
+      "held_actions": 0,
+      "combat_fx_events": 33
+    },
+    "messages_tail": [
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 12 damage.",
+      "Blackwater Warder hits Warrior 1 for 6 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage."
+    ]
+  },
+  {
+    "round": 73,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 57,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 92,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 11,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 9,
+      "held_actions": 0,
+      "combat_fx_events": 34
+    },
+    "messages_tail": [
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 74,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 57,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 92,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 11,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 9,
+      "held_actions": 0,
+      "combat_fx_events": 34
+    },
+    "messages_tail": [
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 75,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 41,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 92,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 11,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 9,
+      "held_actions": 0,
+      "combat_fx_events": 36
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 7 damage.",
+      "Lamp Wisp hits Warrior 1 for 9 damage."
+    ]
+  },
+  {
+    "round": 76,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 41,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 92,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 11,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 9,
+      "held_actions": 0,
+      "combat_fx_events": 36
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 7 damage.",
+      "Lamp Wisp hits Warrior 1 for 9 damage."
+    ]
+  },
+  {
+    "round": 77,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 41,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 92,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 12,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 9,
+      "held_actions": 0,
+      "combat_fx_events": 36
+    },
+    "messages_tail": [
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 7 damage.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 78,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 41,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 92,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 12,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 10,
+      "held_actions": 0,
+      "combat_fx_events": 36
+    },
+    "messages_tail": [
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 7 damage.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 79,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 32,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 81,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 12,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 10,
+      "held_actions": 0,
+      "combat_fx_events": 38
+    },
+    "messages_tail": [
+      "Blackwater Warder hits Warrior 1 for 7 damage.",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage."
+    ]
+  },
+  {
+    "round": 80,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 27,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 81,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 12,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 10,
+      "held_actions": 0,
+      "combat_fx_events": 39
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|yWarrior 1 is tangled in webbing!|n"
+    ]
+  },
+  {
+    "round": 81,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 27,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 81,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 12,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 10,
+      "held_actions": 0,
+      "combat_fx_events": 39
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing."
+    ]
+  },
+  {
+    "round": 82,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 27,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 81,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 12,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 10,
+      "held_actions": 0,
+      "combat_fx_events": 39
+    },
+    "messages_tail": [
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing."
+    ]
+  },
+  {
+    "round": 83,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 16,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 81,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 13,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 10,
+      "held_actions": 0,
+      "combat_fx_events": 40
+    },
+    "messages_tail": [
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage."
+    ]
+  },
+  {
+    "round": 84,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 16,
+        "max_hp": 237,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 81,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 13,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 11,
+      "held_actions": 0,
+      "combat_fx_events": 40
+    },
+    "messages_tail": [
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 9 damage.",
+      "Blackwater Warder hits Warrior 1 for 5 damage.",
+      "|yWarrior 1 is tangled in webbing!|n",
+      "Warrior 1 tears free of the webbing.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage."
+    ]
+  },
+  {
+    "round": 85,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 13,
+        "max_hp": 237,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "ability",
+          "ability": "shieldbash",
+          "target": "e1"
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 71,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 13,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 11,
+      "held_actions": 0,
+      "combat_fx_events": 42
+    },
+    "messages_tail": [
+      "Warrior 1 tears free of the webbing.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 3 damage."
+    ]
+  },
+  {
+    "round": 86,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 13,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 71,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 13,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 11,
+      "held_actions": 0,
+      "combat_fx_events": 42
+    },
+    "messages_tail": [
+      "Warrior 1 tears free of the webbing.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 3 damage."
+    ]
+  },
+  {
+    "round": 87,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 1,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 71,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 13,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 11,
+      "held_actions": 0,
+      "combat_fx_events": 43
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 3 damage.",
+      "Lamp Wisp hits Warrior 1 for 12 damage."
+    ]
+  },
+  {
+    "round": 88,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 1,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 71,
+        "max_hp": 257,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 13,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 11,
+      "held_actions": 0,
+      "combat_fx_events": 43
+    },
+    "messages_tail": [
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 3 damage.",
+      "Lamp Wisp hits Warrior 1 for 12 damage."
+    ]
+  },
+  {
+    "round": 89,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Warrior 1",
+        "class": "warrior",
+        "hp": 1,
+        "max_hp": 237,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 71,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 14,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 11,
+      "held_actions": 0,
+      "combat_fx_events": 43
+    },
+    "messages_tail": [
+      "Lamp Wisp hits Warrior 1 for 11 damage.",
+      "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 3 damage.",
+      "Lamp Wisp hits Warrior 1 for 12 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+    ]
+  },
+  {
+    "round": 90,
+    "outcome": "defeat",
+    "pending_actions": {},
+    "players": [],
+    "companions": [],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "The Hollow Lantern",
+        "template_key": "hollow_lantern",
+        "hp": 71,
+        "max_hp": 257,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Blackwater Flare"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Blackwater Warder",
+        "template_key": "drowned_warder",
+        "hp": 100,
+        "max_hp": 100,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Lamp Wisp",
+        "template_key": "hollow_wisp",
+        "hp": 63,
+        "max_hp": 63,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 14,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 12,
+      "held_actions": 0,
+      "combat_fx_events": 45
+    },
+    "messages_tail": [
+      "Warrior 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
+      "The Hollow Lantern is knocked off-balance.",
+      "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 3 damage.",
+      "Lamp Wisp hits Warrior 1 for 12 damage.",
+      "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+      "Blackwater Warder hits Warrior 1 for 7 damage.",
+      "|rThe party is driven back toward town.|n"
+    ]
+  }
+]

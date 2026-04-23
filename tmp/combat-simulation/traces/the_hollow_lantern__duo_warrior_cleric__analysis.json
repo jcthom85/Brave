@@ -1,0 +1,794 @@
+{
+  "telegraph_windows": [
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 4,
+      "round_ended": 5,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 4,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits The Hollow Lantern for 19 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 5,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits The Hollow Lantern for 19 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 11,
+      "round_ended": 12,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 11,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0"
+          ],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+            "|yCleric 2's Guardian Light takes the edge off The Hollow Lantern's Blackwater Flare.|n",
+            "The Hollow Lantern hits Warrior 1 for 1 damage.",
+            "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n",
+            "Warrior 1 shakes off the curse.",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1's Shield Bash slams wide of The Hollow Lantern.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 12,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": "Warrior 1",
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "shieldbash",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:3"
+          ],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+            "|yCleric 2's Guardian Light takes the edge off The Hollow Lantern's Blackwater Flare.|n",
+            "The Hollow Lantern hits Warrior 1 for 1 damage.",
+            "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n",
+            "Warrior 1 shakes off the curse.",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1's Shield Bash slams wide of The Hollow Lantern.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 18,
+      "round_ended": 19,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 18,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:3"
+          ],
+          "messages_tail": [
+            "|yCleric 2's Guardian Light takes the edge off The Hollow Lantern's Blackwater Flare.|n",
+            "The Hollow Lantern hits Warrior 1 for 1 damage.",
+            "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n",
+            "Warrior 1 shakes off the curse.",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 23 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 19,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:2"
+          ],
+          "messages_tail": [
+            "|yCleric 2's Guardian Light takes the edge off The Hollow Lantern's Blackwater Flare.|n",
+            "The Hollow Lantern hits Warrior 1 for 1 damage.",
+            "|mThe Hollow Lantern brands Warrior 1 in wrong light!|n",
+            "Warrior 1 shakes off the curse.",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 23 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 25,
+      "round_ended": 26,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 25,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "The Hollow Lantern is knocked off-balance.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
+            "Cleric 2 restores 1 HP to Warrior 1.",
+            "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+            "The Hollow Lantern struggles against the frost and loses the moment.",
+            "Warrior 1 hits The Hollow Lantern for 17 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 26,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1"
+          ],
+          "messages_tail": [
+            "The Hollow Lantern is knocked off-balance.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
+            "Cleric 2 restores 1 HP to Warrior 1.",
+            "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+            "The Hollow Lantern struggles against the frost and loses the moment.",
+            "Warrior 1 hits The Hollow Lantern for 17 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 31,
+      "round_ended": 32,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 31,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 23 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
+            "Cleric 2 restores 0 HP to Warrior 1.",
+            "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 32,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1"
+          ],
+          "messages_tail": [
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 23 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
+            "Cleric 2 restores 0 HP to Warrior 1.",
+            "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 37,
+      "round_ended": 38,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 37,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "Cleric 2 hits The Hollow Lantern for 15 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 38,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 21 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "Cleric 2 hits The Hollow Lantern for 15 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 43,
+      "round_ended": 44,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 43,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 hits The Hollow Lantern for 15 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "Cleric 2 hits The Hollow Lantern for 18 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 44,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 hits The Hollow Lantern for 15 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "Cleric 2 hits The Hollow Lantern for 18 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 49,
+      "round_ended": 50,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 49,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 hits The Hollow Lantern for 18 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "Cleric 2 hits The Hollow Lantern for 18 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 50,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 hits The Hollow Lantern for 18 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "Cleric 2 hits The Hollow Lantern for 18 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 55,
+      "round_ended": 56,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 55,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 hits The Hollow Lantern for 18 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 20 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "Cleric 2 misses The Hollow Lantern.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 56,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 hits The Hollow Lantern for 18 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 20 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "Cleric 2 misses The Hollow Lantern.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 61,
+      "round_ended": 62,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 61,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 misses The Hollow Lantern.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "Cleric 2 hits The Hollow Lantern for 14 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 62,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 misses The Hollow Lantern.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 22 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks The Hollow Lantern's Blackwater Flare.|n",
+            "Cleric 2 hits The Hollow Lantern for 14 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    }
+  ],
+  "interrupt_windows": [
+    {
+      "round": 12,
+      "enemy_key": "The Hollow Lantern",
+      "interrupt_ready_actor": null,
+      "interrupt_pending_actor": "Warrior 1"
+    }
+  ]
+}

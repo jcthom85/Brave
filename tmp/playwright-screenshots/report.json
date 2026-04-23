@@ -1,0 +1,40 @@
+{
+  "base_url": "http://127.0.0.1:4001",
+  "output_dir": "/home/jcthom85/Brave/tmp/playwright-screenshots",
+  "screenshots": [
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-exploration/activity.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-exploration/nearby.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-exploration/menu.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-exploration/room.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-exploration/character.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-exploration/pack.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-exploration/journal.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-exploration/party.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/desktop-combat/solo_regular.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/desktop-combat/party_duo.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/desktop-combat/party_trio.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/desktop-combat/party_quad.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/desktop-combat/ranger_companion.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/desktop-combat/elite_enemy.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/desktop-combat/boss_enemy.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/desktop-combat/boss_with_adds.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/desktop-combat/battle-feed-before-first-action.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/desktop-combat/battle-feed-after-first-action.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/desktop-combat/battle-feed-after-several-actions.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-combat/solo_regular.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-combat/party_duo.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-combat/party_trio.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-combat/party_quad.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-combat/ranger_companion.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-combat/elite_enemy.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-combat/boss_enemy.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-combat/boss_with_adds.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-combat/mobile_card_count.png",
+    "/home/jcthom85/Brave/tmp/playwright-screenshots/mobile-combat/elite_vs_regular.png"
+  ],
+  "checks": [
+    "mobile exploration panel persistence",
+    "combat rendering, feed persistence, and rank layout"
+  ],
+  "failures": []
+}

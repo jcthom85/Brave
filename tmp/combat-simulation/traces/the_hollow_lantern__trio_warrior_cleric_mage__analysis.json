@@ -1,0 +1,865 @@
+{
+  "telegraph_windows": [
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 4,
+      "round_ended": 5,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 4,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1",
+            "Mage 3:recovering:1"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits The Hollow Lantern for 19 damage.",
+            "Mage 3 hits The Hollow Lantern for 17 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 5,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0",
+            "Mage 3:charging:0"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits The Hollow Lantern for 19 damage.",
+            "Mage 3 hits The Hollow Lantern for 17 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 11,
+      "round_ended": 12,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 11,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0",
+            "Mage 3:charging:0"
+          ],
+          "messages_tail": [
+            "Warrior 1 shakes off the curse.",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 19 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+            "Mage 3 hits The Hollow Lantern for 27 damage. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 12,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": "Mage 3",
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "shieldbash",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "frostbind",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:3",
+            "Mage 3:charging:3"
+          ],
+          "messages_tail": [
+            "Warrior 1 shakes off the curse.",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 19 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+            "Mage 3 hits The Hollow Lantern for 27 damage. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 18,
+      "round_ended": 19,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 18,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:3",
+            "Mage 3:charging:3"
+          ],
+          "messages_tail": [
+            "The Hollow Lantern struggles against the frost and loses the moment.",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 20 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+            "Mage 3 hits The Hollow Lantern for 28 damage. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 19,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:2",
+            "Mage 3:charging:2"
+          ],
+          "messages_tail": [
+            "The Hollow Lantern struggles against the frost and loses the moment.",
+            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
+            "Warrior 1 hits The Hollow Lantern for 20 damage. The impact staggers the target.",
+            "The Hollow Lantern is knocked off-balance.",
+            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+            "Mage 3 hits The Hollow Lantern for 28 damage. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 25,
+      "round_ended": 26,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 25,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "|yWarrior 1 is tangled in webbing!|n",
+            "Lamp Wisp hits Mage 3 for 16 damage.",
+            "|mMage 3 shudders under a hollow-light curse!|n",
+            "Warrior 1 tears free of the webbing.",
+            "Mage 3 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Lamp Wisp hits Mage 3 for 14 damage.",
+            "|mMage 3 shudders under a hollow-light curse!|n"
+          ]
+        },
+        {
+          "round": 26,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1",
+            "Mage 3:winding:1"
+          ],
+          "messages_tail": [
+            "Lamp Wisp hits Mage 3 for 16 damage.",
+            "|mMage 3 shudders under a hollow-light curse!|n",
+            "Warrior 1 tears free of the webbing.",
+            "Mage 3 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Lamp Wisp hits Mage 3 for 14 damage.",
+            "|mMage 3 shudders under a hollow-light curse!|n",
+            "Blackwater Warder hits Warrior 1 for 5 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 31,
+      "round_ended": 32,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 31,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+            "Mage 3 hits The Hollow Lantern for 14 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "Lamp Wisp hits Mage 3 for 13 damage.",
+            "|mMage 3 shudders under a hollow-light curse!|n",
+            "Mage 3 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Blackwater Warder hits Warrior 1 for 8 damage."
+          ]
+        },
+        {
+          "round": 32,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1",
+            "Mage 3:winding:1"
+          ],
+          "messages_tail": [
+            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+            "Mage 3 hits The Hollow Lantern for 14 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "Lamp Wisp hits Mage 3 for 13 damage.",
+            "|mMage 3 shudders under a hollow-light curse!|n",
+            "Mage 3 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Blackwater Warder hits Warrior 1 for 8 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 37,
+      "round_ended": 38,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 37,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "Mage 3 hits The Hollow Lantern for 14 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "Lamp Wisp hits Mage 3 for 14 damage.",
+            "|mMage 3 shudders under a hollow-light curse!|n",
+            "Mage 3 shakes off the curse.",
+            "Blackwater Warder hits Warrior 1 for 7 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Lamp Wisp hits Mage 3 for 17 damage."
+          ]
+        },
+        {
+          "round": 38,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1",
+            "Mage 3:winding:1"
+          ],
+          "messages_tail": [
+            "Mage 3 hits The Hollow Lantern for 14 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "Lamp Wisp hits Mage 3 for 14 damage.",
+            "|mMage 3 shudders under a hollow-light curse!|n",
+            "Mage 3 shakes off the curse.",
+            "Blackwater Warder hits Warrior 1 for 7 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Lamp Wisp hits Mage 3 for 17 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 43,
+      "round_ended": 44,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 43,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+            "Mage 3 hits The Hollow Lantern for 12 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "Blackwater Warder hits Warrior 1 for 6 damage.",
+            "Lamp Wisp hits Mage 3 for 14 damage.",
+            "|mMage 3 shudders under a hollow-light curse!|n",
+            "Mage 3 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 44,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1",
+            "Mage 3:winding:1"
+          ],
+          "messages_tail": [
+            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+            "Mage 3 hits The Hollow Lantern for 12 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "Blackwater Warder hits Warrior 1 for 6 damage.",
+            "Lamp Wisp hits Mage 3 for 14 damage.",
+            "|mMage 3 shudders under a hollow-light curse!|n",
+            "Mage 3 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 49,
+      "round_ended": 50,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 49,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+            "Mage 3's Frost Bind breaks apart before it can hold The Hollow Lantern.",
+            "Lamp Wisp hits Mage 3 for 14 damage.",
+            "Blackwater Warder hits Warrior 1 for 9 damage.",
+            "|yWarrior 1 is tangled in webbing!|n",
+            "Warrior 1 tears free of the webbing.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Lamp Wisp hits Mage 3 for 16 damage."
+          ]
+        },
+        {
+          "round": 50,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1",
+            "Mage 3:winding:1"
+          ],
+          "messages_tail": [
+            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+            "Mage 3's Frost Bind breaks apart before it can hold The Hollow Lantern.",
+            "Lamp Wisp hits Mage 3 for 14 damage.",
+            "Blackwater Warder hits Warrior 1 for 9 damage.",
+            "|yWarrior 1 is tangled in webbing!|n",
+            "Warrior 1 tears free of the webbing.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Lamp Wisp hits Mage 3 for 16 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 55,
+      "round_ended": 56,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 55,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
+            "Mage 3 hits The Hollow Lantern for 13 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "Blackwater Warder hits Warrior 1 for 9 damage.",
+            "|yWarrior 1 is tangled in webbing!|n",
+            "Warrior 1 tears free of the webbing.",
+            "Lamp Wisp hits Mage 3 for 17 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 56,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1",
+            "Mage 3:winding:1"
+          ],
+          "messages_tail": [
+            "Mage 3 hits The Hollow Lantern for 13 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
+            "The Hollow Lantern is bound in frost.",
+            "Blackwater Warder hits Warrior 1 for 9 damage.",
+            "|yWarrior 1 is tangled in webbing!|n",
+            "Warrior 1 tears free of the webbing.",
+            "Lamp Wisp hits Mage 3 for 17 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Blackwater Warder hits Warrior 1 for 5 damage."
+          ]
+        }
+      ]
+    }
+  ],
+  "interrupt_windows": [
+    {
+      "round": 12,
+      "enemy_key": "The Hollow Lantern",
+      "interrupt_ready_actor": null,
+      "interrupt_pending_actor": "Mage 3"
+    }
+  ]
+}

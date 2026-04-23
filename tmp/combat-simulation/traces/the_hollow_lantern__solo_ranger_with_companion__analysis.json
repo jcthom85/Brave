@@ -1,0 +1,477 @@
+{
+  "telegraph_windows": [
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 4,
+      "round_ended": 5,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 4,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits The Hollow Lantern for 22 damage.",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits The Hollow Lantern for 13 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 5,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits The Hollow Lantern for 22 damage.",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits The Hollow Lantern for 13 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 11,
+      "round_ended": 12,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 11,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "The Hollow Lantern hits Ranger 1 for 16 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits The Hollow Lantern for 21 damage.",
+            "Ranger 1 shakes off the curse.",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits The Hollow Lantern for 13 damage.",
+            "Ranger 1 hits The Hollow Lantern for 21 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 12,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "The Hollow Lantern hits Ranger 1 for 16 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits The Hollow Lantern for 21 damage.",
+            "Ranger 1 shakes off the curse.",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits The Hollow Lantern for 13 damage.",
+            "Ranger 1 hits The Hollow Lantern for 21 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 18,
+      "round_ended": 19,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 18,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|mMarsh Hound shudders under a hollow-light curse!|n",
+            "Ranger 1 tears free of the webbing.",
+            "Ranger 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
+            "Ranger 1 shakes off the curse.",
+            "Marsh Hound shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Lamp Wisp hits Marsh Hound for 12 damage.",
+            "|mMarsh Hound shudders under a hollow-light curse!|n"
+          ]
+        },
+        {
+          "round": 19,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Marsh Hound shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Lamp Wisp hits Marsh Hound for 12 damage.",
+            "|mMarsh Hound shudders under a hollow-light curse!|n",
+            "Ranger 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits Lamp Wisp for 16 damage.",
+            "Blackwater Warder hits Ranger 1 for 6 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 25,
+      "round_ended": 26,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 25,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
+            "Marsh Hound shakes off the curse.",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits Lamp Wisp for 15 damage.",
+            "Blackwater Warder hits Ranger 1 for 7 damage.",
+            "|yRanger 1 is tangled in webbing!|n",
+            "Ranger 1 tears free of the webbing.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 26,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Marsh Hound shakes off the curse.",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits Lamp Wisp for 15 damage.",
+            "Blackwater Warder hits Ranger 1 for 7 damage.",
+            "|yRanger 1 is tangled in webbing!|n",
+            "Ranger 1 tears free of the webbing.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Lamp Wisp hits Marsh Hound for 15 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 32,
+      "round_ended": 33,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 32,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits Lamp Wisp for 16 damage.",
+            "Lamp Wisp falls.",
+            "Blackwater Warder hits Ranger 1 for 10 damage.",
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 33,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits Lamp Wisp for 16 damage.",
+            "Lamp Wisp falls.",
+            "Blackwater Warder hits Ranger 1 for 10 damage.",
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 39,
+      "round_ended": 40,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 39,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|yRanger 1 is tangled in webbing!|n",
+            "Ranger 1 tears free of the webbing.",
+            "Ranger 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
+            "Ranger 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow.",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound misses Blackwater Warder.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Blackwater Warder hits Ranger 1 for 8 damage."
+          ]
+        },
+        {
+          "round": 40,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|yRanger 1 is tangled in webbing!|n",
+            "Ranger 1 tears free of the webbing.",
+            "Ranger 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
+            "Ranger 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow.",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound misses Blackwater Warder.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Blackwater Warder hits Ranger 1 for 8 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 46,
+      "round_ended": 47,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 46,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rThe Hollow Lantern floods the chamber with white-black fire and sears Ranger 1 for 23 damage!|n",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow.",
+            "Ranger 1 shakes off the curse.",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits Blackwater Warder for 18 damage.",
+            "Blackwater Warder hits Ranger 1 for 7 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 47,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow.",
+            "Ranger 1 shakes off the curse.",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits Blackwater Warder for 18 damage.",
+            "Blackwater Warder hits Ranger 1 for 7 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 53,
+      "round_ended": 54,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 53,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rThe Hollow Lantern floods the chamber with white-black fire and sears Ranger 1 for 19 damage!|n",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits Blackwater Warder for 16 damage.",
+            "Blackwater Warder hits Ranger 1 for 11 damage.",
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 54,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Blackwater Warder hits Ranger 1 for 11 damage.",
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits The Hollow Lantern for 9 damage. The ward absorbs part of the blow.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+            "Marsh Hound hits Blackwater Warder for 18 damage.",
+            "Blackwater Warder hits Ranger 1 for 6 damage.",
+            "|rThe party is driven back toward town.|n"
+          ]
+        }
+      ]
+    }
+  ],
+  "interrupt_windows": []
+}

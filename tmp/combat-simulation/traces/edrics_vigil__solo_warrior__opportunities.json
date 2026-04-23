@@ -1,0 +1,18 @@
+{
+  "telegraph_windows": 7,
+  "telegraph_ticks": 14,
+  "interrupt_ready_ticks": 0,
+  "interrupt_charging_zero_ticks": 4,
+  "interrupt_recovering_ticks": 0,
+  "interrupt_late_pending_ticks": 4,
+  "by_enemy": {
+    "Sir Edric the Restless": {
+      "windows": 7,
+      "ticks": 14,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 4,
+      "interrupt_recovering_ticks": 0,
+      "interrupt_late_pending_ticks": 4
+    }
+  }
+}

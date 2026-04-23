@@ -1,0 +1,229 @@
+{
+  "totals": {
+    "traces": 12,
+    "telegraph_windows": 83,
+    "telegraph_ticks": 166,
+    "interrupt_ready_ticks": 0,
+    "interrupt_charging_zero_ticks": 28,
+    "interrupt_recovering_ticks": 7,
+    "interrupt_late_pending_ticks": 16
+  },
+  "by_trace": {
+    "the_hollow_lantern__solo_warrior": {
+      "telegraph_windows": 14,
+      "telegraph_ticks": 28,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 4,
+      "interrupt_recovering_ticks": 2,
+      "interrupt_late_pending_ticks": 2,
+      "by_enemy": {
+        "The Hollow Lantern": {
+          "windows": 14,
+          "ticks": 28,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 4,
+          "interrupt_recovering_ticks": 2,
+          "interrupt_late_pending_ticks": 2
+        }
+      }
+    },
+    "the_hollow_lantern__duo_warrior_cleric": {
+      "telegraph_windows": 10,
+      "telegraph_ticks": 20,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 2,
+      "interrupt_recovering_ticks": 1,
+      "interrupt_late_pending_ticks": 1,
+      "by_enemy": {
+        "The Hollow Lantern": {
+          "windows": 10,
+          "ticks": 20,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 2,
+          "interrupt_recovering_ticks": 1,
+          "interrupt_late_pending_ticks": 1
+        }
+      }
+    },
+    "the_hollow_lantern__trio_warrior_cleric_mage": {
+      "telegraph_windows": 9,
+      "telegraph_ticks": 18,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 4,
+      "interrupt_recovering_ticks": 2,
+      "interrupt_late_pending_ticks": 1,
+      "by_enemy": {
+        "The Hollow Lantern": {
+          "windows": 9,
+          "ticks": 18,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 4,
+          "interrupt_recovering_ticks": 2,
+          "interrupt_late_pending_ticks": 1
+        }
+      }
+    },
+    "the_hollow_lantern__full_party": {
+      "telegraph_windows": 6,
+      "telegraph_ticks": 12,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 4,
+      "interrupt_recovering_ticks": 2,
+      "interrupt_late_pending_ticks": 1,
+      "by_enemy": {
+        "The Hollow Lantern": {
+          "windows": 6,
+          "ticks": 12,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 4,
+          "interrupt_recovering_ticks": 2,
+          "interrupt_late_pending_ticks": 1
+        }
+      }
+    },
+    "the_hollow_lantern__solo_ranger_no_companion": {
+      "telegraph_windows": 6,
+      "telegraph_ticks": 12,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 0,
+      "interrupt_recovering_ticks": 0,
+      "interrupt_late_pending_ticks": 0,
+      "by_enemy": {
+        "The Hollow Lantern": {
+          "windows": 6,
+          "ticks": 12,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 0,
+          "interrupt_recovering_ticks": 0,
+          "interrupt_late_pending_ticks": 0
+        }
+      }
+    },
+    "the_hollow_lantern__solo_ranger_with_companion": {
+      "telegraph_windows": 8,
+      "telegraph_ticks": 16,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 0,
+      "interrupt_recovering_ticks": 0,
+      "interrupt_late_pending_ticks": 0,
+      "by_enemy": {
+        "The Hollow Lantern": {
+          "windows": 8,
+          "ticks": 16,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 0,
+          "interrupt_recovering_ticks": 0,
+          "interrupt_late_pending_ticks": 0
+        }
+      }
+    },
+    "edrics_vigil__solo_warrior": {
+      "telegraph_windows": 7,
+      "telegraph_ticks": 14,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 4,
+      "interrupt_recovering_ticks": 0,
+      "interrupt_late_pending_ticks": 4,
+      "by_enemy": {
+        "Sir Edric the Restless": {
+          "windows": 7,
+          "ticks": 14,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 4,
+          "interrupt_recovering_ticks": 0,
+          "interrupt_late_pending_ticks": 4
+        }
+      }
+    },
+    "edrics_vigil__duo_warrior_cleric": {
+      "telegraph_windows": 7,
+      "telegraph_ticks": 14,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 4,
+      "interrupt_recovering_ticks": 0,
+      "interrupt_late_pending_ticks": 4,
+      "by_enemy": {
+        "Sir Edric the Restless": {
+          "windows": 7,
+          "ticks": 14,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 4,
+          "interrupt_recovering_ticks": 0,
+          "interrupt_late_pending_ticks": 4
+        }
+      }
+    },
+    "edrics_vigil__trio_warrior_cleric_mage": {
+      "telegraph_windows": 3,
+      "telegraph_ticks": 6,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 4,
+      "interrupt_recovering_ticks": 0,
+      "interrupt_late_pending_ticks": 2,
+      "by_enemy": {
+        "Sir Edric the Restless": {
+          "windows": 3,
+          "ticks": 6,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 4,
+          "interrupt_recovering_ticks": 0,
+          "interrupt_late_pending_ticks": 2
+        }
+      }
+    },
+    "edrics_vigil__full_party": {
+      "telegraph_windows": 2,
+      "telegraph_ticks": 4,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 2,
+      "interrupt_recovering_ticks": 0,
+      "interrupt_late_pending_ticks": 1,
+      "by_enemy": {
+        "Sir Edric the Restless": {
+          "windows": 2,
+          "ticks": 4,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 2,
+          "interrupt_recovering_ticks": 0,
+          "interrupt_late_pending_ticks": 1
+        }
+      }
+    },
+    "edrics_vigil__solo_ranger_no_companion": {
+      "telegraph_windows": 6,
+      "telegraph_ticks": 12,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 0,
+      "interrupt_recovering_ticks": 0,
+      "interrupt_late_pending_ticks": 0,
+      "by_enemy": {
+        "Sir Edric the Restless": {
+          "windows": 6,
+          "ticks": 12,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 0,
+          "interrupt_recovering_ticks": 0,
+          "interrupt_late_pending_ticks": 0
+        }
+      }
+    },
+    "edrics_vigil__solo_ranger_with_companion": {
+      "telegraph_windows": 5,
+      "telegraph_ticks": 10,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 0,
+      "interrupt_recovering_ticks": 0,
+      "interrupt_late_pending_ticks": 0,
+      "by_enemy": {
+        "Sir Edric the Restless": {
+          "windows": 5,
+          "ticks": 10,
+          "interrupt_ready_ticks": 0,
+          "interrupt_charging_zero_ticks": 0,
+          "interrupt_recovering_ticks": 0,
+          "interrupt_late_pending_ticks": 0
+        }
+      }
+    }
+  }
+}

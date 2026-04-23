@@ -1,0 +1,18 @@
+{
+  "telegraph_windows": 6,
+  "telegraph_ticks": 12,
+  "interrupt_ready_ticks": 0,
+  "interrupt_charging_zero_ticks": 0,
+  "interrupt_recovering_ticks": 0,
+  "interrupt_late_pending_ticks": 0,
+  "by_enemy": {
+    "The Hollow Lantern": {
+      "windows": 6,
+      "ticks": 12,
+      "interrupt_ready_ticks": 0,
+      "interrupt_charging_zero_ticks": 0,
+      "interrupt_recovering_ticks": 0,
+      "interrupt_late_pending_ticks": 0
+    }
+  }
+}

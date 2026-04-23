@@ -1,0 +1,3824 @@
+[
+  {
+    "round": 0,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 193,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 106,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 0
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 148,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 0
+    },
+    "messages_tail": []
+  },
+  {
+    "round": 1,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 193,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 106,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 3
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 148,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 0
+    },
+    "messages_tail": []
+  },
+  {
+    "round": 2,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 193,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 106,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 2
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 148,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 0
+    },
+    "messages_tail": []
+  },
+  {
+    "round": 3,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 193,
+        "max_hp": 193,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 106,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 126,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 1
+    },
+    "messages_tail": [
+      "Ranger 1 hits Sir Edric the Restless for 22 damage."
+    ]
+  },
+  {
+    "round": 4,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 193,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 106,
+        "max_hp": 106,
+        "phase": "recovering",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 109,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 0,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 2
+    },
+    "messages_tail": [
+      "Ranger 1 hits Sir Edric the Restless for 22 damage.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Sir Edric the Restless for 17 damage."
+    ]
+  },
+  {
+    "round": 5,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 193,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 106,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 0
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 109,
+        "max_hp": 148,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 2
+    },
+    "messages_tail": [
+      "Ranger 1 hits Sir Edric the Restless for 22 damage.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Sir Edric the Restless for 17 damage.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+    ]
+  },
+  {
+    "round": 6,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 193,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 106,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 3
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 109,
+        "max_hp": 148,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 2
+    },
+    "messages_tail": [
+      "Ranger 1 hits Sir Edric the Restless for 22 damage.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Sir Edric the Restless for 17 damage.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+    ]
+  },
+  {
+    "round": 7,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 183,
+        "max_hp": 193,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 106,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 2
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 88,
+        "max_hp": 148,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 35,
+        "max_hp": 35,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 4
+    },
+    "messages_tail": [
+      "Ranger 1 hits Sir Edric the Restless for 21 damage.",
+      "|rEdric's Grave Shade joins the fight!|n",
+      "|rEdric's Grave-Light joins the fight!|n",
+      "|rSir Edric raises his blade and the barrow answers. Grave-light coils around him as lesser dead rise to his call!|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+      "|mRanger 1 shudders under a grave-cold curse!|n"
+    ]
+  },
+  {
+    "round": 8,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 183,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 89,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 88,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 35,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 6
+    },
+    "messages_tail": [
+      "|rSir Edric raises his blade and the barrow answers. Grave-light coils around him as lesser dead rise to his call!|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+      "|mRanger 1 shudders under a grave-cold curse!|n",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 7 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n"
+    ]
+  },
+  {
+    "round": 9,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 183,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 89,
+        "max_hp": 106,
+        "phase": "recovering",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 88,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 20,
+        "max_hp": 35,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 7
+    },
+    "messages_tail": [
+      "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+      "|mRanger 1 shudders under a grave-cold curse!|n",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 7 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "Ranger 1 shakes off the curse.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 15 damage."
+    ]
+  },
+  {
+    "round": 10,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 183,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 89,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 0
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 88,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 20,
+        "max_hp": 35,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 7
+    },
+    "messages_tail": [
+      "|mRanger 1 shudders under a grave-cold curse!|n",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 7 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "Ranger 1 shakes off the curse.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 15 damage.",
+      "Marsh Hound shakes off the curse."
+    ]
+  },
+  {
+    "round": 11,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 183,
+        "max_hp": 193,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 89,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 3
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 78,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 20,
+        "max_hp": 35,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 8
+    },
+    "messages_tail": [
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 7 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "Ranger 1 shakes off the curse.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 15 damage.",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow."
+    ]
+  },
+  {
+    "round": 12,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 183,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 89,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 2
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 78,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 20,
+        "max_hp": 35,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 1,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 8
+    },
+    "messages_tail": [
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 7 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "Ranger 1 shakes off the curse.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 15 damage.",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow."
+    ]
+  },
+  {
+    "round": 13,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 183,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 69,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 78,
+        "max_hp": 148,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 20,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 10
+    },
+    "messages_tail": [
+      "Ranger 1 shakes off the curse.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 15 damage.",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 10 damage."
+    ]
+  },
+  {
+    "round": 14,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 183,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 69,
+        "max_hp": 106,
+        "phase": "recovering",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 78,
+        "max_hp": 148,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 3,
+        "max_hp": 35,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 11
+    },
+    "messages_tail": [
+      "Marsh Hound hits Edric's Grave-Light for 15 damage.",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 10 damage.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 17 damage."
+    ]
+  },
+  {
+    "round": 15,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 69,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 0
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 78,
+        "max_hp": 148,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 3,
+        "max_hp": 35,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 13
+    },
+    "messages_tail": [
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 10 damage.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 17 damage.",
+      "Ranger 1 misses Sir Edric the Restless.",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Ranger 1 for 9 damage."
+    ]
+  },
+  {
+    "round": 16,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 69,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 3
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 78,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 3,
+        "max_hp": 35,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 13
+    },
+    "messages_tail": [
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 10 damage.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 17 damage.",
+      "Ranger 1 misses Sir Edric the Restless.",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Ranger 1 for 9 damage."
+    ]
+  },
+  {
+    "round": 17,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 69,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 2
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 78,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 3,
+        "max_hp": 35,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 13
+    },
+    "messages_tail": [
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 10 damage.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 17 damage.",
+      "Ranger 1 misses Sir Edric the Restless.",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Ranger 1 for 9 damage."
+    ]
+  },
+  {
+    "round": 18,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 54,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 78,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 3,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 15
+    },
+    "messages_tail": [
+      "Marsh Hound hits Edric's Grave-Light for 17 damage.",
+      "Ranger 1 misses Sir Edric the Restless.",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Ranger 1 for 9 damage.",
+      "Edric's Grave Shade hits Marsh Hound for 8 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 7 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n"
+    ]
+  },
+  {
+    "round": 19,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 54,
+        "max_hp": 106,
+        "phase": "recovering",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 68,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 18
+    },
+    "messages_tail": [
+      "Sir Edric the Restless hits Ranger 1 for 9 damage.",
+      "Edric's Grave Shade hits Marsh Hound for 8 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 7 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 16 damage.",
+      "Edric's Grave-Light falls."
+    ]
+  },
+  {
+    "round": 20,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 54,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 0
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 68,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 2,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 18
+    },
+    "messages_tail": [
+      "Edric's Grave Shade hits Marsh Hound for 8 damage.",
+      "Edric's Grave-Light hits Marsh Hound for 7 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 16 damage.",
+      "Edric's Grave-Light falls.",
+      "Marsh Hound shakes off the curse."
+    ]
+  },
+  {
+    "round": 21,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 54,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 3
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 68,
+        "max_hp": 148,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 18
+    },
+    "messages_tail": [
+      "Edric's Grave-Light hits Marsh Hound for 7 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 16 damage.",
+      "Edric's Grave-Light falls.",
+      "Marsh Hound shakes off the curse.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+    ]
+  },
+  {
+    "round": 22,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 54,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 2
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 68,
+        "max_hp": 148,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 18
+    },
+    "messages_tail": [
+      "Edric's Grave-Light hits Marsh Hound for 7 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave-Light for 16 damage.",
+      "Edric's Grave-Light falls.",
+      "Marsh Hound shakes off the curse.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+    ]
+  },
+  {
+    "round": 23,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 44,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 68,
+        "max_hp": 148,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 37,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 21
+    },
+    "messages_tail": [
+      "Edric's Grave-Light falls.",
+      "Marsh Hound shakes off the curse.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Ranger 1 misses Sir Edric the Restless.",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "Sir Edric the Restless misses Ranger 1.",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n"
+    ]
+  },
+  {
+    "round": 24,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 44,
+        "max_hp": 106,
+        "phase": "recovering",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 68,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 19,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 22
+    },
+    "messages_tail": [
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Ranger 1 misses Sir Edric the Restless.",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "Sir Edric the Restless misses Ranger 1.",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 18 damage."
+    ]
+  },
+  {
+    "round": 25,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 44,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 0
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 68,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 19,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 22
+    },
+    "messages_tail": [
+      "Ranger 1 misses Sir Edric the Restless.",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "Sir Edric the Restless misses Ranger 1.",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 18 damage.",
+      "Marsh Hound shakes off the curse."
+    ]
+  },
+  {
+    "round": 26,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 44,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 3
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 68,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 19,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 22
+    },
+    "messages_tail": [
+      "Ranger 1 misses Sir Edric the Restless.",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "Sir Edric the Restless misses Ranger 1.",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 18 damage.",
+      "Marsh Hound shakes off the curse."
+    ]
+  },
+  {
+    "round": 27,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 44,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 2
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 57,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 19,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 23
+    },
+    "messages_tail": [
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "Sir Edric the Restless misses Ranger 1.",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 18 damage.",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow."
+    ]
+  },
+  {
+    "round": 28,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 33,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 57,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 19,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 3,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 24
+    },
+    "messages_tail": [
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 18 damage.",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
+      "Edric's Grave Shade hits Marsh Hound for 11 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n"
+    ]
+  },
+  {
+    "round": 29,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 33,
+        "max_hp": 106,
+        "phase": "recovering",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 57,
+        "max_hp": 148,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 4,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 25
+    },
+    "messages_tail": [
+      "Marsh Hound hits Edric's Grave Shade for 18 damage.",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
+      "Edric's Grave Shade hits Marsh Hound for 11 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 15 damage.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+    ]
+  },
+  {
+    "round": 30,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 33,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 0
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 57,
+        "max_hp": 148,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 4,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 25
+    },
+    "messages_tail": [
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
+      "Edric's Grave Shade hits Marsh Hound for 11 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 15 damage.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Marsh Hound shakes off the curse."
+    ]
+  },
+  {
+    "round": 31,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 23,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 3
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 47,
+        "max_hp": 148,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 4,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 27
+    },
+    "messages_tail": [
+      "Marsh Hound hits Edric's Grave Shade for 15 damage.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Marsh Hound for 10 damage."
+    ]
+  },
+  {
+    "round": 32,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 23,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 2
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 47,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 4,
+        "max_hp": 37,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 27
+    },
+    "messages_tail": [
+      "Marsh Hound hits Edric's Grave Shade for 15 damage.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Marsh Hound for 10 damage."
+    ]
+  },
+  {
+    "round": 33,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 13,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 47,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 4,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 28
+    },
+    "messages_tail": [
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Marsh Hound for 10 damage.",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n"
+    ]
+  },
+  {
+    "round": 34,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 13,
+        "max_hp": 106,
+        "phase": "recovering",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 47,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 30
+    },
+    "messages_tail": [
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Marsh Hound for 10 damage.",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 15 damage.",
+      "Edric's Grave Shade falls."
+    ]
+  },
+  {
+    "round": 35,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 13,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 0
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 37,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 31
+    },
+    "messages_tail": [
+      "Sir Edric the Restless hits Marsh Hound for 10 damage.",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 15 damage.",
+      "Edric's Grave Shade falls.",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow."
+    ]
+  },
+  {
+    "round": 36,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 13,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 3
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 37,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 4,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 31
+    },
+    "messages_tail": [
+      "Sir Edric the Restless hits Marsh Hound for 10 damage.",
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 15 damage.",
+      "Edric's Grave Shade falls.",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow."
+    ]
+  },
+  {
+    "round": 37,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 13,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 2
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 37,
+        "max_hp": 148,
+        "phase": "winding",
+        "ticks_remaining": 2,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 2
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 31
+    },
+    "messages_tail": [
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 15 damage.",
+      "Edric's Grave Shade falls.",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+    ]
+  },
+  {
+    "round": 38,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 13,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 37,
+        "max_hp": 148,
+        "phase": "winding",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "phase": "winding",
+      "interruptible": true,
+      "ticks_remaining": 1
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 31
+    },
+    "messages_tail": [
+      "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Edric's Grave Shade for 15 damage.",
+      "Edric's Grave Shade falls.",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+    ]
+  },
+  {
+    "round": 39,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 3,
+        "max_hp": 106,
+        "phase": "recovering",
+        "ticks_remaining": 1
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 19,
+        "max_hp": 148,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e1",
+          "label": "Funeral Charge"
+        }
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 34
+    },
+    "messages_tail": [
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Sir Edric the Restless for 8 damage. The ward absorbs part of the blow.",
+      "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n"
+    ]
+  },
+  {
+    "round": 40,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 3,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 0
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 19,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 0,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 34
+    },
+    "messages_tail": [
+      "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Sir Edric the Restless for 8 damage. The ward absorbs part of the blow.",
+      "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n"
+    ]
+  },
+  {
+    "round": 41,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 2,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 3,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 3
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 19,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 4,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 34
+    },
+    "messages_tail": [
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Sir Edric the Restless for 8 damage. The ward absorbs part of the blow.",
+      "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "Marsh Hound shakes off the curse."
+    ]
+  },
+  {
+    "round": 42,
+    "outcome": "active",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "charging",
+        "ticks_remaining": 1,
+        "current_action": {},
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 3,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 2
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 19,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 34
+    },
+    "messages_tail": [
+      "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
+      "Marsh Hound hits Sir Edric the Restless for 8 damage. The ward absorbs part of the blow.",
+      "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "Marsh Hound shakes off the curse."
+    ]
+  },
+  {
+    "round": 43,
+    "outcome": "victory",
+    "pending_actions": {},
+    "players": [
+      {
+        "id": 1,
+        "key": "Ranger 1",
+        "class": "ranger",
+        "hp": 174,
+        "max_hp": 193,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "attack",
+          "target": null
+        },
+        "pending_action": {}
+      }
+    ],
+    "companions": [
+      {
+        "id": "c1",
+        "key": "Marsh Hound",
+        "owner_id": 1,
+        "hp": 3,
+        "max_hp": 106,
+        "phase": "charging",
+        "ticks_remaining": 2
+      }
+    ],
+    "enemies": [
+      {
+        "id": "e1",
+        "key": "Sir Edric the Restless",
+        "template_key": "sir_edric_restless",
+        "hp": 0,
+        "max_hp": 148,
+        "phase": "charging",
+        "ticks_remaining": 3,
+        "current_action": {}
+      },
+      {
+        "id": "e2",
+        "key": "Edric's Grave Shade",
+        "template_key": "restless_shade",
+        "hp": 0,
+        "max_hp": 37,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e2",
+          "label": "Attack"
+        }
+      },
+      {
+        "id": "e3",
+        "key": "Edric's Grave-Light",
+        "template_key": "barrow_wisp",
+        "hp": 0,
+        "max_hp": 35,
+        "phase": "recovering",
+        "ticks_remaining": 1,
+        "current_action": {
+          "kind": "enemy_attack",
+          "enemy_id": "e3",
+          "label": "Attack"
+        }
+      }
+    ],
+    "telegraph": {
+      "enemy_id": null,
+      "enemy_key": null,
+      "phase": null,
+      "interruptible": false,
+      "ticks_remaining": 0
+    },
+    "telemetry": {
+      "telegraphed_actions": 5,
+      "telegraphed_interrupts": 0,
+      "telegraphed_response_actions": 0,
+      "held_actions": 0,
+      "combat_fx_events": 36
+    },
+    "messages_tail": [
+      "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+      "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+      "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+      "Sir Edric the Restless hits Marsh Hound for 10 damage.",
+      "|mMarsh Hound shudders under a grave-cold curse!|n",
+      "Marsh Hound shakes off the curse.",
+      "Ranger 1 hits Sir Edric the Restless for 21 damage.",
+      "Sir Edric the Restless falls."
+    ]
+  }
+]
