@@ -98,6 +98,8 @@ let defaultout_plugin = (function () {
     var pendingCombatTransitionCleanupTimeout = null;
     var pendingCombatTransitionMode = "";
     var pendingCombatResultReturnTransition = false;
+    var suppressMobileNonInputFocusUntil = 0;
+    var suppressMobileRoomNavScrollUntil = 0;
     var pendingRegionTransitionViewData = null;
     var pendingRegionTransitionTimeout = null;
     var pendingRegionTransitionCleanupTimeout = null;
@@ -5678,6 +5680,71 @@ let defaultout_plugin = (function () {
         document.body.classList.toggle("brave-sticky-view-active", !!active);
     };
 
+    var focusWithoutScroll = function (node) {
+        if (!node || typeof node.focus !== "function") {
+            return;
+        }
+        try {
+            node.focus({ preventScroll: true });
+        } catch (err) {
+            node.focus();
+        }
+    };
+
+    var suppressMobileNonInputFocus = function (durationMs) {
+        if (!isMobileViewport()) {
+            return;
+        }
+        suppressMobileNonInputFocusUntil = Math.max(
+            suppressMobileNonInputFocusUntil || 0,
+            Date.now() + Math.max(0, durationMs || 0)
+        );
+    };
+
+    var shouldSuppressMobileNonInputFocus = function (target) {
+        if (!isMobileViewport() || Date.now() >= (suppressMobileNonInputFocusUntil || 0)) {
+            return false;
+        }
+        return !isTextEntryElement(target);
+    };
+
+    var isRoomNavigationCommand = function (command) {
+        var normalized = String(command || "").trim().toLowerCase();
+        return normalized === "n"
+            || normalized === "north"
+            || normalized === "s"
+            || normalized === "south"
+            || normalized === "e"
+            || normalized === "east"
+            || normalized === "w"
+            || normalized === "west"
+            || normalized === "u"
+            || normalized === "up"
+            || normalized === "d"
+            || normalized === "down";
+    };
+
+    var suppressMobileRoomNavScroll = function (durationMs) {
+        if (!isMobileViewport()) {
+            return;
+        }
+        suppressMobileRoomNavScrollUntil = Math.max(
+            suppressMobileRoomNavScrollUntil || 0,
+            Date.now() + Math.max(0, durationMs || 0)
+        );
+    };
+
+    var shouldSuppressMobileRoomNavScroll = function (target) {
+        return !!(
+            isMobileViewport()
+            && Date.now() < (suppressMobileRoomNavScrollUntil || 0)
+            && target
+            && target.id === "messagewindow"
+            && currentViewData
+            && isRoomLikeView(currentViewData)
+        );
+    };
+
     var pulseBodyClass = function (className, duration) {
         var body = document.body;
         if (!body) {
@@ -7370,8 +7437,12 @@ let defaultout_plugin = (function () {
         );
         var variantClass = viewData.variant ? " brave-view--" + escapeHtml(viewData.variant) : "";
         var toneClass = viewData.tone ? " brave-view--tone-" + escapeHtml(viewData.tone) : "";
-        if (!options.skipCombatTransition && enteringCombat && startCombatTransition(viewData, "enter")) {
-            return;
+        if (!options.skipCombatTransition && enteringCombat) {
+            blurActiveUiControl();
+            suppressMobileNonInputFocus(1200);
+            if (startCombatTransition(viewData, "enter")) {
+                return;
+            }
         }
         if (isCombatView) {
             combatViewTransitionActive = true;
@@ -7905,6 +7976,7 @@ let defaultout_plugin = (function () {
         };
 
         var renderEntries = function (items) {
+            var disableMobileCombatEntryFocus = !!(isMobileViewport() && viewData && viewData.variant === "combat");
             var renderEntryBodyLines = function (entry) {
                 var lines = [];
                 if (entry && Array.isArray(entry.lines)) {
@@ -7948,7 +8020,7 @@ let defaultout_plugin = (function () {
                     combatRefAttr = " data-entry-ref='" + escapeHtml(entry.entry_ref) + "'";
                 }
                 return (
-                    "<div class='" + rowClass + "'" + combatStateAttr + combatRefAttr + commandAttrs(entry) + ">"
+                    "<div class='" + rowClass + "'" + combatStateAttr + combatRefAttr + commandAttrs(entry, !disableMobileCombatEntryFocus) + ">"
                     + (backgroundIcon ? icon(backgroundIcon, "brave-view__entry-ornament") : "")
                     + "<div class='brave-view__entry-head'>"
                     + ((entry && entry.badge)
@@ -8007,7 +8079,7 @@ let defaultout_plugin = (function () {
                         combatRefAttr = " data-entry-ref='" + escapeHtml(entry.entry_ref) + "'";
                     }
                     var hasInlineActions = !!(entry && Array.isArray(entry.actions) && entry.actions.length);
-                    var useButtonRoot = hasBrowserInteraction(entry) && !hasInlineActions;
+                    var useButtonRoot = hasBrowserInteraction(entry) && !hasInlineActions && !disableMobileCombatEntryFocus;
                     var tagName = useButtonRoot ? "button" : "article";
                     var extraAttrs = useButtonRoot ? " type='button'" : "";
                     if (useButtonRoot) {
@@ -8018,7 +8090,7 @@ let defaultout_plugin = (function () {
                         + extraAttrs
                         + combatStateAttr
                         + combatRefAttr
-                        + commandAttrs(entry)
+                        + commandAttrs(entry, useButtonRoot)
                         + ">"
                         + (backgroundIcon ? icon(backgroundIcon, "brave-view__entry-ornament") : "")
                         + "<div class='brave-view__entry-head'>"
@@ -8364,6 +8436,7 @@ let defaultout_plugin = (function () {
                 : null;
             pendingMainScrollRestore = null;
             if (!isSameRoomReactiveRefresh) {
+                blurActiveUiControl();
                 clearTextOutput({
                     preserveCombatTransition: !!options.skipCombatTransition,
                     preservePicker: preservePickerOnRefresh,
@@ -8584,9 +8657,16 @@ let defaultout_plugin = (function () {
         if (!command || !plugin_handler || !plugin_handler.onSend) {
             return;
         }
+        var normalizedCommand = String(command || "").trim().toLowerCase();
         var braveAudio = getBraveAudio();
         if (confirmText && !window.confirm(confirmText)) {
             return;
+        }
+        blurActiveUiControl();
+        suppressMobileNonInputFocus(1200);
+        if (isRoomNavigationCommand(normalizedCommand)) {
+            suppressMobileRoomNavScroll(900);
+            resetAllScrollPositions();
         }
         clearPickerSheet();
         clearBrowserNotice();
@@ -8598,7 +8678,6 @@ let defaultout_plugin = (function () {
             }
             closeMobileCommandTray();
         }
-        var normalizedCommand = String(command || "").trim().toLowerCase();
         if (
             isPreservedSystemViewActive()
             && (
@@ -9752,7 +9831,7 @@ let defaultout_plugin = (function () {
             return;
         }
         window.setTimeout(function () {
-            field.focus();
+            focusWithoutScroll(field);
             if (typeof field.setSelectionRange === "function") {
                 var length = String(field.value || "").length;
                 field.setSelectionRange(length, length);
@@ -9910,6 +9989,30 @@ let defaultout_plugin = (function () {
             return;
         }
         browserInteractionHandlersBound = true;
+
+        document.addEventListener("pointerdown", function (event) {
+            if (!isMobileViewport()) {
+                return;
+            }
+            var navTarget = event.target.closest(
+                "#mobile-nav-dock .brave-view__navcard, "
+                + "#mobile-nav-dock .brave-view__nav-centercard, "
+                + "#mobile-nav-dock .brave-view__nav-chip"
+            );
+            if (!navTarget) {
+                return;
+            }
+            // Keep mobile nav taps from focusing dock controls and yanking the room scroller downward.
+            event.preventDefault();
+        }, true);
+
+        document.addEventListener("scroll", function (event) {
+            var target = event.target;
+            if (!shouldSuppressMobileRoomNavScroll(target)) {
+                return;
+            }
+            target.scrollTop = 0;
+        }, true);
 
         document.addEventListener("click", function (event) {
             if (Date.now() < suppressBrowserClickUntil) {
@@ -10299,6 +10402,10 @@ let defaultout_plugin = (function () {
                     + ".brave-view__list-item[data-brave-prefill], "
                     + ".brave-view__list-item[data-brave-picker], "
                     + ".brave-view__list-item[data-brave-connection-screen], "
+                    + ".brave-view__entry[data-brave-command], "
+                    + ".brave-view__entry[data-brave-prefill], "
+                    + ".brave-view__entry[data-brave-picker], "
+                    + ".brave-view__entry[data-brave-connection-screen], "
                     + ".brave-view__entry--button[data-brave-command], "
                     + ".brave-view__entry--button[data-brave-prefill], "
                     + ".brave-view__entry--button[data-brave-picker], "
@@ -10426,6 +10533,25 @@ let defaultout_plugin = (function () {
                 return;
             }
             sendBrowserCommand(target.getAttribute("data-brave-command"), target.getAttribute("data-brave-confirm"));
+        }, true);
+
+        document.addEventListener("focusin", function (event) {
+            var target = event.target;
+            if (!shouldSuppressMobileNonInputFocus(target)) {
+                return;
+            }
+            window.setTimeout(function () {
+                if (target && typeof target.blur === "function" && shouldSuppressMobileNonInputFocus(target)) {
+                    try {
+                        target.blur();
+                    } catch (err) {
+                        // Ignore focus cleanup failures.
+                    }
+                }
+                if (shouldSuppressMobileNonInputFocus(target)) {
+                    resetAllScrollPositions();
+                }
+            }, 0);
         }, true);
 
         window.addEventListener("resize", function () {
@@ -10558,6 +10684,26 @@ let defaultout_plugin = (function () {
             return false;
         }
         return true;
+    };
+
+    var blurActiveUiControl = function () {
+        var active = document.activeElement;
+        var tagName;
+        if (!active || active === document.body || active === document.documentElement) {
+            return;
+        }
+        tagName = String(active.tagName || "").toUpperCase();
+        if (tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT") {
+            return;
+        }
+        if (!active.blur || typeof active.blur !== "function") {
+            return;
+        }
+        try {
+            active.blur();
+        } catch (err) {
+            // Ignore focus cleanup failures.
+        }
     };
 
     //
