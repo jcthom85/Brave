@@ -257,3 +257,36 @@ def get_entity_response(character, entity, action):
         return response
 
     return None
+
+
+def get_entity_emote_response(character, entity, emote_text):
+    """Return an optional authored response for a targeted emote."""
+
+    if getattr(entity.db, "brave_entity_kind", None) != "npc":
+        return None
+
+    reactions = getattr(entity.db, "brave_emote_reactions", None)
+    if isinstance(reactions, str):
+        return reactions
+    if not isinstance(reactions, dict):
+        return getattr(entity.db, "brave_emote_response", None)
+
+    lowered = str(emote_text or "").strip().lower()
+    if not lowered:
+        return reactions.get("default") or reactions.get("any")
+
+    verb = lowered.split()[0]
+    if verb.endswith("ies") and len(verb) > 3:
+        verb = verb[:-3] + "y"
+    elif verb.endswith("es"):
+        stem = verb[:-2]
+        if stem.endswith(("s", "x", "z", "ch", "sh", "o")):
+            verb = stem
+    elif verb.endswith("s") and len(verb) > 1:
+        verb = verb[:-1]
+
+    for key in (verb, lowered.split()[0], "default", "any"):
+        response = reactions.get(key)
+        if response:
+            return response
+    return None

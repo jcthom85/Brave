@@ -230,7 +230,7 @@ class RoomViewTests(unittest.TestCase):
         self.assertIsNone(vicinity_items[0].get("picker", {}).get("subtitle"))
         self.assertIsNone(vicinity_items[1].get("picker", {}).get("subtitle"))
         self.assertEqual(
-            ["Mastery"],
+            ["Mastery", "Emote At"],
             [option.get("label") for option in vicinity_items[0].get("picker", {}).get("options", [])],
         )
         self.assertEqual(

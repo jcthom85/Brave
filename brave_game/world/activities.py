@@ -81,6 +81,81 @@ def _is_targetable_consumable_character(obj):
     return False
 
 
+def _is_targetable_social_actor(obj):
+    """Return whether a room object can be socially targeted."""
+
+    if not obj:
+        return False
+    if hasattr(obj, "ensure_brave_character"):
+        return True
+    return getattr(getattr(obj, "db", None), "brave_entity_kind", None) == "npc"
+
+
+def get_targetable_social_characters(character, include_self=False):
+    """Return nearby Brave social actors that can be targeted by emotes."""
+
+    candidates = []
+    room = getattr(character, "location", None)
+    if room:
+        for obj in list(getattr(room, "contents", []) or []):
+            if not _is_targetable_social_actor(obj):
+                continue
+            if obj == character and not include_self:
+                continue
+            if obj not in candidates:
+                candidates.append(obj)
+
+    if include_self and character not in candidates:
+        candidates.insert(0, character)
+
+    def _sort_key(candidate):
+        same_party = (
+            candidate != character
+            and getattr(getattr(candidate, "db", None), "brave_party_id", None)
+            and getattr(getattr(candidate, "db", None), "brave_party_id", None)
+            == getattr(getattr(character, "db", None), "brave_party_id", None)
+        )
+        kind = getattr(getattr(candidate, "db", None), "brave_entity_kind", None)
+        return (
+            0 if candidate == character else 1,
+            0 if same_party else 1,
+            0 if kind == "npc" else 1,
+            str(getattr(candidate, "key", "") or "").lower(),
+            getattr(candidate, "id", 0),
+        )
+
+    candidates.sort(key=_sort_key)
+    return candidates
+
+
+def match_targetable_social_character(character, query, include_self=False):
+    """Find a nearby Brave social actor by fuzzy name for emotes."""
+
+    candidates = get_targetable_social_characters(character, include_self=include_self)
+    if not query:
+        return None
+
+    query_norm = _normalize_target_token(query)
+    exact = []
+    partial = []
+    for candidate in candidates:
+        names = [getattr(candidate, "key", "")]
+        aliases = getattr(getattr(candidate, "aliases", None), "all", None)
+        if callable(aliases):
+            names.extend(alias for alias in aliases())
+        tokens = [_normalize_target_token(name) for name in names if name]
+        if any(query_norm == token for token in tokens):
+            exact.append(candidate)
+        elif any(query_norm in token for token in tokens):
+            partial.append(candidate)
+
+    if exact:
+        return exact[0] if len(exact) == 1 else exact
+    if partial:
+        return partial[0] if len(partial) == 1 else partial
+    return None
+
+
 def get_targetable_consumable_characters(character, include_self=False):
     """Return nearby Brave characters that can be targeted by explore consumables."""
 

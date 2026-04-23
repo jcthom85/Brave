@@ -27,6 +27,8 @@ let defaultInPlugin = (function () {
     var isLoggedIn = false;
     var lastMobileInputOpenAt = 0;
     var pendingOverlayFocusTimeout = null;
+    var pendingChatPrefix = "";
+    var pendingChatPrompt = "";
     var isMobileViewport = function () {
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
     };
@@ -55,6 +57,18 @@ let defaultInPlugin = (function () {
             window.clearTimeout(pendingOverlayFocusTimeout);
             pendingOverlayFocusTimeout = null;
         }
+    };
+
+    var clearChatDraft = function () {
+        pendingChatPrefix = "";
+        pendingChatPrompt = "";
+    };
+
+    var getChatPlaceholder = function () {
+        if (pendingChatPrompt) {
+            return pendingChatPrompt;
+        }
+        return placeholderByMode.chat;
     };
 
     var getEffectiveInputMode = function () {
@@ -294,7 +308,7 @@ let defaultInPlugin = (function () {
 
     var decorateInputs = function () {
         var effectiveMode = getEffectiveInputMode();
-        $(".inputfield, #inputfield").attr("placeholder", effectiveMode === INPUT_MODE_CHAT ? placeholderByMode.chat : placeholderByMode.command);
+        $(".inputfield, #inputfield").attr("placeholder", effectiveMode === INPUT_MODE_CHAT ? getChatPlaceholder() : placeholderByMode.command);
         ensureInputModeBar();
     };
 
@@ -357,6 +371,23 @@ let defaultInPlugin = (function () {
         }
         refreshInputChrome();
         return getEffectiveInputMode();
+    };
+
+    var openChatDraft = function (commandPrefix, options) {
+        options = options || {};
+        if (getResolvedInputContext() !== INPUT_CONTEXT_PLAY) {
+            setInputContext(INPUT_CONTEXT_PLAY);
+        }
+        pendingChatPrefix = String(commandPrefix || "");
+        pendingChatPrompt = String(options.prompt || "");
+        setInputMode(INPUT_MODE_CHAT);
+        var inputfield = focusInput({ force: true, openOverlay: true, chatMode: true });
+        if (inputfield.length > 0) {
+            inputfield.val("");
+            moveCaretToEnd(inputfield);
+        }
+        refreshInputChrome();
+        return inputfield;
     };
 
     var setInputContext = function (context) {
@@ -481,6 +512,7 @@ let defaultInPlugin = (function () {
 
     var setInputValue = function (value, options) {
         options = options || {};
+        clearChatDraft();
         if (options.mode) {
             setInputMode(options.mode);
         } else {
@@ -557,6 +589,15 @@ let defaultInPlugin = (function () {
                 continue;
             }
             if (effectiveMode === INPUT_MODE_CHAT) {
+                if (pendingChatPrefix) {
+                    if (trimmed.charAt(0) === "/") {
+                        clearChatDraft();
+                        plugin_handler.onSend(trimmed.slice(1));
+                        continue;
+                    }
+                    plugin_handler.onSend(pendingChatPrefix + trimmed);
+                    continue;
+                }
                 if (trimmed.charAt(0) === "/") {
                     plugin_handler.onSend(trimmed.slice(1));
                 } else {
@@ -567,6 +608,8 @@ let defaultInPlugin = (function () {
             plugin_handler.onSend(line);
         }
         inputfield.val("");
+        clearChatDraft();
+        refreshInputChrome();
         if (isMobileInputOpen()) {
             setMobileInputOpen(false);
             event.preventDefault();
@@ -767,6 +810,8 @@ let defaultInPlugin = (function () {
             return setMobileInputOpen(false);
         },
         isMobileInputOpen: isMobileInputOpen,
+        openChatDraft: openChatDraft,
+        clearChatDraft: clearChatDraft,
     };
 })();
 window.plugin_handler.add("default_in", defaultInPlugin);

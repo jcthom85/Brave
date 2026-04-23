@@ -304,6 +304,45 @@ class CombatActionPayloadTests(unittest.TestCase):
             [option.get("command") for option in action.get("picker", {}).get("options", [])],
         )
 
+    def test_emote_action_targets_enemies_in_combat(self):
+        room = DummyRoom()
+        rogue = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "rogue",
+            {"hp": 16, "mana": 0, "stamina": 12},
+            {"max_hp": 20, "max_mana": 0, "max_stamina": 12},
+            ["Cheap Shot"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [rogue],
+            [
+                {"id": "e1", "key": "Bandit Raider", "hp": 9, "max_hp": 12, "template_key": "bandit_raider"},
+                {"id": "e2", "key": "Bandit Raider", "hp": 9, "max_hp": 12, "template_key": "bandit_raider"},
+            ],
+        )
+
+        payload = build_combat_action_payload(encounter, rogue)
+        emote = _action(payload["emotes"], "emote")
+
+        self.assertEqual("social", emote.get("kind"))
+        self.assertEqual("Emote", emote.get("label"))
+        self.assertEqual("Emote At", emote.get("picker", {}).get("title"))
+        self.assertEqual(
+            ["Bandit Raider 1", "Bandit Raider 2"],
+            [option.get("label") for option in emote.get("picker", {}).get("options", [])],
+        )
+        self.assertEqual(
+            ["emote = e1", "emote = e2"],
+            [option.get("command") for option in emote.get("picker", {}).get("options", [])],
+        )
+        self.assertEqual(
+            "Emote At Bandit Raider 1",
+            emote.get("picker", {}).get("options", [])[0].get("picker", {}).get("title"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

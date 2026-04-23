@@ -4,8 +4,13 @@ import re
 
 from evennia.commands.default.muxcommand import MuxCommand
 
-from world.activities import match_targetable_consumable_character, use_consumable_template
+from world.activities import (
+    match_targetable_consumable_character,
+    match_targetable_social_character,
+    use_consumable_template,
+)
 from world.data.items import ITEM_TEMPLATES, get_item_category, get_item_use_profile, match_inventory_item
+from world.interactions import get_entity_emote_response
 from world.party import get_present_party_members
 from world.data.quests import QUESTS
 from world.genders import get_brave_pronoun
@@ -42,6 +47,33 @@ def _third_person_verb(verb):
     if verb.endswith(("s", "x", "z", "ch", "sh")):
         return verb + "es"
     return verb + "s"
+
+
+def _base_form_verb(verb):
+    """Return a best-effort base form for a simple third-person verb."""
+
+    verb = str(verb or "").strip().lower()
+    if not verb:
+        return ""
+    if verb.endswith("ies") and len(verb) > 3:
+        return verb[:-3] + "y"
+    if verb.endswith("es"):
+        stem = verb[:-2]
+        if stem.endswith(("s", "x", "z", "ch", "sh", "o")):
+            return stem
+    if verb.endswith("s") and len(verb) > 1:
+        return verb[:-1]
+    return verb
+
+
+def _second_person_phrase(text):
+    """Rewrite a room-style phrase so it reads naturally after `You`."""
+
+    words = str(text or "").split()
+    if not words:
+        return ""
+    words[0] = _base_form_verb(words[0])
+    return " ".join(words)
 
 
 def _format_social_emote(character, text):
@@ -94,8 +126,50 @@ def _format_social_emote(character, text):
         self_text = verb
     else:
         room_text = base
-        self_text = base
+        self_text = _second_person_phrase(base)
     return f"{character.key} {room_text}{punctuation}", f"You {self_text}{punctuation}"
+
+
+def _find_emote_target(character, text):
+    """Return a nearby social actor or enemy explicitly mentioned in an emote, if any."""
+
+    if not character or not character.location:
+        return None
+
+    lowered = str(text or "").lower()
+    room_target = match_targetable_social_character(character, text, include_self=False)
+    if isinstance(room_target, list):
+        room_target = room_target[0] if room_target else None
+    if room_target and room_target != character:
+        return "room", room_target
+
+    get_encounter = getattr(character, "get_active_encounter", None)
+    encounter = get_encounter() if callable(get_encounter) else None
+    if encounter and not encounter.is_participant(character):
+        encounter = None
+    if encounter:
+        enemies = list(encounter.get_active_enemies())
+        enemies.sort(key=lambda enemy: len(enemy.get("key", "") or ""), reverse=True)
+        for enemy in enemies:
+            name = str(enemy.get("key") or "").strip()
+            if not name:
+                continue
+            if re.search(r"\b" + re.escape(name.lower()) + r"\b", lowered):
+                return "enemy", enemy
+
+    return None
+
+
+def _target_perspective_emote(room_line, target_name):
+    """Rewrite a room emote line so the named target sees `you`."""
+
+    line = str(room_line or "").strip()
+    name = str(target_name or "").strip()
+    if not line or not name:
+        return line
+
+    rewritten = re.sub(r"\b" + re.escape(name) + r"\b", "you", line, count=1)
+    return rewritten
 
 
 def _format_context_bonus_summary(bonuses, context):
@@ -488,9 +562,34 @@ class BraveCharacterCommand(MuxCommand):
             self.msg("Usage: emote <message>")
             return False
 
-        from world.browser_panels import broadcast_room_activity
+        from world.browser_panels import broadcast_room_activity, send_room_activity_event
 
-        broadcast_room_activity(character.location, room_line, exclude=[character], cls="out", category="emote")
+        target_info = _find_emote_target(character, text)
+        excluded = [character]
+        if target_info:
+            target_kind, target = target_info
+            if target_kind == "room":
+                target_line = _target_perspective_emote(room_line, target.key)
+                send_room_activity_event(target, target_line, cls="out", category="emote")
+                excluded.append(target)
+            elif target_kind == "enemy":
+                encounter = None
+                get_active_encounter = getattr(character, "get_active_encounter", None)
+                if callable(get_active_encounter):
+                    encounter = get_active_encounter()
+                if not encounter:
+                    from typeclasses.scripts import BraveEncounter
+
+                    encounter = BraveEncounter.get_for_room(character.location)
+                if encounter and encounter.is_participant(character):
+                    reaction = encounter.react_to_emote(character, target, text)
+                    if reaction:
+                        broadcast_room_activity(character.location, reaction, exclude=excluded, cls="out")
+        broadcast_room_activity(character.location, room_line, exclude=excluded, cls="out")
+        if target_info and target_info[0] == "room":
+            response = get_entity_emote_response(character, target_info[1], text)
+            if response:
+                broadcast_room_activity(character.location, response, exclude=[character], cls="out", category="emote")
         self.msg(self_line)
         return True
 
@@ -573,7 +672,7 @@ class BraveCharacterCommand(MuxCommand):
         return matches[0] if len(matches) == 1 else matches, entities
 
     def get_local_characters(self, character, include_self=False):
-        """Return connected player characters in the current room."""
+        """Return local player characters in the current room."""
 
         if not character.location:
             return []
@@ -581,14 +680,18 @@ class BraveCharacterCommand(MuxCommand):
         characters = [
             obj
             for obj in character.location.contents
-            if hasattr(obj, "ensure_brave_character") and getattr(obj, "is_connected", False)
+            if hasattr(obj, "ensure_brave_character")
+            and (
+                getattr(obj, "is_connected", False)
+                or bool(getattr(getattr(obj, "db", None), "brave_test_fixture", False))
+            )
         ]
         if not include_self:
             characters = [obj for obj in characters if obj != character]
         return characters
 
     def find_local_character(self, character, query, include_self=False):
-        """Find a connected local player character by fuzzy name."""
+        """Find a local player character by fuzzy name."""
 
         characters = self.get_local_characters(character, include_self=include_self)
         if not query:

@@ -236,6 +236,9 @@ def mastery_rank_label(rank):
 def format_mastery_name(name, rank):
     """Return a menu-friendly ability display with roman rank suffix."""
 
+    rank = int(rank or 1)
+    if rank <= 1:
+        return name
     return f"{name} {mastery_rank_roman(rank)}"
 
 

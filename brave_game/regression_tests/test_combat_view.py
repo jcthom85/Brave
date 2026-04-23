@@ -470,6 +470,28 @@ class CombatViewTests(unittest.TestCase):
         self.assertEqual("boss", captain.get("size_class"))
         self.assertEqual("knight-helmet", captain.get("background_icon"))
 
+    def test_elite_enemy_gets_elite_size_class(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "template_key": "goblin_cutter", "key": "Goblin Cutter", "hp": 30, "max_hp": 30}],
+        )
+
+        view = build_combat_view(encounter, warrior)
+        enemies_section = _section(view, "Enemies")
+        cutter = _entry(enemies_section, "Goblin Cutter")
+        self.assertEqual("elite", cutter.get("size_class"))
+
     def test_duplicate_enemy_names_are_numbered_in_view(self):
         room = DummyRoom()
         warrior = DummyCharacter(

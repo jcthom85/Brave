@@ -106,6 +106,38 @@ def _enemy_picker(title, command_prefix, enemies):
     }
 
 
+def _emote_picker(target_label):
+    return {
+        "title": f"Emote At {target_label}",
+        "subtitle": "Choose a quick social emote aimed at this enemy.",
+        "options": [
+            {"label": "Smile", "icon": "sentiment_satisfied", "command": f"emote smiles at {target_label}"},
+            {"label": "Nod", "icon": "how_to_reg", "command": f"emote nods to {target_label}"},
+            {"label": "Wave", "icon": "waving_hand", "command": f"emote waves at {target_label}"},
+            {"label": "Laugh", "icon": "sentiment_very_satisfied", "command": f"emote laughs at {target_label}"},
+            {"label": "Bow", "icon": "self_improvement", "command": f"emote bows to {target_label}"},
+            {"label": "Taunt", "icon": "sentiment_very_dissatisfied", "command": f"emote taunts the {target_label}"},
+        ],
+    }
+
+
+def _emote_enemy_picker(title, command_prefix, enemies):
+    return {
+        "title": title,
+        "subtitle": "Choose an enemy.",
+        "options": [
+            {
+                "label": label,
+                "command": f"{command_prefix} = {enemy['id']}",
+                "icon": _enemy_option_icon(enemy),
+                "tone": "danger",
+                "picker": _emote_picker(label),
+            }
+            for label, enemy in _enemy_display_options(enemies)
+        ],
+    }
+
+
 def _ally_picker(title, command_prefix, ordered_participants, character):
     return {
         "title": title,
@@ -356,10 +388,40 @@ def build_combat_item_actions(encounter, character):
     return item_actions
 
 
+def build_combat_emote_actions(encounter):
+    """Return social emote actions for combat enemies."""
+
+    enemies = encounter.get_active_enemies()
+    action = {
+        "id": "social:emote",
+        "kind": "social",
+        "key": "emote",
+        "label": "Emote",
+        "text": "Emote",
+        "badge": None,
+        "target_mode": "enemy",
+        "command": None,
+        "picker": None,
+        "actions": None,
+        "disabled_reason": None,
+        "tooltip": "Choose an enemy to emote at.",
+    }
+
+    if not enemies:
+        action["disabled_reason"] = "No foes available."
+    elif len(enemies) == 1:
+        action["picker"] = _emote_picker(enemies[0]["key"])
+    else:
+        action["picker"] = _emote_enemy_picker("Emote At", "emote", enemies)
+
+    return [_finalize_action(action)]
+
+
 def build_combat_action_payload(encounter, character):
     """Return the normalized combat action payload for a browser combat view."""
 
     return {
         "abilities": build_combat_ability_actions(encounter, character),
         "items": build_combat_item_actions(encounter, character),
+        "emotes": build_combat_emote_actions(encounter),
     }

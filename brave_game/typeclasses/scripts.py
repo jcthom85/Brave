@@ -92,6 +92,23 @@ def _normalize_token(value):
     return "".join(char for char in (value or "").lower() if char.isalnum())
 
 
+def _base_form_verb(verb):
+    """Return a best-effort base form for a social verb."""
+
+    verb = str(verb or "").strip().lower()
+    if not verb:
+        return ""
+    if verb.endswith("ies") and len(verb) > 3:
+        return verb[:-3] + "y"
+    if verb.endswith("es"):
+        stem = verb[:-2]
+        if stem.endswith(("s", "x", "z", "ch", "sh", "o")):
+            return stem
+    if verb.endswith("s") and len(verb) > 1:
+        return verb[:-1]
+    return verb
+
+
 def _ability_display_name(character, ability_key):
     """Return the resonance-aware display name for an ability key."""
 
@@ -1686,6 +1703,36 @@ class BraveEncounter(Script):
 
         return [enemy for enemy in self.db.enemies or [] if enemy["hp"] > 0]
 
+    def react_to_emote(self, character, enemy, emote_text):
+        """Optionally react to a targeted social emote."""
+
+        if not enemy or enemy not in self.get_active_enemies():
+            return None
+
+        template = ENEMY_TEMPLATES.get(enemy.get("template_key"), {})
+        reactions = enemy.get("emote_reactions")
+        if not reactions:
+            reactions = template.get("emote_reactions")
+        if isinstance(reactions, str):
+            return reactions
+
+        if isinstance(reactions, dict):
+            verb = _base_form_verb(str(emote_text or "").split()[:1][0] if str(emote_text or "").split() else "")
+            chosen = reactions.get(verb) or reactions.get("default") or reactions.get("any")
+            if isinstance(chosen, dict):
+                response = chosen.get("text") or chosen.get("message")
+                aggro = int(chosen.get("aggro", chosen.get("threat", 0)) or 0)
+            else:
+                response = chosen
+                aggro = 0
+            if aggro > 0 and character:
+                self._add_threat(character, aggro)
+            return response
+
+        if character and template.get("emote_aggro"):
+            self._add_threat(character, int(template.get("emote_aggro", 0) or 0))
+        return None
+
     def _get_scaling_profile(self):
         size = max(1, min(4, int(self.db.expected_party_size or 1)))
         return PARTY_SCALING[size]
@@ -2297,6 +2344,8 @@ class BraveEncounter(Script):
             "spell_power": template.get("spell_power", template["attack_power"]),
             "target_strategy": template.get("target_strategy", "highest_threat"),
             "special": template.get("special"),
+            "emote_reactions": dict(template.get("emote_reactions") or {}),
+            "emote_aggro": template.get("emote_aggro", 0),
             "marked_turns": 0,
             "judged_turns": 0,
             "bound_turns": 0,

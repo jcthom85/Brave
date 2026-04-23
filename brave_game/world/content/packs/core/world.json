@@ -148,6 +148,7 @@
         "innkeeper"
       ],
       "desc": "Uncle Pib moves between kettles and tables with practiced ease. He looks like the sort of man who could solve a crisis with a ladle, a joke, or both.",
+      "emote_response": "Uncle Pib gives a small, knowing nod and goes back to the kettle.",
       "gender": "male",
       "id": "uncle_pib_underbough",
       "key": "Uncle Pib Underbough",

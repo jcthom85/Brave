@@ -48,7 +48,7 @@ ENEMY_TEMPLATES = {
     },
     "goblin_cutter": {
         "name": "Goblin Cutter",
-        "tags": ["goblin", "raider"],
+        "tags": ["goblin", "raider", "elite"],
         "max_hp": 34,
         "attack_power": 10,
         "armor": 3,

@@ -343,7 +343,7 @@ def _entry(
     return entry
 
 
-def _picker_option(label, *, command=None, prefill=None, icon=None, meta=None, tone=None, picker=None):
+def _picker_option(label, *, command=None, prefill=None, icon=None, meta=None, tone=None, picker=None, chat_open=False, chat_prompt=None):
     option = {"label": label}
     if command:
         option["command"] = command
@@ -357,6 +357,10 @@ def _picker_option(label, *, command=None, prefill=None, icon=None, meta=None, t
         option["tone"] = tone
     if picker:
         option["picker"] = picker
+    if chat_open:
+        option["chat_open"] = True
+    if chat_prompt:
+        option["chat_prompt"] = chat_prompt
     return option
 
 
@@ -490,6 +494,7 @@ def _build_world_interaction_picker(viewer, target):
             )
             for action in _build_talk_actions(target)
         ]
+        options.append(_picker_option("Emote At", icon="sentiment_satisfied", picker=_build_targeted_room_emote_picker(target.key)))
         return _picker(title, body=body, options=options, title_icon="forum")
 
     if kind == "readable":
@@ -1218,52 +1223,6 @@ def _format_room_threat_items(visible_threats):
 
 def _format_room_entity_items(viewer, visible_entities, visible_chars):
     items = []
-    viewer_party_id = getattr(getattr(viewer, "db", None), "brave_party_id", None)
-    follow_target = get_follow_target(viewer) if viewer and viewer_party_id else None
-    party_leader = get_party_leader(viewer) if viewer and viewer_party_id else None
-    party_size = len(get_party_members(viewer)) if viewer and viewer_party_id else 0
-    room = getattr(viewer, "location", None)
-    encounter = getattr(getattr(room, "ndb", None), "brave_encounter", None) if room else None
-    engaged_participant_ids = set()
-    if encounter and getattr(encounter, "db", None):
-        engaged_participant_ids = {
-            int(participant_id)
-            for participant_id in (getattr(encounter.db, "participants", None) or [])
-            if participant_id is not None
-        }
-
-    for obj in visible_chars or []:
-        actions = []
-        same_party = bool(viewer_party_id and viewer_party_id == getattr(obj.db, "brave_party_id", None))
-        engaged = bool(getattr(obj, "id", None) in engaged_participant_ids)
-        if same_party:
-            if follow_target and follow_target.id == obj.id:
-                actions.append(_action("Stay", "party stay", "do_not_disturb_on", tone="muted"))
-            else:
-                actions.append(_action("Follow", f"party follow {obj.key}", "directions_walk"))
-            actions.append(_action("Where", "party where", "location_searching", tone="muted"))
-            if party_leader and party_leader.id == viewer.id:
-                actions.append(
-                    _action(
-                        "Kick",
-                        f"party kick {obj.key}",
-                        "person_remove",
-                        tone="danger",
-                        confirm=f"Remove {obj.key} from the party?",
-                    )
-                )
-        elif not getattr(obj.db, "brave_party_id", None) and (not viewer_party_id or (party_leader and party_leader.id == viewer.id and party_size < 4)):
-            actions.append(_action("Invite", f"party invite {obj.key}", "person_add"))
-        items.append(
-            _item(
-                obj.key,
-                icon="person",
-                actions=actions,
-                detail="Engaged" if engaged else None,
-                marker_icon="swords" if engaged else None,
-                tooltip="Already in the current fight." if engaged else None,
-            )
-        )
 
     kind_order = {"npc": 0, "readable": 1, "arcade": 2, "object": 3}
     sorted_entities = sorted(
@@ -1294,6 +1253,82 @@ def _format_room_entity_items(viewer, visible_entities, visible_chars):
             )
         )
 
+    viewer_party_id = getattr(getattr(viewer, "db", None), "brave_party_id", None)
+    follow_target = get_follow_target(viewer) if viewer and viewer_party_id else None
+    party_leader = get_party_leader(viewer) if viewer and viewer_party_id else None
+    room = getattr(viewer, "location", None)
+    encounter = getattr(getattr(room, "ndb", None), "brave_encounter", None) if room else None
+    engaged_participant_ids = set()
+    if encounter and getattr(encounter, "db", None):
+        engaged_participant_ids = {
+            int(participant_id)
+            for participant_id in (getattr(encounter.db, "participants", None) or [])
+            if participant_id is not None
+        }
+
+    char_entries = []
+    for obj in list(visible_chars or []):
+        party_id = getattr(getattr(obj, "db", None), "brave_party_id", None)
+        same_party = bool(viewer_party_id and viewer_party_id == party_id)
+        grouped = bool(party_id)
+        engaged = bool(getattr(obj, "id", None) in engaged_participant_ids)
+        following = bool(follow_target and follow_target.id == getattr(obj, "id", None))
+        leader = bool(party_leader and party_leader.id == getattr(obj, "id", None))
+        can_invite = bool(
+            not party_id
+            and (not viewer_party_id or (party_leader and party_leader.id == viewer.id and len(get_party_members(viewer)) < 4))
+        )
+        can_kick = bool(same_party and party_leader and party_leader.id == viewer.id)
+
+        detail_bits = []
+        if engaged:
+            detail_bits.append("Engaged")
+        elif same_party:
+            detail_bits.append("Party")
+        elif grouped:
+            detail_bits.append("Grouped")
+        if leader:
+            detail_bits.append("Leader")
+        if following:
+            detail_bits.append("Following")
+
+        priority = 0
+        if engaged:
+            priority -= 30
+        if same_party:
+            priority -= 24
+        if leader:
+            priority -= 18
+        if following:
+            priority -= 12
+        if grouped:
+            priority -= 6
+
+        char_entries.append(
+            (
+                priority,
+                obj.key.lower(),
+                _item(
+                    obj.key,
+                    icon="person",
+                    detail=" · ".join(detail_bits) if detail_bits else None,
+                    marker_icon="swords" if engaged else None,
+                    picker=_build_room_character_picker(
+                        viewer,
+                        obj,
+                        same_party=same_party,
+                        engaged=engaged,
+                        following=following,
+                        leader=leader,
+                        can_invite=can_invite,
+                        can_kick=can_kick,
+                    ),
+                ),
+            )
+        )
+
+    items.extend(entry for _priority, _key, entry in sorted(char_entries, key=lambda value: (value[0], value[1])))
+
     return items
 
 
@@ -1303,12 +1338,11 @@ def _build_targeted_room_emote_picker(target_name):
         subtitle="Choose a quick social emote aimed at this person.",
         title_icon="sentiment_satisfied",
         options=[
-            _picker_option("Smile", prefill=f"emote smiles at {target_name}", icon="sentiment_satisfied"),
-            _picker_option("Nod", prefill=f"emote nods to {target_name}", icon="how_to_reg"),
-            _picker_option("Wave", prefill=f"emote waves at {target_name}", icon="waving_hand"),
-            _picker_option("Laugh", prefill=f"emote laughs with {target_name}", icon="sentiment_very_satisfied"),
-            _picker_option("Bow", prefill=f"emote bows to {target_name}", icon="self_improvement"),
-            _picker_option("Custom", prefill=f"emote ", icon="edit_note", meta=f"Write your own emote mentioning {target_name}."),
+            _picker_option("Smile", command=f"emote smiles at {target_name}", icon="sentiment_satisfied"),
+            _picker_option("Nod", command=f"emote nods to {target_name}", icon="how_to_reg"),
+            _picker_option("Wave", command=f"emote waves at {target_name}", icon="waving_hand"),
+            _picker_option("Laugh", command=f"emote laughs with {target_name}", icon="sentiment_very_satisfied"),
+            _picker_option("Bow", command=f"emote bows to {target_name}", icon="self_improvement"),
         ],
     )
 
@@ -1318,15 +1352,15 @@ def _build_room_character_picker(viewer, obj, *, same_party=False, engaged=False
     subtitle = "Choose how to interact with this person nearby."
     options = [
         _picker_option(
-            "Message",
-            prefill=f"/tell {target_name} = ",
+            "Whisper",
+            prefill=f"whisper {target_name} = ",
             icon="forum",
-            meta=f"Open a private message draft to {target_name}.",
+            chat_open=True,
+            chat_prompt=f"Whisper to {target_name}...",
         ),
         _picker_option(
             "Emote At",
             icon="sentiment_satisfied",
-            meta=f"Aim a social emote at {target_name}.",
             picker=_build_targeted_room_emote_picker(target_name),
         ),
     ]
@@ -1347,7 +1381,7 @@ def _build_room_character_picker(viewer, obj, *, same_party=False, engaged=False
                 )
             )
     elif can_invite:
-        options.append(_picker_option("Invite", command=f"party invite {target_name}", icon="person_add", meta=f"Invite {target_name} to join your party."))
+        options.append(_picker_option("Invite", command=f"party invite {target_name}", icon="person_add"))
 
     body = []
     if same_party:
@@ -3798,6 +3832,8 @@ def build_combat_view(encounter, character):
     def combat_option_icon(action):
         if action.get("kind") == "ability":
             return get_ability_icon_name(action.get("key"))
+        if action.get("kind") == "social":
+            return "sentiment_satisfied"
         return "lunch_dining"
 
     def combat_picker_options(action):

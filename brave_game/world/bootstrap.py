@@ -111,6 +111,8 @@ def _ensure_world_object(entity_data, rooms_by_id):
     obj.db.brave_display_name = entity_data.get("display_name", "")
     obj.db.brave_entity_id = entity_data["id"]
     obj.db.brave_entity_kind = entity_data.get("kind", "scenery")
+    obj.db.brave_emote_response = entity_data.get("emote_response")
+    obj.db.brave_emote_reactions = dict(entity_data.get("emote_reactions") or {})
     if obj.db.brave_entity_kind == "npc" or entity_data.get("gender"):
         gender = normalize_brave_gender(entity_data.get("gender"), default=DEFAULT_BRAVE_GENDER)
         obj.db.brave_gender = gender

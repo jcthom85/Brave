@@ -10,8 +10,13 @@ let defaultout_plugin = (function () {
     "use strict";
 
     var THEME_STORAGE_KEY = "brave.webclient.theme";
+    var VIDEO_SETTINGS_STORAGE_KEY = "brave.webclient.video";
     var LEGACY_FONT_STORAGE_KEY = "brave.webclient.font";
     var LEGACY_SIZE_STORAGE_KEY = "evenniaFontSize";
+    var DEFAULT_VIDEO_SETTINGS = {
+        ui_scale: 1,
+        reduced_motion: false,
+    };
     var THEME_PRESETS = {
         hearth: { font: "redhat", size: "1.0" },
         signalglass: { font: "sharetech", size: "1.0" },
@@ -83,6 +88,7 @@ let defaultout_plugin = (function () {
     var pendingCombatResultReturnTransition = false;
     var suppressedCombatEntryRefs = {};
     var combatViewTransitionActive = false;
+    var currentVideoSettings = null;
     var COMBAT_IMPACT_RGB = {
         damage: "199, 55, 44",
         heal: "65, 160, 100",
@@ -103,8 +109,93 @@ let defaultout_plugin = (function () {
         return !!(window.matchMedia && window.matchMedia("(max-width: 900px)").matches);
     };
 
+    var getBraveAudio = function () {
+        if (!window.BraveAudio || typeof window.BraveAudio.getState !== "function") {
+            return null;
+        }
+        return window.BraveAudio;
+    };
+
+    var normalizeVideoUiScale = function (value) {
+        var numeric = parseFloat(value);
+        if (!Number.isFinite(numeric)) {
+            numeric = DEFAULT_VIDEO_SETTINGS.ui_scale;
+        }
+        numeric = Math.max(0.85, Math.min(1.35, numeric));
+        return Math.round(numeric * 100) / 100;
+    };
+
+    var normalizeVideoSettings = function (settings) {
+        settings = settings && typeof settings === "object" ? settings : {};
+        return {
+            ui_scale: normalizeVideoUiScale(settings.ui_scale),
+            reduced_motion: !!settings.reduced_motion,
+        };
+    };
+
+    var getVideoSettings = function () {
+        if (currentVideoSettings) {
+            return currentVideoSettings;
+        }
+        var parsed = {};
+        if (window.localStorage) {
+            try {
+                parsed = JSON.parse(window.localStorage.getItem(VIDEO_SETTINGS_STORAGE_KEY) || "{}") || {};
+            } catch (error) {
+                parsed = {};
+            }
+        }
+        currentVideoSettings = normalizeVideoSettings(parsed);
+        return currentVideoSettings;
+    };
+
+    var applyVideoSettings = function (settings, options) {
+        var normalized = normalizeVideoSettings(settings);
+        var opts = options || {};
+        currentVideoSettings = normalized;
+        setBodyState("motion", normalized.reduced_motion ? "reduced" : "full");
+        if (window.localStorage && opts.persist !== false) {
+            window.localStorage.setItem(VIDEO_SETTINGS_STORAGE_KEY, JSON.stringify(normalized));
+        }
+        if (opts.refreshTheme !== false) {
+            applyTheme(document.body.getAttribute("data-brave-theme") || "hearth", {
+                skipPulse: true,
+                skipPersistTheme: true,
+            });
+        }
+    };
+
+    var setVideoSetting = function (key, value) {
+        var next = normalizeVideoSettings(getVideoSettings());
+        if (key === "ui_scale") {
+            next.ui_scale = normalizeVideoUiScale(value);
+        } else if (key === "reduced_motion") {
+            next.reduced_motion = !!value;
+        } else {
+            return next;
+        }
+        applyVideoSettings(next);
+        return next;
+    };
+
+    var toggleVideoSetting = function (key) {
+        var next = normalizeVideoSettings(getVideoSettings());
+        if (key === "reduced_motion") {
+            next.reduced_motion = !next.reduced_motion;
+            applyVideoSettings(next);
+        }
+        return next;
+    };
+
+    var formatScalePercent = function (value) {
+        return Math.round(normalizeVideoUiScale(value) * 100) + "%";
+    };
+
     var prefersReducedMotion = function () {
-        return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+        return !!(
+            getVideoSettings().reduced_motion
+            || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+        );
     };
 
     var getCombatTransitionRevealDelay = function (mode) {
@@ -134,6 +225,67 @@ let defaultout_plugin = (function () {
             return inputPlugin.getInputMode();
         }
         return "chat";
+    };
+
+    var handleAudioPickerInteraction = function (target) {
+        if (!target) {
+            return false;
+        }
+        var audioActionTarget = target.closest("[data-brave-audio-action]");
+        if (audioActionTarget) {
+            var braveAudio = getBraveAudio();
+            if (braveAudio && audioActionTarget.getAttribute("data-brave-audio-action") === "unlock") {
+                braveAudio.unlock().then(function () {
+                    renderPickerSheet();
+                });
+            }
+            return true;
+        }
+        var audioPreviewTarget = target.closest("[data-brave-audio-preview]");
+        if (audioPreviewTarget) {
+            var braveAudioPreview = getBraveAudio();
+            if (braveAudioPreview && typeof braveAudioPreview.previewCue === "function") {
+                braveAudioPreview.previewCue(audioPreviewTarget.getAttribute("data-brave-audio-preview"));
+            }
+            return true;
+        }
+        var audioToggleTarget = target.closest("[data-brave-audio-toggle]");
+        if (audioToggleTarget) {
+            var braveAudioToggle = getBraveAudio();
+            if (braveAudioToggle && typeof braveAudioToggle.toggleSetting === "function") {
+                braveAudioToggle.toggleSetting(audioToggleTarget.getAttribute("data-brave-audio-toggle"));
+                renderPickerSheet();
+            }
+            return true;
+        }
+        return false;
+    };
+
+    var handleVideoPickerInteraction = function (target) {
+        var actionTarget;
+        var toggleTarget;
+        if (!target) {
+            return false;
+        }
+        actionTarget = target.closest("[data-brave-video-action]");
+        if (actionTarget) {
+            if (actionTarget.getAttribute("data-brave-video-action") === "fullscreen") {
+                toggleFullscreenMode().finally(function () {
+                    renderPickerSheet();
+                });
+            } else if (actionTarget.getAttribute("data-brave-video-action") === "reset") {
+                applyVideoSettings(DEFAULT_VIDEO_SETTINGS);
+                renderPickerSheet();
+            }
+            return true;
+        }
+        toggleTarget = target.closest("[data-brave-video-toggle]");
+        if (toggleTarget) {
+            toggleVideoSetting(toggleTarget.getAttribute("data-brave-video-toggle"));
+            renderPickerSheet();
+            return true;
+        }
+        return false;
     };
 
     var viewSupportsBottomInput = function (viewData) {
@@ -347,6 +499,12 @@ let defaultout_plugin = (function () {
         return null;
     };
 
+    var currentRoomActivityTab = "activity";
+
+    var normalizeRoomActivityTab = function (tab) {
+        return tab === "nearby" ? "nearby" : "activity";
+    };
+
     var getRoomSocialPresence = function (roomView) {
         var data = roomView && roomView.social_presence && typeof roomView.social_presence === "object"
             ? roomView.social_presence
@@ -360,7 +518,7 @@ let defaultout_plugin = (function () {
             engaged_total: isNaN(engagedTotal) ? 0 : Math.max(0, engagedTotal),
             party_total: isNaN(partyTotal) ? 0 : Math.max(0, partyTotal),
             group_count: isNaN(groupCount) ? 0 : Math.max(0, groupCount),
-            overlay_sections: Array.isArray(data.overlay_sections) ? data.overlay_sections : [],
+            people: Array.isArray(data.people) ? data.people : [],
         };
     };
 
@@ -419,77 +577,100 @@ let defaultout_plugin = (function () {
         return voices;
     };
 
-    var buildRoomSocialPresenceMarkup = function (roomView, options) {
+    var buildRoomActivityTabsMarkup = function (roomView) {
         var presence = getRoomSocialPresence(roomView);
-        var opts = options || {};
-        var mobile = !!opts.mobile;
-        var voices = getRoomActiveVoices(mobile ? 4 : 3);
-        var visibleVoices = voices.slice(0, 2);
-        var overflowVoices = Math.max(0, voices.length - visibleVoices.length);
-        if (!presence.nearby_total && !visibleVoices.length) {
-            return "";
-        }
-        var stats = [
-            "<span class='brave-room-social__pill'><strong>" + escapeHtml(String(presence.nearby_total)) + "</strong><span>nearby</span></span>",
-        ];
-        if (visibleVoices.length) {
-            stats.push("<span class='brave-room-social__pill'><strong>" + escapeHtml(String(visibleVoices.length)) + "</strong><span>speaking</span></span>");
-        }
-        if (presence.group_count) {
-            stats.push("<span class='brave-room-social__pill'><strong>" + escapeHtml(String(presence.group_count)) + "</strong><span>parties</span></span>");
-        }
-        if (presence.engaged_total) {
-            stats.push("<span class='brave-room-social__pill'><strong>" + escapeHtml(String(presence.engaged_total)) + "</strong><span>engaged</span></span>");
-        }
         return (
-            "<div class='brave-room-social" + (mobile ? " brave-room-social--mobile" : "") + "'>"
-            + "<div class='brave-room-social__head'>"
-            + "<div class='brave-room-social__stats'>" + stats.join("") + "</div>"
-            + "<button type='button' class='brave-room-social__people brave-click' data-brave-people-open='1'>"
-            + icon("groups", "brave-room-social__people-icon")
-            + "<span>People</span>"
-            + "</button>"
-            + "</div>"
-            + (visibleVoices.length
-                ? "<div class='brave-room-social__voices'>"
-                    + "<div class='brave-room-social__voices-label'>Active Voices</div>"
-                    + "<div class='brave-room-social__voice-list'>"
-                    + visibleVoices.map(function (voice) {
-                        return "<div class='brave-room-social__voice brave-room-social__voice--" + escapeHtml(voice.category || "speech") + "'>"
-                            + "<span class='brave-room-social__voice-speaker'>" + escapeHtml(voice.speaker || "Nearby") + "</span>"
-                            + "<span class='brave-room-social__voice-line'>" + escapeHtml(voice.line || "") + "</span>"
-                            + "</div>";
-                    }).join("")
-                    + (overflowVoices ? "<div class='brave-room-social__voice-more'>+" + escapeHtml(String(overflowVoices)) + " more in activity</div>" : "")
-                    + "</div>"
-                    + "</div>"
-                : "")
+            "<div class='brave-room-activity-tabs' data-brave-room-tabs='1'>"
+            + "<button type='button' class='brave-room-activity-tabs__button brave-click"
+                + (currentRoomActivityTab === "activity" ? " brave-room-activity-tabs__button--active" : "")
+                + "' data-brave-activity-tab='activity' aria-pressed='" + (currentRoomActivityTab === "activity" ? "true" : "false") + "'>"
+                + "<span>Activity</span>"
+                + "</button>"
+            + "<button type='button' class='brave-room-activity-tabs__button brave-click"
+                + (currentRoomActivityTab === "nearby" ? " brave-room-activity-tabs__button--active" : "")
+                + "' data-brave-activity-tab='nearby' aria-pressed='" + (currentRoomActivityTab === "nearby" ? "true" : "false") + "'>"
+                + "<span>Nearby</span>"
+                + (presence.nearby_total ? "<strong>" + escapeHtml(String(presence.nearby_total)) + "</strong>" : "")
+                + "</button>"
             + "</div>"
         );
     };
 
-    var syncRailSocialPresence = function (panel, roomView) {
-        if (!panel) {
-            return;
+    var buildRoomNearbyMarkup = function (roomView, options) {
+        var presence = getRoomSocialPresence(roomView);
+        var people = presence.people || [];
+        var opts = options || {};
+        var summaryBits = [];
+        if (presence.nearby_total) {
+            summaryBits.push(String(presence.nearby_total) + " nearby");
         }
-        var host = panel.querySelector(".brave-room-social-host");
-        if (!host) {
-            return;
+        if (presence.group_count) {
+            summaryBits.push(String(presence.group_count) + " group" + (presence.group_count === 1 ? "" : "s"));
         }
-        host.innerHTML = buildRoomSocialPresenceMarkup(roomView || getCurrentRoomView(), { mobile: false });
-        host.classList.toggle("brave-room-social-host--empty", !host.innerHTML.trim());
+        if (presence.engaged_total) {
+            summaryBits.push(String(presence.engaged_total) + " engaged");
+        }
+        return (
+            "<div class='brave-room-nearby" + (opts.mobile ? " brave-room-nearby--mobile" : "") + "'>"
+            + (summaryBits.length ? "<div class='brave-room-nearby__summary'>" + escapeHtml(summaryBits.join(" · ")) + "</div>" : "")
+            + (people.length
+                ? "<div class='brave-room-nearby__list'>"
+                    + people.map(function (person) {
+                        var badgeTone = person && person.badge_tone ? " brave-room-nearby__badge--" + escapeHtml(person.badge_tone) : "";
+                        return (
+                            "<button type='button' class='brave-room-nearby__entry brave-click'"
+                            + commandAttrs(person, false)
+                            + ">"
+                            + "<span class='brave-room-nearby__entry-icon'>" + icon("person") + "</span>"
+                            + "<span class='brave-room-nearby__entry-body'>"
+                            + "<span class='brave-room-nearby__entry-head'>"
+                            + "<span class='brave-room-nearby__entry-name'>" + escapeHtml(person && person.name ? person.name : "") + "</span>"
+                            + (person && person.badge ? "<span class='brave-room-nearby__badge" + badgeTone + "'>" + escapeHtml(person.badge) + "</span>" : "")
+                            + "</span>"
+                            + (person && person.summary ? "<span class='brave-room-nearby__entry-summary'>" + escapeHtml(person.summary) + "</span>" : "")
+                            + (person && person.detail ? "<span class='brave-room-nearby__entry-detail'>" + escapeHtml(person.detail) + "</span>" : "")
+                            + "</span>"
+                            + "<span class='brave-room-nearby__entry-chevron'>" + icon("chevron_right") + "</span>"
+                            + "</button>"
+                        );
+                    }).join("")
+                    + "</div>"
+                : "<div class='brave-room-nearby__empty'>No other players are visible here right now.</div>")
+            + "</div>"
+        );
     };
 
-    var syncMobileSocialPresence = function (host, roomView) {
-        if (!host) {
+    var syncRoomActivityCardSurface = function (root, roomView, options) {
+        if (!root) {
             return;
         }
-        var socialHost = host.querySelector(".brave-mobile-social-presence");
-        if (!socialHost) {
-            return;
+        var opts = options || {};
+        var tabsHost = root.querySelector("[data-brave-room-tabs-host]");
+        var activityPane = root.querySelector("[data-brave-room-pane='activity']");
+        var nearbyPane = root.querySelector("[data-brave-room-pane='nearby']");
+        var nearbyHost = root.querySelector("[data-brave-room-nearby]");
+        var jump = root.querySelector("[data-brave-activity-scroll='rail']");
+        if (tabsHost) {
+            tabsHost.innerHTML = buildRoomActivityTabsMarkup(roomView);
         }
-        socialHost.innerHTML = buildRoomSocialPresenceMarkup(roomView || getCurrentRoomView(), { mobile: true });
-        socialHost.classList.toggle("brave-room-social-host--empty", !socialHost.innerHTML.trim());
+        if (nearbyHost) {
+            nearbyHost.innerHTML = buildRoomNearbyMarkup(roomView, { mobile: !!opts.mobile });
+        }
+        if (activityPane) {
+            activityPane.classList.toggle("brave-room-activity-pane--hidden", currentRoomActivityTab !== "activity");
+        }
+        if (nearbyPane) {
+            nearbyPane.classList.toggle("brave-room-activity-pane--hidden", currentRoomActivityTab !== "nearby");
+        }
+        if (jump) {
+            jump.classList.toggle("brave-room-log__jump--hidden", currentRoomActivityTab !== "activity");
+        }
+    };
+
+    var setRoomActivityTab = function (tab) {
+        currentRoomActivityTab = normalizeRoomActivityTab(tab);
+        syncRoomActivityCardSurface(document.getElementById("scene-vicinity-panel"), getCurrentRoomView(), { mobile: false });
+        syncRoomActivityCardSurface(document.getElementById("mobile-utility-sheet"), getCurrentRoomView(), { mobile: true });
     };
 
     var getReactiveSourceId = function (viewData) {
@@ -569,6 +750,127 @@ let defaultout_plugin = (function () {
             }
         });
         return commands;
+    };
+
+    var getMovementDirectionKey = function (entry) {
+        var raw = "";
+        if (entry && entry.direction) {
+            raw = String(entry.direction).trim().toLowerCase();
+        } else if (entry && entry.label) {
+            raw = String(entry.label).trim().toLowerCase();
+        } else if (entry && entry.text) {
+            raw = String(entry.text).trim().toLowerCase();
+        } else if (entry && entry.badge) {
+            raw = String(entry.badge).trim().toLowerCase();
+        }
+        if (raw === "n" || raw === "north") {
+            return "north";
+        }
+        if (raw === "s" || raw === "south") {
+            return "south";
+        }
+        if (raw === "e" || raw === "east") {
+            return "east";
+        }
+        if (raw === "w" || raw === "west") {
+            return "west";
+        }
+        if (raw === "u" || raw === "up") {
+            return "up";
+        }
+        if (raw === "d" || raw === "down") {
+            return "down";
+        }
+        return "";
+    };
+
+    var getDesktopMovementCommands = function () {
+        var roomView = getCurrentRoomView();
+        var navSection = findSectionByKind(roomView, "navpad");
+        var commands = {};
+        var entries = [];
+        if (!navSection) {
+            return commands;
+        }
+        if (Array.isArray(navSection.items)) {
+            entries = entries.concat(navSection.items);
+        }
+        if (Array.isArray(navSection.vertical_items)) {
+            entries = entries.concat(navSection.vertical_items);
+        }
+        entries.forEach(function (entry) {
+            var direction = getMovementDirectionKey(entry);
+            if (!direction || !entry || !entry.command || commands[direction]) {
+                return;
+            }
+            commands[direction] = entry.command;
+        });
+        return commands;
+    };
+
+    var isTextEntryElement = function (element) {
+        if (!element || element === document.body) {
+            return false;
+        }
+        var tagName = element.tagName ? element.tagName.toLowerCase() : "";
+        if (tagName === "input" || tagName === "textarea" || tagName === "select") {
+            return true;
+        }
+        if (element.isContentEditable) {
+            return true;
+        }
+        if (typeof element.closest === "function" && element.closest("[contenteditable='true'], .inputwrap")) {
+            return true;
+        }
+        return false;
+    };
+
+    var shouldHandleDesktopMovementHotkeys = function (event) {
+        if (!event || isMobileViewport() || currentArcadeState) {
+            return false;
+        }
+        if (event.altKey || event.ctrlKey || event.metaKey) {
+            return false;
+        }
+        if (currentPickerData || isCombatUiActive()) {
+            return false;
+        }
+        if (document.getElementById("brave-activity-overlay") || document.getElementById("brave-fishing-minigame")) {
+            return false;
+        }
+        if (!getCurrentRoomView()) {
+            return false;
+        }
+        return !isTextEntryElement(event.target || document.activeElement);
+    };
+
+    var handleDesktopMovementHotkey = function (event) {
+        var command = "";
+        var key = String(event && event.key ? event.key : "").toLowerCase();
+        var commands = shouldHandleDesktopMovementHotkeys(event) ? getDesktopMovementCommands() : null;
+        if (!commands) {
+            return false;
+        }
+        if (key === "arrowup" || key === "w") {
+            command = commands.north || "";
+        } else if (key === "arrowdown" || key === "s") {
+            command = commands.south || "";
+        } else if (key === "arrowleft" || key === "a") {
+            command = commands.west || "";
+        } else if (key === "arrowright" || key === "d") {
+            command = commands.east || "";
+        } else if (key === "q") {
+            command = commands.up || "";
+        } else if (key === "e") {
+            command = commands.down || "";
+        }
+        if (!command) {
+            return false;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        sendBrowserCommand(command);
+        return true;
     };
 
     var hasAnySwipeCommands = function (commands) {
@@ -2055,9 +2357,12 @@ let defaultout_plugin = (function () {
     };
 
     var buildMobileDockToolsMarkup = function () {
+        var roomView = getCurrentRoomView();
+        var presence = getRoomSocialPresence(roomView);
         return (
             "<div class='brave-mobile-tools'>"
             + buildMobileUtilityButton("activity", "Activity", "timeline", currentMobileUtilityTab === "activity", mobileRoomActivityUnreadCount)
+            + buildMobileUtilityButton("nearby", "Nearby", "groups", currentMobileUtilityTab === "nearby", presence.nearby_total)
             + buildMobileUtilityButton("menu", "Menu", "menu", currentMobileUtilityTab === "menu")
             + "</div>"
         );
@@ -2077,6 +2382,7 @@ let defaultout_plugin = (function () {
         { key: "character", label: "Character", icon: "person" },
         { key: "quests", label: "Journal", icon: "menu_book" },
         { key: "party", label: "Party", icon: "groups" },
+        { key: "nearby", label: "Nearby", icon: "groups" },
         { key: "menu", label: "Menu", icon: "menu" }
     ];
 
@@ -2336,6 +2642,7 @@ let defaultout_plugin = (function () {
             character: "Character",
             quests: "Journal",
             party: "Party",
+            nearby: "Nearby",
             menu: "Menu"
         })[tab] || "Room";
     };
@@ -2371,8 +2678,8 @@ let defaultout_plugin = (function () {
                         + roomActionsMarkup
                         + "</div>"
                     : "")
-                + "<div class='brave-mobile-sheet__section brave-mobile-social-presence brave-room-social-host'></div>"
                 + "<div class='brave-mobile-sheet__section brave-mobile-sheet__section--activity'>"
+                + "<div class='brave-mobile-sheet__quest-title'>Activity</div>"
                 + "<div class='brave-mobile-activity-log brave-room-log'>"
                 + "<div class='brave-room-log__body brave-room-log__body--mobile' role='log' aria-live='polite' aria-relevant='additions text'>"
                 + currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("")
@@ -2389,6 +2696,14 @@ let defaultout_plugin = (function () {
             bodyMarkup = buildMobileQuestsPanelMarkup(roomView);
         } else if (tab === "party") {
             bodyMarkup = buildMobilePartyPanelMarkup(roomView);
+        } else if (tab === "nearby") {
+            panelClass += " brave-mobile-sheet__panel--nearby";
+            bodyClass += " brave-mobile-sheet__body--nearby";
+            bodyMarkup =
+                "<div class='brave-mobile-sheet__section'>"
+                + "<div class='brave-mobile-sheet__quest-title'>Nearby</div>"
+                + buildRoomNearbyMarkup(roomView, { mobile: true })
+                + "</div>";
         } else if (tab === "menu") {
             bodyMarkup =
                 "<div class='brave-mobile-sheet__section'>"
@@ -2431,7 +2746,7 @@ let defaultout_plugin = (function () {
         host.innerHTML = buildMobileUtilitySheetMarkup(currentMobileUtilityTab, roomView);
         host.setAttribute("aria-hidden", "false");
         document.body.classList.add("brave-mobile-sheet-active");
-        syncMobileSocialPresence(host, roomView);
+        syncRoomActivityCardSurface(host, roomView, { mobile: true });
         if (currentMobileUtilityTab === "activity") {
             mobileRoomActivityUnreadCount = 0;
             renderMobileNavDock();
@@ -2574,7 +2889,297 @@ let defaultout_plugin = (function () {
                 clearBrowserNotice();
             }, duration);
         }
+        var braveAudio = getBraveAudio();
+        if (braveAudio && typeof braveAudio.handleNotice === "function") {
+            braveAudio.handleNotice(noticeData || {});
+        }
         return true;
+    };
+
+    var buildAudioSettingsPicker = function () {
+        return {
+            picker_id: "audio-settings",
+            picker_kind: "audio-settings",
+            title: "Audio",
+            title_icon: "graphic_eq",
+            subtitle: "Layered ambience, music, and effects for Brave.",
+            body: ["Adjust the layered ambience, music, and effects mix."]
+        };
+    };
+
+    var buildVideoSettingsPicker = function () {
+        return {
+            picker_id: "video-settings",
+            picker_kind: "video-settings",
+            title: "Video",
+            title_icon: "tv",
+            body: ["Display scale, fullscreen, and motion controls."]
+        };
+    };
+
+    var buildAccessibilitySettingsPicker = function () {
+        return {
+            picker_id: "accessibility-settings",
+            picker_kind: "menu",
+            title: "Accessibility",
+            title_icon: "accessibility_new",
+            body: [
+                "Accessibility settings are the next settings pass.",
+                "Text size, contrast presets, and motion reduction will live here."
+            ]
+        };
+    };
+
+    var buildInterfaceSettingsPicker = function () {
+        return {
+            picker_id: "interface-settings",
+            picker_kind: "menu",
+            title: "Interface",
+            title_icon: "palette",
+            body: ["Visual polish and interface preferences live here."],
+            options: [
+                { label: "Theme", icon: "snowflake", command: "theme", meta: "Swap the active visual palette." }
+            ]
+        };
+    };
+
+    var buildSettingsPicker = function () {
+        return {
+            picker_id: "settings-menu",
+            picker_kind: "menu",
+            title: "Settings",
+            title_icon: "settings",
+            options: [
+                { label: "Video", icon: "tv", picker: buildVideoSettingsPicker() },
+                { label: "Audio", icon: "graphic_eq", picker: buildAudioSettingsPicker() },
+                { label: "Accessibility", icon: "accessibility_new", picker: buildAccessibilitySettingsPicker() },
+                { label: "Interface", icon: "palette", picker: buildInterfaceSettingsPicker() }
+            ]
+        };
+    };
+
+    var formatAudioPercent = function (value) {
+        var numeric = parseFloat(value);
+        if (!Number.isFinite(numeric)) {
+            numeric = 0;
+        }
+        return Math.round(Math.max(0, Math.min(1, numeric)) * 100) + "%";
+    };
+
+    var supportsFullscreenApi = function () {
+        var root = document.documentElement;
+        return !!(
+            root
+            && (
+                root.requestFullscreen
+                || root.webkitRequestFullscreen
+                || root.msRequestFullscreen
+            )
+        );
+    };
+
+    var isFullscreenActive = function () {
+        return !!(
+            document.fullscreenElement
+            || document.webkitFullscreenElement
+            || document.msFullscreenElement
+        );
+    };
+
+    var toggleFullscreenMode = function () {
+        var root = document.documentElement;
+        if (!supportsFullscreenApi() || !root) {
+            return Promise.resolve(false);
+        }
+        if (isFullscreenActive()) {
+            if (document.exitFullscreen) {
+                return Promise.resolve(document.exitFullscreen()).then(function () { return true; });
+            }
+            if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+                return Promise.resolve(true);
+            }
+            if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+                return Promise.resolve(true);
+            }
+            return Promise.resolve(false);
+        }
+        if (root.requestFullscreen) {
+            return Promise.resolve(root.requestFullscreen()).then(function () { return true; });
+        }
+        if (root.webkitRequestFullscreen) {
+            root.webkitRequestFullscreen();
+            return Promise.resolve(true);
+        }
+        if (root.msRequestFullscreen) {
+            root.msRequestFullscreen();
+            return Promise.resolve(true);
+        }
+        return Promise.resolve(false);
+    };
+
+    var renderVideoSettingsPickerMarkup = function (pickerData, panelClass, backdropClass, panelStyle) {
+        var videoSettings = getVideoSettings();
+        var motionSource = videoSettings.reduced_motion
+            ? "Brave setting"
+            : ((window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? "system preference" : "full");
+        var statusLines = [
+            "Fullscreen: " + (isFullscreenActive() ? "active" : "windowed"),
+            "Reduced motion: " + (prefersReducedMotion() ? "on" : "off"),
+            "Motion source: " + motionSource,
+            "UI scale: " + formatScalePercent(videoSettings.ui_scale)
+        ];
+
+        return (
+            "<div class='" + backdropClass + "' data-brave-picker-close='1'></div>"
+            + "<div class='" + panelClass + "' role='dialog' aria-modal='true' aria-label='" + escapeHtml(pickerData.title || "Video") + "'" + panelStyle + ">"
+            + "<div class='brave-picker-sheet__head'>"
+            + "<div class='brave-picker-sheet__titlebar'>"
+            + "<span class='brave-picker-sheet__title-icon'>" + icon(pickerData.title_icon || "tv") + "</span>"
+            + "<div class='brave-picker-sheet__title'>" + escapeHtml(pickerData.title || "Video") + "</div>"
+            + "<button type='button' class='brave-picker-sheet__close brave-view__action brave-view__action--muted brave-view__back' data-brave-picker-close='1'>"
+            + icon("close", "brave-view__action-icon")
+            + "<span>Close</span>"
+            + "</button>"
+            + "</div>"
+            + "</div>"
+            + "<div class='brave-picker-sheet__bodycopy'>"
+            + statusLines.map(function (line) {
+                return "<div class='brave-picker-sheet__bodyline'>" + escapeHtml(line) + "</div>";
+            }).join("")
+            + "</div>"
+            + "<div class='brave-audio-settings'>"
+            + "<div class='brave-audio-settings__toggles'>"
+            + "<button type='button' class='brave-picker-sheet__option brave-audio-settings__toggle brave-click' data-brave-video-action='fullscreen'>"
+            + "<span class='brave-picker-sheet__option-icon brave-audio-settings__toggle-indicator'>" + icon(isFullscreenActive() ? "fullscreen_exit" : "fullscreen") + "</span>"
+            + "<span class='brave-picker-sheet__option-body'><span class='brave-picker-sheet__option-label'>" + escapeHtml(isFullscreenActive() ? "Exit fullscreen" : "Enter fullscreen") + "</span></span>"
+            + "</button>"
+            + "<button type='button' class='brave-picker-sheet__option brave-audio-settings__toggle brave-click' data-brave-video-toggle='reduced_motion' aria-pressed='" + (videoSettings.reduced_motion ? "true" : "false") + "'>"
+            + "<span class='brave-picker-sheet__option-icon brave-audio-settings__toggle-indicator'>" + icon(prefersReducedMotion() ? "motion_photos_off" : "motion_photos_on") + "</span>"
+            + "<span class='brave-picker-sheet__option-body'><span class='brave-picker-sheet__option-label'>Reduce motion</span></span>"
+            + "</button>"
+            + "<button type='button' class='brave-picker-sheet__option brave-audio-settings__toggle brave-click' data-brave-video-action='reset'>"
+            + "<span class='brave-picker-sheet__option-icon brave-audio-settings__toggle-indicator'>" + icon("restart_alt") + "</span>"
+            + "<span class='brave-picker-sheet__option-body'><span class='brave-picker-sheet__option-label'>Reset video settings</span></span>"
+            + "</button>"
+            + "</div>"
+            + "<div class='brave-audio-settings__sliders'>"
+            + "<label class='brave-audio-settings__slider-row'>"
+            + "<span class='brave-audio-settings__slider-label'>"
+            + "<span class='brave-audio-settings__slider-icon'>" + icon("format_size") + "</span>"
+            + "<span>UI Scale</span>"
+            + "</span>"
+            + "<input class='brave-audio-settings__slider' type='range' min='0.85' max='1.35' step='0.01' value='" + escapeHtml(String(videoSettings.ui_scale)) + "' data-brave-video-setting='ui_scale' data-brave-video-kind='range'>"
+            + "<span class='brave-audio-settings__slider-value'>" + escapeHtml(formatScalePercent(videoSettings.ui_scale)) + "</span>"
+            + "</label>"
+            + "</div>"
+            + "</div>"
+            + "</div>"
+        );
+    };
+
+    var renderAudioSettingsPickerMarkup = function (pickerData, panelClass, backdropClass, panelStyle) {
+        var braveAudio = getBraveAudio();
+        var state = braveAudio ? braveAudio.getState() : {
+            supported: false,
+            unlocked: false,
+            manifest_loaded: false,
+            settings: {
+                enabled: false,
+                muted: true,
+                reduce_repetition: true,
+                master: 0,
+                ambience: 0,
+                music: 0,
+                sfx: 0
+            },
+            active_layers: {
+                ambience: "",
+                music: ""
+            }
+        };
+        var settingsState = state.settings || {};
+        var statusLines = [];
+        if (!state.supported) {
+            statusLines.push("Audio API unavailable in this browser.");
+        } else if (!state.unlocked) {
+            statusLines.push("Audio is waiting for a browser unlock gesture.");
+        } else {
+            statusLines.push("Audio unlocked and ready.");
+        }
+        if (!state.manifest_loaded) {
+            statusLines.push("Manifest still loading.");
+        }
+        statusLines.push("Device: " + (state.mobile ? "mobile" : "desktop"));
+        statusLines.push("Ambience: " + ((state.active_layers && state.active_layers.ambience) || "idle"));
+        statusLines.push("Music: " + ((state.active_layers && state.active_layers.music) || "idle"));
+        if (state.last_playback && state.last_playback.mode) {
+            statusLines.push("Last playback: " + state.last_playback.cue + " via " + state.last_playback.mode);
+        }
+        if (state.last_playback && state.last_playback.error) {
+            statusLines.push("Last error: " + state.last_playback.error);
+        }
+
+        var sliders = [
+            { key: "master", label: "Master", icon: "tune" },
+            { key: "ambience", label: "Ambience", icon: "air" },
+            { key: "music", label: "Music", icon: "music_note" },
+            { key: "sfx", label: "Effects", icon: "bolt" }
+        ];
+
+        return (
+            "<div class='" + backdropClass + "' data-brave-picker-close='1'></div>"
+            + "<div class='" + panelClass + "' role='dialog' aria-modal='true' aria-label='" + escapeHtml(pickerData.title || "Audio") + "'" + panelStyle + ">"
+            + "<div class='brave-picker-sheet__head'>"
+            + "<div class='brave-picker-sheet__titlebar'>"
+            + "<span class='brave-picker-sheet__title-icon'>" + icon(pickerData.title_icon || "graphic_eq") + "</span>"
+            + "<div class='brave-picker-sheet__title'>" + escapeHtml(pickerData.title || "Audio") + "</div>"
+            + "<button type='button' class='brave-picker-sheet__close brave-view__action brave-view__action--muted brave-view__back' data-brave-picker-close='1'>"
+            + icon("close", "brave-view__action-icon")
+            + "<span>Close</span>"
+            + "</button>"
+            + "</div>"
+            + (pickerData.subtitle ? "<div class='brave-picker-sheet__subtitle'>" + escapeHtml(pickerData.subtitle) + "</div>" : "")
+            + "</div>"
+            + "<div class='brave-picker-sheet__bodycopy'>"
+            + statusLines.map(function (line) {
+                return "<div class='brave-picker-sheet__bodyline'>" + escapeHtml(line) + "</div>";
+            }).join("")
+            + "</div>"
+            + "<div class='brave-audio-settings'>"
+            + "<div class='brave-audio-settings__toggles'>"
+            + "<button type='button' class='brave-picker-sheet__option brave-audio-settings__toggle brave-click' data-brave-audio-toggle='enabled' aria-pressed='" + (settingsState.enabled ? "true" : "false") + "'>"
+            + "<span class='brave-picker-sheet__option-icon brave-audio-settings__toggle-indicator'>" + icon(settingsState.enabled ? "check_circle" : "radio_button_unchecked") + "</span>"
+            + "<span class='brave-picker-sheet__option-body'><span class='brave-picker-sheet__option-label'>Audio enabled</span></span>"
+            + "</button>"
+            + "<button type='button' class='brave-picker-sheet__option brave-audio-settings__toggle brave-click' data-brave-audio-toggle='muted' aria-pressed='" + (settingsState.muted ? "true" : "false") + "'>"
+            + "<span class='brave-picker-sheet__option-icon brave-audio-settings__toggle-indicator'>" + icon(settingsState.muted ? "volume_off" : "volume_up") + "</span>"
+            + "<span class='brave-picker-sheet__option-body'><span class='brave-picker-sheet__option-label'>Mute all</span></span>"
+            + "</button>"
+            + "<button type='button' class='brave-picker-sheet__option brave-audio-settings__toggle brave-click' data-brave-audio-toggle='reduce_repetition' aria-pressed='" + (settingsState.reduce_repetition ? "true" : "false") + "'>"
+            + "<span class='brave-picker-sheet__option-icon brave-audio-settings__toggle-indicator'>" + icon(settingsState.reduce_repetition ? "repeat_one" : "all_inclusive") + "</span>"
+            + "<span class='brave-picker-sheet__option-body'><span class='brave-picker-sheet__option-label'>Reduce repeat SFX</span></span>"
+            + "</button>"
+            + "</div>"
+            + "<div class='brave-audio-settings__sliders'>"
+            + sliders.map(function (entry) {
+                var value = settingsState[entry.key] || 0;
+                return (
+                    "<label class='brave-audio-settings__slider-row'>"
+                    + "<span class='brave-audio-settings__slider-label'>"
+                    + "<span class='brave-audio-settings__slider-icon'>" + icon(entry.icon) + "</span>"
+                    + "<span>" + escapeHtml(entry.label) + "</span>"
+                    + "</span>"
+                    + "<input class='brave-audio-settings__slider' type='range' min='0' max='1' step='0.01' value='" + escapeHtml(String(value)) + "' data-brave-audio-setting='" + escapeHtml(entry.key) + "' data-brave-audio-kind='range'>"
+                    + "<span class='brave-audio-settings__slider-value'>" + escapeHtml(formatAudioPercent(value)) + "</span>"
+                    + "</label>"
+                );
+            }).join("")
+            + "</div>"
+            + "</div>"
+            + "</div>"
+        );
     };
 
     var renderPickerSheet = function () {
@@ -2593,7 +3198,7 @@ let defaultout_plugin = (function () {
         if (!host) {
             return;
         }
-        if (!pickerData || (!pickerOptions.length && !pickerBody.length)) {
+        if (!pickerData || (!pickerOptions.length && !pickerBody.length && pickerData.picker_kind !== "audio-settings" && pickerData.picker_kind !== "video-settings")) {
             clearPickerSheet();
             return;
         }
@@ -2613,48 +3218,54 @@ let defaultout_plugin = (function () {
             panelStyle = " style='right: " + right + "px; bottom: " + bottom + "px;'";
         }
 
-        host.innerHTML =
-            "<div class='" + backdropClass + "' data-brave-picker-close='1'></div>"
-            + "<div class='" + panelClass + "' role='dialog' aria-modal='true' aria-label='" + escapeHtml(pickerData.title || "Details") + "'" + panelStyle + ">"
-            + "<div class='brave-picker-sheet__head'>"
-            + "<div class='brave-picker-sheet__titlebar'>"
-            + (pickerData.title_icon ? "<span class='brave-picker-sheet__title-icon'>" + icon(pickerData.title_icon) + "</span>" : "")
-            + "<div class='brave-picker-sheet__title'>" + escapeHtml(pickerData.title || "") + "</div>"
-            + "<button type='button' class='brave-picker-sheet__close brave-view__action brave-view__action--muted brave-view__back' data-brave-picker-close='1'>"
-            + icon("close", "brave-view__action-icon")
-            + "<span>Close</span>"
-            + "</button>"
-            + "</div>"
-            + (pickerData.subtitle ? "<div class='brave-picker-sheet__subtitle'>" + escapeHtml(pickerData.subtitle) + "</div>" : "")
-            + "</div>"
-            + (pickerBody.length
-                ? "<div class='brave-picker-sheet__bodycopy'>"
-                    + pickerBody.map(function (line) {
-                        return "<div class='brave-picker-sheet__bodyline'>" + escapeHtml(line) + "</div>";
-                    }).join("")
-                    + "</div>"
-                : "")
-            + (pickerOptions.length
-                ? "<div class='brave-picker-sheet__options'>"
-                    + pickerOptions.map(function (option) {
-                        var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
-                        return (
-                            "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + "'"
-                            + commandAttrs(option, false)
-                            + ">"
-                            + "<span class='brave-picker-sheet__option-icon'>"
-                            + icon(option && option.icon ? option.icon : "arrow_right_alt")
-                            + "</span>"
-                            + "<span class='brave-picker-sheet__option-body'>"
-                            + "<span class='brave-picker-sheet__option-label'>" + escapeHtml(option && option.label ? option.label : "") + "</span>"
-                            + (option && option.meta ? "<span class='brave-picker-sheet__option-meta'>" + escapeHtml(option.meta) + "</span>" : "")
-                            + "</span>"
-                            + "</button>"
-                        );
-                    }).join("")
-                    + "</div>"
-                : "")
-            + "</div>";
+        if (pickerData.picker_kind === "audio-settings") {
+            host.innerHTML = renderAudioSettingsPickerMarkup(pickerData, panelClass, backdropClass, panelStyle);
+        } else if (pickerData.picker_kind === "video-settings") {
+            host.innerHTML = renderVideoSettingsPickerMarkup(pickerData, panelClass, backdropClass, panelStyle);
+        } else {
+            host.innerHTML =
+                "<div class='" + backdropClass + "' data-brave-picker-close='1'></div>"
+                + "<div class='" + panelClass + "' role='dialog' aria-modal='true' aria-label='" + escapeHtml(pickerData.title || "Details") + "'" + panelStyle + ">"
+                + "<div class='brave-picker-sheet__head'>"
+                + "<div class='brave-picker-sheet__titlebar'>"
+                + (pickerData.title_icon ? "<span class='brave-picker-sheet__title-icon'>" + icon(pickerData.title_icon) + "</span>" : "")
+                + "<div class='brave-picker-sheet__title'>" + escapeHtml(pickerData.title || "") + "</div>"
+                + "<button type='button' class='brave-picker-sheet__close brave-view__action brave-view__action--muted brave-view__back' data-brave-picker-close='1'>"
+                + icon("close", "brave-view__action-icon")
+                + "<span>Close</span>"
+                + "</button>"
+                + "</div>"
+                + (pickerData.subtitle ? "<div class='brave-picker-sheet__subtitle'>" + escapeHtml(pickerData.subtitle) + "</div>" : "")
+                + "</div>"
+                + (pickerBody.length
+                    ? "<div class='brave-picker-sheet__bodycopy'>"
+                        + pickerBody.map(function (line) {
+                            return "<div class='brave-picker-sheet__bodyline'>" + escapeHtml(line) + "</div>";
+                        }).join("")
+                        + "</div>"
+                    : "")
+                + (pickerOptions.length
+                    ? "<div class='brave-picker-sheet__options'>"
+                        + pickerOptions.map(function (option) {
+                            var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
+                            return (
+                                "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + "'"
+                                + commandAttrs(option, false)
+                                + ">"
+                                + "<span class='brave-picker-sheet__option-icon'>"
+                                + icon(option && option.icon ? option.icon : "arrow_right_alt")
+                                + "</span>"
+                                + "<span class='brave-picker-sheet__option-body'>"
+                                + "<span class='brave-picker-sheet__option-label'>" + escapeHtml(option && option.label ? option.label : "") + "</span>"
+                                + (option && option.meta ? "<span class='brave-picker-sheet__option-meta'>" + escapeHtml(option.meta) + "</span>" : "")
+                                + "</span>"
+                                + "</button>"
+                            );
+                        }).join("")
+                        + "</div>"
+                    : "")
+                + "</div>";
+        }
         host.setAttribute("aria-hidden", "false");
         document.body.classList.add("brave-picker-active");
     };
@@ -2668,7 +3279,7 @@ let defaultout_plugin = (function () {
                 || (!!pickerData.body && !Array.isArray(pickerData.body))
             )
         );
-        if (!pickerData || (!hasOptions && !hasBody)) {
+        if (!pickerData || (!hasOptions && !hasBody && pickerData.picker_kind !== "audio-settings" && pickerData.picker_kind !== "video-settings")) {
             return false;
         }
         currentPickerData = pickerData;
@@ -2733,7 +3344,7 @@ let defaultout_plugin = (function () {
             && commands.indexOf("quests") !== -1
             && commands.indexOf("map") !== -1
             && commands.indexOf("party") !== -1
-            && commands.indexOf("theme") !== -1;
+            && commands.indexOf("quit") !== -1;
     };
 
     var shouldPreservePickerOnViewRefresh = function (viewData) {
@@ -2815,6 +3426,9 @@ let defaultout_plugin = (function () {
         );
         if (!canOpenChat) {
             return;
+        }
+        if (inputPlugin && typeof inputPlugin.clearChatDraft === "function") {
+            inputPlugin.clearChatDraft();
         }
         if (inputPlugin && typeof inputPlugin.setInputContext === "function" && viewSupportsBottomInput(currentViewData)) {
             inputPlugin.setInputContext("play");
@@ -2907,7 +3521,7 @@ let defaultout_plugin = (function () {
                 { label: "Journal", icon: "menu_book", command: "quests" },
                 { label: "Map", icon: "map", command: "map" },
                 { label: "Party", icon: "group", command: "party" },
-                { label: "Theme", icon: "snowflake", command: "theme" },
+                { label: "Settings", icon: "settings", picker: buildSettingsPicker() },
                 { label: "Quit", icon: "logout", command: "quit", tone: "danger" }
             ]
         };
@@ -2920,7 +3534,7 @@ let defaultout_plugin = (function () {
                 var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
                 return (
                     "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + "'"
-                    + (option && option.command ? " data-brave-command='" + escapeHtml(option.command) + "'" : "")
+                    + commandAttrs(option, false)
                     + ">"
                     + "<span class='brave-picker-sheet__option-icon'>"
                     + icon(option && option.icon ? option.icon : "menu")
@@ -3297,7 +3911,7 @@ let defaultout_plugin = (function () {
     };
 
     var commandAttrs = function (entry, includeRole) {
-        if (!entry || (!entry.command && !entry.prefill && !entry.picker && !entry.connection_screen)) {
+        if (!entry || (!entry.command && !entry.prefill && !entry.picker && !entry.connection_screen && !entry.chat_open)) {
             return "";
         }
         var attrs = "";
@@ -3313,6 +3927,12 @@ let defaultout_plugin = (function () {
             if (!titleValue) {
                 titleValue = entry.prefill;
             }
+        }
+        if (entry.chat_open) {
+            attrs += " data-brave-chat-open='1'";
+        }
+        if (entry.chat_prompt) {
+            attrs += " data-brave-chat-prompt='" + escapeHtml(entry.chat_prompt) + "'";
         }
         if (entry.picker) {
             attrs += " data-brave-picker='" + escapeHtml(JSON.stringify(entry.picker)) + "'";
@@ -3467,7 +4087,7 @@ let defaultout_plugin = (function () {
     };
 
     var hasBrowserInteraction = function (entry) {
-        return !!(entry && (entry.command || entry.prefill || entry.picker || entry.connection_screen));
+        return !!(entry && (entry.command || entry.prefill || entry.picker || entry.connection_screen || entry.chat_open));
     };
 
     var getCommandInput = function () {
@@ -4296,8 +4916,12 @@ let defaultout_plugin = (function () {
             return true;
         }
 
-        var currentSections = Array.prototype.slice.call(currentSectionsWrap.children || []);
-        var nextSections = Array.prototype.slice.call(nextSectionsWrap.children || []);
+        var currentSections = Array.prototype.slice.call(currentSectionsWrap.children || []).filter(function (section) {
+            return !section.classList || !section.classList.contains("brave-combat-log");
+        });
+        var nextSections = Array.prototype.slice.call(nextSectionsWrap.children || []).filter(function (section) {
+            return !section.classList || !section.classList.contains("brave-combat-log");
+        });
         if (currentSections.length !== nextSections.length) {
             currentView.innerHTML = nextView.innerHTML;
             return true;
@@ -4997,9 +5621,14 @@ let defaultout_plugin = (function () {
         if (previousScene && previousScene !== nextScene) {
             pulseBodyClass(nextScene === "combat" ? "brave-scene-combat-enter" : "brave-scene-shift", 220);
         }
+        var braveAudio = getBraveAudio();
+        if (braveAudio && typeof braveAudio.setReactiveState === "function") {
+            braveAudio.setReactiveState(state || {});
+        }
     };
 
     var clearReactiveState = function () {
+        var braveAudio = getBraveAudio();
         setBodyState("scene", "system");
         setBodyState("world-tone", "neutral");
         setBodyState("danger", "");
@@ -5020,6 +5649,9 @@ let defaultout_plugin = (function () {
         combatViewTransitionActive = false;
         clearCombatTransitionOverlay();
         clearCombatFxOverlay();
+        if (braveAudio && typeof braveAudio.clearReactiveState === "function") {
+            braveAudio.clearReactiveState();
+        }
     };
 
     var clearStickyView = function () {
@@ -5292,8 +5924,8 @@ let defaultout_plugin = (function () {
             }
         }
         syncRailActivityLog();
-        syncRailSocialPresence(document.getElementById("scene-vicinity-panel"), getCurrentRoomView());
-        syncMobileSocialPresence(document.getElementById("mobile-utility-sheet"), getCurrentRoomView());
+        syncRoomActivityCardSurface(document.getElementById("scene-vicinity-panel"), getCurrentRoomView(), { mobile: false });
+        syncRoomActivityCardSurface(document.getElementById("mobile-utility-sheet"), getCurrentRoomView(), { mobile: true });
         return $(body);
     };
 
@@ -5390,7 +6022,7 @@ let defaultout_plugin = (function () {
         body.innerHTML = currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("");
         bindRailActivityScrollState(body);
         restoreRailActivityScroll(body, shouldStickToBottom);
-        syncRailSocialPresence(panel, getCurrentRoomView());
+        syncRoomActivityCardSurface(panel, getCurrentRoomView(), { mobile: false });
         return $(body);
     };
 
@@ -5426,7 +6058,7 @@ let defaultout_plugin = (function () {
         if (!body) {
             return null;
         }
-        syncMobileSocialPresence(host, getCurrentRoomView());
+        syncRoomActivityCardSurface(host, getCurrentRoomView(), { mobile: true });
         return syncRoomActivityLog(body);
     };
 
@@ -5524,10 +6156,9 @@ let defaultout_plugin = (function () {
         var sticky = mwin.children(".brave-sticky-view");
         var inlineSectionParent = sticky.find(".brave-view--combat .brave-view__sections").first();
         var useInlineStickyLog = sticky.length
-            && document.body.getAttribute("data-brave-scene") === "combat"
-            && window.matchMedia("(max-width: 640px)").matches;
+            && document.body.getAttribute("data-brave-scene") === "combat";
         var preferredParent = useInlineStickyLog && inlineSectionParent.length ? inlineSectionParent : (useInlineStickyLog ? sticky : mwin);
-        var fallbackParent = useInlineStickyLog ? sticky.add(mwin) : sticky;
+        var fallbackParent = useInlineStickyLog ? inlineSectionParent.add(sticky).add(mwin) : sticky;
 
         var log = preferredParent.children(".brave-combat-log");
         if (!log.length && fallbackParent && fallbackParent.length) {
@@ -5931,12 +6562,16 @@ let defaultout_plugin = (function () {
                 + "<div class='brave-room-activity-card'>"
                 + "<div class='scene-card__eyebrow scene-pack-panel__title'>"
                 + icon("forum", "scene-card__eyebrow-icon scene-pack-panel__title-icon")
-                + "<span>Activity</span>"
+                + "<div class='brave-room-activity-card__tabs' data-brave-room-tabs-host='1'></div>"
                 + "<button type='button' class='brave-room-log__jump' data-brave-activity-scroll='rail' aria-label='Activity is at the latest line' disabled>0</button>"
                 + "</div>"
-                + "<div class='brave-room-social-host'></div>"
+                + "<div class='brave-room-activity-pane brave-room-activity-pane--activity' data-brave-room-pane='activity'>"
                 + "<div class='brave-room-log brave-room-log--rail'>"
                 + "<div class='brave-room-log__body brave-room-log__body--rail' role='log' aria-live='polite' aria-relevant='additions text'></div>"
+                + "</div>"
+                + "</div>"
+                + "<div class='brave-room-activity-pane brave-room-activity-pane--nearby brave-room-activity-pane--hidden' data-brave-room-pane='nearby'>"
+                + "<div class='brave-room-nearby-host' data-brave-room-nearby='1'></div>"
                 + "</div>"
                 + "</div>"
                 + "</div>";
@@ -5961,7 +6596,7 @@ let defaultout_plugin = (function () {
         panel.removeAttribute("tabindex");
         panel.classList.remove("brave-click");
         syncRailActivityLog();
-        syncRailSocialPresence(panel, currentViewData);
+        syncRoomActivityCardSurface(panel, currentViewData, { mobile: false });
         updateRailActivityCue();
     };
 
@@ -6126,6 +6761,10 @@ let defaultout_plugin = (function () {
             && shouldPreserveCurrentViewOnRoomRefresh(viewData)
         ) {
             currentRoomViewData = viewData;
+            if (currentMobileUtilityTab && isMobileViewport()) {
+                renderMobileNavDock();
+                renderMobileUtilitySheet();
+            }
             return;
         }
         if (pendingArcadeRoomRestore && isRoomLikeView(viewData)) {
@@ -7042,6 +7681,10 @@ let defaultout_plugin = (function () {
                 setBodyState("view", viewData && viewData.variant ? viewData.variant : "");
 
                 var stickyContainer = mwin.children(".brave-sticky-view");
+                var preservedCombatLog = null;
+                if (viewData.variant === "combat" && stickyContainer.length) {
+                    preservedCombatLog = stickyContainer.find(".brave-combat-log").first().detach();
+                }
                 if (
                     stickyContainer.length
                     && patchCombatInPlace
@@ -7052,6 +7695,12 @@ let defaultout_plugin = (function () {
                     stickyContainer.html(viewMarkup);
                 } else {
                     mwin.prepend("<div class='brave-sticky-view'>" + viewMarkup + "</div>");
+                }
+                if (preservedCombatLog && preservedCombatLog.length && viewData.variant === "combat") {
+                    var combatSections = mwin.children(".brave-sticky-view").find(".brave-view--combat .brave-view__sections").first();
+                    if (combatSections.length && !combatSections.children(".brave-combat-log").length) {
+                        combatSections.append(preservedCombatLog);
+                    }
                 }
                 if (viewData.variant === "combat" && previousCombatSnapshots.length) {
                     restoreCombatAtbContinuity(previousCombatSnapshots);
@@ -7311,6 +7960,7 @@ let defaultout_plugin = (function () {
         if (!command || !plugin_handler || !plugin_handler.onSend) {
             return;
         }
+        var braveAudio = getBraveAudio();
         if (confirmText && !window.confirm(confirmText)) {
             return;
         }
@@ -7338,6 +7988,9 @@ let defaultout_plugin = (function () {
             )
         ) {
             allowNextRoomRefreshNavigationUntil = Date.now() + 1500;
+        }
+        if (braveAudio && typeof braveAudio.handleUiAction === "function") {
+            braveAudio.handleUiAction("click");
         }
         plugin_handler.onSend(command);
     };
@@ -7447,59 +8100,6 @@ let defaultout_plugin = (function () {
                 return "<div class='brave-activity-overlay__bodyline'>" + escapeHtml(line) + "</div>";
             }).join("")
             + "</div>";
-    };
-
-    var openRoomPeopleOverlay = function () {
-        var roomView = getCurrentRoomView();
-        var presence = getRoomSocialPresence(roomView);
-        var voices = getRoomActiveVoices(6);
-        var stats = [];
-        var sections = [];
-
-        if (!presence.nearby_total && !voices.length) {
-            return;
-        }
-
-        stats.push({ label: "Nearby", value: String(presence.nearby_total) });
-        if (voices.length) {
-            stats.push({ label: "Speaking", value: String(voices.length) });
-        }
-        if (presence.group_count) {
-            stats.push({ label: "Parties", value: String(presence.group_count) });
-        }
-        if (presence.engaged_total) {
-            stats.push({ label: "Engaged", value: String(presence.engaged_total) });
-        }
-
-        if (voices.length) {
-            sections.push({
-                label: "Active Voices",
-                items: voices.map(function (voice) {
-                    return {
-                        title: voice.speaker || "Nearby",
-                        summary: voice.line || "",
-                        badge: voice.category === "emote" ? "Emote" : "Speech",
-                        badge_tone: voice.category === "emote" ? "muted" : "",
-                    };
-                }),
-                empty: "No one is speaking right now.",
-            });
-        }
-
-        presence.overlay_sections.forEach(function (section) {
-            sections.push(section);
-        });
-
-        renderActivityOverlay("presence", {}, {
-            icon: "groups",
-            eyebrow: roomView && roomView.title ? roomView.title : "Room",
-            title: "People Nearby",
-            stats: stats,
-            body_lines: [
-                "This compact social layer keeps the rail readable while still surfacing who matters right now.",
-            ],
-            sections: sections,
-        });
     };
 
     var normalizeArcadeResultNotes = function (notes, fallbackLines) {
@@ -8721,14 +9321,29 @@ let defaultout_plugin = (function () {
             if (chatOpenTarget) {
                 event.preventDefault();
                 event.stopPropagation();
+                if (chatOpenTarget.hasAttribute("data-brave-prefill")) {
+                    var inputPlugin = getDefaultInPlugin();
+                    clearPickerSheet();
+                    if (inputPlugin && typeof inputPlugin.openChatDraft === "function") {
+                        inputPlugin.openChatDraft(
+                            chatOpenTarget.getAttribute("data-brave-prefill"),
+                            {
+                                prompt: chatOpenTarget.getAttribute("data-brave-chat-prompt") || "",
+                            }
+                        );
+                        return;
+                    }
+                    prefillBrowserInput(chatOpenTarget.getAttribute("data-brave-prefill"));
+                    return;
+                }
                 focusCommandInput();
                 return;
             }
-            var peopleOpenTarget = event.target.closest("[data-brave-people-open]");
-            if (peopleOpenTarget) {
+            var activityTabTarget = event.target.closest("[data-brave-activity-tab]");
+            if (activityTabTarget) {
                 event.preventDefault();
                 event.stopPropagation();
-                openRoomPeopleOverlay();
+                setRoomActivityTab(activityTabTarget.getAttribute("data-brave-activity-tab"));
                 return;
             }
             var mobileTarget = event.target.closest("[data-brave-mobile-panel], [data-brave-mobile-action]");
@@ -8767,6 +9382,11 @@ let defaultout_plugin = (function () {
                 syncCombatActionTray();
                 return;
             }
+            if (handleVideoPickerInteraction(event.target) || handleAudioPickerInteraction(event.target)) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             var target = event.target.closest("[data-brave-command], [data-brave-prefill], [data-brave-picker], [data-brave-connection-screen]");
             if (!target) {
                 return;
@@ -8774,15 +9394,32 @@ let defaultout_plugin = (function () {
             event.preventDefault();
             event.stopPropagation();
             if (target.hasAttribute("data-brave-connection-screen")) {
+                var braveAudioConnection = getBraveAudio();
+                if (braveAudioConnection && typeof braveAudioConnection.handleUiAction === "function") {
+                    braveAudioConnection.handleUiAction("click");
+                }
                 openConnectionScreen(target.getAttribute("data-brave-connection-screen"));
                 return;
             }
             if (target.hasAttribute("data-brave-picker")) {
+                var braveAudioPicker = getBraveAudio();
+                if (braveAudioPicker && typeof braveAudioPicker.handleUiAction === "function") {
+                    braveAudioPicker.handleUiAction("click");
+                }
+                if (isMobileViewport()) {
+                    currentMobileUtilityTab = null;
+                    clearMobileUtilitySheet();
+                    renderMobileNavDock();
+                }
                 openPickerFromTarget(target);
                 return;
             }
             if (target.hasAttribute("data-brave-prefill")) {
                 clearPickerSheet();
+                var braveAudioPrefill = getBraveAudio();
+                if (braveAudioPrefill && typeof braveAudioPrefill.handleUiAction === "function") {
+                    braveAudioPrefill.handleUiAction("click");
+                }
                 prefillBrowserInput(target.getAttribute("data-brave-prefill"));
                 return;
             }
@@ -8799,7 +9436,63 @@ let defaultout_plugin = (function () {
             submitBrowserForm(form);
         }, true);
 
+        document.addEventListener("input", function (event) {
+            var videoSettingTarget = event.target.closest("[data-brave-video-setting][data-brave-video-kind='range']");
+            if (videoSettingTarget) {
+                setVideoSetting(videoSettingTarget.getAttribute("data-brave-video-setting"), parseFloat(videoSettingTarget.value || "0"));
+                var videoValueNode = videoSettingTarget.parentNode && videoSettingTarget.parentNode.querySelector(".brave-audio-settings__slider-value");
+                if (videoValueNode) {
+                    videoValueNode.textContent = formatScalePercent(videoSettingTarget.value || "1");
+                }
+                return;
+            }
+            var settingTarget = event.target.closest("[data-brave-audio-setting][data-brave-audio-kind='range']");
+            if (!settingTarget) {
+                return;
+            }
+            var braveAudio = getBraveAudio();
+            if (!braveAudio || typeof braveAudio.setSetting !== "function") {
+                return;
+            }
+            braveAudio.setSetting(settingTarget.getAttribute("data-brave-audio-setting"), parseFloat(settingTarget.value || "0"));
+            var valueNode = settingTarget.parentNode && settingTarget.parentNode.querySelector(".brave-audio-settings__slider-value");
+            if (valueNode) {
+                valueNode.textContent = formatAudioPercent(settingTarget.value || "0");
+            }
+        }, true);
+
+        document.addEventListener("change", function (event) {
+            var toggleTarget = event.target.closest("[data-brave-audio-setting][data-brave-audio-kind='boolean']");
+            if (!toggleTarget) {
+                return;
+            }
+            var braveAudio = getBraveAudio();
+            if (!braveAudio || typeof braveAudio.setSetting !== "function") {
+                return;
+            }
+            braveAudio.setSetting(toggleTarget.getAttribute("data-brave-audio-setting"), !!toggleTarget.checked);
+            renderPickerSheet();
+        }, true);
+
+        document.addEventListener("fullscreenchange", function () {
+            if (currentPickerData && currentPickerData.picker_kind === "video-settings") {
+                renderPickerSheet();
+            }
+        }, true);
+
+        document.addEventListener("keydown", function (event) {
+            if (handleDesktopMovementHotkey(event)) {
+                return;
+            }
+        }, true);
+
         document.addEventListener("pointerdown", function (event) {
+            if (handleVideoPickerInteraction(event.target) || handleAudioPickerInteraction(event.target)) {
+                event.preventDefault();
+                event.stopPropagation();
+                suppressBrowserClickUntil = Date.now() + 320;
+                return;
+            }
             var directPrefillTarget = event.target.closest(
                 ".brave-view__entry--button[data-brave-prefill], "
                 + ".brave-view__list-item[data-brave-prefill], "
@@ -9139,13 +9832,17 @@ let defaultout_plugin = (function () {
         var selectedFont = options && typeof options.font === "string" ? options.font : preset.font;
         var sizeValue = options && options.size !== undefined ? options.size : preset.size;
         var parsed = parseFloat(sizeValue);
-        var selectedSize = Number.isFinite(parsed) && parsed >= 0.8 && parsed <= 1.6 ? parsed.toFixed(1) : preset.size;
+        var baseSize = Number.isFinite(parsed) && parsed >= 0.8 && parsed <= 1.6 ? parsed : parseFloat(preset.size || "1.0");
+        var scaleMultiplier = getVideoSettings().ui_scale;
+        var selectedSize = Math.max(0.8, Math.min(1.8, baseSize * scaleMultiplier)).toFixed(2);
 
         document.body.setAttribute("data-brave-theme", selected);
         document.body.setAttribute("data-brave-font", selectedFont);
         document.documentElement.style.setProperty("--brave-font-size-scale", selectedSize);
-        pulseBodyClass("brave-theme-shift", 320);
-        if (window.localStorage) {
+        if (!(options && options.skipPulse)) {
+            pulseBodyClass("brave-theme-shift", 320);
+        }
+        if (window.localStorage && !(options && options.skipPersistTheme)) {
             window.localStorage.setItem(THEME_STORAGE_KEY, selected);
             window.localStorage.removeItem(LEGACY_FONT_STORAGE_KEY);
             window.localStorage.removeItem(LEGACY_SIZE_STORAGE_KEY);
@@ -9154,6 +9851,14 @@ let defaultout_plugin = (function () {
 
     var clearTextOutput = function (options) {
         options = options || {};
+        var preservedRoomViewData = null;
+        if (options.preserveMobileSheet) {
+            if (isRoomLikeView(currentRoomViewData)) {
+                preservedRoomViewData = currentRoomViewData;
+            } else if (isRoomLikeView(currentViewData)) {
+                preservedRoomViewData = currentViewData;
+            }
+        }
         teardownArcadeMode();
         if (currentAtbAnimationFrame && window.cancelAnimationFrame) {
             window.cancelAnimationFrame(currentAtbAnimationFrame);
@@ -9177,7 +9882,7 @@ let defaultout_plugin = (function () {
         setStickyViewMode(false);
         suppressNextLookText = false;
         currentViewData = null;
-        currentRoomViewData = null;
+        currentRoomViewData = preservedRoomViewData;
         syncInputContextForView(null);
         if (!options.preservePicker) {
             clearPickerSheet();
@@ -9391,7 +10096,12 @@ let defaultout_plugin = (function () {
         }
 
         if (cmdname === "brave_combat_fx") {
-            handleCombatFxEvent(getOobPayload(args, kwargs, "brave_combat_fx", {}) || {});
+            var combatFxPayload = getOobPayload(args, kwargs, "brave_combat_fx", {}) || {};
+            handleCombatFxEvent(combatFxPayload);
+            var braveAudioCombat = getBraveAudio();
+            if (braveAudioCombat && typeof braveAudioCombat.handleCombatFx === "function") {
+                braveAudioCombat.handleCombatFx(combatFxPayload);
+            }
             return true;
         }
 
@@ -9423,6 +10133,10 @@ let defaultout_plugin = (function () {
         if (cmdname === "brave_room_activity") {
             var activityPayload = getOobPayload(args, kwargs, "brave_room_activity", {}) || {};
             pushRoomFeedEntry(activityPayload.cls || "out", activityPayload.text || "", activityPayload);
+            var braveAudioActivity = getBraveAudio();
+            if (braveAudioActivity && typeof braveAudioActivity.handleRoomActivity === "function") {
+                braveAudioActivity.handleRoomActivity(activityPayload);
+            }
             return true;
         }
 
@@ -9505,8 +10219,13 @@ let defaultout_plugin = (function () {
     //
     // Mandatory plugin init function
     var init = function () {
+        applyVideoSettings(getVideoSettings(), { persist: false, refreshTheme: false });
         var storedTheme = window.localStorage ? window.localStorage.getItem(THEME_STORAGE_KEY) : null;
         applyTheme(storedTheme || "hearth");
+        var braveAudio = getBraveAudio();
+        if (braveAudio && typeof braveAudio.init === "function") {
+            braveAudio.init({ manifestUrl: window.BRAVE_AUDIO_MANIFEST_URL || "" });
+        }
         clearBrowserNotice();
         clearSceneRail();
         clearReactiveState();
@@ -9524,6 +10243,13 @@ let defaultout_plugin = (function () {
         clearSceneRail();
         renderDesktopToolbar();
         resetAllScrollPositions();
+        if (currentViewData && currentViewData.variant === "connection") {
+            window.setTimeout(function () {
+                if (currentViewData && currentViewData.variant === "connection") {
+                    sendBrowserCommand("look");
+                }
+            }, 80);
+        }
     };
 
     var onConnectionClose = function () {

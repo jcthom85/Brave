@@ -17,6 +17,13 @@
       "armor": 6,
       "attack_power": 18,
       "desc": "A hard-looking tower raider in pieced mail, built to break a line and hold the breach.",
+      "emote_reactions": {
+        "taunt": {
+          "aggro": 1,
+          "text": "The bandit raider spits to the side and tightens his grip on the spear."
+        },
+        "default": "The bandit raider narrows his eyes and keeps watching the line."
+      },
       "dodge": 6,
       "loot": [
         {
@@ -497,7 +504,8 @@
       ],
       "tags": [
         "goblin",
-        "raider"
+        "raider",
+        "elite"
       ],
       "xp": 22
     },
