@@ -150,6 +150,10 @@ class DummyMappedRoom:
             brave_room_id=room_id,
             brave_activities=[],
             brave_portal_hub=False,
+            brave_world="Brave",
+            brave_zone="Test Ridge",
+            brave_safe=True,
+            desc=f"{key} description.",
         )
         self.exits = []
 
@@ -583,6 +587,33 @@ class RoomViewTests(unittest.TestCase):
         self.assertTrue(discover_room(character, room))
         self.assertFalse(discover_room(character, room))
         self.assertEqual(["goblin_warrens_entry"], character.db.brave_discovered_rooms)
+
+    def test_room_view_micromap_hides_undiscovered_rooms(self):
+        character = DummyCharacter()
+        current_room = DummyMappedRoom("current_room", key="Current Room", x=0, y=0)
+        discovered_room = DummyMappedRoom("discovered_room", key="Discovered Room", x=1, y=0)
+        hidden_room = DummyMappedRoom("hidden_room", key="Hidden Room", x=2, y=0)
+        character.db.brave_discovered_rooms = ["current_room", "discovered_room"]
+
+        with patch(
+            "world.browser_views.build_minimap_snapshot",
+            wraps=build_minimap_snapshot,
+        ), patch(
+            "world.navigation.get_rooms_in_map_region",
+            return_value=[current_room, discovered_room, hidden_room],
+        ):
+            view = build_room_view(current_room, character)
+
+        micromap = view.get("micromap") or {}
+        room_titles = [
+            cell.get("title")
+            for row in (micromap.get("map_tiles", {}) or {}).get("rows", [])
+            for cell in row
+            if cell.get("kind") == "room"
+        ]
+        self.assertTrue(any("Current Room" in title for title in room_titles))
+        self.assertTrue(any("Discovered Room" in title for title in room_titles))
+        self.assertFalse(any("Hidden Room" in title for title in room_titles))
 
 
 if __name__ == "__main__":

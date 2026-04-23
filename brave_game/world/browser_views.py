@@ -30,6 +30,7 @@ from world.forging import get_forge_entries
 from world.genders import BRAVE_GENDER_LABELS, get_brave_gender_label
 from world.navigation import (
     build_map_snapshot,
+    build_minimap_snapshot,
     format_exit_summary,
     format_route_hint,
     get_exit_direction,
@@ -1767,6 +1768,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         "layout": "explore",
         "room_id": str(getattr(room, "id", "") or ""),
         "region_name": str(region_name or ""),
+        "micromap": build_minimap_snapshot(room, radius=2, character=looker),
         "mobile_pack": _build_mobile_pack_payload(looker),
         "mobile_panels": _build_mobile_room_payload(
             room,

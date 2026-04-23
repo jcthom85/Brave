@@ -10,7 +10,7 @@ import textwrap
 from evennia.objects.objects import DefaultRoom
 
 from world.browser_views import build_room_view
-from world.navigation import format_exit_summary, render_minimap, sort_exits
+from world.navigation import build_minimap_snapshot, format_exit_summary, sort_exits
 from world.questing import get_tracked_quest_payload
 from world.resonance import get_resonance_label, get_world_label
 
@@ -234,7 +234,7 @@ class Room(ObjectParent, DefaultRoom):
         visible_entities = kwargs.get("visible_entities")
 
         if self.db.brave_map_region:
-            map_data = render_minimap(self, radius=2, character=looker)
+            map_data = build_minimap_snapshot(self, radius=2, character=looker)
             if looker and map_data:
                 _send_webclient_event(looker, mapdata=map_data)
 
