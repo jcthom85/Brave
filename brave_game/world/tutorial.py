@@ -476,7 +476,7 @@ def get_tutorial_combat_focus(character, encounter):
 
     if not getattr(getattr(character, "db", None), "brave_tutorial", None):
         return []
-    state = ensure_tutorial_state(character)
+    state = _get_normalized_tutorial_state(character)
     if state.get("status") != "active" or not encounter:
         return []
     room_id = getattr(getattr(getattr(encounter, "obj", None), "db", None), "brave_room_id", None)
@@ -509,6 +509,29 @@ def get_tutorial_combat_focus(character, encounter):
         }
     )
     return prompts[:3]
+
+
+def _is_in_tutorial_combat(character):
+    """Return whether combat-specific tutorial guidance should own the overlay."""
+
+    if not character:
+        return False
+    location = getattr(character, "location", None)
+    if not is_tutorial_solo_combat_room(location):
+        return False
+    get_encounter = getattr(character, "get_active_encounter", None)
+    if not callable(get_encounter):
+        return False
+    encounter = get_encounter()
+    if not encounter:
+        return False
+    is_participant = getattr(encounter, "is_participant", None)
+    if callable(is_participant):
+        return bool(is_participant(character))
+    participants = getattr(encounter, "get_active_participants", None)
+    if callable(participants):
+        return character in (participants() or [])
+    return True
 
 
 def _remaining_pack_tasks(flags):
@@ -947,6 +970,8 @@ def get_tutorial_mechanical_guidance(character):
 
     state = _get_normalized_tutorial_state(character)
     if state.get("status") != "active":
+        return None
+    if _is_in_tutorial_combat(character):
         return None
 
     step_key = state.get("step") or "first_steps"

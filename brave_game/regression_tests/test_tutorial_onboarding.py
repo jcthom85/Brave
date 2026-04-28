@@ -21,6 +21,7 @@ from world.tutorial import (
     ensure_tutorial_state,
     get_lanternfall_intro_text,
     get_lanternfall_recap_text,
+    get_tutorial_mechanical_guidance,
     get_tutorial_combat_focus,
     get_tutorial_exit_block,
     get_tutorial_entity_response,
@@ -321,6 +322,29 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertEqual("Combat Tutorial", view.get("guidance_eyebrow"))
         self.assertTrue(view.get("guidance"))
         self.assertNotIn("Training Focus", [section.get("label") for section in view.get("sections", [])])
+
+    def test_regular_tutorial_guidance_defers_during_vermin_pens_combat(self):
+        character = DummyCharacter()
+        begin_tutorial(character)
+        state = ensure_tutorial_state(character)
+        state["flags"].update(
+            {
+                "talked_tamsin": True,
+                "visited_quartermaster_shed": True,
+                "returned_to_wayfarers_yard": True,
+                "talked_nella": True,
+                "viewed_gear": True,
+                "viewed_pack": True,
+                "read_supply_board": True,
+                "talked_brask": True,
+            }
+        )
+        character.db.brave_tutorial = state
+        character.location = _room("tutorial_vermin_pens", safe=False)
+        encounter = SimpleNamespace(is_participant=lambda participant: participant is character)
+        character.get_active_encounter = lambda: encounter
+
+        self.assertIsNone(get_tutorial_mechanical_guidance(character))
 
     def test_rest_only_counts_after_tutorial_fight(self):
         character = DummyCharacter()
