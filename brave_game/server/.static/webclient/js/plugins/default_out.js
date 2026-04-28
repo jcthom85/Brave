@@ -3750,10 +3750,11 @@ let defaultout_plugin = (function () {
         if (sheet) {
             sheet.setAttribute("aria-hidden", String(!active));
             if (!active) {
-                sheet.classList.remove("brave-objectives-sheet--tutorial");
+                sheet.classList.remove("brave-objectives-sheet--tutorial", "brave-objectives-sheet--welcome");
             }
         }
         if (!active) {
+            body.classList.remove("brave-objectives-welcome-active");
             currentWelcomePages = [];
             if (currentViewData && Array.isArray(currentViewData.welcome_pages)) {
                 currentViewData.welcome_pages = [];
@@ -3766,7 +3767,8 @@ let defaultout_plugin = (function () {
         if (!host || !currentWelcomePages.length) {
             return;
         }
-        host.classList.add("brave-objectives-sheet--tutorial");
+        host.classList.add("brave-objectives-sheet--tutorial", "brave-objectives-sheet--welcome");
+        document.body.classList.add("brave-objectives-welcome-active");
         var page = currentWelcomePages[currentWelcomePageIndex];
         var isLast = currentWelcomePageIndex === currentWelcomePages.length - 1;
 
@@ -3826,6 +3828,8 @@ let defaultout_plugin = (function () {
         var objectivesTitle = viewData && viewData.guidance_title ? viewData.guidance_title : (viewData.title || viewData.eyebrow || "Current Tasks");
 
         host.classList.add("brave-objectives-sheet--tutorial");
+        host.classList.remove("brave-objectives-sheet--welcome");
+        document.body.classList.remove("brave-objectives-welcome-active");
         host.innerHTML =
             "<div class='brave-objectives-sheet__backdrop' data-brave-objectives-toggle='1'></div>"
             + "<div class='brave-objectives-sheet__panel' role='dialog' aria-modal='true' aria-label='Current Objectives'>"
