@@ -364,6 +364,132 @@ class CombatViewTests(unittest.TestCase):
             [(meter.get("label"), meter.get("value")) for meter in enemy_entry.get("meters", [])],
         )
 
+    def test_enemy_windup_highlights_matching_reaction_actions(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 24},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 24},
+            ["Strike", "Shield Bash", "Intercept"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [{"id": "e1", "key": "Old Greymaw", "hp": 28, "max_hp": 32, "template_key": "old_greymaw"}],
+            atb_states={
+                "p:7": {"phase": "ready", "gauge": 100, "ready_gauge": 100},
+                "e:e1": {
+                    "phase": "winding",
+                    "ticks_remaining": 1,
+                    "timing": {"telegraph": True, "interruptible": True},
+                    "current_action": {"kind": "enemy_attack", "label": "Brush Pounce"},
+                },
+            },
+        )
+
+        view = build_combat_view(encounter, warrior)
+        abilities_action = _action(view, "Abilities")
+        shield_bash = _picker_option(abilities_action.get("picker", {}), "Shield Bash")
+        intercept = _picker_option(abilities_action.get("picker", {}), "Intercept")
+        strike = _picker_option(abilities_action.get("picker", {}), "Strike")
+        payload = view.get("combat_actions", {})
+        actions_by_key = {action.get("key"): action for action in payload.get("abilities", [])}
+
+        self.assertEqual(["guard", "interrupt"], view.get("reaction_window", {}).get("roles"))
+        self.assertEqual("good", abilities_action.get("tone"))
+        self.assertEqual("good", shield_bash.get("tone"))
+        self.assertEqual("good", intercept.get("tone"))
+        self.assertEqual("accent", strike.get("tone"))
+        self.assertIn("REACTION", shield_bash.get("meta", ""))
+        self.assertIs(actions_by_key.get("shieldbash", {}).get("reaction_recommended"), True)
+        self.assertIs(actions_by_key.get("intercept", {}).get("reaction_recommended"), True)
+        self.assertIs(actions_by_key.get("strike", {}).get("reaction_recommended"), False)
+
+    def test_enemy_windup_highlights_cleanse_when_party_is_afflicted(self):
+        room = DummyRoom()
+        cleric = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "cleric",
+            {"hp": 20, "mana": 24, "stamina": 6},
+            {"max_hp": 24, "max_mana": 24, "max_stamina": 10},
+            ["Cleanse", "Smite"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [cleric],
+            [{"id": "e1", "key": "Bog Wolf", "hp": 11, "max_hp": 16, "template_key": "road_wolf"}],
+            states={
+                7: {
+                    "guard": 0,
+                    "bleed_turns": 0,
+                    "poison_turns": 1,
+                    "curse_turns": 0,
+                    "snare_turns": 0,
+                    "feint_turns": 0,
+                }
+            },
+            atb_states={
+                "p:7": {"phase": "ready", "gauge": 100, "ready_gauge": 100},
+                "e:e1": {
+                    "phase": "winding",
+                    "ticks_remaining": 1,
+                    "timing": {"telegraph": True, "interruptible": False},
+                    "current_action": {"kind": "enemy_attack", "label": "Snap Bite"},
+                },
+            },
+        )
+
+        view = build_combat_view(encounter, cleric)
+        abilities_action = _action(view, "Abilities")
+        cleanse = _picker_option(abilities_action.get("picker", {}), "Cleanse")
+        smite = _picker_option(abilities_action.get("picker", {}), "Smite")
+        actions_by_key = {action.get("key"): action for action in view.get("combat_actions", {}).get("abilities", [])}
+
+        self.assertEqual(["cleanse", "guard"], view.get("reaction_window", {}).get("roles"))
+        self.assertEqual("good", cleanse.get("tone"))
+        self.assertEqual("accent", smite.get("tone"))
+        self.assertIn("REACTION", cleanse.get("meta", ""))
+        self.assertIs(actions_by_key.get("cleanse", {}).get("reaction_recommended"), True)
+
+    def test_enemy_card_surfaces_latest_telegraph_outcome(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 20, "mana": 0, "stamina": 12},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 14},
+            ["Strike"],
+        )
+        encounter = DummyEncounter(
+            room,
+            [warrior],
+            [
+                {
+                    "id": "e1",
+                    "key": "Tower Archer",
+                    "hp": 11,
+                    "max_hp": 16,
+                    "template_key": "tower_archer",
+                    "telegraph_outcome": "mitigated",
+                    "telegraph_label": "Aimed Shot",
+                    "telegraph_answer": "Brace",
+                    "telegraph_target": "Dad",
+                }
+            ],
+        )
+
+        view = build_combat_view(encounter, warrior)
+        enemy_entry = _entry(_section(view, "Enemies"), "Tower Archer")
+
+        self.assertIn("Mitigated", [chip.get("label") for chip in enemy_entry.get("chips", [])])
+
     def test_atb_meter_stays_full_during_windup_and_resets_empty_for_recovery(self):
         room = DummyRoom()
         warrior = DummyCharacter(

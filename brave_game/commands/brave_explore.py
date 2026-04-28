@@ -25,7 +25,9 @@ from world.activities import (
 from world.browser_panels import build_cook_panel, build_fishing_panel, build_map_panel, build_travel_panel, send_webclient_event
 from world.browser_views import build_cook_view, build_fishing_view, build_map_view, build_travel_view
 from world.navigation import render_map, render_minimap, sort_exits
+from world.resting import room_allows_rest
 from world.screen_text import format_entry, render_screen, wrap_text
+from world.tutorial import record_command_event
 
 from .brave import BraveCharacterCommand, _stack_blocks
 
@@ -485,6 +487,7 @@ class CmdMap(BraveCharacterCommand):
                 panel=build_map_panel(character, mode="minimap"),
                 view=build_map_view(character.location, character, mode="minimap"),
             )
+            record_command_event(character, "map")
             return
 
         self.scene_msg(
@@ -492,6 +495,7 @@ class CmdMap(BraveCharacterCommand):
             panel=build_map_panel(character, mode="map"),
             view=build_map_view(character.location, character, mode="map"),
         )
+        record_command_event(character, "map")
 
 
 class CmdEmote(BraveCharacterCommand):
@@ -541,9 +545,10 @@ class CmdRest(BraveCharacterCommand):
         if encounter and encounter.is_participant(character):
             self.msg("You can't rest in the middle of a fight.")
             return
-        if not character.location or not character.location.db.brave_safe:
-            self.msg("You need a safe place before you can properly rest.")
+        if not room_allows_rest(character.location):
+            self.msg("You need a proper rest spot before you can recover. Try the Lantern Rest Inn or another marked resting place.")
             return
 
         character.restore_resources()
+        record_command_event(character, "rest")
         self.msg("You take a moment to recover your strength.")

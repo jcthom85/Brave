@@ -1,48 +1,42 @@
-# Brave Evennia Game Dir
+# Brave Evennia Game Directory
 
-This directory contains the Evennia game scaffold for `Brave`.
+This directory contains the Evennia game scaffold and Brave-specific runtime code.
 
-Project-level design docs live in [`/mnt/c/Brave/docs`](/mnt/c/Brave/docs). The
-most relevant setup and architecture references are:
+Project docs live in [`../docs`](../docs). The best entry points are:
 
-- [`docs/evennia_setup.md`](/mnt/c/Brave/docs/evennia_setup.md)
-- [`docs/evennia_architecture.md`](/mnt/c/Brave/docs/evennia_architecture.md)
-- [`docs/implementation_plan.md`](/mnt/c/Brave/docs/implementation_plan.md)
+- [`../docs/evennia_setup.md`](../docs/evennia_setup.md)
+- [`../docs/evennia_architecture.md`](../docs/evennia_architecture.md)
+- [`../docs/world_and_content.md`](../docs/world_and_content.md)
+- [`../docs/first_hour_chapter_plan.md`](../docs/first_hour_chapter_plan.md)
 
 ## Current Status
 
-- Evennia scaffold created
-- Database initialized with `evennia migrate`
-- Server name set to `Brave`
-- Default networking left open for local LAN play
+- Evennia project scaffold is in place.
+- Core content is data-driven through JSON packs in `world/content/packs/core/`.
+- Current live build includes character creation, seven classes, Wayfarer's Yard onboarding, Brambleford, Goblin Road through Drowned Weir, Junk-Yard Planet, ATB combat, creator tooling, party play, town activities, audio hooks, and browser UI panels.
 
 ## Local Run
 
 From the project root:
 
 ```bash
-cd /mnt/c/Brave
 ./run_evennia.sh start
 ```
-
-On first start, Evennia will prompt for a superuser account.
 
 Connect locally with:
 
 - Web client: `http://localhost:4001/webclient`
 - Telnet client: `localhost:4000`
 
-Connect from other devices on the same network with the host machine's LAN IP:
+Connect from another device on the same network with the host machine's LAN IP:
 
 - Web client: `http://<host-lan-ip>:4001/webclient`
 - Telnet client: `<host-lan-ip>:4000`
 
-## Initial Build Direction
+## Runtime Layout
 
-Keep the Evennia scaffold mostly intact until the first vertical slice is working.
-Add Brave-specific logic through:
-
-- Typeclasses for player and world entities
-- Data-driven content definitions
-- Commands layered on top of Evennia defaults
-- Encounter scripts for combat and quest progression
+- `commands/`: player, combat, exploration, creator, town, profile, party, and arcade commands.
+- `server/conf/`: Evennia settings, startup hooks, web plugins, and connection screens.
+- `typeclasses/`: Evennia object, room, account, character, exit, channel, and script behavior.
+- `web/`: Brave webclient, API, website, templates, static assets, and audio/browser code.
+- `world/`: content registry, world bootstrap, quests, combat, tutorial, UI views, activities, commerce, portals, and progression systems.

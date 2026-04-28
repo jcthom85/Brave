@@ -79,7 +79,32 @@ class CreatorApiTests(unittest.TestCase):
         payload = json.loads(response.content)
         self.assertEqual(200, response.status_code)
         self.assertEqual("rooms", payload["domain"])
-        self.assertTrue(any(entry["id"] == "brambleford_town_green" for entry in payload["results"]))
+        match = next(entry for entry in payload["results"] if entry["id"] == "brambleford_town_green")
+        self.assertIn("map_region", match)
+        self.assertIn("map_x", match)
+        self.assertIn("map_y", match)
+
+    def test_reference_search_returns_exit_graph_edges(self):
+        request = self.factory.get("/api/content/references/exits", {"q": "brambleford", "limit": 5})
+        request.user = self.user
+        response = views.content_references(request, "exits")
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("exits", payload["domain"])
+        self.assertTrue(payload["results"])
+        self.assertIn("source", payload["results"][0])
+        self.assertIn("destination", payload["results"][0])
+
+    def test_reference_search_returns_roaming_party_matches(self):
+        request = self.factory.get("/api/content/references/roaming-parties", {"limit": 5})
+        request.user = self.user
+        response = views.content_references(request, "roaming-parties")
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("roaming-parties", payload["domain"])
+        self.assertTrue(payload["results"])
+        self.assertIn("region", payload["results"][0])
+        self.assertIn("start_room", payload["results"][0])
 
     def test_preview_returns_room_payload(self):
         request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "room", "args": ["brambleford_town_green"]}), content_type="application/json")
@@ -90,6 +115,44 @@ class CreatorApiTests(unittest.TestCase):
         self.assertEqual("room", payload["kind"])
         self.assertEqual("brambleford_town_green", payload["preview"]["room"]["id"])
 
+    def test_preview_returns_quest_payload_with_starting_state(self):
+        request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "quest", "args": ["practice_makes_heroes"]}), content_type="application/json")
+        request.user = self.user
+        response = views.content_preview(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("quest", payload["kind"])
+        self.assertIn("is_starting", payload["preview"])
+        self.assertIn("objectives", payload["preview"])
+
+    def test_preview_returns_roaming_party_payload(self):
+        request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "roaming-party", "args": ["blackreed_patrol"]}), content_type="application/json")
+        request.user = self.user
+        response = views.content_preview(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("roaming-party", payload["kind"])
+        self.assertEqual("blackreed_patrol", payload["preview"]["party_key"])
+        self.assertIn("total_xp", payload["preview"])
+
+    def test_preview_returns_dialogue_payload(self):
+        request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "dialogue", "args": ["brother_alden"]}), content_type="application/json")
+        request.user = self.user
+        response = views.content_preview(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("dialogue", payload["kind"])
+        self.assertIn("talk_rules", payload["preview"])
+
+    def test_preview_returns_readable_payload(self):
+        request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "readable", "args": ["barrow_marker_stone"]}), content_type="application/json")
+        request.user = self.user
+        response = views.content_preview(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("readable", payload["kind"])
+        self.assertIn("text", payload["preview"])
+
     def test_mutate_dry_run_returns_diff(self):
         request = self.factory.post("/api/content/mutate", data=json.dumps({"kind": "room", "target": "creator_api_room", "payload": {"key": "Creator API Room", "desc": "Dry run through the web creator api.", "zone": "Testing", "world": "Brave"}, "write": False}), content_type="application/json")
         request.user = self.user
@@ -99,6 +162,33 @@ class CreatorApiTests(unittest.TestCase):
         self.assertTrue(payload["ok"])
         self.assertFalse(payload["write"])
         self.assertIn("creator_api_room", payload["diff"])
+
+    def test_mutate_roaming_party_dry_run_returns_diff(self):
+        request = self.factory.post(
+            "/api/content/mutate",
+            data=json.dumps({
+                "kind": "roaming-party",
+                "target": "creator_api_patrol",
+                "payload": {
+                    "key": "creator_api_patrol",
+                    "region": "brambleford",
+                    "start_room": "brambleford_town_green",
+                    "interval": 18,
+                    "respawn_delay": 180,
+                    "avoid_safe": True,
+                    "encounter": {"key": "creator_api_patrol", "title": "Creator API Patrol", "intro": "", "enemies": ["training_dummy"]},
+                },
+                "write": False,
+            }),
+            content_type="application/json",
+        )
+        request.user = self.user
+        response = views.content_mutate(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertTrue(payload["ok"])
+        self.assertFalse(payload["write"])
+        self.assertIn("creator_api_patrol", payload["diff"])
 
     def test_remove_dry_run_returns_diff(self):
         request = self.factory.post("/api/content/remove", data=json.dumps({"kind": "read", "target": "dawn_bell", "write": False}), content_type="application/json")

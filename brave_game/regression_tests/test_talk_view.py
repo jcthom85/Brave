@@ -15,22 +15,14 @@ chargen_stub.get_next_chargen_step = lambda *args, **kwargs: None
 chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
-from world.browser_panels import build_talk_panel
-from world.browser_views import build_talk_list_view, build_talk_view
-
-
-def _section(view, label):
-    for section in view.get("sections", []):
-        if section.get("label") == label:
-            return section
-    raise AssertionError(f"Missing section {label}")
+from world.browser_views import _build_world_interaction_picker
 
 
 class DummyNPC:
-    def __init__(self, key, entity_id="mira"):
+    def __init__(self, key, entity_id="mira", kind="npc"):
         self.key = key
         self.location = SimpleNamespace()
-        self.db = SimpleNamespace(brave_entity_id=entity_id)
+        self.db = SimpleNamespace(brave_entity_id=entity_id, brave_entity_kind=kind)
 
 
 class DummyCharacter:
@@ -38,40 +30,34 @@ class DummyCharacter:
         self.location = SimpleNamespace(
             db=SimpleNamespace(brave_world="Brave", brave_zone="Brambleford")
         )
+        self.db = SimpleNamespace(
+            brave_quests={},
+            brave_shop_bonus=None,
+            brave_inventory=[],
+        )
 
 
 class TalkViewTests(unittest.TestCase):
-    def test_talk_list_view_renders_browser_picker_entries(self):
+    def test_npc_interaction_picker_renders_dialogue_and_options(self):
         character = DummyCharacter()
-        view = build_talk_list_view(character, [DummyNPC("Mira"), DummyNPC("Uncle Pib")])
+        target = DummyNPC("Mira", entity_id="mira_fenleaf")
+        picker = _build_world_interaction_picker(character, target)
 
-        self.assertEqual("dialogue-list", view.get("variant"))
-        section = _section(view, "Nearby NPCs")
-        self.assertEqual("dialogue-list", section.get("variant"))
-        self.assertEqual(["Mira", "Uncle Pib"], [item.get("title") for item in section.get("items", [])])
-        self.assertEqual(["talk Mira", "talk Uncle Pib"], [item.get("command") for item in section.get("items", [])])
+        self.assertEqual("Mira", picker.get("title"))
+        self.assertEqual("forum", picker.get("title_icon"))
+        self.assertIn("The road's quieter than it was", " ".join(picker.get("body", [])))
+        
+        options = picker.get("options", [])
+        self.assertEqual(["Emote At"], [opt.get("label") for opt in options])
 
-    def test_talk_view_renders_structured_dialogue_actions(self):
-        view = build_talk_view(DummyNPC("Leda", entity_id="leda_thornwick"), "Welcome in.\nTake your time.")
+    def test_readable_interaction_picker_renders_text(self):
+        character = DummyCharacter()
+        target = DummyNPC("Supply Board", entity_id="tutorial_supply_board", kind="readable")
+        picker = _build_world_interaction_picker(character, target)
 
-        self.assertEqual("dialogue", view.get("variant"))
-        self.assertTrue(view.get("preserve_rail"))
-        self.assertEqual("", view.get("eyebrow"))
-        self.assertEqual([], view.get("chips"))
-        self.assertEqual("Close", view.get("back_action", {}).get("label"))
-        section = view.get("sections", [])[0]
-        self.assertTrue(section.get("hide_label"))
-        self.assertEqual("quote", section.get("variant"))
-        self.assertEqual(['"Welcome in."', '"Take your time."'], section.get("lines"))
-        self.assertEqual(["Open Shop"], [item.get("label") for item in view.get("actions", [])])
-
-    def test_talk_panel_drops_dead_board_action_and_npc_chip(self):
-        panel = build_talk_panel(DummyNPC("Leda", entity_id="leda_thornwick"))
-
-        self.assertEqual("", panel.get("eyebrow"))
-        self.assertEqual([], panel.get("chips"))
-        actions = panel.get("sections", [])[0].get("items", [])
-        self.assertEqual(["talk Leda"], [item.get("text") for item in actions])
+        self.assertEqual("Supply Board", picker.get("title"))
+        self.assertEqual("menu_book", picker.get("title_icon"))
+        self.assertIn("SOUTH LANTERN OUT", " ".join(picker.get("body", [])))
 
 
 if __name__ == "__main__":

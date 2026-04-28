@@ -51,7 +51,17 @@ from world.resonance import (
     resolve_ability_query,
 )
 from world.tinkering import get_tinkering_entries
-from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
+from world.tutorial import (
+    LANTERNFALL_RECAP_PAGES,
+    LANTERNFALL_WELCOME_PAGES,
+    TUTORIAL_STEPS,
+    ensure_tutorial_state,
+    get_tutorial_mechanical_guidance,
+    get_tutorial_objective_entries,
+    is_tutorial_active,
+    should_show_lanternfall_recap,
+)
+from world.resting import room_allows_rest
 
 CONTENT = get_content_registry()
 CHARACTER_CONTENT = CONTENT.characters
@@ -102,6 +112,20 @@ ROOM_ENTITY_KIND_ICONS = {
 
 ROOM_ENTITY_ID_ICONS = {
     "kitchen_hearth": "soup_kitchen",
+}
+
+TUTORIAL_TALK_ENTITY_IDS = {
+    "sergeant_tamsin_vale",
+    "quartermaster_nella_cobb",
+    "courier_peep_marrow",
+    "ringhand_brask",
+    "captain_harl_rowan",
+}
+
+TUTORIAL_READ_ENTITY_IDS = {
+    "tutorial_supply_board",
+    "family_post_sign",
+    "tutorial_damaged_cart",
 }
 
 GEAR_SLOT_LABELS = {
@@ -178,6 +202,8 @@ def _item(
     tooltip=None,
     detail=None,
     marker_icon=None,
+    on_open_command=None,
+    dismiss_bubble_speaker=None,
 ):
     item = {"text": text}
     if icon:
@@ -200,6 +226,10 @@ def _item(
         item["detail"] = detail
     if marker_icon:
         item["marker_icon"] = marker_icon
+    if on_open_command:
+        item["on_open_command"] = on_open_command
+    if dismiss_bubble_speaker:
+        item["dismiss_bubble_speaker"] = dismiss_bubble_speaker
     return item
 
 
@@ -409,6 +439,7 @@ def _make_view(
     actions=None,
     back=False,
     reactive=None,
+    welcome_pages=None,
 ):
     view_actions = list(actions or [])
     back_action = _action("Close", "look", "close", tone="muted", aria_label="Close") if back else None
@@ -424,6 +455,7 @@ def _make_view(
         "sections": sections or [],
         "actions": view_actions,
         "reactive": reactive or {},
+        "welcome_pages": welcome_pages or [],
     }
 
 
@@ -451,12 +483,7 @@ def _reactive_from_character(character, *, scene="system", danger=None, boss=Fal
 
 
 def _format_dialogue_line(line):
-    text = str(line or "").strip()
-    if not text:
-        return ""
-    if (text.startswith('"') and text.endswith('"')) or (text.startswith("“") and text.endswith("”")):
-        return text
-    return f'"{text}"'
+    return str(line or "").strip()
 
 
 def _build_talk_actions(target):
@@ -689,47 +716,6 @@ def _build_empty_gear_entry(character, slot):
     )
 
 
-def build_talk_list_view(character, npcs):
-    """Return a browser-first list of nearby NPCs to start a conversation with."""
-
-    npc_entries = [
-        _entry(
-            npc.key,
-            meta="Nearby",
-            lines=["Open a focused dialogue screen."],
-            icon="forum",
-            command=f"talk {npc.key}",
-            actions=[_action("Talk", f"talk {npc.key}", "forum", tone="accent")],
-            chips=[_chip("NPC", "forum", "muted")],
-        )
-        for npc in npcs
-    ]
-    if not npc_entries:
-        npc_entries = [_entry("No one available", lines=["No one here looks free for conversation."], icon="person_off")]
-
-    return {
-        **_make_view(
-            "Conversation",
-            "Who Do You Want To Talk To?",
-            eyebrow_icon="forum",
-            title_icon="groups",
-            subtitle="Choose a nearby NPC to open a focused dialogue screen.",
-            sections=[
-                _section(
-                    "Nearby NPCs",
-                    "forum",
-                    "entries",
-                    items=npc_entries,
-                    variant="dialogue-list",
-                )
-            ],
-            back=True,
-            reactive=_reactive_from_character(character, scene="dialogue"),
-        ),
-        "variant": "dialogue-list",
-    }
-
-
 def _pre_section(label, icon, text, *, span=None, tone=None, hide_label=False, grid=None):
     section = {
         "label": label,
@@ -773,21 +759,14 @@ def _movement_command(direction, fallback):
 
 
 CHARGEN_STEP_ORDER = (
-    "menunode_welcome",
     "menunode_choose_race",
     "menunode_choose_class",
+    "menunode_choose_gender",
     "menunode_choose_name",
     "menunode_confirm",
 )
 
 CHARGEN_STEP_META = {
-    "menunode_welcome": {
-        "eyebrow": "The First Step",
-        "title": "Begin Your Journey",
-        "title_icon": "person_add",
-        "subtitle": "Before the road ahead, we define the soul who walks it.",
-        "step_index": 0,
-    },
     "menunode_choose_race": {
         "eyebrow": "Ancestry",
         "title": "Choose Your Origin",
@@ -802,19 +781,26 @@ CHARGEN_STEP_META = {
         "subtitle": "How do you face the world when it bites back?",
         "step_index": 2,
     },
+    "menunode_choose_gender": {
+        "eyebrow": "Identity",
+        "title": "Choose A Gender",
+        "title_icon": "person",
+        "subtitle": "Select the gender identity for your character.",
+        "step_index": 3,
+    },
     "menunode_choose_name": {
         "eyebrow": "Identity",
-        "title": "Name And Gender",
+        "title": "Choose A Name",
         "title_icon": "badge",
-        "subtitle": "Set the name and gender this character will carry into the world.",
-        "step_index": 3,
+        "subtitle": "Set the name this character will carry into the world.",
+        "step_index": 4,
     },
     "menunode_confirm": {
         "eyebrow": "Finality",
         "title": "Review And Forge",
         "title_icon": "task_alt",
         "subtitle": "The path is clear. Is this the one who will walk it?",
-        "step_index": 4,
+        "step_index": 5,
     },
 }
 
@@ -824,8 +810,8 @@ def build_chargen_view(account, state, *, error=None):
 
     from world.chargen import get_next_chargen_step
 
-    step_key = state.get("step") or "menunode_welcome"
-    step_meta = CHARGEN_STEP_META.get(step_key, CHARGEN_STEP_META["menunode_welcome"])
+    step_key = state.get("step") or "menunode_choose_race"
+    step_meta = CHARGEN_STEP_META.get(step_key, CHARGEN_STEP_META["menunode_choose_race"])
     slots_left = account.get_available_character_slots()
     slot_text = "Unlimited" if slots_left is None else str(slots_left)
     race_name = RACES.get(state.get("race"), {}).get("name", "Not set")
@@ -833,7 +819,7 @@ def build_chargen_view(account, state, *, error=None):
     gender_label = get_brave_gender_label(state.get("gender"))
 
     chips = [
-        _chip(f"Step {step_meta['step_index'] + 1} / 5", "steps", "accent"),
+        _chip(f"Step {step_meta['step_index']} / 5", "steps", "accent"),
         _chip(f"{slot_text} open", "add_circle", "muted"),
     ]
     if state.get("race"):
@@ -908,21 +894,53 @@ def build_chargen_view(account, state, *, error=None):
                 icon="swords",
                 command="continue",
             ),
+            "menunode_choose_gender": _entry(
+                "Choose Gender",
+                meta="Step 3",
+                icon="person",
+                command="continue",
+            ),
             "menunode_choose_name": _entry(
                 "Choose Name",
-                meta="Step 3",
+                meta="Step 4",
                 icon="badge",
                 command="continue",
             ),
             "menunode_confirm": _entry(
                 "Review Character",
-                meta="Step 4",
+                meta="Step 5",
                 icon="task_alt",
                 command="continue",
                 chips=[_chip("Ready", "check_circle", "good")],
             ),
         }[next_step]
         sections.append(_section("Next Step", "format_list_numbered", "entries", items=[next_step_entry]))
+    elif step_key == "menunode_choose_gender":
+        sections = []
+        if error:
+            sections.append(
+                _section(
+                    "Identity Issue",
+                    "trash",
+                    "lines",
+                    lines=[error.replace("|r", "").replace("|n", "")],
+                    span="wide",
+                )
+            )
+        gender_entries = []
+        for gender_key, label in BRAVE_GENDER_LABELS.items():
+            gender_entries.append(
+                _entry(
+                    label,
+                    meta="Selected" if state.get("gender") == gender_key else None,
+                    lines=[],
+                    icon="person",
+                    command=label.lower(),
+                    chips=[_chip("Current", "check_circle", "good")] if state.get("gender") == gender_key else [],
+                )
+            )
+        sections.append(_section("Gender", "person", "entries", items=gender_entries, span="wide"))
+        actions.append(_action("Back", "back", "arrow_back", tone="muted"))
     elif step_key == "menunode_choose_name":
         sections = []
         if error:
@@ -934,7 +952,7 @@ def build_chargen_view(account, state, *, error=None):
                     lines=[error.replace("|r", "").replace("|n", "")],
                     span="wide",
                 )
-        )
+            )
         sections.append(
             _section(
                 "Identity",
@@ -963,19 +981,6 @@ def build_chargen_view(account, state, *, error=None):
                 submit_mode="raw",
             )
         )
-        gender_entries = []
-        for gender_key, label in BRAVE_GENDER_LABELS.items():
-            gender_entries.append(
-                _entry(
-                    label,
-                    meta="Selected" if state.get("gender") == gender_key else None,
-                    lines=[],
-                    icon="person",
-                    command=label.lower(),
-                    chips=[_chip("Current", "check_circle", "good")] if state.get("gender") == gender_key else [],
-                )
-            )
-        sections.append(_section("Gender", "person", "entries", items=gender_entries))
         sections.append(
             _section(
                 "Rules",
@@ -985,22 +990,7 @@ def build_chargen_view(account, state, *, error=None):
                     _item("2 to 24 characters", icon="straighten"),
                     _item("Letters, spaces, apostrophes, and hyphens only", icon="spellcheck"),
                     _item("Must be unique across all characters", icon="shield"),
-                    _item("Select gender before continuing.", icon="person"),
                 ],
-            )
-        )
-        sections.append(
-            _section(
-                "Draft",
-                "checklist",
-                "pairs",
-                items=[
-                    _pair("Name", state.get("name") or "Not set", "badge"),
-                    _pair("Gender", gender_label, "person"),
-                    _pair("Race", race_name, get_race_icon(state.get("race"), RACES.get(state.get("race")))),
-                    _pair("Class", class_name, get_class_icon(state.get("class"), CLASSES.get(state.get("class")))),
-                ],
-                span="wide",
             )
         )
         actions.append(_action("Back", "back", "arrow_back", tone="muted"))
@@ -1060,7 +1050,6 @@ def build_chargen_view(account, state, *, error=None):
         actions.extend(
             [
                 _action("Create And Play", "finish play", "play_arrow", tone="accent"),
-                _action("Create Character", "finish", "play_arrow", tone="good"),
                 _action("Back", "back", "arrow_back", tone="muted"),
             ]
         )
@@ -1104,30 +1093,22 @@ def build_chargen_view(account, state, *, error=None):
                         icon=get_class_icon(state.get("class"), class_data),
                     ),
                 ],
+                span="wide",
+                variant="grid3",
             )
         )
         sections.append(
             _section(
-                "Ready",
+                "Begin Your Journey",
                 "play_arrow",
                 "entries",
                 items=[
                     _entry(
-                        "Create And Play",
-                        meta="Fastest Start",
+                        "Begin Your Journey",
                         lines=["Create this character and enter the world immediately."],
                         icon="login",
                         command="finish play",
-                        chips=[_chip("Recommended", "bolt", "accent")],
                     ),
-                    _entry(
-                        "Create Character",
-                        meta="Final Step",
-                        lines=["Create and return to your character list."],
-                        icon="play_arrow",
-                        command="finish",
-                        chips=[_chip("Roster", "groups", "good")],
-                    )
                 ],
                 span="wide",
             )
@@ -1236,12 +1217,19 @@ def _format_room_entity_items(viewer, visible_entities, visible_chars):
         label = obj.key if kind == "npc" else _display_name(obj)
         command = None
         picker = None
+        on_open_command = None
+        dismiss_bubble_speaker = None
         if kind == "npc":
             command = f"talk {obj.key}"
             picker = _build_world_interaction_picker(viewer, obj)
+            if entity_id in TUTORIAL_TALK_ENTITY_IDS:
+                on_open_command = f"_bravepopup talk {obj.key}"
+                dismiss_bubble_speaker = obj.key
         elif kind == "readable":
             command = f"read {obj.key}"
             picker = _build_world_interaction_picker(viewer, obj)
+            if entity_id in TUTORIAL_READ_ENTITY_IDS:
+                on_open_command = f"_bravepopup read {obj.key}"
         elif kind == "arcade":
             command = f"arcade inspect {obj.key}"
             picker = _build_world_interaction_picker(viewer, obj)
@@ -1251,6 +1239,8 @@ def _format_room_entity_items(viewer, visible_entities, visible_chars):
                 icon=ROOM_ENTITY_ID_ICONS.get(entity_id, ROOM_ENTITY_KIND_ICONS.get(kind, "category")),
                 command=command,
                 picker=picker,
+                on_open_command=on_open_command,
+                dismiss_bubble_speaker=dismiss_bubble_speaker,
             )
         )
 
@@ -1565,7 +1555,7 @@ def _format_room_context_action_items(room, viewer):
     ]
 
     items = []
-    if getattr(room.db, "brave_safe", False):
+    if room_allows_rest(room):
         items.append(_item("Rest", icon="campfire", command="rest"))
 
     if local_arcades:
@@ -1602,75 +1592,17 @@ def _format_room_context_action_items(room, viewer):
 
 
 def _build_tutorial_guidance(character):
-    """Return raw guidance entries for the tutorial floating sheet."""
+    """Return raw guidance entries for the tutorial floating sheet (the TUTORIAL overlay)."""
 
-    state = ensure_tutorial_state(character)
-    if state.get("status") != "active":
+    mechanical = get_tutorial_mechanical_guidance(character)
+    if not mechanical:
         return []
 
-    step_key = state.get("step") or "first_steps"
-    step = TUTORIAL_STEPS[step_key]
-    flags = state.get("flags", {})
-
-    guidance = [(step["summary"], "info")]
-
-    if step_key == "first_steps":
-        guidance.extend(
-            [
-                ("Speak with Sergeant Tamsin Vale.", "forum" if not flags.get("talked_tamsin") else "check_circle"),
-                ("Head east to Quartermaster Shed.", "east" if not flags.get("visited_quartermaster_shed") else "check_circle"),
-                ("Return to Wayfarer's Yard.", "west" if not flags.get("returned_to_wayfarers_yard") else "check_circle"),
-            ]
-        )
-    elif step_key == "pack_before_walk":
-        guidance.extend(
-            [
-                ("Speak with Quartermaster Nella Cobb.", "forum" if not flags.get("talked_nella") else "check_circle"),
-                ("Check your gear.", "shield" if not flags.get("viewed_gear") else "check_circle"),
-                ("Open your pack.", "inventory_2" if not flags.get("viewed_pack") else "check_circle"),
-                ("Read the supply board.", "article" if not flags.get("read_supply_board") else "check_circle"),
-            ]
-        )
-    elif step_key == "stand_your_ground":
-        guidance.append(("Speak with Ringhand Brask.", "forum" if not flags.get("talked_brask") else "check_circle"))
-    elif step_key == "clear_the_pens":
-        guidance.append(("Win one fight in the Vermin Pens.", "swords" if not flags.get("won_vermin_fight") else "check_circle"))
-    elif step_key == "through_the_gate":
-        guidance.append(("Report to Captain Harl Rowan.", "forum" if not flags.get("talked_harl") else "check_circle"))
-
-    optional_done = flags.get("read_family_post_sign") or flags.get("talked_peep")
-    guidance.append(("Optional: Visit Family Post for party basics.", "groups" if not optional_done else "check_circle"))
-
-    return guidance
+    return mechanical["guidance"]
 
 
-WELCOME_PAGES = [
-    {
-        "title": "Welcome to Brave, adventurer!",
-        "text": "You've stepped into a world where every choice matters. This isn't just a game; it's a living story where you and your family forge a path together.",
-        "icon": "auto_awesome",
-    },
-    {
-        "title": "Getting Your Bearings",
-        "text": "Brambleford is your home for now. Speak with the people you meet—they have stories to tell and wisdom to share. Sergeant Tamsin Vale is waiting for you nearby.",
-        "icon": "explore",
-    },
-    {
-        "title": "Your Kit",
-        "text": "An adventurer is only as good as their tools. Use the icons at the top to check your gear and open your pack. Knowing your straps and knives will save your life one day.",
-        "icon": "inventory_2",
-    },
-    {
-        "title": "The Fray",
-        "text": "The world is dangerous. In the pens to the south, you'll learn to stand your ground. Fighting is more than just swinging steel; it's about timing and using your calling's unique skills.",
-        "icon": "swords",
-    },
-    {
-        "title": "Ready?",
-        "text": "The Wayfarer's Yard is just the beginning. When you're ready, head south toward the town green. Adventure awaits, and the songs of Brave are yet to be written.",
-        "icon": "celebration",
-    },
-]
+WELCOME_PAGES = LANTERNFALL_WELCOME_PAGES
+RECAP_PAGES = LANTERNFALL_RECAP_PAGES
 
 
 def build_room_view(room, looker, *, visible_threats=None, visible_entities=None, visible_chars=None):
@@ -1709,14 +1641,23 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
     visible_items = _format_room_entity_items(looker, visible_entities, visible_chars)
     room_action_items = _format_room_context_action_items(room, looker)
     sections = []
-    tutorial_guidance = _build_tutorial_guidance(looker)
+    tutorial_guidance = []
     welcome_pages = []
-    if tutorial_guidance and not getattr(looker.db, "brave_welcome_shown", False):
-        state = ensure_tutorial_state(looker)
-        flags = state.get("flags", {})
-        if not flags.get("talked_tamsin") and state.get("step") == "first_steps":
-            welcome_pages = WELCOME_PAGES
-            looker.db.brave_welcome_shown = True
+    
+    welcome_shown = getattr(looker.db, "brave_welcome_shown", False)
+    room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+
+    if not welcome_shown:
+        if is_tutorial_active(looker):
+            welcome_pages = LANTERNFALL_WELCOME_PAGES
+        elif room_id == "brambleford_training_yard":
+            welcome_pages = LANTERNFALL_RECAP_PAGES
+        
+        if welcome_pages:
+             sessions = getattr(looker, "sessions", None)
+             if sessions and sessions.count() > 0:
+                 looker.db.brave_welcome_shown = True
+                 looker.db.brave_lanternfall_intro_shown = True
 
     sections.append(
         _section(
@@ -1741,6 +1682,15 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
     if not vicinity_items:
         vicinity_items.append(_item("All is quiet.", icon="visibility_off"))
 
+    guidance_eyebrow = None
+    guidance_title = None
+    if is_tutorial_active(looker):
+        mechanical = get_tutorial_mechanical_guidance(looker)
+        if mechanical:
+            tutorial_guidance = mechanical["guidance"]
+            guidance_eyebrow = mechanical["eyebrow"]
+            guidance_title = mechanical["title"]
+
     sections.append(
         _section(
             "The Vicinity",
@@ -1764,6 +1714,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
                 scene="explore",
                 danger="safe" if room.db.brave_safe else "danger",
             ),
+            welcome_pages=welcome_pages,
         ),
         "layout": "explore",
         "room_id": str(getattr(room, "id", "") or ""),
@@ -1783,6 +1734,8 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         "variant": "room",
         "tone": "safe" if room.db.brave_safe else "danger",
         "guidance": tutorial_guidance,
+        "guidance_eyebrow": guidance_eyebrow,
+        "guidance_title": guidance_title,
         "welcome_pages": welcome_pages,
         "room_actions": room_action_items,
         "social_presence": _build_room_social_presence(looker, visible_chars),
@@ -2209,10 +2162,6 @@ def _format_quest_reward_text(definition):
     return ", ".join(parts)
 
 
-def _character_status_label(character):
-    return "In Play" if character.sessions.all() else "Ready"
-
-
 def _character_location_label(character):
     return character.location.key if character.location else ""
 
@@ -2276,13 +2225,11 @@ def build_account_view(account):
         character.ensure_brave_character()
         race_name = RACES[character.db.brave_race]["name"]
         class_name = CLASSES[character.db.brave_class]["name"]
-        status_parts = [_character_status_label(character)]
-        if location_label := _character_location_label(character):
-            status_parts.append(location_label)
         lines = [
             f"{race_name} {class_name} · Level {character.db.brave_level}",
-            " · ".join(status_parts),
         ]
+        if location_label := _character_location_label(character):
+            lines.append(location_label)
         entry_chips = []
         if last_played and character.id == last_played.id:
             entry_chips.append(_chip("Last Played", "history", "accent"))
@@ -2314,7 +2261,7 @@ def build_account_view(account):
             "",
             "groups",
             "entries",
-            items=roster_entries or [_entry("No characters yet.", lines=["Use `create` to make your first adventurer."], icon="person_add")],
+            items=roster_entries or [_entry("No characters yet.", lines=["Create your first adventurer to begin."], icon="person_add")],
             hide_label=True,
         ),
     ]
@@ -2413,7 +2360,7 @@ def build_connection_view(*, screen="menu", error=None, username="", registratio
         )
         eyebrow = "Sign In"
         eyebrow_icon = "login"
-        subtitle = "Enter your account username and password."
+        subtitle = ""
     elif normalized_screen == "create":
         actions.append(_action("Back", "", "arrow_back", tone="muted"))
         actions[-1]["connection_screen"] = "menu"
@@ -2480,22 +2427,22 @@ def build_connection_view(*, screen="menu", error=None, username="", registratio
         )
         eyebrow = "Create Account"
         eyebrow_icon = "person_add"
-        subtitle = "Make an account, then build your first adventurer."
+        subtitle = "Make an account, then shape your first adventurer."
     else:
         sections.append(
             _section(
                 "Enter Brave",
-                "login",
+                "key",
                 "list",
                 items=[
-                    _item("Sign In", badge="IN", icon="login"),
-                    _item("Create Account", badge="NEW", icon="person_add"),
+                    _item("Sign In", icon="key"),
+                    _item("Create Account", icon="quill"),
                 ],
             )
         )
         sections[0]["items"][0]["connection_screen"] = "signin"
         sections[0]["items"][1]["connection_screen"] = "create"
-        eyebrow = "Welcome."
+        eyebrow = ""
         eyebrow_icon = None
         subtitle = ""
 
@@ -2642,35 +2589,15 @@ def _build_tutorial_entry(character):
 
     step_key = state.get("step") or "first_steps"
     step = TUTORIAL_STEPS[step_key]
-    flags = state.get("flags", {})
+    tutorial_objectives = get_tutorial_objective_entries(character) or {}
     lines = [step["summary"]]
-
-    if step_key == "first_steps":
-        lines.extend(
-            [
-                f"[{'x' if flags.get('talked_tamsin') else ' '}] Speak with Sergeant Tamsin Vale.",
-                f"[{'x' if flags.get('visited_quartermaster_shed') else ' '}] Head east to Quartermaster Shed.",
-                f"[{'x' if flags.get('returned_to_wayfarers_yard') else ' '}] Return to Wayfarer's Yard.",
-            ]
+    lines.extend(
+        _line(
+            objective.get("text", "Objective"),
+            icon="check_box" if objective.get("completed") else "check_box_outline_blank",
         )
-    elif step_key == "pack_before_walk":
-        lines.extend(
-            [
-                f"[{'x' if flags.get('talked_nella') else ' '}] Speak with Quartermaster Nella Cobb.",
-                f"[{'x' if flags.get('viewed_gear') else ' '}] Check your gear.",
-                f"[{'x' if flags.get('viewed_pack') else ' '}] Open your pack.",
-                f"[{'x' if flags.get('read_supply_board') else ' '}] Read the supply board.",
-            ]
-        )
-    elif step_key == "stand_your_ground":
-        lines.append(f"[{'x' if flags.get('talked_brask') else ' '}] Speak with Ringhand Brask.")
-    elif step_key == "clear_the_pens":
-        lines.append(f"[{'x' if flags.get('won_vermin_fight') else ' '}] Win one fight in the Vermin Pens.")
-    elif step_key == "through_the_gate":
-        lines.append(f"[{'x' if flags.get('talked_harl') else ' '}] Report to Captain Harl Rowan.")
-
-    optional_done = flags.get("read_family_post_sign") or flags.get("talked_peep")
-    lines.append(f"[{'x' if optional_done else ' '}] Optional: Visit Family Post for party basics.")
+        for objective in tutorial_objectives.get("objectives", [])
+    )
     return _entry(step["title"], meta="Tutorial", lines=lines, icon="school")
 
 
@@ -2824,6 +2751,7 @@ def build_quests_view(character):
 
     journal_mode = _get_journal_mode(character)
     tutorial_entry = _build_tutorial_entry(character)
+    tutorial_active = tutorial_entry is not None
     tracked_key = get_tracked_quest(character)
     nearby_npcs = _local_npc_keys(character)
     tracked_entry = _build_journal_quest_entry(
@@ -2832,7 +2760,7 @@ def build_quests_view(character):
         tracked_key=tracked_key,
         nearby_npcs=nearby_npcs,
         detailed=True,
-    ) if tracked_key else None
+    ) if tracked_key and not tutorial_active else None
     active_keys = [
         quest_key
         for quest_key in STARTING_QUESTS
@@ -2871,25 +2799,16 @@ def build_quests_view(character):
         )
     ]
     if journal_mode == "active":
-        if tracked_entry:
+        effective_tracked_entry = tutorial_entry or tracked_entry
+        if effective_tracked_entry:
             sections.append(
                 _section(
                     "",
-                    "flag",
+                    "school" if tutorial_entry else "flag",
                     "entries",
-                    items=[tracked_entry],
+                    items=[effective_tracked_entry],
                     variant="tracked",
                     hide_label=True,
-                )
-            )
-        if tutorial_entry:
-            sections.append(
-                _section(
-                    "Tutorial",
-                    "school",
-                    "entries",
-                    items=[tutorial_entry],
-                    variant="tutorial",
                 )
             )
         sections.extend(
@@ -3631,62 +3550,6 @@ def build_travel_view(character):
     )
 
 
-def build_talk_view(target, response):
-    """Return a browser-first view for NPC dialogue."""
-
-    paragraphs = [line.strip() for line in str(response or "").splitlines() if line.strip()]
-    if not paragraphs:
-        paragraphs = ["They have nothing to say right now."]
-    dialogue_lines = [_format_dialogue_line(line) for line in paragraphs]
-
-    return {
-        **_make_view(
-            "",
-            target.key,
-            eyebrow_icon=None,
-            title_icon="person",
-            subtitle="",
-            sections=[
-                _section(
-                    "",
-                    "forum",
-                    "lines",
-                    lines=dialogue_lines,
-                    variant="quote",
-                    hide_label=True,
-                )
-            ],
-            actions=_build_talk_actions(target),
-            back=True,
-            reactive=_reactive_view(getattr(target, "location", None), scene="dialogue"),
-        ),
-        "variant": "dialogue",
-    }
-
-
-def build_read_view(target, response):
-    """Return a browser-first view for readable world text."""
-
-    paragraphs = [line.strip() for line in str(response or "").splitlines() if line.strip()]
-    return _make_view(
-        "",
-        _display_name(target),
-        eyebrow_icon=None,
-        title_icon=None,
-        sections=[
-            _section(
-                "",
-                "menu_book",
-                "lines",
-                lines=paragraphs or ["There is nothing legible here right now."],
-                hide_label=True,
-            )
-        ],
-        back=True,
-        reactive=_reactive_view(getattr(target, "location", None), scene="read"),
-    )
-
-
 def build_arcade_detail_view(cabinet):
     """Return a descriptive inspect view for one local arcade cabinet."""
 
@@ -3772,6 +3635,27 @@ def build_combat_view(encounter, character):
 
     from typeclasses.scripts import ABILITY_LIBRARY
 
+    condition_telegraph_enemies = {
+        "briar_imp",
+        "cave_bat_swarm",
+        "cave_spider",
+        "carrion_hound",
+        "drowned_warder",
+        "fen_wisp",
+        "goblin_hexer",
+        "grave_crow",
+        "grubnak_the_pot_king",
+        "hollow_lantern",
+        "hollow_wisp",
+        "mire_hound",
+        "miretooth",
+        "restless_shade",
+        "rot_crow",
+        "ruk_fence_cutter",
+        "sir_edric_restless",
+        "sludge_slime",
+    }
+
     timing_scale = max(1, int(round(1 / max(0.1, float(getattr(encounter, "interval", 1) or 1)))))
 
     def display_atb_ticks(raw_ticks):
@@ -3842,14 +3726,66 @@ def build_combat_view(encounter, character):
             return "sentiment_satisfied"
         return "lunch_dining"
 
+    def party_has_harmful_condition():
+        for participant in participants:
+            state = encounter._get_participant_state(participant)
+            if any(int(state.get(key, 0) or 0) > 0 for key in ("bleed_turns", "poison_turns", "curse_turns", "snare_turns")):
+                return True
+        return False
+
+    def build_reaction_window():
+        roles = set()
+        threats = []
+        harmful_condition_active = party_has_harmful_condition()
+        for enemy in enemies:
+            state = actor_atb_state(enemy=enemy)
+            if (state or {}).get("phase") != "winding":
+                continue
+            timing = dict((state or {}).get("timing") or {})
+            action = dict((state or {}).get("current_action") or {})
+            threat_roles = {"guard"}
+            if timing.get("interruptible"):
+                threat_roles.add("interrupt")
+            template_key = str(enemy.get("template_key") or "").strip().lower()
+            if harmful_condition_active or template_key in condition_telegraph_enemies:
+                threat_roles.add("cleanse")
+            roles.update(threat_roles)
+            threats.append(
+                {
+                    "enemy_id": enemy.get("id"),
+                    "enemy": str(enemy.get("key") or "Enemy"),
+                    "label": action.get("label") or enemy.get("telegraph_label") or "Attack",
+                    "interruptible": bool(timing.get("interruptible")),
+                    "roles": sorted(threat_roles),
+                }
+            )
+        return {"active": bool(threats), "roles": sorted(roles), "threats": threats}
+
+    def mark_reaction_actions(actions, reaction_roles):
+        for action in actions:
+            role = action.get("reaction_role")
+            recommended = bool(role and role in reaction_roles)
+            action["reaction_recommended"] = recommended
+            if recommended:
+                action["reaction_hint"] = f"Reaction window: {role}"
+                if action.get("tooltip"):
+                    action["tooltip"] = f"{action['tooltip']}\nReaction window: useful now."
+                else:
+                    action["tooltip"] = "Reaction window: useful now."
+        return actions
+
     def combat_picker_options(action):
         options = []
+        reaction_recommended = bool(action.get("reaction_recommended"))
         if action.get("enabled"):
+            meta = action.get("text")
+            if reaction_recommended:
+                meta = f"{meta} · REACTION" if meta else "REACTION"
             primary = {
                 "label": action.get("label") or action.get("text") or "",
                 "icon": combat_option_icon(action),
-                "meta": action.get("text"),
-                "tone": "accent" if action.get("kind") == "ability" else "good",
+                "meta": meta,
+                "tone": "good" if reaction_recommended else ("accent" if action.get("kind") == "ability" else "good"),
                 "tooltip": action.get("tooltip"),
             }
             if action.get("picker"):
@@ -3867,7 +3803,7 @@ def build_combat_view(encounter, character):
                 "label": action.get("label") or action.get("text") or "",
                 "icon": inline_action.get("icon") or combat_option_icon(action),
                 "meta": inline_action.get("label"),
-                "tone": inline_action.get("tone") or "muted",
+                "tone": "good" if reaction_recommended else (inline_action.get("tone") or "muted"),
                 "tooltip": action.get("tooltip"),
             }
             if picker:
@@ -3881,14 +3817,15 @@ def build_combat_view(encounter, character):
         options = []
         for action in actions:
             options.extend(combat_picker_options(action))
+        has_reaction = any(action.get("reaction_recommended") for action in actions)
         return _action(
             title,
             None,
             icon_name,
-            tone="accent" if options else "muted",
+            tone="good" if has_reaction else ("accent" if options else "muted"),
             picker=_picker(
                 title,
-                subtitle="Choose an action.",
+                subtitle="Reaction tools are highlighted." if has_reaction else "Choose an action.",
                 picker_id=f"combat-{title.strip().lower()}",
                 options=options,
                 body=[] if options else [empty_text],
@@ -3977,6 +3914,18 @@ def build_combat_view(encounter, character):
 
     def build_enemy_status_chips(enemy):
         chips = []
+        telegraph_outcome = str(enemy.get("telegraph_outcome") or "").lower()
+        telegraph_answer = str(enemy.get("telegraph_answer") or "")
+        if telegraph_outcome == "interrupted":
+            chips.append(_chip("Interrupted", "block", "good"))
+        elif telegraph_outcome == "redirected":
+            chips.append(_chip("Redirected", "swap_horiz", "good"))
+        elif telegraph_outcome == "mitigated":
+            chips.append(_chip("Mitigated", "shield", "good"))
+        elif telegraph_outcome == "unanswered":
+            chips.append(_chip("Landed Clean", "priority_high", "danger"))
+        elif telegraph_outcome == "pending" and telegraph_answer:
+            chips.append(_chip(f"Answer: {telegraph_answer}", "shield", "accent"))
         if enemy.get("marked_turns", 0) > 0:
             chips.append(_chip(f"Marked {enemy['marked_turns']}", "my_location", "accent"))
         if enemy.get("bound_turns", 0) > 0:
@@ -4055,7 +4004,11 @@ def build_combat_view(encounter, character):
         selected_use = get_item_use_profile(selected_item, context="combat") or {}
         selected_target_kind = selected_use.get("target")
 
+    reaction_window = build_reaction_window()
     combat_actions = build_combat_action_payload(encounter, character)
+    reaction_roles = set(reaction_window.get("roles") or [])
+    mark_reaction_actions(combat_actions.get("abilities", []), reaction_roles)
+    mark_reaction_actions(combat_actions.get("items", []), reaction_roles)
 
     def build_companion_sidecar(companion):
         resources = participant_resources(companion)
@@ -4188,6 +4141,28 @@ def build_combat_view(encounter, character):
             )
         )
 
+    tutorial_guidance = []
+    guidance_eyebrow = None
+    guidance_title = None
+    try:
+        from world.tutorial import get_tutorial_combat_focus
+    except Exception:
+        tutorial_focus = []
+    else:
+        tutorial_focus = get_tutorial_combat_focus(character, encounter)
+    if tutorial_focus:
+        guidance_eyebrow = "Combat Tutorial"
+        guidance_title = "Training Focus"
+        tutorial_guidance = [
+            (
+                f"{str(item.get('title', 'Training') or 'Training').strip()}: {str(item.get('text', '') or '').strip()}"
+                if str(item.get("text", "") or "").strip()
+                else str(item.get("title", "Training") or "Training").strip(),
+                item.get("icon") or "school",
+            )
+            for item in tutorial_focus
+        ]
+
     return {
         **_make_view(
             "Combat",
@@ -4215,7 +4190,11 @@ def build_combat_view(encounter, character):
             reactive=_reactive_view(encounter.obj, scene="combat", danger="combat"),
         ),
         "variant": "combat",
+        "guidance": tutorial_guidance,
+        "guidance_eyebrow": guidance_eyebrow,
+        "guidance_title": guidance_title,
         "combat_actions": combat_actions,
+        "reaction_window": reaction_window,
         "party_count": party_count,
         "enemy_count": foe_count,
         "sticky": True,
@@ -4711,7 +4690,7 @@ def build_sheet_view(character):
     }
 
 
-def build_gear_view(character):
+def build_gear_view(character, feedback=None):
     """Return a browser-first main view for equipped gear."""
 
     equipment = character.db.brave_equipment or {}
@@ -4721,6 +4700,28 @@ def build_gear_view(character):
         else _build_empty_gear_entry(character, slot)
         for slot in EQUIPMENT_SLOTS
     ]
+    sections = []
+    if feedback:
+        sections.append(
+            _section(
+                "Power Feedback",
+                "trending_up",
+                "lines",
+                lines=[feedback],
+                span="wide",
+            )
+        )
+    sections.append(
+        _section(
+            "",
+            "shield",
+            "entries",
+            items=slot_entries,
+            hide_label=True,
+            span="wide",
+            variant="slots",
+        )
+    )
 
     return {
         **_make_view(
@@ -4730,17 +4731,7 @@ def build_gear_view(character):
             title_icon="shield",
             subtitle="",
             chips=[],
-            sections=[
-                _section(
-                    "",
-                    "shield",
-                    "entries",
-                    items=slot_entries,
-                    hide_label=True,
-                    span="wide",
-                    variant="slots",
-                )
-            ],
+            sections=sections,
             back=True,
             reactive=_reactive_from_character(character, scene="equipment"),
         ),

@@ -24,6 +24,11 @@ Brave's shipped web audio assets are sourced from OpenGameArt.
   - Title: `Boss Battle Theme`
   - Author: CleytonKauffman
   - License: CC0
+- `music/victory_fanfare.ogg`
+  - Source: https://opengameart.org/content/victory-fanfare
+  - Title: `Victory Fanfare`
+  - Author: ARoachIFoundOnMyPillow
+  - License: CC0
 
 ## Ambience
 

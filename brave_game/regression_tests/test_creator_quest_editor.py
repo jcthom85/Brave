@@ -42,12 +42,12 @@ class CreatorQuestEditorViewTests(unittest.TestCase):
         body = response.content.decode("utf-8")
 
         self.assertEqual(200, response.status_code)
-        self.assertIn("Quest Lines", body)
-        self.assertIn("Sync Quest Form To JSON", body)
-        self.assertIn("Objective One", body)
-        self.assertIn("Reward Item", body)
-        self.assertIn("validation-notes", body)
-        self.assertIn("creator_common.js", body)
+        self.assertIn("Quest Builder", body)
+        self.assertIn("Add Objective", body)
+        self.assertIn("Add Prerequisite", body)
+        self.assertIn("Add Reward Item", body)
+        self.assertIn("Advanced Source", body)
+        self.assertIn("Save Quest", body)
         self.assertIn("/api/content", body)
 
 

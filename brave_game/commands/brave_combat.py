@@ -6,6 +6,7 @@ from world.browser_views import build_combat_view
 from world.browser_panels import build_combat_panel
 from world.party import get_present_party_members
 from world.content import get_content_registry
+from world.tutorial import is_tutorial_solo_combat_room, record_command_event
 
 from .brave import BraveCharacterCommand
 
@@ -305,9 +306,10 @@ class CmdFight(BraveCharacterCommand):
                 self.msg("Nothing stirs here right now.")
                 return
 
+        solo_tutorial = is_tutorial_solo_combat_room(character.location)
         encounter, created = BraveEncounter.start_for_room(
             character.location,
-            expected_party_size=self.get_present_party_size(character),
+            expected_party_size=1 if solo_tutorial else self.get_present_party_size(character),
             threat_query=threat_query,
         )
         if not encounter:
@@ -316,7 +318,7 @@ class CmdFight(BraveCharacterCommand):
 
         if created:
             encounter.add_participant(character)
-            if character.db.brave_party_id:
+            if character.db.brave_party_id and not solo_tutorial:
                 for other in get_present_party_members(character):
                     if other != character and getattr(other, "is_connected", False):
                         encounter.add_participant(other)
@@ -439,9 +441,10 @@ class CmdAttack(BraveCharacterCommand):
                     self.msg("Choose which threat to open on first: " + ", ".join(str(option.get("display_name") or option.get("party_name") or "threat") for option in preview))
                     return
 
+            solo_tutorial = is_tutorial_solo_combat_room(character.location)
             encounter, _created = BraveEncounter.start_for_room(
                 character.location,
-                expected_party_size=self.get_present_party_size(character),
+                expected_party_size=1 if solo_tutorial else self.get_present_party_size(character),
                 threat_query=threat_query,
             )
             if not encounter:
@@ -449,7 +452,7 @@ class CmdAttack(BraveCharacterCommand):
                 return
 
             encounter.add_participant(character)
-            if getattr(character.db, "brave_party_id", None):
+            if getattr(character.db, "brave_party_id", None) and not solo_tutorial:
                 for other in get_present_party_members(character):
                     if other != character and getattr(other, "is_connected", False):
                         encounter.add_participant(other)
@@ -504,6 +507,7 @@ class CmdUse(BraveCharacterCommand):
             return
 
         ok, message = encounter.queue_ability(character, action_name, target_name)
+        ability_queued = ok
         if not ok:
             consumable_match = encounter.find_consumable(character, action_name, context="combat")
             if consumable_match:
@@ -512,6 +516,8 @@ class CmdUse(BraveCharacterCommand):
             self.msg(message)
             return
 
+        if ability_queued:
+            record_command_event(character, "class_ability")
         self._refresh_combat_scene(encounter, character)
         self.msg(message)
 

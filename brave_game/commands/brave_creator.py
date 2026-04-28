@@ -15,6 +15,7 @@ from world.content import (
     preview_quest,
     preview_race,
     preview_readable,
+    preview_roaming_party,
     preview_room,
     preview_room_encounters,
 )
@@ -94,6 +95,10 @@ def preview_content(kind, args, registry=None):
         if len(tokens) != 1:
             raise ValueError("Usage: content preview enemy <template_key>")
         return preview_enemy(tokens[0], registry=registry)
+    if normalized == "roaming-party":
+        if len(tokens) != 1:
+            raise ValueError("Usage: content preview roaming-party <party_key>")
+        return preview_roaming_party(tokens[0], registry=registry)
 
     raise ValueError(f"Unknown preview kind: {kind}")
 
@@ -187,6 +192,13 @@ def mutate_content(kind, target, raw_payload, *, write=False, editor=None, stage
             raise ValueError("Encounter-table payload must be a JSON list.")
         return editor.upsert_room_encounters(key, payload, write=write, stage=stage, author=author)
 
+    if normalized == "roaming-party":
+        if not key:
+            raise ValueError("Roaming-party updates require a party key.")
+        if not isinstance(payload, dict):
+            raise ValueError("Roaming-party payload must be a JSON object.")
+        return editor.upsert_roaming_party(key, payload, write=write, stage=stage, author=author)
+
     if normalized == "portal":
         if not key:
             raise ValueError("Portal updates require a portal key.")
@@ -254,6 +266,10 @@ def remove_content(kind, target, *, write=False, editor=None, stage="live", auth
         if not key:
             raise ValueError("Encounter-table removal requires a room id.")
         return editor.delete_room_encounters(key, write=write, stage=stage, author=author)
+    if normalized == "roaming-party":
+        if not key:
+            raise ValueError("Roaming-party removal requires a party key.")
+        return editor.delete_roaming_party(key, write=write, stage=stage, author=author)
     if normalized == "portal":
         if not key:
             raise ValueError("Portal removal requires a portal key.")

@@ -14,6 +14,7 @@ from .preview import (
     preview_quest,
     preview_race,
     preview_readable,
+    preview_roaming_party,
     preview_room_encounters,
     preview_room,
 )
@@ -37,6 +38,7 @@ __all__ = [
     "preview_quest",
     "preview_race",
     "preview_readable",
+    "preview_roaming_party",
     "preview_room_encounters",
     "preview_room",
 ]

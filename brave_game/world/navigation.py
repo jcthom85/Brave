@@ -5,6 +5,7 @@ from collections import deque
 from evennia.utils import search
 
 from world.content import get_content_registry
+from world.resting import room_allows_rest
 
 
 CONTENT = get_content_registry()
@@ -269,8 +270,9 @@ def _map_marker_keys(room, *, current=False, party=False, tracked_room_ids=None)
         keys.add("forge")
     if room_id and room_id == SYSTEMS_CONTENT.outfitters_room_id:
         keys.add("shop")
-    if "cooking" in activities:
+    if room_allows_rest(room):
         keys.add("rest")
+    if "cooking" in activities:
         keys.add("cooking")
     if room_id and room_id in SYSTEMS_CONTENT.fishing_spots:
         keys.add("fishing")

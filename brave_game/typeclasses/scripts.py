@@ -71,7 +71,7 @@ from world.race_perks import (
     get_wounded_damage_bonus,
 )
 from world.rewards import format_reward_summary, merge_reward_entries, roll_enemy_rewards
-from world.tutorial import get_tutorial_defeat_room, record_encounter_victory
+from world.tutorial import get_tutorial_defeat_room, is_tutorial_solo_combat_room, record_encounter_victory
 
 COMBAT_BOSS_CREDIT_RATIO = (2, 3)
 COMBAT_ACTION_SCORE_CAP = 3.0
@@ -415,6 +415,12 @@ PARTY_SCALING = {
     2: {"label": "Duo", "hp": 0.94, "power": 0.95, "accuracy": -1, "xp": 1.0},
     3: {"label": "Trio", "hp": 1.08, "power": 1.02, "accuracy": 1, "xp": 1.03},
     4: {"label": "Full Party", "hp": 1.22, "power": 1.1, "accuracy": 3, "xp": 1.08},
+}
+
+DROWNED_WEIR_SOLO_SCALING = {"hp": 0.9, "power": 0.82, "accuracy": -4}
+SOLO_ENCOUNTER_SCALING_OVERRIDES = {
+    "high_walk_claim": {"hp": 0.92, "power": 0.86, "accuracy": -2},
+    "the_hollow_lantern": {"hp": 0.62, "power": 0.55, "accuracy": -10},
 }
 
 
@@ -1554,6 +1560,25 @@ class BraveEncounter(Script):
             enemy=enemy,
         )
 
+    def _record_telegraph_outcome(self, enemy, outcome, *, label=None, answer=None, target=None):
+        """Store the latest answer state for a telegraphed enemy action."""
+
+        if not enemy:
+            return
+        enemy["telegraph_outcome"] = str(outcome or "").strip().lower() or "unanswered"
+        enemy["telegraph_label"] = label or enemy.get("telegraph_label") or self._enemy_action_label(enemy)
+        if answer:
+            enemy["telegraph_answer"] = str(answer)
+        else:
+            enemy.pop("telegraph_answer", None)
+        if target:
+            enemy["telegraph_target"] = _combat_target_name(target, "Companion")
+        else:
+            enemy.pop("telegraph_target", None)
+        saver = getattr(self, "_save_enemy", None)
+        if callable(saver):
+            saver(enemy)
+
     def _apply_reaction_guard(self, source, target, *, amount, label, redirect_to=None):
         """Apply a telegraph-answering guard or redirect effect."""
 
@@ -1583,6 +1608,7 @@ class BraveEncounter(Script):
             return False
         recovery_ticks = 1 + get_interrupt_recovery_bonus(character)
         self._set_enemy_recovery_state(enemy, ticks=recovery_ticks)
+        self._record_telegraph_outcome(enemy, "interrupted", label=reaction["label"], answer=tool_label, target=character)
         self.obj.msg_contents(
             f"|g{character.key}'s {tool_label} breaks {enemy['key']}'s {reaction['label']}.|n"
         )
@@ -1735,7 +1761,19 @@ class BraveEncounter(Script):
 
     def _get_scaling_profile(self):
         size = max(1, min(4, int(self.db.expected_party_size or 1)))
-        return PARTY_SCALING[size]
+        scaling = dict(PARTY_SCALING[size])
+        room_id = str(self.db.room_id or "")
+        if size == 1 and room_id.startswith("drowned_weir_"):
+            scaling["hp"] = round(scaling["hp"] * DROWNED_WEIR_SOLO_SCALING["hp"], 4)
+            scaling["power"] = round(scaling["power"] * DROWNED_WEIR_SOLO_SCALING["power"], 4)
+            scaling["accuracy"] += DROWNED_WEIR_SOLO_SCALING["accuracy"]
+            scaling["label"] = "Solo Drowned Weir"
+        encounter_override = SOLO_ENCOUNTER_SCALING_OVERRIDES.get(str(self.db.encounter_key or ""))
+        if size == 1 and encounter_override:
+            scaling["hp"] = round(scaling["hp"] * encounter_override.get("hp", 1.0), 4)
+            scaling["power"] = round(scaling["power"] * encounter_override.get("power", 1.0), 4)
+            scaling["accuracy"] += int(encounter_override.get("accuracy", 0) or 0)
+        return scaling
 
     def _primary_resource_key(self, character):
         if character.db.brave_class in {"cleric", "mage", "druid"}:
@@ -1824,7 +1862,7 @@ class BraveEncounter(Script):
 
     def _enemy_action_timing(self, enemy):
         template_key = (enemy or {}).get("template_key")
-        if template_key in {"old_greymaw", "miretooth", "tower_archer", "mag_clamp_drone"}:
+        if template_key in {"old_greymaw", "miretooth", "ruk_fence_cutter", "tower_archer", "mag_clamp_drone"}:
             return normalize_atb_profile({"windup_ticks": 1, "recovery_ticks": 1, "telegraph": True})
         if template_key in {"sir_edric_restless", "foreman_coilback", "captain_varn_blackreed", "grubnak_the_pot_king", "hollow_lantern"}:
             return normalize_atb_profile({"windup_ticks": 2, "recovery_ticks": 1, "telegraph": True})
@@ -1835,6 +1873,7 @@ class BraveEncounter(Script):
         return {
             "old_greymaw": "Brush Pounce",
             "miretooth": "Reed Ambush",
+            "ruk_fence_cutter": "Fence-Cutter Swing",
             "tower_archer": "Aimed Shot",
             "mag_clamp_drone": "Clamp Burst",
             "sir_edric_restless": "Funeral Charge",
@@ -1850,6 +1889,7 @@ class BraveEncounter(Script):
         return {
             "old_greymaw": f"|y{enemy['key']} lowers into the brush, gathering for {label}.|n",
             "miretooth": f"|y{enemy['key']} disappears into the reeds and lines up {label}.|n",
+            "ruk_fence_cutter": f"|y{enemy['key']} plants his feet and hauls the axe back for {label}.|n",
             "tower_archer": f"|y{enemy['key']} draws a careful bead for {label}.|n",
             "mag_clamp_drone": f"|y{enemy['key']} locks its rig and charges {label}.|n",
             "sir_edric_restless": f"|y{enemy['key']} raises {possessive} blade for {label}.|n",
@@ -2089,6 +2129,15 @@ class BraveEncounter(Script):
 
         if not character or character.location != self.obj:
             return False, "You are not in the right place to join this fight."
+
+        if is_tutorial_solo_combat_room(self.obj):
+            active_players = [
+                participant
+                for participant in self.get_active_player_participants()
+                if participant and participant.id != character.id
+            ]
+            if active_players:
+                return False, "The newbie pen is a one-at-a-time lesson. Wait for the current training fight to finish."
 
         character.ensure_brave_character()
         if (character.db.brave_resources or {}).get("hp", 0) <= 0:
@@ -3451,6 +3500,8 @@ class BraveEncounter(Script):
             hit_text = f"|rThe Hollow Lantern floods the chamber with white-black fire and sears {target_name} for {{damage}} damage!|n"
 
         if not self._roll_hit(enemy["accuracy"], derived["dodge"]):
+            if telegraphed:
+                self._record_telegraph_outcome(enemy, "unanswered", label=action_label, target=target)
             self.obj.msg_contents(f"{enemy['key']} misses {target_name}.")
             self._emit_miss_fx(enemy, target)
             return
@@ -3474,15 +3525,18 @@ class BraveEncounter(Script):
                 self._record_participant_contribution(target, mitigation=prevented)
         if telegraphed:
             if redirected_by:
+                self._record_telegraph_outcome(enemy, "redirected", label=action_label, answer=reaction_label, target=target)
                 self.obj.msg_contents(
                     f"|y{_combat_target_name(redirected_by, 'Companion')} cuts in front of {enemy['key']}'s {action_label}, pulling it off {_combat_target_name(original_target, 'Companion')}.|n"
                 )
             elif reaction_prevented > 0:
+                self._record_telegraph_outcome(enemy, "mitigated", label=action_label, answer=reaction_label, target=target)
                 source_name = _combat_target_name(reaction_source or target, "Companion")
                 self.obj.msg_contents(
                     f"|y{source_name}'s {reaction_label} takes the edge off {enemy['key']}'s {action_label}.|n"
                 )
             else:
+                self._record_telegraph_outcome(enemy, "unanswered", label=action_label, target=target)
                 self.obj.msg_contents(f"|r{enemy['key']}'s {action_label} lands clean.|n")
         damage = max(1, damage - get_incoming_damage_reduction(target))
         if _is_companion_actor(target):
@@ -3600,6 +3654,9 @@ class BraveEncounter(Script):
                 tick_ms=tick_ms,
             )
             if state.get("phase") == "winding":
+                timing = dict(state.get("timing") or {})
+                if timing.get("telegraph"):
+                    self._record_telegraph_outcome(enemy, "pending", label=action["label"])
                 self.obj.msg_contents(self._enemy_telegraph_message(enemy))
         if state.get("phase") == "resolving":
             self._execute_enemy_turn(enemy)

@@ -170,6 +170,8 @@ class ContentEditor:
         return mutations
 
     def upsert_room(self, room_data, *, write=False, stage="live", author="system"):
+        room_data = dict(room_data)
+        room_data.setdefault("safe", False)
         room_id = room_data["id"]
 
         def updater(payload):
@@ -321,6 +323,23 @@ class ContentEditor:
 
         return self.apply_pack_update("encounters", updater, write=write, stage=stage, author=author, action="upsert", target=room_id)
 
+    def upsert_roaming_party(self, party_key, party_data, *, write=False, stage="live", author="system"):
+        def updater(payload):
+            parties = [dict(entry) for entry in payload.get("roaming_parties", [])]
+            next_party = dict(party_data)
+            next_party["key"] = party_key
+            for index, existing in enumerate(parties):
+                if existing.get("key") == party_key:
+                    parties[index] = next_party
+                    break
+            else:
+                parties.append(next_party)
+            parties.sort(key=lambda entry: entry.get("key", ""))
+            payload["roaming_parties"] = parties
+            return payload
+
+        return self.apply_pack_update("encounters", updater, write=write, stage=stage, author=author, action="upsert", target=party_key)
+
     def upsert_portal(self, portal_key, portal_data, *, write=False, stage="live", author="system"):
         def updater(payload):
             portals = dict(payload.get("portals", {}).get("portals", {}))
@@ -445,6 +464,13 @@ class ContentEditor:
             return payload
 
         return self.apply_pack_update("encounters", updater, write=write, stage=stage, author=author, action="remove", target=room_id)
+
+    def delete_roaming_party(self, party_key, *, write=False, stage="live", author="system"):
+        def updater(payload):
+            payload["roaming_parties"] = [entry for entry in payload.get("roaming_parties", []) if entry.get("key") != party_key]
+            return payload
+
+        return self.apply_pack_update("encounters", updater, write=write, stage=stage, author=author, action="remove", target=party_key)
 
     def delete_portal(self, portal_key, *, write=False, stage="live", author="system"):
         def updater(payload):

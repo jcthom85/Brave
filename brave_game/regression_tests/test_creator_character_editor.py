@@ -38,13 +38,12 @@ class CreatorCharacterEditorViewTests(unittest.TestCase):
         response = creator_character_editor(request)
         body = response.content.decode("utf-8")
         self.assertEqual(200, response.status_code)
-        self.assertIn("Character Content", body)
-        self.assertIn("Class / Progression", body)
-        self.assertIn("Race", body)
+        self.assertIn("Character Builder", body)
+        self.assertIn("Class Builder", body)
+        self.assertIn("Race Builder", body)
         self.assertIn("Character Config", body)
-        self.assertIn("Sync Class Form To JSON", body)
-        self.assertIn("Sync Race Form To JSON", body)
-        self.assertIn("Sync Config Form To JSON", body)
+        self.assertIn("Advanced Source", body)
+        self.assertIn("Sync Builder To Source", body)
         self.assertIn("/api/content", body)
 
 

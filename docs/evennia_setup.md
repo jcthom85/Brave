@@ -2,13 +2,13 @@
 
 ## Current Baseline
 
-`Brave` is now scaffolded as an Evennia project in [`brave_game`](/mnt/c/Brave/brave_game).
+`Brave` is scaffolded as an Evennia project in [`brave_game`](../brave_game).
 
 Pinned framework version:
 
 - `evennia==6.0.0`
 
-Project root dependencies are tracked in [`requirements.txt`](/mnt/c/Brave/requirements.txt).
+Project root dependencies are tracked in [`requirements.txt`](../requirements.txt).
 
 ## Recommended Environment
 
@@ -16,8 +16,7 @@ For this workspace, use a Python `3.12` virtual environment.
 
 Important practical note:
 
-- If you are developing under WSL with the project stored on `/mnt/c/...`, keep the virtualenv on the Linux filesystem when possible and point the project at it.
-- Creating large Python environments directly on the mounted Windows filesystem can be slow or unreliable.
+- Keep the virtual environment inside this workspace unless you have a reason to share it elsewhere.
 
 ## Install
 
@@ -35,7 +34,7 @@ If the mounted filesystem makes local venv creation problematic, create it elsew
 The database has already been initialized once for this workspace, but the normal command is:
 
 ```bash
-cd /mnt/c/Brave
+cd /home/jcthom85/Brave
 ./run_evennia.sh migrate
 ```
 
@@ -49,7 +48,7 @@ Practical note:
 ## Start The Server
 
 ```bash
-cd /mnt/c/Brave
+cd /home/jcthom85/Brave
 ./run_evennia.sh start
 ```
 
@@ -70,7 +69,7 @@ If you prefer creating it manually instead, use Django's management command from
 Useful related commands:
 
 ```bash
-cd /mnt/c/Brave
+cd /home/jcthom85/Brave
 ./run_evennia.sh restart
 ./run_evennia.sh stop
 ./run_evennia.sh -l
@@ -119,13 +118,13 @@ Once logged in, the most useful current commands are:
 
 ## Current Project Layout
 
-- [`docs/`](/mnt/c/Brave/docs): design and build docs
-- [`brave_game/server/`](/mnt/c/Brave/brave_game/server): Evennia server config, logs, and lifecycle hooks
-- [`brave_game/typeclasses/`](/mnt/c/Brave/brave_game/typeclasses): core game entities
-- [`brave_game/commands/`](/mnt/c/Brave/brave_game/commands): command and cmdset extensions
-- [`brave_game/world/`](/mnt/c/Brave/brave_game/world): content definitions, help entries, prototypes, batch commands
-- [`brave_game/web/`](/mnt/c/Brave/brave_game/web): web routes and client customization
+- [`docs/`](../docs): design and build docs
+- [`brave_game/server/`](../brave_game/server): Evennia server config, logs, and lifecycle hooks
+- [`brave_game/typeclasses/`](../brave_game/typeclasses): core game entities
+- [`brave_game/commands/`](../brave_game/commands): command and cmdset extensions
+- [`brave_game/world/`](../brave_game/world): content, combat, quests, tutorial, and UI helpers
+- [`brave_game/web/`](../brave_game/web): web routes, templates, static assets, API, and browser client customization
 
 ## Next Technical Step
 
-Do not start with broad customization of Evennia's web client or replacement of default commands. The next useful step is to expand the current vertical slice with stronger party play, broader enemy variety, and a first named boss encounter.
+The next useful technical step should support the first-hour story pass: make the existing tutorial, cellar, road, and Ruk beats more reactive and better connected before adding new areas.

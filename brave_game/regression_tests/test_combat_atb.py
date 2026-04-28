@@ -69,30 +69,30 @@ class CombatAtbTests(unittest.TestCase):
         self.assertEqual(3, profile["cooldown_ticks"])
 
     def test_tick_atb_state_advances_from_charging_to_ready(self):
-        state = create_atb_state(fill_rate=120)
-        state = tick_atb_state(state)
+        state = create_atb_state(fill_rate=120, ready_gauge=100, phase_started_at_ms=1000)
+        state = tick_atb_state(state, now_ms=2000)
 
         self.assertEqual("ready", state["phase"])
         self.assertEqual(100, state["gauge"])
 
     def test_start_and_finish_atb_action_walks_through_windup_and_recovery(self):
-        state = create_atb_state(phase="ready", gauge=100)
-        state = start_atb_action(state, {"kind": "ability"}, {"windup_ticks": 2, "recovery_ticks": 1})
+        state = create_atb_state(phase="ready", gauge=100, ready_gauge=100, phase_started_at_ms=1000)
+        state = start_atb_action(state, {"kind": "ability"}, {"windup_ticks": 2, "recovery_ticks": 1}, now_ms=1000)
         self.assertEqual("winding", state["phase"])
         self.assertEqual(2, state["ticks_remaining"])
 
-        state = tick_atb_state(state)
+        state = tick_atb_state(state, now_ms=2000)
         self.assertEqual("winding", state["phase"])
         self.assertEqual(1, state["ticks_remaining"])
 
-        state = tick_atb_state(state)
+        state = tick_atb_state(state, now_ms=3000)
         self.assertEqual("resolving", state["phase"])
 
-        state = finish_atb_action(state)
+        state = finish_atb_action(state, now_ms=3000)
         self.assertEqual("recovering", state["phase"])
         self.assertEqual(1, state["ticks_remaining"])
 
-        state = tick_atb_state(state)
+        state = tick_atb_state(state, now_ms=4000)
         self.assertEqual("charging", state["phase"])
         self.assertEqual(0, state["gauge"])
 

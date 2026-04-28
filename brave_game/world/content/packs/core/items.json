@@ -1416,6 +1416,16 @@
       "slot": "chest",
       "summary": "Travel-ready robes stitched for mud, weather, and long prayers."
     },
+    "wayfarer_clasp": {
+      "bonuses": {
+        "accuracy": 1,
+        "max_hp": 4
+      },
+      "kind": "equipment",
+      "name": "Wayfarer Clasp",
+      "slot": "trinket",
+      "summary": "A plain brass yard clasp stamped with Brambleford's gate mark, small enough to ignore until it keeps a strap tight."
+    },
     "weirward_bulwark": {
       "bonuses": {
         "armor": 8,

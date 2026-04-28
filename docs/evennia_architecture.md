@@ -17,7 +17,7 @@ Target model:
 
 - One host machine runs the Evennia server
 - Each player connects from their own browser or MUD client
-- In phase 1, each human has one account and one active adventurer
+- Each human can have an account and character roster
 - Family play happens over the local network, not a shared-screen client
 
 This is the cleanest match for Evennia's account, session, and character model.
@@ -104,7 +104,7 @@ Likely script uses:
 
 ### Combat Resolution Model
 
-Recommended phase-1 model:
+Current model:
 
 - Fixed-tick encounter processing
 - Basic attacks handled automatically by combat state
@@ -136,7 +136,7 @@ That controller should own:
 
 Do not replace Evennia's default command set all at once.
 
-Phase-1 approach:
+Current approach:
 
 - Keep core navigation and inspection commands available while building
 - Add Brave-specific commands incrementally
@@ -164,7 +164,7 @@ Evennia's defaults give us a working baseline quickly, but a family-friendly RPG
 
 ### Version-Controlled Content First
 
-Phase 1 should keep core content in source-controlled data rather than in manual in-game builders.
+Core content lives in source-controlled JSON packs, with creator tooling editing those packs through validated mutation paths.
 
 Recommended early content categories:
 
@@ -198,11 +198,11 @@ Less ideal prototype candidates:
 
 Recommended ownership by package:
 
-- [`brave_game/typeclasses/`](/mnt/c/Brave/brave_game/typeclasses): entity behavior and persistent object models
-- [`brave_game/commands/`](/mnt/c/Brave/brave_game/commands): player command surface
-- [`brave_game/world/`](/mnt/c/Brave/brave_game/world): game data, prototypes, help entries, content loaders
-- [`brave_game/server/conf/`](/mnt/c/Brave/brave_game/server/conf): minimal server hooks and settings overrides
-- [`brave_game/web/`](/mnt/c/Brave/brave_game/web): optional browser UI customization after the core loop works
+- [`brave_game/typeclasses/`](../brave_game/typeclasses): entity behavior and persistent object models
+- [`brave_game/commands/`](../brave_game/commands): player command surface
+- [`brave_game/world/`](../brave_game/world): content registry, game systems, combat, quests, tutorial, and browser view payloads
+- [`brave_game/server/conf/`](../brave_game/server/conf): server hooks, settings, web plugins, and connection screens
+- [`brave_game/web/`](../brave_game/web): web routes, templates, API, static assets, audio hooks, and browser client customization
 
 ## Persistence Rules
 
@@ -224,30 +224,17 @@ Avoid early persistence of:
 
 ## Web Client Strategy
 
-Use the stock Evennia web client first.
+The stock Evennia client has been extended with Brave-specific panels, browser views, audio hooks, and mobile-oriented layout work. Commands remain canonical; browser controls should send the same commands instead of creating a second gameplay API.
 
-Do not start by rebuilding the browser UI.
+## Current Technical Priorities
 
-Only customize after:
+In Evennia terms, the useful next work is:
 
-- Character creation works
-- Party movement works
-- Combat output is readable
-- The first zone loop is playable
-
-The likely first useful web customization is a lightweight side pane for character sheet or party status, not a complete frontend rewrite.
-
-## Phase-1 Technical Priorities
-
-In Evennia terms, the recommended implementation order is:
-
-1. Character data model
-2. Zone and room graph for Brambleford plus Goblin Road
-3. Item and enemy prototypes
-4. Quest state model
-5. Encounter controller and combat tick loop
-6. Class abilities for Warrior, Cleric, and Ranger
-7. First boss fight
+1. Keep JSON content validation strict.
+2. Preserve command behavior as the canonical gameplay path.
+3. Strengthen browser views where they clarify current state or remove typing friction.
+4. Tighten the first-hour flow before adding new world breadth.
+5. Keep combat output readable for both solo and family-party sessions.
 
 ## Explicit Non-Goals
 

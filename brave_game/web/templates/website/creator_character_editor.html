@@ -9,170 +9,1468 @@
     * { box-sizing:border-box; }
     body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:radial-gradient(circle at top left, rgba(139,74,41,.14), transparent 28%),linear-gradient(180deg,#f3eadb 0%,#f9f3e8 44%,#efe2cf 100%); min-height:100vh; }
     .shell { width:min(1680px,calc(100vw - 32px)); margin:24px auto; display:grid; grid-template-columns:320px minmax(0,1fr); gap:20px; }
-    .panel { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
     .panel-head { padding:18px 20px; border-bottom:1px solid var(--line); background:linear-gradient(135deg, rgba(139,74,41,.12), rgba(217,200,172,.22)); }
-    .panel-head h1,.panel-head h2,.panel-head h3 { margin:0; font-weight:700; letter-spacing:.02em; }
+    .panel-head h1,.panel-head h2,.panel-head h3 { margin:0; font-weight:700; letter-spacing:0; }
     .panel-head p { margin:8px 0 0; color:var(--muted); line-height:1.4; }
     .panel-body { padding:18px 20px 20px; }
-    .search,.field input,.field select,textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:10px 12px; font:inherit; background:#fff; }
-    .search { margin-bottom:12px; }
-    .selector-list { display:grid; gap:8px; max-height:260px; overflow:auto; padding-right:4px; }
-    .selector-row { width:100%; text-align:left; border:1px solid var(--line); background:#fff; border-radius:12px; padding:12px; cursor:pointer; transition:transform 120ms ease,border-color 120ms ease,background 120ms ease; }
-    .selector-row:hover,.selector-row.active { transform:translateY(-1px); border-color:var(--accent); background:#fff8f2; }
-    .selector-row strong,.selector-row span { display:block; }
-    .selector-row span { color:var(--muted); font-size:.92rem; margin-top:4px; }
-    .workspace { display:grid; grid-template-rows:auto auto minmax(500px,auto) minmax(240px,auto); gap:16px; }
-    .toolbar,.editor-toolbar,.chips { display:flex; flex-wrap:wrap; gap:10px; }
-    .meta { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.94rem; }
-    .editor-grid { display:grid; grid-template-columns:1.1fr .9fr .9fr; gap:16px; }
     .stack { display:grid; gap:12px; }
+    .toolbar,.editor-toolbar,.chips,.summary-grid,.row-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .tabs { display:flex; flex-wrap:wrap; gap:10px; padding:0 20px; background:#fff8f2; border-bottom:1px solid var(--line); }
+    .tab { border-radius:0; border:0; border-bottom:3px solid transparent; box-shadow:none; color:var(--muted); background:transparent; padding:14px 4px 11px; }
+    .tab.active { color:var(--ink); border-bottom-color:var(--accent); }
+    .tab-panel[hidden] { display:none; }
+    .meta { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.94rem; }
+    .search,.field input,.field select,.field textarea,textarea,pre { width:100%; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); font:inherit; }
+    .search { margin-bottom:12px; padding:10px 12px; }
+    .field input,.field select,.field textarea { padding:10px 12px; }
+    .field textarea { min-height:90px; resize:vertical; }
+    .entity-list { display:grid; gap:8px; max-height:calc(100vh - 260px); overflow:auto; padding-right:4px; }
+    .entity-row { width:100%; text-align:left; border:1px solid var(--line); background:#fff; border-radius:8px; padding:12px; cursor:pointer; transition:transform 120ms ease,border-color 120ms ease,background 120ms ease; }
+    .entity-row:hover,.entity-row.active { transform:translateY(-1px); border-color:var(--accent); background:#fff8f2; }
+    .entity-row strong,.entity-row span { display:block; }
+    .entity-row span { color:var(--muted); font-size:.92rem; margin-top:4px; }
+    .builder-grid { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:16px; }
+    .surface { border:1px solid var(--line); border-radius:8px; background:#fffdfa; overflow:hidden; }
+    .surface-head { padding:12px 14px; border-bottom:1px solid var(--line); background:#fff7ef; display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+    .surface-head h3 { margin:0; font-size:1rem; }
+    .surface-head p { margin:4px 0 0; color:var(--muted); font-size:.92rem; line-height:1.4; }
+    .surface-body { padding:14px; }
     .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .field-grid.three { grid-template-columns:repeat(3,minmax(0,1fr)); }
     .field { display:grid; gap:6px; }
     .field.full { grid-column:1/-1; }
-    .field label { font-size:.88rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+    .field label { font-size:.82rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+    .chip,.pill { border:1px solid var(--line); border-radius:999px; padding:8px 12px; background:#fff; font-size:.92rem; }
+    .pill.good { border-color:rgba(47,109,76,.28); color:var(--good); background:#eef8f1; }
+    .pill.bad { border-color:rgba(141,49,34,.28); color:var(--bad); background:#fff0ed; }
     button { border:0; border-radius:999px; padding:10px 16px; font:inherit; cursor:pointer; background:var(--accent); color:#fff; box-shadow:0 10px 24px rgba(139,74,41,.24); }
     button.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none; }
+    button.danger { background:#fff0ed; color:var(--bad); border:1px solid rgba(141,49,34,.2); box-shadow:none; }
     button:disabled { opacity:.55; cursor:progress; }
-    .chip { border:1px solid var(--line); border-radius:999px; padding:8px 12px; background:#fff; font-size:.92rem; }
-    textarea,pre { width:100%; margin:0; border:1px solid var(--line); border-radius:14px; background:#fffdfa; font:.95rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
-    textarea { min-height:180px; padding:16px; resize:vertical; }
-    pre { min-height:220px; padding:16px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
-    .status { padding:12px 14px; border-radius:12px; background:#fff6e7; color:var(--ink); border:1px solid var(--line); }
+    textarea,pre { margin:0; border:1px solid var(--line); border-radius:8px; background:#fffdfa; font:.92rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
+    textarea { min-height:220px; padding:14px; resize:vertical; }
+    pre { min-height:180px; padding:14px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+    .status { padding:12px 14px; border-radius:8px; background:#fff6e7; color:var(--ink); border:1px solid var(--line); }
     .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
     .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
-    @media (max-width:1280px) { .editor-grid { grid-template-columns:1fr; } }
-    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .selector-list { max-height:220px; } .field-grid { grid-template-columns:1fr; } }
-  
-    .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
+    .validation-notes { padding:12px 14px; border-radius:8px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
     .validation-notes[hidden] { display:none; }
     .validation-notes strong { display:block; margin-bottom:8px; }
     .validation-notes ul { margin:0; padding-left:20px; display:grid; gap:6px; }
-
+    .rule-list,.pair-list,.preview-list,.slice-list { display:grid; gap:10px; }
+    .rule-card,.pair-card,.slice-card { border:1px solid var(--line); border-radius:8px; background:#fff; padding:12px; display:grid; gap:10px; }
+    .rule-head,.pair-head,.slice-head { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    .rule-head strong,.pair-head strong,.slice-head strong { font-size:.96rem; }
+    .rule-head span,.pair-head span,.slice-head span { display:block; color:var(--muted); font-size:.9rem; margin-top:4px; }
+    .pair-row { display:grid; grid-template-columns:minmax(0,1fr) 130px auto; gap:8px; align-items:end; }
+    .pair-row.two { grid-template-columns:minmax(0,1fr) 120px 120px auto; }
+    .pair-row .field { min-width:0; }
+    .pair-row .wide { grid-column:1/-1; }
+    .slice-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:end; }
+    .summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+    .summary-card { border:1px solid var(--line); border-radius:8px; background:#fffdfa; padding:12px; min-height:76px; }
+    .summary-card strong { display:block; font-size:1.25rem; }
+    .summary-card span { display:block; color:var(--muted); margin-top:4px; font-size:.9rem; }
+    details { border:1px solid var(--line); border-radius:8px; background:#fffdfa; }
+    details summary { cursor:pointer; padding:12px 14px; color:var(--muted); }
+    details .details-body { padding:0 14px 14px; }
+    @media (max-width:1180px) { .builder-grid,.summary-grid { grid-template-columns:1fr; } }
+    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .field-grid,.field-grid.three,.pair-row,.pair-row.two { grid-template-columns:1fr; } .entity-list { max-height:240px; } }
   </style>
 </head>
 <body>
   <div class="shell">
     <section class="panel">
-      <div class="panel-head"><h1>Character Content</h1><p>Browse classes and races, then edit progression data and global character-config values through the live content registry.</p></div>
+      <div class="panel-head">
+        <h1>Character Builder</h1>
+        <p>Build classes, races, and character defaults without opening raw JSON by default.</p>
+      </div>
       <div class="panel-body stack">
-        <input id="class-search" class="search" type="search" placeholder="Search classes">
-        <div id="class-list" class="selector-list"></div>
-        <input id="race-search" class="search" type="search" placeholder="Search races">
-        <div id="race-list" class="selector-list"></div>
+        <div>
+          <input id="class-search" class="search" type="search" placeholder="Search classes">
+          <div id="class-list" class="entity-list"></div>
+        </div>
+        <div>
+          <input id="race-search" class="search" type="search" placeholder="Search races">
+          <div id="race-list" class="entity-list"></div>
+        </div>
       </div>
     </section>
-    <section class="workspace">
-      <div class="panel"><div class="panel-head"><h2 id="editor-title">Character Editor</h2><p id="editor-subtitle">Select a class or race to load authored character-domain content.</p></div><div class="panel-body"><div class="meta"><span>API root: <strong>{{ api_root }}</strong></span><span>Reference domain: <strong>{{ reference_domain }}</strong></span></div></div></div>
-      <div class="toolbar"><button id="load-content" class="secondary" type="button">Reload Character Previews</button><button id="new-class" class="secondary" type="button">New Class Draft</button><button id="new-race" class="secondary" type="button">New Race Draft</button><button id="validate-content" class="secondary" type="button">Validate Packs</button><button id="reload-content" class="secondary" type="button">Reload Registry</button></div>
-      <div class="editor-grid">
-        <section class="panel"><div class="panel-head"><h3>Class / Progression</h3><p>Edit a class definition including base stats and the progression list.</p></div><div class="panel-body stack">
-          <div class="field-grid">
-            <div class="field"><label for="class-id">Class Key</label><input id="class-id" type="text"></div>
-            <div class="field"><label for="class-name">Class Name</label><input id="class-name" type="text"></div>
-            <div class="field"><label for="class-role">Role</label><input id="class-role" type="text"></div>
-            <div class="field"><label for="class-resource">Resource</label><input id="class-resource" type="text"></div>
-            <div class="field full"><label for="class-summary">Summary</label><textarea id="class-summary" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="class-base-stats">Base Stats JSON</label><textarea id="class-base-stats" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="class-progression">Progression JSON</label><textarea id="class-progression" spellcheck="false"></textarea></div>
-          </div>
-          <div class="editor-toolbar"><button id="sync-class-form" class="secondary" type="button">Sync Class Form To JSON</button><button id="diff-class" type="button">Dry-Run Class</button><button id="write-class" type="button">Write Class</button></div>
-          <textarea id="class-json" spellcheck="false"></textarea>
-          <div class="chips"><div id="class-chip" class="chip">Class: -</div></div>
-        </div></section>
-        <section class="panel"><div class="panel-head"><h3>Race</h3><p>Edit race bonuses, perk, and summary against the authored race catalog.</p></div><div class="panel-body stack">
-          <div class="field-grid">
-            <div class="field"><label for="race-id">Race Key</label><input id="race-id" type="text"></div>
-            <div class="field"><label for="race-name">Race Name</label><input id="race-name" type="text"></div>
-            <div class="field"><label for="race-perk">Perk</label><input id="race-perk" type="text"></div>
-            <div class="field full"><label for="race-summary">Summary</label><textarea id="race-summary" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="race-bonuses">Bonuses JSON</label><textarea id="race-bonuses" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="race-perk-summary">Perk Summary</label><textarea id="race-perk-summary" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="race-perk-bonuses">Perk Bonuses JSON</label><textarea id="race-perk-bonuses" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="race-perk-effects">Perk Effects JSON</label><textarea id="race-perk-effects" spellcheck="false"></textarea></div>
-          </div>
-          <div class="editor-toolbar"><button id="sync-race-form" class="secondary" type="button">Sync Race Form To JSON</button><button id="diff-race" type="button">Dry-Run Race</button><button id="write-race" type="button">Write Race</button></div>
-          <textarea id="race-json" spellcheck="false"></textarea>
-          <div class="chips"><div id="race-chip" class="chip">Race: -</div></div>
-        </div></section>
-        <section class="panel"><div class="panel-head"><h3>Character Config</h3><p>Edit global character-domain config like defaults, XP thresholds, and content-library metadata.</p></div><div class="panel-body stack">
-          <div class="field-grid">
-            <div class="field"><label for="starting-race">Starting Race</label><input id="starting-race" type="text"></div>
-            <div class="field"><label for="starting-class">Starting Class</label><input id="starting-class" type="text"></div>
-            <div class="field"><label for="max-level">Max Level</label><input id="max-level" type="number" min="1" value="10"></div>
-            <div class="field full"><label for="primary-stats">Primary Stats JSON</label><textarea id="primary-stats" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="vertical-slice-classes">Vertical Slice Classes JSON</label><textarea id="vertical-slice-classes" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="xp-for-level">XP For Level JSON</label><textarea id="xp-for-level" spellcheck="false"></textarea></div>
-          </div>
-          <div class="editor-toolbar"><button id="sync-config-form" class="secondary" type="button">Sync Config Form To JSON</button><button id="diff-config" type="button">Dry-Run Config</button><button id="write-config" type="button">Write Config</button></div>
-          <textarea id="config-json" spellcheck="false"></textarea>
-          <div class="chips"><div id="config-chip" class="chip">Config: live</div></div>
-        </div></section>
+
+    <section class="stack">
+      <div class="panel">
+        <div class="panel-head">
+          <h2 id="editor-title">Character Builder</h2>
+          <p id="editor-subtitle">Select a class or race to load authored content, or start a new draft.</p>
+        </div>
+        <div class="panel-body">
+          <div class="meta"><span>API root: <strong>{{ api_root }}</strong></span><span>Reference domain: <strong>{{ reference_domain }}</strong></span></div>
+        </div>
+        <nav class="tabs" aria-label="Character builder sections">
+          <button class="tab active" type="button" data-tab="class-panel">Class Builder</button>
+          <button class="tab" type="button" data-tab="race-panel">Race Builder</button>
+          <button class="tab" type="button" data-tab="config-panel">Character Config</button>
+        </nav>
       </div>
-      <div class="panel"><div class="panel-head"><h2>Preview / Diff Output</h2><p>Class previews resolve progression entries into actions and passives. Config previews show defaults and the XP ladder from the live registry.</p></div><div class="panel-body"><div id="status" class="status">Waiting for class or race selection.</div><pre id="output"></pre></div></div>
+
+      <div class="toolbar">
+        <button id="load-content" class="secondary" type="button">Refresh Selection</button>
+        <button id="new-class" class="secondary" type="button">New Class Draft</button>
+        <button id="new-race" class="secondary" type="button">New Race Draft</button>
+        <button id="validate-content" class="secondary" type="button">Check Content</button>
+        <button id="reload-content" class="secondary" type="button">Reload Registry</button>
+      </div>
+
+      <div id="validation-notes" class="validation-notes" hidden></div>
+
+      <div id="class-panel" class="tab-panel">
+        <div class="summary-grid">
+          <div class="summary-card"><strong id="class-summary-name">-</strong><span>Class</span></div>
+          <div class="summary-card"><strong id="class-summary-role">-</strong><span>Role</span></div>
+          <div class="summary-card"><strong id="class-summary-progression">0</strong><span>Progression entries</span></div>
+          <div class="summary-card"><strong id="class-summary-unknown">0</strong><span>Unresolved entries</span></div>
+        </div>
+        <div class="builder-grid">
+          <section class="surface">
+            <div class="surface-head">
+              <div>
+                <h3>Class Definition</h3>
+                <p>Edit class identity, base stats, and progression unlocks.</p>
+              </div>
+            </div>
+            <div class="surface-body stack">
+              <div class="field-grid">
+                <div class="field"><label for="class-id">Class Key</label><input id="class-id" type="text"></div>
+                <div class="field"><label for="class-name">Class Name</label><input id="class-name" type="text"></div>
+                <div class="field"><label for="class-role">Role</label><input id="class-role" type="text"></div>
+                <div class="field"><label for="class-resource">Resource</label><input id="class-resource" type="text"></div>
+                <div class="field"><label for="class-icon">Icon</label><input id="class-icon" type="text"></div>
+                <div class="field full"><label for="class-summary">Summary</label><textarea id="class-summary" spellcheck="false"></textarea></div>
+              </div>
+              <section class="surface">
+                <div class="surface-head">
+                  <div>
+                    <h3>Base Stats</h3>
+                    <p>Set the class starting stat spread.</p>
+                  </div>
+                  <button id="add-class-stat" class="secondary" type="button">Add Stat</button>
+                </div>
+                <div class="surface-body">
+                  <div id="class-stat-list" class="pair-list"></div>
+                </div>
+              </section>
+              <section class="surface">
+                <div class="surface-head">
+                  <div>
+                    <h3>Progression</h3>
+                    <p>Enter unlock levels and ability names.</p>
+                  </div>
+                  <button id="add-class-progression" class="secondary" type="button">Add Unlock</button>
+                </div>
+                <div class="surface-body">
+                  <div id="class-progression-list" class="rule-list"></div>
+                </div>
+              </section>
+              <div class="editor-toolbar">
+                <button id="sync-class-form" class="secondary" type="button">Sync Builder To Source</button>
+                <button id="diff-class" type="button">Preview Class Changes</button>
+                <button id="write-class" type="button">Save Class</button>
+              </div>
+              <details>
+                <summary>Advanced Source</summary>
+                <div class="details-body stack">
+                  <textarea id="class-json" spellcheck="false"></textarea>
+                  <button id="sync-class-source" class="secondary" type="button">Apply Source To Builder</button>
+                </div>
+              </details>
+            </div>
+          </section>
+
+          <section class="surface">
+            <div class="surface-head">
+              <div>
+                <h3>Class Preview</h3>
+                <p>Resolved progression with actions and passive unlocks.</p>
+              </div>
+            </div>
+            <div class="surface-body stack">
+              <div class="chips">
+                <div id="class-chip" class="chip">Class: -</div>
+                <div id="class-progress-chip" class="chip">Progression: 0</div>
+              </div>
+              <div id="class-preview-list" class="preview-list"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div id="race-panel" class="tab-panel" hidden>
+        <div class="summary-grid">
+          <div class="summary-card"><strong id="race-summary-name">-</strong><span>Race</span></div>
+          <div class="summary-card"><strong id="race-summary-perk">-</strong><span>Perk</span></div>
+          <div class="summary-card"><strong id="race-summary-bonuses">0</strong><span>Stat bonuses</span></div>
+          <div class="summary-card"><strong id="race-summary-effects">0</strong><span>Perk effects</span></div>
+        </div>
+        <div class="builder-grid">
+          <section class="surface">
+            <div class="surface-head">
+              <div>
+                <h3>Race Definition</h3>
+                <p>Edit the race summary, perk, and stat bonuses.</p>
+              </div>
+            </div>
+            <div class="surface-body stack">
+              <div class="field-grid">
+                <div class="field"><label for="race-id">Race Key</label><input id="race-id" type="text"></div>
+                <div class="field"><label for="race-name">Race Name</label><input id="race-name" type="text"></div>
+                <div class="field"><label for="race-perk">Perk</label><input id="race-perk" type="text"></div>
+                <div class="field"><label for="race-icon">Icon</label><input id="race-icon" type="text"></div>
+                <div class="field full"><label for="race-summary">Summary</label><textarea id="race-summary" spellcheck="false"></textarea></div>
+                <div class="field full"><label for="race-perk-summary">Perk Summary</label><textarea id="race-perk-summary" spellcheck="false"></textarea></div>
+              </div>
+              <section class="surface">
+                <div class="surface-head">
+                  <div>
+                    <h3>Race Bonuses</h3>
+                    <p>Race bonus stats use the same key/value row editor as classes.</p>
+                  </div>
+                  <button id="add-race-bonus" class="secondary" type="button">Add Bonus</button>
+                </div>
+                <div class="surface-body"><div id="race-bonus-list" class="pair-list"></div></div>
+              </section>
+              <section class="surface">
+                <div class="surface-head">
+                  <div>
+                    <h3>Perk Bonuses</h3>
+                    <p>Extra stat bonuses tied directly to the race perk.</p>
+                  </div>
+                  <button id="add-race-perk-bonus" class="secondary" type="button">Add Bonus</button>
+                </div>
+                <div class="surface-body"><div id="race-perk-bonus-list" class="pair-list"></div></div>
+              </section>
+              <section class="surface">
+                <div class="surface-head">
+                  <div>
+                    <h3>Perk Effects</h3>
+                    <p>Numeric perk modifiers and reductions.</p>
+                  </div>
+                  <button id="add-race-effect" class="secondary" type="button">Add Effect</button>
+                </div>
+                <div class="surface-body"><div id="race-effect-list" class="pair-list"></div></div>
+              </section>
+              <div class="editor-toolbar">
+                <button id="sync-race-form" class="secondary" type="button">Sync Builder To Source</button>
+                <button id="diff-race" type="button">Preview Race Changes</button>
+                <button id="write-race" type="button">Save Race</button>
+              </div>
+              <details>
+                <summary>Advanced Source</summary>
+                <div class="details-body stack">
+                  <textarea id="race-json" spellcheck="false"></textarea>
+                  <button id="sync-race-source" class="secondary" type="button">Apply Source To Builder</button>
+                </div>
+              </details>
+            </div>
+          </section>
+
+          <section class="surface">
+            <div class="surface-head">
+              <div>
+                <h3>Race Preview</h3>
+                <p>Resolved race information from the registry.</p>
+              </div>
+            </div>
+            <div class="surface-body stack">
+              <div class="chips">
+                <div id="race-chip" class="chip">Race: -</div>
+                <div id="race-perk-chip" class="chip">Perk: -</div>
+              </div>
+              <div id="race-preview-list" class="preview-list"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div id="config-panel" class="tab-panel" hidden>
+        <div class="summary-grid">
+          <div class="summary-card"><strong id="config-summary-race">-</strong><span>Starting race</span></div>
+          <div class="summary-card"><strong id="config-summary-class">-</strong><span>Starting class</span></div>
+          <div class="summary-card"><strong id="config-summary-abilities">0</strong><span>Abilities</span></div>
+          <div class="summary-card"><strong id="config-summary-passives">0</strong><span>Passives</span></div>
+        </div>
+        <div class="builder-grid">
+          <section class="surface">
+            <div class="surface-head">
+              <div>
+                <h3>Character Defaults</h3>
+                <p>Edit the global starting setup and leveling structure.</p>
+              </div>
+            </div>
+            <div class="surface-body stack">
+              <div class="field-grid">
+                <div class="field"><label for="starting-race">Starting Race</label><select id="starting-race"></select></div>
+                <div class="field"><label for="starting-class">Starting Class</label><select id="starting-class"></select></div>
+                <div class="field"><label for="max-level">Max Level</label><input id="max-level" type="number" min="1" value="10"></div>
+                <div class="field full"><label for="primary-stats-list">Primary Stats</label><div id="primary-stats-list" class="slice-list"></div></div>
+              </div>
+              <section class="surface">
+                <div class="surface-head">
+                  <div>
+                    <h3>Vertical Slice Classes</h3>
+                    <p>Choose the classes that are fully supported in the slice.</p>
+                  </div>
+                  <button id="add-slice-class" class="secondary" type="button">Add Class</button>
+                </div>
+                <div class="surface-body"><div id="slice-class-list" class="slice-list"></div></div>
+              </section>
+              <section class="surface">
+                <div class="surface-head">
+                  <div>
+                    <h3>XP For Level</h3>
+                    <p>Level thresholds for the entire class system.</p>
+                  </div>
+                  <button id="add-xp-row" class="secondary" type="button">Add Level</button>
+                </div>
+                <div class="surface-body"><div id="xp-list" class="rule-list"></div></div>
+              </section>
+              <div class="editor-toolbar">
+                <button id="sync-config-form" class="secondary" type="button">Sync Builder To Source</button>
+                <button id="diff-config" type="button">Preview Config Changes</button>
+                <button id="write-config" type="button">Save Config</button>
+              </div>
+              <details>
+                <summary>Advanced Source</summary>
+                <div class="details-body stack">
+                  <textarea id="config-json" spellcheck="false"></textarea>
+                  <button id="sync-config-source" class="secondary" type="button">Apply Source To Builder</button>
+                </div>
+              </details>
+            </div>
+          </section>
+
+          <section class="surface">
+            <div class="surface-head">
+              <div>
+                <h3>Character Preview</h3>
+                <p>Resolved counts and default setup from the live registry.</p>
+              </div>
+            </div>
+            <div class="surface-body stack">
+              <div class="chips">
+                <div id="config-chip" class="chip">Config: live</div>
+                <div id="ability-count-chip" class="chip">Abilities: 0</div>
+                <div id="passive-count-chip" class="chip">Passives: 0</div>
+              </div>
+              <div id="config-preview-list" class="preview-list"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Preview / Diff Output</h2>
+          <p>Class and race previews resolve live registry data, while config preview summarizes the whole character domain.</p>
+        </div>
+        <div class="panel-body">
+          <div id="status" class="status">Waiting for class or race selection.</div>
+          <pre id="output"></pre>
+        </div>
+      </div>
     </section>
   </div>
+
+  <datalist id="stat-options"></datalist>
+  <datalist id="ability-options"></datalist>
+
   <script src="/static/website/js/creator_common.js"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
-    const classSearch = document.getElementById('class-search');
-    const classList = document.getElementById('class-list');
-    const raceSearch = document.getElementById('race-search');
-    const raceList = document.getElementById('race-list');
-    const output = document.getElementById('output');
-    const statusBox = document.getElementById('status');
-    const validationNotes = document.getElementById('validation-notes');
+    const $ = (id) => document.getElementById(id);
+    const classSearch = $('class-search');
+    const classList = $('class-list');
+    const raceSearch = $('race-search');
+    const raceList = $('race-list');
+    const output = $('output');
+    const statusBox = $('status');
+    const validationNotes = $('validation-notes');
     const creatorTools = window.BraveCreator.bind(API_ROOT, statusBox, validationNotes);
-    const editorTitle = document.getElementById('editor-title');
-    const editorSubtitle = document.getElementById('editor-subtitle');
-    const loadContentButton = document.getElementById('load-content');
-    const newClassButton = document.getElementById('new-class');
-    const newRaceButton = document.getElementById('new-race');
-    const validateButton = document.getElementById('validate-content');
-    const reloadButton = document.getElementById('reload-content');
-    const classId = document.getElementById('class-id'); const className = document.getElementById('class-name'); const classRole = document.getElementById('class-role'); const classResource = document.getElementById('class-resource'); const classSummary = document.getElementById('class-summary'); const classBaseStats = document.getElementById('class-base-stats'); const classProgression = document.getElementById('class-progression'); const classJson = document.getElementById('class-json'); const classChip = document.getElementById('class-chip');
-    const raceId = document.getElementById('race-id'); const raceName = document.getElementById('race-name'); const racePerk = document.getElementById('race-perk'); const raceSummary = document.getElementById('race-summary'); const raceBonuses = document.getElementById('race-bonuses'); const racePerkSummary = document.getElementById('race-perk-summary'); const racePerkBonuses = document.getElementById('race-perk-bonuses'); const racePerkEffects = document.getElementById('race-perk-effects'); const raceJson = document.getElementById('race-json'); const raceChip = document.getElementById('race-chip');
-    const startingRace = document.getElementById('starting-race'); const startingClass = document.getElementById('starting-class'); const maxLevel = document.getElementById('max-level'); const primaryStats = document.getElementById('primary-stats'); const verticalSliceClasses = document.getElementById('vertical-slice-classes'); const xpForLevel = document.getElementById('xp-for-level'); const configJson = document.getElementById('config-json');
-    const syncClassButton = document.getElementById('sync-class-form'); const diffClassButton = document.getElementById('diff-class'); const writeClassButton = document.getElementById('write-class'); const syncRaceButton = document.getElementById('sync-race-form'); const diffRaceButton = document.getElementById('diff-race'); const writeRaceButton = document.getElementById('write-race'); const syncConfigButton = document.getElementById('sync-config-form'); const diffConfigButton = document.getElementById('diff-config'); const writeConfigButton = document.getElementById('write-config');
+    const editorTitle = $('editor-title');
+    const editorSubtitle = $('editor-subtitle');
+    const loadContentButton = $('load-content');
+    const newClassButton = $('new-class');
+    const newRaceButton = $('new-race');
+    const validateButton = $('validate-content');
+    const reloadButton = $('reload-content');
+    const classTabButton = document.querySelector('[data-tab="class-panel"]');
+    const raceTabButton = document.querySelector('[data-tab="race-panel"]');
+    const configTabButton = document.querySelector('[data-tab="config-panel"]');
+    const classPanel = $('class-panel');
+    const racePanel = $('race-panel');
+    const configPanel = $('config-panel');
+    const classId = $('class-id');
+    const className = $('class-name');
+    const classRole = $('class-role');
+    const classResource = $('class-resource');
+    const classIcon = $('class-icon');
+    const classSummary = $('class-summary');
+    const classStatList = $('class-stat-list');
+    const classProgressionList = $('class-progression-list');
+    const classJson = $('class-json');
+    const classChip = $('class-chip');
+    const classProgressChip = $('class-progress-chip');
+    const classSummaryName = $('class-summary-name');
+    const classSummaryRole = $('class-summary-role');
+    const classSummaryProgression = $('class-summary-progression');
+    const classSummaryUnknown = $('class-summary-unknown');
+    const classPreviewList = $('class-preview-list');
+    const addClassStatButton = $('add-class-stat');
+    const addClassProgressionButton = $('add-class-progression');
+    const syncClassButton = $('sync-class-form');
+    const syncClassSourceButton = $('sync-class-source');
+    const diffClassButton = $('diff-class');
+    const writeClassButton = $('write-class');
+    const raceId = $('race-id');
+    const raceName = $('race-name');
+    const racePerk = $('race-perk');
+    const raceIcon = $('race-icon');
+    const raceSummary = $('race-summary');
+    const racePerkSummary = $('race-perk-summary');
+    const raceBonusList = $('race-bonus-list');
+    const racePerkBonusList = $('race-perk-bonus-list');
+    const raceEffectList = $('race-effect-list');
+    const raceJson = $('race-json');
+    const raceChip = $('race-chip');
+    const racePerkChip = $('race-perk-chip');
+    const raceSummaryName = $('race-summary-name');
+    const raceSummaryPerk = $('race-summary-perk');
+    const raceSummaryBonuses = $('race-summary-bonuses');
+    const raceSummaryEffects = $('race-summary-effects');
+    const racePreviewList = $('race-preview-list');
+    const addRaceBonusButton = $('add-race-bonus');
+    const addRacePerkBonusButton = $('add-race-perk-bonus');
+    const addRaceEffectButton = $('add-race-effect');
+    const syncRaceButton = $('sync-race-form');
+    const syncRaceSourceButton = $('sync-race-source');
+    const diffRaceButton = $('diff-race');
+    const writeRaceButton = $('write-race');
+    const startingRace = $('starting-race');
+    const startingClass = $('starting-class');
+    const maxLevel = $('max-level');
+    const primaryStatsList = $('primary-stats-list');
+    const sliceClassList = $('slice-class-list');
+    const xpList = $('xp-list');
+    const configJson = $('config-json');
+    const configChip = $('config-chip');
+    const abilityCountChip = $('ability-count-chip');
+    const passiveCountChip = $('passive-count-chip');
+    const configSummaryRace = $('config-summary-race');
+    const configSummaryClass = $('config-summary-class');
+    const configSummaryAbilities = $('config-summary-abilities');
+    const configSummaryPassives = $('config-summary-passives');
+    const configPreviewList = $('config-preview-list');
+    const addSliceClassButton = $('add-slice-class');
+    const addXpRowButton = $('add-xp-row');
+    const syncConfigButton = $('sync-config-form');
+    const syncConfigSourceButton = $('sync-config-source');
+    const diffConfigButton = $('diff-config');
+    const writeConfigButton = $('write-config');
 
-    let classes = []; let races = []; let selectedClass = null; let selectedRace = null;
-    function setBusy(isBusy) { for (const button of [loadContentButton,newClassButton,newRaceButton,validateButton,reloadButton,syncClassButton,diffClassButton,writeClassButton,syncRaceButton,diffRaceButton,writeRaceButton,syncConfigButton,diffConfigButton,writeConfigButton]) button.disabled = isBusy; }
-    function setStatus(message, tone='') { creatorTools.setStatus(message, tone); }
-    function showValidation(messages) { return creatorTools.showValidation(messages); }
-    async function apiFetch(path, options={}) { const response = await fetch(`${API_ROOT}${path}`, { credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers||{})}, ...options }); const payload = await response.json().catch(() => ({})); if (!response.ok || payload.ok === false) throw new Error(payload.error || `Request failed with ${response.status}`); return payload; }
-    function renderList(container, entries, selectedId, filter, onSelect){ const token = filter.trim().toLowerCase(); const filtered = entries.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || '').toLowerCase().includes(token))); container.innerHTML = ''; for (const entry of filtered) { const button = document.createElement('button'); button.type = 'button'; button.className = 'selector-row' + (entry.id === selectedId ? ' active' : ''); button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id}${entry.meta ? ` · ${entry.meta}` : ''}</span>`; button.addEventListener('click', () => onSelect(entry)); container.appendChild(button); } }
-    function parseJson(textarea, fallback) { const raw = textarea.value.trim(); if (!raw) return fallback; try { return JSON.parse(raw); } catch (error) { throw new Error(`${textarea.id} JSON parse error: ${error.message}`); } }
-    function classDraft(){ return { name:'New Class', role:'Role', resource:'stamina', summary:'', base_stats:{ strength:1, agility:1, intellect:1, spirit:1, vitality:1 }, progression:[[1,'Strike']] }; }
-    function raceDraft(){ return { name:'New Race', perk:'Perk', summary:'', bonuses:{ strength:1 }, perk_summary:'', perk_bonuses:{}, perk_effects:{} }; }
-    function populateClassForm(classKey, payload){ classId.value = classKey || ''; className.value = payload.name || ''; classRole.value = payload.role || ''; classResource.value = payload.resource || ''; classSummary.value = payload.summary || ''; classBaseStats.value = JSON.stringify(payload.base_stats || {}, null, 2); classProgression.value = JSON.stringify(payload.progression || [], null, 2); classJson.value = JSON.stringify(payload, null, 2); classChip.textContent = `Class: ${classKey || '-'}`; }
-    function populateRaceForm(raceKey, payload){ raceId.value = raceKey || ''; raceName.value = payload.name || ''; racePerk.value = payload.perk || ''; raceSummary.value = payload.summary || ''; raceBonuses.value = JSON.stringify(payload.bonuses || {}, null, 2); racePerkSummary.value = payload.perk_summary || ''; racePerkBonuses.value = JSON.stringify(payload.perk_bonuses || {}, null, 2); racePerkEffects.value = JSON.stringify(payload.perk_effects || {}, null, 2); raceJson.value = JSON.stringify(payload, null, 2); raceChip.textContent = `Race: ${raceKey || '-'}`; }
-    function populateConfigForm(payload){ startingRace.value = payload.starting_race || ''; startingClass.value = payload.starting_class || ''; maxLevel.value = payload.max_level || 10; primaryStats.value = JSON.stringify(payload.primary_stats || [], null, 2); verticalSliceClasses.value = JSON.stringify(payload.vertical_slice_classes || [], null, 2); xpForLevel.value = JSON.stringify(payload.xp_for_level || {}, null, 2); configJson.value = JSON.stringify({ starting_race: payload.starting_race, starting_class: payload.starting_class, max_level: payload.max_level, primary_stats: payload.primary_stats, vertical_slice_classes: payload.vertical_slice_classes, xp_for_level: payload.xp_for_level }, null, 2); }
-    function syncClassFormToJson(){ const key = classId.value.trim(); const messages = creatorTools.requireFields([{ label: 'Class key', value: key }, { label: 'Class name', value: className.value.trim() }]); if (!showValidation(messages)) { setStatus('Class form is incomplete.', 'bad'); return null; } let baseStats, progression; try { baseStats = parseJson(classBaseStats, {}); progression = parseJson(classProgression, []); } catch (error) { showValidation([error.message]); setStatus(error.message, 'bad'); return null; } const payload = { name: className.value.trim() || key, role: classRole.value.trim() || '', resource: classResource.value.trim() || '', summary: classSummary.value.trim() || '', base_stats: baseStats, progression: progression }; creatorTools.clearValidation(); classJson.value = JSON.stringify(payload, null, 2); classChip.textContent = `Class: ${key}`; return payload; }
-    function syncRaceFormToJson(){ const key = raceId.value.trim(); const messages = creatorTools.requireFields([{ label: 'Race key', value: key }, { label: 'Race name', value: raceName.value.trim() }]); if (!showValidation(messages)) { setStatus('Race form is incomplete.', 'bad'); return null; } let bonuses, perkBonuses, perkEffects; try { bonuses = parseJson(raceBonuses, {}); perkBonuses = parseJson(racePerkBonuses, {}); perkEffects = parseJson(racePerkEffects, {}); } catch (error) { showValidation([error.message]); setStatus(error.message, 'bad'); return null; } const payload = { name: raceName.value.trim() || key, perk: racePerk.value.trim() || '', summary: raceSummary.value.trim() || '', bonuses: bonuses, perk_summary: racePerkSummary.value.trim() || '', perk_bonuses: perkBonuses, perk_effects: perkEffects }; creatorTools.clearValidation(); raceJson.value = JSON.stringify(payload, null, 2); raceChip.textContent = `Race: ${key}`; return payload; }
-    function syncConfigFormToJson(){ const messages = creatorTools.requireFields([{ label: 'Starting race', value: startingRace.value.trim() }, { label: 'Starting class', value: startingClass.value.trim() }]); if (!showValidation(messages)) { setStatus('Character config is incomplete.', 'bad'); return null; } let primary, vertical, xp; try { primary = parseJson(primaryStats, []); vertical = parseJson(verticalSliceClasses, []); xp = parseJson(xpForLevel, {}); } catch (error) { showValidation([error.message]); setStatus(error.message, 'bad'); return null; } const payload = { starting_race: startingRace.value.trim() || '', starting_class: startingClass.value.trim() || '', max_level: Number(maxLevel.value || 10), primary_stats: primary, vertical_slice_classes: vertical, xp_for_level: xp }; creatorTools.clearValidation(); configJson.value = JSON.stringify(payload, null, 2); return payload; }
-    async function loadReferences(){ [classes, races] = await Promise.all([ creatorTools.fetchReferences('classes'), creatorTools.fetchReferences('races') ]); renderList(classList, classes, selectedClass && selectedClass.id, classSearch.value, selectClass); renderList(raceList, races, selectedRace && selectedRace.id, raceSearch.value, selectRace); }
-    async function loadConfigPreview(){ const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'character-config', args:[] }) }); populateConfigForm(payload.preview); return payload.preview; }
-    async function selectClass(entry){ selectedClass = entry; renderList(classList, classes, entry.id, classSearch.value, selectClass); editorTitle.textContent = entry.label || entry.id; editorSubtitle.textContent = `${entry.id}${entry.meta ? ` · ${entry.meta}` : ''}`; await loadClassPreview(entry.id); }
-    async function selectRace(entry){ selectedRace = entry; renderList(raceList, races, entry.id, raceSearch.value, selectRace); await loadRacePreview(entry.id); }
-    async function loadClassPreview(classKey = selectedClass && selectedClass.id){ if (!classKey) return; setBusy(true); setStatus(`Loading class preview for ${classKey}...`); try { const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'class', args:[classKey] }) }); populateClassForm(payload.preview.class_key, payload.preview.class || {}); output.textContent = JSON.stringify(payload.preview, null, 2); setStatus(`Loaded class preview for ${classKey}.`, 'good'); } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
-    async function loadRacePreview(raceKey = selectedRace && selectedRace.id){ if (!raceKey) return; setBusy(true); setStatus(`Loading race preview for ${raceKey}...`); try { const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'race', args:[raceKey] }) }); populateRaceForm(payload.preview.race_key, payload.preview.race || {}); output.textContent = JSON.stringify(payload.preview, null, 2); setStatus(`Loaded race preview for ${raceKey}.`, 'good'); } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
-    async function mutate(kind, target, payload, write){ const result = await apiFetch('/mutate', { method:'POST', body: JSON.stringify({ kind, target, payload, write }) }); output.textContent = result.diff || JSON.stringify(result, null, 2); if (write) { const errors = result.validation_errors || []; if (errors.length) { setStatus(`Write completed with ${errors.length} validation issue(s).`, 'bad'); output.textContent = `${result.diff || ''}
+    let classes = [];
+    let races = [];
+    let selectedClass = null;
+    let selectedRace = null;
+    let classSourceExtras = {};
+    let raceSourceExtras = {};
+    let configSourceExtras = {};
+    let classStatsRows = [];
+    let classProgressionRows = [];
+    let raceBonusRows = [];
+    let racePerkBonusRows = [];
+    let raceEffectRows = [];
+    let primaryStatRows = [];
+    let sliceClassRows = [];
+    let xpRows = [];
+    let abilityNames = [];
+    let passiveNames = [];
+    let primaryStatOptions = ['strength', 'agility', 'intellect', 'spirit', 'vitality'];
 
-Validation errors:
-- ${errors.join('
-- ')}`.trim(); } else { setStatus(`Wrote ${kind} ${target || 'config'}.`, 'good'); await loadReferences(); await loadConfigPreview(); if (selectedClass) await loadClassPreview(selectedClass.id); if (selectedRace) await loadRacePreview(selectedRace.id); } } else { setStatus(`Dry-run diff ready for ${kind} ${target || 'config'}.`, 'good'); } }
-    async function mutateClass(write){ const payload = syncClassFormToJson(); const target = classId.value.trim(); if (!payload || !target) return; setBusy(true); setStatus(write ? `Writing class ${target}...` : `Generating class diff for ${target}...`); try { await mutate('class', target, payload, write); selectedClass = { id: target, label: payload.name, meta: payload.role }; } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
-    async function mutateRace(write){ const payload = syncRaceFormToJson(); const target = raceId.value.trim(); if (!payload || !target) return; setBusy(true); setStatus(write ? `Writing race ${target}...` : `Generating race diff for ${target}...`); try { await mutate('race', target, payload, write); selectedRace = { id: target, label: payload.name, meta: payload.perk }; } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
-    async function mutateConfig(write){ const payload = syncConfigFormToJson(); if (!payload) return; setBusy(true); setStatus(write ? 'Writing character config...' : 'Generating character-config diff...'); try { await mutate('character-config', '', payload, write); } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
-    async function validateContent(){ setBusy(true); setStatus('Validating content packs...'); try { const payload = await apiFetch('/validate', { method:'POST', body:'{}' }); if (payload.errors.length) { setStatus(`Validation found ${payload.errors.length} issue(s).`, 'bad'); output.textContent = payload.errors.join('
-'); } else { setStatus('Content validation passed.', 'good'); output.textContent = JSON.stringify(payload, null, 2); } } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
-    async function reloadContent(){ setBusy(true); setStatus('Reloading registry from disk...'); try { const payload = await apiFetch('/reload', { method:'POST', body:'{}' }); setStatus('Content registry reloaded.', 'good'); output.textContent = JSON.stringify(payload, null, 2); await loadReferences(); await loadConfigPreview(); if (selectedClass) await loadClassPreview(selectedClass.id); if (selectedRace) await loadRacePreview(selectedRace.id); } catch (error) { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; } finally { setBusy(false); } }
-    function newClassDraft(){ selectedClass = null; populateClassForm('new_class', classDraft()); editorTitle.textContent = 'New Class Draft'; editorSubtitle.textContent = 'Stage a new class and progression list before writing it to the pack.'; renderList(classList, classes, null, classSearch.value, selectClass); setStatus('New class draft staged in the form.', 'good'); }
-    function newRaceDraft(){ selectedRace = null; populateRaceForm('new_race', raceDraft()); renderList(raceList, races, null, raceSearch.value, selectRace); setStatus('New race draft staged in the form.', 'good'); }
+    function setBusy(isBusy) {
+      for (const button of [loadContentButton, newClassButton, newRaceButton, validateButton, reloadButton, syncClassButton, syncClassSourceButton, diffClassButton, writeClassButton, syncRaceButton, syncRaceSourceButton, diffRaceButton, writeRaceButton, syncConfigButton, syncConfigSourceButton, diffConfigButton, writeConfigButton, addClassStatButton, addClassProgressionButton, addRaceBonusButton, addRacePerkBonusButton, addRaceEffectButton, addSliceClassButton, addXpRowButton]) {
+        button.disabled = isBusy;
+      }
+    }
+
+    function setStatus(message, tone = '') {
+      creatorTools.setStatus(message, tone);
+    }
+
+    function showValidation(messages) {
+      return creatorTools.showValidation(messages);
+    }
+
+    async function apiFetch(path, options = {}) {
+      const response = await fetch(`${API_ROOT}${path}`, {
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options,
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload.ok === false) throw new Error(payload.error || `Request failed with ${response.status}`);
+      return payload;
+    }
+
+    function fillSelect(select, entries, options = {}) {
+      creatorTools.fillSelect(select, entries, options);
+    }
+
+    function renderList(container, entries, selectedId, filter, onSelect) {
+      const token = filter.trim().toLowerCase();
+      const filtered = entries.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || '').toLowerCase().includes(token)));
+      container.innerHTML = '';
+      for (const entry of filtered) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'entity-row' + (entry.id === selectedId ? ' active' : '');
+        const meta = [entry.meta, entry.kind].filter(Boolean).join(' · ');
+        button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id}${meta ? ` · ${meta}` : ''}</span>`;
+        button.addEventListener('click', () => onSelect(entry));
+        container.appendChild(button);
+      }
+    }
+
+    function setTab(tabId) {
+      for (const tab of document.querySelectorAll('.tab')) {
+        tab.classList.toggle('active', tab.dataset.tab === tabId);
+      }
+      classPanel.hidden = tabId !== 'class-panel';
+      racePanel.hidden = tabId !== 'race-panel';
+      configPanel.hidden = tabId !== 'config-panel';
+    }
+
+    function setStatOptions() {
+      const datalist = $('stat-options');
+      datalist.innerHTML = '';
+      for (const stat of primaryStatOptions) {
+        const option = document.createElement('option');
+        option.value = stat;
+        datalist.appendChild(option);
+      }
+    }
+
+    function setAbilityOptions() {
+      const datalist = $('ability-options');
+      datalist.innerHTML = '';
+      for (const name of [...abilityNames, ...passiveNames]) {
+        const option = document.createElement('option');
+        option.value = name;
+        datalist.appendChild(option);
+      }
+    }
+
+    function createPairRow(data = {}, labels = {}) {
+      return { key: data.key || '', value: data.value ?? '', keyLabel: labels.keyLabel || 'Key', valueLabel: labels.valueLabel || 'Value', valueType: labels.valueType || 'number', valueStep: labels.valueStep || '1', valueList: labels.valueList || '', valueMin: labels.valueMin || '0', valueMax: labels.valueMax || '' };
+    }
+
+    function renderPairRows(container, rows, labels, onChange) {
+      container.innerHTML = '';
+      if (!rows.length) {
+        const empty = document.createElement('div');
+        empty.className = 'pill';
+        empty.textContent = labels.empty || 'No entries yet.';
+        container.appendChild(empty);
+        return;
+      }
+      rows.forEach((row, index) => {
+        const card = document.createElement('div');
+        card.className = 'pair-card';
+        const head = document.createElement('div');
+        head.className = 'pair-head';
+        const strong = document.createElement('strong');
+        strong.textContent = `${labels.title || 'Entry'} ${index + 1}`;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'danger';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', () => {
+          rows.splice(index, 1);
+          onChange();
+        });
+        head.appendChild(strong);
+        head.appendChild(remove);
+        card.appendChild(head);
+        const rowGrid = document.createElement('div');
+        rowGrid.className = 'pair-row';
+        if (labels.valueType === 'number' && labels.hasOwnProperty('secondValue')) rowGrid.classList.add('two');
+        const keyField = document.createElement('div');
+        keyField.className = 'field';
+        keyField.innerHTML = `<label>${row.keyLabel || labels.keyLabel || 'Key'}</label>`;
+        const keyInput = document.createElement('input');
+        keyInput.type = 'text';
+        keyInput.value = row.key || '';
+        if (labels.keyList) keyInput.setAttribute('list', labels.keyList);
+        keyInput.addEventListener('input', () => { row.key = keyInput.value; onChange(); });
+        keyField.appendChild(keyInput);
+        rowGrid.appendChild(keyField);
+
+        const valueField = document.createElement('div');
+        valueField.className = 'field';
+        valueField.innerHTML = `<label>${row.valueLabel || labels.valueLabel || 'Value'}</label>`;
+        const valueInput = document.createElement('input');
+        valueInput.type = labels.valueType === 'number' ? 'number' : 'text';
+        if (labels.valueType === 'number') {
+          valueInput.step = labels.valueStep || '1';
+          valueInput.min = labels.valueMin || '0';
+        }
+        valueInput.value = row.value ?? '';
+        if (labels.valueList) valueInput.setAttribute('list', labels.valueList);
+        valueInput.addEventListener('input', () => {
+          row.value = labels.valueType === 'number' ? Number(valueInput.value || 0) : valueInput.value;
+          onChange();
+        });
+        valueField.appendChild(valueInput);
+        rowGrid.appendChild(valueField);
+
+        if (labels.secondValue) {
+          const secondField = document.createElement('div');
+          secondField.className = 'field';
+          secondField.innerHTML = `<label>${labels.secondValueLabel || 'Value 2'}</label>`;
+          const secondInput = document.createElement('input');
+          secondInput.type = labels.secondValueType || 'number';
+          secondInput.step = labels.secondValueStep || '1';
+          secondInput.min = labels.secondValueMin || '0';
+          secondInput.value = row.secondValue ?? '';
+          secondInput.addEventListener('input', () => { row.secondValue = Number(secondInput.value || 0); onChange(); });
+          secondField.appendChild(secondInput);
+          rowGrid.appendChild(secondField);
+        }
+        card.appendChild(rowGrid);
+        container.appendChild(card);
+      });
+    }
+
+    function renderClassPreview(preview) {
+      classPreviewList.innerHTML = '';
+      const entries = preview && Array.isArray(preview.progression) ? preview.progression : [];
+      for (const entry of entries) {
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        const kind = entry.entry_type || 'unknown';
+        pill.textContent = `Level ${entry.level} · ${entry.name} · ${kind}`;
+        classPreviewList.appendChild(pill);
+      }
+      if (!entries.length) {
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        pill.textContent = 'No progression loaded.';
+        classPreviewList.appendChild(pill);
+      }
+      classSummaryProgression.textContent = String(entries.length);
+      classProgressChip.textContent = `Progression: ${entries.length}`;
+      classSummaryUnknown.textContent = String(preview && Array.isArray(preview.unknown_progression_entries) ? preview.unknown_progression_entries.length : 0);
+    }
+
+    function renderRacePreview(preview) {
+      racePreviewList.innerHTML = '';
+      const lines = [
+        preview.race ? preview.race.summary : '',
+        preview.race ? `Perk: ${preview.race.perk || '-'}` : '',
+        preview.race ? `Starting race: ${preview.starting_race || '-'}` : '',
+      ].filter(Boolean);
+      for (const line of lines) {
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        pill.textContent = line;
+        racePreviewList.appendChild(pill);
+      }
+      if (!lines.length) {
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        pill.textContent = 'No race preview loaded.';
+        racePreviewList.appendChild(pill);
+      }
+    }
+
+    function renderConfigPreview(preview) {
+      configPreviewList.innerHTML = '';
+      const entries = [
+        `Primary stats: ${(preview.primary_stats || []).join(', ') || '-'}`,
+        `Vertical slice classes: ${(preview.vertical_slice_classes || []).join(', ') || '-'}`,
+        `XP levels: ${Object.keys(preview.xp_for_level || {}).length}`,
+      ];
+      for (const line of entries) {
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        pill.textContent = line;
+        configPreviewList.appendChild(pill);
+      }
+    }
+
+    function syncClassSummary(preview = {}) {
+      classSummaryName.textContent = className.value.trim() || '-';
+      classSummaryRole.textContent = classRole.value.trim() || '-';
+      classSummaryProgression.textContent = String(classProgressionRows.length);
+      classSummaryUnknown.textContent = String(preview.unknown_progression_entries ? preview.unknown_progression_entries.length : 0);
+      classChip.textContent = `Class: ${classId.value.trim() || '-'}`;
+    }
+
+    function syncRaceSummary() {
+      raceSummaryName.textContent = raceName.value.trim() || '-';
+      raceSummaryPerk.textContent = racePerk.value.trim() || '-';
+      raceSummaryBonuses.textContent = String(raceBonusRows.length);
+      raceSummaryEffects.textContent = String(raceEffectRows.length);
+      raceChip.textContent = `Race: ${raceId.value.trim() || '-'}`;
+      racePerkChip.textContent = `Perk: ${racePerk.value.trim() || '-'}`;
+    }
+
+    function syncConfigSummary(preview = {}) {
+      configSummaryRace.textContent = startingRace.value || '-';
+      configSummaryClass.textContent = startingClass.value || '-';
+      configSummaryAbilities.textContent = String(preview.ability_count ?? abilityNames.length);
+      configSummaryPassives.textContent = String(preview.passive_count ?? passiveNames.length);
+      configChip.textContent = 'Config: live';
+      abilityCountChip.textContent = `Abilities: ${preview.ability_count ?? abilityNames.length}`;
+      passiveCountChip.textContent = `Passives: ${preview.passive_count ?? passiveNames.length}`;
+    }
+
+    function createClassStatRow(key = '', value = 1) {
+      return { key, value };
+    }
+
+    function createProgressionRow(level = 1, ability = '') {
+      return { key: String(level), value: ability };
+    }
+
+    function createSliceRow(classKey = '') {
+      return { key: classKey, value: '' };
+    }
+
+    function createXpRow(level = 1, xp = 0) {
+      return { key: String(level), value: xp };
+    }
+
+    function renderClassStats() {
+      renderPairRows(classStatList, classStatsRows, {
+        title: 'Base Stat',
+        empty: 'No class stats yet.',
+        keyLabel: 'Stat',
+        valueLabel: 'Value',
+        keyList: 'stat-options',
+        valueType: 'number',
+        valueStep: '1',
+      }, () => {
+        syncClassSummary();
+        syncClassStateToSource(false);
+      });
+    }
+
+    function renderClassProgression() {
+      renderPairRows(classProgressionList, classProgressionRows, {
+        title: 'Unlock',
+        empty: 'No progression entries yet.',
+        keyLabel: 'Level',
+        valueLabel: 'Ability Name',
+        valueType: 'text',
+        valueList: 'ability-options',
+      }, () => {
+        syncClassSummary();
+        syncClassStateToSource(false);
+      });
+    }
+
+    function renderRacePairs() {
+      renderPairRows(raceBonusList, raceBonusRows, {
+        title: 'Bonus',
+        empty: 'No race bonuses yet.',
+        keyLabel: 'Stat',
+        valueLabel: 'Value',
+        keyList: 'stat-options',
+        valueType: 'number',
+        valueStep: '1',
+      }, () => { syncRaceSummary(); syncRaceStateToSource(false); });
+      renderPairRows(racePerkBonusList, racePerkBonusRows, {
+        title: 'Perk Bonus',
+        empty: 'No perk bonuses yet.',
+        keyLabel: 'Stat',
+        valueLabel: 'Value',
+        keyList: 'stat-options',
+        valueType: 'number',
+        valueStep: '1',
+      }, () => { syncRaceSummary(); syncRaceStateToSource(false); });
+      renderPairRows(raceEffectList, raceEffectRows, {
+        title: 'Effect',
+        empty: 'No perk effects yet.',
+        keyLabel: 'Effect',
+        valueLabel: 'Value',
+        valueType: 'number',
+        valueStep: '0.1',
+        valueMin: '-999999',
+      }, () => { syncRaceSummary(); syncRaceStateToSource(false); });
+    }
+
+    function renderPrimaryStats() {
+      primaryStatsList.innerHTML = '';
+      if (!primaryStatRows.length) {
+        const empty = document.createElement('div');
+        empty.className = 'pill';
+        empty.textContent = 'No primary stats configured.';
+        primaryStatsList.appendChild(empty);
+        return;
+      }
+      primaryStatRows.forEach((row, index) => {
+        const card = document.createElement('div');
+        card.className = 'slice-card';
+        const head = document.createElement('div');
+        head.className = 'slice-head';
+        const strong = document.createElement('strong');
+        strong.textContent = `Stat ${index + 1}`;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'danger';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', () => {
+          primaryStatRows.splice(index, 1);
+          renderPrimaryStats();
+          syncConfigSummary();
+          syncConfigStateToSource(false);
+        });
+        head.appendChild(strong);
+        head.appendChild(remove);
+        card.appendChild(head);
+        const rowGrid = document.createElement('div');
+        rowGrid.className = 'slice-row';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.setAttribute('list', 'stat-options');
+        input.value = row || '';
+        input.addEventListener('input', () => {
+          primaryStatRows[index] = input.value;
+          syncConfigSummary();
+          syncConfigStateToSource(false);
+        });
+        rowGrid.appendChild(input);
+        card.appendChild(rowGrid);
+        primaryStatsList.appendChild(card);
+      });
+    }
+
+    function renderSliceClasses() {
+      sliceClassList.innerHTML = '';
+      if (!sliceClassRows.length) {
+        const empty = document.createElement('div');
+        empty.className = 'pill';
+        empty.textContent = 'No slice classes configured.';
+        sliceClassList.appendChild(empty);
+        return;
+      }
+      sliceClassRows.forEach((row, index) => {
+        const card = document.createElement('div');
+        card.className = 'slice-card';
+        const head = document.createElement('div');
+        head.className = 'slice-head';
+        const strong = document.createElement('strong');
+        strong.textContent = `Slice Class ${index + 1}`;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'danger';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', () => {
+          sliceClassRows.splice(index, 1);
+          renderSliceClasses();
+          syncConfigSummary();
+          syncConfigStateToSource(false);
+        });
+        head.appendChild(strong);
+        head.appendChild(remove);
+        card.appendChild(head);
+        const rowGrid = document.createElement('div');
+        rowGrid.className = 'slice-row';
+        const select = document.createElement('select');
+        fillSelect(select, classes, { placeholder: 'Choose class', selectedValue: row });
+        select.addEventListener('change', () => {
+          sliceClassRows[index] = select.value;
+          syncConfigSummary();
+          syncConfigStateToSource(false);
+        });
+        rowGrid.appendChild(select);
+        card.appendChild(rowGrid);
+        sliceClassList.appendChild(card);
+      });
+    }
+
+    function renderXpRows() {
+      xpList.innerHTML = '';
+      if (!xpRows.length) {
+        const empty = document.createElement('div');
+        empty.className = 'pill';
+        empty.textContent = 'No XP levels configured.';
+        xpList.appendChild(empty);
+        return;
+      }
+      xpRows.forEach((row, index) => {
+        const card = document.createElement('div');
+        card.className = 'rule-card';
+        const head = document.createElement('div');
+        head.className = 'rule-head';
+        const strong = document.createElement('strong');
+        strong.textContent = `Level ${index + 1}`;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'danger';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', () => {
+          xpRows.splice(index, 1);
+          renderXpRows();
+          syncConfigSummary();
+          syncConfigStateToSource(false);
+        });
+        head.appendChild(strong);
+        head.appendChild(remove);
+        card.appendChild(head);
+        const rowGrid = document.createElement('div');
+        rowGrid.className = 'pair-row';
+        const levelField = document.createElement('div');
+        levelField.className = 'field';
+        levelField.innerHTML = '<label>Level</label>';
+        const levelInput = document.createElement('input');
+        levelInput.type = 'number';
+        levelInput.min = '1';
+        levelInput.value = row.key || 1;
+        levelInput.addEventListener('input', () => {
+          row.key = String(Math.max(1, Number(levelInput.value || 1)));
+          syncConfigSummary();
+          syncConfigStateToSource(false);
+        });
+        levelField.appendChild(levelInput);
+        rowGrid.appendChild(levelField);
+        const xpField = document.createElement('div');
+        xpField.className = 'field';
+        xpField.innerHTML = '<label>XP Needed</label>';
+        const xpInput = document.createElement('input');
+        xpInput.type = 'number';
+        xpInput.min = '0';
+        xpInput.value = row.value ?? 0;
+        xpInput.addEventListener('input', () => {
+          row.value = Number(xpInput.value || 0);
+          syncConfigSummary();
+          syncConfigStateToSource(false);
+        });
+        xpField.appendChild(xpInput);
+        rowGrid.appendChild(xpField);
+        card.appendChild(rowGrid);
+        xpList.appendChild(card);
+      });
+    }
+
+    function classDraft() {
+      return {
+        name: 'New Class',
+        role: 'Role',
+        resource: 'resource',
+        icon: '',
+        summary: '',
+        base_stats: Object.fromEntries(primaryStatOptions.slice(0, 5).map((stat) => [stat, 1])),
+        progression: [[1, 'Strike']],
+      };
+    }
+
+    function raceDraft() {
+      return {
+        name: 'New Race',
+        perk: 'Perk',
+        icon: '',
+        summary: '',
+        perk_summary: '',
+        bonuses: { strength: 1 },
+        perk_bonuses: {},
+        perk_effects: {},
+      };
+    }
+
+    function configDraftFromPreview(preview) {
+      return {
+        starting_race: preview.starting_race || '',
+        starting_class: preview.starting_class || '',
+        max_level: preview.max_level || 10,
+        primary_stats: preview.primary_stats || [],
+        vertical_slice_classes: preview.vertical_slice_classes || [],
+        xp_for_level: preview.xp_for_level || {},
+        ability_library: {},
+        implemented_ability_keys: preview.implemented_ability_keys || [],
+        passive_ability_bonuses: {},
+      };
+    }
+
+    function populateClassForm(classKey, payload, preview = {}) {
+      classSourceExtras = { ...payload };
+      delete classSourceExtras.name;
+      delete classSourceExtras.role;
+      delete classSourceExtras.resource;
+      delete classSourceExtras.icon;
+      delete classSourceExtras.summary;
+      delete classSourceExtras.base_stats;
+      delete classSourceExtras.progression;
+      classId.value = classKey || '';
+      className.value = payload.name || '';
+      classRole.value = payload.role || '';
+      classResource.value = payload.resource || '';
+      classIcon.value = payload.icon || '';
+      classSummary.value = payload.summary || '';
+      classStatsRows = Object.entries(payload.base_stats || {}).map(([key, value]) => createClassStatRow(key, value));
+      classProgressionRows = (payload.progression || []).map(([level, ability]) => createProgressionRow(level, ability));
+      if (!classStatsRows.length) classStatsRows = primaryStatOptions.slice(0, 5).map((stat) => createClassStatRow(stat, 1));
+      if (!classProgressionRows.length) classProgressionRows = [createProgressionRow(1, 'Strike')];
+      classJson.value = JSON.stringify(payload, null, 2);
+      syncClassSummary(preview);
+      renderClassStats();
+      renderClassProgression();
+      renderClassPreview(preview);
+    }
+
+    function populateRaceForm(raceKey, payload) {
+      raceSourceExtras = { ...payload };
+      delete raceSourceExtras.name;
+      delete raceSourceExtras.perk;
+      delete raceSourceExtras.icon;
+      delete raceSourceExtras.summary;
+      delete raceSourceExtras.perk_summary;
+      delete raceSourceExtras.bonuses;
+      delete raceSourceExtras.perk_bonuses;
+      delete raceSourceExtras.perk_effects;
+      raceId.value = raceKey || '';
+      raceName.value = payload.name || '';
+      racePerk.value = payload.perk || '';
+      raceIcon.value = payload.icon || '';
+      raceSummary.value = payload.summary || '';
+      racePerkSummary.value = payload.perk_summary || '';
+      raceBonusRows = Object.entries(payload.bonuses || {}).map(([key, value]) => createPairRow({ key, value }, { keyLabel: 'Stat', valueLabel: 'Value', valueType: 'number', valueStep: '1' }));
+      racePerkBonusRows = Object.entries(payload.perk_bonuses || {}).map(([key, value]) => createPairRow({ key, value }, { keyLabel: 'Stat', valueLabel: 'Value', valueType: 'number', valueStep: '1' }));
+      raceEffectRows = Object.entries(payload.perk_effects || {}).map(([key, value]) => createPairRow({ key, value }, { keyLabel: 'Effect', valueLabel: 'Value', valueType: 'number', valueStep: '0.1', valueMin: '-999999' }));
+      if (!raceBonusRows.length) raceBonusRows = [createPairRow({ key: 'strength', value: 1 }, { keyLabel: 'Stat', valueLabel: 'Value', valueType: 'number', valueStep: '1' })];
+      raceJson.value = JSON.stringify(payload, null, 2);
+      syncRaceSummary();
+      renderRacePairs();
+      renderRacePreview({ race: payload });
+    }
+
+    function populateConfigForm(payload) {
+      configSourceExtras = { ...payload };
+      delete configSourceExtras.starting_race;
+      delete configSourceExtras.starting_class;
+      delete configSourceExtras.max_level;
+      delete configSourceExtras.primary_stats;
+      delete configSourceExtras.vertical_slice_classes;
+      delete configSourceExtras.xp_for_level;
+      startingRace.value = payload.starting_race || '';
+      startingClass.value = payload.starting_class || '';
+      maxLevel.value = payload.max_level || 10;
+      primaryStatRows = [...(payload.primary_stats || [])];
+      sliceClassRows = [...(payload.vertical_slice_classes || [])];
+      xpRows = Object.entries(payload.xp_for_level || {}).map(([level, xp]) => createXpRow(level, xp)).sort((a, b) => Number(a.key) - Number(b.key));
+      if (!primaryStatRows.length) primaryStatRows = [...primaryStatOptions.slice(0, 5)];
+      if (!sliceClassRows.length) sliceClassRows = classes.slice(0, 3).map((entry) => entry.id);
+      if (!xpRows.length) xpRows = [createXpRow(1, 0), createXpRow(2, 50), createXpRow(3, 125)];
+      configJson.value = JSON.stringify(payload, null, 2);
+      syncConfigSummary(payload);
+      renderPrimaryStats();
+      renderSliceClasses();
+      renderXpRows();
+      renderConfigPreview(payload);
+    }
+
+    function buildClassPayload() {
+      const baseStats = {};
+      for (const row of classStatsRows) {
+        const key = String(row.key || '').trim();
+        if (!key) continue;
+        baseStats[key] = Number(row.value || 0);
+      }
+      const progression = classProgressionRows
+        .map((row) => [Number(row.key || 1), String(row.value || '').trim()])
+        .filter(([, ability]) => ability);
+      return {
+        ...classSourceExtras,
+        name: className.value.trim(),
+        role: classRole.value.trim(),
+        resource: classResource.value.trim(),
+        icon: classIcon.value.trim(),
+        summary: classSummary.value.trim(),
+        base_stats: baseStats,
+        progression,
+      };
+    }
+
+    function buildRacePayload() {
+      const toMap = (rows) => {
+        const payload = {};
+        for (const row of rows) {
+          const key = String(row.key || '').trim();
+          if (!key) continue;
+          payload[key] = Number(row.value || 0);
+        }
+        return payload;
+      };
+      return {
+        ...raceSourceExtras,
+        name: raceName.value.trim(),
+        perk: racePerk.value.trim(),
+        icon: raceIcon.value.trim(),
+        summary: raceSummary.value.trim(),
+        perk_summary: racePerkSummary.value.trim(),
+        bonuses: toMap(raceBonusRows),
+        perk_bonuses: toMap(racePerkBonusRows),
+        perk_effects: toMap(raceEffectRows),
+      };
+    }
+
+    function buildConfigPayload() {
+      const toList = (rows) => rows.map((value) => String(value || '').trim()).filter(Boolean);
+      const xpForLevel = {};
+      for (const row of xpRows) {
+        const level = Number(row.key || 0);
+        if (!level) continue;
+        xpForLevel[level] = Number(row.value || 0);
+      }
+      return {
+        ...configSourceExtras,
+        starting_race: startingRace.value.trim(),
+        starting_class: startingClass.value.trim(),
+        max_level: Number(maxLevel.value || 10),
+        primary_stats: toList(primaryStatRows),
+        vertical_slice_classes: toList(sliceClassRows),
+        xp_for_level: xpForLevel,
+      };
+    }
+
+    function syncClassStateToSource(showStatus = true) {
+      const key = classId.value.trim();
+      const messages = creatorTools.requireFields([
+        { label: 'Class key', value: key },
+        { label: 'Class name', value: className.value.trim() },
+        { label: 'Class role', value: classRole.value.trim() },
+        { label: 'Class resource', value: classResource.value.trim() },
+        { label: 'Class summary', value: classSummary.value.trim() },
+      ]);
+      if (!classStatsRows.length) messages.push('At least one base stat is required.');
+      if (!classProgressionRows.length) messages.push('At least one progression unlock is required.');
+      if (!showValidation(messages)) {
+        if (showStatus) setStatus('Class form is incomplete.', 'bad');
+        return null;
+      }
+      const payload = buildClassPayload();
+      classJson.value = JSON.stringify(payload, null, 2);
+      syncClassSummary();
+      renderClassPreview({ progression: classProgressionRows.map((row) => ({ level: Number(row.key || 0), name: row.value, entry_type: 'action' })) });
+      return payload;
+    }
+
+    function syncRaceStateToSource(showStatus = true) {
+      const key = raceId.value.trim();
+      const messages = creatorTools.requireFields([
+        { label: 'Race key', value: key },
+        { label: 'Race name', value: raceName.value.trim() },
+        { label: 'Race perk', value: racePerk.value.trim() },
+        { label: 'Race summary', value: raceSummary.value.trim() },
+      ]);
+      if (!showValidation(messages)) {
+        if (showStatus) setStatus('Race form is incomplete.', 'bad');
+        return null;
+      }
+      const payload = buildRacePayload();
+      raceJson.value = JSON.stringify(payload, null, 2);
+      syncRaceSummary();
+      renderRacePreview({ race: payload });
+      return payload;
+    }
+
+    function syncConfigStateToSource(showStatus = true) {
+      const messages = creatorTools.requireFields([
+        { label: 'Starting race', value: startingRace.value.trim() },
+        { label: 'Starting class', value: startingClass.value.trim() },
+      ]);
+      if (!primaryStatRows.length) messages.push('At least one primary stat is required.');
+      if (!xpRows.length) messages.push('At least one XP level row is required.');
+      if (!showValidation(messages)) {
+        if (showStatus) setStatus('Character config is incomplete.', 'bad');
+        return null;
+      }
+      const payload = buildConfigPayload();
+      configJson.value = JSON.stringify(payload, null, 2);
+      syncConfigSummary(payload);
+      renderConfigPreview(payload);
+      return payload;
+    }
+
+    function createClassDraft() {
+      selectedClass = null;
+      populateClassForm('new_class', classDraft());
+      renderList(classList, classes, null, classSearch.value, selectClass);
+      setTab('class-panel');
+      editorTitle.textContent = 'New Class Draft';
+      editorSubtitle.textContent = 'Stage a new class and progression list before writing it to the pack.';
+      setStatus('New class draft staged in the builder.', 'good');
+    }
+
+    function createRaceDraft() {
+      selectedRace = null;
+      populateRaceForm('new_race', raceDraft());
+      renderList(raceList, races, null, raceSearch.value, selectRace);
+      setTab('race-panel');
+      editorTitle.textContent = 'New Race Draft';
+      editorSubtitle.textContent = 'Stage a new race before writing it to the pack.';
+      setStatus('New race draft staged in the builder.', 'good');
+    }
+
+    async function loadReferences() {
+      [classes, races] = await Promise.all([
+        creatorTools.fetchReferences('classes', { limit: 1000 }),
+        creatorTools.fetchReferences('races', { limit: 1000 }),
+      ]);
+      renderList(classList, classes, selectedClass && selectedClass.id, classSearch.value, selectClass);
+      renderList(raceList, races, selectedRace && selectedRace.id, raceSearch.value, selectRace);
+      setStatOptions();
+      setAbilityOptions();
+      fillSelect(startingRace, races, { placeholder: 'Choose race', labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`, selectedValue: startingRace.value });
+      fillSelect(startingClass, classes, { placeholder: 'Choose class', labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`, selectedValue: startingClass.value });
+    }
+
+    async function loadConfigPreview() {
+      const payload = await apiFetch('/preview', { method: 'POST', body: JSON.stringify({ kind: 'character-config', args: [] }) });
+      const preview = payload.preview || {};
+      primaryStatOptions = [...(preview.primary_stats || primaryStatOptions)];
+      abilityNames = [...(preview.ability_names || [])];
+      passiveNames = [...(preview.passive_names || [])];
+      setStatOptions();
+      setAbilityOptions();
+      populateConfigForm(configDraftFromPreview(preview));
+      return preview;
+    }
+
+    async function selectClass(entry) {
+      selectedClass = entry;
+      setTab('class-panel');
+      renderList(classList, classes, entry.id, classSearch.value, selectClass);
+      editorTitle.textContent = entry.label || entry.id;
+      editorSubtitle.textContent = `${entry.id}${entry.meta ? ` · ${entry.meta}` : ''}`;
+      await loadClassPreview(entry.id);
+    }
+
+    async function selectRace(entry) {
+      selectedRace = entry;
+      setTab('race-panel');
+      renderList(raceList, races, entry.id, raceSearch.value, selectRace);
+      editorTitle.textContent = entry.label || entry.id;
+      editorSubtitle.textContent = `${entry.id}${entry.meta ? ` · ${entry.meta}` : ''}`;
+      await loadRacePreview(entry.id);
+    }
+
+    async function loadClassPreview(classKey = selectedClass && selectedClass.id) {
+      if (!classKey) return;
+      setBusy(true);
+      setStatus(`Loading class preview for ${classKey}...`);
+      try {
+        const payload = await apiFetch('/preview', { method: 'POST', body: JSON.stringify({ kind: 'class', args: [classKey] }) });
+        populateClassForm(payload.preview.class_key, payload.preview.class || {}, payload.preview);
+        output.textContent = JSON.stringify(payload.preview, null, 2);
+        setStatus(`Loaded class preview for ${classKey}.`, 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function loadRacePreview(raceKey = selectedRace && selectedRace.id) {
+      if (!raceKey) return;
+      setBusy(true);
+      setStatus(`Loading race preview for ${raceKey}...`);
+      try {
+        const payload = await apiFetch('/preview', { method: 'POST', body: JSON.stringify({ kind: 'race', args: [raceKey] }) });
+        populateRaceForm(payload.preview.race_key, payload.preview.race || {});
+        output.textContent = JSON.stringify(payload.preview, null, 2);
+        setStatus(`Loaded race preview for ${raceKey}.`, 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function mutate(kind, target, payload, write) {
+      const result = await apiFetch('/mutate', { method: 'POST', body: JSON.stringify({ kind, target, payload, write }) });
+      output.textContent = result.diff || JSON.stringify(result, null, 2);
+      if (write) {
+        const errors = result.validation_errors || [];
+        if (errors.length) {
+          setStatus(`Save completed with ${errors.length} validation issue(s).`, 'bad');
+          output.textContent = `${result.diff || ''}\n\nValidation errors:\n- ${errors.join('\n- ')}`.trim();
+        } else {
+          setStatus(`Saved ${kind} ${target || 'config'}.`, 'good');
+          await loadReferences();
+          await loadConfigPreview();
+          if (selectedClass) await loadClassPreview(selectedClass.id);
+          if (selectedRace) await loadRacePreview(selectedRace.id);
+        }
+      } else {
+        setStatus(`Preview ready for ${kind} ${target || 'config'}.`, 'good');
+      }
+    }
+
+    async function mutateClass(write) {
+      const payload = syncClassStateToSource();
+      const target = classId.value.trim();
+      if (!payload || !target) return;
+      setBusy(true);
+      setStatus(write ? `Saving class ${target}...` : `Previewing class changes for ${target}...`);
+      try {
+        await mutate('class', target, payload, write);
+        selectedClass = { id: target, label: payload.name, meta: payload.role };
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function mutateRace(write) {
+      const payload = syncRaceStateToSource();
+      const target = raceId.value.trim();
+      if (!payload || !target) return;
+      setBusy(true);
+      setStatus(write ? `Saving race ${target}...` : `Previewing race changes for ${target}...`);
+      try {
+        await mutate('race', target, payload, write);
+        selectedRace = { id: target, label: payload.name, meta: payload.perk };
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function mutateConfig(write) {
+      const payload = syncConfigStateToSource();
+      if (!payload) return;
+      setBusy(true);
+      setStatus(write ? 'Saving character config...' : 'Previewing character-config changes...');
+      try {
+        await mutate('character-config', '', payload, write);
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function validateContent() {
+      setBusy(true);
+      setStatus('Checking content packs...');
+      try {
+        const payload = await apiFetch('/validate', { method: 'POST', body: '{}' });
+        if (payload.errors.length) {
+          setStatus(`Content check found ${payload.errors.length} issue(s).`, 'bad');
+          output.textContent = payload.errors.join('\n');
+        } else {
+          setStatus('Content check passed.', 'good');
+          output.textContent = JSON.stringify(payload, null, 2);
+        }
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function reloadContent() {
+      setBusy(true);
+      setStatus('Reloading registry from disk...');
+      try {
+        const payload = await apiFetch('/reload', { method: 'POST', body: '{}' });
+        setStatus('Content registry reloaded.', 'good');
+        output.textContent = JSON.stringify(payload, null, 2);
+        await loadReferences();
+        await loadConfigPreview();
+        if (selectedClass) await loadClassPreview(selectedClass.id);
+        if (selectedRace) await loadRacePreview(selectedRace.id);
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
     classSearch.addEventListener('input', () => renderList(classList, classes, selectedClass && selectedClass.id, classSearch.value, selectClass));
     raceSearch.addEventListener('input', () => renderList(raceList, races, selectedRace && selectedRace.id, raceSearch.value, selectRace));
-    loadContentButton.addEventListener('click', async () => { await loadConfigPreview(); if (selectedClass) await loadClassPreview(selectedClass.id); if (selectedRace) await loadRacePreview(selectedRace.id); });
-    newClassButton.addEventListener('click', newClassDraft); newRaceButton.addEventListener('click', newRaceDraft); syncClassButton.addEventListener('click', () => { if (syncClassFormToJson()) setStatus('Class form synced to JSON.', 'good'); }); diffClassButton.addEventListener('click', () => mutateClass(false)); writeClassButton.addEventListener('click', () => mutateClass(true)); syncRaceButton.addEventListener('click', () => { if (syncRaceFormToJson()) setStatus('Race form synced to JSON.', 'good'); }); diffRaceButton.addEventListener('click', () => mutateRace(false)); writeRaceButton.addEventListener('click', () => mutateRace(true)); syncConfigButton.addEventListener('click', () => { if (syncConfigFormToJson()) setStatus('Character config synced to JSON.', 'good'); }); diffConfigButton.addEventListener('click', () => mutateConfig(false)); writeConfigButton.addEventListener('click', () => mutateConfig(true)); validateButton.addEventListener('click', validateContent); reloadButton.addEventListener('click', reloadContent);
-    newClassDraft(); newRaceDraft(); loadReferences().then(loadConfigPreview).catch((error) => { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; });
+    document.querySelectorAll('.tab').forEach((button) => button.addEventListener('click', () => setTab(button.dataset.tab)));
+    loadContentButton.addEventListener('click', async () => {
+      await loadConfigPreview();
+      if (selectedClass) await loadClassPreview(selectedClass.id);
+      if (selectedRace) await loadRacePreview(selectedRace.id);
+    });
+    newClassButton.addEventListener('click', createClassDraft);
+    newRaceButton.addEventListener('click', createRaceDraft);
+    addClassStatButton.addEventListener('click', () => { classStatsRows.push(createClassStatRow(primaryStatOptions[0] || 'strength', 1)); renderClassStats(); syncClassStateToSource(false); });
+    addClassProgressionButton.addEventListener('click', () => { classProgressionRows.push(createProgressionRow(classProgressionRows.length + 1, '')); renderClassProgression(); syncClassStateToSource(false); });
+    addRaceBonusButton.addEventListener('click', () => { raceBonusRows.push(createPairRow({}, { keyLabel: 'Stat', valueLabel: 'Value', valueType: 'number', valueStep: '1' })); renderRacePairs(); syncRaceStateToSource(false); });
+    addRacePerkBonusButton.addEventListener('click', () => { racePerkBonusRows.push(createPairRow({}, { keyLabel: 'Stat', valueLabel: 'Value', valueType: 'number', valueStep: '1' })); renderRacePairs(); syncRaceStateToSource(false); });
+    addRaceEffectButton.addEventListener('click', () => { raceEffectRows.push(createPairRow({}, { keyLabel: 'Effect', valueLabel: 'Value', valueType: 'number', valueStep: '0.1', valueMin: '-999999' })); renderRacePairs(); syncRaceStateToSource(false); });
+    addSliceClassButton.addEventListener('click', () => { sliceClassRows.push(''); renderSliceClasses(); syncConfigStateToSource(false); });
+    addXpRowButton.addEventListener('click', () => { xpRows.push(createXpRow(xpRows.length + 1, 0)); renderXpRows(); syncConfigStateToSource(false); });
+    syncClassButton.addEventListener('click', () => { if (syncClassStateToSource()) setStatus('Class builder synced to source.', 'good'); });
+    syncClassSourceButton.addEventListener('click', () => {
+      try {
+        const payload = creatorTools.parseJsonField(classJson, {}, { label: 'Class source', expect: 'object' });
+        populateClassForm(classId.value.trim() || 'new_class', payload);
+        setStatus('Advanced source applied to the class builder.', 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+      }
+    });
+    diffClassButton.addEventListener('click', () => mutateClass(false));
+    writeClassButton.addEventListener('click', () => mutateClass(true));
+    syncRaceButton.addEventListener('click', () => { if (syncRaceStateToSource()) setStatus('Race builder synced to source.', 'good'); });
+    syncRaceSourceButton.addEventListener('click', () => {
+      try {
+        const payload = creatorTools.parseJsonField(raceJson, {}, { label: 'Race source', expect: 'object' });
+        populateRaceForm(raceId.value.trim() || 'new_race', payload);
+        setStatus('Advanced source applied to the race builder.', 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+      }
+    });
+    diffRaceButton.addEventListener('click', () => mutateRace(false));
+    writeRaceButton.addEventListener('click', () => mutateRace(true));
+    syncConfigButton.addEventListener('click', () => { if (syncConfigStateToSource()) setStatus('Config builder synced to source.', 'good'); });
+    syncConfigSourceButton.addEventListener('click', () => {
+      try {
+        const payload = creatorTools.parseJsonField(configJson, {}, { label: 'Config source', expect: 'object' });
+        primaryStatOptions = [...(payload.primary_stats || primaryStatOptions)];
+        setStatOptions();
+        populateConfigForm(payload);
+        setStatus('Advanced source applied to the config builder.', 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+      }
+    });
+    diffConfigButton.addEventListener('click', () => mutateConfig(false));
+    writeConfigButton.addEventListener('click', () => mutateConfig(true));
+    validateButton.addEventListener('click', validateContent);
+    reloadButton.addEventListener('click', reloadContent);
+
+    populateClassForm('new_class', classDraft());
+    populateRaceForm('new_race', raceDraft());
+    setTab('class-panel');
+    loadReferences()
+      .then(loadConfigPreview)
+      .catch((error) => { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; });
   </script>
 </body>
 </html>

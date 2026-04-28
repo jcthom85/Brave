@@ -34,9 +34,18 @@ from world.ranger_companions import (
     get_companion_name,
     normalize_companion_bond_state,
 )
-from world.tutorial import ensure_tutorial_state, handle_room_enter, is_tutorial_active
+from world.tutorial import (
+    ensure_tutorial_state,
+    get_lanternfall_intro_text,
+    get_lanternfall_recap_text,
+    handle_room_enter,
+    is_tutorial_active,
+    should_show_lanternfall_recap,
+)
+from world.spawning import ensure_newbie_area_on_puppet, is_brave_room, place_new_brave_character
 
 from evennia.objects.objects import DefaultCharacter
+from evennia.utils import delay
 
 from .objects import ObjectParent
 
@@ -64,12 +73,52 @@ class Character(ObjectParent, DefaultCharacter):
 
     default_description = "A sturdy-looking adventurer taking their first steps into danger."
 
+    def _send_opening_cinematic(self):
+        if getattr(self.db, "brave_opening_cinematic_shown", False):
+            return
+        if not self.location or not self.sessions.count():
+            return
+            
+        # Delay slightly to ensure the browser view has rendered
+        delay(0.8, self._actually_send_opening_cinematic)
+
+    def _actually_send_opening_cinematic(self):
+        if getattr(self.db, "brave_opening_cinematic_shown", False):
+            return
+        sessions = self.sessions.all()
+        if not self.location or not sessions:
+            return
+
+        # print(f"DEBUG: sending opening cinematic for {self.key}")
+        room_id = getattr(getattr(self.location, "db", None), "brave_room_id", None)
+        from world.browser_panels import send_npc_speech_event
+
+        if is_tutorial_active(self):
+            self.db.brave_opening_cinematic_shown = True
+            send_npc_speech_event(
+                self,
+                "Sergeant Tamsin Vale",
+                "Hear that bell? Talk to me first. We get you steady, then we get you useful.",
+            )
+            return
+
+        quest_state = (self.db.brave_quests or {}).get("practice_makes_heroes", {})
+        if room_id == "brambleford_training_yard" and quest_state.get("status") == "active":
+            self.db.brave_opening_cinematic_shown = True
+            self.db.brave_opening_bubble_shown = True
+            send_npc_speech_event(
+                self,
+                "Captain Harl Rowan",
+                "You! The bell didn't ring for our health. Get over here!",
+            )
+
     @staticmethod
     def _canonicalize_race_key(race_key):
         race_key = str(race_key or "").strip().lower()
         return LEGACY_RACE_KEYS.get(race_key, race_key)
 
     def at_object_creation(self):
+        print(f"!!! URGENT: CHARACTER created: {self.key} !!!")
         super().at_object_creation()
         self.ensure_brave_character()
 
@@ -80,7 +129,8 @@ class Character(ObjectParent, DefaultCharacter):
             discover_room(self, self.location)
             if source_location and source_location != self.location and move_type not in {"defeat", "flee"}:
                 self.ndb.brave_previous_location = source_location
-            advance_room_visit(self, self.location)
+            if move_type != "spawn":
+                advance_room_visit(self, self.location)
             handle_room_enter(self, self.location)
             if move_type not in {"defeat", "flee"}:
                 from world.party import handle_party_follow
@@ -96,25 +146,53 @@ class Character(ObjectParent, DefaultCharacter):
         return super().at_pre_move(destination, **kwargs)
 
     def at_post_puppet(self, **kwargs):
-        sessions = self.sessions.get()
-        latest_session = sessions[-1] if sessions else None
-        protocol = (getattr(latest_session, "protocol_key", "") or "").lower() if latest_session else ""
+        """Called just after puppeting is complete."""
+        sessions = self.sessions.all()
+        session = sessions[-1] if sessions else None
+        protocol = str(getattr(session, "protocol_key", "") or "").lower() if session else ""
+        
+        print(f"\n{'#'*60}\n### CHARACTER AT_POST_PUPPET: {self.key} (protocol={protocol})\n{'#'*60}\n")
+        
         if self.account:
             self.account.db._last_puppet = self
         self.ensure_brave_character()
-        if not self.db.brave_seen_welcome:
-            self.db.brave_seen_welcome = True
+        
+        if self.account:
+            ensure_newbie_area_on_puppet(self.account, self)
+
+        if self.account and not is_brave_room(self.location):
+            place_new_brave_character(self.account, self)
+
+        # TRIGGER NARRATIVE/CINEMATIC LOGIC
         if protocol in {"websocket", "ajax/comet", "webclient"}:
             if self.location:
-                self.ndb.brave_first_region_discovery = bool(discover_region(self, self.location))
-                discover_room(self, self.location)
+                # Ensure quests are synced before room rendering
+                ensure_starter_quests(self)
+                # Check for room-visit objectives immediately upon entry/login
+                advance_room_visit(self, self.location)
+                # Force a room look to trigger the browser_view and its welcome_pages
                 self.location.return_appearance(self)
-            return
+                # Delay the cinematic/speech to let the modal land and the UI stabilize
+                delay(2.5, self._send_opening_cinematic)
+        else:
+            # Telnet/SSH logic
+            if is_tutorial_active(self) and not self.db.brave_lanternfall_intro_shown:
+                 self.db.brave_lanternfall_intro_shown = True
+                 self.msg(get_lanternfall_intro_text())
+            elif should_show_lanternfall_recap(self) and not self.db.brave_lanternfall_intro_shown:
+                 self.db.brave_lanternfall_intro_shown = True
+                 self.msg(get_lanternfall_recap_text())
+        
         super().at_post_puppet(**kwargs)
+
+    def at_post_unpuppet(self, account, **kwargs):
+        """Called just after unpuppeting."""
+        print(f"\n!!! URGENT: at_post_unpuppet for {self.key} !!!\n")
+        super().at_post_unpuppet(account, **kwargs)
 
     def ensure_brave_character(self):
         """Initialize Brave-specific state if missing."""
-
+        print(f"DEBUG: ensuring brave state for {self.key}")
         if not self.db.brave_race:
             self.db.brave_race = CHARACTER_CONTENT.starting_race
         else:

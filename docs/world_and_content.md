@@ -1,264 +1,172 @@
 # World And Content
 
+This document reflects the current core content pack in `brave_game/world/content/packs/core/`. If this file disagrees with the JSON pack, the pack wins.
+
+## Live Shape
+
+`Brave` is currently a cozy fantasy MUD with a complete first fantasy ladder, one portal branch, and a town hub built for local family co-op.
+
+The present live structure is:
+
+- Onboarding: Wayfarer's Yard.
+- Hub: Brambleford.
+- First road chapter: Goblin Road through Ruk the Fence-Cutter.
+- Optional early branch after Ruk: Junk-Yard Planet.
+- Fantasy continuation: Whispering Woods, Old Barrow Field, Ruined Watchtower, Goblin Warrens, Blackfen Approach.
+- Fantasy capstone: Drowned Weir and The Hollow Lantern.
+
 ## Brambleford
 
-Brambleford is a lantern-lit frontier town beside an old river crossing. It should feel practical, warm, and slightly eccentric, with a sense that ordinary people are doing their best while danger grows outside the walls.
+Brambleford is a lantern-lit frontier town beside an old river crossing. It should feel practical, warm, a little funny, and worth protecting.
 
-The canonical room-by-room town layout now lives in [Brambleford Town Plan](brambleford_town_plan.md). Use that document as the source of truth for Brambleford's map, room list, and reserved expansion footprint.
+Current town rooms:
 
-### Town Mood
+- `brambleford_town_green`: central hub and notice board.
+- `brambleford_lantern_rest_inn`: social hub, cooking, arcade cabinet, Great Catch log, Uncle Pib, Sister Maybelle.
+- `brambleford_rat_and_kettle_cellar`: first live town combat space.
+- `brambleford_outfitters`: shopkeeping loop and Leda Thornwick.
+- `brambleford_training_yard`: Captain Harl handoff after tutorial.
+- `brambleford_mastery_hall`: mastery refinement with Mistress Elira Thorne.
+- `brambleford_mayors_hall`: Mayor Elric and civic quest framing.
+- `brambleford_chapel_dawn_bell`: Dawn Bell blessing, chapel lore, Brother Alden.
+- `brambleford_east_gate`: Mira Fenleaf and the road handoff.
+- `brambleford_hobbyists_wharf`: fishing.
+- `brambleford_ironroot_forge`: forging and Torren Ironroot.
+- `brambleford_menders_shed`: tinkering and Mender Veska Flint.
+- `brambleford_great_observatory`: Joss Veller and portal framing.
+- `brambleford_trophy_hall`: family trophy display.
+- `brambleford_nexus_gate`: portal departure chamber.
 
-- Safe
-- Slightly funny
-- Lived-in
-- Worth protecting
+## Tutorial Area
 
-### Key Locations
+Wayfarer's Yard is the current first-time-player onboarding branch. It is not a detached training island; it sits beside Brambleford's training grounds.
 
-- **The Lantern Rest Inn:** The social hub. Features the "Great Catch" fishing log and the Kitchen Hearth.
-- **Ironroot Forge:** For gear upgrades and crafting discussion.
-- **Brambleford Outfitters:** Where the "Shopkeeper's Shift" minigame takes place.
-- **Chapel of the Dawn Bell:** Blessings, healing, cleansing, and undead lore.
-- **The Great Observatory (The Nexus):** A high hill overlooking the town. Contains the portal ring to the Multiverse.
-- **The Hobbyist's Wharf:** A small dock on the Bramble River for fishing and resource gathering.
-- **Town Green:** For family meetings and public announcements.
-- **Training Yard:** Where kids practice their "Design Quests" on dummies.
-- **Mayor's Hall:** Quest central.
-- **Rat and Kettle Tavern Cellar:** The first "Dungeon" for the boys to clear.
+Current tutorial rooms:
 
-### The Nexus: Portal Worlds (Phase 1)
+- `tutorial_wayfarers_yard`: start, Tamsin, rest point.
+- `tutorial_quartermaster_shed`: Nella, gear, pack, supply board.
+- `tutorial_family_post`: optional party basics.
+- `tutorial_sparring_ring`: Brask and class-skill instruction.
+- `tutorial_vermin_pens`: controlled first fight.
+- `tutorial_gate_walk`: bridge back to Brambleford.
 
-- **The Junk-Yard Planet (Sci-Fi):** A first look at "Tech" skins for the fantasy classes.
-- **The Training Island (Martial):** Testing the "Ki" and speed-based combat.
-- **The Drafting Table:** A blank "Sandbox" zone for the boys to build in.
+## Live Quest Ladder
 
-### Key NPCs
+The current starting quest chain is:
 
-- Mayor Elric Thorne: practical, burdened, decent
-- Sister Maybelle: warm, sharp, dependable
-- Torren Ironroot: gruff dwarf blacksmith with dry humor
-- Mira Fenleaf: elven hunter and wilderness guide
-- Uncle Pib Underbough: halfling inn cook and comic relief quest source
-- Joss Veller: town lamplighter who knows more than he admits
-- Captain Harl Rowan: militia veteran and Warrior trainer
-- Brother Alden: anxious assistant cleric and lore source
+1. `practice_makes_heroes`
+2. `rats_in_the_kettle`
+3. `roadside_howls`
+4. `fencebreakers`
+5. `ruk_the_fence_cutter`
+6. `what_whispers_in_the_wood`
+7. `herbs_for_sister_maybelle`
+8. `greymaws_trail`
+9. `bridgework_for_joss`
+10. `signal_in_the_scrap`
+11. `foreman_coilback`
+12. `lanterns_at_dusk`
+13. `do_not_disturb_the_dead`
+14. `the_knight_without_rest`
+15. `smoke_on_the_ridge`
+16. `loose_arrows`
+17. `captain_varn_blackreed`
+18. `below_the_fencebreakers`
+19. `gutters_and_hexes`
+20. `the_pot_kings_feast`
+21. `bogwater_rumors`
+22. `lights_in_the_reeds`
+23. `miretooths_claim`
+24. `the_south_light`
+25. `locks_under_blackwater`
+26. `the_hollow_lantern`
 
-### Live Class Roster
+The first-hour spine is the first five quests after tutorial:
 
-The current live phase-1 class roster is:
+`Practice Makes Heroes` -> `Rats in the Kettle` -> `Roadside Howls` -> `Fencebreakers` -> `Ruk the Fence-Cutter`.
 
-- Warrior
-- Cleric
-- Ranger
-- Mage
-- Rogue
-- Paladin
-- Druid
-
-## Zone Progression
-
-Recommended level bands for phase 1:
-
-- Goblin Road: levels 1 to 2
-- Whispering Woods: levels 2 to 4
-- Old Barrow Field: levels 4 to 6
-- Ruined Watchtower: levels 5 to 7
-- Goblin Warrens: levels 7 to 9
-- Blackfen Approach: levels 9 to 10
-- Drowned Weir: levels 10 to 11 and the current phase-1 capstone
-
-## Outer Zones
+## Zone Roles
 
 ### Goblin Road
 
-- Tone: adventurous, lively, lightly dangerous
-- Purpose: first combat zone, introduces wolves, goblins, and roadside pressure
-- Enemies: Thorn Rat, Road Wolf, Goblin Sneak, Goblin Cutter
-- Boss: Ruk the Fence-Cutter
+Rooms: Trailhead, Old Fence Line, Wolf Turn, Fencebreaker Camp.
+
+Purpose: first real adventure space. It teaches room-by-room pushing, light outdoor fights, road pressure, and the first named boss.
+
+Boss: Ruk the Fence-Cutter.
 
 ### Whispering Woods
 
-- Tone: mysterious, layered, slightly eerie
-- Purpose: introduces unease, roots, and more magical enemy flavor
-- Enemies: Forest Wolf, Cave Spider, Briar Imp, Mossling
-- Boss: Old Greymaw
+Rooms: Whispering Woods Trail, Old Stone Path, Briar Glade, Greymaw's Hollow.
+
+Purpose: moves the game from practical road danger into unease, roots, old warnings, and creature-haunted wilderness.
+
+Boss: Old Greymaw.
+
+### Junk-Yard Planet
+
+Rooms: Junk-Yard Landing, Scrapway Verge, Relay Trench, Crane Grave, Anchor Pit.
+
+Purpose: first portal branch and genre shift. It proves that Brave can keep the same character core while changing world tone and enemy texture.
+
+Boss: Foreman Coilback.
 
 ### Old Barrow Field
 
-- Tone: solemn, dangerous, darker than earlier zones
-- Purpose: undead escalation and cleansing value
-- Enemies: Skeletal Soldier, Restless Shade, Grave Crow, Barrow Wisp
-- Boss: Sir Edric the Restless
+Rooms: Old Barrow Causeway, Marker Row, Barrow Circle, Sunken Dais.
+
+Purpose: undead escalation, chapel value, memory, old oaths, and the first heavier emotional note.
+
+Boss: Sir Edric the Restless.
 
 ### Ruined Watchtower
 
-- Tone: grounded fantasy danger, tactical, siege-like
-- Purpose: bandit organization, ranged pressure, and positional encounters
-- Enemies: Bandit Scout, Bandit Raider, Tower Archer, Carrion Hound
-- Boss: Captain Varn Blackreed
+Rooms: Watchtower Approach, Archer's Ledge, Breach Yard, Cracked Tower Stairs, Blackreed's Roost.
+
+Purpose: tactical mortal threat. Bandits understand sightlines, pressure, dogs, archers, and road control.
+
+Boss: Captain Varn Blackreed.
 
 ### Goblin Warrens
 
-- Tone: ugly, mean, energetic dungeon zone
-- Purpose: reveals goblin coordination and mid-to-late phase pressure
-- Enemies: Goblin Hexer, Goblin Brute, Cave Bat Swarm, Sludge Slime
-- Boss: Grubnak the Pot-King
+Rooms: Sinkmouth Cut, Bone Midden, Feast Hall, Sludge Run, Torchgut Tunnel, Pot-King's Court.
+
+Purpose: reveals that Ruk was not the whole goblin problem. The road cutters were connected to a deeper, uglier power center.
+
+Boss: Grubnak the Pot-King.
 
 ### Blackfen Approach
 
-- Tone: grim, windswept, ominous
-- Purpose: end-of-phase threat spike and phase-2 foreshadowing
-- Enemies: Mire Hound, Bog Creeper, Fen Wisp, Rot Crow
-- Elite: Miretooth
+Rooms: Fenreach Track, Reedflats, Carrion Rise, Boglight Hollow, Miretooth's Wallow.
+
+Purpose: pivots from bandits and goblins to the wrong south light. The marsh should feel patient, misleading, and old enough to make Brambleford look small.
+
+Elite: Miretooth.
 
 ### Drowned Weir
 
-- Tone: drowned civic ruin, wrong light, chapter-ending unease
-- Purpose: phase-1 capstone and the answer to the south-light thread beyond Blackfen
-- Enemies: Drowned Warder, Hollow Wisp, Silt Stalker
-- Boss: The Hollow Lantern
+Rooms: Drowned Causeway, Sluice Walk, Sunken Lock, Lantern Weir, Blackwater Lamp House.
 
-## Core Bestiary
+Purpose: phase-1 fantasy capstone. The wrong light becomes physical, answerable, and dangerous.
 
-Phase-1 core monsters:
-
-- Thorn Rat
-- Road Wolf
-- Goblin Sneak
-- Goblin Cutter
-- Forest Wolf
-- Cave Spider
-- Briar Imp
-- Mossling
-- Skeletal Soldier
-- Restless Shade
-- Bandit Scout
-- Bandit Raider
-- Goblin Brute
-- Goblin Hexer
-- Mire Hound
-- Fen Wisp
-
-## Bosses And Named Encounters
-
-### Ruk the Fence-Cutter
-
-- Fantasy: goblin raider chief using stolen farm gear
-- Mechanics: bleed, add summoning, low-health enrage
-
-### Old Greymaw
-
-- Fantasy: scarred apex wolf of the woods
-- Mechanics: lunges, bleed, vanishing reposition
-
-### Sir Edric the Restless
-
-- Fantasy: ancient knight risen from the barrows
-- Mechanics: shielded phases, undead adds, curse aura
-
-### Captain Varn Blackreed
-
-- Fantasy: disciplined bandit commander in the watchtower
-- Mechanics: ranged orders, add coordination, weak-target punishment
-
-### Grubnak the Pot-King
-
-- Fantasy: oversized goblin tyrant ruling a filthy feast-hall
-- Mechanics: boiling stew throws, goblin waves, stagger slam
-
-### Miretooth
-
-- Fantasy: predatory fen beast stalking the marsh edge
-- Mechanics: poison, ambush, fear flavor
-
-### The Hollow Lantern
-
-- Fantasy: the wrong south light given shape in a drowned lamp house
-- Mechanics: warded phase, summoned support, low-health escalation
-
-## Quest Structure
-
-Quest types:
-
-- Kill quests
-- Collection quests
-- Delivery quests
-- Exploration quests
-- Boss hunts
-- Story quests
-- Funny town quests
-
-### Starter Quest Set
-
-Town quests:
-
-- Rats in the Kettle
-- A Blade Needs a Hand
-- Lanterns at Dusk
-- The Baker's Missing Flour
-- Practice Makes Heroes
-
-Goblin Road quests:
-
-- Fencebreakers
-- Roadside Howls
-- The Stolen Satchel
-
-Whispering Woods quests:
-
-- Herbs for Sister Maybelle
-- What Whispers in the Wood
-- Greymaw's Trail
-
-Barrow and dungeon quests:
-
-- Do Not Disturb the Dead
-- The Knight Without Rest
-- Signals Gone Dark
-- The Pot-King's Feast
-
-Optional extras:
-
-- Bogwater Rumors
-- A Ring in the Mud
-- The Lamplighter's Secret
+Boss: The Hollow Lantern.
 
 ## Story Arc
 
-### Act 1: Small Local Problems
+The current fantasy arc works because it widens in layers:
 
-Goblins raid fences, wolves prowl too close to town, and lanterns are being sabotaged.
+1. The town has ordinary problems that still matter.
+2. The road is being cut apart by something organized.
+3. The woods and barrows show that the local world is older and less stable than Brambleford wants to admit.
+4. Mortal opportunists seize the ruined tower.
+5. The warrens reveal a deeper goblin infrastructure.
+6. Blackfen shows the road problem was only one symptom.
+7. Drowned Weir turns the south-light thread into a chapter-ending answer.
 
-### Act 2: The Woods Are Wrong
+## Writing Rules
 
-The forest grows uneasy. Trails shift. Old stones and whispers hint that something deeper is moving.
-
-### Act 3: The Dead Stir
-
-The barrows awaken and ancient protections begin to fail.
-
-### Act 4: Mortal Opportunists
-
-Bandits at the Ruined Watchtower take advantage of the growing chaos.
-
-### Act 5: The Goblin Power Center
-
-The Goblin Warrens reveal real organization, arming, and hints of outside influence.
-
-### Act 6: Something Beyond
-
-Blackfen Approach suggests that the true threat extends past goblins and bandits.
-
-### Act 7: The Wrong South Light
-
-Drowned Weir reveals the chapter-ending source of that wrongness and gives Brambleford a clean local victory.
-
-## Content Principles
-
-Use these principles while adding content:
-
-- Every zone should have a distinct enemy mix and mood
-- Every zone should reinforce at least one combat lesson
-- Town quests should occasionally provide relief, humor, or character flavor
-- Boss names and item names should stay specific and memorable
-- Story should be conveyed through quests, NPC reactions, enemy flavor, and place names rather than long exposition
+- Story should travel through rooms, NPC reactions, quest handoffs, readable objects, encounter intros, and trophy payoffs.
+- Keep exposition short. A player should understand the current problem before they understand the whole backstory.
+- Make every zone teach one new mood and one new play pattern.
+- Let Brambleford react to completed bosses. The town is the emotional scoreboard.
+- Do not add random chores to the first hour. Every task should either teach play or sharpen the road-to-Ruk story.

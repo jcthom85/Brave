@@ -25,6 +25,18 @@ ENCOUNTER_CONTENT = CONTENT.encounters
 DEFAULT_LEVEL = 10
 DEFAULT_RACE = CHARACTER_CONTENT.starting_race
 DEFAULT_OUTPUT_DIR = Path("/home/jcthom85/Brave/tmp/combat-simulation")
+ZONE_LEVEL_BANDS = (
+    ("tutorial_", 1),
+    ("brambleford_", 1),
+    ("goblin_road_", 2),
+    ("whispering_woods_", 3),
+    ("junkyard_planet_", 4),
+    ("old_barrow_field_", 5),
+    ("ruined_watchtower_", 6),
+    ("goblin_warrens_", 8),
+    ("blackfen_approach_", 10),
+    ("drowned_weir_", 10),
+)
 TELEGRAPH_RESPONSE_ABILITIES = {
     "shieldbash",
     "intercept",
@@ -76,6 +88,20 @@ PARTY_SCENARIOS = (
         "members": ("ranger",),
         "companions": {"ranger": "marsh_hound"},
     },
+)
+
+FIRST_HOUR_ROUTE_STEPS = (
+    {"kind": "encounter", "key": "yard_scuttle", "label": "Wayfarer's Yard vermin"},
+    {"kind": "quest", "key": "practice_makes_heroes"},
+    {"kind": "encounter", "key": "grain_raiders", "label": "Rat and Kettle cellar"},
+    {"kind": "quest", "key": "rats_in_the_kettle"},
+    {"kind": "quest", "key": "roadside_howls"},
+    {"kind": "encounter", "key": "trailhead_wolf", "label": "Goblin Road trailhead"},
+    {"kind": "encounter", "key": "fencebreakers", "label": "Old Fence Line raiders"},
+    {"kind": "quest", "key": "fencebreakers"},
+    {"kind": "encounter", "key": "wolf_turn_pack", "label": "Wolf Turn"},
+    {"kind": "encounter", "key": "ruks_stand", "label": "Ruk's camp"},
+    {"kind": "quest", "key": "ruk_the_fence_cutter", "requires_victory": "ruks_stand"},
 )
 
 
@@ -303,7 +329,6 @@ METHOD_NAMES = (
     "_set_enemy_recovery_state",
     "_apply_reaction_guard",
     "_clear_reaction_state",
-    "_try_interrupt_enemy_action",
     "_get_participant_state",
     "_save_participant_state",
     "_save_enemy",
@@ -369,6 +394,9 @@ class SimulationEncounter:
         self.telemetry = {
             "telegraphed_actions": 0,
             "telegraphed_interrupts": 0,
+            "telegraphed_redirects": 0,
+            "telegraphed_mitigations": 0,
+            "telegraphed_unanswered": 0,
             "telegraphed_response_actions": 0,
             "held_actions": 0,
             "combat_fx_events": 0,
@@ -450,6 +478,15 @@ class SimulationEncounter:
         if interrupted:
             self.telemetry["telegraphed_interrupts"] += 1
         return interrupted
+
+    def _record_telegraph_outcome(self, enemy, outcome, *, label=None, answer=None, target=None):
+        BraveEncounter._record_telegraph_outcome(self, enemy, outcome, label=label, answer=answer, target=target)
+        if outcome == "redirected":
+            self.telemetry["telegraphed_redirects"] += 1
+        elif outcome == "mitigated":
+            self.telemetry["telegraphed_mitigations"] += 1
+        elif outcome == "unanswered":
+            self.telemetry["telegraphed_unanswered"] += 1
 
     def _advance_player_atb(self, character):
         tick_ms = self._atb_tick_ms()
@@ -860,6 +897,22 @@ def _telegraphed_enemy_state(encounter):
     return None, {}
 
 
+def _harmful_condition_target(encounter):
+    candidates = []
+    for ally in encounter.get_active_player_participants():
+        state = encounter._get_participant_state(ally)
+        condition_count = sum(
+            1
+            for key in ("bleed_turns", "poison_turns", "curse_turns", "snare_turns")
+            if int(state.get(key, 0) or 0) > 0
+        )
+        if condition_count:
+            candidates.append((condition_count, 1.0 - _actor_hp_ratio(ally), -int(ally.id), ally))
+    if not candidates:
+        return None
+    return max(candidates)[-1]
+
+
 def _imminent_boss_telegraph_enemy(encounter):
     for enemy in encounter.get_active_enemies():
         if "boss" not in set(enemy.get("tags", []) or []):
@@ -922,6 +975,13 @@ def _telegraph_response_action(encounter, character, telegraphed_enemy, predicte
         if predicted_target is character and _can_use(character, "manashield"):
             return {"kind": "ability", "ability": "manashield", "target": character.id}
     elif class_key == "cleric":
+        afflicted = _harmful_condition_target(encounter)
+        if afflicted and _can_use(character, "cleanse"):
+            return {"kind": "ability", "ability": "cleanse", "target": afflicted.id}
+        if afflicted and _can_use(character, "renewinglight"):
+            return {"kind": "ability", "ability": "renewinglight", "target": afflicted.id}
+        if afflicted and _can_use(character, "blessing"):
+            return {"kind": "ability", "ability": "blessing", "target": afflicted.id}
         if predicted_target and not isinstance(predicted_target, dict) and _can_use(character, "guardianlight"):
             return {"kind": "ability", "ability": "guardianlight", "target": predicted_target.id}
         if _can_use(character, "sanctuary"):
@@ -977,10 +1037,17 @@ def choose_player_action(encounter, character):
     if class_key == "cleric":
         target_hp = (lowest_player_ally.db.brave_resources or {}).get("hp", 0)
         target_max_hp = lowest_player_ally.db.brave_derived_stats.get("max_hp", 1)
+        afflicted = _harmful_condition_target(encounter)
         if telegraphed_enemy and predicted_target and not isinstance(predicted_target, dict) and _can_use(character, "guardianlight"):
             return {"kind": "ability", "ability": "guardianlight", "target": predicted_target.id}
         if sum(1 for ally in encounter.get_active_player_participants() if _actor_hp_ratio(ally) <= 0.75) >= 2 and _can_use(character, "sanctuary"):
             return {"kind": "ability", "ability": "sanctuary", "target": character.id}
+        if afflicted and _actor_hp_ratio(afflicted) <= 0.75 and _can_use(character, "renewinglight"):
+            return {"kind": "ability", "ability": "renewinglight", "target": afflicted.id}
+        if afflicted and _can_use(character, "cleanse"):
+            return {"kind": "ability", "ability": "cleanse", "target": afflicted.id}
+        if afflicted and _can_use(character, "blessing"):
+            return {"kind": "ability", "ability": "blessing", "target": afflicted.id}
         if target_hp / max(1, target_max_hp) <= 0.35 and _can_use(character, "renewinglight"):
             return {"kind": "ability", "ability": "renewinglight", "target": lowest_player_ally.id}
         if target_hp / max(1, target_max_hp) <= 0.55 and _can_use(character, "heal"):
@@ -1048,23 +1115,36 @@ def _queue_pending_actions(encounter):
     encounter.db.pending_actions = pending
 
 
-def _build_party(scenario):
+def infer_expected_level(authored):
+    """Return the approximate intended level for an authored encounter."""
+
+    room_id = str((authored or {}).get("room_id") or "")
+    for prefix, level in ZONE_LEVEL_BANDS:
+        if room_id.startswith(prefix):
+            return level
+    return DEFAULT_LEVEL
+
+
+def _build_party(scenario, *, level=None):
     party = []
+    scenario_level = int(scenario.get("level", level if level is not None else DEFAULT_LEVEL) or DEFAULT_LEVEL)
     for index, class_key in enumerate(scenario["members"], start=1):
         companion_key = scenario.get("companions", {}).get(class_key)
         party.append(
             SimulatedCharacter(
                 index,
                 class_key,
+                level=scenario_level,
                 companion_key=companion_key,
             )
         )
     return party
 
 
-def simulate_encounter(authored, scenario, *, base_seed=1, max_rounds=160, trace=False):
+def simulate_encounter(authored, scenario, *, base_seed=1, max_rounds=160, trace=False, level=None):
     encounter_data = dict(authored["encounter_data"])
-    seed = _seed_to_int(base_seed, authored["source"], encounter_data.get("key"), scenario["key"])
+    scenario_level = int(level if level is not None else scenario.get("level", DEFAULT_LEVEL) or DEFAULT_LEVEL)
+    seed = _seed_to_int(base_seed, authored["source"], encounter_data.get("key"), scenario["key"], scenario_level)
     random.seed(seed)
 
     room = DummyRoom(authored["room_id"] or authored["source"])
@@ -1074,7 +1154,7 @@ def simulate_encounter(authored, scenario, *, base_seed=1, max_rounds=160, trace
         expected_party_size=len(scenario["members"]),
         seed=seed,
     )
-    party = _build_party(scenario)
+    party = _build_party(scenario, level=scenario_level)
     for character in party:
         encounter.add_simulated_participant(character)
     trace_log = [_trace_snapshot(encounter)] if trace else None
@@ -1117,6 +1197,8 @@ def simulate_encounter(authored, scenario, *, base_seed=1, max_rounds=160, trace
         "max_rank": max_rank,
         "scenario_key": scenario["key"],
         "scenario_label": scenario["label"],
+        "character_level": scenario_level,
+        "expected_level": infer_expected_level(authored),
         "party_size": len(scenario["members"]),
         "party_classes": list(scenario["members"]),
         "companion_enabled": bool(any(scenario.get("companions", {}).values())),
@@ -1138,6 +1220,9 @@ def simulate_encounter(authored, scenario, *, base_seed=1, max_rounds=160, trace
         "meaningful_actions": sum(int(entry.get("meaningful_actions", 0) or 0) for entry in contributions.values()),
         "telegraphed_actions": int(encounter.telemetry["telegraphed_actions"]),
         "telegraphed_interrupts": int(encounter.telemetry["telegraphed_interrupts"]),
+        "telegraphed_redirects": int(encounter.telemetry["telegraphed_redirects"]),
+        "telegraphed_mitigations": int(encounter.telemetry["telegraphed_mitigations"]),
+        "telegraphed_unanswered": int(encounter.telemetry["telegraphed_unanswered"]),
         "telegraphed_response_actions": int(encounter.telemetry["telegraphed_response_actions"]),
         "held_actions": int(encounter.telemetry["held_actions"]),
         "combat_fx_events": int(encounter.telemetry["combat_fx_events"]),
@@ -1149,22 +1234,39 @@ def simulate_encounter(authored, scenario, *, base_seed=1, max_rounds=160, trace
 def build_summary(runs):
     by_scenario = {}
     by_rank = {}
+    by_encounter = {}
     for run in runs:
         scenario_bucket = by_scenario.setdefault(run["scenario_key"], [])
         scenario_bucket.append(run)
         rank_bucket = by_rank.setdefault(run["rank_bucket"], [])
         rank_bucket.append(run)
+        encounter_bucket = by_encounter.setdefault(run["encounter_key"], [])
+        encounter_bucket.append(run)
 
     def _aggregate(entries):
+        telegraphed_actions = sum(int(entry.get("telegraphed_actions", 0) or 0) for entry in entries)
+        telegraphed_answers = sum(
+            int(entry.get("telegraphed_interrupts", 0) or 0)
+            + int(entry.get("telegraphed_redirects", 0) or 0)
+            + int(entry.get("telegraphed_mitigations", 0) or 0)
+            for entry in entries
+        )
         return {
             "runs": len(entries),
             "victories": sum(1 for entry in entries if entry["outcome"] == "victory"),
             "defeats": sum(1 for entry in entries if entry["outcome"] == "defeat"),
             "timeouts": sum(1 for entry in entries if entry["outcome"] == "timeout"),
+            "near_wipes": sum(1 for entry in entries if entry.get("near_wipe")),
             "win_rate": round(sum(1 for entry in entries if entry["outcome"] == "victory") / float(max(1, len(entries))), 4),
             "avg_rounds": round(mean(entry["rounds"] for entry in entries), 2),
             "avg_remaining_hp_ratio": round(mean(entry["player_remaining_hp_ratio"] for entry in entries), 4),
             "avg_damage_taken": round(mean(entry["damage_taken"] for entry in entries), 2),
+            "avg_healing_done": round(mean(entry["healing_done"] for entry in entries), 2),
+            "avg_mitigation_done": round(mean(entry["mitigation_done"] for entry in entries), 2),
+            "telegraphed_actions": telegraphed_actions,
+            "telegraphed_answers": telegraphed_answers,
+            "telegraph_answer_rate": round(telegraphed_answers / float(max(1, telegraphed_actions)), 4),
+            "telegraphed_unanswered": sum(int(entry.get("telegraphed_unanswered", 0) or 0) for entry in entries),
         }
 
     scenario_summary = {
@@ -1211,17 +1313,249 @@ def build_summary(runs):
             entry["encounter_key"],
         ),
     )[:12]
+    near_wipes = sorted(
+        [run for run in runs if run.get("near_wipe")],
+        key=lambda entry: (
+            entry["player_remaining_hp_ratio"],
+            -entry["rounds"],
+            entry["scenario_key"],
+            entry["encounter_key"],
+        ),
+    )[:12]
+    longest_victories = sorted(
+        [run for run in runs if run["outcome"] == "victory"],
+        key=lambda entry: (
+            -entry["rounds"],
+            entry["player_remaining_hp_ratio"],
+            entry["scenario_key"],
+            entry["encounter_key"],
+        ),
+    )[:12]
+    telegraph_risks = sorted(
+        [
+            run
+            for run in runs
+            if int(run.get("telegraphed_actions", 0) or 0) > 0
+            and int(run.get("telegraphed_interrupts", 0) or 0)
+            + int(run.get("telegraphed_redirects", 0) or 0)
+            + int(run.get("telegraphed_mitigations", 0) or 0)
+            <= 0
+        ],
+        key=lambda entry: (
+            -int(entry.get("telegraphed_actions", 0) or 0),
+            entry["outcome"] == "victory",
+            entry["player_remaining_hp_ratio"],
+            entry["scenario_key"],
+            entry["encounter_key"],
+        ),
+    )[:12]
+
+    encounter_summary = {}
+    for encounter_key, entries in sorted(by_encounter.items()):
+        aggregate = _aggregate(entries)
+        encounter_summary[encounter_key] = {
+            **aggregate,
+            "rank_bucket": entries[0]["rank_bucket"] if entries else "normal",
+            "source": entries[0]["source"] if entries else "",
+            "enemy_templates": list(entries[0].get("enemy_templates") or []) if entries else [],
+        }
+
+    encounter_risks = sorted(
+        encounter_summary.items(),
+        key=lambda item: (
+            item[1]["win_rate"],
+            item[1]["avg_remaining_hp_ratio"],
+            -item[1]["near_wipes"],
+            -item[1]["avg_rounds"],
+            item[0],
+        ),
+    )[:15]
 
     return {
         "totals": {
             "encounters": len({(run["source"], run["encounter_key"]) for run in runs}),
             "runs": len(runs),
+            "victories": sum(1 for run in runs if run["outcome"] == "victory"),
+            "defeats": sum(1 for run in runs if run["outcome"] == "defeat"),
+            "timeouts": sum(1 for run in runs if run["outcome"] == "timeout"),
+            "near_wipes": sum(1 for run in runs if run.get("near_wipe")),
         },
         "scenario_summary": scenario_summary,
         "rank_summary": rank_summary,
+        "encounter_summary": encounter_summary,
         "ranger_companion_delta": ranger_deltas,
         "toughest_runs": toughest,
+        "near_wipes": near_wipes,
+        "longest_victories": longest_victories,
+        "telegraph_risks": telegraph_risks,
+        "encounter_risks": [
+            {"encounter_key": key, **data}
+            for key, data in encounter_risks
+        ],
     }
+
+
+def build_progression_runs(*, base_seed=1, max_rounds=160, limit=None):
+    authored = collect_authored_encounters()
+    if limit is not None:
+        authored = authored[: max(0, int(limit))]
+    runs = []
+    for encounter in authored:
+        level = infer_expected_level(encounter)
+        for scenario in PARTY_SCENARIOS:
+            runs.append(simulate_encounter(encounter, scenario, base_seed=base_seed, max_rounds=max_rounds, level=level))
+    return runs
+
+
+def _level_for_xp(xp_total):
+    level = 1
+    for candidate in range(2, CHARACTER_CONTENT.max_level + 1):
+        if int(xp_total or 0) >= int(CHARACTER_CONTENT.xp_for_level[candidate]):
+            level = candidate
+    return level
+
+
+def _find_authored_encounter(encounter_key):
+    for authored in collect_authored_encounters():
+        if authored["encounter_data"].get("key") == encounter_key:
+            return authored
+    raise KeyError(f"Unknown encounter key: {encounter_key}")
+
+
+def _encounter_xp(encounter_data):
+    total = 0
+    for template_key in encounter_data.get("enemies") or []:
+        template = ENCOUNTER_CONTENT.get_enemy_template(template_key) or {}
+        total += int(template.get("xp", 0) or 0)
+    return total
+
+
+def _quest_xp(quest_key):
+    definition = CONTENT.quests.get(quest_key) or {}
+    return int((definition.get("rewards") or {}).get("xp", 0) or 0)
+
+
+def build_first_hour_route_report(*, scenario_key="solo_warrior", base_seed=1, max_rounds=160):
+    """Simulate the canonical first-hour route with XP and level pacing."""
+
+    scenario = next(entry for entry in PARTY_SCENARIOS if entry["key"] == scenario_key)
+    xp_total = 0
+    level = 1
+    steps = []
+    encounter_outcomes = {}
+    unlock_order_after_ruk = [
+        quest_key
+        for quest_key in CONTENT.quests.starting_quests
+        if "ruk_the_fence_cutter" in (CONTENT.quests.get(quest_key) or {}).get("prerequisites", [])
+    ]
+
+    for index, step in enumerate(FIRST_HOUR_ROUTE_STEPS, start=1):
+        before_xp = xp_total
+        before_level = level
+        if step["kind"] == "quest":
+            quest_key = step["key"]
+            required_victory = step.get("requires_victory")
+            if required_victory and encounter_outcomes.get(required_victory) != "victory":
+                steps.append(
+                    {
+                        "index": index,
+                        "kind": "quest",
+                        "key": quest_key,
+                        "title": (CONTENT.quests.get(quest_key) or {}).get("title", quest_key),
+                        "blocked": True,
+                        "blocked_by": required_victory,
+                        "xp_awarded": 0,
+                        "xp_before": before_xp,
+                        "xp_after": xp_total,
+                        "level_before": before_level,
+                        "level_after": level,
+                    }
+                )
+                continue
+            xp_awarded = _quest_xp(quest_key)
+            xp_total += xp_awarded
+            level = _level_for_xp(xp_total)
+            steps.append(
+                {
+                    "index": index,
+                    "kind": "quest",
+                    "key": quest_key,
+                    "title": (CONTENT.quests.get(quest_key) or {}).get("title", quest_key),
+                    "xp_awarded": xp_awarded,
+                    "xp_before": before_xp,
+                    "xp_after": xp_total,
+                    "level_before": before_level,
+                    "level_after": level,
+                }
+            )
+            continue
+
+        authored = _find_authored_encounter(step["key"])
+        run = simulate_encounter(authored, scenario, base_seed=base_seed, max_rounds=max_rounds, level=level)
+        encounter_outcomes[step["key"]] = run["outcome"]
+        xp_awarded = _encounter_xp(authored["encounter_data"]) if run["outcome"] == "victory" else 0
+        xp_total += xp_awarded
+        level = _level_for_xp(xp_total)
+        steps.append(
+            {
+                "index": index,
+                "kind": "encounter",
+                "key": step["key"],
+                "title": authored["encounter_data"].get("title") or step.get("label"),
+                "source": authored["source"],
+                "xp_awarded": xp_awarded,
+                "xp_before": before_xp,
+                "xp_after": xp_total,
+                "level_before": before_level,
+                "level_after": level,
+                "outcome": run["outcome"],
+                "rounds": run["rounds"],
+                "remaining_hp_ratio": run["player_remaining_hp_ratio"],
+                "telegraphed_actions": run["telegraphed_actions"],
+                "telegraphed_answers": run["telegraphed_interrupts"] + run["telegraphed_redirects"] + run["telegraphed_mitigations"],
+            }
+        )
+
+    return {
+        "scenario_key": scenario_key,
+        "final_xp": xp_total,
+        "final_level": level,
+        "steps": steps,
+        "post_ruk_unlock_order": unlock_order_after_ruk,
+    }
+
+
+def render_first_hour_route_markdown(report):
+    lines = [
+        "# First Hour Route Summary",
+        "",
+        f"- Scenario: `{report['scenario_key']}`",
+        f"- Final XP/level: {report['final_xp']} XP, level {report['final_level']}",
+        f"- First post-Ruk lead: `{(report.get('post_ruk_unlock_order') or [''])[0]}`",
+        "",
+        "## Route",
+        "",
+    ]
+    for step in report["steps"]:
+        if step["kind"] == "quest":
+            if step.get("blocked"):
+                lines.append(
+                    f"- {step['index']}. Quest `{step['key']}`: blocked by `{step['blocked_by']}`, "
+                    f"level {step['level_before']} -> {step['level_after']}"
+                )
+                continue
+            lines.append(
+                f"- {step['index']}. Quest `{step['key']}`: +{step['xp_awarded']} XP, "
+                f"level {step['level_before']} -> {step['level_after']}"
+            )
+        else:
+            lines.append(
+                f"- {step['index']}. Encounter `{step['key']}`: {step['outcome']}, "
+                f"+{step['xp_awarded']} XP, level {step['level_before']} -> {step['level_after']}, "
+                f"HP {step['remaining_hp_ratio']}, telegraphs {step['telegraphed_answers']}/{step['telegraphed_actions']}"
+            )
+    lines.append("")
+    return "\n".join(lines)
 
 
 def render_markdown(summary):
@@ -1230,6 +1564,8 @@ def render_markdown(summary):
         "",
         f"- Encounter definitions covered: {summary['totals']['encounters']}",
         f"- Scenario runs: {summary['totals']['runs']}",
+        f"- Victories/defeats/timeouts: {summary['totals']['victories']}/{summary['totals']['defeats']}/{summary['totals']['timeouts']}",
+        f"- Near wipes: {summary['totals']['near_wipes']}",
         "",
         "## Scenario Summary",
         "",
@@ -1238,14 +1574,26 @@ def render_markdown(summary):
         lines.append(
             f"- `{key}`: {data['victories']}/{data['runs']} wins, "
             f"{data['defeats']} defeats, {data['timeouts']} timeouts, "
-            f"avg rounds {data['avg_rounds']}, avg remaining HP {data['avg_remaining_hp_ratio']}"
+            f"near wipes {data['near_wipes']}, avg rounds {data['avg_rounds']}, "
+            f"avg remaining HP {data['avg_remaining_hp_ratio']}, telegraph answer rate {data['telegraph_answer_rate']}"
         )
     lines.extend(["", "## Rank Summary", ""])
     for key, data in summary["rank_summary"].items():
         lines.append(
             f"- `{key}`: {data['victories']}/{data['runs']} wins, "
-            f"avg rounds {data['avg_rounds']}, avg remaining HP {data['avg_remaining_hp_ratio']}"
+            f"near wipes {data['near_wipes']}, avg rounds {data['avg_rounds']}, "
+            f"avg remaining HP {data['avg_remaining_hp_ratio']}, telegraph answer rate {data['telegraph_answer_rate']}"
         )
+    lines.extend(["", "## Encounter Risk List", ""])
+    if not summary["encounter_risks"]:
+        lines.append("- No encounter risk data.")
+    else:
+        for risk in summary["encounter_risks"]:
+            lines.append(
+                f"- `{risk['encounter_key']}` ({risk['rank_bucket']}): win rate {risk['win_rate']}, "
+                f"near wipes {risk['near_wipes']}, avg rounds {risk['avg_rounds']}, "
+                f"avg remaining HP {risk['avg_remaining_hp_ratio']}"
+            )
     lines.extend(["", "## Ranger Companion Delta", ""])
     if not summary["ranger_companion_delta"]:
         lines.append("- No ranger companion comparison data.")
@@ -1260,9 +1608,33 @@ def render_markdown(summary):
     lines.extend(["", "## Toughest Runs", ""])
     for run in summary["toughest_runs"]:
         lines.append(
-                f"- `{run['scenario_key']}` vs `{run['encounter_key']}`: {run['outcome']}, "
-                f"rounds {run['rounds']}, remaining HP {run['player_remaining_hp_ratio']}, "
-                f"telegraphs {run['telegraphed_actions']}/{run['telegraphed_response_actions']}/{run['telegraphed_interrupts']}"
+            f"- `{run['scenario_key']}` vs `{run['encounter_key']}`: {run['outcome']}, "
+            f"rounds {run['rounds']}, remaining HP {run['player_remaining_hp_ratio']}, "
+            f"telegraphs {run['telegraphed_actions']}/{run['telegraphed_response_actions']}/{run['telegraphed_interrupts']}"
+        )
+    lines.extend(["", "## Near Wipes", ""])
+    if not summary["near_wipes"]:
+        lines.append("- No near wipes.")
+    else:
+        for run in summary["near_wipes"]:
+            lines.append(
+                f"- `{run['scenario_key']}` vs `{run['encounter_key']}`: rounds {run['rounds']}, "
+                f"remaining HP {run['player_remaining_hp_ratio']}, damage taken {run['damage_taken']}"
+            )
+    lines.extend(["", "## Longest Victories", ""])
+    for run in summary["longest_victories"]:
+        lines.append(
+            f"- `{run['scenario_key']}` vs `{run['encounter_key']}`: rounds {run['rounds']}, "
+            f"remaining HP {run['player_remaining_hp_ratio']}, rank {run['rank_bucket']}"
+        )
+    lines.extend(["", "## Telegraph Risks", ""])
+    if not summary["telegraph_risks"]:
+        lines.append("- No unanswered telegraph risks.")
+    else:
+        for run in summary["telegraph_risks"]:
+            lines.append(
+                f"- `{run['scenario_key']}` vs `{run['encounter_key']}`: {run['telegraphed_actions']} telegraphs, "
+                f"{run['telegraphed_unanswered']} unanswered, outcome {run['outcome']}, remaining HP {run['player_remaining_hp_ratio']}"
             )
     lines.append("")
     return "\n".join(lines)
@@ -1291,6 +1663,8 @@ def run_harness(*, output_dir=DEFAULT_OUTPUT_DIR, base_seed=1, max_rounds=160, l
     summary_md = output_path / "summary.md"
     interrupt_opportunity_json = output_path / "interrupt_opportunities.json"
     interrupt_opportunity_md = output_path / "interrupt_opportunities.md"
+    first_hour_route_json = output_path / "first_hour_route.json"
+    first_hour_route_md = output_path / "first_hour_route.md"
     trace_dir = output_path / "traces"
     trace_dir.mkdir(parents=True, exist_ok=True)
     report_json.write_text(json.dumps(runs, indent=2), encoding="utf-8")
@@ -1322,6 +1696,19 @@ def run_harness(*, output_dir=DEFAULT_OUTPUT_DIR, base_seed=1, max_rounds=160, l
     interrupt_opportunity_report = build_interrupt_opportunity_report(opportunity_runs)
     interrupt_opportunity_json.write_text(json.dumps(interrupt_opportunity_report, indent=2), encoding="utf-8")
     interrupt_opportunity_md.write_text(render_interrupt_opportunity_markdown(interrupt_opportunity_report), encoding="utf-8")
+    first_hour_route = {
+        scenario["key"]: build_first_hour_route_report(
+            scenario_key=scenario["key"],
+            base_seed=base_seed,
+            max_rounds=max_rounds,
+        )
+        for scenario in PARTY_SCENARIOS
+    }
+    first_hour_route_json.write_text(json.dumps(first_hour_route, indent=2), encoding="utf-8")
+    first_hour_route_md.write_text(
+        "\n".join(render_first_hour_route_markdown(report) for report in first_hour_route.values()),
+        encoding="utf-8",
+    )
     return {
         "output_dir": str(output_path),
         "report_json": str(report_json),
@@ -1329,11 +1716,14 @@ def run_harness(*, output_dir=DEFAULT_OUTPUT_DIR, base_seed=1, max_rounds=160, l
         "summary_md": str(summary_md),
         "interrupt_opportunity_json": str(interrupt_opportunity_json),
         "interrupt_opportunity_md": str(interrupt_opportunity_md),
+        "first_hour_route_json": str(first_hour_route_json),
+        "first_hour_route_md": str(first_hour_route_md),
         "trace_dir": str(trace_dir),
         "trace_files": trace_files,
         "runs": runs,
         "summary": summary,
         "interrupt_opportunity_report": interrupt_opportunity_report,
+        "first_hour_route": first_hour_route,
     }
 
 
@@ -1345,7 +1735,20 @@ def main():
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--trace-encounter", action="append", default=[])
     parser.add_argument("--trace-scenario", action="append", default=[])
+    parser.add_argument("--progression-levels", action="store_true")
+    parser.add_argument("--first-hour-route", action="store_true")
     args = parser.parse_args()
+
+    if args.progression_levels:
+        runs = build_progression_runs(base_seed=args.base_seed, max_rounds=args.max_rounds, limit=args.limit)
+        summary = build_summary(runs)
+        print(render_markdown(summary))
+        return
+
+    if args.first_hour_route:
+        report = build_first_hour_route_report(base_seed=args.base_seed, max_rounds=args.max_rounds)
+        print(render_first_hour_route_markdown(report))
+        return
 
     result = run_harness(
         output_dir=args.output_dir,
@@ -1355,7 +1758,7 @@ def main():
         trace_encounters=args.trace_encounter,
         trace_scenarios=args.trace_scenario,
     )
-    print(result["summary_md"])
+    print(Path(result["summary_md"]).read_text(encoding="utf-8"))
     print(f"\nSaved combat simulation outputs to {result['output_dir']}")
 
 

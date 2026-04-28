@@ -45,10 +45,12 @@ class CreatorIndexViewTests(unittest.TestCase):
         body = response.content.decode("utf-8")
         self.assertEqual(200, response.status_code)
         self.assertIn("Brave Creator", body)
+        self.assertIn("builder tooling", body)
         self.assertIn("/creator/world/", body)
         self.assertIn("staff, superuser, or Developer-authorized account", body)
         self.assertIn("/creator/items/", body)
         self.assertIn("/creator/characters/", body)
+        self.assertIn("Open Character Builder", body)
 
 
 if __name__ == "__main__":

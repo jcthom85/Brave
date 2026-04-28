@@ -6,7 +6,7 @@ Brave creator tools in the web interface are restricted to authenticated staff, 
 
 Start at `/creator/` for the creator landing page.
 
-## Editors
+## Builders
 
 - `/creator/world/` for rooms, exits, and entities
 - `/creator/quests/` for quest content

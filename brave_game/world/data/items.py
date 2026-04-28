@@ -77,6 +77,13 @@ ITEM_TEMPLATES = {
         "summary": "Travel-ready robes stitched for mud, weather, and long prayers.",
         "bonuses": {"armor": 2, "max_hp": 6, "max_mana": 6},
     },
+    "wayfarer_clasp": {
+        "name": "Wayfarer Clasp",
+        "kind": "equipment",
+        "slot": "trinket",
+        "summary": "A plain brass yard clasp stamped with Brambleford's gate mark, small enough to ignore until it keeps a strap tight.",
+        "bonuses": {"max_hp": 4, "accuracy": 1},
+    },
     "emberglass_staff": {
         "name": "Emberglass Staff",
         "kind": "equipment",

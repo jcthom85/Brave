@@ -1054,9 +1054,9 @@
       "xp": 64
     },
     "ruk_fence_cutter": {
-      "accuracy": 72,
-      "armor": 4,
-      "attack_power": 14,
+      "accuracy": 74,
+      "armor": 5,
+      "attack_power": 28,
       "desc": "A broad goblin brute in stolen harness, gripping the jagged axe that gave him his name.",
       "dodge": 8,
       "loot": [
@@ -1071,7 +1071,7 @@
           "min": 1
         }
       ],
-      "max_hp": 84,
+      "max_hp": 190,
       "gender": "male",
       "name": "Ruk the Fence-Cutter",
       "silver": [
@@ -1084,7 +1084,7 @@
         "ruk",
         "raider"
       ],
-      "xp": 90
+      "xp": 55
     },
     "salvage_drone": {
       "accuracy": 75,
@@ -1319,6 +1319,26 @@
         "rat"
       ],
       "xp": 12
+    },
+    "tutorial_thorn_rat": {
+      "accuracy": 68,
+      "armor": 0,
+      "attack_power": 3,
+      "desc": "A burr-matted yard rat penned for training, still mean enough to make a lesson stick.",
+      "dodge": 5,
+      "loot": [],
+      "max_hp": 28,
+      "name": "Yard Thorn Rat",
+      "silver": [
+        0,
+        0
+      ],
+      "tags": [
+        "beast",
+        "rat",
+        "tutorial"
+      ],
+      "xp": 8
     },
     "tower_archer": {
       "accuracy": 83,
@@ -1637,7 +1657,7 @@
         "enemies": [
           "ruk_fence_cutter"
         ],
-        "intro": "A heavy goblin rises from behind the chopped rails and drags a jagged axe through the dirt.",
+        "intro": "A heavy goblin rises from behind the chopped rails, lantern glass grit crunching under one boot as he drags a jagged axe through the dirt.",
         "key": "ruks_stand",
         "title": "Ruk the Fence-Cutter"
       }
@@ -1648,7 +1668,7 @@
           "goblin_sneak",
           "goblin_cutter"
         ],
-        "intro": "Two goblins are still at the fence line, hacking loose boards for spite or firewood.",
+        "intro": "Two goblins are still at the fence line, hacking loose boards and stacking them like someone is waiting for the next load.",
         "key": "fencebreakers",
         "title": "Fencebreakers"
       },
@@ -1657,7 +1677,7 @@
           "road_wolf",
           "goblin_cutter"
         ],
-        "intro": "A goblin raider and a hungry wolf have both decided this stretch of road belongs to them.",
+        "intro": "A goblin raider jerks a cut harness from the mud just as a hungry wolf slips out beside him, both of them too comfortable on Brambleford's road.",
         "key": "wolf_and_raider",
         "title": "Mud and Teeth"
       },
@@ -1666,7 +1686,7 @@
           "goblin_slinger",
           "goblin_cutter"
         ],
-        "intro": "A goblin slinger peppers the road with stolen stones while a cutter rushes in behind him.",
+        "intro": "A goblin slinger peppers the road with stolen stones while a cutter rushes in behind him, blade still nicked with fence sap.",
         "key": "stone_and_knife",
         "title": "Stone and Knife"
       }
@@ -1676,7 +1696,7 @@
         "enemies": [
           "road_wolf"
         ],
-        "intro": "A road wolf slips from the brush and tests your nerve.",
+        "intro": "A road wolf slips from the brush with cart mud on its legs and tests your nerve.",
         "key": "trailhead_wolf",
         "title": "A Roadside Wolf"
       },
@@ -1685,7 +1705,7 @@
           "thorn_rat",
           "thorn_rat"
         ],
-        "intro": "A pair of thorn rats spill out from a ditch, all teeth and burr-matted fur.",
+        "intro": "A pair of thorn rats spill out from a ditch near torn canvas, all teeth and burr-matted fur.",
         "key": "trailhead_rats",
         "title": "Thorn Rat Scatter"
       },
@@ -2185,7 +2205,7 @@
     "tutorial_vermin_pens": [
       {
         "enemies": [
-          "thorn_rat"
+          "tutorial_thorn_rat"
         ],
         "intro": "Straw erupts under the rail and a thorn rat bolts straight at the nearest warm ankle.",
         "key": "yard_scuttle",
@@ -2193,7 +2213,7 @@
       },
       {
         "enemies": [
-          "thorn_rat"
+          "tutorial_thorn_rat"
         ],
         "intro": "A burr-matted rat launches itself out of a feed bin with all the confidence of a creature that has never once paid for grain.",
         "key": "bin_raider",

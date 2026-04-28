@@ -1658,6 +1658,16 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     cursor: pointer;
 }
 
+.brave-audio-settings__toggle[aria-pressed="true"] {
+    border-color: color-mix(in srgb, var(--brave-accent) 46%, rgba(var(--brave-accent-rgb), 0.18));
+    background:
+        linear-gradient(180deg, rgba(var(--brave-accent-rgb), 0.16), rgba(var(--brave-accent-rgb), 0.06)),
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-panel-soft) 90%, transparent), color-mix(in srgb, var(--brave-panel-deep) 94%, transparent));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 0 1px rgba(var(--brave-accent-rgb), 0.08);
+}
+
 .brave-audio-settings__toggle-indicator {
     display: inline-flex;
     align-items: center;
@@ -1665,6 +1675,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     width: 24px;
     height: 24px;
     color: var(--brave-text-bright);
+}
+
+.brave-audio-settings__toggle[aria-pressed="true"] .brave-audio-settings__toggle-indicator {
+    color: color-mix(in srgb, var(--brave-accent) 68%, var(--brave-text-bright));
 }
 
 .brave-audio-settings__slider-row {
@@ -4671,64 +4685,155 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--account,
-.brave-view--connection {
-    max-width: 440px;
-    gap: 12px;
+.brave-view--connection,
+.brave-view--chargen {
+    position: relative;
     min-height: 100%;
+    isolation: isolate;
+    overflow: hidden;
+    border-color: rgba(229, 184, 101, 0.22);
+    box-shadow: 0 26px 80px rgba(0, 0, 0, 0.36), inset 0 1px rgba(255, 245, 213, 0.08);
+}
+
+.brave-view--account::before,
+.brave-view--connection::before,
+.brave-view--chargen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.brave-view--connection {
+    max-width: min(940px, 100%);
+    gap: 16px;
+    background:
+        linear-gradient(110deg, rgba(7, 13, 11, 0.96) 0%, rgba(22, 35, 25, 0.92) 44%, rgba(51, 29, 24, 0.94) 100%);
+}
+
+.brave-view--connection::before {
+    background:
+        linear-gradient(90deg, rgba(224, 180, 103, 0.13) 0 1px, transparent 1px 100%),
+        repeating-linear-gradient(155deg, rgba(255, 236, 186, 0.08) 0 1px, transparent 1px 28px),
+        linear-gradient(155deg, transparent 0%, transparent 45%, rgba(132, 44, 35, 0.2) 45%, rgba(132, 44, 35, 0.2) 56%, transparent 56%);
+    background-size: 42px 100%, auto, auto;
+    opacity: 0.75;
+}
+
+.brave-view--account {
+    max-width: min(980px, 100%);
+    gap: 16px;
+    background:
+        linear-gradient(115deg, rgba(16, 20, 15, 0.97) 0%, rgba(37, 35, 25, 0.94) 46%, rgba(38, 25, 27, 0.96) 100%);
+}
+
+.brave-view--account::before {
+    background:
+        repeating-linear-gradient(90deg, rgba(238, 197, 119, 0.08) 0 1px, transparent 1px 72px),
+        repeating-linear-gradient(0deg, transparent 0 14px, rgba(116, 80, 48, 0.08) 14px 15px, transparent 15px 31px),
+        linear-gradient(135deg, rgba(101, 135, 119, 0.16), transparent 38%, rgba(152, 61, 49, 0.14));
+    opacity: 0.72;
 }
 
 .brave-view--chargen {
-    max-width: 920px;
-    gap: 14px;
-    min-height: 100%;
+    max-width: min(1080px, 100%);
+    gap: 16px;
+    background:
+        linear-gradient(118deg, rgba(18, 18, 16, 0.97) 0%, rgba(31, 35, 28, 0.95) 42%, rgba(24, 44, 47, 0.93) 100%);
 }
 
-.brave-view--connection {
-    max-width: 470px;
+.brave-view--chargen::before {
+    background:
+        repeating-linear-gradient(135deg, rgba(232, 190, 111, 0.08) 0 1px, transparent 1px 34px),
+        linear-gradient(90deg, rgba(139, 52, 44, 0.13), transparent 33%, rgba(77, 143, 129, 0.15)),
+        repeating-linear-gradient(0deg, transparent 0 28px, rgba(255, 244, 213, 0.035) 28px 29px);
+    opacity: 0.7;
 }
 
 .brave-view--account .brave-view__hero,
 .brave-view--connection .brave-view__hero,
 .brave-view--chargen .brave-view__hero {
-    gap: 8px;
-    padding: 12px 14px 14px;
+    gap: 10px;
+    min-height: 184px;
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid rgba(238, 197, 119, 0.24);
+    background:
+        linear-gradient(135deg, rgba(246, 214, 149, 0.11), transparent 34%),
+        linear-gradient(0deg, rgba(0, 0, 0, 0.3), rgba(10, 12, 10, 0.08));
+}
+
+.brave-view--connection .brave-view__hero {
+    justify-content: flex-end;
+    min-height: 250px;
+    background:
+        linear-gradient(155deg, rgba(242, 198, 111, 0.16) 0%, transparent 28%),
+        linear-gradient(25deg, rgba(90, 34, 31, 0.34) 0%, transparent 42%),
+        repeating-linear-gradient(0deg, rgba(255, 238, 184, 0.055) 0 1px, transparent 1px 18px);
+}
+
+.brave-view--account .brave-view__hero {
+    min-height: 172px;
+}
+
+.brave-view--account .brave-view__sections,
+.brave-view--connection .brave-view__sections,
+.brave-view--chargen .brave-view__sections {
+    gap: 14px;
+    flex: 1 1 auto;
+    align-content: start;
 }
 
 .brave-view--account .brave-view__sections,
 .brave-view--connection .brave-view__sections {
     grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
-    flex: 1 1 auto;
-    align-content: start;
-}
-
-.brave-view--account .brave-view__sections {
-    max-width: 440px;
-}
-
-.brave-view--connection .brave-view__sections {
-    max-width: 470px;
-    align-items: start;
+    max-width: none;
 }
 
 .brave-view--chargen .brave-view__sections {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.28fr);
     align-items: start;
-    max-width: 920px;
-    flex: 1 1 auto;
-    align-content: start;
+    max-width: none;
+}
+
+.brave-view--account .brave-view__entry,
+.brave-view--connection .brave-view__entry,
+.brave-view--chargen .brave-view__entry {
+    border-radius: 8px;
+    border-color: rgba(236, 196, 122, 0.22);
+    background:
+        linear-gradient(135deg, rgba(255, 234, 185, 0.08), transparent 46%),
+        rgba(8, 13, 12, 0.58);
 }
 
 .brave-view--account .brave-view__entry,
 .brave-view--connection .brave-view__entry {
-    gap: 6px;
-    padding: 10px 10px 8px;
+    gap: 8px;
+    padding: 14px 14px 12px;
+}
+
+.brave-view--account .brave-view__entry:hover,
+.brave-view--connection .brave-view__entry:hover,
+.brave-view--chargen .brave-view__entry:hover {
+    border-color: rgba(239, 197, 116, 0.42);
+    background:
+        linear-gradient(135deg, rgba(255, 225, 162, 0.13), transparent 48%),
+        rgba(17, 27, 22, 0.78);
+}
+
+.brave-view--account .brave-view__entry:first-child {
+    border-style: dashed;
+    border-color: rgba(238, 173, 88, 0.42);
+    background:
+        linear-gradient(135deg, rgba(209, 113, 62, 0.15), transparent 45%),
+        rgba(13, 18, 14, 0.62);
 }
 
 .brave-view--chargen .brave-view__entry {
     min-height: 100%;
     gap: 8px;
-    padding: 14px 14px 12px;
+    padding: 16px 16px 14px;
 }
 
 .brave-view--chargen .brave-view__entry--ornamented {
@@ -4745,25 +4850,26 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--chargen .brave-view__entry-ornament {
-    left: 50%;
-    right: auto;
+    left: auto;
+    right: 8px;
     top: 50%;
-    transform: translate(-50%, -50%);
-    --brave-entry-ornament-ratio: 0.28;
-    --brave-entry-ornament-fallback: 3.75rem;
-    --brave-entry-ornament-color: rgba(var(--brave-accent-rgb), 0.14);
-    --brave-entry-ornament-glow: rgba(var(--brave-accent-rgb), 0.16);
+    transform: translateY(-50%);
+    --brave-entry-ornament-ratio: 0.36;
+    --brave-entry-ornament-fallback: 4.6rem;
+    --brave-entry-ornament-color: rgba(231, 186, 109, 0.14);
+    --brave-entry-ornament-glow: rgba(75, 151, 137, 0.18);
     opacity: 0.95;
-}
-
-.brave-view--connection .brave-view__entry {
-    padding: 12px 12px 10px;
 }
 
 .brave-view--account .brave-view__section,
 .brave-view--connection .brave-view__section,
 .brave-view--chargen .brave-view__section {
-    padding: 14px 14px 12px;
+    padding: 16px;
+    border-radius: 8px;
+    border-color: rgba(238, 197, 119, 0.2);
+    background:
+        linear-gradient(145deg, rgba(255, 235, 192, 0.06), transparent 46%),
+        rgba(8, 12, 11, 0.72);
 }
 
 .brave-view--account .brave-view__section,
@@ -4783,17 +4889,30 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--account .brave-view__wordmark-text,
 .brave-view--connection .brave-view__wordmark-text,
 .brave-view--chargen .brave-view__wordmark-text {
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.16em);
-    font-size: clamp(1.9rem, 4vw, 3rem);
+    letter-spacing: 0;
+    color: #ffe6a7;
+    text-shadow: 0 3px 0 rgba(92, 38, 26, 0.72), 0 12px 34px rgba(0, 0, 0, 0.55);
 }
 
-.brave-view--connection .brave-view__subtitle {
-    max-width: 42ch;
+.brave-view--connection .brave-view__wordmark-text {
+    font-size: clamp(3.4rem, 9vw, 6.8rem);
+    line-height: 0.86;
+}
+
+.brave-view--account .brave-view__wordmark-text,
+.brave-view--chargen .brave-view__wordmark-text {
+    font-size: clamp(2.6rem, 5.8vw, 4.6rem);
+}
+
+.brave-view--connection .brave-view__subtitle,
+.brave-view--chargen .brave-view__subtitle {
+    max-width: 58ch;
+    color: rgba(255, 242, 209, 0.82);
 }
 
 .brave-view--connection .brave-view__list-item {
     align-items: center;
-    padding: 11px 12px;
+    padding: 13px 14px;
 }
 
 .brave-view--connection .brave-view__list-main {
@@ -4803,7 +4922,6 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 .brave-view--connection .brave-view__section--list {
     min-height: auto;
     flex: 0 0 auto;
-    padding: 10px 10px 8px;
 }
 
 .brave-view--connection .brave-view__section--form {
@@ -4813,15 +4931,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--connection .brave-view__section--list .brave-view__list {
-    gap: 6px;
+    gap: 8px;
 }
 
 .brave-view--connection .brave-view__section--list .brave-view__section-label {
-    margin-bottom: 8px;
-}
-
-.brave-view--chargen .brave-view__subtitle {
-    max-width: 56ch;
+    margin-bottom: 10px;
 }
 
 .brave-view--connection .brave-view__entry-line:first-child {
@@ -4829,13 +4943,23 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--chargen .brave-view__entry-meta {
-    color: var(--brave-text-dim);
+    color: rgba(255, 235, 190, 0.68);
 }
 
 .brave-view--chargen .brave-view__entries {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
+}
+
+.brave-view--chargen .brave-view__section--grid3 .brave-view__entries {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media screen and (max-width: 900px) {
+    .brave-view--chargen .brave-view__section--grid3 .brave-view__entries {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 .brave-view--room {
@@ -6475,7 +6599,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-room-voice-layer {
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     align-items: flex-end;
     gap: 8px;
     width: 100%;
@@ -6483,6 +6607,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 
 .brave-room-voice-layer--mobile {
     align-items: stretch;
+}
+
+.brave-room-voice-layer--self {
+    align-items: flex-start;
+}
+
+.brave-room-voice-layer--self .brave-room-voice-bubble {
+    pointer-events: auto;
+    cursor: pointer;
 }
 
 .brave-room-voice-bubble {
@@ -6498,9 +6631,15 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         0 16px 28px rgba(0, 0, 0, 0.22),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px);
+    cursor: pointer;
     animation:
-        brave-room-voice-bubble-in 200ms ease,
-        brave-room-voice-bubble-out 360ms ease 2.24s forwards;
+        brave-room-voice-bubble-in 200ms ease;
+}
+
+.brave-room-voice-bubble.brave-room-voice-bubble--dismissing {
+    pointer-events: none;
+    animation:
+        brave-room-voice-bubble-out 220ms ease forwards;
 }
 
 .brave-room-voice-bubble::after {
@@ -6536,8 +6675,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         0 10px 18px rgba(0, 0, 0, 0.18),
         inset 0 1px 0 rgba(255, 255, 255, 0.04);
     animation:
-        brave-room-voice-bubble-in 180ms ease,
-        brave-room-voice-bubble-out 280ms ease 1.52s forwards;
+        brave-room-voice-bubble-in 180ms ease;
 }
 
 .brave-room-voice-bubble--emote::after {
@@ -6548,6 +6686,46 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     border-right-color: color-mix(in srgb, var(--brave-world-line) 70%, rgba(255, 255, 255, 0.08));
     border-bottom-color: color-mix(in srgb, var(--brave-world-line) 70%, rgba(255, 255, 255, 0.08));
     background: linear-gradient(135deg, rgba(11, 16, 22, 0.82), rgba(8, 12, 18, 0.78));
+}
+
+.brave-room-voice-bubble--self::after {
+    right: auto;
+    left: 24px;
+}
+
+.brave-room-voice-bubble--self {
+    border-color: color-mix(in srgb, var(--brave-good) 42%, rgba(255, 255, 255, 0.14));
+    background:
+        radial-gradient(circle at 22% 18%, color-mix(in srgb, var(--brave-good) 18%, transparent), transparent 52%),
+        linear-gradient(180deg, rgba(15, 28, 26, 0.94), rgba(9, 18, 20, 0.92));
+}
+
+.brave-room-voice-bubble--self::after {
+    border-right-color: color-mix(in srgb, var(--brave-good) 42%, rgba(255, 255, 255, 0.14));
+    border-bottom-color: color-mix(in srgb, var(--brave-good) 42%, rgba(255, 255, 255, 0.14));
+    background: linear-gradient(135deg, rgba(15, 28, 26, 0.94), rgba(9, 18, 20, 0.92));
+}
+
+.brave-room-voice-bubble--threat {
+    width: min(100%, 336px);
+    border-color: color-mix(in srgb, var(--brave-bad) 72%, rgba(255, 226, 174, 0.3));
+    background:
+        radial-gradient(circle at 14% 10%, rgba(255, 202, 118, 0.16), transparent 46%),
+        radial-gradient(circle at 100% 20%, color-mix(in srgb, var(--brave-bad) 24%, transparent), transparent 48%),
+        linear-gradient(180deg, rgba(34, 18, 16, 0.96), rgba(16, 12, 15, 0.94));
+    box-shadow:
+        0 18px 32px rgba(0, 0, 0, 0.28),
+        0 0 0 1px color-mix(in srgb, var(--brave-bad) 14%, transparent),
+        0 0 24px color-mix(in srgb, var(--brave-bad) 16%, transparent),
+        inset 0 1px 0 rgba(255, 235, 198, 0.07);
+    animation:
+        brave-room-voice-bubble-in 200ms ease;
+}
+
+.brave-room-voice-bubble--threat::after {
+    border-right-color: color-mix(in srgb, var(--brave-bad) 72%, rgba(255, 226, 174, 0.3));
+    border-bottom-color: color-mix(in srgb, var(--brave-bad) 72%, rgba(255, 226, 174, 0.3));
+    background: linear-gradient(135deg, rgba(34, 18, 16, 0.96), rgba(16, 12, 15, 0.94));
 }
 
 .brave-room-voice-bubble__speaker {
@@ -6562,6 +6740,11 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     color: color-mix(in srgb, var(--brave-text-dim) 84%, rgba(255, 255, 255, 0.58));
     font-size: calc(0.58rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     letter-spacing: 0.06em;
+}
+
+.brave-room-voice-bubble--threat .brave-room-voice-bubble__speaker {
+    color: color-mix(in srgb, var(--brave-bad) 64%, #ffd18a);
+    letter-spacing: 0.1em;
 }
 
 .brave-room-voice-bubble__line {
@@ -6584,6 +6767,12 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
     -webkit-line-clamp: 1;
 }
 
+.brave-room-voice-bubble--threat .brave-room-voice-bubble__line {
+    color: color-mix(in srgb, var(--brave-text-bright) 86%, #ffe2b5);
+    font-weight: 650;
+    -webkit-line-clamp: 3;
+}
+
 .brave-room-voice-overflow {
     align-self: flex-end;
     padding: 5px 10px;
@@ -6597,6 +6786,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 #brave-room-voice-overlay-desktop,
+#brave-room-voice-overlay-self,
 #brave-room-voice-overlay-mobile {
     position: absolute;
     pointer-events: none;
@@ -6604,11 +6794,13 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 #brave-room-voice-overlay-desktop[aria-hidden="true"],
+#brave-room-voice-overlay-self[aria-hidden="true"],
 #brave-room-voice-overlay-mobile[aria-hidden="true"] {
     display: none;
 }
 
 body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-desktop,
+body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-self,
 body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-mobile {
     display: none !important;
 }
@@ -6617,6 +6809,12 @@ body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-mobile {
     right: var(--brave-rail-offset);
     bottom: 352px;
     width: min(var(--brave-rail-column-width), calc(100% - 68px));
+}
+
+#brave-room-voice-overlay-self {
+    left: max(24px, env(safe-area-inset-left, 0px) + 24px);
+    bottom: 112px;
+    width: min(340px, calc(100% - 68px));
 }
 
 #brave-room-voice-overlay-mobile {
@@ -13315,6 +13513,19 @@ body.brave-combat-return-active .scene-card {
         min-height: clamp(420px, calc(100dvh - 220px), 720px);
     }
 
+    .brave-view--connection .brave-view__hero {
+        min-height: 190px;
+        padding: 20px;
+    }
+
+    .brave-view--connection .brave-view__section {
+        min-height: auto;
+    }
+
+    .brave-view--connection .brave-view__wordmark-text {
+        font-size: clamp(3rem, 16vw, 4.8rem);
+    }
+
     .brave-view--account .brave-view__entries,
     .brave-view--connection .brave-view__entries,
     .brave-view--chargen .brave-view__entries {
@@ -13347,7 +13558,7 @@ body.brave-combat-return-active .scene-card {
         right: 16px;
         bottom: 12px;
         display: block;
-        z-index: 7;
+        z-index: 5001;
         pointer-events: none;
     }
 
@@ -13549,7 +13760,7 @@ body.brave-combat-return-active .scene-card {
         right: 16px;
         top: 16px;
         bottom: 16px;
-        z-index: 8;
+        z-index: 5002;
         pointer-events: none;
     }
 
@@ -13706,13 +13917,16 @@ body.brave-combat-return-active .scene-card {
     .brave-room-voice-layer--mobile .brave-room-voice-overflow {
         align-self: stretch;
         width: 100%;
+        pointer-events: auto;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
     .brave-room-voice-layer--mobile .brave-room-voice-bubble::after {
-        right: 18px;
+        display: none;
     }
 
-    #brave-room-voice-overlay-desktop {
+    #brave-room-voice-overlay-desktop,
+    #brave-room-voice-overlay-self {
         display: none !important;
     }
 
@@ -14015,8 +14229,8 @@ body.brave-combat-return-active .scene-card {
         max-width: none;
         margin: 0;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        grid-template-rows: 104px 78px 104px;
-        row-gap: 3px;
+        grid-template-rows: 84px 94px 84px;
+        row-gap: 2px;
         column-gap: 6px;
     }
 
@@ -14038,8 +14252,8 @@ body.brave-combat-return-active .scene-card {
 
     #mobile-nav-dock .brave-view__navcard {
         flex-direction: column;
-        gap: 4px;
-        padding: 10px 9px;
+        gap: 2px;
+        padding: 6px 8px;
     }
 
     #mobile-nav-dock .brave-view__navcard-badge {
@@ -14999,7 +15213,7 @@ body.brave-combat-return-active .scene-card {
 
     #mobile-nav-dock .brave-view__navcard,
     #mobile-nav-dock .brave-view__navslot {
-        height: 86px;
+        height: 100%;
     }
 
     .brave-mobile-tools {
@@ -15097,7 +15311,7 @@ body.brave-combat-return-active .scene-card {
 
     .brave-view__navcard,
     .brave-view__navslot {
-        height: 94px;
+        height: 100%;
     }
 
     .brave-view__nav-centercard {
@@ -16285,4 +16499,1066 @@ body.brave-mobile-input-open #inputsend {
     body.brave-mobile-nav-active.brave-mobile-input-open #messagewindow {
         padding-bottom: calc(var(--brave-mobile-dock-clearance) + 8px);
     }
+}
+
+/* Front door polish: title, login, account roster, and character creation. */
+.brave-view--account,
+.brave-view--connection,
+.brave-view--chargen {
+    --brave-frontdoor-bg-top: #0b1118;
+    --brave-frontdoor-bg-bottom: #030609;
+    --brave-frontdoor-panel: rgba(12, 19, 26, 0.94);
+    --brave-frontdoor-panel-strong: rgba(15, 26, 34, 0.96);
+    --brave-frontdoor-panel-soft: rgba(20, 35, 43, 0.82);
+    --brave-frontdoor-line: rgba(112, 162, 180, 0.22);
+    --brave-frontdoor-line-strong: rgba(132, 190, 209, 0.4);
+    --brave-frontdoor-title: #e5f1f4;
+    --brave-frontdoor-text: #bbccd2;
+    --brave-frontdoor-muted: #8399a2;
+    --brave-frontdoor-dim: #647983;
+    --brave-frontdoor-accent: #76b6c8;
+    --brave-frontdoor-accent-rgb: 118, 182, 200;
+    --brave-frontdoor-accent-strong: #9bd4df;
+    --brave-frontdoor-good: #8db989;
+    --brave-frontdoor-warn: #c69a5c;
+    --brave-frontdoor-danger: #d07a73;
+    width: min(1040px, 100%);
+    max-width: min(1040px, 100%);
+    gap: 18px;
+    padding: 18px;
+    overflow: visible;
+    border: 1px solid var(--brave-frontdoor-line);
+    border-radius: 14px;
+    background:
+        radial-gradient(circle at 12% 0, rgba(88, 136, 159, 0.18), transparent 34%),
+        radial-gradient(circle at 94% 10%, rgba(118, 151, 112, 0.12), transparent 36%),
+        linear-gradient(180deg, var(--brave-frontdoor-bg-top), var(--brave-frontdoor-bg-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(224, 244, 249, 0.045),
+        0 22px 58px rgba(0, 0, 0, 0.42);
+}
+
+.brave-view--account::before,
+.brave-view--connection::before,
+.brave-view--chargen::before {
+    display: none;
+}
+
+.brave-view--account .brave-view__hero,
+.brave-view--connection .brave-view__hero,
+.brave-view--chargen .brave-view__hero {
+    position: relative;
+    min-height: 150px;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 22px 24px;
+    overflow: hidden;
+    border: 1px solid var(--brave-frontdoor-line);
+    border-radius: 12px;
+    background:
+        linear-gradient(90deg, rgba(118, 182, 200, 0.1), transparent 42%),
+        radial-gradient(circle at 86% 18%, rgba(141, 185, 137, 0.14), transparent 34%),
+        linear-gradient(135deg, rgba(19, 31, 40, 0.94), rgba(10, 19, 27, 0.96) 58%, rgba(4, 7, 11, 0.99));
+    box-shadow: inset 0 1px 0 rgba(224, 244, 249, 0.04);
+}
+
+.brave-view--connection .brave-view__hero {
+    min-height: 220px;
+}
+
+.brave-view--account .brave-view__hero::after,
+.brave-view--connection .brave-view__hero::after,
+.brave-view--chargen .brave-view__hero::after {
+    content: "";
+    position: absolute;
+    right: 20px;
+    bottom: 18px;
+    width: min(30%, 220px);
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(var(--brave-frontdoor-accent-rgb), 0.56), transparent);
+    opacity: 0.75;
+    pointer-events: none;
+}
+
+.brave-view--account .brave-view__wordmark-text,
+.brave-view--connection .brave-view__wordmark-text,
+.brave-view--chargen .brave-view__wordmark-text {
+    letter-spacing: 0;
+    color: var(--brave-frontdoor-title);
+    font-size: clamp(3rem, 9vw, 6.2rem);
+    line-height: 0.9;
+    text-shadow:
+        0 2px 0 rgba(0, 12, 18, 0.78),
+        0 0 24px rgba(var(--brave-frontdoor-accent-rgb), 0.12),
+        0 12px 28px rgba(0, 0, 0, 0.46);
+}
+
+.brave-view--account .brave-view__wordmark-text,
+.brave-view--chargen .brave-view__wordmark-text {
+    font-size: clamp(2.7rem, 6vw, 4.6rem);
+}
+
+.brave-view--account .brave-view__eyebrow,
+.brave-view--connection .brave-view__eyebrow,
+.brave-view--chargen .brave-view__eyebrow {
+    letter-spacing: 0.08em;
+    color: var(--brave-frontdoor-muted);
+}
+
+.brave-view--connection .brave-view__subtitle,
+.brave-view--chargen .brave-view__subtitle {
+    color: var(--brave-frontdoor-text);
+    text-transform: none;
+}
+
+.brave-view--account .brave-view__sections,
+.brave-view--connection .brave-view__sections,
+.brave-view--chargen .brave-view__sections {
+    gap: 14px;
+    max-width: none;
+    align-content: start;
+}
+
+.brave-view--account .brave-view__sections,
+.brave-view--connection .brave-view__sections {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.brave-view--chargen .brave-view__sections {
+    grid-template-columns: minmax(260px, 0.42fr) minmax(0, 0.58fr);
+}
+
+.brave-view--account .brave-view__section,
+.brave-view--connection .brave-view__section,
+.brave-view--chargen .brave-view__section {
+    min-height: 0;
+    padding: 16px;
+    border: 1px solid var(--brave-frontdoor-line);
+    border-radius: 10px;
+    background:
+        linear-gradient(180deg, rgba(197, 227, 236, 0.035), transparent 32%),
+        var(--brave-frontdoor-panel);
+    box-shadow: inset 0 1px 0 rgba(224, 244, 249, 0.03);
+}
+
+.brave-view--account .brave-view__section,
+.brave-view--connection .brave-view__section {
+    flex: 0 1 auto;
+}
+
+.brave-view--connection .brave-view__section--form,
+.brave-view--connection .brave-view__section--list {
+    align-self: stretch;
+}
+
+.brave-view--account .brave-view__entries,
+.brave-view--connection .brave-view__entries,
+.brave-view--chargen .brave-view__entries {
+    min-height: 0;
+    gap: 10px;
+}
+
+.brave-view--chargen .brave-view__entries {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.brave-view--account .brave-view__entry,
+.brave-view--connection .brave-view__entry,
+.brave-view--chargen .brave-view__entry {
+    min-height: 0;
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid var(--brave-frontdoor-line);
+    border-radius: 10px;
+    background:
+        linear-gradient(180deg, rgba(224, 244, 249, 0.026), transparent 36%),
+        rgba(11, 19, 25, 0.88);
+    box-shadow: none;
+}
+
+.brave-view--account .brave-view__entry:first-child {
+    border-style: solid;
+    border-color: rgba(var(--brave-frontdoor-accent-rgb), 0.34);
+    background:
+        linear-gradient(90deg, rgba(var(--brave-frontdoor-accent-rgb), 0.12), transparent 50%),
+        rgba(12, 23, 30, 0.9);
+}
+
+.brave-view--account .brave-view__entry:hover,
+.brave-view--connection .brave-view__entry:hover,
+.brave-view--chargen .brave-view__entry:hover {
+    border-color: var(--brave-frontdoor-line-strong);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-frontdoor-accent-rgb), 0.07), transparent 40%),
+        rgba(15, 28, 36, 0.94);
+    transform: translateY(-1px);
+}
+
+.brave-view--chargen .brave-view__entry--ornamented {
+    padding-right: 64px;
+}
+
+.brave-view--chargen .brave-view__entry-ornament {
+    right: 10px;
+    --brave-entry-ornament-ratio: 0.3;
+    --brave-entry-ornament-fallback: 4rem;
+    --brave-entry-ornament-color: rgba(var(--brave-frontdoor-accent-rgb), 0.13);
+    --brave-entry-ornament-glow: rgba(118, 151, 112, 0.08);
+}
+
+.brave-view--connection .brave-view__list-item {
+    min-height: 54px;
+    align-items: center;
+    border-radius: 10px;
+}
+
+.brave-view--connection .brave-view__list-main {
+    align-items: center;
+}
+
+.brave-view--connection .brave-view__field-input,
+.brave-view--chargen .brave-view__field-input {
+    min-height: 46px;
+    border-radius: 9px;
+    border-color: var(--brave-frontdoor-line);
+    background:
+        linear-gradient(180deg, rgba(224, 244, 249, 0.035), transparent 34%),
+        rgba(4, 8, 12, 0.76);
+}
+
+.brave-view--connection .brave-view__form-submit,
+.brave-view--chargen .brave-view__form-submit {
+    width: 100%;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.brave-view--account .brave-view__title,
+.brave-view--connection .brave-view__title,
+.brave-view--chargen .brave-view__title,
+.brave-view--account .brave-view__entry-title,
+.brave-view--connection .brave-view__entry-title,
+.brave-view--chargen .brave-view__entry-title,
+.brave-view--account .brave-view__pair-value,
+.brave-view--connection .brave-view__pair-value,
+.brave-view--chargen .brave-view__pair-value {
+    color: var(--brave-frontdoor-title);
+}
+
+.brave-view--account .brave-view__section-label,
+.brave-view--connection .brave-view__section-label,
+.brave-view--chargen .brave-view__section-label {
+    color: var(--brave-frontdoor-muted);
+}
+
+.brave-view--account .brave-view__entry-meta,
+.brave-view--connection .brave-view__entry-meta,
+.brave-view--chargen .brave-view__entry-meta,
+.brave-view--account .brave-view__entry-line,
+.brave-view--connection .brave-view__entry-line,
+.brave-view--chargen .brave-view__entry-line,
+.brave-view--account .brave-view__list-text,
+.brave-view--connection .brave-view__list-text,
+.brave-view--chargen .brave-view__list-text,
+.brave-view--account .brave-view__pair-label,
+.brave-view--connection .brave-view__pair-label,
+.brave-view--chargen .brave-view__pair-label,
+.brave-view--connection .brave-view__field-label,
+.brave-view--chargen .brave-view__field-label {
+    color: var(--brave-frontdoor-muted);
+}
+
+.brave-view--account .brave-view__section-icon,
+.brave-view--connection .brave-view__section-icon,
+.brave-view--chargen .brave-view__section-icon,
+.brave-view--account .brave-view__eyebrow-icon,
+.brave-view--connection .brave-view__eyebrow-icon,
+.brave-view--chargen .brave-view__eyebrow-icon,
+.brave-view--account .brave-view__title-icon,
+.brave-view--connection .brave-view__title-icon,
+.brave-view--chargen .brave-view__title-icon,
+.brave-view--account .brave-view__pair-icon,
+.brave-view--connection .brave-view__pair-icon,
+.brave-view--chargen .brave-view__pair-icon {
+    color: var(--brave-frontdoor-accent);
+}
+
+.brave-view--account .brave-view__entry-icon-wrap,
+.brave-view--connection .brave-view__entry-icon-wrap,
+.brave-view--chargen .brave-view__entry-icon-wrap,
+.brave-view--account .brave-view__entry-badge,
+.brave-view--connection .brave-view__entry-badge,
+.brave-view--chargen .brave-view__entry-badge {
+    border-color: rgba(var(--brave-frontdoor-accent-rgb), 0.24);
+    background: rgba(var(--brave-frontdoor-accent-rgb), 0.12);
+    color: var(--brave-frontdoor-accent-strong);
+}
+
+.brave-view--account .brave-view__list-item,
+.brave-view--connection .brave-view__list-item,
+.brave-view--chargen .brave-view__list-item,
+.brave-view--account .brave-view__pair,
+.brave-view--connection .brave-view__pair,
+.brave-view--chargen .brave-view__pair {
+    border-color: rgba(var(--brave-frontdoor-accent-rgb), 0.16);
+    background:
+        linear-gradient(180deg, rgba(224, 244, 249, 0.022), transparent 42%),
+        rgba(8, 15, 21, 0.72);
+}
+
+.brave-view--account .scene-card__chip,
+.brave-view--connection .scene-card__chip,
+.brave-view--chargen .scene-card__chip {
+    border-color: rgba(var(--brave-frontdoor-accent-rgb), 0.2);
+    background: rgba(var(--brave-frontdoor-accent-rgb), 0.1);
+    color: var(--brave-frontdoor-text);
+}
+
+.brave-view--account .scene-card__chip--accent,
+.brave-view--connection .scene-card__chip--accent,
+.brave-view--chargen .scene-card__chip--accent {
+    border-color: rgba(var(--brave-frontdoor-accent-rgb), 0.34);
+    background: rgba(var(--brave-frontdoor-accent-rgb), 0.16);
+    color: var(--brave-frontdoor-accent-strong);
+}
+
+.brave-view--account .scene-card__chip--good,
+.brave-view--connection .scene-card__chip--good,
+.brave-view--chargen .scene-card__chip--good {
+    border-color: rgba(141, 185, 137, 0.3);
+    background: rgba(141, 185, 137, 0.12);
+    color: #c7e2c3;
+}
+
+.brave-view--account .scene-card__chip--warn,
+.brave-view--connection .scene-card__chip--warn,
+.brave-view--chargen .scene-card__chip--warn {
+    border-color: rgba(198, 154, 92, 0.3);
+    background: rgba(198, 154, 92, 0.12);
+    color: #e0c69b;
+}
+
+.brave-view--account .brave-view__action,
+.brave-view--connection .brave-view__action,
+.brave-view--chargen .brave-view__action,
+.brave-view--account .brave-view__mini-action,
+.brave-view--connection .brave-view__mini-action,
+.brave-view--chargen .brave-view__mini-action,
+.brave-view--connection .brave-view__form-submit,
+.brave-view--chargen .brave-view__form-submit {
+    border-color: rgba(var(--brave-frontdoor-accent-rgb), 0.22);
+    background:
+        linear-gradient(180deg, rgba(224, 244, 249, 0.035), transparent 42%),
+        rgba(12, 23, 30, 0.84);
+    color: var(--brave-frontdoor-text);
+}
+
+.brave-view--account .brave-view__action-icon,
+.brave-view--connection .brave-view__action-icon,
+.brave-view--chargen .brave-view__action-icon,
+.brave-view--account .brave-view__mini-action-icon,
+.brave-view--connection .brave-view__mini-action-icon,
+.brave-view--chargen .brave-view__mini-action-icon {
+    color: var(--brave-frontdoor-accent);
+}
+
+.brave-view--account .brave-view__action--accent,
+.brave-view--connection .brave-view__action--accent,
+.brave-view--chargen .brave-view__action--accent,
+.brave-view--connection .brave-view__form-submit,
+.brave-view--chargen .brave-view__form-submit {
+    border-color: rgba(var(--brave-frontdoor-accent-rgb), 0.38);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-frontdoor-accent-rgb), 0.18), rgba(51, 103, 119, 0.16));
+    color: var(--brave-frontdoor-title);
+}
+
+.brave-view--account .brave-view__action--danger,
+.brave-view--connection .brave-view__action--danger,
+.brave-view--chargen .brave-view__action--danger,
+.brave-view--account .brave-view__mini-action--danger,
+.brave-view--connection .brave-view__mini-action--danger,
+.brave-view--chargen .brave-view__mini-action--danger {
+    border-color: rgba(208, 122, 115, 0.3);
+    background: rgba(208, 122, 115, 0.1);
+    color: #e5b0aa;
+}
+
+@media screen and (max-width: 900px) {
+    .brave-view--account,
+    .brave-view--connection,
+    .brave-view--chargen {
+        width: 100%;
+        max-width: 100%;
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .brave-view--account .brave-view__hero,
+    .brave-view--connection .brave-view__hero,
+    .brave-view--chargen .brave-view__hero {
+        min-height: 148px;
+        padding: 18px;
+    }
+
+    .brave-view--connection .brave-view__hero {
+        min-height: 176px;
+    }
+
+    .brave-view--account .brave-view__wordmark-text,
+    .brave-view--connection .brave-view__wordmark-text,
+    .brave-view--chargen .brave-view__wordmark-text {
+        font-size: clamp(2.9rem, 17vw, 4.6rem);
+    }
+
+    .brave-view--account .brave-view__sections,
+    .brave-view--connection .brave-view__sections,
+    .brave-view--chargen .brave-view__sections {
+        grid-template-columns: minmax(0, 1fr);
+        min-height: 0;
+        align-content: start;
+    }
+
+    .brave-view--account .brave-view__section,
+    .brave-view--connection .brave-view__section,
+    .brave-view--chargen .brave-view__section {
+        min-height: 0;
+    }
+
+    .brave-view--chargen .brave-view__entries {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .brave-view--chargen .brave-view__entry--ornamented {
+        padding-right: 58px;
+    }
+}
+
+body[data-brave-view="connection"],
+body[data-brave-view="account"],
+body[data-brave-view="chargen"] {
+    --brave-frontdoor-bg-top: #0b1118;
+    --brave-frontdoor-bg-bottom: #030609;
+    --brave-frontdoor-panel: rgba(12, 19, 26, 0.94);
+    --brave-frontdoor-panel-strong: rgba(15, 26, 34, 0.96);
+    --brave-frontdoor-panel-soft: rgba(20, 35, 43, 0.82);
+    --brave-frontdoor-line: rgba(112, 162, 180, 0.22);
+    --brave-frontdoor-line-strong: rgba(132, 190, 209, 0.4);
+    --brave-frontdoor-title: #e5f1f4;
+    --brave-frontdoor-text: #bbccd2;
+    --brave-frontdoor-muted: #8399a2;
+    --brave-frontdoor-dim: #647983;
+    --brave-frontdoor-accent: #76b6c8;
+    --brave-frontdoor-accent-rgb: 118, 182, 200;
+    --brave-frontdoor-accent-strong: #9bd4df;
+    --brave-frontdoor-good: #8db989;
+    --brave-frontdoor-warn: #c69a5c;
+    --brave-frontdoor-danger: #d07a73;
+    background:
+        radial-gradient(circle at 18% 0, rgba(88, 136, 159, 0.16), transparent 30%),
+        radial-gradient(circle at 82% 0, rgba(118, 151, 112, 0.09), transparent 26%),
+        linear-gradient(180deg, var(--brave-frontdoor-bg-top), var(--brave-frontdoor-bg-bottom));
+}
+
+body[data-brave-view="connection"]::before,
+body[data-brave-view="account"]::before,
+body[data-brave-view="chargen"]::before {
+    background:
+        linear-gradient(135deg, rgba(224, 244, 249, 0.025), transparent 30%),
+        radial-gradient(circle at 25% 18%, rgba(var(--brave-frontdoor-accent-rgb), 0.07), transparent 24%),
+        radial-gradient(circle at 78% 10%, rgba(118, 151, 112, 0.055), transparent 20%);
+}
+
+body[data-brave-view="connection"]::after,
+body[data-brave-view="account"]::after,
+body[data-brave-view="chargen"]::after {
+    opacity: 0.05;
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.018), transparent 16%, transparent 84%, rgba(255, 255, 255, 0.014)),
+        radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.32), transparent 38%);
+}
+
+body[data-brave-view="connection"] .content,
+body[data-brave-view="connection"] #messagewindow,
+body[data-brave-view="account"] .content,
+body[data-brave-view="account"] #messagewindow,
+body[data-brave-view="chargen"] .content,
+body[data-brave-view="chargen"] #messagewindow {
+    border-color: rgba(var(--brave-frontdoor-accent-rgb), 0.2);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-frontdoor-accent-rgb), 0.09), transparent 42%),
+        radial-gradient(circle at 100% 0, rgba(118, 151, 112, 0.07), transparent 38%),
+        linear-gradient(180deg, rgba(8, 14, 20, 0.98), rgba(2, 5, 8, 0.995));
+    box-shadow:
+        inset 0 1px 0 rgba(224, 244, 249, 0.035),
+        0 24px 72px rgba(0, 0, 0, 0.44);
+}
+
+body[data-brave-view="connection"] .brave-view--connection,
+body[data-brave-view="account"] .brave-view--account,
+body[data-brave-view="chargen"] .brave-view--chargen {
+    border-color: var(--brave-frontdoor-line);
+    background:
+        radial-gradient(circle at 12% 0, rgba(88, 136, 159, 0.18), transparent 34%),
+        radial-gradient(circle at 94% 10%, rgba(118, 151, 112, 0.12), transparent 36%),
+        linear-gradient(180deg, var(--brave-frontdoor-bg-top), var(--brave-frontdoor-bg-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(224, 244, 249, 0.045),
+        0 22px 58px rgba(0, 0, 0, 0.42);
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__hero,
+body[data-brave-view="account"] .brave-view--account .brave-view__hero,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__hero,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__section,
+body[data-brave-view="account"] .brave-view--account .brave-view__section,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__section,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__entry,
+body[data-brave-view="account"] .brave-view--account .brave-view__entry,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__entry {
+    border-color: var(--brave-frontdoor-line);
+    background:
+        linear-gradient(180deg, rgba(224, 244, 249, 0.03), transparent 36%),
+        rgba(11, 19, 25, 0.9);
+    box-shadow: inset 0 1px 0 rgba(224, 244, 249, 0.03);
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__hero,
+body[data-brave-view="account"] .brave-view--account .brave-view__hero,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__hero {
+    background:
+        linear-gradient(90deg, rgba(var(--brave-frontdoor-accent-rgb), 0.1), transparent 42%),
+        radial-gradient(circle at 86% 18%, rgba(141, 185, 137, 0.14), transparent 34%),
+        linear-gradient(135deg, rgba(19, 31, 40, 0.94), rgba(10, 19, 27, 0.96) 58%, rgba(4, 7, 11, 0.99));
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__hero::after,
+body[data-brave-view="account"] .brave-view--account .brave-view__hero::after,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__hero::after {
+    background: linear-gradient(90deg, transparent, rgba(var(--brave-frontdoor-accent-rgb), 0.56), transparent);
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__wordmark-text,
+body[data-brave-view="account"] .brave-view--account .brave-view__wordmark-text,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__wordmark-text,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__title,
+body[data-brave-view="account"] .brave-view--account .brave-view__title,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__title,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-title,
+body[data-brave-view="account"] .brave-view--account .brave-view__entry-title,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__entry-title {
+    color: var(--brave-frontdoor-title);
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__wordmark-text,
+body[data-brave-view="account"] .brave-view--account .brave-view__wordmark-text,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__wordmark-text {
+    text-shadow:
+        0 2px 0 rgba(0, 12, 18, 0.78),
+        0 0 24px rgba(var(--brave-frontdoor-accent-rgb), 0.12),
+        0 12px 28px rgba(0, 0, 0, 0.46);
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__eyebrow,
+body[data-brave-view="account"] .brave-view--account .brave-view__eyebrow,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__eyebrow,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__section-label,
+body[data-brave-view="account"] .brave-view--account .brave-view__section-label,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__section-label,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-meta,
+body[data-brave-view="account"] .brave-view--account .brave-view__entry-meta,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__entry-meta,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-line,
+body[data-brave-view="account"] .brave-view--account .brave-view__entry-line,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__entry-line,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__list-text,
+body[data-brave-view="account"] .brave-view--account .brave-view__list-text,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__list-text {
+    color: var(--brave-frontdoor-muted);
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__section-icon,
+body[data-brave-view="account"] .brave-view--account .brave-view__section-icon,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__section-icon,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-icon-wrap,
+body[data-brave-view="account"] .brave-view--account .brave-view__entry-icon-wrap,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__entry-icon-wrap,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-badge,
+body[data-brave-view="account"] .brave-view--account .brave-view__entry-badge,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__entry-badge {
+    border-color: rgba(var(--brave-frontdoor-accent-rgb), 0.24);
+    background: rgba(var(--brave-frontdoor-accent-rgb), 0.12);
+    color: var(--brave-frontdoor-accent-strong);
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__list-item,
+body[data-brave-view="account"] .brave-view--account .brave-view__list-item,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__list-item,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__action,
+body[data-brave-view="account"] .brave-view--account .brave-view__action,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__action,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__form-submit,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__form-submit,
+body[data-brave-view="connection"] .brave-view--connection .scene-card__chip,
+body[data-brave-view="account"] .brave-view--account .scene-card__chip,
+body[data-brave-view="chargen"] .brave-view--chargen .scene-card__chip {
+    border-color: rgba(var(--brave-frontdoor-accent-rgb), 0.2);
+    background:
+        linear-gradient(180deg, rgba(224, 244, 249, 0.026), transparent 42%),
+        rgba(8, 15, 21, 0.78);
+    color: var(--brave-frontdoor-text);
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__field-input,
+body[data-brave-view="chargen"] .brave-view--chargen .brave-view__field-input {
+    border-color: var(--brave-frontdoor-line);
+    background:
+        linear-gradient(180deg, rgba(224, 244, 249, 0.035), transparent 34%),
+        rgba(4, 8, 12, 0.76);
+    color: var(--brave-frontdoor-title);
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__section--list .brave-view__entry-icon-wrap,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__section--list .brave-view__entry-badge {
+    min-width: 2.35rem !important;
+    min-height: 2.35rem !important;
+    border: 1px solid rgba(var(--brave-frontdoor-accent-rgb), 0.34) !important;
+    border-radius: 10px !important;
+    background:
+        linear-gradient(180deg, rgba(154, 212, 223, 0.18), rgba(42, 84, 99, 0.13)),
+        rgba(8, 20, 28, 0.9) !important;
+    color: #c9eef5 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(224, 244, 249, 0.06),
+        0 0 0 1px rgba(var(--brave-frontdoor-accent-rgb), 0.06) !important;
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__section--list .brave-view__entry-icon,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__section--list .brave-icon,
+body[data-brave-view="connection"] .brave-view--connection .brave-view__section--list .ra {
+    color: #c9eef5 !important;
+    text-shadow: 0 0 14px rgba(var(--brave-frontdoor-accent-rgb), 0.22);
+}
+
+body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-badge {
+    min-width: 2.75rem !important;
+    min-height: 2rem !important;
+    padding: 0 0.72rem !important;
+    border: 1px solid rgba(var(--brave-frontdoor-accent-rgb), 0.42) !important;
+    border-radius: 8px !important;
+    background:
+        linear-gradient(180deg, rgba(154, 212, 223, 0.2), rgba(42, 84, 99, 0.18)),
+        rgba(8, 20, 28, 0.92) !important;
+    color: #c9eef5 !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+    box-shadow:
+        inset 0 1px 0 rgba(224, 244, 249, 0.06),
+        0 0 0 1px rgba(var(--brave-frontdoor-accent-rgb), 0.08) !important;
+}
+
+/* Objectives / Welcome Modal */
+#brave-objectives-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    pointer-events: none;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding: 40px;
+
+    --brave-obj-accent: var(--brave-accent);
+    --brave-obj-accent-rgb: var(--brave-accent-rgb);
+    --brave-obj-bg: linear-gradient(180deg, rgba(var(--brave-surface-soft-rgb), 0.98), rgba(var(--brave-surface-soft-rgb), 0.96));
+    --brave-obj-border: color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.34));
+    --brave-obj-glow: 0 32px 64px rgba(0, 0, 0, 0.48);
+}
+
+#brave-objectives-sheet.brave-objectives-sheet--tutorial {
+    --brave-obj-accent: #00f2ff;
+    --brave-obj-accent-rgb: 0, 242, 255;
+    --brave-obj-bg: linear-gradient(180deg, rgba(10, 20, 30, 0.96), rgba(8, 16, 24, 0.98));
+    --brave-obj-border: rgba(0, 242, 255, 0.32);
+    --brave-obj-glow: 0 0 40px rgba(0, 242, 255, 0.08), 0 32px 64px rgba(0, 0, 0, 0.6);
+}
+
+#brave-objectives-sheet[aria-hidden="false"] {
+    /* pointer-events: auto; -- REMOVED: this blocks the whole screen. Children handle their own pointer-events. */
+}
+
+.brave-objectives-sheet__backdrop {
+    position: fixed;
+    inset: 0;
+    background: transparent;
+    pointer-events: none;
+    transition: background 0.4s ease;
+    z-index: 0;
+}
+
+#brave-objectives-sheet[aria-hidden="false"] .brave-objectives-sheet__backdrop {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+#brave-objectives-sheet[aria-hidden="false"] .brave-objectives-sheet__backdrop--welcome {
+    background: rgba(4, 6, 8, 0.85);
+    backdrop-filter: blur(12px);
+    pointer-events: auto;
+    z-index: 1;
+}
+
+.brave-objectives-sheet__panel {
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+    width: 340px;
+    max-height: min(80vh, 500px);
+    background: var(--brave-obj-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--brave-obj-border);
+    border-radius: var(--brave-radius-panel);
+    box-shadow: var(--brave-obj-glow);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: var(--brave-body-font-family);
+}
+
+.brave-objectives-sheet__panel--welcome {
+    width: 440px;
+    max-height: min(90vh, 580px);
+    align-self: center;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#brave-objectives-sheet[aria-hidden="false"] .brave-objectives-sheet__panel {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.brave-objectives-sheet__head {
+    padding: 24px 24px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    position: relative;
+}
+
+.brave-objectives-sheet__panel--welcome .brave-objectives-sheet__head {
+    padding: 32px 32px 24px;
+}
+
+.brave-objectives-sheet__eyebrow {
+    font-family: var(--brave-ui-font-family);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--brave-obj-accent);
+    opacity: 0.85;
+    margin-bottom: 8px;
+}
+
+.brave-objectives-sheet__title {
+    font-family: var(--brave-dialogue-font-family);
+    font-size: 1.3rem;
+    line-height: 1.2;
+    color: var(--brave-text-bright);
+}
+
+.brave-objectives-sheet__panel--welcome .brave-objectives-sheet__title {
+    font-size: 1.7rem;
+}
+
+.brave-objectives-sheet__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    color: var(--brave-text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+}
+
+.brave-objectives-sheet__close:hover {
+    color: var(--brave-text-soft);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.brave-objectives-sheet__close span {
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.brave-objectives-sheet__body {
+    padding: 8px 0;
+    overflow-y: auto;
+    flex: 1 1 auto;
+}
+
+.brave-objectives-sheet__panel--welcome .brave-objectives-sheet__body {
+    padding: 20px 32px 32px;
+}
+
+.brave-objectives-sheet__welcome-hero {
+    margin-bottom: 24px;
+    color: var(--brave-obj-accent);
+}
+
+.brave-objectives-sheet__welcome-icon {
+    font-size: 64px !important;
+    filter: drop-shadow(0 0 12px rgba(var(--brave-obj-accent-rgb), 0.34));
+}
+
+.brave-objectives-sheet__welcome-text {
+    font-family: var(--brave-body-font-family);
+    font-size: calc(1.06rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.6;
+    color: var(--brave-text-soft);
+}
+
+.brave-objectives-sheet__foot {
+    padding: 16px 32px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.brave-objectives-sheet__nav-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--brave-text-soft);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.brave-objectives-sheet__nav-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--brave-text-bright);
+}
+
+.brave-objectives-sheet__nav-btn--primary {
+    background: linear-gradient(180deg, rgba(var(--brave-obj-accent-rgb), 0.24), rgba(var(--brave-obj-accent-rgb), 0.12));
+    border-color: rgba(var(--brave-obj-accent-rgb), 0.42);
+    color: var(--brave-obj-accent);
+}
+
+.brave-objectives-sheet__nav-btn--primary:hover {
+    background: linear-gradient(180deg, rgba(var(--brave-obj-accent-rgb), 0.32), rgba(var(--brave-obj-accent-rgb), 0.18));
+    border-color: rgba(var(--brave-obj-accent-rgb), 0.54);
+    transform: translateY(-1px);
+}
+
+.brave-objectives-sheet__entry {
+    padding: 12px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    transition: opacity 0.3s ease;
+}
+
+.brave-objectives-sheet__entry--done {
+    opacity: 0.5;
+}
+
+.brave-objectives-sheet__entry:last-child {
+    border-bottom: 0;
+}
+
+.brave-objectives-sheet__entry-icon-wrap {
+    color: var(--brave-obj-accent);
+    background: rgba(var(--brave-obj-accent-rgb), 0.08);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.brave-objectives-sheet__entry-icon {
+    font-size: 18px !important;
+}
+
+.brave-objectives-sheet__entry-text {
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.9rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.4;
+    color: var(--brave-text-soft);
+    padding-top: 4px;
+}
+
+@media (max-width: 700px) {
+    #brave-objectives-sheet {
+        justify-content: center;
+        align-items: flex-end;
+        padding: 12px;
+    }
+
+    .brave-objectives-sheet__panel {
+        width: min(100%, 420px);
+        max-height: min(36vh, 260px);
+        transform: translateY(20px);
+    }
+
+    .brave-objectives-sheet__panel--welcome {
+        width: min(100%, 420px);
+        max-height: min(90vh, 580px);
+        align-self: center;
+    }
+
+    .brave-objectives-sheet__head {
+        padding: 16px 18px 12px;
+    }
+
+    .brave-objectives-sheet__title {
+        font-size: 1.12rem;
+    }
+
+    .brave-objectives-sheet__body {
+        padding: 4px 0;
+    }
+
+    .brave-objectives-sheet__entry {
+        padding: 10px 16px;
+        gap: 10px;
+    }
+}
+
+/* Inline Speech Bubbles */
+.brave-inline-voice-bubble {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 8px;
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.brave-inline-voice-bubble::after {
+    top: auto;
+    bottom: -7px;
+    right: 24px;
+    transform: none;
+    border-top-color: color-mix(in srgb, rgba(var(--brave-accent-rgb), 0.34) 68%, rgba(255, 255, 255, 0.12));
+    border-bottom: 0;
+    border-right-color: transparent;
+    border-left-color: transparent;
+}
+
+#brave-intro-veil {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: #0b120f;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2.0s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#brave-intro-veil.brave-intro-veil--active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Quest Complete Overlay */
+.brave-quest-complete-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, transparent 70%);
+}
+
+.brave-quest-complete-overlay__panel {
+    background: linear-gradient(180deg, rgba(20, 30, 25, 0.98), rgba(10, 15, 12, 0.99));
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.4);
+    border-radius: 32px;
+    padding: 40px 60px;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(var(--brave-accent-rgb), 0.15), 0 32px 64px rgba(0, 0, 0, 0.6);
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(16px);
+}
+
+.brave-quest-complete-overlay--active .brave-quest-complete-overlay__panel {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.brave-quest-complete-overlay__eyebrow {
+    font-family: var(--brave-ui-font-family);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    color: var(--brave-accent);
+    margin-bottom: 12px;
+    animation: brave-quest-pop-eyebrow 0.8s ease-out forwards;
+}
+
+.brave-quest-complete-overlay__title {
+    font-family: var(--brave-dialogue-font-family);
+    font-size: 2.2rem;
+    color: var(--brave-text-bright);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    text-shadow: 0 0 24px rgba(var(--brave-accent-rgb), 0.4);
+}
+
+.brave-quest-complete-overlay__rewards {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.brave-quest-complete-overlay__reward {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.brave-quest-complete-overlay__reward-label {
+    font-family: var(--brave-ui-font-family);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    color: var(--brave-text-dim);
+    letter-spacing: 0.08em;
+}
+
+.brave-quest-complete-overlay__reward-value {
+    font-family: var(--brave-body-font-family);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--brave-text-bright);
+}
+
+@keyframes brave-quest-pop-eyebrow {
+    0% { letter-spacing: -0.2em; opacity: 0; }
+    100% { letter-spacing: 0.24em; opacity: 1; }
 }

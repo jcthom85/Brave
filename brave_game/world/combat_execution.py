@@ -10,6 +10,17 @@ CONTENT = get_content_registry()
 ABILITY_LIBRARY = CONTENT.characters.ability_library
 
 
+def _ally_hp_pair(ally):
+    """Return current and max HP for a character or companion ally."""
+
+    if isinstance(ally, dict):
+        return int(ally.get("hp", 0) or 0), int(ally.get("max_hp", 1) or 1)
+    return (
+        int((ally.db.brave_resources or {}).get("hp", 0) or 0),
+        int(ally.db.brave_derived_stats.get("max_hp", 1) or 1),
+    )
+
+
 def _active_ranger_companion(character):
     """Return the active ranger companion payload, if any."""
 
@@ -393,7 +404,8 @@ def _execute_cleric_ability(encounter, character, ability_key, ability_name, tar
         heal_amount = max(1, 4 + derived.get("healing_power", 0) // 2)
         for ally in allies:
             state = encounter._get_participant_state(ally)
-            rescue_bonus = 2 if (ally.db.brave_resources or {}).get("hp", 0) <= ally.db.brave_derived_stats.get("max_hp", 1) // 2 else 0
+            ally_hp, ally_max_hp = _ally_hp_pair(ally)
+            rescue_bonus = 2 if ally_hp <= ally_max_hp // 2 else 0
             state["guard"] = max(state.get("guard", 0), guard_value + rescue_bonus)
             encounter._save_participant_state(ally, state)
             encounter._heal_character(character, ally, heal_amount + rescue_bonus, heal_type="holy")
@@ -940,6 +952,10 @@ def _execute_druid_ability(encounter, character, ability_key, ability_name, targ
             encounter._scaled_heal_amount(derived, 13 + min(4, field_score), variance=4, divisor=3),
             heal_type="nature",
         )
+        cleared = encounter._clear_one_harmful_effect(target)
+        if cleared:
+            encounter.obj.msg_contents(f"|gLiving current washes the {cleared} from {target.key}.|n")
+            encounter._record_participant_contribution(character, meaningful=True, utility=1)
         secondary_targets = [
             ally
             for ally in allies

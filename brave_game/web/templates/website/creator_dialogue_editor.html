@@ -6,171 +6,252 @@
   <title>{{ page_title }}</title>
   <style>
     :root { --ink:#1d2230; --accent:#7b4f2f; --panel:#fff9f0; --line:#d9c8ac; --muted:#6b6157; --good:#2f6d4c; --bad:#8d3122; --shadow:rgba(29,34,48,0.12); }
-    * { box-sizing: border-box; }
+    * { box-sizing:border-box; }
     body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:radial-gradient(circle at top left, rgba(123,79,47,.15), transparent 26%),linear-gradient(180deg,#f3ebde 0%,#f9f3ea 44%,#efe2cf 100%); min-height:100vh; }
-    .shell { width:min(1600px,calc(100vw - 32px)); margin:24px auto; display:grid; grid-template-columns:320px minmax(0,1fr); gap:20px; }
-    .panel { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
+    .shell { width:min(1680px,calc(100vw - 32px)); margin:24px auto; display:grid; grid-template-columns:320px minmax(0,1fr); gap:20px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
     .panel-head { padding:18px 20px; border-bottom:1px solid var(--line); background:linear-gradient(135deg, rgba(123,79,47,.12), rgba(217,200,172,.22)); }
-    .panel-head h1,.panel-head h2,.panel-head h3 { margin:0; font-weight:700; letter-spacing:.02em; }
+    .panel-head h1,.panel-head h2,.panel-head h3 { margin:0; font-weight:700; letter-spacing:0; }
     .panel-head p { margin:8px 0 0; color:var(--muted); line-height:1.4; }
     .panel-body { padding:18px 20px 20px; }
-    .search,.field input,.field select,textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:10px 12px; font:inherit; background:#fff; }
+    .workspace { display:grid; gap:16px; }
+    .stack { display:grid; gap:12px; }
+    .toolbar,.editor-toolbar,.chips,.row-actions,.summary-grid { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .meta { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.94rem; }
+    .search,.field input,.field select,textarea { width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font:inherit; background:#fff; color:var(--ink); }
     .search { margin-bottom:12px; }
     .entity-list,.selector-list { display:grid; gap:8px; max-height:calc(100vh - 260px); overflow:auto; padding-right:4px; }
-    .entity-row,.selector-row { width:100%; text-align:left; border:1px solid var(--line); background:#fff; border-radius:12px; padding:12px; cursor:pointer; transition:transform 120ms ease,border-color 120ms ease,background 120ms ease; }
+    .entity-row,.selector-row { width:100%; text-align:left; border:1px solid var(--line); background:#fff; border-radius:8px; padding:12px; cursor:pointer; transition:transform 120ms ease,border-color 120ms ease,background 120ms ease; }
     .entity-row:hover,.entity-row.active,.selector-row:hover,.selector-row.active { transform:translateY(-1px); border-color:var(--accent); background:#fff8f2; }
     .entity-row strong,.entity-row span,.selector-row strong,.selector-row span { display:block; }
     .entity-row span,.selector-row span { color:var(--muted); font-size:.92rem; margin-top:4px; }
     .selector-row.empty { cursor:default; }
-    .workspace { display:grid; grid-template-rows:auto auto minmax(420px,auto) minmax(240px,auto); gap:16px; }
-    .toolbar,.editor-toolbar,.chips { display:flex; flex-wrap:wrap; gap:10px; }
-    .meta { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.94rem; }
-    .editor-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .stack { display:grid; gap:12px; }
+    .builder-grid { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:16px; }
     .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
     .field { display:grid; gap:6px; }
     .field.full { grid-column:1/-1; }
-    .field label { font-size:.88rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+    .field label { font-size:.82rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+    .section { border:1px solid var(--line); border-radius:8px; background:#fffdfa; overflow:hidden; }
+    .section-head { padding:12px 14px; border-bottom:1px solid var(--line); background:#fff7ef; }
+    .section-head h3 { margin:0; font-size:1rem; }
+    .section-head p { margin:4px 0 0; color:var(--muted); font-size:.92rem; line-height:1.4; }
+    .section-body { padding:14px; }
     button { border:0; border-radius:999px; padding:10px 16px; font:inherit; cursor:pointer; background:var(--accent); color:#fff; box-shadow:0 10px 24px rgba(123,79,47,.24); }
     button.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none; }
     button.danger { background:#fff0ed; color:var(--bad); border:1px solid rgba(141,49,34,.2); box-shadow:none; }
     button:disabled { opacity:.55; cursor:progress; }
-    .chip { border:1px solid var(--line); border-radius:999px; padding:8px 12px; background:#fff; font-size:.92rem; }
-    textarea,pre { width:100%; margin:0; border:1px solid var(--line); border-radius:14px; background:#fffdfa; font:.95rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
-    textarea { min-height:250px; padding:16px; resize:vertical; }
-    pre { min-height:220px; padding:16px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
-    .status { padding:12px 14px; border-radius:12px; background:#fff6e7; color:var(--ink); border:1px solid var(--line); }
+    .chip,.pill { border:1px solid var(--line); border-radius:999px; padding:8px 12px; background:#fff; color:var(--ink); font-size:.92rem; }
+    .pill.good { border-color:rgba(47,109,76,.28); color:var(--good); background:#eef8f1; }
+    .pill.bad { border-color:rgba(141,49,34,.28); color:var(--bad); background:#fff0ed; }
+    textarea,pre { width:100%; margin:0; border:1px solid var(--line); border-radius:8px; background:#fffdfa; font:.92rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
+    textarea { min-height:220px; padding:14px; resize:vertical; }
+    pre { min-height:180px; padding:14px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+    .status { padding:12px 14px; border-radius:8px; background:#fff6e7; color:var(--ink); border:1px solid var(--line); }
     .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
     .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
-    @media (max-width:1180px) { .editor-grid { grid-template-columns:1fr; } }
-    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .entity-list,.selector-list { max-height:280px; } .field-grid { grid-template-columns:1fr; } }
-  
-    .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
+    .validation-notes { padding:12px 14px; border-radius:8px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
     .validation-notes[hidden] { display:none; }
     .validation-notes strong { display:block; margin-bottom:8px; }
     .validation-notes ul { margin:0; padding-left:20px; display:grid; gap:6px; }
-
+    .rule-list,.preview-list,.response-list { display:grid; gap:10px; }
+    .rule-card,.read-card { border:1px solid var(--line); border-radius:8px; background:#fff; padding:12px; display:grid; gap:10px; }
+    .rule-head,.read-head { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    .rule-head strong,.read-head strong { font-size:.96rem; }
+    .rule-head span,.read-head span { display:block; color:var(--muted); font-size:.9rem; margin-top:4px; }
+    .rule-target { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+    .rule-target .field { min-width:0; }
+    .rule-target .wide { grid-column:1/-1; }
+    .rule-hint { color:var(--muted); font-size:.9rem; }
+    .summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .summary-card { border:1px solid var(--line); border-radius:8px; background:#fffdfa; padding:12px; min-height:76px; }
+    .summary-card strong { display:block; font-size:1.25rem; }
+    .summary-card span { display:block; color:var(--muted); margin-top:4px; font-size:.9rem; }
+    details { border:1px solid var(--line); border-radius:8px; background:#fffdfa; }
+    details summary { cursor:pointer; padding:12px 14px; color:var(--muted); }
+    details .details-body { padding:0 14px 14px; }
+    @media (max-width:1180px) { .builder-grid,.summary-grid { grid-template-columns:1fr; } }
+    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .field-grid,.rule-target { grid-template-columns:1fr; } .entity-list,.selector-list { max-height:240px; } }
   </style>
 </head>
 <body>
   <div class="shell">
     <section class="panel">
       <div class="panel-head">
-        <h1>Dialogue</h1>
-        <p>Browse authored entities, then manage full talk-rule lists or readable text against the live dialogue registry.</p>
+        <h1>Dialogue Builder</h1>
+        <p>Build NPC talk rules and readable text without starting from raw JSON.</p>
       </div>
-      <div class="panel-body">
+      <div class="panel-body stack">
         <input id="entity-search" class="search" type="search" placeholder="Search entities by id, label, or kind">
         <div id="entity-list" class="entity-list"></div>
       </div>
     </section>
+
     <section class="workspace">
       <div class="panel">
         <div class="panel-head">
-          <h2 id="editor-title">Dialogue Editor</h2>
-          <p id="editor-subtitle">Select an entity to load talk-rule or readable content.</p>
+          <h2 id="editor-title">Dialogue Builder</h2>
+          <p id="editor-subtitle">Select an NPC or readable entity to load its authored content.</p>
         </div>
         <div class="panel-body">
           <div class="meta"><span>API root: <strong>{{ api_root }}</strong></span><span>Reference domain: <strong>{{ reference_domain }}</strong></span></div>
         </div>
       </div>
+
       <div class="toolbar">
-        <button id="load-entity" class="secondary" type="button">Reload Entity Preview</button>
-        <button id="validate-content" class="secondary" type="button">Validate Packs</button>
+        <button id="load-entity" class="secondary" type="button">Refresh Selection</button>
+        <button id="validate-content" class="secondary" type="button">Check Content</button>
         <button id="reload-content" class="secondary" type="button">Reload Registry</button>
       </div>
-      <div class="editor-grid">
-        <section class="panel">
-          <div class="panel-head"><h3>Talk Rule List</h3><p>Select, add, or remove authored talk rules, then sync the full list to JSON.</p></div>
-          <div class="panel-body stack">
-            <div id="rule-list" class="selector-list"></div>
-            <div class="field-grid">
-              <div class="field"><label for="dialogue-active">Active Quest</label><select id="dialogue-active"></select></div>
-              <div class="field"><label for="dialogue-room">Room Gate</label><select id="dialogue-room"></select></div>
-              <div class="field"><label for="dialogue-resonance">Resonance</label><select id="dialogue-resonance"><option value="">None</option><option value="fantasy">fantasy</option><option value="tech">tech</option></select></div>
-              <div class="field full"><label for="dialogue-text">Rule Text</label><textarea id="dialogue-text" spellcheck="false"></textarea></div>
+
+      <div id="validation-notes" class="validation-notes" hidden></div>
+
+      <div class="summary-grid">
+        <div class="summary-card"><strong id="entity-kind-chip">-</strong><span>Entity kind</span></div>
+        <div class="summary-card"><strong id="entity-id-chip">-</strong><span>Selected entity</span></div>
+        <div class="summary-card"><strong id="rule-count-chip">0</strong><span>Talk rules</span></div>
+      </div>
+
+      <div class="builder-grid">
+        <section class="stack">
+          <section class="section">
+            <div class="section-head">
+              <h3>Talk Rules</h3>
+              <p>Author the list of rules that can fire for this NPC.</p>
             </div>
-            <div class="editor-toolbar">
-              <button id="new-rule" class="secondary" type="button">New Talk Rule</button>
-              <button id="remove-rule" class="danger" type="button">Remove Talk Rule</button>
-              <button id="sync-dialogue-form" class="secondary" type="button">Sync Rule List To JSON</button>
-              <button id="diff-dialogue" type="button">Dry-Run Dialogue</button>
-              <button id="write-dialogue" type="button">Write Dialogue</button>
+            <div class="section-body stack">
+              <div id="rule-list" class="selector-list"></div>
+              <div class="editor-toolbar">
+                <button id="new-rule" class="secondary" type="button">Add Talk Rule</button>
+                <button id="remove-rule" class="danger" type="button">Remove Talk Rule</button>
+              </div>
+              <div class="field-grid">
+                <div class="field"><label for="rule-mode">Trigger Mode</label><select id="rule-mode"><option value="always">Always</option><option value="active">Active Quest</option><option value="completed">Completed Quest</option></select></div>
+                <div class="field"><label for="dialogue-active">Quest Gate</label><select id="dialogue-active"></select></div>
+                <div class="field"><label for="dialogue-room">Room Gate</label><select id="dialogue-room"></select></div>
+                <div class="field"><label for="dialogue-resonance">Resonance</label><select id="dialogue-resonance"><option value="">None</option><option value="fantasy">Fantasy</option><option value="tech">Tech</option></select></div>
+                <div class="field full"><label for="dialogue-text">Rule Text</label><textarea id="dialogue-text" spellcheck="false"></textarea></div>
+              </div>
+              <div class="editor-toolbar">
+                <button id="sync-dialogue-form" class="secondary" type="button">Sync Builder To Source</button>
+                <button id="diff-dialogue" type="button">Preview Dialogue Changes</button>
+                <button id="write-dialogue" type="button">Save Dialogue</button>
+              </div>
+              <details>
+                <summary>Advanced Source</summary>
+                <div class="details-body stack">
+                  <textarea id="dialogue-json" spellcheck="false"></textarea>
+                  <button id="sync-dialogue-source" class="secondary" type="button">Apply Source To Builder</button>
+                </div>
+              </details>
             </div>
-            <textarea id="dialogue-json" spellcheck="false"></textarea>
-          </div>
+          </section>
         </section>
-        <section class="panel">
-          <div class="panel-head"><h3>Readable Text</h3><p>Best for readable markers, signs, and plaques.</p></div>
-          <div class="panel-body stack">
-            <div class="field-grid">
+
+        <section class="stack">
+          <section class="section">
+            <div class="section-head">
+              <h3>Dialogue Snapshot</h3>
+              <p>Rule summaries and resolved text for the selected entity.</p>
+            </div>
+            <div class="section-body stack">
+              <div class="chips"><div id="rule-summary-chip" class="chip">Rules: 0</div><div id="readable-summary-chip" class="chip">Readable: No</div></div>
+              <div class="preview-list" id="dialogue-preview-list"></div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <h3>Readable Text</h3>
+              <p>Use this for signs, plaques, notes, and other readable entities.</p>
+            </div>
+            <div class="section-body stack">
               <div class="field full"><label for="readable-text">Readable Response</label><textarea id="readable-text" spellcheck="false"></textarea></div>
+              <div class="editor-toolbar">
+                <button id="sync-read-form" class="secondary" type="button">Sync Readable To Source</button>
+                <button id="diff-read" type="button">Preview Readable Changes</button>
+                <button id="write-read" type="button">Save Readable</button>
+              </div>
+              <details>
+                <summary>Advanced Source</summary>
+                <div class="details-body stack">
+                  <textarea id="read-json" spellcheck="false"></textarea>
+                  <button id="sync-read-source" class="secondary" type="button">Apply Source To Builder</button>
+                </div>
+              </details>
             </div>
-            <div class="editor-toolbar">
-              <button id="sync-read-form" class="secondary" type="button">Sync Read Text To JSON</button>
-              <button id="diff-read" type="button">Dry-Run Readable</button>
-              <button id="write-read" type="button">Write Readable</button>
-            </div>
-            <textarea id="read-json" spellcheck="false"></textarea>
-            <div class="chips"><div id="entity-kind-chip" class="chip">Kind: -</div><div id="entity-id-chip" class="chip">Entity: -</div><div id="rule-count-chip" class="chip">Rules: 0</div></div>
-          </div>
+          </section>
         </section>
       </div>
+
       <div class="panel">
-        <div class="panel-head"><h2>Preview / Diff Output</h2><p>Dialogue preview loads the live entity definition plus authored talk/read content.</p></div>
-        <div class="panel-body"><div id="status" class="status">Waiting for entity selection.</div><pre id="output"></pre></div>
+        <div class="panel-head">
+          <h2>Preview / Diff Output</h2>
+          <p>Preview resolves the live entity definition plus authored dialogue and readable content.</p>
+        </div>
+        <div class="panel-body">
+          <div id="status" class="status">Waiting for entity selection.</div>
+          <pre id="output"></pre>
+        </div>
       </div>
     </section>
   </div>
+
   <script src="/static/website/js/creator_common.js"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
-    const entityList = document.getElementById("entity-list");
-    const entitySearch = document.getElementById("entity-search");
-    const ruleList = document.getElementById("rule-list");
-    const output = document.getElementById("output");
-    const statusBox = document.getElementById("status");
-    const validationNotes = document.getElementById("validation-notes");
+    const $ = (id) => document.getElementById(id);
+    const entityList = $('entity-list');
+    const entitySearch = $('entity-search');
+    const ruleList = $('rule-list');
+    const output = $('output');
+    const statusBox = $('status');
+    const validationNotes = $('validation-notes');
     const creatorTools = window.BraveCreator.bind(API_ROOT, statusBox, validationNotes);
-    const editorTitle = document.getElementById("editor-title");
-    const editorSubtitle = document.getElementById("editor-subtitle");
-    const entityKindChip = document.getElementById("entity-kind-chip");
-    const entityIdChip = document.getElementById("entity-id-chip");
-    const ruleCountChip = document.getElementById("rule-count-chip");
-    const loadEntityButton = document.getElementById("load-entity");
-    const validateButton = document.getElementById("validate-content");
-    const reloadButton = document.getElementById("reload-content");
-    const dialogueActive = document.getElementById("dialogue-active");
-    const dialogueRoom = document.getElementById("dialogue-room");
-    const dialogueResonance = document.getElementById("dialogue-resonance");
-    const dialogueText = document.getElementById("dialogue-text");
-    const dialogueJson = document.getElementById("dialogue-json");
-    const newRuleButton = document.getElementById("new-rule");
-    const removeRuleButton = document.getElementById("remove-rule");
-    const syncDialogueButton = document.getElementById("sync-dialogue-form");
-    const diffDialogueButton = document.getElementById("diff-dialogue");
-    const writeDialogueButton = document.getElementById("write-dialogue");
-    const readableText = document.getElementById("readable-text");
-    const readJson = document.getElementById("read-json");
-    const syncReadButton = document.getElementById("sync-read-form");
-    const diffReadButton = document.getElementById("diff-read");
-    const writeReadButton = document.getElementById("write-read");
+    const editorTitle = $('editor-title');
+    const editorSubtitle = $('editor-subtitle');
+    const entityKindChip = $('entity-kind-chip');
+    const entityIdChip = $('entity-id-chip');
+    const ruleCountChip = $('rule-count-chip');
+    const ruleSummaryChip = $('rule-summary-chip');
+    const readableSummaryChip = $('readable-summary-chip');
+    const loadEntityButton = $('load-entity');
+    const validateButton = $('validate-content');
+    const reloadButton = $('reload-content');
+    const ruleMode = $('rule-mode');
+    const dialogueActive = $('dialogue-active');
+    const dialogueRoom = $('dialogue-room');
+    const dialogueResonance = $('dialogue-resonance');
+    const dialogueText = $('dialogue-text');
+    const dialogueJson = $('dialogue-json');
+    const newRuleButton = $('new-rule');
+    const removeRuleButton = $('remove-rule');
+    const syncDialogueButton = $('sync-dialogue-form');
+    const syncDialogueSourceButton = $('sync-dialogue-source');
+    const diffDialogueButton = $('diff-dialogue');
+    const writeDialogueButton = $('write-dialogue');
+    const readableText = $('readable-text');
+    const readJson = $('read-json');
+    const syncReadButton = $('sync-read-form');
+    const syncReadSourceButton = $('sync-read-source');
+    const diffReadButton = $('diff-read');
+    const writeReadButton = $('write-read');
+    const dialoguePreviewList = $('dialogue-preview-list');
 
     let entities = [];
     let quests = [];
     let rooms = [];
-    let selectedEntityId = "";
+    let selectedEntityId = '';
     let selectedEntity = null;
     let dialogueRules = [];
     let selectedRuleIndex = -1;
 
     function setBusy(isBusy) {
-      for (const button of [loadEntityButton, validateButton, reloadButton, newRuleButton, removeRuleButton, syncDialogueButton, diffDialogueButton, writeDialogueButton, syncReadButton, diffReadButton, writeReadButton]) {
+      for (const button of [loadEntityButton, validateButton, reloadButton, newRuleButton, removeRuleButton, syncDialogueButton, syncDialogueSourceButton, diffDialogueButton, writeDialogueButton, syncReadButton, syncReadSourceButton, diffReadButton, writeReadButton]) {
         button.disabled = isBusy;
       }
     }
 
-    function setStatus(message, tone = "") {
+    function setStatus(message, tone = '') {
       creatorTools.setStatus(message, tone);
     }
 
@@ -180,8 +261,8 @@
 
     async function apiFetch(path, options = {}) {
       const response = await fetch(`${API_ROOT}${path}`, {
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
         ...options,
       });
       const payload = await response.json().catch(() => ({}));
@@ -189,61 +270,114 @@
       return payload;
     }
 
-    function fillSelect(select, entries, { placeholder = "None", includeBlank = true, labelBuilder = (entry) => entry.label || entry.id, selectedValue = "" } = {}) {
-      creatorTools.fillSelect(select, entries, { placeholder, includeBlank, labelBuilder, selectedValue });
+    function fillSelect(select, entries, options = {}) {
+      creatorTools.fillSelect(select, entries, options);
     }
 
-    function renderEntities(filter = "") {
+    function renderEntities(filter = '') {
       const token = filter.trim().toLowerCase();
-      const filtered = entities.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || "").toLowerCase().includes(token)));
-      entityList.innerHTML = "";
+      const filtered = entities.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || '').toLowerCase().includes(token)));
+      entityList.innerHTML = '';
       for (const entry of filtered) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "entity-row" + (entry.id === selectedEntityId ? " active" : "");
-        button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id}${entry.meta ? ` · ${entry.meta}` : ""}</span>`;
-        button.addEventListener("click", () => selectEntity(entry));
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'entity-row' + (entry.id === selectedEntityId ? ' active' : '');
+        const meta = [entry.meta, entry.kind].filter(Boolean).join(' · ');
+        button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id}${meta ? ` · ${meta}` : ''}</span>`;
+        button.addEventListener('click', () => selectEntity(entry));
         entityList.appendChild(button);
       }
     }
 
     function buildRuleDraft() {
-      return { text: "New dialogue text" };
+      return { mode: 'always', active: '', room_id: '', resonance: '', text: 'New dialogue text' };
     }
 
-    function renderRuleList() {
-      ruleList.innerHTML = "";
-      if (!dialogueRules.length) {
-        const empty = document.createElement("div");
-        empty.className = "selector-row empty";
-        empty.innerHTML = "<strong>No Talk Rules</strong><span>Create the first rule to start authoring dialogue.</span>";
-        ruleList.appendChild(empty);
-      }
-      dialogueRules.forEach((rule, index) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "selector-row" + (index === selectedRuleIndex ? " active" : "");
-        const summary = [rule.active, rule.room_id, rule.resonance].filter(Boolean).join(" · ") || "Always available";
-        const label = (rule.text || "New dialogue text").slice(0, 60);
-        button.innerHTML = `<strong>Rule ${index + 1}</strong><span>${label}${summary ? ` · ${summary}` : ""}</span>`;
-        button.addEventListener("click", () => selectRule(index));
-        ruleList.appendChild(button);
-      });
-      ruleCountChip.textContent = `Rules: ${dialogueRules.length}`;
-      removeRuleButton.disabled = selectedRuleIndex < 0 || !dialogueRules.length;
+    function normalizeRule(rule) {
+      const mode = rule.completed ? 'completed' : rule.active ? 'active' : 'always';
+      return {
+        mode,
+        active: rule.active || rule.completed || '',
+        room_id: rule.room_id || '',
+        resonance: rule.resonance || '',
+        text: rule.text || '',
+      };
+    }
+
+    function summarizeRule(rule) {
+      const parts = [];
+      if (rule.mode === 'active' && rule.active) parts.push(`Active: ${rule.active}`);
+      if (rule.mode === 'completed' && rule.active) parts.push(`Completed: ${rule.active}`);
+      if (rule.room_id) parts.push(`Room: ${rule.room_id}`);
+      if (rule.resonance) parts.push(`Resonance: ${rule.resonance}`);
+      if (!parts.length) parts.push('Always available');
+      return parts.join(' · ');
+    }
+
+    function syncModeToQuestField() {
+      const needsQuest = ruleMode.value !== 'always';
+      dialogueActive.disabled = !needsQuest;
+      if (!needsQuest) dialogueActive.value = '';
     }
 
     function populateRuleForm(rule) {
-      fillSelect(dialogueActive, quests, { placeholder: "No active quest gate", labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`, selectedValue: rule.active || "" });
-      fillSelect(dialogueRoom, rooms, { placeholder: "No room gate", labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`, selectedValue: rule.room_id || "" });
-      dialogueResonance.value = rule.resonance || "";
-      dialogueText.value = rule.text || "";
+      const data = rule || buildRuleDraft();
+      ruleMode.value = data.mode || 'always';
+      fillSelect(dialogueActive, quests, { placeholder: 'No quest gate', labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`, selectedValue: data.active || '' });
+      fillSelect(dialogueRoom, rooms, { placeholder: 'No room gate', labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`, selectedValue: data.room_id || '' });
+      dialogueResonance.value = data.resonance || '';
+      dialogueText.value = data.text || '';
+      syncModeToQuestField();
+      updateDialogueSummary();
+    }
+
+    function renderRuleList() {
+      ruleList.innerHTML = '';
+      if (!dialogueRules.length) {
+        const empty = document.createElement('div');
+        empty.className = 'selector-row empty';
+        empty.innerHTML = '<strong>No Talk Rules</strong><span>Add the first rule to start authoring dialogue.</span>';
+        ruleList.appendChild(empty);
+      }
+      dialogueRules.forEach((rule, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'selector-row' + (index === selectedRuleIndex ? ' active' : '');
+        const label = (rule.text || 'New dialogue text').slice(0, 60);
+        button.innerHTML = `<strong>Rule ${index + 1}</strong><span>${label}${label ? ` · ${summarizeRule(rule)}` : summarizeRule(rule)}</span>`;
+        button.addEventListener('click', () => selectRule(index));
+        ruleList.appendChild(button);
+      });
+      ruleCountChip.textContent = `Rules: ${dialogueRules.length}`;
+      ruleSummaryChip.textContent = `Rules: ${dialogueRules.length}`;
+      removeRuleButton.disabled = selectedRuleIndex < 0 || !dialogueRules.length;
+    }
+
+    function renderDialoguePreview() {
+      dialoguePreviewList.innerHTML = '';
+      for (const rule of dialogueRules) {
+        const card = document.createElement('div');
+        card.className = 'pill';
+        card.textContent = `${rule.text || 'New dialogue text'} · ${summarizeRule(rule)}`;
+        dialoguePreviewList.appendChild(card);
+      }
+      if (!dialogueRules.length) {
+        const empty = document.createElement('div');
+        empty.className = 'pill';
+        empty.textContent = 'No talk rules yet.';
+        dialoguePreviewList.appendChild(empty);
+      }
+    }
+
+    function updateDialogueSummary() {
+      renderDialoguePreview();
+      readableSummaryChip.textContent = readableText.value.trim() ? 'Readable: Yes' : 'Readable: No';
     }
 
     function syncDialogueStateToJson() {
-      creatorTools.clearValidation();
       dialogueJson.value = JSON.stringify(dialogueRules, null, 2);
-      ruleCountChip.textContent = `Rules: ${dialogueRules.length}`;
+      renderRuleList();
+      updateDialogueSummary();
       return dialogueRules;
     }
 
@@ -257,76 +391,70 @@
         }
       }
       const text = dialogueText.value.trim();
-      const messages = creatorTools.requireFields([{ label: "Dialogue rule text", value: text }]);
+      const messages = creatorTools.requireFields([{ label: 'Dialogue rule text', value: text }]);
       if (!showValidation(messages)) {
-        setStatus("Dialogue rule text is required.", "bad");
+        setStatus('Dialogue rule text is required.', 'bad');
         return null;
       }
       const payload = {
         text,
-        active: dialogueActive.value || undefined,
-        room_id: dialogueRoom.value || undefined,
-        resonance: dialogueResonance.value || undefined,
+        ...(ruleMode.value === 'active' && dialogueActive.value ? { active: dialogueActive.value } : {}),
+        ...(ruleMode.value === 'completed' && dialogueActive.value ? { completed: dialogueActive.value } : {}),
+        ...(dialogueRoom.value ? { room_id: dialogueRoom.value } : {}),
+        ...(dialogueResonance.value ? { resonance: dialogueResonance.value } : {}),
       };
-      dialogueRules[selectedRuleIndex] = Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined && value !== ""));
+      dialogueRules[selectedRuleIndex] = payload;
       syncDialogueStateToJson();
       renderRuleList();
       return dialogueRules;
     }
 
-    function selectRule(index) {
-      selectedRuleIndex = index;
-      const rule = dialogueRules[index] || buildRuleDraft();
-      populateRuleForm(rule);
-      renderRuleList();
+    function syncDialogueSourceToForm() {
+      try {
+        const value = creatorTools.parseJsonField(dialogueJson, [], { label: 'Dialogue source', expect: 'array' });
+        dialogueRules = value.map((rule) => normalizeRule(rule));
+        selectedRuleIndex = dialogueRules.length ? 0 : -1;
+        populateRuleForm(dialogueRules[0] || buildRuleDraft());
+        setStatus('Advanced source applied to the dialogue builder.', 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+      }
     }
 
-    function createRule() {
-      syncDialogueFormToState();
-      dialogueRules.push(buildRuleDraft());
-      selectedRuleIndex = dialogueRules.length - 1;
-      populateRuleForm(dialogueRules[selectedRuleIndex]);
-      syncDialogueStateToJson();
-      renderRuleList();
-      setStatus("New talk rule draft added.", "good");
-    }
-
-    function removeRule() {
-      if (selectedRuleIndex < 0 || !dialogueRules.length) {
-        setStatus("Select a talk rule first.", "bad");
-        return;
-      }
-      dialogueRules.splice(selectedRuleIndex, 1);
-      if (!dialogueRules.length) {
-        selectedRuleIndex = -1;
-        populateRuleForm(buildRuleDraft());
-      } else {
-        selectedRuleIndex = Math.max(0, selectedRuleIndex - 1);
-        populateRuleForm(dialogueRules[selectedRuleIndex]);
-      }
-      syncDialogueStateToJson();
-      renderRuleList();
-      setStatus("Talk rule removed from the staged list.", "good");
+    function populateReadForm(text) {
+      readableText.value = text || '';
+      readJson.value = JSON.stringify(text || '', null, 2);
+      updateDialogueSummary();
     }
 
     function syncReadFormToJson() {
-      const payload = readableText.value || "";
-      if (!showValidation(creatorTools.requireFields([{ label: "Readable response", value: payload }]))) {
-        setStatus("Readable response is required.", "bad");
+      const payload = readableText.value.trim();
+      if (!showValidation(creatorTools.requireFields([{ label: 'Readable response', value: payload }]))) {
+        setStatus('Readable response is required.', 'bad');
         return null;
       }
-      creatorTools.clearValidation();
       readJson.value = JSON.stringify(payload, null, 2);
+      updateDialogueSummary();
       return payload;
+    }
+
+    function syncReadSourceToForm() {
+      try {
+        const value = creatorTools.parseJsonField(readJson, '', { label: 'Readable source' });
+        populateReadForm(String(value || ''));
+        setStatus('Advanced source applied to the readable builder.', 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+      }
     }
 
     async function loadReferences() {
       [entities, quests, rooms] = await Promise.all([
-        creatorTools.fetchReferences('entities'),
-        creatorTools.fetchReferences('quests'),
-        creatorTools.fetchReferences('rooms'),
+        creatorTools.fetchReferences('entities', { limit: 1000 }),
+        creatorTools.fetchReferences('quests', { limit: 1000 }),
+        creatorTools.fetchReferences('rooms', { limit: 1000 }),
       ]);
-      fillSelect(dialogueActive, quests, { placeholder: 'No active quest gate', labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})` });
+      fillSelect(dialogueActive, quests, { placeholder: 'No quest gate', labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})` });
       fillSelect(dialogueRoom, rooms, { placeholder: 'No room gate', labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})` });
       renderEntities(entitySearch.value);
       renderRuleList();
@@ -338,8 +466,8 @@
       renderEntities(entitySearch.value);
       editorTitle.textContent = entry.label || entry.id;
       editorSubtitle.textContent = `${entry.id}${entry.meta ? ` · ${entry.meta}` : ''}`;
-      entityKindChip.textContent = `Kind: ${entry.meta || '-'}`;
-      entityIdChip.textContent = `Entity: ${entry.id}`;
+      entityKindChip.textContent = entry.meta || '-';
+      entityIdChip.textContent = entry.id;
       await loadPreview(entry);
     }
 
@@ -349,26 +477,22 @@
       setStatus(`Loading dialogue preview for ${entry.id}...`);
       try {
         if (entry.meta === 'readable') {
-          const readPayload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'readable', args:[entry.id] }) });
-          readableText.value = readPayload.preview.text || '';
-          readJson.value = JSON.stringify(readPayload.preview.text || '', null, 2);
+          const readPayload = await apiFetch('/preview', { method: 'POST', body: JSON.stringify({ kind: 'readable', args: [entry.id] }) });
+          populateReadForm(readPayload.preview.text || '');
           dialogueRules = [];
           selectedRuleIndex = -1;
           populateRuleForm(buildRuleDraft());
           syncDialogueStateToJson();
-          renderRuleList();
           output.textContent = JSON.stringify(readPayload.preview, null, 2);
         } else {
-          const dialoguePayload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'dialogue', args:[entry.id] }) });
-          dialogueRules = Array.isArray(dialoguePayload.preview.talk_rules) ? dialoguePayload.preview.talk_rules.map((rule) => ({ ...rule })) : [];
-          if (!dialogueRules.length) {
-            dialogueRules = [buildRuleDraft()];
-          }
+          const dialoguePayload = await apiFetch('/preview', { method: 'POST', body: JSON.stringify({ kind: 'dialogue', args: [entry.id] }) });
+          dialogueRules = Array.isArray(dialoguePayload.preview.talk_rules) ? dialoguePayload.preview.talk_rules.map((rule) => normalizeRule(rule)) : [];
+          if (!dialogueRules.length) dialogueRules = [buildRuleDraft()];
           selectedRuleIndex = 0;
           populateRuleForm(dialogueRules[0]);
           syncDialogueStateToJson();
-          renderRuleList();
           output.textContent = JSON.stringify(dialoguePayload.preview, null, 2);
+          populateReadForm('');
         }
         setStatus(`Loaded preview for ${entry.id}.`, 'good');
       } catch (error) {
@@ -379,32 +503,63 @@
       }
     }
 
+    function selectRule(index) {
+      selectedRuleIndex = index;
+      populateRuleForm(dialogueRules[index] || buildRuleDraft());
+      renderRuleList();
+    }
+
+    function createRule() {
+      if (selectedEntity && selectedEntity.meta === 'readable') {
+        setStatus('Switch to an NPC to add talk rules.', 'bad');
+        return;
+      }
+      syncDialogueFormToState();
+      dialogueRules.push(buildRuleDraft());
+      selectedRuleIndex = dialogueRules.length - 1;
+      populateRuleForm(dialogueRules[selectedRuleIndex]);
+      syncDialogueStateToJson();
+      renderRuleList();
+      setStatus('New talk rule staged in the builder.', 'good');
+    }
+
+    function removeRule() {
+      if (selectedRuleIndex < 0 || !dialogueRules.length) {
+        setStatus('Select a talk rule first.', 'bad');
+        return;
+      }
+      dialogueRules.splice(selectedRuleIndex, 1);
+      selectedRuleIndex = dialogueRules.length ? Math.max(0, selectedRuleIndex - 1) : -1;
+      populateRuleForm(dialogueRules[selectedRuleIndex] || buildRuleDraft());
+      syncDialogueStateToJson();
+      renderRuleList();
+      setStatus('Talk rule removed from the staged list.', 'good');
+    }
+
     async function mutate(kind, payload, write) {
-      const result = await apiFetch('/mutate', { method:'POST', body: JSON.stringify({ kind, target:selectedEntityId, payload, write }) });
+      const result = await apiFetch('/mutate', { method: 'POST', body: JSON.stringify({ kind, target: selectedEntityId, payload, write }) });
       output.textContent = result.diff || JSON.stringify(result, null, 2);
       if (write) {
         const errors = result.validation_errors || [];
         if (errors.length) {
-          setStatus(`Write completed with ${errors.length} validation issue(s).`, 'bad');
-          output.textContent = `${result.diff || ''}
-
-Validation errors:
-- ${errors.join('
-- ')}`.trim();
+          setStatus(`Save completed with ${errors.length} validation issue(s).`, 'bad');
+          output.textContent = `${result.diff || ''}\n\nValidation errors:\n- ${errors.join('\n- ')}`.trim();
         } else {
-          setStatus(`Wrote ${kind} for ${selectedEntityId}.`, 'good');
+          setStatus(`Saved ${kind} for ${selectedEntityId}.`, 'good');
           await loadPreview();
         }
       } else {
-        setStatus(`Dry-run diff ready for ${kind} ${selectedEntityId}.`, 'good');
+        setStatus(`Preview ready for ${kind} ${selectedEntityId}.`, 'good');
       }
     }
 
     async function mutateDialogue(write) {
       if (!selectedEntityId) return setStatus('Choose an entity first.', 'bad');
+      if (selectedEntity && selectedEntity.meta === 'readable') return setStatus('Choose an NPC to edit talk rules.', 'bad');
       const payload = syncDialogueFormToState();
+      if (!payload) return;
       setBusy(true);
-      setStatus(write ? `Writing dialogue for ${selectedEntityId}...` : `Generating dialogue diff for ${selectedEntityId}...`);
+      setStatus(write ? `Saving dialogue for ${selectedEntityId}...` : `Previewing dialogue changes for ${selectedEntityId}...`);
       try {
         await mutate('dialogue', payload, write);
       } catch (error) {
@@ -418,8 +573,9 @@ Validation errors:
     async function mutateRead(write) {
       if (!selectedEntityId) return setStatus('Choose an entity first.', 'bad');
       const payload = syncReadFormToJson();
+      if (payload === null) return;
       setBusy(true);
-      setStatus(write ? `Writing readable text for ${selectedEntityId}...` : `Generating readable diff for ${selectedEntityId}...`);
+      setStatus(write ? `Saving readable text for ${selectedEntityId}...` : `Previewing readable changes for ${selectedEntityId}...`);
       try {
         await mutate('read', payload, write);
       } catch (error) {
@@ -432,15 +588,14 @@ Validation errors:
 
     async function validateContent() {
       setBusy(true);
-      setStatus('Validating content packs...');
+      setStatus('Checking content packs...');
       try {
-        const payload = await apiFetch('/validate', { method:'POST', body:'{}' });
+        const payload = await apiFetch('/validate', { method: 'POST', body: '{}' });
         if (payload.errors.length) {
-          setStatus(`Validation found ${payload.errors.length} issue(s).`, 'bad');
-          output.textContent = payload.errors.join('
-');
+          setStatus(`Content check found ${payload.errors.length} issue(s).`, 'bad');
+          output.textContent = payload.errors.join('\n');
         } else {
-          setStatus('Content validation passed.', 'good');
+          setStatus('Content check passed.', 'good');
           output.textContent = JSON.stringify(payload, null, 2);
         }
       } catch (error) {
@@ -455,7 +610,7 @@ Validation errors:
       setBusy(true);
       setStatus('Reloading registry from disk...');
       try {
-        const payload = await apiFetch('/reload', { method:'POST', body:'{}' });
+        const payload = await apiFetch('/reload', { method: 'POST', body: '{}' });
         setStatus('Content registry reloaded.', 'good');
         output.textContent = JSON.stringify(payload, null, 2);
         await loadReferences();
@@ -468,20 +623,24 @@ Validation errors:
       }
     }
 
+    ruleMode.addEventListener('change', syncModeToQuestField);
     entitySearch.addEventListener('input', () => renderEntities(entitySearch.value));
     loadEntityButton.addEventListener('click', () => loadPreview());
     newRuleButton.addEventListener('click', createRule);
     removeRuleButton.addEventListener('click', removeRule);
-    syncDialogueButton.addEventListener('click', () => { syncDialogueFormToState(); setStatus('Talk rule list synced to JSON.', 'good'); });
+    syncDialogueButton.addEventListener('click', () => { if (syncDialogueFormToState()) setStatus('Talk rule list synced to source.', 'good'); });
+    syncDialogueSourceButton.addEventListener('click', syncDialogueSourceToForm);
     diffDialogueButton.addEventListener('click', () => mutateDialogue(false));
     writeDialogueButton.addEventListener('click', () => mutateDialogue(true));
-    syncReadButton.addEventListener('click', () => { syncReadFormToJson(); setStatus('Readable text synced to JSON.', 'good'); });
+    syncReadButton.addEventListener('click', () => { if (syncReadFormToJson() !== null) setStatus('Readable text synced to source.', 'good'); });
+    syncReadSourceButton.addEventListener('click', syncReadSourceToForm);
     diffReadButton.addEventListener('click', () => mutateRead(false));
     writeReadButton.addEventListener('click', () => mutateRead(true));
     validateButton.addEventListener('click', validateContent);
     reloadButton.addEventListener('click', reloadContent);
+
     populateRuleForm(buildRuleDraft());
-    syncDialogueStateToJson();
+    populateReadForm('');
     renderRuleList();
     loadReferences().catch((error) => { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; });
   </script>

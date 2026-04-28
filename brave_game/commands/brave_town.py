@@ -6,9 +6,7 @@ from world.browser_panels import (
     build_cook_panel,
     build_forge_panel,
     build_portals_panel,
-    build_read_panel,
     build_shop_panel,
-    build_talk_panel,
     build_tinker_panel,
     send_webclient_event,
 )
@@ -17,10 +15,7 @@ from world.browser_views import (
     build_forge_view,
     build_portals_view,
     build_prayer_view,
-    build_read_view,
     build_shop_view,
-    build_talk_list_view,
-    build_talk_view,
     build_tinker_view,
 )
 from world.activities import format_recipe_list
@@ -589,10 +584,9 @@ class CmdTalk(BraveCharacterCommand):
     Speak with a local NPC.
 
     Usage:
-      talk
       talk <name>
 
-    Lists talkable NPCs in the room or gets contextual guidance from one of them.
+    Opens the interaction menu for a nearby NPC.
     """
 
     key = "talk"
@@ -610,16 +604,7 @@ class CmdTalk(BraveCharacterCommand):
             return
 
         if not self.args:
-            npcs = self.get_local_entities(character, kind="npc")
-            if not npcs:
-                self.msg("No one here looks free for conversation.")
-                return
-            screen = render_screen(
-                "Conversation",
-                subtitle="Choose someone nearby to speak with.",
-                sections=[("Nearby NPCs", [f"  - {npc.key}" for npc in npcs])],
-            )
-            self.scene_msg(screen, view=build_talk_list_view(character, npcs))
+            self.msg("Who do you want to talk to?")
             return
 
         target, npcs = self.find_local_entity(character, self.args.strip(), kind="npc")
@@ -628,25 +613,48 @@ class CmdTalk(BraveCharacterCommand):
             return
         if not target:
             if npcs:
-                self.msg(
-                    "No one here matches that name. You can talk to: "
-                    + ", ".join(npc.key for npc in npcs)
-                )
+                self.msg("No one here matches that name. You can talk to: " + ", ".join(npc.key for npc in npcs))
             else:
                 self.msg("No one here looks free for conversation.")
             return
 
-        response = get_entity_response(character, target, "talk")
-        if not response:
-            self.msg(f"{target.key} has nothing to say right now.")
+        from world.browser_views import _build_world_interaction_picker
+
+        self.scene_msg(None, picker=_build_world_interaction_picker(character, target))
+        get_entity_response(character, target, "talk", is_action=True)
+
+
+class CmdBravePopup(BraveCharacterCommand):
+    """
+    Run lightweight interaction side effects for browser popups.
+
+    Usage:
+      _bravepopup talk <name>
+      _bravepopup read <name>
+    """
+
+    key = "_bravepopup"
+    locks = "cmd:all()"
+    help_category = "Brave"
+    auto_help = False
+
+    def func(self):
+        character = self.get_character()
+        if not character:
             return
 
-        screen = render_screen(
-            target.key,
-            subtitle="Conversation",
-            sections=[("What They Say", _wrap_paragraphs(response))],
-        )
-        self.scene_msg(screen, panel=build_talk_panel(target), view=build_talk_view(target, response))
+        args = str(self.args or "").strip()
+        verb, _, target_name = args.partition(" ")
+        verb = verb.lower()
+        if verb not in {"talk", "read"} or not target_name.strip():
+            return
+
+        kind = "npc" if verb == "talk" else "readable"
+        target, _candidates = self.find_local_entity(character, target_name.strip(), kind=kind)
+        if not target or isinstance(target, list):
+            return
+
+        get_entity_response(character, target, verb, is_action=True)
 
 
 class CmdSteal(BraveCharacterCommand):
@@ -736,10 +744,9 @@ class CmdRead(BraveCharacterCommand):
     Read a local sign, board, or notice.
 
     Usage:
-      read
       read <thing>
 
-    Lists readable objects in the room or shows their text.
+    Opens the interaction menu for a nearby readable object.
     """
 
     key = "read"
@@ -750,8 +757,8 @@ class CmdRead(BraveCharacterCommand):
         if not character:
             return
 
-        readable_objects = self.get_local_entities(character, kind="readable")
         if not self.args:
+            readable_objects = self.get_local_entities(character, kind="readable")
             if not readable_objects:
                 self.msg("There is nothing obvious to read here.")
                 return
@@ -764,30 +771,12 @@ class CmdRead(BraveCharacterCommand):
             return
         if not target:
             if readable_objects:
-                self.msg(
-                    "Nothing readable here matches that name. You can read: "
-                    + ", ".join(obj.key for obj in readable_objects)
-                )
+                self.msg("Nothing readable here matches that name. You can read: " + ", ".join(obj.key for obj in readable_objects))
             else:
                 self.msg("There is nothing obvious to read here.")
             return
 
-        if getattr(target.db, "brave_entity_id", None) == "kitchen_hearth":
-            self.scene_msg(
-                format_recipe_list(character),
-                panel=build_cook_panel(character),
-                view=build_cook_view(character),
-            )
-            return
+        from world.browser_views import _build_world_interaction_picker
 
-        response = get_entity_response(character, target, "read")
-        if not response:
-            self.msg(f"There is nothing new to make out from {target.key}.")
-            return
-
-        screen = render_screen(
-            target.key,
-            subtitle="Read Text",
-            sections=[("Inscription", _wrap_paragraphs(response))],
-        )
-        self.scene_msg(screen, panel=build_read_panel(target), view=build_read_view(target, response))
+        self.scene_msg(None, picker=_build_world_interaction_picker(character, target))
+        get_entity_response(character, target, "read", is_action=True)

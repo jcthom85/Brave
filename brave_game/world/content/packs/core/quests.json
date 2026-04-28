@@ -161,11 +161,11 @@
     },
     "fencebreakers": {
       "giver": "Mira Fenleaf",
-      "next_step": "Push through to Fencebreaker Camp and bring down Ruk the Fence-Cutter.",
+      "next_step": "Push through Wolf Turn to Fencebreaker Camp and find the brute ordering the road cut.",
       "objectives": [
         {
           "count": 2,
-          "description": "Defeat 2 goblin raiders on Goblin Road.",
+          "description": "Defeat 2 goblin cutters or raiders working the fence line.",
           "enemy_tag": "goblin",
           "type": "defeat_enemy"
         }
@@ -175,9 +175,9 @@
       ],
       "rewards": {
         "silver": 12,
-        "xp": 80
+        "xp": 30
       },
-      "summary": "Drive off the goblin raiders cutting apart roadside fences before the farmers lose what little they have left.",
+      "summary": "Stop the goblin cutters stripping fence rails and look for the pattern behind the road damage.",
       "title": "Fencebreakers"
     },
     "foreman_coilback": {
@@ -432,24 +432,24 @@
     },
     "practice_makes_heroes": {
       "giver": "Captain Harl Rowan",
-      "next_step": "Go south to Town Green, then west to the inn and speak with Uncle Pib Underbough.",
+      "next_step": "Go south to Town Green, read the fresh notice if you need direction, then head west to the inn and speak with Uncle Pib Underbough.",
       "objectives": [
         {
-          "description": "Visit Captain Harl Rowan at the Training Yard.",
-          "room_id": "brambleford_training_yard",
-          "type": "visit_room"
+          "description": "Report to Captain Harl Rowan after Wayfarer's Yard.",
+          "npc_id": "captain_harl_rowan",
+          "type": "talk_to_npc"
         }
       ],
       "rewards": {
         "silver": 6,
-        "xp": 40
+        "xp": 20
       },
-      "summary": "Report to the training yard and get your bearings before leaving town.",
+      "summary": "Report to Captain Harl after the alarm and get pointed at the first town problem.",
       "title": "Practice Makes Heroes"
     },
     "rats_in_the_kettle": {
       "giver": "Uncle Pib Underbough",
-      "next_step": "Go east to the East Gate and speak with Mira Fenleaf about the road.",
+      "next_step": "Go east to the East Gate and speak with Mira Fenleaf about the cut road.",
       "objectives": [
         {
           "description": "Head down into the Rat and Kettle Cellar beneath the inn.",
@@ -458,7 +458,7 @@
         },
         {
           "count": 3,
-          "description": "Defeat 3 thorn rats in or around Brambleford.",
+          "description": "Defeat 3 thorn rats before they ruin more stores.",
           "enemy_tag": "rat",
           "type": "defeat_enemy"
         }
@@ -474,27 +474,27 @@
           }
         ],
         "silver": 8,
-        "xp": 60
+        "xp": 35
       },
-      "summary": "Drive the thorn rats out of the inn cellar before they chew through another week of supplies.",
+      "summary": "Drive the alarm-spooked thorn rats out of the inn cellar before they chew through supplies the town may need.",
       "title": "Rats in the Kettle"
     },
     "roadside_howls": {
       "giver": "Mira Fenleaf",
-      "next_step": "Thin the goblin cutters still working along Goblin Road.",
+      "next_step": "Follow the cut fences east and thin the goblin cutters still working along Goblin Road.",
       "objectives": [
         {
-          "description": "Check in at the East Gate.",
+          "description": "Check in with Mira at the East Gate.",
           "room_id": "brambleford_east_gate",
           "type": "visit_room"
         },
         {
-          "description": "Reach the Old Fence Line on Goblin Road.",
+          "description": "Reach the Old Fence Line and inspect the cut rails.",
           "room_id": "goblin_road_old_fence_line",
           "type": "visit_room"
         },
         {
-          "description": "Push as far as Wolf Turn and see how dangerous the road has become.",
+          "description": "Push as far as Wolf Turn and follow the damage toward its source.",
           "room_id": "goblin_road_wolf_turn",
           "type": "visit_room"
         }
@@ -514,14 +514,14 @@
           }
         ],
         "silver": 10,
-        "xp": 70
+        "xp": 25
       },
-      "summary": "Scout the eastern road where wolves and goblins have been causing trouble.",
+      "summary": "Scout the eastern road, read the tracks, and learn whether the dead lantern and cut fences are connected.",
       "title": "Roadside Howls"
     },
     "ruk_the_fence_cutter": {
       "giver": "Mira Fenleaf",
-      "next_step": "After Ruk falls, check in with Mira, Sister Maybelle, or Joss to choose the next branch.",
+      "next_step": "After Ruk falls, check in with Mira, Sister Maybelle, or Joss. The road is safer, but the black lantern is still unanswered.",
       "objectives": [
         {
           "description": "Find the Fencebreaker Camp beyond Wolf Turn.",
@@ -529,7 +529,7 @@
           "type": "visit_room"
         },
         {
-          "description": "Defeat Ruk the Fence-Cutter.",
+          "description": "Defeat Ruk the Fence-Cutter and break the first road threat.",
           "enemy_tag": "ruk",
           "type": "defeat_enemy"
         }
@@ -545,9 +545,9 @@
           }
         ],
         "silver": 18,
-        "xp": 120
+        "xp": 40
       },
-      "summary": "Track down the goblin brute leading the fence raiders and break his hold on Goblin Road.",
+      "summary": "Track down the goblin brute leading the fence raids and find out how much of the morning alarm belongs to him.",
       "title": "Ruk the Fence-Cutter"
     },
     "signal_in_the_scrap": {
@@ -740,12 +740,12 @@
     "roadside_howls",
     "fencebreakers",
     "ruk_the_fence_cutter",
-    "bridgework_for_joss",
-    "signal_in_the_scrap",
-    "foreman_coilback",
     "what_whispers_in_the_wood",
     "herbs_for_sister_maybelle",
     "greymaws_trail",
+    "bridgework_for_joss",
+    "signal_in_the_scrap",
+    "foreman_coilback",
     "lanterns_at_dusk",
     "do_not_disturb_the_dead",
     "the_knight_without_rest",

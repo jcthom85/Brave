@@ -336,27 +336,41 @@ def _format_quest_reward_text(definition):
     return ", ".join(parts)
 
 
-def _format_tutorial_screen_block(character):
-    """Return structured tutorial journal lines for the current onboarding step."""
+def _format_tutorial_screen_block(character, completed_only=False):
+    """Return structured tutorial journal lines for current or completed onboarding steps."""
 
     state = ensure_tutorial_state(character)
-    if state.get("status") != "active":
+    status = state.get("status")
+    if status == "inactive":
         return []
 
-    step_key = state.get("step") or "first_steps"
+    flags = state.get("flags", {})
+    current_step_key = state.get("step")
+    current_order = TUTORIAL_STEPS[current_step_key]["order"] if current_step_key else 999
+    
+    if completed_only:
+        blocks = []
+        for step_key, step in TUTORIAL_STEPS.items():
+            if status == "completed" or (step["order"] < current_order):
+                blocks.append(format_entry(step["title"] + " [Tutorial Completed]", details=[step["summary"]]))
+        return blocks
+
+    if status == "completed":
+        return [] # Entire tutorial is done, individual steps handled by completed_only=True path
+
+    step_key = current_step_key or "first_steps"
     step = TUTORIAL_STEPS[step_key]
-    flags = state["flags"]
 
     checks = []
     if step_key == "first_steps":
         checks = [
-            f"[{'x' if flags.get('talked_tamsin') else ' '}] Speak with Sergeant Tamsin Vale.",
-            f"[{'x' if flags.get('visited_quartermaster_shed') else ' '}] Head east to Quartermaster Shed.",
-            f"[{'x' if flags.get('returned_to_wayfarers_yard') else ' '}] Return to Wayfarer's Yard.",
+            f"[{'x' if flags.get('talked_tamsin') else ' '}] Consult with Sergeant Tamsin Vale.",
+            f"[{'x' if flags.get('visited_quartermaster_shed') else ' '}] Check the Quartermaster Shed east of the yard.",
+            f"[{'x' if flags.get('returned_to_wayfarers_yard') else ' '}] Return before the yard moves on.",
         ]
     elif step_key == "pack_before_walk":
         checks = [
-            f"[{'x' if flags.get('talked_nella') else ' '}] Speak with Quartermaster Nella Cobb.",
+            f"[{'x' if flags.get('talked_nella') else ' '}] Let Quartermaster Nella check your kit.",
             f"[{'x' if flags.get('viewed_gear') else ' '}] Check your gear.",
             f"[{'x' if flags.get('viewed_pack') else ' '}] Open your pack.",
             f"[{'x' if flags.get('read_supply_board') else ' '}] Read the supply board.",
@@ -367,14 +381,19 @@ def _format_tutorial_screen_block(character):
         ]
     elif step_key == "clear_the_pens":
         checks = [
+            f"[{'x' if flags.get('used_class_ability') else ' '}] Use your class skill in combat.",
             f"[{'x' if flags.get('won_vermin_fight') else ' '}] Win one fight in the Vermin Pens.",
+        ]
+    elif step_key == "catch_your_breath":
+        checks = [
+            f"[{'x' if flags.get('rested_after_fight') else ' '}] Rest in Wayfarer's Yard.",
         ]
     elif step_key == "through_the_gate":
         checks = [
             f"[{'x' if flags.get('talked_harl') else ' '}] Report to Captain Harl Rowan in the Training Yard.",
         ]
 
-    optional_done = flags.get("read_family_post_sign") or flags.get("talked_peep")
+    optional_done = flags.get("read_family_post_sign") or flags.get("talked_peep") or flags.get("visited_family_post")
     checks.append(f"[{'x' if optional_done else ' '}] Optional: Visit Family Post for party basics.")
 
     details = [step["summary"]]
@@ -802,3 +821,18 @@ class BraveCharacterCommand(MuxCommand):
             verb=verb,
             target=target,
         )
+
+
+class CmdFinishPlaySilent(BraveCharacterCommand):
+    """
+    Silent placeholder for the 'finish play' command which is sent by the
+    webclient during character creation.
+    """
+
+    key = "finish play"
+    aliases = ["play now", "enter world"]
+    locks = "cmd:all()"
+    priority = -10
+
+    def func(self):
+        pass

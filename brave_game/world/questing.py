@@ -2,12 +2,14 @@
 
 from copy import deepcopy
 
+from evennia.utils import logger
 from world.content import get_content_registry
 from world.trophies import unlock_trophy
 
 CONTENT = get_content_registry()
 ITEM_CONTENT = CONTENT.items
 QUEST_CONTENT = CONTENT.quests
+
 
 
 def _build_initial_objective_state(objective):
@@ -103,17 +105,57 @@ def pop_recent_quest_updates(character):
     return recent
 
 
-def _build_initial_quest_state(quest_key, definition, quest_log):
+def _quest_can_unlock(character, quest_key, definition, quest_log):
+    if quest_key == "rats_in_the_kettle" and not bool(getattr(character.db, "brave_harl_cellar_job_assigned", False)):
+        return False
+    return _prerequisites_met(quest_log, definition)
+
+
+def _build_initial_quest_state(character, quest_key, definition, quest_log):
     return {
-        "status": "active" if _prerequisites_met(quest_log, definition) else "locked",
+        "status": "active" if _quest_can_unlock(character, quest_key, definition, quest_log) else "locked",
         "objectives": [
             _build_initial_objective_state(objective) for objective in definition["objectives"]
         ],
     }
 
 
-def _normalize_quest_state(quest_key, quest_state):
+def _reset_quest_state(quest_key):
     definition = QUEST_CONTENT.quests[quest_key]
+    return {
+        "status": "locked",
+        "objectives": [
+            _build_initial_objective_state(objective) for objective in definition["objectives"]
+        ],
+    }
+
+
+def reset_opening_quests_for_new_character(character):
+    """Force a newly-created character into the intended pre-Harl opening state."""
+
+    quest_log = deepcopy(character.db.brave_quests or {})
+    quest_log["practice_makes_heroes"] = _reset_quest_state("practice_makes_heroes")
+    quest_log["practice_makes_heroes"]["status"] = "active"
+    
+    # Ensure rats_in_the_kettle is NOT in the log at all initially if we want it completely hidden,
+    # or keep it as locked if we want it to show up as locked.
+    # The user says "should not be assigned", so we'll keep it out of the log entirely until Harl gives it.
+    if "rats_in_the_kettle" in quest_log:
+        del quest_log["rats_in_the_kettle"]
+    
+    character.db.brave_harl_cellar_job_assigned = False
+    character.db.brave_opening_sequence_active = True
+    character.db.brave_tracked_quest = "practice_makes_heroes"
+    character.db.brave_track_suppressed = False
+    character.db.brave_quests = quest_log
+    return quest_log
+
+
+def _normalize_quest_state(quest_key, quest_state):
+    definition = QUEST_CONTENT.quests.get(quest_key)
+    if not definition:
+        return False
+        
     objectives = quest_state.get("objectives", [])
     changed = False
 
@@ -146,13 +188,8 @@ def _normalize_quest_state(quest_key, quest_state):
 
     quest_state["objectives"] = objectives
     if quest_state.get("status") not in {"active", "completed", "locked"}:
-        quest_state["status"] = "completed" if all(objective["completed"] for objective in objectives) else "active"
+        quest_state["status"] = "active"
         changed = True
-
-    if quest_state.get("status") != "locked" and all(objective["completed"] for objective in objectives):
-        if quest_state["status"] != "completed":
-            quest_state["status"] = "completed"
-            changed = True
 
     return changed
 
@@ -161,7 +198,15 @@ def _complete_quest(character, definition, state, messages):
     if state.get("status") == "completed":
         return False
 
+    try:
+        from world.browser_panels import send_quest_complete_event
+
+        send_quest_complete_event(character, definition["title"], rewards=definition.get("rewards", {}))
+    except Exception:
+        pass
+
     state["status"] = "completed"
+    _refresh_tracked_quest_scene(character)
     messages.append(f"|yQuest complete:|n {definition['title']}")
     rewards = definition.get("rewards", {})
     reward_xp = rewards.get("xp", 0)
@@ -192,17 +237,21 @@ def _complete_quest(character, definition, state, messages):
         messages.append("|cTown reaction:|n Joss, Mayor Elric, and the Trophy Hall all have something new to say.")
     if definition.get("next_step"):
         messages.append(f"|cNext lead:|n {definition['next_step']}")
+
     return True
 
 
-def _unlock_available_quests(quest_log, messages):
+def _unlock_available_quests(character, quest_log, messages):
     changed = False
     for quest_key in QUEST_CONTENT.starting_quests:
         state = quest_log.get(quest_key)
-        definition = QUEST_CONTENT.quests[quest_key]
+        definition = QUEST_CONTENT.quests.get(quest_key)
+        if not definition:
+            continue
+            
         if not state or state.get("status") != "locked":
             continue
-        if not _prerequisites_met(quest_log, definition):
+        if not _quest_can_unlock(character, quest_key, definition, quest_log):
             continue
         state["status"] = "active"
         changed = True
@@ -258,6 +307,7 @@ def _sync_collect_item_progress(character, quest_log, messages):
             if progress != previous:
                 objective_state["progress"] = progress
                 changed = True
+                _refresh_tracked_quest_scene(character)
                 messages.append(
                     f"|gQuest updated:|n {definition['title']} - {progress}/{required}"
                 )
@@ -284,9 +334,19 @@ def _sync_quest_log(character, quest_log, messages):
     changed = False
 
     for quest_key in QUEST_CONTENT.starting_quests:
-        definition = QUEST_CONTENT.quests[quest_key]
+        definition = QUEST_CONTENT.quests.get(quest_key)
+        if not definition:
+            continue
+
+        if (
+            quest_key == "rats_in_the_kettle"
+            and quest_key not in quest_log
+            and not bool(getattr(character.db, "brave_harl_cellar_job_assigned", False))
+        ):
+            continue
+            
         if quest_key not in quest_log:
-            quest_log[quest_key] = _build_initial_quest_state(quest_key, definition, quest_log)
+            quest_log[quest_key] = _build_initial_quest_state(character, quest_key, definition, quest_log)
             changed = True
         else:
             changed = _normalize_quest_state(quest_key, quest_log[quest_key]) or changed
@@ -294,12 +354,15 @@ def _sync_quest_log(character, quest_log, messages):
                 quest_log[quest_key].get("status") == "locked"
                 and not definition.get("prerequisites")
             ):
+                # SPECIAL CASE: We don't want rats_in_the_kettle to auto-unlock even if it has no prereqs (it does, but just in case)
+                if quest_key == "rats_in_the_kettle":
+                    continue
                 quest_log[quest_key]["status"] = "active"
                 changed = True
 
     while True:
         progressed = False
-        progressed = _unlock_available_quests(quest_log, messages) or progressed
+        progressed = _unlock_available_quests(character, quest_log, messages) or progressed
         progressed = _sync_collect_item_progress(character, quest_log, messages) or progressed
         progressed = _complete_ready_quests(character, quest_log, messages) or progressed
         if not progressed:
@@ -321,6 +384,53 @@ def ensure_starter_quests(character):
         character.db.brave_quests = quest_log
 
     return quest_log
+
+
+def unlock_quest(character, quest_key):
+    """Manually activate a quest for a character, even if not in STARTING_QUESTS."""
+
+    definition = QUEST_CONTENT.quests.get(quest_key)
+    if not definition:
+        return False
+
+    quest_log = deepcopy(character.db.brave_quests or {})
+    messages = []
+
+    created = quest_key not in quest_log
+    if created:
+        quest_log[quest_key] = _build_initial_quest_state(character, quest_key, definition, quest_log)
+
+    state = quest_log[quest_key]
+    if state.get("status") == "active" and not created:
+        return False
+
+    state["status"] = "active"
+    messages.append(f"|cNew quest:|n {definition['title']}")
+    if definition.get("next_step"):
+        messages.append(f"|cLead:|n {definition['next_step']}")
+
+    character.db.brave_quests = quest_log
+    _sync_tracked_quest(character, quest_log, messages)
+    character.db.brave_quests = quest_log
+    _refresh_tracked_quest_scene(character)
+
+    if messages:
+        _record_recent_updates(character, messages)
+    _send_progress_notice(character, messages)
+
+    return True
+
+
+def _is_active_quest(character, quest_key):
+    """Return whether a specific quest is currently active."""
+    quest_log = character.db.brave_quests or {}
+    return quest_log.get(quest_key, {}).get("status") == "active"
+
+
+def _is_completed_quest(character, quest_key):
+    """Return whether a specific quest is already completed."""
+    quest_log = character.db.brave_quests or {}
+    return quest_log.get(quest_key, {}).get("status") == "completed"
 
 
 def get_active_quests(character):
@@ -404,11 +514,29 @@ def resolve_active_quest_query(character, query):
 def get_tracked_quest_payload(character):
     """Return compact tracked-quest data for browser exploration UI."""
 
+    try:
+        from world.tutorial import get_tutorial_objective_entries
+    except Exception:
+        tutorial = None
+    else:
+        tutorial = get_tutorial_objective_entries(character)
+    if tutorial:
+        return {
+            "title": tutorial["title"],
+            "giver": "Wayfarer's Yard",
+            "objectives": tutorial["objectives"][:4],
+            "line": tutorial["summary"],
+            "kind": "tutorial",
+        }
+
     quest_key = get_tracked_quest(character)
     if not quest_key:
         return None
 
-    definition = QUEST_CONTENT.quests[quest_key]
+    definition = QUEST_CONTENT.quests.get(quest_key)
+    if not definition:
+        return None
+        
     state = (character.db.brave_quests or {}).get(quest_key, {})
     objectives = []
     for objective in state.get("objectives", []):
@@ -434,7 +562,10 @@ def get_tracked_quest_payload(character):
 def format_quest_block(character, quest_key):
     """Format a single quest block for display."""
 
-    definition = QUEST_CONTENT.quests[quest_key]
+    definition = QUEST_CONTENT.quests.get(quest_key)
+    if not definition:
+        return None
+        
     state = (character.db.brave_quests or {}).get(quest_key)
     if not state or state.get("status") == "locked":
         return None
@@ -463,6 +594,7 @@ def format_quest_block(character, quest_key):
 def advance_room_visit(character, room):
     """Update room-visit objectives when a character enters a tagged room."""
 
+
     room_id = getattr(room.db, "brave_room_id", None)
     if not room_id:
         return
@@ -483,7 +615,50 @@ def advance_room_visit(character, room):
             objective_state = state["objectives"][index]
             if objective_state["completed"]:
                 continue
+            
+
             if objective["type"] == "visit_room" and objective["room_id"] == room_id:
+                objective_state["progress"] = objective_state.get("required", 1)
+                objective_state["completed"] = True
+                changed = True
+                messages.append(
+                    f"|gQuest updated:|n {definition['title']} - {objective['description']}"
+                )
+
+    changed = _sync_quest_log(character, quest_log, messages) or changed
+
+    if changed:
+        character.db.brave_quests = quest_log
+        _refresh_tracked_quest_scene(character)
+
+    if messages:
+        _record_recent_updates(character, messages)
+    _send_progress_notice(character, messages)
+
+
+def advance_talk_to_npc(character, npc_id):
+    """Update talk-to objectives when a character speaks with a tagged NPC."""
+
+    if not npc_id:
+        return
+
+    quest_log = deepcopy(character.db.brave_quests or {})
+    messages = []
+    changed = False
+
+    for quest_key, state in quest_log.items():
+        if state.get("status") != "active":
+            continue
+
+        definition = QUEST_CONTENT.quests.get(quest_key)
+        if not definition:
+            continue
+
+        for index, objective in enumerate(definition["objectives"]):
+            objective_state = state["objectives"][index]
+            if objective_state["completed"]:
+                continue
+            if objective["type"] == "talk_to_npc" and objective["npc_id"] == npc_id:
                 objective_state["progress"] = objective_state.get("required", 1)
                 objective_state["completed"] = True
                 changed = True

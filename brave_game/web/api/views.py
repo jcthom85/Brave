@@ -87,7 +87,30 @@ def _match_query(value, query):
 
 def _reference_entries(domain, registry):
     if domain == "rooms":
-        return [{"id": room.get("id"), "label": room.get("key"), "meta": room.get("zone")} for room in registry.world.rooms]
+        return [
+            {
+                "id": room.get("id"),
+                "label": room.get("key"),
+                "meta": room.get("zone"),
+                "zone": room.get("zone"),
+                "map_region": room.get("map_region") or room.get("zone"),
+                "map_x": room.get("map_x", 0),
+                "map_y": room.get("map_y", 0),
+            }
+            for room in registry.world.rooms
+        ]
+    if domain == "exits":
+        return [
+            {
+                "id": exit_data.get("id"),
+                "label": exit_data.get("key"),
+                "meta": f"{exit_data.get('source')} -> {exit_data.get('destination')}",
+                "key": exit_data.get("key"),
+                "source": exit_data.get("source"),
+                "destination": exit_data.get("destination"),
+            }
+            for exit_data in registry.world.exits
+        ]
     if domain == "entities":
         return [{"id": entity.get("id"), "label": entity.get("key"), "meta": entity.get("kind"), "room_id": entity.get("location")} for entity in registry.world.entities]
     if domain == "items":
@@ -97,9 +120,43 @@ def _reference_entries(domain, registry):
     if domain == "races":
         return [{"id": race_id, "label": race_data.get("name"), "meta": race_data.get("perk")} for race_id, race_data in registry.characters.races.items()]
     if domain == "quests":
-        return [{"id": quest_id, "label": quest.get("title"), "meta": registry.quests.get_quest_region(quest_id)} for quest_id, quest in registry.quests.quests.items()]
+        starting = set(registry.quests.starting_quests)
+        return [
+            {
+                "id": quest_id,
+                "label": quest.get("title"),
+                "meta": registry.quests.get_quest_region(quest_id),
+                "region": registry.quests.get_quest_region(quest_id),
+                "starting": quest_id in starting,
+                "objective_count": len(quest.get("objectives", [])),
+                "reward_count": len(quest.get("rewards", {}).get("items", [])),
+            }
+            for quest_id, quest in registry.quests.quests.items()
+        ]
     if domain == "enemies":
         return [{"id": template_id, "label": template.get("name"), "meta": template.get("xp", 0)} for template_id, template in registry.encounters.enemy_templates.items()]
+    if domain == "enemy-tags":
+        tags = {}
+        for template_id, template in registry.encounters.enemy_templates.items():
+            for tag in template.get("tags", []):
+                tag_key = str(tag or "").strip().lower()
+                if not tag_key:
+                    continue
+                tags[tag_key] = tags.get(tag_key, 0) + 1
+        return [{"id": tag, "label": tag.replace("_", " ").title(), "meta": count} for tag, count in tags.items()]
+    if domain == "roaming-parties":
+        return [
+            {
+                "id": party_key,
+                "label": (party.get("encounter") or {}).get("title") or party_key,
+                "meta": party.get("region"),
+                "region": party.get("region"),
+                "start_room": party.get("start_room"),
+                "interval": party.get("interval", 0),
+                "respawn_delay": party.get("respawn_delay", 0),
+            }
+            for party_key, party in registry.encounters.roaming_parties.items()
+        ]
     if domain == "portals":
         return [{"id": portal_id, "label": portal.get("name"), "meta": portal.get("status")} for portal_id, portal in registry.systems.portals.items()]
     if domain == "forge":
@@ -149,7 +206,7 @@ def content_references(request, domain):
         return _json_error(f"Unknown reference domain: {domain}", status=404)
 
     query = request.GET.get("q", "")
-    limit = max(1, min(250, int(request.GET.get("limit", DEFAULT_REFERENCE_LIMIT) or DEFAULT_REFERENCE_LIMIT)))
+    limit = max(1, min(1000, int(request.GET.get("limit", DEFAULT_REFERENCE_LIMIT) or DEFAULT_REFERENCE_LIMIT)))
     filtered = [entry for entry in entries if _match_query(entry.get("id"), query) or _match_query(entry.get("label"), query) or _match_query(entry.get("meta"), query)]
     filtered.sort(key=lambda entry: (str(entry.get("label") or ""), str(entry.get("id") or "")))
     return JsonResponse({"ok": True, "domain": domain, "count": len(filtered), "results": filtered[:limit]})

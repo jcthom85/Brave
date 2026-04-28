@@ -38,12 +38,14 @@ class CreatorDialogueEditorViewTests(unittest.TestCase):
         response = creator_dialogue_editor(request)
         body = response.content.decode("utf-8")
         self.assertEqual(200, response.status_code)
-        self.assertIn("Dialogue", body)
-        self.assertIn("Talk Rule List", body)
-        self.assertIn("New Talk Rule", body)
+        self.assertIn("Dialogue Builder", body)
+        self.assertIn("Add Talk Rule", body)
         self.assertIn("Remove Talk Rule", body)
-        self.assertIn("Sync Rule List To JSON", body)
+        self.assertIn("Sync Builder To Source", body)
+        self.assertIn("Advanced Source", body)
         self.assertIn("Readable Response", body)
+        self.assertIn("Save Dialogue", body)
+        self.assertIn("Save Readable", body)
         self.assertIn("/api/content", body)
 
 

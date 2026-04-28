@@ -168,7 +168,7 @@ class CmdBraveLogout(COMMAND_DEFAULT_CLASS):
 
     key = "logout"
     aliases = ["log out"]
-    locks = "cmd:pperm(Player) and is_ooc()"
+    locks = "cmd:pperm(Player)"
     help_category = "General"
     account_caller = True
 
@@ -208,7 +208,7 @@ class CmdBraveCreate(COMMAND_DEFAULT_CLASS):
 
     key = "charcreate"
     aliases = ["create", "new", "chargen"]
-    locks = "cmd:pperm(Player) and is_ooc()"
+    locks = "cmd:pperm(Player)"
     help_category = "General"
     account_caller = True
 
@@ -242,7 +242,7 @@ class CmdBraveDelete(COMMAND_DEFAULT_CLASS):
 
     key = "chardelete"
     aliases = ["delete"]
-    locks = "cmd:pperm(Player) and is_ooc()"
+    locks = "cmd:pperm(Player)"
     help_category = "General"
     account_caller = True
 

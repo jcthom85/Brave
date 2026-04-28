@@ -14,6 +14,19 @@ ENEMY_TEMPLATES = {
         "silver": (0, 1),
         "loot": [{"item": "thorn_rat_tail", "chance": 0.8}],
     },
+    "tutorial_thorn_rat": {
+        "name": "Yard Thorn Rat",
+        "tags": ["beast", "rat", "tutorial"],
+        "max_hp": 28,
+        "attack_power": 3,
+        "armor": 0,
+        "accuracy": 68,
+        "dodge": 5,
+        "xp": 8,
+        "desc": "A burr-matted yard rat penned for training, still mean enough to make a lesson stick.",
+        "silver": (0, 0),
+        "loot": [],
+    },
     "road_wolf": {
         "name": "Road Wolf",
         "tags": ["wolf", "beast"],
@@ -82,12 +95,12 @@ ENEMY_TEMPLATES = {
     "ruk_fence_cutter": {
         "name": "Ruk the Fence-Cutter",
         "tags": ["goblin", "boss", "ruk", "raider"],
-        "max_hp": 84,
-        "attack_power": 14,
-        "armor": 4,
-        "accuracy": 72,
+        "max_hp": 190,
+        "attack_power": 28,
+        "armor": 5,
+        "accuracy": 74,
         "dodge": 8,
-        "xp": 90,
+        "xp": 55,
         "desc": "A broad goblin brute in stolen harness, gripping the jagged axe that gave him his name.",
         "silver": (10, 14),
         "loot": [
@@ -713,13 +726,13 @@ ROOM_ENCOUNTERS = {
             "key": "yard_scuttle",
             "title": "Yard Scuttle",
             "intro": "Straw erupts under the rail and a thorn rat bolts straight at the nearest warm ankle.",
-            "enemies": ["thorn_rat"],
+            "enemies": ["tutorial_thorn_rat"],
         },
         {
             "key": "bin_raider",
             "title": "Bin Raider",
             "intro": "A burr-matted rat launches itself out of a feed bin with all the confidence of a creature that has never once paid for grain.",
-            "enemies": ["thorn_rat"],
+            "enemies": ["tutorial_thorn_rat"],
         },
     ],
     "brambleford_rat_and_kettle_cellar": [
@@ -1186,13 +1199,13 @@ ROOM_ENCOUNTERS = {
         {
             "key": "trailhead_wolf",
             "title": "A Roadside Wolf",
-            "intro": "A road wolf slips from the brush and tests your nerve.",
+            "intro": "A road wolf slips from the brush with cart mud on its legs and tests your nerve.",
             "enemies": ["road_wolf"],
         },
         {
             "key": "trailhead_rats",
             "title": "Thorn Rat Scatter",
-            "intro": "A pair of thorn rats spill out from a ditch, all teeth and burr-matted fur.",
+            "intro": "A pair of thorn rats spill out from a ditch near torn canvas, all teeth and burr-matted fur.",
             "enemies": ["thorn_rat", "thorn_rat"],
         },
         {
@@ -1206,19 +1219,19 @@ ROOM_ENCOUNTERS = {
         {
             "key": "fencebreakers",
             "title": "Fencebreakers",
-            "intro": "Two goblins are still at the fence line, hacking loose boards for spite or firewood.",
+            "intro": "Two goblins are still at the fence line, hacking loose boards and stacking them like someone is waiting for the next load.",
             "enemies": ["goblin_sneak", "goblin_cutter"],
         },
         {
             "key": "wolf_and_raider",
             "title": "Mud and Teeth",
-            "intro": "A goblin raider and a hungry wolf have both decided this stretch of road belongs to them.",
+            "intro": "A goblin raider jerks a cut harness from the mud just as a hungry wolf slips out beside him, both of them too comfortable on Brambleford's road.",
             "enemies": ["road_wolf", "goblin_cutter"],
         },
         {
             "key": "stone_and_knife",
             "title": "Stone and Knife",
-            "intro": "A goblin slinger peppers the road with stolen stones while a cutter rushes in behind him.",
+            "intro": "A goblin slinger peppers the road with stolen stones while a cutter rushes in behind him, blade still nicked with fence sap.",
             "enemies": ["goblin_slinger", "goblin_cutter"],
         },
     ],
@@ -1240,7 +1253,7 @@ ROOM_ENCOUNTERS = {
         {
             "key": "ruks_stand",
             "title": "Ruk the Fence-Cutter",
-            "intro": "A heavy goblin rises from behind the chopped rails and drags a jagged axe through the dirt.",
+            "intro": "A heavy goblin rises from behind the chopped rails, lantern glass grit crunching under one boot as he drags a jagged axe through the dirt.",
             "enemies": ["ruk_fence_cutter"],
         }
     ],

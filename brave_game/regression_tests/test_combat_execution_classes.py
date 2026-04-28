@@ -88,6 +88,41 @@ class ClassExecutionTests(unittest.TestCase):
         self.assertTrue(messages[0].startswith("|cMarsh Hound uses Hamstring Bite!|n"))
         self.assertEqual("Marsh Hound misses Raider.", messages[1])
 
+    def test_cleric_sanctuary_handles_companion_allies(self):
+        cleric = DummyFighter(1, "Tamsin", "cleric")
+        ally = DummyFighter(2, "Peep", "warrior")
+        companion = {
+            "kind": "companion",
+            "id": "c1",
+            "key": "Marsh Hound",
+            "hp": 8,
+            "max_hp": 20,
+        }
+        states = {}
+        healed = []
+        encounter = SimpleNamespace(
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: None),
+            _get_participant_state=lambda actor: states.setdefault(str(actor.get("id") if isinstance(actor, dict) else actor.id), {"guard": 0}),
+            _save_participant_state=lambda actor, state: states.__setitem__(str(actor.get("id") if isinstance(actor, dict) else actor.id), state),
+            _heal_character=lambda source, target, amount, heal_type="healing": healed.append((target, amount, heal_type)),
+        )
+
+        execute_combat_ability(
+            encounter,
+            cleric,
+            "sanctuary",
+            "Sanctuary",
+            cleric,
+            cleric.db.brave_derived_stats,
+            10,
+            [cleric, ally, companion],
+            [],
+        )
+
+        self.assertIn("c1", states)
+        self.assertGreater(states["c1"]["guard"], 0)
+        self.assertTrue(any(target is companion for target, _amount, _heal_type in healed))
+
     def test_enemy_special_announces_move_name(self):
         messages = []
         target = DummyFighter(2, "Peep", "warrior")
@@ -104,6 +139,7 @@ class ClassExecutionTests(unittest.TestCase):
             _get_effective_derived=lambda actor: dict(actor.db.brave_derived_stats),
             _roll_hit=lambda accuracy, dodge: False,
             _emit_miss_fx=lambda source, target: None,
+            _record_telegraph_outcome=lambda current_enemy, outcome, **kwargs: BraveEncounter._record_telegraph_outcome(encounter, current_enemy, outcome, **kwargs),
         )
 
         BraveEncounter._execute_enemy_turn(encounter, enemy)

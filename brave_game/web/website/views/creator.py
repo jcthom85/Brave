@@ -40,7 +40,7 @@ def creator_world_editor(request):
         {
             "api_root": "/api/content",
             "reference_domain": "rooms",
-            "page_title": "Brave Creator: World Editor",
+            "page_title": "Brave Creator: World Builder",
         },
     )
 
@@ -55,7 +55,7 @@ def creator_quest_editor(request):
         {
             "api_root": "/api/content",
             "reference_domain": "quests",
-            "page_title": "Brave Creator: Quest Editor",
+            "page_title": "Brave Creator: Quest Builder",
         },
     )
 
@@ -70,7 +70,7 @@ def creator_dialogue_editor(request):
         {
             "api_root": "/api/content",
             "reference_domain": "entities",
-            "page_title": "Brave Creator: Dialogue Editor",
+            "page_title": "Brave Creator: Dialogue Builder",
         },
     )
 
@@ -85,7 +85,7 @@ def creator_encounter_editor(request):
         {
             "api_root": "/api/content",
             "reference_domain": "encounters",
-            "page_title": "Brave Creator: Encounter Editor",
+            "page_title": "Brave Creator: Encounter Builder",
         },
     )
 
@@ -100,7 +100,7 @@ def creator_item_editor(request):
         {
             "api_root": "/api/content",
             "reference_domain": "items",
-            "page_title": "Brave Creator: Item Editor",
+            "page_title": "Brave Creator: Item Builder",
         },
     )
 
@@ -115,6 +115,6 @@ def creator_character_editor(request):
         {
             "api_root": "/api/content",
             "reference_domain": "classes",
-            "page_title": "Brave Creator: Character Editor",
+            "page_title": "Brave Creator: Character Builder",
         },
     )

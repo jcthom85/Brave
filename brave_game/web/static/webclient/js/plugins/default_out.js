@@ -49,13 +49,18 @@ let defaultout_plugin = (function () {
     var currentRoomSceneData = null;
     var currentRoomFeedEntries = [];
     var currentRoomVoiceBubbles = [];
+    var currentWelcomePages = [];
+    var currentWelcomePageIndex = 0;
     var currentRoomVoiceBubbleTimers = {};
+    var currentRoomVoiceBubbleRemovalTimers = {};
     var currentRoomVoiceBubbleMarkup = {
         desktop: "",
+        self: "",
         mobile: "",
     };
     var currentRoomVoiceBubbleActive = {
         desktop: false,
+        self: false,
         mobile: false,
     };
     var nextRoomVoiceBubbleId = 1;
@@ -80,6 +85,7 @@ let defaultout_plugin = (function () {
     var currentFishingGame = null;
     var currentFishingAnimationFrame = null;
     var currentConnectionScreen = "menu";
+    var braveGameLoaded = false;
     var suppressBrowserClickUntil = 0;
     var allowNextRoomRefreshNavigationUntil = 0;
     var ENABLE_ROOM_SWIPE_NAV = false;
@@ -110,8 +116,12 @@ let defaultout_plugin = (function () {
     var combatViewTransitionActive = false;
     var ROOM_VOICE_SPEECH_LIMIT = 2;
     var ROOM_VOICE_EMOTE_LIMIT = 1;
-    var ROOM_VOICE_SPEECH_DURATION_MS = 2600;
-    var ROOM_VOICE_EMOTE_DURATION_MS = 1800;
+    var ROOM_VOICE_THREAT_LIMIT = 1;
+    var ROOM_VOICE_SELF_DURATION_MS = 5000;
+    var ROOM_VOICE_DISMISS_ANIMATION_MS = 220;
+    var ROOM_VOICE_SPEECH_DURATION_MS = 60000;
+    var ROOM_VOICE_EMOTE_DURATION_MS = 30000;
+    var ROOM_VOICE_THREAT_DURATION_MS = 60000;
     var currentVideoSettings = null;
     var COMBAT_IMPACT_RGB = {
         damage: "199, 55, 44",
@@ -605,6 +615,31 @@ let defaultout_plugin = (function () {
         return String(speaker || "").trim().toLowerCase();
     };
 
+    var isSelfRoomVoiceBubble = function (bubble) {
+        if (!bubble) {
+            return false;
+        }
+        var speakerKey = getRoomVoiceBubbleSpeakerKey(bubble.speaker);
+        var line = String(bubble.line || "").trim().toLowerCase();
+        return speakerKey === "you" || line.indexOf("you ") === 0;
+    };
+
+    var getRoomVoiceBubbleDurationMs = function (bubble) {
+        if (!bubble) {
+            return ROOM_VOICE_SPEECH_DURATION_MS;
+        }
+        if (isSelfRoomVoiceBubble(bubble)) {
+            return ROOM_VOICE_SELF_DURATION_MS;
+        }
+        if (bubble.category === "emote") {
+            return ROOM_VOICE_EMOTE_DURATION_MS;
+        }
+        if (bubble.category === "threat") {
+            return ROOM_VOICE_THREAT_DURATION_MS;
+        }
+        return ROOM_VOICE_SPEECH_DURATION_MS;
+    };
+
     var clearRoomVoiceBubbleTimer = function (bubbleId) {
         if (!currentRoomVoiceBubbleTimers[bubbleId]) {
             return;
@@ -613,10 +648,27 @@ let defaultout_plugin = (function () {
         delete currentRoomVoiceBubbleTimers[bubbleId];
     };
 
+    var clearRoomVoiceBubbleRemovalTimer = function (bubbleId) {
+        if (!currentRoomVoiceBubbleRemovalTimers[bubbleId]) {
+            return;
+        }
+        window.clearTimeout(currentRoomVoiceBubbleRemovalTimers[bubbleId]);
+        delete currentRoomVoiceBubbleRemovalTimers[bubbleId];
+    };
+
     var buildRoomVoiceBubbleLayerMarkup = function (options) {
         var opts = options || {};
         var active = currentRoomVoiceBubbles
             .slice()
+            .filter(function (bubble) {
+                if (opts.selfOnly) {
+                    return isSelfRoomVoiceBubble(bubble);
+                }
+                if (opts.excludeSelf) {
+                    return !isSelfRoomVoiceBubble(bubble);
+                }
+                return true;
+            })
             .sort(function (left, right) {
                 return (right.updated_at || 0) - (left.updated_at || 0);
             });
@@ -626,18 +678,31 @@ let defaultout_plugin = (function () {
         var emotes = active.filter(function (bubble) {
             return bubble && bubble.category === "emote";
         });
-        var visibleSpeech = speech.slice(0, ROOM_VOICE_SPEECH_LIMIT);
-        var visibleEmotes = visibleSpeech.length ? [] : emotes.slice(0, ROOM_VOICE_EMOTE_LIMIT);
-        var visible = visibleSpeech.concat(visibleEmotes);
+        var threats = active.filter(function (bubble) {
+            return bubble && bubble.category === "threat";
+        });
+        var visibleThreats = threats.slice(0, ROOM_VOICE_THREAT_LIMIT);
+        var visibleSpeech = visibleThreats.length ? [] : speech.slice(0, ROOM_VOICE_SPEECH_LIMIT);
+        var visibleEmotes = (visibleThreats.length || visibleSpeech.length) ? [] : emotes.slice(0, ROOM_VOICE_EMOTE_LIMIT);
+        var visible = visibleThreats.concat(visibleSpeech, visibleEmotes);
         var overflow = Math.max(0, active.length - visible.length);
         if (!visible.length) {
             return "";
         }
         return (
-            "<div class='brave-room-voice-layer" + (opts.mobile ? " brave-room-voice-layer--mobile" : "") + "' aria-hidden='true'>"
+            "<div class='brave-room-voice-layer"
+            + (opts.mobile ? " brave-room-voice-layer--mobile" : "")
+            + (opts.selfOnly ? " brave-room-voice-layer--self" : "")
+            + "' aria-hidden='true'>"
             + visible.map(function (bubble, index) {
                 var bubbleClass = "brave-room-voice-bubble brave-room-voice-bubble--" + escapeHtml(bubble.category || "speech");
-                if (index === 0 && bubble.category === "speech") {
+                if (isSelfRoomVoiceBubble(bubble)) {
+                    bubbleClass += " brave-room-voice-bubble--self";
+                }
+                if (bubble && bubble.dismissing) {
+                    bubbleClass += " brave-room-voice-bubble--dismissing";
+                }
+                if (index === 0 && (bubble.category === "speech" || bubble.category === "threat")) {
                     bubbleClass += " brave-room-voice-bubble--lead";
                 }
                 return (
@@ -656,11 +721,80 @@ let defaultout_plugin = (function () {
         );
     };
 
+    var syncRoomVoiceBubblePositions = function () {
+        var overlay = document.getElementById("brave-room-voice-overlay-desktop");
+        if (!overlay || !currentRoomVoiceBubbles.length) return;
+        
+        currentRoomVoiceBubbles.forEach(function (bubble) {
+            if (isSelfRoomVoiceBubble(bubble)) {
+                return;
+            }
+            var speakerName = escapeHtml(bubble.speaker || "");
+            var target = null;
+            if (speakerName) {
+                try {
+                    var safeSelector = speakerName.replace(/"/g, '\\"');
+                    // Prefer the main view's vicinity section first, then fallback to the rail panel
+                    target = document.querySelector(".brave-view--room .brave-view__section--vicinity [data-brave-speaker=\"" + safeSelector + "\"]");
+                    if (!target || target.offsetWidth === 0) {
+                        target = document.querySelector("#scene-vicinity-panel [data-brave-speaker=\"" + safeSelector + "\"]");
+                    }
+                } catch (e) {}
+            }
+            
+            var bubbleEl = overlay.querySelector("[data-brave-room-voice-id='" + bubble.id + "']");
+            if (target && bubbleEl && target.offsetWidth > 0) {
+                var targetRect = target.getBoundingClientRect();
+                var scrollContainer = target.closest(".brave-view__list") || target.closest(".scene-card__list") || target.closest(".scene-rail__panel");
+                var isHidden = false;
+                
+                if (scrollContainer) {
+                    var containerRect = scrollContainer.getBoundingClientRect();
+                    // Check if the card has scrolled completely out of view
+                    if (targetRect.bottom < containerRect.top || targetRect.top > containerRect.bottom) {
+                        isHidden = true;
+                    }
+                }
+                
+                bubbleEl.style.position = "fixed";
+                bubbleEl.style.top = (targetRect.top - bubbleEl.offsetHeight - 12) + "px";
+                bubbleEl.style.left = targetRect.left + "px";
+                bubbleEl.style.width = targetRect.width + "px";
+                bubbleEl.style.bottom = "auto";
+                bubbleEl.style.right = "auto";
+                bubbleEl.style.zIndex = "100";
+                
+                if (isHidden) {
+                    bubbleEl.style.opacity = "0";
+                    bubbleEl.style.pointerEvents = "none";
+                    bubbleEl.style.transition = "opacity 0.15s ease-out";
+                } else {
+                    bubbleEl.style.opacity = "1";
+                    bubbleEl.style.pointerEvents = "auto";
+                    bubbleEl.style.transition = "opacity 0.15s ease-in";
+                }
+            } else if (bubbleEl) {
+                 bubbleEl.style.position = "";
+                 bubbleEl.style.top = "";
+                 bubbleEl.style.bottom = "";
+                 bubbleEl.style.right = "";
+                 bubbleEl.style.left = "";
+                 bubbleEl.style.width = "";
+                 bubbleEl.style.zIndex = "";
+                 bubbleEl.style.opacity = "";
+                 bubbleEl.style.pointerEvents = "";
+                 bubbleEl.style.transition = "";
+            }
+        });
+    };
+
     var syncRoomVoiceBubbleHosts = function () {
         var railHost = document.getElementById("brave-room-voice-overlay-desktop");
         if (railHost) {
-            var desktopMarkup = buildRoomVoiceBubbleLayerMarkup({ mobile: false });
-            var desktopActive = !!currentRoomVoiceBubbles.length;
+            var desktopMarkup = buildRoomVoiceBubbleLayerMarkup({ mobile: false, excludeSelf: true });
+            var desktopActive = currentRoomVoiceBubbles.some(function (bubble) {
+                return !isSelfRoomVoiceBubble(bubble);
+            });
             if (currentRoomVoiceBubbleMarkup.desktop !== desktopMarkup) {
                 railHost.innerHTML = desktopMarkup;
                 currentRoomVoiceBubbleMarkup.desktop = desktopMarkup;
@@ -669,6 +803,22 @@ let defaultout_plugin = (function () {
                 railHost.setAttribute("aria-hidden", desktopActive ? "false" : "true");
                 railHost.classList.toggle("brave-room-voice-overlay--active", desktopActive);
                 currentRoomVoiceBubbleActive.desktop = desktopActive;
+            }
+        }
+        var selfHost = document.getElementById("brave-room-voice-overlay-self");
+        if (selfHost) {
+            var selfMarkup = buildRoomVoiceBubbleLayerMarkup({ mobile: false, selfOnly: true });
+            var selfActive = currentRoomVoiceBubbles.some(function (bubble) {
+                return isSelfRoomVoiceBubble(bubble);
+            });
+            if (currentRoomVoiceBubbleMarkup.self !== selfMarkup) {
+                selfHost.innerHTML = selfMarkup;
+                currentRoomVoiceBubbleMarkup.self = selfMarkup;
+            }
+            if (currentRoomVoiceBubbleActive.self !== selfActive) {
+                selfHost.setAttribute("aria-hidden", selfActive ? "false" : "true");
+                selfHost.classList.toggle("brave-room-voice-overlay--active", selfActive);
+                currentRoomVoiceBubbleActive.self = selfActive;
             }
         }
         var mobileHost = document.getElementById("brave-room-voice-overlay-mobile");
@@ -685,10 +835,77 @@ let defaultout_plugin = (function () {
                 currentRoomVoiceBubbleActive.mobile = mobileActive;
             }
         }
+        
+        syncRoomVoiceBubblePositions();
     };
+
+    window.addEventListener("scroll", syncRoomVoiceBubblePositions, true);
+    window.addEventListener("resize", syncRoomVoiceBubblePositions);
 
     var removeRoomVoiceBubble = function (bubbleId) {
         clearRoomVoiceBubbleTimer(bubbleId);
+        var bubble = null;
+        for (var i = 0; i < currentRoomVoiceBubbles.length; i += 1) {
+            if (currentRoomVoiceBubbles[i] && currentRoomVoiceBubbles[i].id === bubbleId) {
+                bubble = currentRoomVoiceBubbles[i];
+                break;
+            }
+        }
+        if (!bubble) {
+            clearRoomVoiceBubbleRemovalTimer(bubbleId);
+            return;
+        }
+        if (bubble.dismissing) {
+            return;
+        }
+        bubble.dismissing = true;
+        bubble.dismiss_started_at = Date.now();
+        clearRoomVoiceBubbleRemovalTimer(bubbleId);
+        syncRoomVoiceBubbleHosts();
+        currentRoomVoiceBubbleRemovalTimers[bubbleId] = window.setTimeout(function () {
+            currentRoomVoiceBubbles = currentRoomVoiceBubbles.filter(function (entry) {
+                return entry && entry.id !== bubbleId;
+            });
+            clearRoomVoiceBubbleRemovalTimer(bubbleId);
+            syncRoomVoiceBubbleHosts();
+        }, ROOM_VOICE_DISMISS_ANIMATION_MS);
+    };
+
+    var startRoomVoiceBubbleDismiss = function (bubbleId) {
+        var bubble = null;
+        for (var i = 0; i < currentRoomVoiceBubbles.length; i += 1) {
+            if (currentRoomVoiceBubbles[i] && currentRoomVoiceBubbles[i].id === bubbleId) {
+                bubble = currentRoomVoiceBubbles[i];
+                break;
+            }
+        }
+        if (!bubble) {
+            return;
+        }
+        removeRoomVoiceBubble(bubbleId);
+    };
+
+    var dismissRoomVoiceBubble = function (bubbleId) {
+        clearRoomVoiceBubbleTimer(bubbleId);
+        clearRoomVoiceBubbleRemovalTimer(bubbleId);
+        startRoomVoiceBubbleDismiss(bubbleId);
+    };
+
+    var dismissRoomVoiceBubblesForSpeaker = function (speaker) {
+        var speakerKey = getRoomVoiceBubbleSpeakerKey(speaker);
+        if (!speakerKey) {
+            return;
+        }
+        currentRoomVoiceBubbles.slice().forEach(function (bubble) {
+            if (bubble && getRoomVoiceBubbleSpeakerKey(bubble.speaker) === speakerKey) {
+                dismissRoomVoiceBubble(bubble.id);
+            }
+        });
+    };
+
+    var purgeRoomVoiceBubble = function (bubbleId) {
+        clearRoomVoiceBubbleTimer(bubbleId);
+        clearRoomVoiceBubbleRemovalTimer(bubbleId);
         currentRoomVoiceBubbles = currentRoomVoiceBubbles.filter(function (bubble) {
             return bubble && bubble.id !== bubbleId;
         });
@@ -700,12 +917,12 @@ let defaultout_plugin = (function () {
         var duration = ROOM_VOICE_SPEECH_DURATION_MS;
         for (var i = 0; i < currentRoomVoiceBubbles.length; i += 1) {
             if (currentRoomVoiceBubbles[i] && currentRoomVoiceBubbles[i].id === bubbleId) {
-                duration = currentRoomVoiceBubbles[i].category === "emote" ? ROOM_VOICE_EMOTE_DURATION_MS : ROOM_VOICE_SPEECH_DURATION_MS;
+                duration = getRoomVoiceBubbleDurationMs(currentRoomVoiceBubbles[i]);
                 break;
             }
         }
         currentRoomVoiceBubbleTimers[bubbleId] = window.setTimeout(function () {
-            removeRoomVoiceBubble(bubbleId);
+            startRoomVoiceBubbleDismiss(bubbleId);
         }, duration);
     };
 
@@ -713,20 +930,27 @@ let defaultout_plugin = (function () {
         Object.keys(currentRoomVoiceBubbleTimers).forEach(function (bubbleId) {
             clearRoomVoiceBubbleTimer(bubbleId);
         });
+        Object.keys(currentRoomVoiceBubbleRemovalTimers).forEach(function (bubbleId) {
+            clearRoomVoiceBubbleRemovalTimer(bubbleId);
+        });
         currentRoomVoiceBubbles = [];
         currentRoomVoiceBubbleMarkup.desktop = "";
+        currentRoomVoiceBubbleMarkup.self = "";
         currentRoomVoiceBubbleMarkup.mobile = "";
-        currentRoomVoiceBubbleActive.desktop = false;
-        currentRoomVoiceBubbleActive.mobile = false;
+        currentRoomVoiceBubbleActive.desktop = null;
+        currentRoomVoiceBubbleActive.self = null;
+        currentRoomVoiceBubbleActive.mobile = null;
         syncRoomVoiceBubbleHosts();
     };
 
     var recordRoomVoiceBubble = function (text, category) {
-        if ((category !== "speech" && category !== "emote") || isCombatUiActive() || !isRoomLikeView(getCurrentRoomView())) {
+        if ((category !== "speech" && category !== "emote" && category !== "threat") || isCombatUiActive() || !isRoomLikeView(getCurrentRoomView())) {
             return;
         }
-        var preview = extractRoomVoicePreview(text, category);
-        if (!preview || (preview.category !== "speech" && preview.category !== "emote") || !preview.line) {
+        var preview = category === "threat"
+            ? { speaker: "Danger", line: String(text || "").replace(/\s+/g, " ").trim(), category: "threat" }
+            : extractRoomVoicePreview(text, category);
+        if (!preview || (preview.category !== "speech" && preview.category !== "emote" && preview.category !== "threat") || !preview.line) {
             return;
         }
         var now = Date.now();
@@ -899,6 +1123,27 @@ let defaultout_plugin = (function () {
         );
     };
 
+    var isStructuredMenuViewActive = function () {
+        return !!(
+            currentViewData
+            && !isRoomLikeView(currentViewData)
+            && currentViewData.variant !== "connection"
+            && currentViewData.variant !== "chargen"
+            && currentViewData.variant !== "account"
+            && currentViewData.variant !== "combat"
+            && currentViewData.variant !== "combat-result"
+        );
+    };
+
+    var canRenderSceneRailNow = function () {
+        return !!(
+            currentViewData
+            && isRoomLikeView(currentViewData)
+            && document.body
+            && document.body.getAttribute("data-brave-scene") === "explore"
+        );
+    };
+
     var shouldAllowCurrentRoomRefreshNavigation = function () {
         return allowNextRoomRefreshNavigationUntil > Date.now();
     };
@@ -1022,7 +1267,13 @@ let defaultout_plugin = (function () {
         if (currentPickerData || isCombatUiActive()) {
             return false;
         }
-        if (document.getElementById("brave-activity-overlay") || document.getElementById("brave-fishing-minigame")) {
+        if (
+            document.body.classList.contains("brave-objectives-active")
+            || document.body.classList.contains("brave-picker-active")
+            || document.body.classList.contains("brave-activity-active")
+            || document.body.classList.contains("brave-fishing-active")
+            || document.body.classList.contains("brave-arcade-overlay-active")
+        ) {
             return false;
         }
         if (!getCurrentRoomView()) {
@@ -2888,7 +3139,6 @@ let defaultout_plugin = (function () {
             bodyClass += " brave-mobile-sheet__body--nearby";
             bodyMarkup =
                 "<div class='brave-mobile-sheet__section'>"
-                + "<div class='brave-mobile-sheet__quest-title'>Nearby</div>"
                 + buildRoomNearbyMarkup(roomView, { mobile: true })
                 + "</div>";
         } else if (tab === "menu") {
@@ -3084,14 +3334,67 @@ let defaultout_plugin = (function () {
         return true;
     };
 
+    var renderQuestCompleteOverlay = function (payload) {
+        console.log("DEBUG: renderQuestCompleteOverlay called with", payload);
+        if (!payload || !payload.title) {
+            return;
+        }
+
+        var overlay = document.createElement("div");
+        overlay.className = "brave-quest-complete-overlay";
+
+        var rewardItems = [];
+        var rewards = payload.rewards || {};
+        if (rewards.xp) rewardItems.push({ label: "Experience", value: "+" + rewards.xp });
+        if (rewards.silver) rewardItems.push({ label: "Silver", value: "+" + rewards.silver });
+
+        overlay.innerHTML =
+            "<div class='brave-quest-complete-overlay__panel'>"
+            + "<div class='brave-quest-complete-overlay__eyebrow'>Quest Complete</div>"
+            + "<div class='brave-quest-complete-overlay__title'>" + escapeHtml(payload.title) + "</div>"
+            + (rewardItems.length ?
+                "<div class='brave-quest-complete-overlay__rewards'>"
+                + rewardItems.map(function (reward) {
+                    return (
+                        "<div class='brave-quest-complete-overlay__reward'>"
+                        + "<span class='brave-quest-complete-overlay__reward-label'>" + escapeHtml(reward.label) + "</span>"
+                        + "<span class='brave-quest-complete-overlay__reward-value'>" + escapeHtml(reward.value) + "</span>"
+                        + "</div>"
+                    );
+                }).join("")
+                + "</div>"
+                : "")
+            + "</div>";
+
+        document.body.appendChild(overlay);
+
+        // Trigger entrance animation with a small delay for better browser reliability
+        window.setTimeout(function () {
+            overlay.classList.add("brave-quest-complete-overlay--active");
+        }, 50);
+
+        var braveAudio = getBraveAudio();
+        if (braveAudio && typeof braveAudio.handleUiAction === "function") {
+            braveAudio.handleUiAction("success");
+        }
+
+        // Automatic dismissal
+        window.setTimeout(function () {
+            overlay.classList.remove("brave-quest-complete-overlay--active");
+            window.setTimeout(function () {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+            }, 600);
+        }, 5000);
+    };
+
     var buildAudioSettingsPicker = function () {
         return {
             picker_id: "audio-settings",
             picker_kind: "audio-settings",
             title: "Audio",
-            title_icon: "graphic_eq",
-            subtitle: "Layered ambience, music, and effects for Brave.",
-            body: ["Adjust the layered ambience, music, and effects mix."]
+            title_icon: "graphic_eq"
         };
     };
 
@@ -3100,34 +3403,16 @@ let defaultout_plugin = (function () {
             picker_id: "video-settings",
             picker_kind: "video-settings",
             title: "Video",
-            title_icon: "tv",
-            body: ["Display scale, fullscreen, and motion controls."]
+            title_icon: "tv"
         };
     };
 
     var buildAccessibilitySettingsPicker = function () {
         return {
             picker_id: "accessibility-settings",
-            picker_kind: "menu",
+            picker_kind: "accessibility-settings",
             title: "Accessibility",
-            title_icon: "accessibility_new",
-            body: [
-                "Accessibility settings are the next settings pass.",
-                "Text size, contrast presets, and motion reduction will live here."
-            ]
-        };
-    };
-
-    var buildInterfaceSettingsPicker = function () {
-        return {
-            picker_id: "interface-settings",
-            picker_kind: "menu",
-            title: "Interface",
-            title_icon: "palette",
-            body: ["Visual polish and interface preferences live here."],
-            options: [
-                { label: "Theme", icon: "snowflake", command: "theme", meta: "Swap the active visual palette." }
-            ]
+            title_icon: "accessibility_new"
         };
     };
 
@@ -3140,8 +3425,7 @@ let defaultout_plugin = (function () {
             options: [
                 { label: "Video", icon: "tv", picker: buildVideoSettingsPicker() },
                 { label: "Audio", icon: "graphic_eq", picker: buildAudioSettingsPicker() },
-                { label: "Accessibility", icon: "accessibility_new", picker: buildAccessibilitySettingsPicker() },
-                { label: "Interface", icon: "palette", picker: buildInterfaceSettingsPicker() }
+                { label: "Accessibility", icon: "accessibility_new", picker: buildAccessibilitySettingsPicker() }
             ]
         };
     };
@@ -3209,15 +3493,6 @@ let defaultout_plugin = (function () {
 
     var renderVideoSettingsPickerMarkup = function (pickerData, panelClass, backdropClass, panelStyle) {
         var videoSettings = getVideoSettings();
-        var motionSource = videoSettings.reduced_motion
-            ? "Brave setting"
-            : ((window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? "system preference" : "full");
-        var statusLines = [
-            "Fullscreen: " + (isFullscreenActive() ? "active" : "windowed"),
-            "Reduced motion: " + (prefersReducedMotion() ? "on" : "off"),
-            "Motion source: " + motionSource,
-            "UI scale: " + formatScalePercent(videoSettings.ui_scale)
-        ];
 
         return (
             "<div class='" + backdropClass + "' data-brave-picker-close='1'></div>"
@@ -3232,14 +3507,9 @@ let defaultout_plugin = (function () {
             + "</button>"
             + "</div>"
             + "</div>"
-            + "<div class='brave-picker-sheet__bodycopy'>"
-            + statusLines.map(function (line) {
-                return "<div class='brave-picker-sheet__bodyline'>" + escapeHtml(line) + "</div>";
-            }).join("")
-            + "</div>"
             + "<div class='brave-audio-settings'>"
             + "<div class='brave-audio-settings__toggles'>"
-            + "<button type='button' class='brave-picker-sheet__option brave-audio-settings__toggle brave-click' data-brave-video-action='fullscreen'>"
+            + "<button type='button' class='brave-picker-sheet__option brave-audio-settings__toggle brave-click' data-brave-video-action='fullscreen' aria-pressed='" + (isFullscreenActive() ? "true" : "false") + "'>"
             + "<span class='brave-picker-sheet__option-icon brave-audio-settings__toggle-indicator'>" + icon(isFullscreenActive() ? "fullscreen_exit" : "fullscreen") + "</span>"
             + "<span class='brave-picker-sheet__option-body'><span class='brave-picker-sheet__option-label'>" + escapeHtml(isFullscreenActive() ? "Exit fullscreen" : "Enter fullscreen") + "</span></span>"
             + "</button>"
@@ -3257,6 +3527,48 @@ let defaultout_plugin = (function () {
             + "<span class='brave-audio-settings__slider-label'>"
             + "<span class='brave-audio-settings__slider-icon'>" + icon("format_size") + "</span>"
             + "<span>UI Scale</span>"
+            + "</span>"
+            + "<input class='brave-audio-settings__slider' type='range' min='0.85' max='1.35' step='0.01' value='" + escapeHtml(String(videoSettings.ui_scale)) + "' data-brave-video-setting='ui_scale' data-brave-video-kind='range'>"
+            + "<span class='brave-audio-settings__slider-value'>" + escapeHtml(formatScalePercent(videoSettings.ui_scale)) + "</span>"
+            + "</label>"
+            + "</div>"
+            + "</div>"
+            + "</div>"
+        );
+    };
+
+    var renderAccessibilitySettingsPickerMarkup = function (pickerData, panelClass, backdropClass, panelStyle) {
+        var videoSettings = getVideoSettings();
+
+        return (
+            "<div class='" + backdropClass + "' data-brave-picker-close='1'></div>"
+            + "<div class='" + panelClass + "' role='dialog' aria-modal='true' aria-label='" + escapeHtml(pickerData.title || "Accessibility") + "'" + panelStyle + ">"
+            + "<div class='brave-picker-sheet__head'>"
+            + "<div class='brave-picker-sheet__titlebar'>"
+            + "<span class='brave-picker-sheet__title-icon'>" + icon(pickerData.title_icon || "accessibility_new") + "</span>"
+            + "<div class='brave-picker-sheet__title'>" + escapeHtml(pickerData.title || "Accessibility") + "</div>"
+            + "<button type='button' class='brave-picker-sheet__close brave-view__action brave-view__action--muted brave-view__back' data-brave-picker-close='1'>"
+            + icon("close", "brave-view__action-icon")
+            + "<span>Close</span>"
+            + "</button>"
+            + "</div>"
+            + "</div>"
+            + "<div class='brave-audio-settings'>"
+            + "<div class='brave-audio-settings__toggles'>"
+            + "<button type='button' class='brave-picker-sheet__option brave-audio-settings__toggle brave-click' data-brave-video-toggle='reduced_motion' aria-pressed='" + (videoSettings.reduced_motion ? "true" : "false") + "'>"
+            + "<span class='brave-picker-sheet__option-icon brave-audio-settings__toggle-indicator'>" + icon(prefersReducedMotion() ? "motion_photos_off" : "motion_photos_on") + "</span>"
+            + "<span class='brave-picker-sheet__option-body'><span class='brave-picker-sheet__option-label'>Reduce motion</span></span>"
+            + "</button>"
+            + "<button type='button' class='brave-picker-sheet__option brave-audio-settings__toggle brave-click' data-brave-video-action='reset'>"
+            + "<span class='brave-picker-sheet__option-icon brave-audio-settings__toggle-indicator'>" + icon("restart_alt") + "</span>"
+            + "<span class='brave-picker-sheet__option-body'><span class='brave-picker-sheet__option-label'>Reset accessibility</span></span>"
+            + "</button>"
+            + "</div>"
+            + "<div class='brave-audio-settings__sliders'>"
+            + "<label class='brave-audio-settings__slider-row'>"
+            + "<span class='brave-audio-settings__slider-label'>"
+            + "<span class='brave-audio-settings__slider-icon'>" + icon("format_size") + "</span>"
+            + "<span>Text Scale</span>"
             + "</span>"
             + "<input class='brave-audio-settings__slider' type='range' min='0.85' max='1.35' step='0.01' value='" + escapeHtml(String(videoSettings.ui_scale)) + "' data-brave-video-setting='ui_scale' data-brave-video-kind='range'>"
             + "<span class='brave-audio-settings__slider-value'>" + escapeHtml(formatScalePercent(videoSettings.ui_scale)) + "</span>"
@@ -3288,27 +3600,6 @@ let defaultout_plugin = (function () {
             }
         };
         var settingsState = state.settings || {};
-        var statusLines = [];
-        if (!state.supported) {
-            statusLines.push("Audio API unavailable in this browser.");
-        } else if (!state.unlocked) {
-            statusLines.push("Audio is waiting for a browser unlock gesture.");
-        } else {
-            statusLines.push("Audio unlocked and ready.");
-        }
-        if (!state.manifest_loaded) {
-            statusLines.push("Manifest still loading.");
-        }
-        statusLines.push("Device: " + (state.mobile ? "mobile" : "desktop"));
-        statusLines.push("Ambience: " + ((state.active_layers && state.active_layers.ambience) || "idle"));
-        statusLines.push("Music: " + ((state.active_layers && state.active_layers.music) || "idle"));
-        if (state.last_playback && state.last_playback.mode) {
-            statusLines.push("Last playback: " + state.last_playback.cue + " via " + state.last_playback.mode);
-        }
-        if (state.last_playback && state.last_playback.error) {
-            statusLines.push("Last error: " + state.last_playback.error);
-        }
-
         var sliders = [
             { key: "master", label: "Master", icon: "tune" },
             { key: "ambience", label: "Ambience", icon: "air" },
@@ -3329,11 +3620,6 @@ let defaultout_plugin = (function () {
             + "</button>"
             + "</div>"
             + (pickerData.subtitle ? "<div class='brave-picker-sheet__subtitle'>" + escapeHtml(pickerData.subtitle) + "</div>" : "")
-            + "</div>"
-            + "<div class='brave-picker-sheet__bodycopy'>"
-            + statusLines.map(function (line) {
-                return "<div class='brave-picker-sheet__bodyline'>" + escapeHtml(line) + "</div>";
-            }).join("")
             + "</div>"
             + "<div class='brave-audio-settings'>"
             + "<div class='brave-audio-settings__toggles'>"
@@ -3370,6 +3656,125 @@ let defaultout_plugin = (function () {
         );
     };
 
+    var toggleObjectives = function (force) {
+        var body = document.body;
+        if (!body) {
+            return;
+        }
+        var active = typeof force === "boolean" ? force : !body.classList.contains("brave-objectives-active");
+        body.classList.toggle("brave-objectives-active", active);
+        var sheet = document.getElementById("brave-objectives-sheet");
+        if (sheet) {
+            sheet.setAttribute("aria-hidden", String(!active));
+            if (!active) {
+                sheet.classList.remove("brave-objectives-sheet--tutorial");
+            }
+        }
+        if (!active) {
+            currentWelcomePages = [];
+            if (currentViewData && Array.isArray(currentViewData.welcome_pages)) {
+                currentViewData.welcome_pages = [];
+            }
+        }
+    };
+
+    var renderWelcomePage = function () {
+        var host = document.getElementById("brave-objectives-sheet");
+        if (!host || !currentWelcomePages.length) {
+            return;
+        }
+        host.classList.add("brave-objectives-sheet--tutorial");
+        var page = currentWelcomePages[currentWelcomePageIndex];
+        var isLast = currentWelcomePageIndex === currentWelcomePages.length - 1;
+
+        host.innerHTML =
+            "<div class='brave-objectives-sheet__backdrop brave-objectives-sheet__backdrop--welcome' data-brave-objectives-toggle='1'></div>"
+            + "<div class='brave-objectives-sheet__panel brave-objectives-sheet__panel--welcome' role='dialog' aria-modal='true'>"
+            + "<div class='brave-objectives-sheet__head'>"
+            + "<div class='brave-objectives-sheet__eyebrow'>Step " + (currentWelcomePageIndex + 1) + " of " + currentWelcomePages.length + "</div>"
+            + "<div class='brave-objectives-sheet__title'>" + escapeHtml(page.title) + "</div>"
+            + "</div>"
+            + "<div class='brave-objectives-sheet__body'>"
+            + "<div class='brave-objectives-sheet__welcome-hero'>"
+            + icon(page.icon || "auto_awesome", "brave-objectives-sheet__welcome-icon")
+            + "</div>"
+            + "<div class='brave-objectives-sheet__welcome-text'>" + escapeHtml(page.text) + "</div>"
+            + "</div>"
+            + "<div class='brave-objectives-sheet__foot'>"
+            + (currentWelcomePageIndex > 0 ? "<button type='button' class='brave-objectives-sheet__nav-btn brave-click' data-brave-welcome-prev='1'>Back</button>" : "<div></div>")
+            + "<button type='button' class='brave-objectives-sheet__nav-btn brave-objectives-sheet__nav-btn--primary brave-click' "
+            + (isLast ? "data-brave-objectives-toggle='1'" : "data-brave-welcome-next='1'") + ">"
+            + (isLast ? "Begin Adventure" : "Next")
+            + "</button>"
+            + "</div>"
+            + "</div>";
+    };
+
+    var renderObjectives = function (viewData) {
+        // console.log("DEBUG: renderObjectives called with", viewData);
+        var host = document.getElementById("brave-objectives-sheet");
+        if (!host) {
+            return;
+        }
+
+        if (viewData && Array.isArray(viewData.welcome_pages) && viewData.welcome_pages.length) {
+            currentWelcomePages = viewData.welcome_pages;
+            currentWelcomePageIndex = 0;
+            renderWelcomePage();
+            toggleObjectives(true);
+            return;
+        }
+
+        // If we are currently showing a welcome flow, DO NOT let anything clear it or update it
+        if (document.body.classList.contains("brave-objectives-active") && currentWelcomePages.length > 0) {
+            // console.log("DEBUG: skipping objective update because welcome flow is active");
+            return;
+        }
+
+        var objectives = viewData && viewData.guidance;
+        if (!Array.isArray(objectives) || !objectives.length) {
+            host.innerHTML = "";
+            host.setAttribute("aria-hidden", "true");
+            document.body.classList.remove("brave-objectives-active");
+            return;
+        }
+
+        var objectivesEyebrow = viewData && viewData.guidance_eyebrow ? viewData.guidance_eyebrow : "TUTORIAL";
+        var objectivesTitle = viewData && viewData.guidance_title ? viewData.guidance_title : (viewData.title || viewData.eyebrow || "Current Tasks");
+
+        host.classList.add("brave-objectives-sheet--tutorial");
+        host.innerHTML =
+            "<div class='brave-objectives-sheet__backdrop' data-brave-objectives-toggle='1'></div>"
+            + "<div class='brave-objectives-sheet__panel' role='dialog' aria-modal='true' aria-label='Current Objectives'>"
+            + "<div class='brave-objectives-sheet__head'>"
+            + "<div class='brave-objectives-sheet__eyebrow'>" + escapeHtml(objectivesEyebrow) + "</div>"
+            + "<div class='brave-objectives-sheet__title'>" + escapeHtml(objectivesTitle) + "</div>"
+            + "<button type='button' class='brave-objectives-sheet__close' data-brave-objectives-toggle='1'>"
+            + icon("close", "brave-objectives-sheet__close-icon")
+            + "<span>Close Guide</span>"
+            + "</button>"
+            + "</div>"
+            + "<div class='brave-objectives-sheet__body'>"
+            + objectives.map(function (entry) {
+                var text = Array.isArray(entry) ? entry[0] : String(entry);
+                var entryIcon = Array.isArray(entry) && entry[1] ? entry[1] : "info";
+                var isDone = entryIcon === "check_circle";
+                var doneClass = isDone ? " brave-objectives-sheet__entry--done" : "";
+                return (
+                    "<div class='brave-objectives-sheet__entry" + doneClass + "'>"
+                    + "<span class='brave-objectives-sheet__entry-icon-wrap'>"
+                    + icon(entryIcon, "brave-objectives-sheet__entry-icon")
+                    + "</span>"
+                    + "<span class='brave-objectives-sheet__entry-text'>" + escapeHtml(text) + "</span>"
+                    + "</div>"
+                );
+            }).join("")
+            + "</div>"
+            + "</div>";
+
+        toggleObjectives(true);
+    };
+
     var renderPickerSheet = function () {
         var host = document.getElementById("brave-picker-sheet");
         var pickerData = currentPickerData;
@@ -3386,7 +3791,16 @@ let defaultout_plugin = (function () {
         if (!host) {
             return;
         }
-        if (!pickerData || (!pickerOptions.length && !pickerBody.length && pickerData.picker_kind !== "audio-settings" && pickerData.picker_kind !== "video-settings")) {
+        if (
+            !pickerData
+            || (
+                !pickerOptions.length
+                && !pickerBody.length
+                && pickerData.picker_kind !== "audio-settings"
+                && pickerData.picker_kind !== "video-settings"
+                && pickerData.picker_kind !== "accessibility-settings"
+            )
+        ) {
             clearPickerSheet();
             return;
         }
@@ -3410,6 +3824,8 @@ let defaultout_plugin = (function () {
             host.innerHTML = renderAudioSettingsPickerMarkup(pickerData, panelClass, backdropClass, panelStyle);
         } else if (pickerData.picker_kind === "video-settings") {
             host.innerHTML = renderVideoSettingsPickerMarkup(pickerData, panelClass, backdropClass, panelStyle);
+        } else if (pickerData.picker_kind === "accessibility-settings") {
+            host.innerHTML = renderAccessibilitySettingsPickerMarkup(pickerData, panelClass, backdropClass, panelStyle);
         } else {
             host.innerHTML =
                 "<div class='" + backdropClass + "' data-brave-picker-close='1'></div>"
@@ -3467,7 +3883,16 @@ let defaultout_plugin = (function () {
                 || (!!pickerData.body && !Array.isArray(pickerData.body))
             )
         );
-        if (!pickerData || (!hasOptions && !hasBody && pickerData.picker_kind !== "audio-settings" && pickerData.picker_kind !== "video-settings")) {
+        if (
+            !pickerData
+            || (
+                !hasOptions
+                && !hasBody
+                && pickerData.picker_kind !== "audio-settings"
+                && pickerData.picker_kind !== "video-settings"
+                && pickerData.picker_kind !== "accessibility-settings"
+            )
+        ) {
             return false;
         }
         currentPickerData = pickerData;
@@ -3497,7 +3922,16 @@ let defaultout_plugin = (function () {
                 };
             }
             currentPickerSourceId = String(pickerSourceId || "");
-            return openPickerSheet(pickerData);
+            var opened = openPickerSheet(pickerData);
+            var dismissSpeaker = target.getAttribute("data-brave-dismiss-bubble-speaker") || "";
+            if (opened && dismissSpeaker) {
+                dismissRoomVoiceBubblesForSpeaker(dismissSpeaker);
+            }
+            var onOpenCommand = target.getAttribute("data-brave-on-open-command") || "";
+            if (opened && onOpenCommand && plugin_handler && plugin_handler.onSend) {
+                plugin_handler.onSend(onOpenCommand);
+            }
+            return opened;
         } catch (error) {
             return false;
         }
@@ -4172,6 +4606,12 @@ let defaultout_plugin = (function () {
                 titleValue = entry.label;
             }
         }
+        if (entry.on_open_command) {
+            attrs += " data-brave-on-open-command='" + escapeHtml(entry.on_open_command) + "'";
+        }
+        if (entry.dismiss_bubble_speaker) {
+            attrs += " data-brave-dismiss-bubble-speaker='" + escapeHtml(entry.dismiss_bubble_speaker) + "'";
+        }
         if (entry.connection_screen) {
             attrs += " data-brave-connection-screen='" + escapeHtml(entry.connection_screen) + "'";
             if (!titleValue && (entry.text || entry.label || entry.title)) {
@@ -4403,7 +4843,7 @@ let defaultout_plugin = (function () {
                 eyebrow_icon: "login",
                 title: "",
                 title_icon: null,
-                subtitle: "Enter your account username and password.",
+                subtitle: "",
                 chips: [],
                 actions: [
                     { text: "Back", icon: "arrow_back", connection_screen: "menu", tone: "muted" },
@@ -4481,10 +4921,20 @@ let defaultout_plugin = (function () {
                                 autocomplete: "new-password",
                                 autocapitalize: "none",
                                 spellcheck: false,
+                                enterkeyhint: "next",
+                            },
+                            {
+                                field_name: "password_confirm",
+                                field_label: "Confirm Password",
+                                input_type: "password",
+                                placeholder: "Repeat your password",
+                                autocomplete: "new-password",
+                                autocapitalize: "none",
+                                spellcheck: false,
                                 enterkeyhint: "go",
                             },
                         ],
-                        submit_template: "create {username} {password}",
+                        submit_template: "create {username} {password} {password_confirm}",
                         submit_label: "Create Account",
                         submit_icon: "person_add",
                     },
@@ -4498,7 +4948,7 @@ let defaultout_plugin = (function () {
         return {
             variant: "connection",
             wordmark: "BRAVE",
-            eyebrow: "Welcome.",
+            eyebrow: "",
             eyebrow_icon: null,
             title: "",
             title_icon: null,
@@ -4507,18 +4957,18 @@ let defaultout_plugin = (function () {
             actions: [],
             sections: [
                 {
-                    label: "Account",
-                    icon: "login",
+                    label: "Enter Brave",
+                    icon: "key",
                     kind: "list",
                     items: [
                         {
                             text: "Sign In",
-                            badge: "IN",
+                            icon: "key",
                             connection_screen: "signin",
                         },
                         {
                             text: "Create Account",
-                            badge: "NEW",
+                            icon: "quill",
                             connection_screen: "create",
                         },
                     ],
@@ -5615,15 +6065,32 @@ let defaultout_plugin = (function () {
         });
     };
 
+    var finishGameIntroVeil = function () {
+        var veil = document.getElementById("brave-intro-veil");
+        if (veil) {
+            veil.classList.remove("brave-intro-veil--active");
+        }
+    };
+
+    var startGameIntroVeil = function () {
+        var veil = document.getElementById("brave-intro-veil");
+        if (veil) {
+            veil.classList.add("brave-intro-veil--active");
+            braveGameLoaded = false;
+        }
+    };
+
     var renderConnectionView = function () {
         renderMainView(buildConnectionViewData());
         pruneLegacyConnectionBoilerplate();
+        window.setTimeout(finishGameIntroVeil, 100);
     };
 
     var resetToConnectionView = function (screen) {
         clearTextOutput();
         clearSceneRail();
         clearReactiveState();
+        braveGameLoaded = false;
         currentConnectionScreen = screen || "menu";
         renderConnectionView();
     };
@@ -6245,7 +6712,7 @@ let defaultout_plugin = (function () {
             return false;
         }
         if (entry.category === "threat") {
-            return true;
+            return false;
         }
         if (!isMobileViewport() || currentMobileUtilityTab === "activity") {
             return false;
@@ -7140,6 +7607,8 @@ let defaultout_plugin = (function () {
                             command: entry && entry.command ? entry.command : "",
                             prefill: entry && entry.prefill ? entry.prefill : "",
                             picker: entry && entry.picker ? entry.picker : null,
+                            on_open_command: entry && entry.on_open_command ? entry.on_open_command : "",
+                            dismiss_bubble_speaker: entry && entry.dismiss_bubble_speaker ? entry.dismiss_bubble_speaker : "",
                             connection_screen: entry && entry.connection_screen ? entry.connection_screen : "",
                             tooltip: entry && entry.tooltip ? entry.tooltip : "",
                             confirm: entry && entry.confirm ? entry.confirm : "",
@@ -7288,6 +7757,10 @@ let defaultout_plugin = (function () {
 
     var renderSceneCard = function (sceneData) {
         currentRoomSceneData = (sceneData && typeof sceneData === "object") ? sceneData : {};
+        if (!canRenderSceneRailNow()) {
+            clearSceneCard();
+            return;
+        }
         setMainViewMode(false);
         if (!sceneData || typeof sceneData !== "object" || !sceneData.tracked_quest) {
             clearSceneCard();
@@ -7448,6 +7921,7 @@ let defaultout_plugin = (function () {
             combatViewTransitionActive = true;
         }
         applyReactiveState(viewData.reactive || {});
+        renderObjectives(viewData);
         var previousRoomSceneMeta = lastRenderedRoomSceneMeta || getRenderedRoomSceneMeta();
         var nextRoomSceneMeta = getRoomSceneMeta(viewData);
         var shouldAnimateRegionSceneCard = !!(
@@ -7574,6 +8048,7 @@ let defaultout_plugin = (function () {
                             : "")
                         + "</span>";
                     var rowClass = "brave-view__list-item";
+                    var speakerAttr = (entry && entry.text) ? " data-brave-speaker='" + escapeHtml(entry.text) + "'" : "";
                     var interactive = hasBrowserInteraction(entry);
                     if (interactive) {
                         rowClass += " brave-click brave-click--row";
@@ -7582,7 +8057,7 @@ let defaultout_plugin = (function () {
                     if (interactive && hasInlineActions) {
                         rowClass += " brave-view__list-item--with-actions";
                         return (
-                            "<li class='brave-view__list-row'>"
+                            "<li class='brave-view__list-row'" + speakerAttr + ">"
                             + "<div class='" + rowClass + "'>"
                             + "<button type='button' class='brave-view__list-primary brave-click brave-click--row'"
                             + commandAttrs(entry, false)
@@ -7600,7 +8075,7 @@ let defaultout_plugin = (function () {
                     }
                     if (interactive) {
                         return (
-                            "<li class='brave-view__list-row'>"
+                            "<li class='brave-view__list-row'" + speakerAttr + ">"
                             + "<button type='button' class='" + rowClass + "'"
                             + commandAttrs(entry, false)
                             + ">"
@@ -7614,7 +8089,7 @@ let defaultout_plugin = (function () {
                         );
                     }
                     return (
-                        "<li class='" + rowClass + "'>"
+                        "<li class='" + rowClass + "'" + speakerAttr + ">"
                         + "<div class='brave-view__list-main'>"
                         + lead
                         + textBody
@@ -8380,6 +8855,9 @@ let defaultout_plugin = (function () {
                 if (isRoomLikeView(viewData)) {
                     ensureRoomActivityLog();
                     renderVicinityPanel(viewData);
+                    if (currentRoomSceneData) {
+                        renderSceneCard(currentRoomSceneData);
+                    }
                 } else {
                     clearVicinityPanel();
                 }
@@ -8465,10 +8943,17 @@ let defaultout_plugin = (function () {
             if (!patchedRoomInPlace) {
                 mwin.html(viewMarkup);
             }
+            if (!braveGameLoaded && isRoomLikeView(viewData)) {
+                braveGameLoaded = true;
+                window.setTimeout(finishGameIntroVeil, 400);
+            }
             if (isRoomLikeView(viewData)) {
                 ensureRoomActivityLog();
                 claimRoomActivityEntries();
                 renderVicinityPanel(viewData);
+                if (currentRoomSceneData) {
+                    renderSceneCard(currentRoomSceneData);
+                }
             } else {
                 clearVicinityPanel();
             }
@@ -8667,6 +9152,9 @@ let defaultout_plugin = (function () {
         if (isRoomNavigationCommand(normalizedCommand)) {
             suppressMobileRoomNavScroll(900);
             resetAllScrollPositions();
+        }
+        if (normalizedCommand.indexOf("play ") === 0 || normalizedCommand === "finish play") {
+            startGameIntroVeil();
         }
         clearPickerSheet();
         clearBrowserNotice();
@@ -10003,6 +10491,9 @@ let defaultout_plugin = (function () {
                 return;
             }
             // Keep mobile nav taps from focusing dock controls and yanking the room scroller downward.
+            // We set the suppression window but let the standard 'click' handler below take the command,
+            // which is more compatible with how closest() works across different DOM depths on touch.
+            suppressBrowserClickUntil = 0; // Ensure the following click actually lands
             event.preventDefault();
         }, true);
 
@@ -10044,6 +10535,13 @@ let defaultout_plugin = (function () {
                 clearBrowserNotice();
                 return;
             }
+            var voiceBubbleTarget = event.target.closest("[data-brave-room-voice-id]");
+            if (voiceBubbleTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                dismissRoomVoiceBubble(Number(voiceBubbleTarget.getAttribute("data-brave-room-voice-id")));
+                return;
+            }
             var chatOpenTarget = event.target.closest("[data-brave-chat-open]");
             if (chatOpenTarget) {
                 event.preventDefault();
@@ -10071,6 +10569,29 @@ let defaultout_plugin = (function () {
                 event.preventDefault();
                 event.stopPropagation();
                 setRoomActivityTab(activityTabTarget.getAttribute("data-brave-activity-tab"));
+                return;
+            }
+            var welcomeNext = event.target.closest("[data-brave-welcome-next]");
+            if (welcomeNext) {
+                event.preventDefault();
+                event.stopPropagation();
+                currentWelcomePageIndex++;
+                renderWelcomePage();
+                return;
+            }
+            var welcomePrev = event.target.closest("[data-brave-welcome-prev]");
+            if (welcomePrev) {
+                event.preventDefault();
+                event.stopPropagation();
+                currentWelcomePageIndex--;
+                renderWelcomePage();
+                return;
+            }
+            var objectivesTarget = event.target.closest("[data-brave-objectives-toggle]");
+            if (objectivesTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleObjectives();
                 return;
             }
             var mobileTarget = event.target.closest("[data-brave-mobile-panel], [data-brave-mobile-action]");
@@ -10736,6 +11257,13 @@ let defaultout_plugin = (function () {
         if (currentViewData && rawText.trim() === "") {
             return true;
         }
+        if (
+            isStructuredMenuViewActive()
+            && typeof cls === "string"
+            && cls.indexOf("inp") !== -1
+        ) {
+            return true;
+        }
         if (kwargs && kwargs.type === "look" && suppressNextLookText) {
             return true;
         }
@@ -10811,6 +11339,7 @@ let defaultout_plugin = (function () {
     //
     // Handle Brave-specific OOB events before falling back to generic errors.
     var onUnknownCmd = function (cmdname, args, kwargs) {
+        console.log("!!! OOB RECEIVE:", cmdname, args, kwargs);
         if (cmdname === "mapdata") {
             var mapPayload = getOobPayload(args, kwargs, "mapdata", "");
             renderMap(mapPayload);
@@ -10876,6 +11405,7 @@ let defaultout_plugin = (function () {
         }
 
         if (cmdname === "brave_combat_fx") {
+            console.log("DEBUG: OOB event received:", cmdname, { args: args, kwargs: kwargs });
             var combatFxPayload = getOobPayload(args, kwargs, "brave_combat_fx", {}) || {};
             handleCombatFxEvent(combatFxPayload);
             var braveAudioCombat = getBraveAudio();
@@ -10887,6 +11417,26 @@ let defaultout_plugin = (function () {
 
         if (cmdname === "brave_notice") {
             renderBrowserNotice(getOobPayload(args, kwargs, "brave_notice", {}) || {});
+            return true;
+        }
+
+        if (cmdname === "brave_objectives_update") {
+            var refreshPayload = getOobPayload(args, kwargs, "brave_objectives_update", {}) || {};
+            if (refreshPayload.tutorial) {
+                renderObjectives({ guidance: refreshPayload.tutorial.guidance, guidance_eyebrow: refreshPayload.tutorial.eyebrow, guidance_title: refreshPayload.tutorial.title });
+            }
+            if (refreshPayload.tracked_quest && canRenderSceneRailNow()) {
+                renderSceneCard({ tracked_quest: refreshPayload.tracked_quest });
+            } else if (isStructuredMenuViewActive()) {
+                clearSceneCard();
+            }
+            return true;
+        }
+
+        if (cmdname === "brave_quest_complete") {
+            var questPayload = getOobPayload(args, kwargs, "brave_quest_complete", {}) || {};
+            console.log("DEBUG: Quest Complete payload:", questPayload);
+            renderQuestCompleteOverlay(questPayload);
             return true;
         }
 
@@ -11029,6 +11579,7 @@ let defaultout_plugin = (function () {
         clearSceneRail();
         renderDesktopToolbar();
         resetAllScrollPositions();
+        finishGameIntroVeil();
         if (currentViewData && currentViewData.variant === "connection") {
             window.setTimeout(function () {
                 if (currentViewData && currentViewData.variant === "connection") {

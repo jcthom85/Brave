@@ -11,25 +11,8 @@ def preview_room(room_id, registry=None):
     if not room:
         return None
 
-    exits = [
-        {
-            "id": exit_data.get("id"),
-            "key": exit_data.get("key"),
-            "destination": exit_data.get("destination"),
-            "destination_name": (registry.world.get_room(exit_data.get("destination")) or {}).get("key"),
-        }
-        for exit_data in registry.world.exits
-        if exit_data.get("source") == room_id
-    ]
-    entities = [
-        {
-            "id": entity.get("id"),
-            "key": entity.get("key"),
-            "kind": entity.get("kind"),
-        }
-        for entity in registry.world.entities
-        if entity.get("location") == room_id
-    ]
+    exits = [dict(exit_data) for exit_data in registry.world.exits if exit_data.get("source") == room_id]
+    entities = [dict(entity) for entity in registry.world.entities if entity.get("location") == room_id]
     encounters = [
         {
             "key": encounter.get("key"),
@@ -96,6 +79,8 @@ def preview_class(class_key, registry=None):
 
 def preview_character_config(registry=None):
     registry = registry or get_content_registry()
+    ability_names = sorted({ability.get("name", ability_key) for ability_key, ability in registry.characters.ability_library.items()})
+    passive_names = sorted({passive.get("name", passive_key) for passive_key, passive in registry.characters.passive_ability_bonuses.items()})
     return {
         "primary_stats": list(registry.characters.primary_stats),
         "starting_race": registry.characters.starting_race,
@@ -104,8 +89,12 @@ def preview_character_config(registry=None):
         "vertical_slice_classes": list(registry.characters.vertical_slice_classes),
         "xp_for_level": dict(registry.characters.xp_for_level),
         "implemented_ability_keys": sorted(registry.characters.implemented_ability_keys),
+        "ability_library": dict(registry.characters.ability_library),
+        "passive_ability_bonuses": dict(registry.characters.passive_ability_bonuses),
         "ability_count": len(registry.characters.ability_library),
         "passive_count": len(registry.characters.passive_ability_bonuses),
+        "ability_names": ability_names,
+        "passive_names": passive_names,
     }
 
 
@@ -145,6 +134,16 @@ def preview_quest(quest_key, registry=None):
     if not quest:
         return None
 
+    def _resolve_enemy_tag(tag):
+        token = str(tag or "").strip().lower()
+        if not token:
+            return None
+        for template_id, template in registry.encounters.enemy_templates.items():
+            tags = {str(entry or "").strip().lower() for entry in template.get("tags", [])}
+            if token == template_id.lower() or token in tags:
+                return template
+        return None
+
     objectives = []
     for objective in quest.get("objectives", []):
         entry = dict(objective)
@@ -154,6 +153,10 @@ def preview_quest(quest_key, registry=None):
         room_id = objective.get("room_id")
         if room_id:
             entry["room_name"] = (registry.world.get_room(room_id) or {}).get("key")
+        enemy_tag = objective.get("enemy_tag")
+        if enemy_tag:
+            enemy = _resolve_enemy_tag(enemy_tag) or {}
+            entry["enemy_name"] = enemy.get("name")
         objectives.append(entry)
 
     rewards = []
@@ -167,6 +170,7 @@ def preview_quest(quest_key, registry=None):
     return {
         "quest": quest,
         "region": registry.quests.get_quest_region(quest_key),
+        "is_starting": quest_key in set(registry.quests.starting_quests),
         "prerequisites": list(quest.get("prerequisites", [])),
         "objectives": objectives,
         "reward_items": rewards,
@@ -297,4 +301,31 @@ def preview_enemy(template_key, registry=None):
         "enemy": template,
         "temperament": registry.encounters.get_enemy_temperament(template_key, template),
         "rank": registry.encounters.get_enemy_rank(template_key, template),
+    }
+
+
+def preview_roaming_party(party_key, registry=None):
+    registry = registry or get_content_registry()
+    party = registry.encounters.get_roaming_party(party_key)
+    if not party:
+        return None
+    room = registry.world.get_room(party.get("start_room")) if party.get("start_room") else None
+    encounter = party.get("encounter") or {}
+    enemies = []
+    total_xp = 0
+    for template_key in encounter.get("enemies", []):
+        template = registry.encounters.get_enemy_template(template_key) or {}
+        xp = int(template.get("xp", 0) or 0)
+        total_xp += xp
+        enemies.append({
+            "template_key": template_key,
+            "name": template.get("name", template_key),
+            "xp": xp,
+        })
+    return {
+        "party_key": party_key,
+        "party": party,
+        "start_room_name": room.get("key") if room else None,
+        "enemies": enemies,
+        "total_xp": total_xp,
     }

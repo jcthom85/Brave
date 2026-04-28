@@ -27,13 +27,26 @@ from .account import (
     CmdBraveUnconnectedCreate,
     CmdBraveUnconnectedLook,
 )
+from .brave import CmdFinishPlaySilent
 from .brave_arcade import CmdArcade, CmdArcadeSubmit
 from .brave_combat import CmdAttack, CmdCombatPreview, CmdEnemies, CmdFight, CmdFlee, CmdUse
 from .brave_creator import CmdContent
 from .brave_explore import CmdCook, CmdEat, CmdEmote, CmdFish, CmdItem, CmdMap, CmdReel, CmdRest, CmdTravel
 from .brave_party import CmdParty
 from .brave_profile import CmdBuild, CmdClass, CmdCompanion, CmdGear, CmdMastery, CmdOath, CmdPack, CmdQuests, CmdRace, CmdSheet
-from .brave_town import CmdForge, CmdPortals, CmdPray, CmdRead, CmdSell, CmdShift, CmdShop, CmdSteal, CmdTalk, CmdTinker
+from .brave_town import (
+    CmdBravePopup,
+    CmdForge,
+    CmdPortals,
+    CmdPray,
+    CmdRead,
+    CmdSell,
+    CmdShift,
+    CmdShop,
+    CmdSteal,
+    CmdTalk,
+    CmdTinker,
+)
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -89,9 +102,11 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdArcade())
         self.add(CmdArcadeSubmit())
         self.add(CmdTalk())
+        self.add(CmdBravePopup())
         self.add(CmdSteal())
         self.add(CmdRead())
         self.add(CmdContent())
+        self.add(CmdFinishPlaySilent())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
@@ -118,6 +133,7 @@ class AccountCmdSet(default_cmds.AccountCmdSet):
         self.add(CmdBraveCreate())
         self.add(CmdBraveDelete())
         self.add(CmdBraveTheme())
+        self.add(CmdFinishPlaySilent())
 
 
 class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):

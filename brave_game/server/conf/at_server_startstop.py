@@ -49,12 +49,8 @@ def at_server_start():
     This is called every time the server starts up, regardless of
     how it was shut down.
     """
-    from evennia.server.models import ServerConfig
     from world.bootstrap import ensure_brave_world
     from world.roaming import ROAMING_TICK_INTERVAL, ensure_roaming_party_manager
-
-    if ServerConfig.objects.conf("last_initial_setup_step") != "done":
-        return
 
     ensure_brave_world()
     ensure_roaming_party_manager()

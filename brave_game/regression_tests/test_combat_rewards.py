@@ -68,6 +68,7 @@ class CombatRewardTests(unittest.TestCase):
             enemy,
         )
         encounter._award_enemy_defeat_credit = lambda enemy: BraveEncounter._award_enemy_defeat_credit(encounter, enemy)
+        encounter._award_companion_bond_progress = lambda: BraveEncounter._award_companion_bond_progress(encounter)
 
     @patch("world.browser_panels.send_webclient_event")
     @patch("world.browser_views.build_combat_victory_view", return_value={"view": "victory"})
@@ -220,7 +221,15 @@ class CombatRewardTests(unittest.TestCase):
             ndb=SimpleNamespace(brave_victory_pending=False),
             obj=SimpleNamespace(msg_contents=lambda _message, **_kwargs: None),
             get_active_participants=lambda: [winner],
+            get_active_player_participants=lambda: [winner],
+            get_active_companions=lambda: [],
             get_active_enemies=lambda: [],
+            _apply_participant_effects=lambda: None,
+            _apply_enemy_effects=lambda: None,
+            _advance_player_atb=lambda participant: None,
+            _advance_companion_atb=lambda companion: None,
+            _advance_enemy_atb=lambda enemy: None,
+            _clear_round_states=lambda: None,
             _reward_victory=reward_mock,
             _refresh_browser_combat_views=refresh_mock,
             stop=stop_mock,

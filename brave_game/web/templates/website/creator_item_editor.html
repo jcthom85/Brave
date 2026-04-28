@@ -37,6 +37,16 @@
     textarea,pre { width:100%; margin:0; border:1px solid var(--line); border-radius:14px; background:#fffdfa; font:.95rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
     textarea { min-height:220px; padding:16px; resize:vertical; }
     pre { min-height:220px; padding:16px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+    .stat-list { display:grid; gap:8px; }
+    .stat-row { display:grid; grid-template-columns:minmax(0,1fr) 110px auto; gap:8px; align-items:center; }
+    .stat-row button { padding:8px 12px; }
+    .option-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .option-grid label { display:flex; gap:8px; align-items:center; color:var(--ink); text-transform:none; letter-spacing:0; font-size:.95rem; }
+    .option-grid input { width:auto; }
+    .raw-panel { border:1px solid var(--line); border-radius:8px; background:#fffdfa; overflow:hidden; }
+    .raw-panel summary { cursor:pointer; padding:12px 14px; color:var(--ink); font-weight:700; border-bottom:1px solid transparent; }
+    .raw-panel[open] summary { border-bottom-color:var(--line); }
+    .raw-panel textarea { border:0; border-radius:0; min-height:180px; }
     .status { padding:12px 14px; border-radius:12px; background:#fff6e7; color:var(--ink); border:1px solid var(--line); }
     .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
     .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
@@ -53,35 +63,49 @@
 <body>
   <div class="shell">
     <section class="panel">
-      <div class="panel-head"><h1>Items</h1><p>Browse authored item templates, then edit item stats, restore effects, and use metadata through the live content registry.</p></div>
+      <div class="panel-head"><h1>Item Builder</h1><p>Create gear, meals, materials, rewards, and usable items for Brave.</p></div>
       <div class="panel-body">
         <input id="item-search" class="search" type="search" placeholder="Search items by id, name, or kind">
         <div id="item-list" class="item-list"></div>
       </div>
     </section>
     <section class="workspace">
-      <div class="panel"><div class="panel-head"><h2 id="editor-title">Item Editor</h2><p id="editor-subtitle">Select an item to load its authored template and derived preview data.</p></div><div class="panel-body"><div class="meta"><span>API root: <strong>{{ api_root }}</strong></span><span>Reference domain: <strong>{{ reference_domain }}</strong></span></div></div></div>
-      <div class="toolbar"><button id="load-item" class="secondary" type="button">Reload Item Preview</button><button id="new-item" class="secondary" type="button">New Item Draft</button><button id="validate-content" class="secondary" type="button">Validate Packs</button><button id="reload-content" class="secondary" type="button">Reload Registry</button></div>
+      <div class="panel"><div class="panel-head"><h2 id="editor-title">Item Builder</h2><p id="editor-subtitle">Select an item to load its builder fields and current game links.</p></div><div class="panel-body"><div class="meta"><span>Builder source: <strong>items</strong></span></div></div></div>
+      <div class="toolbar"><button id="load-item" class="secondary" type="button">Reload Item</button><button id="new-item" class="secondary" type="button">New Item Draft</button><button id="validate-content" class="secondary" type="button">Check Content</button><button id="reload-content" class="secondary" type="button">Reload Content</button></div>
+      <div id="validation-notes" class="validation-notes" hidden></div>
       <div class="editor-grid">
-        <section class="panel"><div class="panel-head"><h3>Structured Item Fields</h3><p>Edit the common item fields here, then sync the generated payload to raw JSON.</p></div><div class="panel-body stack">
+        <section class="panel"><div class="panel-head"><h3>Item Builder</h3><p>Build the item with fields and rows. Advanced source is available for unusual fields.</p></div><div class="panel-body stack">
           <div class="field-grid">
             <div class="field"><label for="item-id">Template Id</label><input id="item-id" type="text"></div>
             <div class="field"><label for="item-name">Item Name</label><input id="item-name" type="text"></div>
-            <div class="field"><label for="item-kind">Kind</label><input id="item-kind" type="text" placeholder="equipment, meal, loot, ingredient"></div>
+            <div class="field"><label for="item-kind">Kind</label><select id="item-kind"><option value="loot">loot</option><option value="equipment">equipment</option><option value="consumable">consumable</option><option value="ingredient">ingredient</option><option value="meal">meal</option></select></div>
             <div class="field"><label for="item-slot">Equipment Slot</label><select id="item-slot"><option value="">None</option><option value="main_hand">main_hand</option><option value="off_hand">off_hand</option><option value="head">head</option><option value="chest">chest</option><option value="hands">hands</option><option value="legs">legs</option><option value="feet">feet</option><option value="ring">ring</option><option value="trinket">trinket</option><option value="snack">snack</option></select></div>
             <div class="field"><label for="item-value">Value</label><input id="item-value" type="number" min="0" value="0"></div>
-            <div class="field"><label for="item-stackable">Stackable</label><select id="item-stackable"><option value="false">false</option><option value="true">true</option></select></div>
+            <div class="field"><label for="item-stackable">Stackable</label><select id="item-stackable"><option value="false">No</option><option value="true">Yes</option></select></div>
             <div class="field full"><label for="item-summary">Summary</label><textarea id="item-summary" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="item-bonuses">Bonuses JSON</label><textarea id="item-bonuses" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="item-restore">Restore JSON</label><textarea id="item-restore" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="item-meal-bonuses">Meal Bonuses JSON</label><textarea id="item-meal-bonuses" spellcheck="false"></textarea></div>
-            <div class="field full"><label for="item-use">Use Profile JSON</label><textarea id="item-use" spellcheck="false"></textarea></div>
           </div>
-          <div class="editor-toolbar"><button id="sync-item-form" class="secondary" type="button">Sync Item Form To JSON</button><button id="diff-item" type="button">Dry-Run Item</button><button id="write-item" type="button">Write Item</button></div>
+          <div class="field full"><label>Equipment Bonuses</label><div id="item-bonuses" class="stat-list"></div><button id="add-bonus" class="secondary" type="button">Add Bonus</button></div>
+          <div class="field full"><label>Restore Effects</label><div id="item-restore" class="stat-list"></div><button id="add-restore" class="secondary" type="button">Add Restore</button></div>
+          <div class="field full"><label>Meal Bonuses</label><div id="item-meal-bonuses" class="stat-list"></div><button id="add-meal-bonus" class="secondary" type="button">Add Meal Bonus</button></div>
+          <div class="field-grid">
+            <div class="field"><label for="use-verb">Use Verb</label><input id="use-verb" type="text" placeholder="drink, eat, study, throw"></div>
+            <div class="field"><label for="use-effect-type">Use Effect</label><select id="use-effect-type"><option value="">None</option><option value="restore">restore</option><option value="damage">damage</option><option value="guard">guard</option><option value="meal">meal</option><option value="unlock_recipe">unlock_recipe</option><option value="teach_spell">teach_spell</option><option value="unlock_companion">unlock_companion</option><option value="unlock_oath">unlock_oath</option></select></div>
+            <div class="field"><label for="use-target">Target</label><select id="use-target"><option value="">None</option><option value="self">self</option><option value="ally">ally</option><option value="enemy">enemy</option></select></div>
+            <div class="field"><label for="use-required-class">Required Class</label><input id="use-required-class" type="text" placeholder="mage, ranger, paladin"></div>
+            <div class="field full"><label>Use Contexts</label><div class="option-grid"><label><input id="use-context-explore" type="checkbox" value="explore">Explore</label><label><input id="use-context-combat" type="checkbox" value="combat">Combat</label></div></div>
+            <div class="field"><label for="use-recipe-domain">Recipe Domain</label><select id="use-recipe-domain"><option value="">None</option><option value="cooking">cooking</option><option value="tinkering">tinkering</option></select></div>
+            <div class="field"><label for="use-unlock-key">Unlock Key</label><input id="use-unlock-key" type="text"></div>
+            <div class="field"><label for="use-guard">Guard Amount</label><input id="use-guard" type="number" min="0" value="0"></div>
+            <div class="field"><label for="use-damage-base">Damage Base</label><input id="use-damage-base" type="number" min="0" value="0"></div>
+            <div class="field"><label for="use-damage-variance">Damage Variance</label><input id="use-damage-variance" type="number" min="0" value="0"></div>
+            <div class="field full"><label for="use-extra-text">Use Text</label><textarea id="use-extra-text" spellcheck="true"></textarea></div>
+          </div>
+          <div class="editor-toolbar"><button id="diff-item" type="button">Preview Item Change</button><button id="write-item" type="button">Save Item</button></div>
+          <details class="raw-panel"><summary>Advanced Source</summary><textarea id="item-json" spellcheck="false"></textarea></details>
         </div></section>
-        <section class="panel"><div class="panel-head"><h3>Raw Item Payload</h3><p>Use the raw JSON when you need fields outside the structured controls.</p></div><div class="panel-body stack"><textarea id="item-json" spellcheck="false"></textarea><div class="chips"><div id="item-id-chip" class="chip">Item: -</div><div id="item-kind-chip" class="chip">Kind: -</div><div id="item-category-chip" class="chip">Category: -</div></div></div></section>
+        <section class="panel"><div class="panel-head"><h3>Item Summary</h3><p>Quick checks for what this item does and where it connects.</p></div><div class="panel-body stack"><div class="chips"><div id="item-id-chip" class="chip">Item: -</div><div id="item-kind-chip" class="chip">Kind: -</div><div id="item-category-chip" class="chip">Category: -</div></div><pre id="item-summary-output"></pre></div></section>
       </div>
-      <div class="panel"><div class="panel-head"><h2>Preview / Diff Output</h2><p>Item preview resolves category, use profile, bonus summary, forge links, and quest usage from the live content registry.</p></div><div class="panel-body"><div id="status" class="status">Waiting for item selection.</div><pre id="output"></pre></div></div>
+      <div class="panel"><div class="panel-head"><h2>Activity</h2><p>Shows load results, validation issues, and change previews after you ask for them.</p></div><div class="panel-body"><div id="status" class="status">Waiting for item selection.</div><pre id="output"></pre></div></div>
     </section>
   </div>
   <script src="/static/website/js/creator_common.js"></script>
@@ -109,20 +133,36 @@
     const itemBonuses = document.getElementById('item-bonuses');
     const itemRestore = document.getElementById('item-restore');
     const itemMealBonuses = document.getElementById('item-meal-bonuses');
-    const itemUse = document.getElementById('item-use');
     const itemJson = document.getElementById('item-json');
-    const syncItemButton = document.getElementById('sync-item-form');
     const diffItemButton = document.getElementById('diff-item');
     const writeItemButton = document.getElementById('write-item');
     const itemIdChip = document.getElementById('item-id-chip');
     const itemKindChip = document.getElementById('item-kind-chip');
     const itemCategoryChip = document.getElementById('item-category-chip');
+    const itemSummaryOutput = document.getElementById('item-summary-output');
+    const addBonusButton = document.getElementById('add-bonus');
+    const addRestoreButton = document.getElementById('add-restore');
+    const addMealBonusButton = document.getElementById('add-meal-bonus');
+    const useVerb = document.getElementById('use-verb');
+    const useEffectType = document.getElementById('use-effect-type');
+    const useTarget = document.getElementById('use-target');
+    const useRequiredClass = document.getElementById('use-required-class');
+    const useContextExplore = document.getElementById('use-context-explore');
+    const useContextCombat = document.getElementById('use-context-combat');
+    const useRecipeDomain = document.getElementById('use-recipe-domain');
+    const useUnlockKey = document.getElementById('use-unlock-key');
+    const useGuard = document.getElementById('use-guard');
+    const useDamageBase = document.getElementById('use-damage-base');
+    const useDamageVariance = document.getElementById('use-damage-variance');
+    const useExtraText = document.getElementById('use-extra-text');
 
     let items = [];
     let selectedItem = null;
+    const STAT_OPTIONS = ['accuracy','armor','attack_power','dodge','intellect','max_hp','max_mana','max_stamina','precision','spell_power','spirit','threat'];
+    const RESTORE_OPTIONS = ['hp','mana','stamina'];
 
     function setBusy(isBusy) {
-      for (const button of [loadItemButton, newItemButton, validateButton, reloadButton, syncItemButton, diffItemButton, writeItemButton]) {
+      for (const button of [loadItemButton, newItemButton, validateButton, reloadButton, diffItemButton, writeItemButton, addBonusButton, addRestoreButton, addMealBonusButton]) {
         button.disabled = isBusy;
       }
     }
@@ -152,16 +192,108 @@
         itemList.appendChild(button);
       }
     }
-    function parseJsonField(textarea, fallback = {}) {
-      const raw = textarea.value.trim();
-      if (!raw) return fallback;
+    function parseAdvancedSource() {
       try {
-        const value = JSON.parse(raw);
-        return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
+        return JSON.parse(itemJson.value || '{}') || {};
       } catch (error) {
-        throw new Error(`${textarea.id} JSON parse error: ${error.message}`);
+        throw new Error(`Advanced source parse error: ${error.message}`);
       }
     }
+
+    function renderStatRows(container, values, options) {
+      container.innerHTML = '';
+      const entries = Object.entries(values || {});
+      if (!entries.length) {
+        addStatRow(container, '', 0, options);
+        return;
+      }
+      for (const [key, value] of entries) addStatRow(container, key, value, options);
+    }
+
+    function addStatRow(container, key, value, options) {
+      const row = document.createElement('div');
+      row.className = 'stat-row';
+      const select = document.createElement('select');
+      const blank = document.createElement('option');
+      blank.value = '';
+      blank.textContent = 'None';
+      select.appendChild(blank);
+      for (const optionValue of options) {
+        const option = document.createElement('option');
+        option.value = optionValue;
+        option.textContent = optionValue;
+        option.selected = optionValue === key;
+        select.appendChild(option);
+      }
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.step = '1';
+      input.value = Number(value || 0);
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'secondary';
+      remove.textContent = 'Remove';
+      remove.addEventListener('click', () => row.remove());
+      row.appendChild(select);
+      row.appendChild(input);
+      row.appendChild(remove);
+      container.appendChild(row);
+    }
+
+    function collectStatRows(container) {
+      const values = {};
+      for (const row of Array.from(container.querySelectorAll('.stat-row'))) {
+        const key = row.querySelector('select').value;
+        const amount = Number(row.querySelector('input').value || 0);
+        if (key && amount !== 0) values[key] = amount;
+      }
+      return values;
+    }
+
+    function contextValues() {
+      const contexts = [];
+      if (useContextExplore.checked) contexts.push('explore');
+      if (useContextCombat.checked) contexts.push('combat');
+      return contexts;
+    }
+
+    function setUseUnlockField(use) {
+      useUnlockKey.value = use.unlock_recipe || use.learn_ability || use.unlock_companion || use.unlock_oath || '';
+    }
+
+    function buildUseProfile(restore) {
+      const effectType = useEffectType.value;
+      if (!effectType) return {};
+      const use = {
+        verb: useVerb.value.trim(),
+        effect_type: effectType,
+        target: useTarget.value,
+      };
+      const contexts = contextValues();
+      if (contexts.length) use.contexts = contexts;
+      if (useRequiredClass.value.trim()) use.required_class = useRequiredClass.value.trim();
+      if (effectType === 'restore' && Object.keys(restore).length) use.restore = restore;
+      if (effectType === 'damage') {
+        use.damage = {
+          base: Number(useDamageBase.value || 0),
+          variance: Number(useDamageVariance.value || 0),
+        };
+      }
+      if (effectType === 'guard' && Number(useGuard.value || 0) > 0) use.guard = Number(useGuard.value || 0);
+      if (effectType === 'unlock_recipe') {
+        use.recipe_domain = useRecipeDomain.value || 'cooking';
+        use.unlock_recipe = useUnlockKey.value.trim();
+      }
+      if (effectType === 'teach_spell') use.learn_ability = useUnlockKey.value.trim();
+      if (effectType === 'unlock_companion') use.unlock_companion = useUnlockKey.value.trim();
+      if (effectType === 'unlock_oath') use.unlock_oath = useUnlockKey.value.trim();
+      if (useExtraText.value.trim()) use.extra_text = useExtraText.value.trim();
+      for (const key of ['verb', 'target']) {
+        if (!use[key]) delete use[key];
+      }
+      return use;
+    }
+
     function buildDraft() {
       return { kind: 'loot', name: 'New Item', summary: '', stackable: false, value: 0 };
     }
@@ -173,12 +305,36 @@
       itemValue.value = item.value || 0;
       itemStackable.value = item.stackable ? 'true' : 'false';
       itemSummary.value = item.summary || '';
-      itemBonuses.value = JSON.stringify(item.bonuses || {}, null, 2);
-      itemRestore.value = JSON.stringify(item.restore || {}, null, 2);
-      itemMealBonuses.value = JSON.stringify(item.meal_bonuses || {}, null, 2);
-      itemUse.value = JSON.stringify(item.use || {}, null, 2);
+      renderStatRows(itemBonuses, item.bonuses || {}, STAT_OPTIONS);
+      renderStatRows(itemRestore, item.restore || {}, RESTORE_OPTIONS);
+      renderStatRows(itemMealBonuses, item.meal_bonuses || {}, STAT_OPTIONS);
+      const use = item.use || {};
+      useVerb.value = use.verb || '';
+      useEffectType.value = use.effect_type || '';
+      useTarget.value = use.target || '';
+      useRequiredClass.value = use.required_class || '';
+      useContextExplore.checked = Array.isArray(use.contexts) && use.contexts.includes('explore');
+      useContextCombat.checked = Array.isArray(use.contexts) && use.contexts.includes('combat');
+      useRecipeDomain.value = use.recipe_domain || '';
+      setUseUnlockField(use);
+      useGuard.value = Number(use.guard || 0);
+      useDamageBase.value = Number((use.damage || {}).base || 0);
+      useDamageVariance.value = Number((use.damage || {}).variance || 0);
+      useExtraText.value = use.extra_text || '';
       itemIdChip.textContent = `Item: ${templateId || '-'}`;
       itemKindChip.textContent = `Kind: ${item.kind || '-'}`;
+    }
+
+    function renderItemSummary(preview) {
+      const lines = [];
+      if (preview.category) lines.push(`Category: ${preview.category}`);
+      if (preview.bonus_summary) lines.push(`Bonuses: ${preview.bonus_summary}`);
+      const use = preview.use_profile || {};
+      if (use.effect_type) lines.push(`Use: ${use.verb || 'use'} -> ${use.effect_type}`);
+      if (preview.forge_recipe) lines.push(`Forge result: ${preview.forge_recipe.result || '-'}`);
+      const quests = preview.quest_links || [];
+      if (quests.length) lines.push(`Quest links: ${quests.map((quest) => quest.title || quest.quest_key).join(', ')}`);
+      itemSummaryOutput.textContent = lines.length ? lines.join('\n') : 'No derived item links yet.';
     }
     function syncItemFormToJson() {
       const templateId = itemId.value.trim();
@@ -191,23 +347,31 @@
         setStatus('Item form is incomplete.', 'bad');
         return null;
       }
-      let bonuses, restore, mealBonuses, use;
+      let advanced;
       try {
-        bonuses = parseJsonField(itemBonuses, {});
-        restore = parseJsonField(itemRestore, {});
-        mealBonuses = parseJsonField(itemMealBonuses, {});
-        use = parseJsonField(itemUse, {});
+        advanced = parseAdvancedSource();
       } catch (error) {
         showValidation([error.message]);
         setStatus(error.message, 'bad');
         return null;
       }
+      const bonuses = collectStatRows(itemBonuses);
+      const restore = collectStatRows(itemRestore);
+      const mealBonuses = collectStatRows(itemMealBonuses);
+      const use = buildUseProfile(restore);
       const payload = {
+        ...advanced,
         name: itemName.value.trim() || templateId,
         kind: itemKind.value.trim() || 'loot',
         summary: itemSummary.value.trim() || '',
         stackable: itemStackable.value === 'true',
       };
+      delete payload.bonuses;
+      delete payload.restore;
+      delete payload.meal_bonuses;
+      delete payload.use;
+      delete payload.slot;
+      delete payload.value;
       if (itemSlot.value) payload.slot = itemSlot.value;
       if (Number(itemValue.value || 0) > 0) payload.value = Number(itemValue.value || 0);
       if (Object.keys(bonuses).length) payload.bonuses = bonuses;
@@ -234,14 +398,15 @@
     async function loadPreview(templateId = selectedItem && selectedItem.id) {
       if (!templateId) return setStatus('Choose an item first.', 'bad');
       setBusy(true);
-      setStatus(`Loading item preview for ${templateId}...`);
+      setStatus(`Loading item ${templateId}...`);
       try {
         const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'item', args:[templateId] }) });
         populateItemForm(payload.preview.template_id, payload.preview.item || {});
         itemJson.value = JSON.stringify(payload.preview.item || {}, null, 2);
         itemCategoryChip.textContent = `Category: ${payload.preview.category || '-'}`;
-        output.textContent = JSON.stringify(payload.preview, null, 2);
-        setStatus(`Loaded item preview for ${templateId}.`, 'good');
+        renderItemSummary(payload.preview);
+        output.textContent = `${payload.preview.item.name || templateId}\n${payload.preview.category || 'uncategorized'}${payload.preview.bonus_summary ? `\n${payload.preview.bonus_summary}` : ''}`;
+        setStatus(`Loaded item ${templateId}.`, 'good');
       } catch (error) {
         setStatus(error.message, 'bad');
         output.textContent = error.stack || error.message;
@@ -254,37 +419,34 @@
       populateItemForm('new_item', buildDraft());
       itemJson.value = JSON.stringify(buildDraft(), null, 2);
       itemCategoryChip.textContent = 'Category: draft';
+      itemSummaryOutput.textContent = 'Draft item. Save it to create a pack entry.';
       editorTitle.textContent = 'New Item Draft';
-      editorSubtitle.textContent = 'Stage a new item template before writing it to the pack.';
+      editorSubtitle.textContent = 'Stage a new item before saving it.';
       renderItems(itemSearch.value);
-      setStatus('New item draft staged in the form.', 'good');
+      setStatus('New item draft staged.', 'good');
     }
     async function mutateItem(write) {
       const payload = syncItemFormToJson();
       const target = itemId.value.trim();
       if (!payload || !target) return;
       setBusy(true);
-      setStatus(write ? `Writing item ${target}...` : `Generating item diff for ${target}...`);
+      setStatus(write ? `Saving item ${target}...` : `Previewing item change for ${target}...`);
       try {
         const result = await apiFetch('/mutate', { method:'POST', body: JSON.stringify({ kind:'item', target, payload, write }) });
         output.textContent = result.diff || JSON.stringify(result, null, 2);
         if (write) {
           const errors = result.validation_errors || [];
           if (errors.length) {
-            setStatus(`Write completed with ${errors.length} validation issue(s).`, 'bad');
-            output.textContent = `${result.diff || ''}
-
-Validation errors:
-- ${errors.join('
-- ')}`.trim();
+            setStatus(`Save completed with ${errors.length} validation issue(s).`, 'bad');
+            output.textContent = `${result.diff || ''}\n\nValidation errors:\n- ${errors.join('\n- ')}`.trim();
           } else {
-            setStatus(`Wrote item ${target}.`, 'good');
+            setStatus(`Saved item ${target}.`, 'good');
             await loadReferences();
             selectedItem = { id: target, label: payload.name, meta: payload.kind };
             await loadPreview(target);
           }
         } else {
-          setStatus(`Dry-run diff ready for item ${target}.`, 'good');
+          setStatus(`Change preview ready for item ${target}.`, 'good');
         }
       } catch (error) {
         setStatus(error.message, 'bad');
@@ -295,15 +457,14 @@ Validation errors:
     }
     async function validateContent() {
       setBusy(true);
-      setStatus('Validating content packs...');
+      setStatus('Checking content...');
       try {
         const payload = await apiFetch('/validate', { method:'POST', body:'{}' });
         if (payload.errors.length) {
           setStatus(`Validation found ${payload.errors.length} issue(s).`, 'bad');
-          output.textContent = payload.errors.join('
-');
+          output.textContent = payload.errors.join('\n');
         } else {
-          setStatus('Content validation passed.', 'good');
+          setStatus('Content check passed.', 'good');
           output.textContent = JSON.stringify(payload, null, 2);
         }
       } catch (error) {
@@ -315,10 +476,10 @@ Validation errors:
     }
     async function reloadContent() {
       setBusy(true);
-      setStatus('Reloading registry from disk...');
+      setStatus('Reloading content...');
       try {
         const payload = await apiFetch('/reload', { method:'POST', body:'{}' });
-        setStatus('Content registry reloaded.', 'good');
+        setStatus('Content reloaded.', 'good');
         output.textContent = JSON.stringify(payload, null, 2);
         await loadReferences();
         if (selectedItem) await loadPreview(selectedItem.id);
@@ -332,11 +493,13 @@ Validation errors:
     itemSearch.addEventListener('input', () => renderItems(itemSearch.value));
     loadItemButton.addEventListener('click', () => loadPreview());
     newItemButton.addEventListener('click', newItemDraft);
-    syncItemButton.addEventListener('click', () => { if (syncItemFormToJson()) setStatus('Item form synced to JSON.', 'good'); });
     diffItemButton.addEventListener('click', () => mutateItem(false));
     writeItemButton.addEventListener('click', () => mutateItem(true));
     validateButton.addEventListener('click', validateContent);
     reloadButton.addEventListener('click', reloadContent);
+    addBonusButton.addEventListener('click', () => addStatRow(itemBonuses, '', 0, STAT_OPTIONS));
+    addRestoreButton.addEventListener('click', () => addStatRow(itemRestore, '', 0, RESTORE_OPTIONS));
+    addMealBonusButton.addEventListener('click', () => addStatRow(itemMealBonuses, '', 0, STAT_OPTIONS));
     newItemDraft();
     loadReferences().catch((error) => { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; });
   </script>

@@ -193,6 +193,61 @@ class CombatActionPayloadTests(unittest.TestCase):
         self.assertIsNone(heal.get("reaction_role"))
         self.assertIn("Timing:", heal.get("tooltip", ""))
 
+    def test_first_reaction_candidates_expose_reaction_roles(self):
+        room = DummyRoom()
+        character = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "paladin",
+            {"hp": 24, "mana": 28, "stamina": 28},
+            {"max_hp": 24, "max_mana": 28, "max_stamina": 28},
+            [
+                "Shield Bash",
+                "Intercept",
+                "Guarding Aura",
+                "Shield of Dawn",
+                "Cleanse",
+                "Renewing Light",
+                "Blessing",
+                "Living Current",
+            ],
+        )
+        encounter = DummyEncounter(room, [character], [{"id": "e1", "key": "Bog Wolf", "hp": 11, "max_hp": 16}])
+
+        payload = build_combat_action_payload(encounter, character)
+        roles = {action.get("key"): action.get("reaction_role") for action in payload["abilities"]}
+
+        self.assertEqual("interrupt", roles.get("shieldbash"))
+        self.assertEqual("guard", roles.get("intercept"))
+        self.assertEqual("guard", roles.get("guardingaura"))
+        self.assertEqual("guard", roles.get("shieldofdawn"))
+        self.assertEqual("cleanse", roles.get("cleanse"))
+        self.assertEqual("cleanse", roles.get("renewinglight"))
+        self.assertEqual("cleanse", roles.get("blessing"))
+        self.assertEqual("cleanse", roles.get("livingcurrent"))
+
+    def test_interrupt_reaction_abilities_resolve_without_windup(self):
+        room = DummyRoom()
+        warrior = DummyCharacter(
+            7,
+            "Dad",
+            room,
+            "warrior",
+            {"hp": 24, "mana": 0, "stamina": 28},
+            {"max_hp": 24, "max_mana": 0, "max_stamina": 28},
+            ["Shield Bash", "Strike"],
+        )
+        encounter = DummyEncounter(room, [warrior], [{"id": "e1", "key": "Bog Wolf", "hp": 11, "max_hp": 16}])
+
+        payload = build_combat_action_payload(encounter, warrior)
+        shield_bash = _action(payload["abilities"], "shieldbash")
+        strike = _action(payload["abilities"], "strike")
+
+        self.assertEqual(0, shield_bash.get("timing", {}).get("windup_ticks"))
+        self.assertFalse(shield_bash.get("timing", {}).get("target_locked"))
+        self.assertEqual(1, strike.get("timing", {}).get("windup_ticks"))
+
     def test_payload_normalizes_ally_target_item_state(self):
         room = DummyRoom()
         cleric = DummyCharacter(

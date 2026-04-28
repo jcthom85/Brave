@@ -9,6 +9,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
 from commands.brave import BraveCharacterCommand
+from commands.brave_explore import CmdRest
+from world.browser_panels import format_speech_activity
 
 
 class _DummySessions:
@@ -20,6 +22,12 @@ class _DummySessions:
 
 
 class BraveCharacterCommandTests(unittest.TestCase):
+    def test_format_speech_activity_matches_room_voice_parser(self):
+        self.assertEqual(
+            'Captain Harl Rowan says, "Talk to me."',
+            format_speech_activity("Captain Harl Rowan", "Talk to me."),
+        )
+
     def test_send_room_emote_uses_gendered_head_phrase(self):
         web_session = SimpleNamespace(protocol_key="websocket")
         command = object.__new__(BraveCharacterCommand)
@@ -161,3 +169,49 @@ class BraveCharacterCommandTests(unittest.TestCase):
             [event["kwargs"].get("session") for event in sent if event["args"] == ("snapshot",)],
             [[other_session]],
         )
+
+    def test_rest_requires_authored_rest_site(self):
+        command = object.__new__(CmdRest)
+        room = SimpleNamespace(db=SimpleNamespace(brave_room_id="brambleford_town_green", brave_safe=True, brave_rest_allowed=False))
+        character = SimpleNamespace(key="Dad", location=room, db=SimpleNamespace())
+        character.ensure_brave_character = lambda: character
+        character.restore_resources = lambda: None
+        command.caller = character
+        command.get_encounter = lambda *_args, **_kwargs: None
+
+        sent = []
+        command.msg = lambda message, **_kwargs: sent.append(str(message))
+
+        command.func()
+
+        self.assertEqual(["You need a proper rest spot before you can recover. Try the Lantern Rest Inn or another marked resting place."], sent)
+
+    def test_rest_restores_at_authored_rest_site(self):
+        command = object.__new__(CmdRest)
+        room = SimpleNamespace(db=SimpleNamespace(brave_room_id="tutorial_wayfarers_yard", brave_safe=True, brave_rest_allowed=True))
+        character = SimpleNamespace(
+            key="Dad",
+            location=room,
+            db=SimpleNamespace(
+                brave_tutorial={
+                    "status": "active",
+                    "step": "catch_your_breath",
+                    "flags": {"won_vermin_fight": True},
+                },
+                brave_tutorial_current_step="catch_your_breath",
+            ),
+        )
+        character.ensure_brave_character = lambda: character
+        restored = []
+        character.restore_resources = lambda: restored.append(True)
+        command.caller = character
+        command.get_encounter = lambda *_args, **_kwargs: None
+
+        sent = []
+        command.msg = lambda message, **_kwargs: sent.append(str(message))
+
+        command.func()
+
+        self.assertEqual([True], restored)
+        self.assertEqual(["You take a moment to recover your strength."], sent)
+        self.assertTrue(character.db.brave_tutorial["flags"]["rested_after_fight"])

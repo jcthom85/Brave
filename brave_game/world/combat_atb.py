@@ -23,6 +23,7 @@ DEFAULT_ATB_PROFILE = {
 
 ATB_TIMING_SCALE = 1
 DEFAULT_ATB_TICK_MS = 1000
+INSTANT_INTERRUPT_ABILITIES = {"shieldbash", "cheapshot", "frostbind", "entanglingroots"}
 
 
 def _clamped_tick(value, *, default=0):
@@ -305,9 +306,13 @@ def _default_ability_atb_profile(ability):
 def get_ability_atb_profile(ability_key, ability):
     """Return normalized ATB timing metadata for an ability definition."""
 
-    del ability_key  # Reserved for future keyed overrides.
     ability = dict(ability or {})
-    return normalize_atb_profile(ability.get("atb"), base_profile=_default_ability_atb_profile(ability))
+    base_profile = _default_ability_atb_profile(ability)
+    if str(ability_key or "").lower() in INSTANT_INTERRUPT_ABILITIES:
+        base_profile["windup_ticks"] = 0
+        base_profile["target_locked"] = False
+        base_profile["interruptible"] = False
+    return normalize_atb_profile(ability.get("atb"), base_profile=base_profile)
 
 
 def _default_item_atb_profile(use_profile):

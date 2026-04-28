@@ -883,7 +883,7 @@
         var danger = String((reactive && reactive.danger) || "").toLowerCase();
         var boss = !!(reactive && reactive.boss);
         if (scene === "victory") {
-            return "";
+            return "music.victory";
         }
         if (scene === "combat") {
             return boss ? "music.combat.boss" : "music.combat.standard";

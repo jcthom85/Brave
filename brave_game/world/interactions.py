@@ -4,6 +4,12 @@ from world.activities import format_catch_log, format_kitchen_hearth_text, forma
 from world.commerce import format_shop_bonus, get_sellable_entries, get_shop_bonus
 from world.content import get_content_registry
 from world.forging import get_forge_entries
+from world.questing import (
+    advance_room_visit,
+    advance_talk_to_npc,
+    ensure_starter_quests,
+    unlock_quest,
+)
 from world.race_world_hooks import get_extra_read_insight
 from world.resonance import format_portal_plaque_text
 from world.trophies import format_trophy_case_text
@@ -90,7 +96,7 @@ def _resolve_talk_response(character, entity_id):
     return None
 
 
-def _leda_thornwick(character):
+def _leda_thornwick(character, is_action=False):
     sellables = get_sellable_entries(character)
     bonus = get_shop_bonus(character)
 
@@ -104,16 +110,16 @@ def _leda_thornwick(character):
         if len(sellables) > 3:
             names += ", ..."
         return (
-            "You have trade goods worth my time. Use |wshop|n to see prices, |wsell <item>|n to cash them out, or "
-            f"|wshift|n if you want me in a better mood first. Right now I can move {names}."
+            "You have trade goods worth my time. Check the shop to see prices, sell your items to cash them out, or "
+            f"use a shift if you want me in a better mood first. Right now I can move {names}."
         )
     return (
         "If it keeps a traveler dry, shod, fed, or sensibly tied to their pack, I care. Bring me pelts, salvage, herbs, "
-        "and other practical finds. Use |wshop|n for current prices or |wshift|n if you want to help at the counter."
+        "and other practical finds. Check the shop for current prices or use a shift if you want to help at the counter."
     )
 
 
-def _torren_ironroot(character):
+def _torren_ironroot(character, is_action=False):
     entries = get_forge_entries(character)
     ready = [entry for entry in entries if entry["ready"]]
 
@@ -122,7 +128,7 @@ def _torren_ironroot(character):
         if len(ready) > 2:
             names += ", ..."
         return (
-            "You've got enough scrap and silver for me to do honest work. Use |wforge|n and pick a piece. "
+            "You've got enough scrap and silver for me to do honest work. Open the forge and pick a piece. "
             f"Right now I could turn your kit into {names}."
         )
     if entries:
@@ -134,31 +140,72 @@ def _torren_ironroot(character):
         ]
         return (
             f"I can rework that {first['source_name']} into a {first['result_name']}, but not from optimism alone. "
-            f"Bring me {', '.join(missing)} and {first['silver_cost']} silver. Use |wforge|n if you want the full ledger."
+            f"Bring me {', '.join(missing)} and {first['silver_cost']} silver. Check the forge if you want the full ledger."
         )
     return (
         "I improve field kit, not heirloom nonsense. Wear the piece you want fixed proper, bring me useful scrap and "
-        "silver, and use |wforge|n so we can both stop pretending this is a mystery."
+        "silver, and use the forge so we can both stop pretending this is a mystery."
     )
+
+
+def _captain_harl_rowan(character, is_action=False):
+    response = _resolve_talk_response(character, "captain_harl_rowan")
+    room = getattr(character, "location", None)
+    room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+
+    # Fallback response if no specific talk rule matched but the quest is active
+    if not response and room_id == "brambleford_training_yard" and _is_active(character, "practice_makes_heroes"):
+        response = (
+            "Tamsin sent you through with your head on straight. Good. The south lantern going dark is not your first job; surviving long enough to reach it is. "
+            "Start close: head south to the green, then west to the inn. Uncle Pib's cellar is tearing itself apart, and the stores matter if the road stays cut. "
+            "Clear that, then Mira will put a name to what hit the fences."
+        )
+
+    if (
+        not response
+        and room_id == "brambleford_training_yard"
+        and _is_completed(character, "practice_makes_heroes")
+        and not bool(getattr(character.db, "brave_harl_cellar_job_assigned", False))
+    ):
+        response = (
+            "You got through the first report fast enough. Good. The south lantern is out, the road cart came in torn, "
+            "and we still start close: head south to the green, then west to Uncle Pib. His cellar is tearing itself apart, "
+            "and food stores matter if the road stays cut."
+        )
+
+    if is_action and response and room_id == "brambleford_training_yard" and (
+        _is_active(character, "practice_makes_heroes")
+        or (
+            _is_completed(character, "practice_makes_heroes")
+            and not bool(getattr(character.db, "brave_harl_cellar_job_assigned", False))
+        )
+    ):
+        character.db.brave_harl_cellar_job_assigned = True
+        character.db.brave_opening_sequence_active = False
+        advance_talk_to_npc(character, "captain_harl_rowan")
+        unlock_quest(character, "rats_in_the_kettle")
+        ensure_starter_quests(character)
+    return response
 
 
 def _town_notice_board(character):
     lines = [
-        "Several notices have been pinned and re-pinned so often that the corners are mostly thread.",
+        "Several notices have been pinned and re-pinned so often that the corners are mostly thread. One fresh sheet is still wet from the rain and the ink has been pressed hard enough to dent the board.",
         "",
+        "- SOUTH ROAD LANTERN OUT BEFORE DAWN. REPORT CUT HARNESS, WAGON DAMAGE, OR STRANGE LIGHTS.",
         "- Wolves bold near the east road. Do not leave goats tethered overnight.",
         "- Missing flour sacks and fence planks reported by farms beyond the gate.",
         "- Militia requests steady hands, not loud ones.",
     ]
 
     if _is_active(character, "practice_makes_heroes"):
-        lines.append("- Rowan's chalk note: New hands report to the Training Yard first.")
+        lines.append("- Rowan's chalk note: New hands report to the Training Yard. The inn cellar comes first; the road comes after.")
     if _is_active(character, "rats_in_the_kettle"):
-        lines.append("- Uncle Pib requests immediate help with cellar rats, missing flour, and civic dignity. Inn west, cellar below.")
+        lines.append("- Uncle Pib requests immediate help with cellar rats, missing flour, and civic dignity. Stores matter if the road stays cut. Inn west, cellar below.")
     elif _is_active(character, "roadside_howls") or _is_active(character, "fencebreakers"):
-        lines.append("- Mira's note: Trouble thickest beyond East Gate. Travel in company and report at the gate first.")
+        lines.append("- Mira's note: Claw mud, cut harness, and stolen rails all point east. Travel in company and report at the gate first.")
     elif _is_active(character, "ruk_the_fence_cutter"):
-        lines.append("- A newer warning reads: Fence chief still active beyond Wolf Turn. Do not go alone.")
+        lines.append("- A newer warning reads: Fence chief still active beyond Wolf Turn. He may know why the south lantern went black. Do not go alone.")
     elif _is_active(character, "what_whispers_in_the_wood") or _is_active(character, "greymaws_trail"):
         lines.append("- Sister Maybelle requests fresh moonleaf and fewer mauled volunteers from the south trail.")
     elif _is_completed(character, "fencebreakers"):
@@ -206,6 +253,7 @@ def _town_notice_board(character):
 
 
 DYNAMIC_TALK_HANDLERS = {
+    "captain_harl_rowan": _captain_harl_rowan,
     "leda_thornwick": _leda_thornwick,
     "torren_ironroot": _torren_ironroot,
 }
@@ -221,7 +269,7 @@ DYNAMIC_READ_HANDLERS = {
 }
 
 
-def get_entity_response(character, entity, action):
+def get_entity_response(character, entity, action, is_action=False):
     """Return contextual interaction text for a local entity."""
 
     entity_id = getattr(entity.db, "brave_entity_id", None)
@@ -232,31 +280,47 @@ def get_entity_response(character, entity, action):
     if action == "read" and entity_kind != "readable":
         return None
 
-    tutorial_response = get_tutorial_entity_response(character, entity, action)
-    if tutorial_response is not None:
-        return tutorial_response
+    response = get_tutorial_entity_response(character, entity, action, is_action=is_action)
+    if response is None:
+        if action == "talk":
+            handler = DYNAMIC_TALK_HANDLERS.get(entity_id)
+            if handler:
+                try:
+                    response = handler(character, is_action=is_action)
+                except TypeError:
+                    response = handler(character)
+            else:
+                response = _resolve_talk_response(character, entity_id)
 
-    if action == "talk":
-        response = _resolve_talk_response(character, entity_id)
-        if response is not None:
-            return response
-        handler = DYNAMIC_TALK_HANDLERS.get(entity_id)
-        return handler(character) if handler else None
+        elif action == "read":
+            handler = DYNAMIC_READ_HANDLERS.get(entity_id)
+            extra = get_extra_read_insight(character, entity_id)
+            if handler:
+                response = handler(character)
+            else:
+                response = STATIC_READ_RESPONSES.get(entity_id)
 
-    if action == "read":
-        handler = DYNAMIC_READ_HANDLERS.get(entity_id)
-        extra = get_extra_read_insight(character, entity_id)
-        if handler:
-            response = handler(character)
-            if extra:
+            if response and extra:
                 response += "\n\n" + extra
-            return response
-        response = STATIC_READ_RESPONSES.get(entity_id)
-        if response and extra:
-            response += "\n\n" + extra
-        return response
 
-    return None
+    if is_action and action == "talk" and response:
+        speech_line = " ".join(str(response).replace("\n", " ").split())
+        if speech_line:
+            sentence_end = min(
+                [index for index in (speech_line.find("."), speech_line.find("!"), speech_line.find("?")) if index >= 0]
+                or [-1]
+            )
+            if sentence_end >= 0:
+                speech_line = speech_line[: sentence_end + 1]
+            if len(speech_line) > 150:
+                speech_line = speech_line[:147].rstrip() + "..."
+
+            from world.browser_panels import broadcast_npc_speech, send_npc_speech_event
+
+            send_npc_speech_event(character, entity.key, speech_line)
+            broadcast_npc_speech(character.location, entity.key, speech_line, exclude=[character])
+
+    return response
 
 
 def get_entity_emote_response(character, entity, emote_text):

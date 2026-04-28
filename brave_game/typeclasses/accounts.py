@@ -22,15 +22,12 @@ several more options for customizing the Guest account system.
 
 """
 
-from world.bootstrap import ensure_brave_world, get_room
 from world.browser_panels import send_webclient_event
 from world.browser_views import build_account_view
-from world.questing import ensure_starter_quests
+from world.spawning import place_new_brave_character
 from world.title import build_account_title_screen
-from world.tutorial import begin_tutorial, get_tutorial_start_room, should_start_tutorial
 
 from evennia.accounts.accounts import DefaultAccount, DefaultGuest
-from evennia.server.models import ServerConfig
 from evennia.utils.utils import is_iter
 
 
@@ -148,33 +145,23 @@ class Account(DefaultAccount):
     def at_post_create_character(self, character, **kwargs):
         super().at_post_create_character(character, **kwargs)
         character.ensure_brave_character()
-        ensure_starter_quests(character)
+        place_new_brave_character(self, character)
 
-        if ServerConfig.objects.conf("last_initial_setup_step") != "done":
-            return
-
-        ensure_brave_world()
-        if should_start_tutorial(self):
-            begin_tutorial(character)
-            start_room = (
-                get_tutorial_start_room()
-                or get_room("brambleford_training_yard")
-                or get_room("brambleford_town_green")
-            )
-        else:
-            start_room = get_room("brambleford_training_yard") or get_room("brambleford_town_green")
-        if start_room:
-            character.home = start_room
-            if character.location != start_room:
-                character.move_to(start_room, quiet=True, move_type="spawn")
+    def at_post_puppet(self, character, session=None, **kwargs):
+        """Called just after puppeting is complete."""
+        print(f"\n!!! URGENT: ACCOUNT at_post_puppet for {character.key} !!!\n")
+        super().at_post_puppet(character, session=session, **kwargs)
 
     def at_look(self, target=None, session=None, **kwargs):
         """Show the Brave account title screen while OOC."""
 
         if target and not is_iter(target):
             return super().at_look(target=target, session=session, **kwargs)
-        send_webclient_event(self, session=session, brave_clear_all={})
-        send_webclient_event(self, session=session, brave_view=build_account_view(self))
+        
+        if session:
+            send_webclient_event(self, session=session, brave_clear_all={})
+            send_webclient_event(self, session=session, brave_view=build_account_view(self))
+            
         protocol = (getattr(session, "protocol_key", "") or "").lower() if session else ""
         if protocol in {"websocket", "ajax/comet", "webclient"}:
             return ""

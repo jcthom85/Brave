@@ -11,9 +11,10 @@ ROOMS = [
         "map_icon": "G",
         "safe": True,
         "desc": (
-            "Lantern posts ring the green like quiet guardians, their brasswork polished by "
-            "many practical hands. The square is compact but lively: muddy boots, gossip, and "
-            "the reassuring clatter of a frontier town trying very hard to look unbothered."
+            "The scent of dampened clover and wet slate rises from the wide expanse of the green. "
+            "A heavy stone well sits at the center, its wooden crank groaning as the wind catches the bucket. "
+            "Nearby, the town notice board stands tall, its surface layered in weathered paper and one fresh, "
+            "stark-white sheet that hasn't yet curled from the damp."
         ),
     },
     {
@@ -25,9 +26,11 @@ ROOMS = [
         "map_y": 0,
         "map_icon": "I",
         "safe": True,
+        "rest_allowed": True,
         "desc": (
-            "The inn smells of stew, woodsmoke, and fresh bread. Lanternlight warms the beams, "
-            "and every table seems to carry either a rumor or a complaint about wolves."
+            "The scent of rosemary and scorched fat drifts from the massive stone hearth, warming the dark timber beams above. "
+            "A low, constant murmur of anxious voices fills the taproom, competing with the crackle of the fire. "
+            "Every heavy table is crowded this morning, mostly by people who keep one eye fixed on the door."
         ),
         "activities": ["cooking"],
     },
@@ -41,9 +44,9 @@ ROOMS = [
         "map_icon": "U",
         "safe": True,
         "desc": (
-            "Shelves of boots, rain cloaks, rope, patched travel bags, and sensible trail goods line the walls in "
-            "neat practical ranks. Nothing in the room is fancy, but everything looks like it was chosen by someone "
-            "who expects bad weather, muddy children, and the occasional goblin."
+            "The sharp, clean scent of tanned leather and oilcloth hangs in the still air. "
+            "Orderly shelves hold ranks of durable boots, patched travel bags, and heavy rain-cloaks, all built for the grit of the road. "
+            "Near the counter, a wood-cutting axe leans against a stack of iron spikes, its edge recently and precisely sharpened."
         ),
     },
     {
@@ -56,8 +59,9 @@ ROOMS = [
         "map_icon": "Y",
         "safe": True,
         "desc": (
-            "Worn posts, chopped practice dummies, and chalked sparring rings fill the yard. "
-            "This is where Brambleford tries to turn willing hands into something closer to heroes."
+            "The dull thud of steel on timber and the shuffle of heavy boots echo across the yard. "
+            "Nocked practice posts and chalked sparring rings dominate the space, their surfaces worn smooth by years of drills. "
+            "The rhythmic hammer of the road bell still vibrates in the air, keeping everyone’s shoulders pulled tight and their eyes toward the south."
         ),
     },
     {
@@ -70,9 +74,9 @@ ROOMS = [
         "map_icon": "G",
         "safe": True,
         "desc": (
-            "A short fenced walk climbs north away from the main yard, marked by battered signposts and a practice gate "
-            "that looks built for instruction more than defense. Brambleford is close enough to feel safe, but the little annex "
-            "beyond it is clearly where the town squares away new hands before turning them loose."
+            "The cool morning breeze pulls through this narrow fenced corridor, carrying the sharp scent of wet gravel. "
+            "Battered wooden signposts lean at odd angles, pointing north toward the annex gate. "
+            "It is a quiet, transitionary space, where the safety of Brambleford begins to give way to the more disciplined air of the yard."
         ),
     },
     {
@@ -84,10 +88,11 @@ ROOMS = [
         "map_y": 0,
         "map_icon": "W",
         "safe": True,
+        "rest_allowed": True,
         "desc": (
-            "A compact fenced yard sits just above the main training grounds, laid out with deliberate simplicity: a central post, "
-            "clear lanes, and enough room to make mistakes without wandering into real danger. The whole place feels built to teach "
-            "a traveler how to settle their nerves before the road starts asking harder questions."
+            "The smell of wet wool and woodsmoke hangs heavy in the cool morning air. "
+            "Frantic hands move crates across the muddy timber of the yard, clearing a path for the gate. "
+            "Near the entrance, a splintered road-cart sits abandoned, its axle caked in a grey, clawed mud that hasn't yet dried."
         ),
     },
     {
@@ -100,8 +105,9 @@ ROOMS = [
         "map_icon": "Q",
         "safe": True,
         "desc": (
-            "Peg racks, folded blankets, oilcloth bundles, and labeled crates line the little shed wall to wall. Nothing here is ornate, "
-            "but everything has a place, and the place of every item looks chosen by someone who expects weather, mud, and avoidable mistakes."
+            "The air here is thick with the scent of dry cedar and cold iron. "
+            "Iron-bound crates are stacked haphazardly against the rough-hewn timber walls, some already pried open and half-emptied of their contents. "
+            "A heavy logbook lies open on a makeshift desk, its pages fluttering in the draft from the yard."
         ),
     },
     {
@@ -114,8 +120,9 @@ ROOMS = [
         "map_icon": "P",
         "safe": True,
         "desc": (
-            "A little dispatch post overlooks the yard with chalk slates, route pegs, and a bench meant for regrouping rather than lingering. "
-            "Whoever set it up understood that people travel better when somebody has bothered to think about how they find each other again."
+            "The dry, dusty scent of chalk hangs in the air around this small dispatch post. "
+            "A large slate board overlooks the yard, covered in route-pegs and hastily scribbled names. "
+            "One corner of the board has been wiped clean, waiting for the next set of hands to report for the road."
         ),
     },
     {
@@ -128,8 +135,9 @@ ROOMS = [
         "map_icon": "S",
         "safe": True,
         "desc": (
-            "A chalked ring, nicked practice posts, and a weapons rail mark out the sparring ground. The place feels less like a stage for heroics "
-            "and more like somewhere sensible adults teach people not to panic the first time teeth or steel point the wrong way."
+            "The smell of dry straw and old sweat is baked into the timber here. "
+            "A wide ring is marked out in thick white chalk, centered between nicked practice posts and a sturdy weapons rail. "
+            "A constant, low rattle rises from the pens just below the ledge, as if the ground itself is growing impatient."
         ),
     },
     {
@@ -142,8 +150,9 @@ ROOMS = [
         "map_icon": "V",
         "safe": False,
         "desc": (
-            "Low timber pens and rough feed bins crowd the edge of the annex, the sort of place Brambleford uses to keep troublesome yard vermin from "
-            "turning into a bigger nuisance. The smell is sharp, the straw is restless, and the lesson is obvious: even small trouble still bites."
+            "The sound of scratching and a low, rhythmic thumping vibrates through the timber floorboards here. "
+            "A faint, musky scent of animal sweat and old straw clings to the air. "
+            "The fencing is reinforced with iron mesh, and the gate latch is heavy, cold, and built to keep whatever is inside from tasting the yard."
         ),
     },
     {
@@ -156,8 +165,9 @@ ROOMS = [
         "map_icon": "M",
         "safe": True,
         "desc": (
-            "A practical stone hall with weather notices, petition ledgers, and a long table scarred by years of "
-            "local argument. Nothing here is elegant, but everything feels used by people trying to keep the town upright."
+            "The cool, still air inside the hall carries the faint scent of old wax and dry stone. "
+            "A long oak table sits at the center, its surface scarred by years of weighted arguments and heavy ledgers. "
+            "Neatly stacked petitions and weather-alerts line the sideboards, many of them bearing fresh ink and urgent, underlined notes."
         ),
     },
     {
@@ -170,8 +180,9 @@ ROOMS = [
         "map_icon": "C",
         "safe": True,
         "desc": (
-            "Soft lampglass, pale stone, and a brass bell frame give the little chapel a steadier kind of warmth than the "
-            "inn. Prayer ribbons stir in the draft, and someone has kept every lantern trimmed as if the town's courage depends on it."
+            "A steady, amber warmth radiates from the lanterns lining the pale stone walls. "
+            "Prayer ribbons of faded silk stir in a quiet draft, fluttering around the base of a massive brass bell frame. "
+            "Every glass pane is impeccably clean, as if the town’s very clarity depends on the light remaining unmarred."
         ),
     },
     {
@@ -184,8 +195,9 @@ ROOMS = [
         "map_icon": "E",
         "safe": True,
         "desc": (
-            "The eastern gate looks sturdy enough, but the road beyond it tells a less comforting "
-            "story. Wagon ruts cut through the mud, and the sentries keep glancing toward the hills."
+            "The sharp whistle of the wind cuts through the iron portcullis of the eastern gate. "
+            "Deep wagon ruts are carved into the mud leading out of town, each one filled with a skim of dark, unsettled water. "
+            "Beyond the heavy timber gates, the road climbs into the grey hills, appearing more like a warning than a path."
         ),
     },
     {
@@ -198,9 +210,9 @@ ROOMS = [
         "map_icon": "W",
         "safe": True,
         "desc": (
-            "A weathered little dock juts into the Bramble River beside a rack of loaner poles, bait "
-            "tins, and a bench rubbed smooth by patient elbows. The water is slow here, brown-green in "
-            "the shallows and silver where the current catches lanternlight."
+            "The slow, rhythmic lapping of the Bramble River against the timber piles creates a constant, muddy music. "
+            "A weathered dock juts into the brown-green shallows, lined with a rack of nicked loaner poles and rusted bait tins. "
+            "Farther out, the silver current catches the light of the town lanterns, suggesting movement in the deep."
         ),
         "activities": ["fishing"],
     },
@@ -214,9 +226,9 @@ ROOMS = [
         "map_icon": "F",
         "safe": True,
         "desc": (
-            "A broad smithy yard opens around a coal-hot forge, a quench trough, and workbenches scarred by years of practical "
-            "repair. Fresh nails, bent hinges, spearheads, and half-finished buckles hang from pegs above a clean anvil block "
-            "that looks capable of judging your gear on sight."
+            "A dry, radiating heat pulses from the heart of the smithy yard. "
+            "A massive stone quench-trough sits beside a clean anvil block that is scarred by years of hard, practical repair. "
+            "Pegs above the workbench are heavy with fresh nails and half-finished spearheads, each one reflecting the orange glow of the coal-hot forge."
         ),
     },
     {
@@ -229,9 +241,9 @@ ROOMS = [
         "map_icon": "O",
         "safe": True,
         "desc": (
-            "The observatory crowns Brambleford's highest rise, all brass braces, stone arches, and lantern "
-            "glass polished brighter than the road probably deserves. A great telescope points upward through "
-            "the open dome while a lower chamber hums with stranger work below."
+            "The air here is thin and cold, carrying the faint, metallic hum of clockwork. "
+            "Massive stone arches support a crown of polished brass braces and impeccably clear lantern glass. "
+            "A great telescope points toward the silent stars through an open dome, while a low vibration in the floorboards hints at stranger work being done in the chambers below."
         ),
     },
     {
@@ -244,9 +256,9 @@ ROOMS = [
         "map_icon": "H",
         "safe": True,
         "desc": (
-            "Wooden cases, brass plaques, and open wall-hooks fill the hall above the observatory steps. "
-            "Some shelves still wait empty, but the room has been built with the confidence of people who "
-            "fully intend to bring strange things home."
+            "The silent hall smells of aged oak and cold, polished metal. "
+            "Row upon row of glass-fronted wooden cases and empty brass plaques line the walls, illuminated by the steady glow of wall-mounted lanterns. "
+            "Several heavy wall-hooks and wider shelves remain conspicuously bare, waiting for the return of whatever strange things have yet to be found."
         ),
     },
     {
@@ -259,9 +271,9 @@ ROOMS = [
         "map_icon": "N",
         "safe": True,
         "desc": (
-            "A circular chamber of old stone and newer fittings surrounds a standing ring of pale light. "
-            "Brass plaques, humming anchor lines, and a floor inlaid with star charts make the place feel "
-            "half observatory, half impossible harbor."
+            "A low-frequency hum vibrates through the circular stone floor, carrying the faint, metallic scent of ozone. "
+            "At the center of the chamber, a standing ring of pale, shimmering light casts long, shifting shadows against walls inlaid with complex brass star charts. "
+            "Anchor lines of braided copper lead into the floor, thrumming with the rhythmic pulse of an impossible harbor."
         ),
         "portal_hub": True,
     },
@@ -275,9 +287,9 @@ ROOMS = [
         "map_icon": "C",
         "safe": False,
         "desc": (
-            "The inn cellar is all stone, old barrel racks, and corners that seem designed specifically "
-            "for unpleasant scratching noises. Flour dust, spilled grain, and chewed crate corners make it "
-            "clear the rats have been treating it as a festival ground."
+            "The heavy, stifling air of the cellar smells of damp earth and spilled grain. "
+            "Old stone barrel racks line the low-ceilinged room, their supports caked in a fine, white layer of flour dust. "
+            "Chewed crate corners and the dry rattle of claws against wood echo from the deeper, darker recesses where the lantern-light doesn't quite reach."
         ),
     },
     {
@@ -374,7 +386,7 @@ ROOMS = [
         "safe": False,
         "desc": (
             "The road here is still close enough to town that you can imagine help arriving quickly. "
-            "Broken fence rails and muddy pawprints argue otherwise."
+            "Broken fence rails, clawed mud, and a torn strip of cart canvas argue that trouble already tested that theory before dawn."
         ),
     },
     {
@@ -388,7 +400,7 @@ ROOMS = [
         "safe": False,
         "desc": (
             "A long stretch of smashed fence marks the edge of several hard-worked fields. "
-            "Someone has dragged off planks, and something small has left knife-nicked cuts in the posts."
+            "Someone has dragged off planks in a hurry, and small knife cuts score the posts in the same direction, like the whole fence line was being stripped for a purpose."
         ),
     },
     {
@@ -402,7 +414,7 @@ ROOMS = [
         "safe": False,
         "desc": (
             "The road bends sharply around a thorny rise, and the wind seems to carry every sound "
-            "twice. Prints crisscross the mud here: boot heels, claws, and the narrow mess of goblin feet."
+            "twice. Prints crisscross the mud here: boot heels, claws, narrow goblin feet, and drag marks from rails hauled toward the camp beyond."
         ),
     },
     {
@@ -416,7 +428,7 @@ ROOMS = [
         "safe": False,
         "desc": (
             "Broken wagon frames and stolen fence rails have been stacked into a nasty little camp. "
-            "Chopped boards litter the mud, and a chopping block near the fire bears far too many fresh cuts."
+            "Chopped boards litter the mud, and a chopping block near the fire bears fresh wagon paint, lantern glass grit, and far too many axe cuts."
         ),
     },
     {
@@ -948,11 +960,11 @@ EXITS = [
     {
         "id": "gate_walk_to_training_yard",
         "source": "tutorial_gate_walk",
-        "destination": "brambleford_mastery_hall",
+        "destination": "brambleford_training_yard",
         "key": "south",
         "direction": "south",
-        "label": "Mastery Hall",
-        "aliases": ["s", "hall", "mastery hall", "study"],
+        "label": "Training Yard",
+        "aliases": ["s", "yard", "training yard", "harl"],
     },
     {
         "id": "gate_walk_to_wayfarers_yard",
@@ -1972,8 +1984,8 @@ WORLD_OBJECTS = [
         "kind": "readable",
         "location": "brambleford_town_green",
         "desc": (
-            "Pinned notices mention goblin-cut fences, missing flour, and wolves too bold for comfort. "
-            "The notes are practical rather than dramatic, which somehow makes them more convincing."
+            "Pinned notices mention goblin-cut fences, missing flour, wolves too bold for comfort, and one fresh alarm sheet "
+            "about the dead south-road lantern. The newest ink is still dark."
         ),
     },
     {
@@ -1994,8 +2006,19 @@ WORLD_OBJECTS = [
         "kind": "npc",
         "location": "tutorial_wayfarers_yard",
         "desc": (
-            "Sergeant Tamsin stands like someone who has spent years turning frightened travelers into steadier versions of themselves. "
-            "Her voice looks ready to be blunt, but not unkind."
+            "Sergeant Tamsin stands at the yard gate with alarm-bell tension in her shoulders and absolute control in her voice. "
+            "She looks ready to turn panic into a checklist by force of will."
+        ),
+    },
+    {
+        "id": "tutorial_damaged_cart",
+        "key": "damaged cart",
+        "aliases": ["cart", "damaged cart", "road cart", "harness", "splinters"],
+        "kind": "readable",
+        "location": "tutorial_wayfarers_yard",
+        "desc": (
+            "A road cart leans beside the yard gate with one wheel packed in clawed mud and fence splinters. "
+            "The harness has not snapped; it has been cut clean through."
         ),
     },
     {
@@ -2006,7 +2029,7 @@ WORLD_OBJECTS = [
         "location": "tutorial_quartermaster_shed",
         "desc": (
             "Nella looks like a woman who could judge a traveler's preparedness from twenty paces and improve it from ten. "
-            "Her hands never stop finding straps to straighten or bundles to square."
+            "This morning she has three crates open, a south-road slate under one elbow, and no patience for mystery pockets."
         ),
     },
     {
@@ -2016,7 +2039,8 @@ WORLD_OBJECTS = [
         "kind": "readable",
         "location": "tutorial_quartermaster_shed",
         "desc": (
-            "A square slate board hangs beside the crate stacks, its lettering neat enough to suggest that sloppy people are corrected here as quickly as sloppy packs."
+            "A square slate board hangs beside the crate stacks, its lettering neat enough to suggest that sloppy people are corrected here as quickly as sloppy packs. "
+            "A fresh line across the top reads: SOUTH LANTERN OUT."
         ),
     },
     {
@@ -2046,7 +2070,8 @@ WORLD_OBJECTS = [
         "kind": "npc",
         "location": "tutorial_sparring_ring",
         "desc": (
-            "Brask leans on the rail like a man who has watched enough bad first fights to know exactly when to bark and when to let a lesson land on its own."
+            "Brask leans on the rail like a man who has watched enough bad first fights to know exactly when to bark and when to let a lesson land on its own. "
+            "The pens below rattle every time the road bell rolls through the yard."
         ),
     },
     {

@@ -325,7 +325,7 @@ def borrow_fishing_tackle(character, selection="kit"):
     if choice in {"lure", "hook", "bait"}:
         character.db.brave_active_fishing_lure = STARTER_FISHING_LURE
         return True, "You borrow a |wPlain Hook|n from the wharf rack and set it as your active lure."
-    return False, "Borrow `fish borrow kit`, `fish borrow rod`, or `fish borrow lure`."
+    return False, "Borrow a fishing kit, rod, or lure from the rack to begin."
 
 
 def set_selected_fishing_rod(character, query):
@@ -852,9 +852,9 @@ def reel_line(character):
     rod = FISHING_RODS.get(str(state.get("rod_key") or "").lower(), {})
     lure = FISHING_LURES.get(str(state.get("lure_key") or "").lower(), {})
     hook_chance = float(fish_entry.get("hook_chance", 1.0) or 1.0)
-    hook_chance = min(0.98, hook_chance + (float(rod.get("stability", 0) or 0) * 0.08))
+    hook_chance = min(1.0, hook_chance + (float(rod.get("stability", 0) or 0) * 0.08))
     if fish_entry.get("item") in set(lure.get("attracts", []) or []):
-        hook_chance = min(0.98, hook_chance + 0.04)
+        hook_chance = min(1.0, hook_chance + 0.04)
     if random() > hook_chance:
         return False, "The line jerks, the hook bites, and then the fish twists free at the last second."
 
@@ -905,9 +905,8 @@ def format_pole_rack_text():
     """Return fishing instructions for the wharf."""
 
     return (
-        "A hand-painted note reads: CHECK YOUR TACKLE WITH `fish tackle`, BORROW STARTER GEAR WITH "
-        "`fish borrow kit`, CAST WITH `fish` OR `fish cast`, AND WHEN THE LINE TUGS BACK USE `reel` "
-        "BEFORE THE RIVER CHANGES ITS MIND."
+        "A hand-painted note reads: CHECK YOUR TACKLE, BORROW STARTER GEAR IF YOU NEED IT, "
+        "CAST YOUR LINE, AND WHEN IT TUGS BACK, REEL IN BEFORE THE RIVER CHANGES ITS MIND."
     )
 
 

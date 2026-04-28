@@ -65,21 +65,21 @@ HELP_ENTRY_DICTS = [
             The live slice is still compact, but the core loop is in place. You can already:
 
             - Explore Brambleford, the current fantasy ladder through Drowned Weir, and the first portal world
-            - Use `build`, `race`, and `class` to set your starting identity
-            - Use `sheet`, `gear`, and `pack` to inspect your adventurer and loot
-            - Use `fish` and `reel` at Hobbyist's Wharf for the first town activity loop
-            - Use `cook` and `eat` at the Lantern Rest hearth for simple meal buffs
-            - Use `shop`, `sell`, and `shift` at Brambleford Outfitters for the first town trade loop
-            - Use `forge` at Ironroot Forge to turn field loot and silver into better gear
-            - Use `pray` at the Chapel of the Dawn Bell for a modest one-encounter blessing
-            - Use `portals` at the Nexus Gate to inspect the first guest-world bridge
-            - Use `party` to form a family group before tougher fights
-            - Use `party where` to find one another and `party follow` to stay together
-            - Use `quests` to track your starter objectives
-            - Use `n`, `e`, `s`, `w`, `u`, and `d` for primary movement, with `map` and `minimap` for layout
-            - Use `travel` as a named-route fallback when you want place names spelled out
-            - Use `talk` and `read` to get guidance from Brambleford's NPCs and notice board
-            - Use `fight`, `attack`, `use`, and `rest` in the first combat slice
+            - Review your race and class to set your starting identity
+            - Check your sheet, gear, and pack to inspect your adventurer and loot
+            - Fish and reel at Hobbyist's Wharf for the first town activity loop
+            - Cook and eat at the Lantern Rest hearth for simple meal buffs
+            - Shop, sell, and use shifts at Brambleford Outfitters for the first town trade loop
+            - Use the forge at Ironroot Forge to turn field loot and silver into better gear
+            - Pray at the Chapel of the Dawn Bell for a modest one-encounter blessing
+            - Inspect portals at the Nexus Gate to check the first guest-world bridge
+            - Form a family party before tougher fights
+            - Check your party's location or follow others to stay together
+            - Track your quests to see your current objectives
+            - Move through the world with cardinal directions, and check your map or minimap for layout
+            - Use the travel menu as a named-route fallback when you want place names spelled out
+            - Talk and read to get guidance from Brambleford's NPCs and notice board
+            - Fight, use abilities, and rest in the first combat slice
 
             Warrior, Cleric, Ranger, Mage, Rogue, Paladin, and Druid are currently playable.
 
@@ -87,28 +87,27 @@ HELP_ENTRY_DICTS = [
 
             ## First Steps
 
-            Use `build` to see your current options before you start leveling.
-            Use `sheet` to see your current race, class, level, and unlocked abilities.
-            Use `gear` to inspect your starter loadout and `pack` to review any loot.
-            Use `map` in any room to see the current area layout.
-            Use cardinal movement like `w`, `n`, `e`, `s`, `u`, and `d` as your normal way of getting around.
-            Use `w` from the inn to reach Brambleford Outfitters when you want to turn loot into silver.
-            Use `s` from Town Green to reach Hobbyist's Wharf and try `fish`.
-            Use `s` again from the wharf to reach Ironroot Forge and check `forge` for gear upgrades.
-            Use `pray` at the Chapel of the Dawn Bell when you want a modest one-run blessing before a harder push.
-            Use `cook` in the inn to see simple fish recipes, then `eat <meal>` to carry a buff into the field.
-            Use `n` to reach the Training Yard, then `e` to reach the Great Observatory and `e` again for the Nexus Gate.
-            At the ring, use `portals` and then `e` to enter the first guest world.
-            Use `party` to review members or invite allies standing in the same room.
-            Use `party where` to get route hints to your family and `party follow` when you want someone to lead.
-            Use `shop` to review prices, `sell` to trade pack items, and `shift` to improve your next few sales.
-            Use `quests` to see what places you should visit first.
-            Use `travel` with no arguments when you want a named route list from your current room.
-            Use `talk` or `read` in town if you want direct guidance without leaving the fiction.
+            Review your build to see your current options before you start leveling.
+            Check your sheet to see your current race, class, level, and unlocked abilities.
+            Inspect your gear to see your starter loadout and your pack to review any loot.
+            Check your map in any room to see the current area layout.
+            Use cardinal movement as your normal way of getting around.
+            Go west from the inn to reach Brambleford Outfitters when you want to turn loot into silver.
+            Go south from Town Green to reach Hobbyist's Wharf to try fishing.
+            Go south again from the wharf to reach Ironroot Forge for gear upgrades.
+            Pray at the Chapel of the Dawn Bell when you want a modest one-run blessing before a harder push.
+            Cook in the inn to see simple fish recipes, then eat the meal to carry a buff into the field.
+            Go north to reach the Training Yard, then east to reach the Great Observatory and the Nexus Gate.
+            At the ring, inspect portals and then step through to enter the first guest world.
+            Review your party members or invite allies standing in the same room.
+            Check party locations for route hints to your family or follow when you want someone to lead.
+            Shop to review prices, sell your pack items, and use shifts to improve your next few sales.
+            Check your quests to see what places you should visit first.
+            Use the travel menu when you want a named route list from your current room.
+            Talk or read in town if you want direct guidance without leaving the fiction.
 
-            In dangerous rooms, use `enemies` to preview likely threats and `fight` to engage them.
-            During combat, use `attack <enemy>` for a basic hit or `use <ability> [= target]`
-            for your class action.
+            In dangerous rooms, size up your enemies to preview likely threats and start the fight to engage them.
+            During combat, use basic attacks or your class abilities for special actions.
 
             ## Current Scope
 

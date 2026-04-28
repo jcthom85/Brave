@@ -51,6 +51,12 @@ class ChargenViewTests(unittest.TestCase):
         self.assertEqual("Aria", form.get("fields", [])[0].get("value"))
         self.assertEqual("Save And Continue", form.get("submit_label"))
         self.assertEqual("raw", form.get("submit_mode"))
+        rules = _section(view, "Rules")
+        self.assertEqual("list", rules.get("kind"))
+
+    def test_gender_step_renders_gender_choices(self):
+        view = build_chargen_view(DummyAccount(), {"step": "menunode_choose_gender", "name": "Aria"})
+
         genders = _section(view, "Gender")
         self.assertEqual({"Male", "Female", "Non-binary"}, {entry.get("title") for entry in genders.get("items", [])})
 

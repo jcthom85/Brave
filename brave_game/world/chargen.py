@@ -72,7 +72,9 @@ def get_next_chargen_step(state):
         return "menunode_choose_race"
     if not state.get("class"):
         return "menunode_choose_class"
-    if not state.get("name") or not state.get("gender"):
+    if not state.get("gender"):
+        return "menunode_choose_gender"
+    if not state.get("name"):
         return "menunode_choose_name"
     return "menunode_confirm"
 
@@ -82,7 +84,7 @@ def get_resume_chargen_step(account):
 
     state = get_chargen_state(account)
     if not has_chargen_progress(account):
-        return "menunode_welcome"
+        return "menunode_choose_race"
     return get_next_chargen_step(state)
 
 
@@ -117,16 +119,22 @@ def _summarize_state(state):
     )
 
 
-def _finish_chargen(caller, menu):
+def _finish_chargen(caller, menu, **kwargs):
     """Handle leaving the character creator."""
 
     account = caller.account
+    # Close the menu explicitly
+    if hasattr(menu, "close_menu"):
+        menu.close_menu()
+
     auto_play = getattr(getattr(caller, "ndb", None), "brave_chargen_autoplay", None)
     if getattr(caller, "ndb", None) is not None and hasattr(caller.ndb, "brave_chargen_autoplay"):
         del caller.ndb.brave_chargen_autoplay
     if auto_play:
         account.execute_cmd(f"play {auto_play}", session=caller)
         return
+    
+    # Force re-render of character select screen
     account.execute_cmd("look", session=caller)
 
 
@@ -152,53 +160,40 @@ def start_brave_chargen(session):
     )
 
 
-def menunode_welcome(caller, raw_string=None, **kwargs):
-    """Chargen introduction / resume node."""
+def menunode_choose_gender(caller, raw_string=None, error=None, **kwargs):
+    """Prompt for character gender."""
 
     account = caller.account
-    state = set_chargen_state(account, step="menunode_welcome")
-    _push_chargen_view(caller, state)
-    slots_left = account.get_available_character_slots()
-    slot_text = "unlimited" if slots_left is None else str(slots_left)
-    next_step = get_next_chargen_step(state)
-    next_label = {
-        "menunode_choose_race": "Choose a race",
-        "menunode_choose_class": "Choose a class",
-        "menunode_choose_name": "Choose a name",
-        "menunode_confirm": "Review and create your character",
-    }[next_step]
-
+    state = set_chargen_state(account, step="menunode_choose_gender")
+    _push_chargen_view(caller, state, error=error)
     text = dedent(
         f"""\
-        |wBrave Character Creation|n
+        |wChoose a Gender|n
 
-        Build a new adventurer for account |c{account.key}|n.
-
-        Open character slots: |w{slot_text}|n
+        Select the gender identity for your character.
 
         Current draft:
         {_summarize_state(state)}
-
-        Next step:
-        |w{next_label}|n
         """
     )
-
-    options = [
-        {
-            "key": ("continue", "begin", "resume", "1"),
-            "desc": next_label,
-            "goto": (_continue_chargen, {}),
-        }
-    ]
+    options = (
+        {"key": ("male", "man", "m"), "desc": "Male", "goto": (_set_character_gender, {"gender_key": "male"})},
+        {"key": ("female", "woman", "f"), "desc": "Female", "goto": (_set_character_gender, {"gender_key": "female"})},
+        {"key": ("nonbinary", "non-binary", "non binary", "nb"), "desc": "Non-binary", "goto": (_set_character_gender, {"gender_key": "nonbinary"})},
+        {"key": ("back", "b"), "desc": "Go back to class selection.", "goto": "menunode_choose_class"},
+    )
     return text, options
 
 
-def _continue_chargen(caller, raw_string=None, **kwargs):
-    """Continue the chargen flow from the next required step."""
+def _set_character_gender(caller, raw_string=None, gender_key=None, **kwargs):
+    """Validate and save character gender."""
 
-    state = get_chargen_state(caller.account)
-    return get_next_chargen_step(state)
+    account = caller.account
+    gender = normalize_brave_gender(gender_key or raw_string)
+    if gender not in VALID_BRAVE_GENDERS:
+        return "menunode_choose_gender", {"error": "|rChoose male, female, or non-binary.|n"}
+    set_chargen_state(account, gender=gender, step="menunode_choose_name")
+    return "menunode_choose_name"
 
 
 def menunode_choose_name(caller, raw_string=None, error=None, **kwargs):
@@ -218,7 +213,6 @@ def menunode_choose_name(caller, raw_string=None, error=None, **kwargs):
           - 2 to 24 characters
           - letters, spaces, apostrophes, and hyphens only
           - must be unique across all characters
-          - gender must be set before you continue
 
         Current draft:
         {_summarize_state(state)}
@@ -226,10 +220,7 @@ def menunode_choose_name(caller, raw_string=None, error=None, **kwargs):
     )
     options = (
         {"key": "_default", "goto": _set_character_name},
-        {"key": ("male", "man", "m"), "desc": "Set gender: Male", "goto": (_set_character_gender, {"gender_key": "male"})},
-        {"key": ("female", "woman", "f"), "desc": "Set gender: Female", "goto": (_set_character_gender, {"gender_key": "female"})},
-        {"key": ("nonbinary", "non-binary", "non binary", "nb"), "desc": "Set gender: Non-binary", "goto": (_set_character_gender, {"gender_key": "nonbinary"})},
-        {"key": ("back", "b"), "desc": "Return to the chargen overview.", "goto": "menunode_welcome"},
+        {"key": ("back", "b"), "desc": "Go back to gender selection.", "goto": "menunode_choose_gender"},
     )
     return text, options
 
@@ -245,26 +236,7 @@ def _set_character_name(caller, raw_string, **kwargs):
     if Character.objects.filter_family(db_key__iexact=name).exists():
         return "menunode_choose_name", {"error": "|rThat character name is already taken.|n"}
 
-    state = set_chargen_state(account, name=name)
-    if not state.get("gender"):
-        set_chargen_state(account, step="menunode_choose_name")
-        return "menunode_choose_name", {"error": "|yName saved. Choose a gender before continuing.|n"}
-    set_chargen_state(account, step="menunode_confirm")
-    return "menunode_confirm"
-
-
-def _set_character_gender(caller, raw_string=None, gender_key=None, **kwargs):
-    """Validate and save character gender."""
-
-    account = caller.account
-    gender = normalize_brave_gender(gender_key or raw_string)
-    if gender not in VALID_BRAVE_GENDERS:
-        return "menunode_choose_name", {"error": "|rChoose male, female, or non-binary.|n"}
-    state = set_chargen_state(account, gender=gender)
-    if not state.get("name"):
-        set_chargen_state(account, step="menunode_choose_name")
-        return "menunode_choose_name", {"error": f"|gGender set to {get_brave_gender_label(gender)}.|n Enter a name to continue."}
-    set_chargen_state(account, step="menunode_confirm")
+    set_chargen_state(account, name=name, step="menunode_confirm")
     return "menunode_confirm"
 
 
@@ -291,7 +263,7 @@ def menunode_choose_race(caller, raw_string=None, **kwargs):
             }
         )
     options.append(
-        {"key": ("back", "b"), "desc": "Return to the chargen overview.", "goto": "menunode_welcome"}
+        {"key": ("back", "b"), "desc": "Return to the character selection screen.", "goto": (_finish_chargen, {})}
     )
     return text, options
 
@@ -337,8 +309,8 @@ def menunode_choose_class(caller, raw_string=None, **kwargs):
 def _set_class(caller, raw_string=None, class_key=None, **kwargs):
     """Save class selection."""
 
-    set_chargen_state(caller.account, **{"class": class_key, "step": "menunode_choose_name"})
-    return "menunode_choose_name"
+    set_chargen_state(caller.account, **{"class": class_key, "step": "menunode_choose_gender"})
+    return "menunode_choose_gender"
 
 
 def menunode_confirm(caller, raw_string=None, error=None, **kwargs):
@@ -365,11 +337,10 @@ def menunode_confirm(caller, raw_string=None, error=None, **kwargs):
     )
     options = (
         {
-            "key": ("finish play", "play now", "enter world"),
-            "desc": "Create this character and enter the world immediately",
+            "key": ("finish play", "play now", "enter world", "1", "finish", "create", "confirm"),
+            "desc": "Create this character and enter the world",
             "goto": (_finalize_character, {"play_now": True}),
         },
-        {"key": ("finish", "create", "confirm", "1"), "desc": "Create this character", "goto": _finalize_character},
         {"key": ("back", "b"), "desc": "Go back to name selection.", "goto": "menunode_choose_name"},
     )
     return text, options

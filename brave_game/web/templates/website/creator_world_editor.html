@@ -80,7 +80,7 @@
     }
     .room-row strong, .room-row span, .selector-row strong, .selector-row span { display: block; }
     .room-row span, .selector-row span { color: var(--muted); font-size: 0.92rem; margin-top: 4px; }
-    .workspace { display: grid; grid-template-rows: auto auto minmax(360px, auto) minmax(240px, auto); gap: 16px; }
+    .workspace { display: grid; gap: 16px; }
     .meta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 0.94rem; }
     .toolbar, .editor-toolbar { display: flex; flex-wrap: wrap; gap: 10px; }
     .stack { display: grid; gap: 12px; }
@@ -119,14 +119,230 @@
     }
     .status.good { background: #eef8f1; color: var(--good); border-color: rgba(47, 109, 76, 0.24); }
     .status.bad { background: #fff0ed; color: var(--bad); border-color: rgba(141, 49, 34, 0.24); }
-    .editor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-    @media (max-width: 1180px) { .editor-grid { grid-template-columns: 1fr; } }
+    .builder-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
+      gap: 16px;
+      align-items: start;
+    }
+    .inspector-panel {
+      position: sticky;
+      top: 16px;
+      max-height: calc(100vh - 32px);
+      display: flex;
+      flex-direction: column;
+    }
+    .inspector-panel .panel-body {
+      overflow: auto;
+    }
+    .inspector-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 253, 250, 0.72);
+    }
+    .inspector-tab {
+      border-radius: 12px;
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+    .inspector-tab.active {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+    .editor-tab-panel { display: none; }
+    .editor-tab-panel.active { display: grid; gap: 12px; }
+    .editor-tab-panel h3 { margin: 0; }
+    .editor-tab-panel > p { margin: 0; color: var(--muted); line-height: 1.4; }
+    .entity-kind-fields { display: none; }
+    .entity-kind-fields.active { display: grid; }
+    @media (max-width: 1280px) { .builder-layout { grid-template-columns: 1fr; } .inspector-panel { position: static; max-height: none; } }
     @media (max-width: 980px) { .shell { grid-template-columns: 1fr; } .room-list { max-height: 280px; } .field-grid { grid-template-columns: 1fr; } }
   
     .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
     .validation-notes[hidden] { display:none; }
     .validation-notes strong { display:block; margin-bottom:8px; }
     .validation-notes ul { margin:0; padding-left:20px; display:grid; gap:6px; }
+    .graph-panel .panel-body { display: grid; gap: 12px; padding: 0; }
+    .graph-toolbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 280px) minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: end;
+      padding: 16px 18px 0;
+    }
+    .graph-toolbar .field { gap: 5px; }
+    .graph-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    .graph-actions button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .graph-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 18px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .graph-chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fffdfa;
+      padding: 6px 10px;
+    }
+    .graph-wrap {
+      position: relative;
+      min-height: 560px;
+      border-top: 1px solid var(--line);
+      background:
+        linear-gradient(rgba(212, 195, 171, 0.34) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212, 195, 171, 0.34) 1px, transparent 1px),
+        #f7f0e3;
+      background-size: 56px 56px;
+      overflow: auto;
+    }
+    .graph-menu {
+      position: absolute;
+      z-index: 5;
+      min-width: 180px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: 0 16px 36px rgba(24, 32, 40, 0.16);
+      padding: 6px;
+      display: none;
+    }
+    .graph-menu.open { display: grid; gap: 6px; }
+    .graph-menu button {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: none;
+      text-align: left;
+    }
+    .world-graph {
+      position: relative;
+      width: 1800px;
+      height: 1120px;
+      transform-origin: top left;
+    }
+    .graph-lines {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .graph-line { stroke: #715b48; stroke-width: 3; fill: none; opacity: 0.72; }
+    .graph-line.one-way { stroke: var(--accent); stroke-dasharray: 8 7; }
+    .graph-line.dangling { stroke: var(--bad); stroke-dasharray: 4 6; }
+    .graph-line.pending { stroke: var(--good); stroke-width: 4; opacity: 0.9; }
+    .room-node {
+      position: absolute;
+      width: 142px;
+      min-height: 72px;
+      border: 2px solid #7f6b59;
+      border-radius: 8px;
+      padding: 10px;
+      background: #fffdfa;
+      color: var(--ink);
+      box-shadow: 0 10px 22px rgba(24, 32, 40, 0.14);
+      cursor: grab;
+      text-align: left;
+      transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+    }
+    .room-node.active {
+      border-color: var(--accent);
+      box-shadow: 0 12px 26px rgba(164, 79, 47, 0.22);
+      transform: translateY(-1px);
+    }
+    .room-node.draft {
+      border-style: dashed;
+      opacity: 0.7;
+    }
+    .room-node.connect-source { border-color: var(--good); box-shadow: 0 0 0 4px rgba(47, 109, 76, 0.18); }
+    .room-node.warning { border-color: var(--bad); }
+    .room-node-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .node-handle {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      color: white;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 20;
+      border: 2px solid white;
+      box-shadow: 0 4px 12px rgba(164, 79, 47, 0.32);
+      transition: all 120ms ease;
+    }
+    .node-handle:hover { 
+      transform: scale(1.15); 
+      background: var(--good);
+      box-shadow: 0 6px 16px rgba(47, 109, 76, 0.4);
+    }
+    .node-handle.n { top: -16px; left: calc(50% - 14px); }
+    .node-handle.s { bottom: -16px; left: calc(50% - 14px); }
+    .node-handle.e { right: -16px; top: calc(50% - 14px); }
+    .node-handle.w { left: -16px; top: calc(50% - 14px); }
+    .room-node strong {
+      display: block;
+      font-size: 0.92rem;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+    .room-node span {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font: 0.78rem/1.25 "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      overflow-wrap: anywhere;
+    }
+    .graph-issues {
+      display: grid;
+      gap: 6px;
+      max-height: 130px;
+      overflow: auto;
+      padding: 0 18px 16px;
+      color: var(--bad);
+      font-size: 0.92rem;
+    }
+    .graph-issues:empty { display: none; }
+    @media (max-width: 980px) {
+      .graph-toolbar { grid-template-columns: 1fr; }
+      .graph-actions { justify-content: flex-start; }
+      .graph-wrap { min-height: 440px; }
+    }
+    .raw-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fffdfa;
+      overflow: hidden;
+    }
+    .raw-panel summary {
+      cursor: pointer;
+      padding: 12px 14px;
+      color: var(--ink);
+      font-weight: 700;
+      border-bottom: 1px solid transparent;
+    }
+    .raw-panel[open] summary { border-bottom-color: var(--line); }
+    .raw-panel textarea { border: 0; border-radius: 0; min-height: 180px; }
+    .builder-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 
   </style>
 </head>
@@ -134,8 +350,8 @@
   <div class="shell">
     <section class="panel">
       <div class="panel-head">
-        <h1>World Graph</h1>
-        <p>Browse rooms, then edit the room itself plus its outgoing exits and placed entities from one workspace.</p>
+        <h1>Rooms</h1>
+        <p>Search authored rooms, select one, then edit it from the map inspector.</p>
       </div>
       <div class="panel-body">
         <input id="room-search" class="search" type="search" placeholder="Search rooms by id, title, or zone">
@@ -146,7 +362,7 @@
     <section class="workspace">
       <div class="panel">
         <div class="panel-head">
-          <h2 id="editor-title">World Editor</h2>
+          <h2 id="editor-title">World Builder</h2>
           <p id="editor-subtitle">Select a room from the left to load its room, exit, and entity payloads.</p>
         </div>
         <div class="panel-body">
@@ -165,72 +381,129 @@
 
       <div id="validation-notes" class="validation-notes" hidden></div>
 
-      <div class="editor-grid">
-        <section class="panel stack">
+      <div class="builder-layout">
+        <div class="panel graph-panel">
           <div class="panel-head">
-            <h3>Room Payload</h3>
-            <p>Author the selected room definition.</p>
+            <h2>Room Map</h2>
+            <p>Drag rooms to change map coordinates. Connect mode and direction handles stage exits for review.</p>
           </div>
-          <div class="panel-body stack">
-            <div class="editor-toolbar">
-              <button id="diff-room" type="button">Dry-Run Room</button>
-              <button id="write-room" type="button">Write Room</button>
+          <div class="panel-body">
+            <div class="graph-toolbar">
+              <div class="field">
+                <label for="region-filter">Map Region</label>
+                <select id="region-filter"></select>
+              </div>
+              <div class="graph-meta">
+                <span id="graph-room-count" class="graph-chip">Rooms: 0</span>
+                <span id="graph-exit-count" class="graph-chip">Exits: 0</span>
+                <span id="graph-mode" class="graph-chip">Select mode</span>
+              </div>
+              <div class="graph-actions">
+                <button id="new-room" class="secondary" type="button">New Room</button>
+                <button id="fit-graph" class="secondary" type="button">Fit Graph</button>
+                <button id="connect-rooms" class="secondary" type="button">Connect Rooms</button>
+                <button id="write-position" type="button" disabled>Write Position</button>
+              </div>
             </div>
-            <textarea id="room-json" spellcheck="false"></textarea>
+            <div id="graph-wrap" class="graph-wrap">
+              <div id="world-graph" class="world-graph">
+                <svg id="graph-lines" class="graph-lines" aria-hidden="true"></svg>
+              </div>
+              <div id="graph-menu" class="graph-menu" aria-hidden="true">
+                <button id="graph-menu-add-room" class="secondary" type="button">Add Room Here</button>
+                <button id="graph-menu-delete-room" class="secondary bad" type="button">Delete Room</button>
+              </div>
+            </div>
+            <div id="graph-issues" class="graph-issues"></div>
           </div>
-        </section>
+        </div>
 
-        <section class="panel stack">
+        <section class="panel inspector-panel">
           <div class="panel-head">
-            <h3>Outgoing Exits</h3>
-            <p>Use structured fields for exit authoring, then sync into the raw JSON payload if needed.</p>
+            <h2>Inspector</h2>
+            <p>Edit the selected room, its exits, and placed entities without leaving the map.</p>
+          </div>
+          <div class="inspector-tabs" role="tablist" aria-label="World builder inspector sections">
+            <button class="inspector-tab active" type="button" data-editor-tab="room" role="tab" aria-selected="true">Room</button>
+            <button class="inspector-tab" type="button" data-editor-tab="exits" role="tab" aria-selected="false">Exits</button>
+            <button class="inspector-tab" type="button" data-editor-tab="entities" role="tab" aria-selected="false">Entities</button>
           </div>
           <div class="panel-body stack">
-            <div id="exit-list" class="selector-list"></div>
-            <div class="field-grid">
-              <div class="field"><label for="exit-id">Exit Id</label><input id="exit-id" type="text"></div>
-              <div class="field"><label for="exit-key">Exit Key</label><input id="exit-key" type="text"></div>
-              <div class="field"><label for="exit-source">Source Room</label><select id="exit-source"></select></div>
-              <div class="field"><label for="exit-destination">Destination Room</label><select id="exit-destination"></select></div>
-            </div>
-            <div class="editor-toolbar">
-              <button id="sync-exit-form" class="secondary" type="button">Sync Exit Form To JSON</button>
-              <button id="new-exit" class="secondary" type="button">New Exit Draft</button>
-              <button id="diff-exit" type="button">Dry-Run Exit</button>
-              <button id="write-exit" type="button">Write Exit</button>
-            </div>
-            <textarea id="exit-json" spellcheck="false"></textarea>
-          </div>
-        </section>
+            <section id="editor-tab-room" class="editor-tab-panel active" data-editor-panel="room" role="tabpanel">
+              <h3>Room Details</h3>
+              <p>Build the selected room with fields first. Advanced source stays available when the form is not enough.</p>
+              <div class="field-grid">
+                <div class="field"><label for="room-id">Room Id</label><input id="room-id" type="text"></div>
+                <div class="field"><label for="room-key">Room Name</label><input id="room-key" type="text"></div>
+                <div class="field"><label for="room-zone">Zone</label><input id="room-zone" type="text"></div>
+                <div class="field"><label for="room-world">World</label><input id="room-world" type="text"></div>
+                <div class="field"><label for="room-region">Map Region</label><input id="room-region" type="text"></div>
+                <div class="field"><label for="room-map-x">Map X</label><input id="room-map-x" type="number" step="1"></div>
+                <div class="field"><label for="room-map-y">Map Y</label><input id="room-map-y" type="number" step="1"></div>
+                <div class="field full"><label for="room-desc">Room Description</label><textarea id="room-desc" spellcheck="true"></textarea></div>
+              </div>
+              <div class="builder-actions">
+                <button id="diff-room" type="button">Preview Room Change</button>
+                <button id="write-room" type="button">Save Room</button>
+              </div>
+              <details class="raw-panel">
+                <summary>Advanced Source</summary>
+                <textarea id="room-json" spellcheck="false"></textarea>
+              </details>
+            </section>
 
-        <section class="panel stack">
-          <div class="panel-head">
-            <h3>Room Entities</h3>
-            <p>Use the entity form for common fields, then sync the payload before diffing or writing.</p>
-          </div>
-          <div class="panel-body stack">
-            <div id="entity-list" class="selector-list"></div>
-            <div class="field-grid">
-              <div class="field"><label for="entity-id">Entity Id</label><input id="entity-id" type="text"></div>
-              <div class="field"><label for="entity-key">Entity Key</label><input id="entity-key" type="text"></div>
-              <div class="field"><label for="entity-kind">Entity Kind</label><select id="entity-kind"><option value="npc">npc</option><option value="readable">readable</option><option value="interactable">interactable</option><option value="vendor">vendor</option><option value="portal">portal</option></select></div>
-              <div class="field"><label for="entity-location">Entity Location</label><select id="entity-location"></select></div>
-            </div>
-            <div class="editor-toolbar">
-              <button id="sync-entity-form" class="secondary" type="button">Sync Entity Form To JSON</button>
-              <button id="new-entity" class="secondary" type="button">New Entity Draft</button>
-              <button id="diff-entity" type="button">Dry-Run Entity</button>
-              <button id="write-entity" type="button">Write Entity</button>
-            </div>
-            <textarea id="entity-json" spellcheck="false"></textarea>
+            <section id="editor-tab-exits" class="editor-tab-panel" data-editor-panel="exits" role="tabpanel">
+              <h3>Outgoing Exits</h3>
+              <p>Create paths from this room to another room. Advanced source is available when needed.</p>
+              <div id="exit-list" class="selector-list"></div>
+              <div class="field-grid">
+                <div class="field"><label for="exit-id">Exit Id</label><input id="exit-id" type="text"></div>
+                <div class="field"><label for="exit-key">Exit Key</label><input id="exit-key" type="text"></div>
+                <div class="field"><label for="exit-source">Source Room</label><select id="exit-source"></select></div>
+                <div class="field"><label for="exit-destination">Destination Room</label><select id="exit-destination"></select></div>
+              </div>
+              <div class="editor-toolbar">
+                <button id="new-exit" class="secondary" type="button">New Exit Draft</button>
+                <button id="diff-exit" type="button">Preview Exit Change</button>
+                <button id="write-exit" type="button">Save Exit</button>
+              </div>
+              <details class="raw-panel">
+                <summary>Advanced Source</summary>
+                <textarea id="exit-json" spellcheck="false"></textarea>
+              </details>
+            </section>
+
+            <section id="editor-tab-entities" class="editor-tab-panel" data-editor-panel="entities" role="tabpanel">
+              <h3>Room Entities</h3>
+              <p>Place people, signs, vendors, portals, and interactable objects in the selected room.</p>
+              <div id="entity-list" class="selector-list"></div>
+              <div class="field-grid">
+                <div class="field"><label for="entity-id">Entity Id</label><input id="entity-id" type="text"></div>
+                <div class="field"><label for="entity-key">Entity Key</label><input id="entity-key" type="text"></div>
+                <div class="field"><label for="entity-kind">Entity Kind</label><select id="entity-kind"><option value="npc">npc</option><option value="readable">readable</option><option value="interactable">interactable</option><option value="vendor">vendor</option><option value="portal">portal</option></select></div>
+                <div class="field"><label for="entity-location">Entity Location</label><select id="entity-location"></select></div>
+                <div class="field full"><label for="entity-aliases">Aliases</label><input id="entity-aliases" type="text" placeholder="comma separated, e.g. mayor, elric"></div>
+                <div class="field entity-kind-fields" data-kind-field="npc"><label for="entity-gender">Gender</label><select id="entity-gender"><option value="">Choose gender</option><option value="female">female</option><option value="male">male</option><option value="nonbinary">nonbinary</option></select></div>
+                <div class="field full"><label for="entity-desc">Entity Description</label><textarea id="entity-desc" spellcheck="true"></textarea></div>
+              </div>
+              <div class="editor-toolbar">
+                <button id="new-entity" class="secondary" type="button">New Entity Draft</button>
+                <button id="diff-entity" type="button">Preview Entity Change</button>
+                <button id="write-entity" type="button">Save Entity</button>
+              </div>
+              <details class="raw-panel">
+                <summary>Advanced Source</summary>
+                <textarea id="entity-json" spellcheck="false"></textarea>
+              </details>
+            </section>
           </div>
         </section>
       </div>
 
       <div class="panel">
         <div class="panel-head">
-          <h2>Preview / Diff Output</h2>
-          <p>Room preview includes exits, entities, and encounter summaries. Exit and entity writes use the same content mutation path as the command/API layer.</p>
+          <h2>Activity</h2>
+          <p>Shows load results, validation issues, and change previews after you ask for them.</p>
         </div>
         <div class="panel-body">
           <div id="status" class="status">Waiting for room selection.</div>
@@ -245,6 +518,14 @@
     const API_ROOT = "{{ api_root|escapejs }}";
     const roomList = document.getElementById("room-list");
     const roomSearch = document.getElementById("room-search");
+    const roomIdInput = document.getElementById("room-id");
+    const roomKeyInput = document.getElementById("room-key");
+    const roomZoneInput = document.getElementById("room-zone");
+    const roomWorldInput = document.getElementById("room-world");
+    const roomRegionInput = document.getElementById("room-region");
+    const roomMapXInput = document.getElementById("room-map-x");
+    const roomMapYInput = document.getElementById("room-map-y");
+    const roomDescInput = document.getElementById("room-desc");
     const roomJson = document.getElementById("room-json");
     const exitList = document.getElementById("exit-list");
     const exitJson = document.getElementById("exit-json");
@@ -271,23 +552,58 @@
     const entityKeyInput = document.getElementById("entity-key");
     const entityKindSelect = document.getElementById("entity-kind");
     const entityLocationSelect = document.getElementById("entity-location");
+    const entityAliasesInput = document.getElementById("entity-aliases");
+    const entityGenderSelect = document.getElementById("entity-gender");
+    const entityDescInput = document.getElementById("entity-desc");
+    const entityKindFields = Array.from(document.querySelectorAll("[data-kind-field]"));
     const syncEntityFormButton = document.getElementById("sync-entity-form");
     const newEntityButton = document.getElementById("new-entity");
     const diffEntityButton = document.getElementById("diff-entity");
     const writeEntityButton = document.getElementById("write-entity");
+    const editorTabButtons = Array.from(document.querySelectorAll("[data-editor-tab]"));
+    const editorTabPanels = Array.from(document.querySelectorAll("[data-editor-panel]"));
     const validateButton = document.getElementById("validate-content");
     const reloadButton = document.getElementById("reload-content");
+    const regionFilter = document.getElementById("region-filter");
+    const graphWrap = document.getElementById("graph-wrap");
+    const worldGraph = document.getElementById("world-graph");
+    const graphLines = document.getElementById("graph-lines");
+    const graphRoomCount = document.getElementById("graph-room-count");
+    const graphExitCount = document.getElementById("graph-exit-count");
+    const graphMode = document.getElementById("graph-mode");
+    const graphIssues = document.getElementById("graph-issues");
+    const graphMenu = document.getElementById("graph-menu");
+    const graphMenuAddRoom = document.getElementById("graph-menu-add-room");
+    const graphMenuDeleteRoom = document.getElementById("graph-menu-delete-room");
+    const newRoomButton = document.getElementById("new-room");
+    const fitGraphButton = document.getElementById("fit-graph");
+    const connectRoomsButton = document.getElementById("connect-rooms");
+    const writePositionButton = document.getElementById("write-position");
 
     let rooms = [];
+    let exits = [];
     let selectedRoomId = "";
     let selectedExitId = "";
     let selectedEntityId = "";
     let previewPayload = null;
+    let selectedRegion = "";
+    let connectMode = false;
+    let connectSourceRoomId = "";
+    let pendingRoomPosition = null;
+    let draggingRoom = null;
+    let suppressGraphClick = false;
+    let pendingGraphDraft = null;
+    const GRID_SIZE = 56;
+    const MAP_STEP = 170;
+    const NODE_WIDTH = 142;
+    const NODE_HEIGHT = 72;
+    const GRAPH_MARGIN = 420;
 
     function setBusy(isBusy) {
-      for (const button of [loadButton, diffRoomButton, writeRoomButton, syncExitFormButton, newExitButton, diffExitButton, writeExitButton, syncEntityFormButton, newEntityButton, diffEntityButton, writeEntityButton, validateButton, reloadButton]) {
-        button.disabled = isBusy;
+      for (const button of [loadButton, diffRoomButton, writeRoomButton, syncExitFormButton, newExitButton, diffExitButton, writeExitButton, syncEntityFormButton, newEntityButton, diffEntityButton, writeEntityButton, validateButton, reloadButton, fitGraphButton, connectRoomsButton]) {
+        if (button) button.disabled = isBusy;
       }
+      writePositionButton.disabled = isBusy || !pendingRoomPosition;
     }
 
     function setStatus(message, tone = "") {
@@ -298,9 +614,46 @@
       return creatorTools.showValidation(messages);
     }
 
-    function fillRoomSelect(select, selectedValue = "") {
+    function clearValidation() {
+      creatorTools.clearValidation();
+    }
+
+    function setEditorTab(tabName) {
+      for (const button of editorTabButtons) {
+        const active = button.dataset.editorTab === tabName;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+      }
+      for (const panel of editorTabPanels) {
+        panel.classList.toggle("active", panel.dataset.editorPanel === tabName);
+      }
+    }
+
+    function parseCsv(value) {
+      return String(value || "").split(",").map((entry) => entry.trim()).filter(Boolean);
+    }
+
+    function formatCsv(values) {
+      return Array.isArray(values) ? values.join(", ") : "";
+    }
+
+    function syncEntityKindFields() {
+      const kind = entityKindSelect.value || "npc";
+      for (const field of entityKindFields) {
+        field.classList.toggle("active", field.dataset.kindField === kind);
+      }
+    }
+
+    function fillRoomSelect(select, selectedValue = "", includeBlank = false) {
       const previous = selectedValue || select.value || "";
       select.innerHTML = "";
+      if (includeBlank) {
+        const blank = document.createElement("option");
+        blank.value = "";
+        blank.textContent = "Choose a room";
+        if (!previous) blank.selected = true;
+        select.appendChild(blank);
+      }
       for (const room of rooms) {
         const option = document.createElement("option");
         option.value = room.id;
@@ -324,6 +677,485 @@
       }
     }
 
+    function roomRegion(room) {
+      return room.map_region || room.zone || room.meta || "Unmapped";
+    }
+
+    function roomById(roomId) {
+      return rooms.find((room) => room.id === roomId) || null;
+    }
+
+    function selectedRoomIsPersisted() {
+      return Boolean(selectedRoomId && roomById(selectedRoomId));
+    }
+
+    function graphRooms() {
+      return rooms.filter((room) => roomRegion(room) === selectedRegion);
+    }
+
+    function graphExits(visibleRooms) {
+      const visibleIds = new Set(visibleRooms.map((room) => room.id));
+      return exits.filter((exit) => visibleIds.has(exit.source) || visibleIds.has(exit.destination));
+    }
+
+    function populateRegionFilter() {
+      const regions = Array.from(new Set(rooms.map(roomRegion))).sort((left, right) => left.localeCompare(right));
+      const previous = selectedRegion || regionFilter.value || regions[0] || "";
+      regionFilter.innerHTML = "";
+      for (const region of regions) {
+        const option = document.createElement("option");
+        option.value = region;
+        option.textContent = region;
+        if (region === previous) option.selected = true;
+        regionFilter.appendChild(option);
+      }
+      selectedRegion = regions.includes(previous) ? previous : regions[0] || "";
+      if (selectedRegion) regionFilter.value = selectedRegion;
+    }
+
+    function computeGraphLayout(visibleRooms) {
+      const xs = visibleRooms.map((room) => Number(room.map_x || 0));
+      const ys = visibleRooms.map((room) => Number(room.map_y || 0));
+      const minX = xs.length ? Math.min(...xs) : 0;
+      const maxX = xs.length ? Math.max(...xs) : 0;
+      const minY = ys.length ? Math.min(...ys) : 0;
+      const maxY = ys.length ? Math.max(...ys) : 0;
+      const width = Math.max(900, (maxX - minX + 1) * MAP_STEP + GRAPH_MARGIN * 2);
+      const height = Math.max(620, (maxY - minY + 1) * MAP_STEP + GRAPH_MARGIN * 2);
+      return {
+        width,
+        height,
+        originX: GRAPH_MARGIN - minX * MAP_STEP,
+        originY: GRAPH_MARGIN + maxY * MAP_STEP,
+      };
+    }
+
+    function roomPoint(room, layout) {
+      return {
+        x: layout.originX + Number(room.map_x || 0) * MAP_STEP,
+        y: layout.originY - Number(room.map_y || 0) * MAP_STEP,
+      };
+    }
+
+    function inferExitKey(source, destination) {
+      const dx = Number(destination.map_x || 0) - Number(source.map_x || 0);
+      const dy = Number(destination.map_y || 0) - Number(source.map_y || 0);
+      if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? "east" : "west";
+      if (dy !== 0) return dy > 0 ? "north" : "south";
+      return "path";
+    }
+
+    function shortDirectionAlias(key) {
+      return { north: "n", south: "s", east: "e", west: "w", up: "u", down: "d" }[key] || "";
+    }
+
+    function buildExitAliases(key, destination) {
+      const aliases = [];
+      const shortAlias = shortDirectionAlias(key);
+      if (shortAlias) aliases.push(shortAlias);
+      const label = String((destination && (destination.label || destination.id)) || "").trim().toLowerCase();
+      if (label) aliases.push(label);
+      return Array.from(new Set(aliases));
+    }
+
+    function buildGraphExitDraft(sourceId, destinationId) {
+      const source = roomById(sourceId);
+      const destination = roomById(destinationId);
+      const key = source && destination ? inferExitKey(source, destination) : "path";
+      return {
+        aliases: buildExitAliases(key, destination),
+        direction: key,
+        label: destination ? (destination.label || destination.id) : "",
+        id: `${sourceId}_to_${destinationId}`,
+        key,
+        source: sourceId,
+        destination: destinationId,
+      };
+    }
+
+    function stageExitDraft(draft, message = "") {
+      setEditorTab("exits");
+      selectedExitId = draft.id || "";
+      populateExitForm(draft);
+      exitJson.value = JSON.stringify(draft, null, 2);
+      renderWorldEditors();
+      renderGraph();
+      setStatus(message || `Drafted exit ${draft.id}. Preview or save it from Outgoing Exits.`, "good");
+    }
+
+    function stageEntityDraft(draft, message = "") {
+      setEditorTab("entities");
+      selectedEntityId = draft.id || "";
+      populateEntityForm(draft);
+      entityJson.value = JSON.stringify(draft, null, 2);
+      renderWorldEditors();
+      setStatus(message || `Drafted room object ${draft.id}. Preview or save it from Room Entities.`, "good");
+    }
+
+    function buildRoomDraft(mapX = 0, mapY = 0, region = "") {
+      const safeRegion = region || selectedRegion || roomRegion(rooms[0] || {}) || "Unmapped";
+      return {
+        id: `new_room_${mapX}_${mapY}`,
+        key: "New Room",
+        zone: safeRegion,
+        world: "Brave",
+        map_region: safeRegion,
+        map_x: mapX,
+        map_y: mapY,
+        desc: "",
+      };
+    }
+
+    function hideGraphMenu() {
+      graphMenu.classList.remove("open");
+      graphMenu.setAttribute("aria-hidden", "true");
+      pendingGraphDraft = null;
+    }
+
+    function roomDraftFromPoint(clientX, clientY) {
+      const visibleRooms = graphRooms();
+      const layout = computeGraphLayout(visibleRooms.length ? visibleRooms : rooms);
+      const rect = graphWrap.getBoundingClientRect();
+      const contentX = clientX - rect.left + graphWrap.scrollLeft;
+      const contentY = clientY - rect.top + graphWrap.scrollTop;
+      const mapX = Math.round((contentX - layout.originX) / MAP_STEP);
+      const mapY = Math.round((layout.originY - contentY) / MAP_STEP);
+      return buildRoomDraft(mapX, mapY, selectedRegion || regionFilter.value);
+    }
+
+    function openGraphMenu(clientX, clientY, roomId = "") {
+      pendingGraphDraft = roomDraftFromPoint(clientX, clientY);
+      const isOverlap = rooms.some(r => r.map_x === pendingGraphDraft.map_x && r.map_y === pendingGraphDraft.map_y && r.map_region === pendingGraphDraft.map_region);
+
+      graphMenuAddRoom.disabled = isOverlap;
+      graphMenuAddRoom.style.display = roomId ? "none" : "block";
+      graphMenuAddRoom.textContent = isOverlap ? `Occupied (${pendingGraphDraft.map_x}, ${pendingGraphDraft.map_y})` : "Add Room Here";
+
+      graphMenuDeleteRoom.style.display = roomId ? "block" : "none";
+      graphMenuDeleteRoom.dataset.roomId = roomId;
+
+      graphMenu.style.left = `${clientX - graphWrap.getBoundingClientRect().left + graphWrap.scrollLeft}px`;
+      graphMenu.style.top = `${clientY - graphWrap.getBoundingClientRect().top + graphWrap.scrollTop}px`;
+      graphMenu.classList.add("open");
+      graphMenu.setAttribute("aria-hidden", "false");
+    }
+
+    function createRoomFromDraft(draft) {
+      setEditorTab("room");
+      selectedRoomId = draft.id;
+      selectedExitId = "";
+      selectedEntityId = "";
+      previewPayload = { room: draft, exits: [], entities: [], encounters: [] };
+      selectedRegion = draft.map_region;
+      populateRoomForm(draft);
+      roomJson.value = JSON.stringify(draft, null, 2);
+      editorTitle.textContent = "New Room Draft";
+      editorSubtitle.textContent = `Draft room at ${draft.map_x}, ${draft.map_y} in ${draft.map_region}.`;
+      pendingRoomPosition = null;
+      renderRooms(roomSearch.value);
+      renderGraph();
+      renderWorldEditors();
+      setStatus(`Staged new room draft at ${draft.map_x}, ${draft.map_y}.`, "good");
+    }
+
+    function collectGraphIssues(visibleRooms, visibleExits) {
+      const visibleIds = new Set(visibleRooms.map((room) => room.id));
+      const allRoomIds = new Set(rooms.map((room) => room.id));
+      const outgoingPairs = new Set(exits.map((exit) => `${exit.source}->${exit.destination}`));
+      const coordinateOwners = new Map();
+      const issues = [];
+      for (const room of visibleRooms) {
+        const key = `${Number(room.map_x || 0)},${Number(room.map_y || 0)}`;
+        const current = coordinateOwners.get(key) || [];
+        current.push(room.id);
+        coordinateOwners.set(key, current);
+      }
+      for (const [coordinates, roomIds] of coordinateOwners.entries()) {
+        if (roomIds.length > 1) issues.push(`Overlapping rooms at ${coordinates}: ${roomIds.join(", ")}`);
+      }
+      for (const exit of visibleExits) {
+        if (!allRoomIds.has(exit.source)) issues.push(`Exit ${exit.id} has missing source ${exit.source}`);
+        if (!allRoomIds.has(exit.destination)) issues.push(`Exit ${exit.id} has missing destination ${exit.destination}`);
+        if (visibleIds.has(exit.source) && visibleIds.has(exit.destination) && !outgoingPairs.has(`${exit.destination}->${exit.source}`)) {
+          issues.push(`One-way exit ${exit.id}: ${exit.source} -> ${exit.destination}`);
+        }
+      }
+      return issues;
+    }
+
+    function renderGraphIssues(issues) {
+      graphIssues.innerHTML = "";
+      for (const issue of issues.slice(0, 10)) {
+        const line = document.createElement("div");
+        line.textContent = issue;
+        graphIssues.appendChild(line);
+      }
+      if (issues.length > 10) {
+        const line = document.createElement("div");
+        line.textContent = `${issues.length - 10} more issue(s).`;
+        graphIssues.appendChild(line);
+      }
+    }
+
+    function drawExitLine(exit, layout, visibleIds, outgoingPairs) {
+      const source = roomById(exit.source);
+      const destination = roomById(exit.destination);
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const sourceVisible = source && visibleIds.has(source.id);
+      const destinationVisible = destination && visibleIds.has(destination.id);
+      if (!sourceVisible || !destinationVisible) {
+        line.setAttribute("class", "graph-line dangling");
+        return line;
+      }
+      const start = roomPoint(source, layout);
+      const end = roomPoint(destination, layout);
+      const x1 = start.x + NODE_WIDTH / 2;
+      const y1 = start.y + NODE_HEIGHT / 2;
+      const x2 = end.x + NODE_WIDTH / 2;
+      const y2 = end.y + NODE_HEIGHT / 2;
+      const midX = (x1 + x2) / 2;
+      const midY = (y1 + y2) / 2;
+      const oneWay = !outgoingPairs.has(`${exit.destination}->${exit.source}`);
+      line.setAttribute("class", `graph-line${oneWay ? " one-way" : ""}`);
+      line.setAttribute("d", `M ${x1} ${y1} Q ${midX} ${midY - 22} ${x2} ${y2}`);
+      return line;
+    }
+
+    function renderGraph() {
+      const visibleRooms = graphRooms();
+      if (selectedRoomId && selectedRoomId.startsWith("new_room_") && !rooms.find(r => r.id === selectedRoomId)) {
+        try {
+          const draft = getRoomFormData();
+          if (draft && draft.map_region === (selectedRegion || regionFilter.value)) {
+            visibleRooms.push(draft);
+          }
+        } catch (e) {}
+      }
+      const visibleExits = graphExits(visibleRooms);
+      try {
+        const draft = getExitFormData();
+        if (draft && draft.id && draft.source && draft.destination) {
+          if (!visibleExits.find(e => e.id === draft.id)) {
+            visibleExits.push(draft);
+          }
+        }
+      } catch (e) {}
+      const visibleIds = new Set(visibleRooms.map((room) => room.id));
+      const outgoingPairs = new Set(exits.map((exit) => `${exit.source}->${exit.destination}`));
+      const layout = computeGraphLayout(visibleRooms);
+      worldGraph.style.width = `${layout.width}px`;
+      worldGraph.style.height = `${layout.height}px`;
+      graphLines.setAttribute("viewBox", `0 0 ${layout.width} ${layout.height}`);
+      graphLines.innerHTML = "";
+      for (const exit of visibleExits) {
+        const line = drawExitLine(exit, layout, visibleIds, outgoingPairs);
+        if (line.hasAttribute("d")) graphLines.appendChild(line);
+      }
+      for (const existing of Array.from(worldGraph.querySelectorAll(".room-node"))) existing.remove();
+      const issues = collectGraphIssues(visibleRooms, visibleExits);
+      const warningIds = new Set();
+      for (const issue of issues) {
+        for (const room of visibleRooms) {
+          if (issue.includes(room.id)) warningIds.add(room.id);
+        }
+      }
+      for (const room of visibleRooms) {
+        const isDraft = String(room.id).startsWith("new_room_");
+        const isActive = room.id === selectedRoomId;
+        const point = roomPoint(room, layout);
+        const node = document.createElement("div");
+        node.className = [
+          "room-node",
+          isActive ? "active" : "",
+          room.id === connectSourceRoomId ? "connect-source" : "",
+          warningIds.has(room.id) ? "warning" : "",
+          isDraft ? "draft" : "",
+        ].filter(Boolean).join(" ");
+        node.style.left = `${point.x}px`;
+        node.style.top = `${point.y}px`;
+        node.dataset.roomId = room.id;
+
+        const content = document.createElement("div");
+        content.className = "room-node-content";
+
+        const title = document.createElement("strong");
+        title.textContent = room.label || room.id;
+        const meta = document.createElement("span");
+        meta.textContent = isDraft ? "Draft Room" : `${room.id} @ ${Number(room.map_x || 0)}, ${Number(room.map_y || 0)}`;
+        content.appendChild(title);
+        content.appendChild(meta);
+        node.appendChild(content);
+
+        content.addEventListener("click", () => handleGraphRoomClick(room.id));
+        content.addEventListener("pointerdown", (event) => startRoomDrag(event, room.id, layout));
+        node.addEventListener("contextmenu", (event) => openRoomMenu(event, room.id));
+
+        if (isActive) {
+          const directions = [
+            { key: "n", label: "↑", dx: 0, dy: 1 },
+            { key: "s", label: "↓", dx: 0, dy: -1 },
+            { key: "e", label: "→", dx: 1, dy: 0 },
+            { key: "w", label: "←", dx: -1, dy: 0 },
+          ];
+          for (const dir of directions) {
+            const handle = document.createElement("div");
+            handle.className = `node-handle ${dir.key}`;
+            handle.textContent = dir.label;
+            handle.title = `Draft ${dir.key.toUpperCase()} exit or adjacent room`;
+            handle.addEventListener("click", (e) => {
+              e.stopPropagation();
+              quickConnect(room.id, dir.key, dir.dx, dir.dy);
+            });
+            node.appendChild(handle);
+          }
+        }
+
+        worldGraph.appendChild(node);
+      }
+      graphRoomCount.textContent = `Rooms: ${visibleRooms.length}`;
+      graphExitCount.textContent = `Exits: ${visibleExits.length}`;
+      graphMode.textContent = connectMode ? (connectSourceRoomId ? `Connect from ${connectSourceRoomId}` : "Connect mode") : "Select mode";
+      connectRoomsButton.classList.toggle("active", connectMode);
+      writePositionButton.disabled = !pendingRoomPosition;
+      renderGraphIssues(issues);
+    }
+
+    function fitGraph() {
+      const visibleRooms = graphRooms();
+      if (!visibleRooms.length) return;
+      const layout = computeGraphLayout(visibleRooms);
+      const xs = visibleRooms.map((room) => roomPoint(room, layout).x);
+      const ys = visibleRooms.map((room) => roomPoint(room, layout).y);
+      graphWrap.scrollLeft = Math.max(0, Math.min(...xs) - 120);
+      graphWrap.scrollTop = Math.max(0, Math.min(...ys) - 120);
+    }
+
+    function setSelectedRegionForRoom(roomId) {
+      const room = roomById(roomId);
+      if (!room) return;
+      const region = roomRegion(room);
+      if (region !== selectedRegion) {
+        selectedRegion = region;
+        regionFilter.value = region;
+      }
+    }
+
+    async function quickConnect(sourceId, dirKey, dx, dy) {
+      const source = roomById(sourceId);
+      if (!source) {
+        setStatus("Save this room before drafting exits from it.", "bad");
+        return;
+      }
+
+      const tx = Number(source.map_x || 0) + dx;
+      const ty = Number(source.map_y || 0) + dy;
+      const region = roomRegion(source);
+      let target = rooms.find(r => r.map_x === tx && r.map_y === ty && roomRegion(r) === region);
+
+      setBusy(true);
+      try {
+        if (!target) {
+          createRoomFromDraft(buildRoomDraft(tx, ty, region));
+          setStatus(`Staged a new room ${dirKey.toUpperCase()} of ${sourceId}. Save it, then connect the rooms.`, "good");
+          return;
+        }
+
+        const forward = buildGraphExitDraft(sourceId, target.id);
+        stageExitDraft(forward, `Drafted ${dirKey.toUpperCase()} exit to ${target.id}. Preview or save it from Outgoing Exits.`);
+      } catch (error) {
+        setStatus(error.message, "bad");
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function handleGraphRoomClick(roomId) {
+      if (suppressGraphClick) {
+        suppressGraphClick = false;
+        return;
+      }
+      if (connectMode) {
+        if (!roomById(roomId)) {
+          setStatus("Save this room before connecting it.", "bad");
+          return;
+        }
+        if (!connectSourceRoomId) {
+          connectSourceRoomId = roomId;
+          renderGraph();
+          setStatus(`Choose a destination room for ${roomId}.`);
+          return;
+        }
+        if (connectSourceRoomId === roomId) {
+          connectSourceRoomId = "";
+          renderGraph();
+          setStatus("Connect source cleared.");
+          return;
+        }
+        const sourceId = connectSourceRoomId;
+        const source = roomById(sourceId);
+        const draft = buildGraphExitDraft(sourceId, roomId);
+        connectSourceRoomId = "";
+        connectMode = false;
+        renderGraph();
+        renderRooms(roomSearch.value);
+        await selectRoom(sourceId, source && source.label, source && source.meta);
+        stageExitDraft(draft, `Drafted exit ${draft.source} -> ${draft.destination}. Preview or save it from Outgoing Exits.`);
+        return;
+      }
+      const room = roomById(roomId);
+      selectRoom(roomId, room && room.label, room && room.meta);
+    }
+
+    function startRoomDrag(event, roomId, layout) {
+      if (connectMode || event.button !== 0) return;
+      const room = roomById(roomId);
+      if (!room) return;
+      event.preventDefault();
+      const startPoint = roomPoint(room, layout);
+      draggingRoom = {
+        roomId,
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        startLeft: startPoint.x,
+        startTop: startPoint.y,
+        layout,
+        moved: false,
+      };
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    function updateRoomDrag(event) {
+      if (!draggingRoom) return;
+      const room = roomById(draggingRoom.roomId);
+      if (!room) return;
+      const deltaX = event.clientX - draggingRoom.startClientX;
+      const deltaY = event.clientY - draggingRoom.startClientY;
+      if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) draggingRoom.moved = true;
+      const nextLeft = draggingRoom.startLeft + deltaX;
+      const nextTop = draggingRoom.startTop + deltaY;
+      const nextX = Math.round((nextLeft - draggingRoom.layout.originX) / MAP_STEP);
+      const nextY = Math.round((draggingRoom.layout.originY - nextTop) / MAP_STEP);
+      room.map_x = nextX;
+      room.map_y = nextY;
+      selectedRoomId = room.id;
+      pendingRoomPosition = { roomId: room.id, map_x: nextX, map_y: nextY };
+      if (room.id === roomIdInput.value) {
+        roomMapXInput.value = nextX;
+        roomMapYInput.value = nextY;
+      }
+      renderGraph();
+      renderRooms(roomSearch.value);
+      setStatus(`Moved ${room.id} to ${nextX}, ${nextY}. Write Position to persist.`, "good");
+    }
+
+    function stopRoomDrag() {
+      if (!draggingRoom) return;
+      const moved = draggingRoom.moved;
+      if (moved) suppressGraphClick = true;
+      window.setTimeout(() => { draggingRoom = null; }, 1);
+    }
+
     function renderSelector(container, entries, selectedId, onSelect, labelBuilder) {
       container.innerHTML = "";
       for (const entry of entries) {
@@ -344,29 +1176,41 @@
     }
 
     async function apiFetch(path, options = {}) {
+      const { allowErrorPayload = false, ...requestOptions } = options;
       const response = await fetch(`${API_ROOT}${path}`, {
         credentials: "same-origin",
-        headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-        ...options,
+        headers: { "Content-Type": "application/json", ...(requestOptions.headers || {}) },
+        ...requestOptions,
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload.ok === false) {
+      if (!response.ok || (payload.ok === false && !allowErrorPayload)) {
         throw new Error(payload.error || `Request failed with ${response.status}`);
       }
       return payload;
     }
 
     function buildExitDraft() {
-      return { id: `${selectedRoomId || "new_room"}_exit_draft`, key: "north", source: selectedRoomId || "", destination: selectedRoomId || "" };
+      return { aliases: ["n"], direction: "north", id: `${selectedRoomId || "new_room"}_exit_draft`, key: "north", label: "", source: selectedRoomId || "", destination: "" };
     }
 
     function buildEntityDraft() {
-      return { id: `${selectedRoomId || "new_room"}_entity_draft`, key: "New Entity", kind: "npc", location: selectedRoomId || "" };
+      return { aliases: [], desc: "", gender: "", id: `${selectedRoomId || "new_room"}_entity_draft`, key: "New Entity", kind: "npc", location: selectedRoomId || "" };
+    }
+
+    function populateRoomForm(payload) {
+      roomIdInput.value = payload.id || selectedRoomId || "";
+      roomKeyInput.value = payload.key || "";
+      roomZoneInput.value = payload.zone || "";
+      roomWorldInput.value = payload.world || "Brave";
+      roomRegionInput.value = payload.map_region || payload.zone || "";
+      roomMapXInput.value = Number(payload.map_x || 0);
+      roomMapYInput.value = Number(payload.map_y || 0);
+      roomDescInput.value = payload.desc || "";
     }
 
     function populateExitForm(payload) {
       fillRoomSelect(exitSourceSelect, payload.source || selectedRoomId || "");
-      fillRoomSelect(exitDestinationSelect, payload.destination || selectedRoomId || "");
+      fillRoomSelect(exitDestinationSelect, payload.destination || "", true);
       exitIdInput.value = payload.id || "";
       exitKeyInput.value = payload.key || "";
       if (payload.source) exitSourceSelect.value = payload.source;
@@ -379,15 +1223,87 @@
       entityKeyInput.value = payload.key || "";
       entityKindSelect.value = payload.kind || "npc";
       if (payload.location) entityLocationSelect.value = payload.location;
+      entityAliasesInput.value = formatCsv(payload.aliases || []);
+      entityGenderSelect.value = payload.gender || "";
+      entityDescInput.value = payload.desc || "";
+      syncEntityKindFields();
+    }
+
+    function getRoomFormData() {
+      const existing = parseTextarea(roomJson, "Room");
+      return {
+        ...existing,
+        id: roomIdInput.value.trim(),
+        key: roomKeyInput.value.trim(),
+        desc: roomDescInput.value.trim(),
+        zone: roomZoneInput.value.trim(),
+        world: roomWorldInput.value.trim() || "Brave",
+        map_region: roomRegionInput.value.trim() || roomZoneInput.value.trim(),
+        map_x: Number(roomMapXInput.value || 0),
+        map_y: Number(roomMapYInput.value || 0),
+      };
+    }
+
+    function syncRoomFormToJson() {
+      const payload = getRoomFormData();
+      const messages = creatorTools.requireFields([
+        { label: "Room id", value: payload.id },
+        { label: "Room name", value: payload.key },
+        { label: "Room description", value: payload.desc },
+        { label: "Zone", value: payload.zone },
+        { label: "Map region", value: payload.map_region },
+      ]);
+      if (!showValidation(messages)) {
+        setStatus("Room details are incomplete.", "bad");
+        return null;
+      }
+      clearValidation();
+      roomJson.value = JSON.stringify(payload, null, 2);
+      return payload;
+    }
+
+    function getExitFormData() {
+      const existing = parseTextarea(exitJson, "Exit");
+      const id = exitIdInput.value.trim();
+      const key = exitKeyInput.value.trim();
+      const destinationId = exitDestinationSelect.value;
+      const destinationRoom = roomById(destinationId);
+      const isPersisted = exits.some((entry) => entry.id === id);
+      return {
+        ...existing,
+        aliases: !isPersisted ? buildExitAliases(key, destinationRoom) : (existing.aliases || buildExitAliases(key, destinationRoom)),
+        direction: !isPersisted ? key : (existing.direction || key),
+        label: !isPersisted ? ((destinationRoom && (destinationRoom.label || destinationRoom.id)) || "") : (existing.label || (destinationRoom && (destinationRoom.label || destinationRoom.id)) || ""),
+        id,
+        key,
+        source: exitSourceSelect.value,
+        destination: destinationId,
+      };
+    }
+
+    function getEntityFormData() {
+      const existing = parseTextarea(entityJson, "Entity");
+      const payload = {
+        ...existing,
+        aliases: parseCsv(entityAliasesInput.value),
+        desc: entityDescInput.value.trim(),
+        id: entityIdInput.value.trim(),
+        key: entityKeyInput.value.trim(),
+        kind: entityKindSelect.value,
+        location: entityLocationSelect.value,
+      };
+      if (payload.kind === "npc") {
+        payload.gender = entityGenderSelect.value;
+      } else if (existing.kind !== "npc" && existing.gender) {
+        payload.gender = existing.gender;
+      } else {
+        delete payload.gender;
+      }
+      return payload;
     }
 
     function syncExitFormToJson() {
-      const payload = {
-        id: exitIdInput.value.trim(),
-        key: exitKeyInput.value.trim(),
-        source: exitSourceSelect.value,
-        destination: exitDestinationSelect.value,
-      };
+      const payload = getExitFormData();
       const messages = creatorTools.requireFields([
         { label: "Exit id", value: payload.id },
         { label: "Exit key", value: payload.key },
@@ -398,34 +1314,47 @@
         setStatus("Exit form is incomplete.", "bad");
         return null;
       }
+      clearValidation();
       exitJson.value = JSON.stringify(payload, null, 2);
       return payload;
     }
 
     function syncEntityFormToJson() {
-      const payload = {
-        id: entityIdInput.value.trim(),
-        key: entityKeyInput.value.trim(),
-        kind: entityKindSelect.value,
-        location: entityLocationSelect.value,
-      };
+      const payload = getEntityFormData();
       const messages = creatorTools.requireFields([
         { label: "Entity id", value: payload.id },
         { label: "Entity key", value: payload.key },
         { label: "Entity kind", value: payload.kind },
         { label: "Entity location", value: payload.location },
+        { label: "Entity description", value: payload.desc },
       ]);
+      if (payload.kind === "npc" && !String(payload.gender || "").trim()) {
+        messages.push("NPC gender is required.");
+      }
       if (!showValidation(messages)) {
         setStatus("Entity form is incomplete.", "bad");
         return null;
       }
+      clearValidation();
       entityJson.value = JSON.stringify(payload, null, 2);
       return payload;
     }
 
     function renderWorldEditors() {
-      const exits = (previewPayload && previewPayload.exits) || [];
-      const entities = (previewPayload && previewPayload.entities) || [];
+      const exits = [...((previewPayload && previewPayload.exits) || [])];
+      const entities = [...((previewPayload && previewPayload.entities) || [])];
+      try {
+        const draft = getExitFormData();
+        if (selectedExitId && draft.id === selectedExitId && !exits.find((entry) => entry.id === draft.id)) {
+          exits.unshift(draft);
+        }
+      } catch (e) {}
+      try {
+        const draft = getEntityFormData();
+        if (selectedEntityId && draft.id === selectedEntityId && !entities.find((entry) => entry.id === draft.id)) {
+          entities.unshift(draft);
+        }
+      } catch (e) {}
       renderSelector(exitList, exits, selectedExitId, selectExit, (entry) => ({ title: entry.key || entry.id, meta: `${entry.id} -> ${entry.destination || "?"}` }));
       renderSelector(entityList, entities, selectedEntityId, selectEntity, (entry) => ({ title: entry.key || entry.id, meta: `${entry.id} · ${entry.kind || "entity"}` }));
       if (!selectedExitId && exits.length) {
@@ -448,13 +1377,19 @@
       setBusy(true);
       setStatus("Loading room references...");
       try {
-        const payload = await apiFetch("/references/rooms?limit=500");
-        rooms = payload.results || [];
+        const [roomPayload, exitPayload] = await Promise.all([
+          apiFetch("/references/rooms?limit=1000"),
+          apiFetch("/references/exits?limit=1000"),
+        ]);
+        rooms = roomPayload.results || [];
+        exits = exitPayload.results || [];
+        populateRegionFilter();
         fillRoomSelect(exitSourceSelect, selectedRoomId);
         fillRoomSelect(exitDestinationSelect, selectedRoomId);
         fillRoomSelect(entityLocationSelect, selectedRoomId);
         renderRooms(roomSearch.value);
-        setStatus(`Loaded ${rooms.length} rooms.`, "good");
+        renderGraph();
+        setStatus(`Loaded ${rooms.length} rooms and ${exits.length} exits.`, "good");
       } catch (error) {
         setStatus(error.message, "bad");
         output.textContent = error.stack || error.message;
@@ -464,26 +1399,41 @@
     }
 
     async function selectRoom(roomId, label, meta) {
+      setEditorTab("room");
       selectedRoomId = roomId;
       selectedExitId = "";
       selectedEntityId = "";
+      setSelectedRegionForRoom(roomId);
       renderRooms(roomSearch.value);
+      renderGraph();
       editorTitle.textContent = label || roomId;
       editorSubtitle.textContent = `${roomId}${meta ? ` · ${meta}` : ""}`;
       await loadPreview();
     }
 
     function selectExit(exitId, rerender = true) {
+      if (rerender) setEditorTab("exits");
       selectedExitId = exitId;
-      const entry = ((previewPayload && previewPayload.exits) || []).find((item) => item.id === exitId) || buildExitDraft();
+      let currentDraft = null;
+      try {
+        const draft = getExitFormData();
+        if (draft.id === exitId) currentDraft = draft;
+      } catch (e) {}
+      const entry = ((previewPayload && previewPayload.exits) || []).find((item) => item.id === exitId) || currentDraft || buildExitDraft();
       exitJson.value = JSON.stringify(entry, null, 2);
       populateExitForm(entry);
       if (rerender) renderWorldEditors();
     }
 
     function selectEntity(entityId, rerender = true) {
+      if (rerender) setEditorTab("entities");
       selectedEntityId = entityId;
-      const entry = ((previewPayload && previewPayload.entities) || []).find((item) => item.id === entityId) || buildEntityDraft();
+      let currentDraft = null;
+      try {
+        const draft = getEntityFormData();
+        if (draft.id === entityId) currentDraft = draft;
+      } catch (e) {}
+      const entry = ((previewPayload && previewPayload.entities) || []).find((item) => item.id === entityId) || currentDraft || buildEntityDraft();
       entityJson.value = JSON.stringify(entry, null, 2);
       populateEntityForm(entry);
       if (rerender) renderWorldEditors();
@@ -497,7 +1447,8 @@
         const payload = await apiFetch("/preview", { method: "POST", body: JSON.stringify({ kind: "room", args: [selectedRoomId] }) });
         previewPayload = payload.preview;
         roomJson.value = JSON.stringify(payload.preview.room, null, 2);
-        output.textContent = JSON.stringify(payload.preview, null, 2);
+        populateRoomForm(payload.preview.room || {});
+        output.textContent = `${payload.preview.room.key || selectedRoomId}\n${payload.preview.exits.length} exit(s), ${payload.preview.entities.length} room object(s), ${payload.preview.encounters.length} encounter hook(s).`;
         renderWorldEditors();
         setStatus(`Loaded world preview for ${selectedRoomId}.`, "good");
       } catch (error) {
@@ -513,18 +1464,14 @@
         const errors = result.validation_errors || [];
         if (errors.length) {
           setStatus(`Write completed with ${errors.length} validation issue(s).`, "bad");
-          output.textContent = `${result.diff || ""}
-
-Validation errors:
-- ${errors.join("
-- ")}`.trim();
+          output.textContent = `${result.diff || ""}\n\nValidation errors:\n- ${errors.join("\n- ")}`.trim();
         } else {
-          setStatus(`Wrote ${kind} ${target} and revalidated content.`, "good");
+          setStatus(`Saved ${kind} ${target} and checked content.`, "good");
           await loadPreview();
           await loadRooms();
         }
       } else {
-        setStatus(`Dry-run diff ready for ${kind} ${target}.`, "good");
+        setStatus(`Change preview ready for ${kind} ${target}.`, "good");
       }
     }
 
@@ -537,31 +1484,97 @@ Validation errors:
       }
     }
 
+    async function remove(kind, target, write) {
+      const result = await apiFetch("/remove", { method: "POST", body: JSON.stringify({ kind, target, write }) });
+      output.textContent = result.diff || JSON.stringify(result, null, 2);
+      if (write) {
+        const errors = result.validation_errors || [];
+        if (errors.length) {
+          setStatus(`Removal completed with ${errors.length} validation issue(s).`, "bad");
+          output.textContent = `${result.diff || ""}\n\nValidation errors:\n- ${errors.join("\n- ")}`.trim();
+        } else {
+          setStatus(`Removed ${kind} ${target} and checked content.`, "good");
+          selectedRoomId = "";
+          await loadRooms();
+        }
+      } else {
+        setStatus(`Removal preview ready for ${kind} ${target}.`, "good");
+      }
+    }
+
+    async function deleteRoom(roomId, write) {
+      if (!roomId) return;
+      if (String(roomId).startsWith("new_room_")) {
+        selectedRoomId = "";
+        selectedExitId = "";
+        selectedEntityId = "";
+        renderRooms(roomSearch.value);
+        renderGraph();
+        setStatus("Cleared draft room.", "good");
+        return;
+      }
+      if (write && !confirm(`Are you sure you want to delete room ${roomId}?`)) return;
+      setBusy(true);
+      setStatus(write ? `Deleting room ${roomId}...` : `Previewing removal for ${roomId}...`);
+      try { await remove("room", roomId, write); } catch (error) { setStatus(error.message, "bad"); output.textContent = error.stack || error.message; } finally { setBusy(false); }
+    }
+
     async function mutateRoom(write) {
       if (!selectedRoomId) return setStatus("Choose a room first.", "bad");
-      let payload; try { payload = parseTextarea(roomJson, "Room"); } catch { return; }
+      let payload; try { payload = syncRoomFormToJson(); } catch { return; }
+      if (!payload) return;
       setBusy(true);
-      setStatus(write ? `Writing room ${selectedRoomId}...` : `Generating room diff for ${selectedRoomId}...`);
-      try { await mutate("room", selectedRoomId, payload, write); } catch (error) { setStatus(error.message, "bad"); output.textContent = error.stack || error.message; } finally { setBusy(false); }
+      const target = payload.id || selectedRoomId;
+      setStatus(write ? `Saving room ${target}...` : `Previewing room change for ${target}...`);
+      selectedRoomId = target;
+      try { await mutate("room", target, payload, write); } catch (error) { setStatus(error.message, "bad"); output.textContent = error.stack || error.message; } finally { setBusy(false); }
+    }
+
+    async function writePendingPosition() {
+      if (!pendingRoomPosition) return setStatus("Drag a room before writing coordinates.", "bad");
+      const target = pendingRoomPosition.roomId;
+      setBusy(true);
+      setStatus(`Writing map position for ${target}...`);
+      try {
+        const payload = await apiFetch("/preview", { method: "POST", body: JSON.stringify({ kind: "room", args: [target] }) });
+        const roomPayload = {
+          ...payload.preview.room,
+          map_x: pendingRoomPosition.map_x,
+          map_y: pendingRoomPosition.map_y,
+        };
+        selectedRoomId = target;
+        await mutate("room", target, roomPayload, true);
+        pendingRoomPosition = null;
+        writePositionButton.disabled = true;
+        await loadRooms();
+        await loadPreview();
+      } catch (error) {
+        setStatus(error.message, "bad");
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
     }
 
     async function mutateExit(write) {
       if (!selectedRoomId) return setStatus("Choose a room first.", "bad");
+      if (!selectedRoomIsPersisted()) return setStatus("Save this room before adding exits.", "bad");
       const synced = syncExitFormToJson();
       if (!synced) return;
       const target = synced.id || selectedExitId;
       setBusy(true);
-      setStatus(write ? `Writing exit ${target}...` : `Generating exit diff for ${target}...`);
+      setStatus(write ? `Saving exit ${target}...` : `Previewing exit change for ${target}...`);
       try { await mutate("exit", target, synced, write); selectedExitId = target; } catch (error) { setStatus(error.message, "bad"); output.textContent = error.stack || error.message; } finally { setBusy(false); }
     }
 
     async function mutateEntity(write) {
       if (!selectedRoomId) return setStatus("Choose a room first.", "bad");
+      if (!selectedRoomIsPersisted()) return setStatus("Save this room before adding room objects.", "bad");
       const synced = syncEntityFormToJson();
       if (!synced) return;
       const target = synced.id || selectedEntityId;
       setBusy(true);
-      setStatus(write ? `Writing entity ${target}...` : `Generating entity diff for ${target}...`);
+      setStatus(write ? `Saving room object ${target}...` : `Previewing room object change for ${target}...`);
       try { await mutate("entity", target, synced, write); selectedEntityId = target; } catch (error) { setStatus(error.message, "bad"); output.textContent = error.stack || error.message; } finally { setBusy(false); }
     }
 
@@ -569,11 +1582,10 @@ Validation errors:
       setBusy(true);
       setStatus("Validating content packs...");
       try {
-        const payload = await apiFetch("/validate", { method: "POST", body: "{}" });
+        const payload = await apiFetch("/validate", { method: "POST", body: "{}", allowErrorPayload: true });
         if (payload.errors.length) {
           setStatus(`Validation found ${payload.errors.length} issue(s).`, "bad");
-          output.textContent = payload.errors.join("
-");
+          output.textContent = payload.errors.join("\n");
         } else {
           setStatus("Content validation passed.", "good");
           output.textContent = JSON.stringify(payload, null, 2);
@@ -600,21 +1612,56 @@ Validation errors:
     }
 
     roomSearch.addEventListener("input", () => renderRooms(roomSearch.value));
+    for (const button of editorTabButtons) {
+      button.addEventListener("click", () => setEditorTab(button.dataset.editorTab));
+    }
     loadButton.addEventListener("click", loadPreview);
+    newRoomButton.addEventListener("click", () => createRoomFromDraft(roomDraftFromPoint(graphWrap.getBoundingClientRect().left + graphWrap.clientWidth / 2, graphWrap.getBoundingClientRect().top + graphWrap.clientHeight / 2)));
     diffRoomButton.addEventListener("click", () => mutateRoom(false));
     writeRoomButton.addEventListener("click", () => mutateRoom(true));
-    syncExitFormButton.addEventListener("click", () => { if (syncExitFormToJson()) setStatus("Exit form synced to JSON.", "good"); });
-    newExitButton.addEventListener("click", () => { selectedExitId = ""; const draft = buildExitDraft(); populateExitForm(draft); exitJson.value = JSON.stringify(draft, null, 2); renderWorldEditors(); });
+    if (syncExitFormButton) syncExitFormButton.addEventListener("click", () => { if (syncExitFormToJson()) setStatus("Exit source updated.", "good"); });
+    newExitButton.addEventListener("click", () => stageExitDraft(buildExitDraft(), "New exit draft staged. Preview or save it from Outgoing Exits."));
     diffExitButton.addEventListener("click", () => mutateExit(false));
     writeExitButton.addEventListener("click", () => mutateExit(true));
-    syncEntityFormButton.addEventListener("click", () => { if (syncEntityFormToJson()) setStatus("Entity form synced to JSON.", "good"); });
-    newEntityButton.addEventListener("click", () => { selectedEntityId = ""; const draft = buildEntityDraft(); populateEntityForm(draft); entityJson.value = JSON.stringify(draft, null, 2); renderWorldEditors(); });
+    if (syncEntityFormButton) syncEntityFormButton.addEventListener("click", () => { if (syncEntityFormToJson()) setStatus("Room object source updated.", "good"); });
+    newEntityButton.addEventListener("click", () => stageEntityDraft(buildEntityDraft(), "New room object draft staged. Preview or save it from Room Entities."));
     diffEntityButton.addEventListener("click", () => mutateEntity(false));
     writeEntityButton.addEventListener("click", () => mutateEntity(true));
+    entityKindSelect.addEventListener("change", syncEntityKindFields);
     validateButton.addEventListener("click", validateContent);
     reloadButton.addEventListener("click", reloadContent);
+    regionFilter.addEventListener("change", () => { selectedRegion = regionFilter.value; connectSourceRoomId = ""; renderGraph(); fitGraph(); });
+    const openRoomMenu = (event, roomId = "") => {
+      event.preventDefault();
+      event.stopPropagation();
+      hideGraphMenu();
+      openGraphMenu(event.clientX, event.clientY, roomId);
+    };
+    graphWrap.addEventListener("contextmenu", openRoomMenu);
+    worldGraph.addEventListener("contextmenu", openRoomMenu);
+    graphMenuAddRoom.addEventListener("click", () => {
+      if (pendingGraphDraft) createRoomFromDraft(pendingGraphDraft);
+      hideGraphMenu();
+    });
+    graphMenuDeleteRoom.addEventListener("click", () => {
+      const roomId = graphMenuDeleteRoom.dataset.roomId;
+      if (roomId) deleteRoom(roomId, true);
+      hideGraphMenu();
+    });
+    window.addEventListener("resize", hideGraphMenu);
+    window.addEventListener("scroll", hideGraphMenu, true);
+    fitGraphButton.addEventListener("click", fitGraph);
+    connectRoomsButton.addEventListener("click", () => {
+      connectMode = !connectMode;
+      connectSourceRoomId = "";
+      renderGraph();
+      setStatus(connectMode ? "Connect mode enabled. Choose a source room." : "Connect mode disabled.");
+    });
+    writePositionButton.addEventListener("click", writePendingPosition);
+    window.addEventListener("pointermove", updateRoomDrag);
+    window.addEventListener("pointerup", stopRoomDrag);
 
-    loadRooms();
+    loadRooms().then(fitGraph);
   </script>
 </body>
 </html>

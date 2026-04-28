@@ -116,6 +116,19 @@ def _validate_quest_content(registry, errors):
 
         for objective in definition.get("objectives", []):
             if objective.get("type") != "collect_item":
+                if objective.get("type") == "defeat_enemy":
+                    enemy_tag = str(objective.get("enemy_tag") or "").strip().lower()
+                    if not enemy_tag:
+                        errors.append(f"Quest {quest_key} has a defeat_enemy objective without an enemy tag")
+                        continue
+                    known_tags = {
+                        str(tag or "").strip().lower()
+                        for template in registry.encounters.enemy_templates.values()
+                        for tag in template.get("tags", [])
+                    }
+                    known_ids = {template_id.lower() for template_id in registry.encounters.enemy_templates}
+                    if enemy_tag not in known_tags and enemy_tag not in known_ids:
+                        errors.append(f"Quest {quest_key} defeats unknown enemy tag: {enemy_tag}")
                 continue
             template_id = objective.get("item_id")
             if template_id and template_id not in items.item_templates:

@@ -1,37 +1,86 @@
-# Minigames And Activities: Beyond The Blade
+# Minigames And Activities
 
-In `Brave`, combat is only half the fun. Minigames are first-class citizens designed for relaxation, creative expression, and family cooperation.
+Brave's side activities should make Brambleford feel like a place to return to, not a menu of distractions. They should support the family hangout goal while still feeding the adventure loop.
 
-## 1. The Fishing System (Relax & Collect)
-Fishing is a tactical, timing-based minigame that can be played at any water source (The Bramble River, Blackfen Pools, or Cosmic Oceans).
-- **The Mechanic:** Players cast a line and must react to "ripples" (text cues) to hook a fish. Rarer fish require better rods or specific baits.
-- **The "Great Catch" Log:** A shared family board in the Lantern Rest Inn that tracks the biggest fish caught by each person.
-- **Creative Side:** Kids can design their own "Legendary Fish"—defining its name, description, and where it lives.
+## Live Activity Families
 
-## 2. The Kitchen Hearth (Cooking & Buffs)
-Cooking turns gathered ingredients (herbs, fish, monster drops) into powerful party-wide buffs.
-- **The Mechanic:** A "Recipe Book" where players experiment with combinations. A "Perfect Dish" might grant +10 Vitality for the next dungeon run.
-- **The "Family Meal":** When the whole party eats together at the Inn, the buffs are stronger and a special "Cozy" status is granted (bonus XP).
+Current systems include:
 
-## 3. The Shopkeeper's Shift (Run a Shop for a Day)
-This is a roleplaying-heavy minigame where players take over a shop in Brambleford for a limited time.
-- **The Mechanic:** Players must talk to NPCs, negotiate prices, and manage stock.
-- **Goal:** Keep the customers happy and earn "Town Reputation" and gold.
-- **Mastering the Shop:** Introduces basic math and social negotiation skills for the boys (8 and 10).
+- fishing
+- cooking
+- shopkeeping/commerce
+- forging
+- tinkering
+- chapel blessings
+- trophies
+- arcade cabinet
 
-## 4. Resource Management: The Town Project
-The family can work together to "upgrade" Brambleford or their own shared housing.
-- **Gathering:** Wood from Whispering Woods, Iron from the Warrens, or "Flux" from portals.
-- **Building:** Using resources to add a "Trophy Room," a "Library," or a "Garden" to the town hub.
-- **Impact:** Upgrades unlock new quests, better gear, or new portal destinations.
+Activity and recipe data lives mainly in `brave_game/world/content/packs/core/systems.json`.
 
-## 5. The Hobbyist's Kit: Mastering Game Mechanics
-Each minigame is a "Module" that demonstrates a specific game design concept:
-- **Fishing:** Timing and RNG (Random Number Generation).
-- **Cooking:** Resource combinations and "Crafting Trees."
-- **Shopkeeping:** Economy simulation and NPC interaction logic.
+## Fishing
 
-## 6. Phase-1 Minigame Priorities
-1. **Fishing:** The first "distraction" loop. Includes the Brambleford River and 5 types of fish.
-2. **Simple Cooking:** Using "Firepot" logic to combine 2 items into 1.
-3. **The Shop:** A basic "Merchant Mode" for the Brambleford Outfitters where players can sell their loot at better prices by roleplaying.
+Fishing currently uses authored fishing spots, rods, lures, fish behavior profiles, bite timing, and unlock rules.
+
+Live fishing spots include:
+
+- Hobbyist's Wharf
+- Reedflats
+- Drowned Causeway
+
+Design role:
+
+- give players a calmer town or travel rhythm
+- provide cooking ingredients and collectible flavor
+- let later zones feed back into Brambleford through better tackle and rare catches
+
+## Cooking
+
+Cooking turns gathered ingredients into meals with practical benefits.
+
+Current recipes include simple early plates and later unlockable dishes tied to Blackfen and Drowned Weir materials.
+
+Design role:
+
+- make the inn mechanically useful
+- reward fishing and gathering
+- give the family a reason to regroup before dangerous pushes
+
+## Shopkeeping And Commerce
+
+Brambleford Outfitters and commerce hooks support selling, stock flavor, and shopkeeping-style town play.
+
+Design role:
+
+- make loot feel useful even when it is not an upgrade
+- reinforce Brambleford as a working town
+- give non-combat play a small economic identity
+
+## Forging And Tinkering
+
+Ironroot Forge and Mender's Shed support gear improvement and field utility crafting.
+
+Design role:
+
+- turn road scrap and odd drops into visible preparation
+- give town experts practical identity
+- make returning home between pushes feel smart
+
+## Trophies
+
+The Trophy Hall is the family memory surface. Boss wins and portal relics should land there when possible.
+
+Design role:
+
+- make progress visible
+- give co-op wins a shared place
+- help story beats persist after combat logs scroll away
+
+## First-Hour Rule
+
+Do not let side activities steal the first hour.
+
+During the opening chapter, activities should be optional flavor or lightweight preparation. The player should still feel pulled toward:
+
+`Wayfarer's Yard` -> `Rats in the Kettle` -> `Goblin Road` -> `Ruk`.
+
+After Ruk, activities can breathe more because the player has already finished a real chapter.

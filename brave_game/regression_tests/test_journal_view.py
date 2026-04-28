@@ -59,7 +59,7 @@ class JournalViewTests(unittest.TestCase):
     def test_journal_view_shows_tracked_then_active_regions(self):
         active_key = STARTING_QUESTS[0]
         second_active_key = STARTING_QUESTS[2]
-        completed_key = STARTING_QUESTS[6]
+        completed_key = "bridgework_for_joss"
         character = DummyCharacter(
             quests={
                 active_key: _quest_state(active_key, "active"),
@@ -88,24 +88,26 @@ class JournalViewTests(unittest.TestCase):
         self.assertEqual(["Active", "Completed"], [item.get("label") for item in switcher.get("items", [])])
 
         tracked = view.get("sections", [])[1]
-        tutorial = _section(view, "Tutorial")
         goblin_road = _section(view, "Goblin Road")
 
         self.assertEqual("entries", tracked.get("kind"))
         self.assertEqual("tracked", tracked.get("variant"))
         self.assertTrue(tracked.get("hide_label"))
-        self.assertEqual(QUESTS[active_key]["title"], tracked.get("items", [])[0].get("title"))
-        self.assertEqual("entries", tutorial.get("kind"))
+        self.assertEqual("Lanternfall", tracked.get("items", [])[0].get("title"))
+        tutorial_lines = tracked.get("items", [])[0].get("lines", [])
+        self.assertIn("check_box_outline_blank", [line.get("icon") for line in tutorial_lines if isinstance(line, dict)])
+        self.assertFalse(any(isinstance(line, str) and line.startswith("[") for line in tutorial_lines))
         self.assertEqual("entries", goblin_road.get("kind"))
         self.assertEqual([QUESTS[second_active_key]["title"]], [item.get("title") for item in goblin_road.get("items", [])])
         self.assertEqual([f"Next: {QUESTS[second_active_key]['objectives'][0]['description']}"], goblin_road.get("items", [])[0].get("lines"))
 
         labels = [section.get("label") for section in view.get("sections", [])]
+        self.assertNotIn("Tutorial", labels)
         self.assertNotIn("Completed Quests", labels)
 
     def test_journal_view_switches_to_completed_regions(self):
         completed_key = STARTING_QUESTS[1]
-        later_completed_key = STARTING_QUESTS[6]
+        later_completed_key = "bridgework_for_joss"
         character = DummyCharacter(
             quests={
                 completed_key: _quest_state(completed_key, "completed"),
@@ -123,7 +125,7 @@ class JournalViewTests(unittest.TestCase):
         self.assertEqual(["Active", "Completed"], [item.get("label") for item in view.get("sections", [])[0].get("items", [])])
         labels = [section.get("label") for section in view.get("sections", [])]
         self.assertEqual(["", "Brambleford", "Junk-Yard Planet"], labels)
-        self.assertEqual("list", view.get("sections", [])[1].get("kind"))
+        self.assertEqual("entries", view.get("sections", [])[1].get("kind"))
 
     def test_journal_view_keeps_empty_states(self):
         character = DummyCharacter(

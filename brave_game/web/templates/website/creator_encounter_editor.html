@@ -8,169 +8,304 @@
     :root { --ink:#1d2430; --accent:#8b4a29; --panel:#fff9f0; --line:#d9c8ac; --muted:#6b6157; --good:#2f6d4c; --bad:#8d3122; --shadow:rgba(29,36,48,0.12); }
     * { box-sizing:border-box; }
     body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:radial-gradient(circle at top right, rgba(139,74,41,.15), transparent 26%),linear-gradient(180deg,#f3eadb 0%,#f9f3e8 44%,#efe2cf 100%); min-height:100vh; }
-    .shell { width:min(1600px,calc(100vw - 32px)); margin:24px auto; display:grid; grid-template-columns:320px minmax(0,1fr); gap:20px; }
-    .panel { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
+    .shell { width:min(1680px,calc(100vw - 32px)); margin:24px auto; display:grid; grid-template-columns:320px minmax(0,1fr); gap:20px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
     .panel-head { padding:18px 20px; border-bottom:1px solid var(--line); background:linear-gradient(135deg, rgba(139,74,41,.12), rgba(217,200,172,.22)); }
-    .panel-head h1,.panel-head h2,.panel-head h3 { margin:0; font-weight:700; letter-spacing:.02em; }
+    .panel-head h1,.panel-head h2,.panel-head h3 { margin:0; font-weight:700; letter-spacing:0; }
     .panel-head p { margin:8px 0 0; color:var(--muted); line-height:1.4; }
     .panel-body { padding:18px 20px 20px; }
-    .search,.field input,.field select,textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:10px 12px; font:inherit; background:#fff; }
-    .search { margin-bottom:12px; }
-    .room-list,.enemy-list,.selector-list { display:grid; gap:8px; max-height:260px; overflow:auto; padding-right:4px; }
-    .row,.selector-row { width:100%; text-align:left; border:1px solid var(--line); background:#fff; border-radius:12px; padding:12px; cursor:pointer; transition:transform 120ms ease,border-color 120ms ease,background 120ms ease; }
-    .row:hover,.row.active,.selector-row:hover,.selector-row.active { transform:translateY(-1px); border-color:var(--accent); background:#fff8f2; }
-    .row strong,.row span,.selector-row strong,.selector-row span { display:block; }
-    .row span,.selector-row span { color:var(--muted); font-size:.92rem; margin-top:4px; }
-    .selector-row.empty { cursor:default; }
-    .workspace { display:grid; grid-template-rows:auto auto minmax(440px,auto) minmax(240px,auto); gap:16px; }
-    .toolbar,.editor-toolbar,.chips { display:flex; flex-wrap:wrap; gap:10px; }
-    .meta { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.94rem; }
-    .editor-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .workspace { display:grid; gap:16px; }
     .stack { display:grid; gap:12px; }
+    .tabs,.toolbar,.editor-toolbar,.chips,.stat-strip,.enemy-slots,.row-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .tabs { border-bottom:1px solid var(--line); padding:0 20px; background:#fff8f2; }
+    .tab { border-radius:0; border:0; border-bottom:3px solid transparent; box-shadow:none; color:var(--muted); background:transparent; padding:14px 4px 11px; }
+    .tab.active { color:var(--ink); border-bottom-color:var(--accent); }
+    .tab-panel[hidden] { display:none; }
+    .meta { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.94rem; }
+    .search,.field input,.field select,textarea { width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font:inherit; background:#fff; color:var(--ink); }
+    .search { margin-bottom:10px; }
     .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .field-grid.three { grid-template-columns:repeat(3,minmax(0,1fr)); }
     .field { display:grid; gap:6px; }
     .field.full { grid-column:1/-1; }
-    .field label { font-size:.88rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+    .field label { font-size:.82rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
     button { border:0; border-radius:999px; padding:10px 16px; font:inherit; cursor:pointer; background:var(--accent); color:#fff; box-shadow:0 10px 24px rgba(139,74,41,.24); }
     button.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none; }
     button.danger { background:#fff0ed; color:var(--bad); border:1px solid rgba(141,49,34,.2); box-shadow:none; }
     button:disabled { opacity:.55; cursor:progress; }
-    .chip { border:1px solid var(--line); border-radius:999px; padding:8px 12px; background:#fff; font-size:.92rem; }
-    textarea,pre { width:100%; margin:0; border:1px solid var(--line); border-radius:14px; background:#fffdfa; font:.95rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
-    textarea { min-height:250px; padding:16px; resize:vertical; }
-    pre { min-height:220px; padding:16px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
-    .status { padding:12px 14px; border-radius:12px; background:#fff6e7; color:var(--ink); border:1px solid var(--line); }
+    .row,.selector-row { width:100%; text-align:left; border:1px solid var(--line); background:#fff; border-radius:8px; padding:12px; cursor:pointer; transition:transform 120ms ease,border-color 120ms ease,background 120ms ease; }
+    .row:hover,.row.active,.selector-row:hover,.selector-row.active { transform:translateY(-1px); border-color:var(--accent); background:#fff8f2; }
+    .row strong,.row span,.selector-row strong,.selector-row span { display:block; }
+    .row span,.selector-row span { color:var(--muted); font-size:.92rem; margin-top:4px; }
+    .selector-row.empty { cursor:default; }
+    .browser-section { display:grid; gap:8px; }
+    .browser-section h2 { margin:8px 0 0; font-size:1rem; }
+    .room-list,.enemy-list,.party-list,.selector-list { display:grid; gap:8px; max-height:240px; overflow:auto; padding-right:4px; }
+    .builder-grid { display:grid; grid-template-columns:minmax(280px,380px) minmax(0,1fr); gap:16px; }
+    .builder-grid.single { grid-template-columns:1fr; }
+    .summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+    .summary-card { border:1px solid var(--line); border-radius:8px; background:#fffdfa; padding:12px; min-height:78px; }
+    .summary-card strong { display:block; font-size:1.25rem; }
+    .summary-card span { display:block; color:var(--muted); margin-top:4px; font-size:.9rem; }
+    .chip,.pill { border:1px solid var(--line); border-radius:999px; padding:8px 12px; background:#fff; font-size:.92rem; }
+    .pill.good { border-color:rgba(47,109,76,.28); color:var(--good); background:#eef8f1; }
+    .pill.bad { border-color:rgba(141,49,34,.28); color:var(--bad); background:#fff0ed; }
+    .enemy-slot { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:end; flex:1 1 240px; }
+    .loot-list,.enemy-preview-list { display:grid; gap:8px; }
+    .loot-row { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px auto; gap:8px; align-items:end; }
+    details { border:1px solid var(--line); border-radius:8px; background:#fffdfa; }
+    details summary { cursor:pointer; padding:12px 14px; color:var(--muted); }
+    details .details-body { padding:0 14px 14px; }
+    textarea,pre { width:100%; margin:0; border:1px solid var(--line); border-radius:8px; background:#fffdfa; font:.92rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
+    textarea { min-height:220px; padding:14px; resize:vertical; }
+    pre { min-height:180px; max-height:420px; padding:14px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+    .status { padding:12px 14px; border-radius:8px; background:#fff6e7; color:var(--ink); border:1px solid var(--line); }
     .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
     .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
-    @media (max-width:1180px) { .editor-grid { grid-template-columns:1fr; } }
-    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .room-list,.enemy-list,.selector-list { max-height:240px; } .field-grid { grid-template-columns:1fr; } }
-  
-    .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
+    .validation-notes { padding:12px 14px; border-radius:8px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
     .validation-notes[hidden] { display:none; }
     .validation-notes strong { display:block; margin-bottom:8px; }
     .validation-notes ul { margin:0; padding-left:20px; display:grid; gap:6px; }
-
+    @media (max-width:1180px) { .builder-grid,.summary-grid { grid-template-columns:1fr; } }
+    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .field-grid,.field-grid.three,.loot-row { grid-template-columns:1fr; } .room-list,.enemy-list,.party-list,.selector-list { max-height:220px; } }
   </style>
 </head>
 <body>
   <div class="shell">
     <section class="panel">
-      <div class="panel-head"><h1>Encounters</h1><p>Author room encounter tables and enemy templates using the live encounter registry.</p></div>
+      <div class="panel-head"><h1>Encounter Builder</h1><p>Build room fights, enemy templates, and roaming threats without editing source by default.</p></div>
       <div class="panel-body stack">
-        <input id="room-search" class="search" type="search" placeholder="Search rooms">
-        <div id="room-list" class="room-list"></div>
-        <input id="enemy-search" class="search" type="search" placeholder="Search enemy templates">
-        <div id="enemy-list" class="enemy-list"></div>
+        <div class="browser-section">
+          <h2>Rooms</h2>
+          <input id="room-search" class="search" type="search" placeholder="Search rooms">
+          <div id="room-list" class="room-list"></div>
+        </div>
+        <div class="browser-section">
+          <h2>Enemies</h2>
+          <input id="enemy-search" class="search" type="search" placeholder="Search enemies">
+          <div id="enemy-list" class="enemy-list"></div>
+        </div>
+        <div class="browser-section">
+          <h2>Roaming Parties</h2>
+          <input id="party-search" class="search" type="search" placeholder="Search roaming parties">
+          <div id="party-list" class="party-list"></div>
+        </div>
       </div>
     </section>
+
     <section class="workspace">
-      <div class="panel"><div class="panel-head"><h2 id="editor-title">Encounter Editor</h2><p id="editor-subtitle">Select a room and enemy template to load encounter and template previews.</p></div><div class="panel-body"><div class="meta"><span>API root: <strong>{{ api_root }}</strong></span><span>Reference domain: <strong>{{ reference_domain }}</strong></span></div></div></div>
-      <div class="toolbar"><button id="load-previews" class="secondary" type="button">Reload Encounter Preview</button><button id="validate-content" class="secondary" type="button">Validate Packs</button><button id="reload-content" class="secondary" type="button">Reload Registry</button></div>
-      <div class="editor-grid">
-        <section class="panel"><div class="panel-head"><h3>Encounter List</h3><p>Select, add, or remove room encounter entries, then sync the full room table to JSON.</p></div><div class="panel-body stack">
-          <div id="encounter-list" class="selector-list"></div>
-          <div class="field-grid">
-            <div class="field"><label for="encounter-key">Encounter Key</label><input id="encounter-key" type="text"></div>
-            <div class="field"><label for="encounter-title">Encounter Title</label><input id="encounter-title" type="text"></div>
-            <div class="field full"><label for="encounter-intro">Intro</label><input id="encounter-intro" type="text"></div>
-            <div class="field"><label for="encounter-enemy-one">Enemy One</label><select id="encounter-enemy-one"></select></div>
-            <div class="field"><label for="encounter-enemy-two">Enemy Two</label><select id="encounter-enemy-two"></select></div>
-            <div class="field"><label for="encounter-enemy-three">Enemy Three</label><select id="encounter-enemy-three"></select></div>
-            <div class="field"><label for="encounter-enemy-four">Enemy Four</label><select id="encounter-enemy-four"></select></div>
-          </div>
-          <div class="editor-toolbar"><button id="new-encounter" class="secondary" type="button">New Encounter Entry</button><button id="remove-encounter" class="danger" type="button">Remove Encounter Entry</button><button id="sync-encounter-form" class="secondary" type="button">Sync Encounter List To JSON</button><button id="diff-encounters" type="button">Dry-Run Encounters</button><button id="write-encounters" type="button">Write Encounters</button></div>
-          <textarea id="encounters-json" spellcheck="false"></textarea>
-          <div class="chips"><div id="room-chip" class="chip">Room: -</div><div id="encounter-count-chip" class="chip">Entries: 0</div></div>
-        </div></section>
-        <section class="panel"><div class="panel-head"><h3>Enemy Template</h3><p>Edit one enemy template and sync it to the enemy JSON payload.</p></div><div class="panel-body stack">
-          <div class="field-grid">
-            <div class="field"><label for="enemy-id">Template Key</label><input id="enemy-id" type="text"></div>
-            <div class="field"><label for="enemy-name">Enemy Name</label><input id="enemy-name" type="text"></div>
-            <div class="field"><label for="enemy-xp">XP</label><input id="enemy-xp" type="number" min="1" value="1"></div>
-            <div class="field"><label for="enemy-hp">Max HP</label><input id="enemy-hp" type="number" min="1" value="1"></div>
-            <div class="field"><label for="enemy-attack">Attack Power</label><input id="enemy-attack" type="number" min="0" value="0"></div>
-            <div class="field"><label for="enemy-armor">Armor</label><input id="enemy-armor" type="number" min="0" value="0"></div>
-            <div class="field"><label for="enemy-accuracy">Accuracy</label><input id="enemy-accuracy" type="number" min="0" value="0"></div>
-            <div class="field"><label for="enemy-dodge">Dodge</label><input id="enemy-dodge" type="number" min="0" value="0"></div>
-            <div class="field full"><label for="enemy-desc">Description</label><input id="enemy-desc" type="text"></div>
-            <div class="field full"><label for="enemy-tags">Tags</label><input id="enemy-tags" type="text" placeholder="comma,separated,tags"></div>
-          </div>
-          <div class="editor-toolbar"><button id="new-enemy" class="secondary" type="button">New Enemy Draft</button><button id="sync-enemy-form" class="secondary" type="button">Sync Enemy Form To JSON</button><button id="diff-enemy" type="button">Dry-Run Enemy</button><button id="write-enemy" type="button">Write Enemy</button></div>
-          <textarea id="enemy-json" spellcheck="false"></textarea>
-          <div class="chips"><div id="enemy-chip" class="chip">Enemy: -</div></div>
-        </div></section>
+      <div class="panel">
+        <div class="panel-head"><h2 id="editor-title">Encounter Builder</h2><p id="editor-subtitle">Choose a room, enemy, or roaming party to start building.</p></div>
+        <div class="panel-body stack">
+          <div class="meta"><span>API root: <strong>{{ api_root }}</strong></span><span>Reference domain: <strong>{{ reference_domain }}</strong></span></div>
+          <div class="toolbar"><button id="load-previews" class="secondary" type="button">Refresh Selection</button><button id="validate-content" class="secondary" type="button">Check Content</button><button id="reload-content" class="secondary" type="button">Reload Registry</button></div>
+        </div>
+        <nav class="tabs" aria-label="Encounter builder sections">
+          <button id="tab-room" class="tab active" type="button" data-tab="room-panel">Room Encounters</button>
+          <button id="tab-enemy" class="tab" type="button" data-tab="enemy-panel">Enemy Templates</button>
+          <button id="tab-party" class="tab" type="button" data-tab="party-panel">Roaming Parties</button>
+        </nav>
       </div>
-      <div class="panel"><div class="panel-head"><h2>Preview / Diff Output</h2><p>Encounter preview resolves room encounter lists and enemy metadata from the live content registry.</p></div><div class="panel-body"><div id="status" class="status">Waiting for room and enemy selection.</div><pre id="output"></pre></div></div>
+
+      <section id="room-panel" class="tab-panel">
+        <div class="summary-grid">
+          <div class="summary-card"><strong id="room-summary-name">-</strong><span>Selected room</span></div>
+          <div class="summary-card"><strong id="room-summary-count">0</strong><span>Encounter entries</span></div>
+          <div class="summary-card"><strong id="room-summary-xp">0</strong><span>Selected encounter XP</span></div>
+          <div class="summary-card"><strong id="room-summary-enemies">0</strong><span>Selected enemies</span></div>
+        </div>
+        <div class="builder-grid">
+          <section class="panel">
+            <div class="panel-head"><h3>Room Encounter List</h3><p>Pick the encounter entry for this room or create a new one.</p></div>
+            <div class="panel-body stack">
+              <div id="encounter-list" class="selector-list"></div>
+              <div class="editor-toolbar"><button id="new-encounter" class="secondary" type="button">Add Encounter</button><button id="remove-encounter" class="danger" type="button">Remove Encounter</button></div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h3>Encounter Details</h3><p>Build the encounter players can roll into from this room.</p></div>
+            <div class="panel-body stack">
+              <div id="validation-notes" class="validation-notes" hidden></div>
+              <div class="field-grid">
+                <div class="field"><label for="encounter-key">Key</label><input id="encounter-key" type="text"></div>
+                <div class="field"><label for="encounter-title">Title</label><input id="encounter-title" type="text"></div>
+                <div class="field full"><label for="encounter-intro">Intro Text</label><input id="encounter-intro" type="text"></div>
+              </div>
+              <div class="enemy-slots">
+                <div class="enemy-slot"><div class="field"><label for="encounter-enemy-one">Enemy 1</label><select id="encounter-enemy-one"></select></div><button class="secondary clear-enemy" type="button" data-target="encounter-enemy-one">Clear</button></div>
+                <div class="enemy-slot"><div class="field"><label for="encounter-enemy-two">Enemy 2</label><select id="encounter-enemy-two"></select></div><button class="secondary clear-enemy" type="button" data-target="encounter-enemy-two">Clear</button></div>
+                <div class="enemy-slot"><div class="field"><label for="encounter-enemy-three">Enemy 3</label><select id="encounter-enemy-three"></select></div><button class="secondary clear-enemy" type="button" data-target="encounter-enemy-three">Clear</button></div>
+                <div class="enemy-slot"><div class="field"><label for="encounter-enemy-four">Enemy 4</label><select id="encounter-enemy-four"></select></div><button class="secondary clear-enemy" type="button" data-target="encounter-enemy-four">Clear</button></div>
+              </div>
+              <div id="encounter-enemy-preview" class="enemy-preview-list"></div>
+              <div class="editor-toolbar"><button id="diff-encounters" type="button">Preview Room Changes</button><button id="write-encounters" type="button">Save Room Encounters</button></div>
+              <details><summary>Advanced Source</summary><div class="details-body stack"><textarea id="encounters-json" spellcheck="false"></textarea><button id="sync-encounter-source" class="secondary" type="button">Apply Source To Builder</button></div></details>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="enemy-panel" class="tab-panel" hidden>
+        <div class="builder-grid">
+          <section class="panel">
+            <div class="panel-head"><h3>Enemy Snapshot</h3><p>Core combat profile and authored source health.</p></div>
+            <div class="panel-body stack">
+              <div class="summary-grid">
+                <div class="summary-card"><strong id="enemy-summary-name">-</strong><span>Enemy</span></div>
+                <div class="summary-card"><strong id="enemy-summary-xp">0</strong><span>XP</span></div>
+                <div class="summary-card"><strong id="enemy-summary-rank">-</strong><span>Rank</span></div>
+                <div class="summary-card"><strong id="enemy-summary-temperament">-</strong><span>Temperament</span></div>
+              </div>
+              <div id="enemy-chip" class="chip">Enemy: -</div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h3>Enemy Details</h3><p>Shape the enemy players fight, including stats, tags, and drops.</p></div>
+            <div class="panel-body stack">
+              <div class="field-grid">
+                <div class="field"><label for="enemy-id">Key</label><input id="enemy-id" type="text"></div>
+                <div class="field"><label for="enemy-name">Name</label><input id="enemy-name" type="text"></div>
+                <div class="field"><label for="enemy-xp">XP</label><input id="enemy-xp" type="number" min="1" value="1"></div>
+                <div class="field"><label for="enemy-hp">Max HP</label><input id="enemy-hp" type="number" min="1" value="1"></div>
+                <div class="field"><label for="enemy-attack">Attack Power</label><input id="enemy-attack" type="number" min="0" value="0"></div>
+                <div class="field"><label for="enemy-armor">Armor</label><input id="enemy-armor" type="number" min="0" value="0"></div>
+                <div class="field"><label for="enemy-accuracy">Accuracy</label><input id="enemy-accuracy" type="number" min="0" value="0"></div>
+                <div class="field"><label for="enemy-dodge">Dodge</label><input id="enemy-dodge" type="number" min="0" value="0"></div>
+                <div class="field full"><label for="enemy-desc">Description</label><input id="enemy-desc" type="text"></div>
+                <div class="field full"><label for="enemy-tags">Tags</label><input id="enemy-tags" type="text" placeholder="comma separated"></div>
+              </div>
+              <div class="stack">
+                <div class="row-actions"><strong>Loot Drops</strong><button id="add-loot" class="secondary" type="button">Add Drop</button></div>
+                <div id="loot-list" class="loot-list"></div>
+              </div>
+              <div class="editor-toolbar"><button id="new-enemy" class="secondary" type="button">New Enemy</button><button id="diff-enemy" type="button">Preview Enemy Changes</button><button id="write-enemy" type="button">Save Enemy</button></div>
+              <details><summary>Advanced Source</summary><div class="details-body stack"><textarea id="enemy-json" spellcheck="false"></textarea><button id="sync-enemy-source" class="secondary" type="button">Apply Source To Builder</button></div></details>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="party-panel" class="tab-panel" hidden>
+        <div class="builder-grid">
+          <section class="panel">
+            <div class="panel-head"><h3>Roaming Party Snapshot</h3><p>Mobile encounter configuration for a region.</p></div>
+            <div class="panel-body stack">
+              <div class="summary-grid">
+                <div class="summary-card"><strong id="party-summary-name">-</strong><span>Party</span></div>
+                <div class="summary-card"><strong id="party-summary-region">-</strong><span>Region</span></div>
+                <div class="summary-card"><strong id="party-summary-interval">0</strong><span>Move interval</span></div>
+                <div class="summary-card"><strong id="party-summary-xp">0</strong><span>Encounter XP</span></div>
+              </div>
+              <div id="party-chip" class="chip">Roaming Party: -</div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h3>Roaming Party Details</h3><p>Build the patrol-style encounter that moves through a map region.</p></div>
+            <div class="panel-body stack">
+              <div class="field-grid three">
+                <div class="field"><label for="party-key">Key</label><input id="party-key" type="text"></div>
+                <div class="field"><label for="party-region">Region</label><input id="party-region" type="text"></div>
+                <div class="field"><label for="party-start-room">Start Room</label><select id="party-start-room"></select></div>
+                <div class="field"><label for="party-interval">Move Interval</label><input id="party-interval" type="number" min="1" value="18"></div>
+                <div class="field"><label for="party-respawn">Respawn Delay</label><input id="party-respawn" type="number" min="0" value="180"></div>
+                <div class="field"><label for="party-safe">Avoid Safe Rooms</label><select id="party-safe"><option value="true">Yes</option><option value="false">No</option></select></div>
+                <div class="field"><label for="party-encounter-key">Encounter Key</label><input id="party-encounter-key" type="text"></div>
+                <div class="field"><label for="party-title">Encounter Title</label><input id="party-title" type="text"></div>
+                <div class="field full"><label for="party-intro">Intro Text</label><input id="party-intro" type="text"></div>
+              </div>
+              <div class="enemy-slots">
+                <div class="enemy-slot"><div class="field"><label for="party-enemy-one">Enemy 1</label><select id="party-enemy-one"></select></div><button class="secondary clear-enemy" type="button" data-target="party-enemy-one">Clear</button></div>
+                <div class="enemy-slot"><div class="field"><label for="party-enemy-two">Enemy 2</label><select id="party-enemy-two"></select></div><button class="secondary clear-enemy" type="button" data-target="party-enemy-two">Clear</button></div>
+                <div class="enemy-slot"><div class="field"><label for="party-enemy-three">Enemy 3</label><select id="party-enemy-three"></select></div><button class="secondary clear-enemy" type="button" data-target="party-enemy-three">Clear</button></div>
+                <div class="enemy-slot"><div class="field"><label for="party-enemy-four">Enemy 4</label><select id="party-enemy-four"></select></div><button class="secondary clear-enemy" type="button" data-target="party-enemy-four">Clear</button></div>
+              </div>
+              <div class="editor-toolbar"><button id="new-party" class="secondary" type="button">New Roaming Party</button><button id="diff-party" type="button">Preview Party Changes</button><button id="write-party" type="button">Save Roaming Party</button></div>
+              <details><summary>Advanced Source</summary><div class="details-body stack"><textarea id="party-json" spellcheck="false"></textarea><button id="sync-party-source" class="secondary" type="button">Apply Source To Builder</button></div></details>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <div class="panel"><div class="panel-head"><h2>Preview Output</h2><p>Diffs, registry checks, and resolved encounter summaries appear here.</p></div><div class="panel-body stack"><div id="status" class="status">Waiting for a builder selection.</div><pre id="output"></pre></div></div>
     </section>
   </div>
+
   <script src="/static/website/js/creator_common.js"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
-    const roomSearch = document.getElementById('room-search');
-    const roomList = document.getElementById('room-list');
-    const enemySearch = document.getElementById('enemy-search');
-    const enemyList = document.getElementById('enemy-list');
-    const encounterList = document.getElementById('encounter-list');
-    const output = document.getElementById('output');
-    const statusBox = document.getElementById('status');
-    const validationNotes = document.getElementById('validation-notes');
+    const $ = (id) => document.getElementById(id);
+    const roomSearch = $('room-search');
+    const roomList = $('room-list');
+    const enemySearch = $('enemy-search');
+    const enemyList = $('enemy-list');
+    const partySearch = $('party-search');
+    const partyList = $('party-list');
+    const encounterList = $('encounter-list');
+    const output = $('output');
+    const statusBox = $('status');
+    const validationNotes = $('validation-notes');
     const creatorTools = window.BraveCreator.bind(API_ROOT, statusBox, validationNotes);
-    const editorTitle = document.getElementById('editor-title');
-    const editorSubtitle = document.getElementById('editor-subtitle');
-    const roomChip = document.getElementById('room-chip');
-    const encounterCountChip = document.getElementById('encounter-count-chip');
-    const enemyChip = document.getElementById('enemy-chip');
-    const loadPreviewsButton = document.getElementById('load-previews');
-    const validateButton = document.getElementById('validate-content');
-    const reloadButton = document.getElementById('reload-content');
-    const encounterKey = document.getElementById('encounter-key');
-    const encounterTitle = document.getElementById('encounter-title');
-    const encounterIntro = document.getElementById('encounter-intro');
-    const encounterEnemyOne = document.getElementById('encounter-enemy-one');
-    const encounterEnemyTwo = document.getElementById('encounter-enemy-two');
-    const encounterEnemyThree = document.getElementById('encounter-enemy-three');
-    const encounterEnemyFour = document.getElementById('encounter-enemy-four');
-    const newEncounterButton = document.getElementById('new-encounter');
-    const removeEncounterButton = document.getElementById('remove-encounter');
-    const syncEncounterButton = document.getElementById('sync-encounter-form');
-    const diffEncountersButton = document.getElementById('diff-encounters');
-    const writeEncountersButton = document.getElementById('write-encounters');
-    const encountersJson = document.getElementById('encounters-json');
-    const enemyId = document.getElementById('enemy-id');
-    const enemyName = document.getElementById('enemy-name');
-    const enemyXp = document.getElementById('enemy-xp');
-    const enemyHp = document.getElementById('enemy-hp');
-    const enemyAttack = document.getElementById('enemy-attack');
-    const enemyArmor = document.getElementById('enemy-armor');
-    const enemyAccuracy = document.getElementById('enemy-accuracy');
-    const enemyDodge = document.getElementById('enemy-dodge');
-    const enemyDesc = document.getElementById('enemy-desc');
-    const enemyTags = document.getElementById('enemy-tags');
-    const newEnemyButton = document.getElementById('new-enemy');
-    const syncEnemyButton = document.getElementById('sync-enemy-form');
-    const diffEnemyButton = document.getElementById('diff-enemy');
-    const writeEnemyButton = document.getElementById('write-enemy');
-    const enemyJson = document.getElementById('enemy-json');
+    const editorTitle = $('editor-title');
+    const editorSubtitle = $('editor-subtitle');
+    const loadPreviewsButton = $('load-previews');
+    const validateButton = $('validate-content');
+    const reloadButton = $('reload-content');
+    const encounterFields = {
+      key: $('encounter-key'),
+      title: $('encounter-title'),
+      intro: $('encounter-intro'),
+      enemies: [$('encounter-enemy-one'), $('encounter-enemy-two'), $('encounter-enemy-three'), $('encounter-enemy-four')],
+      source: $('encounters-json'),
+    };
+    const enemyFields = {
+      id: $('enemy-id'),
+      name: $('enemy-name'),
+      xp: $('enemy-xp'),
+      hp: $('enemy-hp'),
+      attack: $('enemy-attack'),
+      armor: $('enemy-armor'),
+      accuracy: $('enemy-accuracy'),
+      dodge: $('enemy-dodge'),
+      desc: $('enemy-desc'),
+      tags: $('enemy-tags'),
+      source: $('enemy-json'),
+    };
+    const partyFields = {
+      key: $('party-key'),
+      region: $('party-region'),
+      startRoom: $('party-start-room'),
+      interval: $('party-interval'),
+      respawn: $('party-respawn'),
+      safe: $('party-safe'),
+      encounterKey: $('party-encounter-key'),
+      title: $('party-title'),
+      intro: $('party-intro'),
+      enemies: [$('party-enemy-one'), $('party-enemy-two'), $('party-enemy-three'), $('party-enemy-four')],
+      source: $('party-json'),
+    };
+    const allActionButtons = [
+      loadPreviewsButton, validateButton, reloadButton, $('new-encounter'), $('remove-encounter'), $('diff-encounters'), $('write-encounters'),
+      $('new-enemy'), $('diff-enemy'), $('write-enemy'), $('add-loot'), $('new-party'), $('diff-party'), $('write-party'),
+    ];
 
     let rooms = [];
     let enemies = [];
+    let parties = [];
     let selectedRoom = null;
     let selectedEnemy = null;
+    let selectedParty = null;
     let encounterEntries = [];
     let selectedEncounterIndex = -1;
+    let enemySourceExtras = {};
+    let lootRows = [];
+    let partySourceExtras = {};
 
     function setBusy(isBusy) {
-      for (const button of [loadPreviewsButton, validateButton, reloadButton, newEncounterButton, removeEncounterButton, syncEncounterButton, diffEncountersButton, writeEncountersButton, newEnemyButton, syncEnemyButton, diffEnemyButton, writeEnemyButton]) {
-        button.disabled = isBusy;
-      }
+      for (const button of allActionButtons) button.disabled = isBusy;
     }
 
     function setStatus(message, tone = '') {
       creatorTools.setStatus(message, tone);
-    }
-
-    function showValidation(messages) {
-      return creatorTools.showValidation(messages);
     }
 
     async function apiFetch(path, options = {}) {
@@ -180,13 +315,27 @@
       return payload;
     }
 
+    function activateTab(panelId) {
+      for (const tab of document.querySelectorAll('.tab')) tab.classList.toggle('active', tab.dataset.tab === panelId);
+      for (const panel of document.querySelectorAll('.tab-panel')) panel.hidden = panel.id !== panelId;
+    }
+
+    function enemyById(id) {
+      return enemies.find((entry) => entry.id === id) || null;
+    }
+
+    function enemyXp(id) {
+      const entry = enemyById(id);
+      return Number(entry && entry.meta || 0);
+    }
+
+    function selectedEnemyIds(selects) {
+      return selects.map((select) => select.value).filter(Boolean);
+    }
+
     function fillEnemySelect(select, selected = '') {
       const chosen = selected || select.value || '';
-      select.innerHTML = '';
-      const blank = document.createElement('option');
-      blank.value = '';
-      blank.textContent = 'None';
-      select.appendChild(blank);
+      select.innerHTML = '<option value="">None</option>';
       for (const enemy of enemies) {
         const option = document.createElement('option');
         option.value = enemy.id;
@@ -196,9 +345,21 @@
       }
     }
 
+    function fillRoomSelect(select, selected = '') {
+      const chosen = selected || select.value || '';
+      select.innerHTML = '<option value="">Choose room</option>';
+      for (const room of rooms) {
+        const option = document.createElement('option');
+        option.value = room.id;
+        option.textContent = `${room.label || room.id} (${room.map_region || room.zone || 'region unknown'})`;
+        if (room.id === chosen) option.selected = true;
+        select.appendChild(option);
+      }
+    }
+
     function renderList(container, entries, selectedId, filter, onSelect) {
       const token = filter.trim().toLowerCase();
-      const filtered = entries.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || '').toLowerCase().includes(token)));
+      const filtered = entries.filter((entry) => !token || [entry.id, entry.label, entry.meta, entry.region, entry.start_room].some((value) => String(value || '').toLowerCase().includes(token)));
       container.innerHTML = '';
       for (const entry of filtered) {
         const button = document.createElement('button');
@@ -215,7 +376,11 @@
     }
 
     function buildEnemyDraft() {
-      return { key: 'new_enemy', name: 'New Enemy', xp: 1, max_hp: 1, attack_power: 0, armor: 0, accuracy: 0, dodge: 0, desc: '', tags: [] };
+      return { key: 'new_enemy', name: 'New Enemy', xp: 1, max_hp: 1, attack_power: 0, armor: 0, accuracy: 0, dodge: 0, desc: '', tags: [], loot: [] };
+    }
+
+    function buildPartyDraft() {
+      return { key: 'new_roaming_party', region: '', start_room: '', interval: 18, respawn_delay: 180, avoid_safe: true, encounter: { key: 'new_roaming_party', title: 'New Roaming Party', intro: '', enemies: [] } };
     }
 
     function renderEncounterList() {
@@ -223,38 +388,50 @@
       if (!encounterEntries.length) {
         const empty = document.createElement('div');
         empty.className = 'selector-row empty';
-        empty.innerHTML = '<strong>No Encounter Entries</strong><span>Create the first encounter for this room.</span>';
+        empty.innerHTML = '<strong>No encounters yet</strong><span>Add the first encounter for this room.</span>';
         encounterList.appendChild(empty);
       }
       encounterEntries.forEach((entry, index) => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'selector-row' + (index === selectedEncounterIndex ? ' active' : '');
-        const summary = (entry.enemies || []).join(', ') || 'No enemies';
-        button.innerHTML = `<strong>${entry.title || entry.key || `Encounter ${index + 1}`}</strong><span>${entry.key || 'encounter'} · ${summary}</span>`;
+        const summary = (entry.enemies || []).map((id) => (enemyById(id) || {}).label || id).join(', ') || 'No enemies';
+        button.innerHTML = `<strong>${entry.title || entry.key || `Encounter ${index + 1}`}</strong><span>${summary}</span>`;
         button.addEventListener('click', () => selectEncounter(index));
         encounterList.appendChild(button);
       });
-      encounterCountChip.textContent = `Entries: ${encounterEntries.length}`;
-      removeEncounterButton.disabled = selectedEncounterIndex < 0 || !encounterEntries.length;
+      $('remove-encounter').disabled = selectedEncounterIndex < 0 || !encounterEntries.length;
+      updateEncounterSummary();
     }
 
     function populateEncounterForm(entry) {
-      encounterKey.value = entry.key || '';
-      encounterTitle.value = entry.title || '';
-      encounterIntro.value = entry.intro || '';
-      const ids = entry.enemies || [];
-      fillEnemySelect(encounterEnemyOne, ids[0] || '');
-      fillEnemySelect(encounterEnemyTwo, ids[1] || '');
-      fillEnemySelect(encounterEnemyThree, ids[2] || '');
-      fillEnemySelect(encounterEnemyFour, ids[3] || '');
+      const data = entry || buildEncounterDraft();
+      encounterFields.key.value = data.key || '';
+      encounterFields.title.value = data.title || '';
+      encounterFields.intro.value = data.intro || '';
+      const ids = data.enemies || [];
+      encounterFields.enemies.forEach((select, index) => fillEnemySelect(select, ids[index] || ''));
+      updateEncounterSummary();
     }
 
-    function syncEncounterStateToJson() {
-      creatorTools.clearValidation();
-      encountersJson.value = JSON.stringify(encounterEntries, null, 2);
-      encounterCountChip.textContent = `Entries: ${encounterEntries.length}`;
+    function syncEncounterStateToSource() {
+      encounterFields.source.value = JSON.stringify(encounterEntries, null, 2);
+      renderEncounterPreview();
+      updateEncounterSummary();
       return encounterEntries;
+    }
+
+    function syncEncounterSourceToState() {
+      try {
+        const value = creatorTools.parseJsonField(encounterFields.source, [], { label:'Encounter source', expect:'array' });
+        encounterEntries = value.map((entry) => ({ ...entry }));
+        selectedEncounterIndex = encounterEntries.length ? 0 : -1;
+        populateEncounterForm(encounterEntries[0] || buildEncounterDraft());
+        renderEncounterList();
+        setStatus('Advanced source applied to the room encounter builder.', 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+      }
     }
 
     function syncEncounterFormToState() {
@@ -263,33 +440,26 @@
         return null;
       }
       if (selectedEncounterIndex < 0) {
-        if (!encounterEntries.length) {
-          encounterEntries = [buildEncounterDraft()];
-          selectedEncounterIndex = 0;
-        } else {
-          selectedEncounterIndex = 0;
-        }
+        encounterEntries = encounterEntries.length ? encounterEntries : [buildEncounterDraft()];
+        selectedEncounterIndex = 0;
       }
-      const key = encounterKey.value.trim();
-      const title = encounterTitle.value.trim();
-      const enemiesSelected = [encounterEnemyOne.value, encounterEnemyTwo.value, encounterEnemyThree.value, encounterEnemyFour.value].filter(Boolean);
+      const enemiesSelected = selectedEnemyIds(encounterFields.enemies);
       const messages = creatorTools.requireFields([
-        { label: 'Encounter key', value: key },
-        { label: 'Encounter title', value: title },
+        { label: 'Encounter key', value: encounterFields.key.value },
+        { label: 'Encounter title', value: encounterFields.title.value },
       ]);
-      if (!enemiesSelected.length) messages.push('At least one encounter enemy is required.');
-      if (!showValidation(messages)) {
-        setStatus('Encounter entry is incomplete.', 'bad');
+      if (!enemiesSelected.length) messages.push('At least one enemy is required.');
+      if (!creatorTools.showValidation(messages)) {
+        setStatus('Encounter is incomplete.', 'bad');
         return null;
       }
-      const payload = {
-        key,
-        title,
-        intro: encounterIntro.value.trim() || '',
+      encounterEntries[selectedEncounterIndex] = {
+        key: encounterFields.key.value.trim(),
+        title: encounterFields.title.value.trim(),
+        intro: encounterFields.intro.value.trim(),
         enemies: enemiesSelected,
       };
-      encounterEntries[selectedEncounterIndex] = payload;
-      syncEncounterStateToJson();
+      syncEncounterStateToSource();
       renderEncounterList();
       return encounterEntries;
     }
@@ -301,109 +471,291 @@
     }
 
     function createEncounter() {
-      syncEncounterFormToState();
+      if (selectedRoom) syncEncounterFormToState();
       encounterEntries.push(buildEncounterDraft());
       selectedEncounterIndex = encounterEntries.length - 1;
       populateEncounterForm(encounterEntries[selectedEncounterIndex]);
-      syncEncounterStateToJson();
+      syncEncounterStateToSource();
       renderEncounterList();
-      setStatus('New encounter entry draft added.', 'good');
+      setStatus('New encounter added to the room builder.', 'good');
     }
 
     function removeEncounter() {
       if (selectedEncounterIndex < 0 || !encounterEntries.length) {
-        setStatus('Select an encounter entry first.', 'bad');
+        setStatus('Select an encounter first.', 'bad');
         return;
       }
       encounterEntries.splice(selectedEncounterIndex, 1);
-      if (!encounterEntries.length) {
-        selectedEncounterIndex = -1;
-        populateEncounterForm(buildEncounterDraft());
-      } else {
-        selectedEncounterIndex = Math.max(0, selectedEncounterIndex - 1);
-        populateEncounterForm(encounterEntries[selectedEncounterIndex]);
-      }
-      syncEncounterStateToJson();
+      selectedEncounterIndex = encounterEntries.length ? Math.max(0, selectedEncounterIndex - 1) : -1;
+      populateEncounterForm(encounterEntries[selectedEncounterIndex] || buildEncounterDraft());
+      syncEncounterStateToSource();
       renderEncounterList();
-      setStatus('Encounter entry removed from the staged list.', 'good');
+      setStatus('Encounter removed from the staged room list.', 'good');
     }
 
-    function syncEnemyFormToJson() {
-      const templateKey = enemyId.value.trim();
+    function renderEncounterPreview() {
+      const ids = selectedEnemyIds(encounterFields.enemies);
+      const container = $('encounter-enemy-preview');
+      container.innerHTML = '';
+      for (const id of ids) {
+        const entry = enemyById(id);
+        const row = document.createElement('div');
+        row.className = 'pill';
+        row.textContent = `${entry && entry.label ? entry.label : id} · ${enemyXp(id)} XP`;
+        container.appendChild(row);
+      }
+    }
+
+    function updateEncounterSummary() {
+      const ids = selectedEnemyIds(encounterFields.enemies);
+      $('room-summary-name').textContent = selectedRoom ? (selectedRoom.label || selectedRoom.id) : '-';
+      $('room-summary-count').textContent = String(encounterEntries.length);
+      $('room-summary-enemies').textContent = String(ids.length);
+      $('room-summary-xp').textContent = String(ids.reduce((total, id) => total + enemyXp(id), 0));
+    }
+
+    function renderLootRows() {
+      const list = $('loot-list');
+      list.innerHTML = '';
+      if (!lootRows.length) {
+        const empty = document.createElement('div');
+        empty.className = 'pill';
+        empty.textContent = 'No loot drops configured.';
+        list.appendChild(empty);
+        return;
+      }
+      lootRows.forEach((drop, index) => {
+        const row = document.createElement('div');
+        row.className = 'loot-row';
+        row.innerHTML = `
+          <div class="field"><label>Item</label><input data-loot-field="item" data-index="${index}" type="text" value="${drop.item || ''}"></div>
+          <div class="field"><label>Chance</label><input data-loot-field="chance" data-index="${index}" type="number" min="0" max="1" step="0.01" value="${drop.chance ?? 1}"></div>
+          <div class="field"><label>Qty</label><input data-loot-field="quantity" data-index="${index}" type="number" min="1" value="${drop.quantity || 1}"></div>
+          <button class="danger" data-remove-loot="${index}" type="button">Remove</button>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function collectLootRows() {
+      const nextRows = lootRows.map((entry) => ({ ...entry }));
+      document.querySelectorAll('[data-loot-field]').forEach((input) => {
+        const index = Number(input.dataset.index);
+        const field = input.dataset.lootField;
+        nextRows[index][field] = field === 'item' ? input.value.trim() : Number(input.value || (field === 'chance' ? 1 : 1));
+      });
+      lootRows = nextRows.filter((entry) => entry.item);
+      return lootRows;
+    }
+
+    function syncEnemyFormToSource() {
+      collectLootRows();
+      const templateKey = enemyFields.id.value.trim();
       if (!templateKey) {
-        setStatus('Enemy template key is required.', 'bad');
+        setStatus('Enemy key is required.', 'bad');
         return null;
       }
       const payload = {
-        name: enemyName.value.trim() || templateKey,
-        xp: Number(enemyXp.value || 1),
-        max_hp: Number(enemyHp.value || 1),
-        attack_power: Number(enemyAttack.value || 0),
-        armor: Number(enemyArmor.value || 0),
-        accuracy: Number(enemyAccuracy.value || 0),
-        dodge: Number(enemyDodge.value || 0),
-        desc: enemyDesc.value.trim() || '',
-        tags: enemyTags.value.split(',').map((value) => value.trim()).filter(Boolean),
+        ...enemySourceExtras,
+        name: enemyFields.name.value.trim() || templateKey,
+        xp: Number(enemyFields.xp.value || 1),
+        max_hp: Number(enemyFields.hp.value || 1),
+        attack_power: Number(enemyFields.attack.value || 0),
+        armor: Number(enemyFields.armor.value || 0),
+        accuracy: Number(enemyFields.accuracy.value || 0),
+        dodge: Number(enemyFields.dodge.value || 0),
+        desc: enemyFields.desc.value.trim() || '',
+        tags: enemyFields.tags.value.split(',').map((value) => value.trim()).filter(Boolean),
+        loot: lootRows,
       };
-      enemyJson.value = JSON.stringify(payload, null, 2);
+      enemyFields.source.value = JSON.stringify(payload, null, 2);
+      updateEnemySummary(payload);
       return payload;
     }
 
-    function populateEnemyForm(templateKey, enemy) {
-      enemyId.value = templateKey || '';
-      enemyName.value = enemy.name || '';
-      enemyXp.value = enemy.xp || 1;
-      enemyHp.value = enemy.max_hp || 1;
-      enemyAttack.value = enemy.attack_power || 0;
-      enemyArmor.value = enemy.armor || 0;
-      enemyAccuracy.value = enemy.accuracy || 0;
-      enemyDodge.value = enemy.dodge || 0;
-      enemyDesc.value = enemy.desc || '';
-      enemyTags.value = (enemy.tags || []).join(', ');
-      enemyJson.value = JSON.stringify(enemy, null, 2);
+    function populateEnemyForm(templateKey, enemy, preview = {}) {
+      const data = enemy || {};
+      enemySourceExtras = { ...data };
+      delete enemySourceExtras.name;
+      delete enemySourceExtras.xp;
+      delete enemySourceExtras.max_hp;
+      delete enemySourceExtras.attack_power;
+      delete enemySourceExtras.armor;
+      delete enemySourceExtras.accuracy;
+      delete enemySourceExtras.dodge;
+      delete enemySourceExtras.desc;
+      delete enemySourceExtras.tags;
+      delete enemySourceExtras.loot;
+      enemyFields.id.value = templateKey || '';
+      enemyFields.name.value = data.name || '';
+      enemyFields.xp.value = data.xp || 1;
+      enemyFields.hp.value = data.max_hp || 1;
+      enemyFields.attack.value = data.attack_power || 0;
+      enemyFields.armor.value = data.armor || 0;
+      enemyFields.accuracy.value = data.accuracy || 0;
+      enemyFields.dodge.value = data.dodge || 0;
+      enemyFields.desc.value = data.desc || '';
+      enemyFields.tags.value = (data.tags || []).join(', ');
+      lootRows = Array.isArray(data.loot) ? data.loot.map((entry) => ({ ...entry })) : [];
+      renderLootRows();
+      enemyFields.source.value = JSON.stringify(data, null, 2);
+      updateEnemySummary(data, preview);
+    }
+
+    function syncEnemySourceToForm() {
+      try {
+        const data = creatorTools.parseJsonField(enemyFields.source, {}, { label:'Enemy source', expect:'object' });
+        populateEnemyForm(enemyFields.id.value.trim() || selectedEnemy && selectedEnemy.id || 'new_enemy', data);
+        setStatus('Advanced source applied to the enemy builder.', 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+      }
+    }
+
+    function updateEnemySummary(enemy, preview = {}) {
+      const data = enemy || {};
+      $('enemy-summary-name').textContent = data.name || enemyFields.name.value || '-';
+      $('enemy-summary-xp').textContent = String(data.xp || enemyFields.xp.value || 0);
+      $('enemy-summary-rank').textContent = preview.rank || '-';
+      $('enemy-summary-temperament').textContent = preview.temperament || '-';
+      $('enemy-chip').textContent = `Enemy: ${enemyFields.id.value || '-'}`;
+    }
+
+    function populatePartyForm(party, preview = {}) {
+      const data = party || buildPartyDraft();
+      const encounter = data.encounter || {};
+      partySourceExtras = { ...data };
+      delete partySourceExtras.key;
+      delete partySourceExtras.region;
+      delete partySourceExtras.start_room;
+      delete partySourceExtras.interval;
+      delete partySourceExtras.respawn_delay;
+      delete partySourceExtras.avoid_safe;
+      delete partySourceExtras.encounter;
+      partyFields.key.value = data.key || '';
+      partyFields.region.value = data.region || '';
+      fillRoomSelect(partyFields.startRoom, data.start_room || '');
+      partyFields.interval.value = data.interval || 18;
+      partyFields.respawn.value = data.respawn_delay || 180;
+      partyFields.safe.value = data.avoid_safe === false ? 'false' : 'true';
+      partyFields.encounterKey.value = encounter.key || data.key || '';
+      partyFields.title.value = encounter.title || '';
+      partyFields.intro.value = encounter.intro || '';
+      const ids = encounter.enemies || [];
+      partyFields.enemies.forEach((select, index) => fillEnemySelect(select, ids[index] || ''));
+      partyFields.source.value = JSON.stringify(data, null, 2);
+      updatePartySummary(data, preview);
+    }
+
+    function readPartyFormPayload() {
+      const enemyIds = selectedEnemyIds(partyFields.enemies);
+      return {
+        ...partySourceExtras,
+        key: partyFields.key.value.trim(),
+        region: partyFields.region.value.trim(),
+        start_room: partyFields.startRoom.value,
+        interval: Number(partyFields.interval.value || 18),
+        respawn_delay: Number(partyFields.respawn.value || 0),
+        avoid_safe: partyFields.safe.value === 'true',
+        encounter: {
+          key: partyFields.encounterKey.value.trim() || partyFields.key.value.trim(),
+          title: partyFields.title.value.trim(),
+          intro: partyFields.intro.value.trim(),
+          enemies: enemyIds,
+        },
+      };
+    }
+
+    function syncPartyFormToSource() {
+      const enemyIds = selectedEnemyIds(partyFields.enemies);
+      const messages = creatorTools.requireFields([
+        { label: 'Roaming party key', value: partyFields.key.value },
+        { label: 'Region', value: partyFields.region.value },
+        { label: 'Start room', value: partyFields.startRoom.value },
+        { label: 'Encounter title', value: partyFields.title.value },
+      ]);
+      if (!enemyIds.length) messages.push('At least one roaming party enemy is required.');
+      if (!creatorTools.showValidation(messages)) {
+        setStatus('Roaming party is incomplete.', 'bad');
+        return null;
+      }
+      const payload = readPartyFormPayload();
+      partyFields.source.value = JSON.stringify(payload, null, 2);
+      updatePartySummary(payload);
+      return payload;
+    }
+
+    function syncPartySourceToForm() {
+      try {
+        const data = creatorTools.parseJsonField(partyFields.source, {}, { label:'Roaming party source', expect:'object' });
+        populatePartyForm(data);
+        setStatus('Advanced source applied to the roaming party builder.', 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+      }
+    }
+
+    function updatePartySummary(party, preview = {}) {
+      const data = party || {};
+      const encounter = data.encounter || {};
+      $('party-summary-name').textContent = encounter.title || data.key || '-';
+      $('party-summary-region').textContent = data.region || '-';
+      $('party-summary-interval').textContent = String(data.interval || 0);
+      $('party-summary-xp').textContent = String(preview.total_xp || selectedEnemyIds(partyFields.enemies).reduce((total, id) => total + enemyXp(id), 0));
+      $('party-chip').textContent = `Roaming Party: ${data.key || '-'}`;
     }
 
     async function loadReferences() {
-      [rooms, enemies] = await Promise.all([
-        creatorTools.fetchReferences('rooms'),
-        creatorTools.fetchReferences('enemies'),
+      [rooms, enemies, parties] = await Promise.all([
+        creatorTools.fetchReferences('rooms', { limit:1000 }),
+        creatorTools.fetchReferences('enemies', { limit:1000 }),
+        creatorTools.fetchReferences('roaming-parties', { limit:1000 }),
       ]);
-      [encounterEnemyOne, encounterEnemyTwo, encounterEnemyThree, encounterEnemyFour].forEach((select) => fillEnemySelect(select));
+      encounterFields.enemies.forEach((select) => fillEnemySelect(select));
+      partyFields.enemies.forEach((select) => fillEnemySelect(select));
+      fillRoomSelect(partyFields.startRoom);
       renderList(roomList, rooms, selectedRoom && selectedRoom.id, roomSearch.value, selectRoom);
       renderList(enemyList, enemies, selectedEnemy && selectedEnemy.id, enemySearch.value, selectEnemy);
+      renderList(partyList, parties, selectedParty && selectedParty.id, partySearch.value, selectParty);
       renderEncounterList();
     }
 
     async function selectRoom(entry) {
       selectedRoom = entry;
-      roomChip.textContent = `Room: ${entry.id}`;
+      activateTab('room-panel');
       renderList(roomList, rooms, entry.id, roomSearch.value, selectRoom);
       await loadEncounterPreview();
     }
 
     async function selectEnemy(entry) {
       selectedEnemy = entry;
-      enemyChip.textContent = `Enemy: ${entry.id}`;
+      activateTab('enemy-panel');
       renderList(enemyList, enemies, entry.id, enemySearch.value, selectEnemy);
       await loadEnemyPreview();
+    }
+
+    async function selectParty(entry) {
+      selectedParty = entry;
+      activateTab('party-panel');
+      renderList(partyList, parties, entry.id, partySearch.value, selectParty);
+      await loadPartyPreview();
     }
 
     async function loadEncounterPreview() {
       if (!selectedRoom) return;
       setBusy(true);
-      setStatus(`Loading encounter preview for ${selectedRoom.id}...`);
+      setStatus(`Loading encounters for ${selectedRoom.id}...`);
       try {
         const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'encounters', args:[selectedRoom.id] }) });
-        encounterEntries = Array.isArray(payload.preview.encounters) ? payload.preview.encounters.map((entry) => ({ ...entry })) : [];
-        if (!encounterEntries.length) encounterEntries = [buildEncounterDraft()];
-        selectedEncounterIndex = 0;
-        populateEncounterForm(encounterEntries[0]);
-        syncEncounterStateToJson();
+        encounterEntries = Array.isArray(payload.preview.encounters) ? payload.preview.encounters.map((entry) => ({ key:entry.key, title:entry.title, intro:entry.intro || '', enemies:[...(entry.enemies || [])] })) : [];
+        selectedEncounterIndex = encounterEntries.length ? 0 : -1;
+        populateEncounterForm(encounterEntries[0] || buildEncounterDraft());
+        syncEncounterStateToSource();
         renderEncounterList();
         output.textContent = JSON.stringify(payload.preview, null, 2);
         editorTitle.textContent = selectedRoom.label || selectedRoom.id;
-        editorSubtitle.textContent = `${selectedRoom.id} encounter table`;
-        setStatus(`Loaded encounter preview for ${selectedRoom.id}.`, 'good');
+        editorSubtitle.textContent = `${selectedRoom.id} room encounters`;
+        setStatus(`Loaded encounters for ${selectedRoom.id}.`, 'good');
       } catch (error) {
         setStatus(error.message, 'bad');
         output.textContent = error.stack || error.message;
@@ -415,12 +767,33 @@
     async function loadEnemyPreview() {
       if (!selectedEnemy) return;
       setBusy(true);
-      setStatus(`Loading enemy preview for ${selectedEnemy.id}...`);
+      setStatus(`Loading enemy ${selectedEnemy.id}...`);
       try {
         const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'enemy', args:[selectedEnemy.id] }) });
-        populateEnemyForm(payload.preview.template_key || selectedEnemy.id, payload.preview.enemy || {});
+        populateEnemyForm(payload.preview.template_key || selectedEnemy.id, payload.preview.enemy || {}, payload.preview);
         output.textContent = JSON.stringify(payload.preview, null, 2);
-        setStatus(`Loaded enemy preview for ${selectedEnemy.id}.`, 'good');
+        editorTitle.textContent = payload.preview.enemy.name || selectedEnemy.id;
+        editorSubtitle.textContent = `${selectedEnemy.id} enemy template`;
+        setStatus(`Loaded enemy ${selectedEnemy.id}.`, 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function loadPartyPreview() {
+      if (!selectedParty) return;
+      setBusy(true);
+      setStatus(`Loading roaming party ${selectedParty.id}...`);
+      try {
+        const payload = await apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'roaming-party', args:[selectedParty.id] }) });
+        populatePartyForm(payload.preview.party || {}, payload.preview);
+        output.textContent = JSON.stringify(payload.preview, null, 2);
+        editorTitle.textContent = (payload.preview.party.encounter || {}).title || selectedParty.id;
+        editorSubtitle.textContent = `${selectedParty.id} roaming party`;
+        setStatus(`Loaded roaming party ${selectedParty.id}.`, 'good');
       } catch (error) {
         setStatus(error.message, 'bad');
         output.textContent = error.stack || error.message;
@@ -432,10 +805,19 @@
     function createEnemyDraft() {
       const draft = buildEnemyDraft();
       selectedEnemy = { id: draft.key, label: draft.name, meta: draft.xp };
-      enemyChip.textContent = `Enemy: ${draft.key}`;
+      activateTab('enemy-panel');
       populateEnemyForm(draft.key, draft);
       renderList(enemyList, enemies, null, enemySearch.value, selectEnemy);
-      setStatus('New enemy draft staged in the form.', 'good');
+      setStatus('New enemy staged in the builder.', 'good');
+    }
+
+    function createPartyDraft() {
+      const draft = buildPartyDraft();
+      selectedParty = { id: draft.key, label: draft.encounter.title, meta: draft.region };
+      activateTab('party-panel');
+      populatePartyForm(draft);
+      renderList(partyList, parties, null, partySearch.value, selectParty);
+      setStatus('New roaming party staged in the builder.', 'good');
     }
 
     async function mutate(kind, target, payload, write) {
@@ -444,20 +826,17 @@
       if (write) {
         const errors = result.validation_errors || [];
         if (errors.length) {
-          setStatus(`Write completed with ${errors.length} validation issue(s).`, 'bad');
-          output.textContent = `${result.diff || ''}
-
-Validation errors:
-- ${errors.join('
-- ')}`.trim();
+          setStatus(`Save completed with ${errors.length} content issue(s).`, 'bad');
+          output.textContent = `${result.diff || ''}\n\nValidation errors:\n- ${errors.join('\n- ')}`.trim();
         } else {
-          setStatus(`Wrote ${kind} ${target}.`, 'good');
+          setStatus(`Saved ${kind} ${target}.`, 'good');
           await loadReferences();
-          if (selectedRoom) await loadEncounterPreview();
-          if (selectedEnemy) await loadEnemyPreview();
+          if (kind === 'encounters' && selectedRoom) await loadEncounterPreview();
+          if (kind === 'enemy' && selectedEnemy) await loadEnemyPreview();
+          if (kind === 'roaming-party' && selectedParty) await loadPartyPreview();
         }
       } else {
-        setStatus(`Dry-run diff ready for ${kind} ${target}.`, 'good');
+        setStatus(`Preview ready for ${kind} ${target}.`, 'good');
       }
     }
 
@@ -465,7 +844,7 @@ Validation errors:
       const payload = syncEncounterFormToState();
       if (!payload || !selectedRoom) return;
       setBusy(true);
-      setStatus(write ? `Writing encounters for ${selectedRoom.id}...` : `Generating encounter diff for ${selectedRoom.id}...`);
+      setStatus(write ? `Saving room encounters for ${selectedRoom.id}...` : `Previewing room encounter changes for ${selectedRoom.id}...`);
       try {
         await mutate('encounters', selectedRoom.id, payload, write);
       } catch (error) {
@@ -477,11 +856,11 @@ Validation errors:
     }
 
     async function mutateEnemy(write) {
-      const payload = syncEnemyFormToJson();
-      const target = enemyId.value.trim();
+      const payload = syncEnemyFormToSource();
+      const target = enemyFields.id.value.trim();
       if (!payload || !target) return;
       setBusy(true);
-      setStatus(write ? `Writing enemy ${target}...` : `Generating enemy diff for ${target}...`);
+      setStatus(write ? `Saving enemy ${target}...` : `Previewing enemy changes for ${target}...`);
       try {
         await mutate('enemy', target, payload, write);
       } catch (error) {
@@ -492,17 +871,32 @@ Validation errors:
       }
     }
 
+    async function mutateParty(write) {
+      const payload = syncPartyFormToSource();
+      const target = partyFields.key.value.trim();
+      if (!payload || !target) return;
+      setBusy(true);
+      setStatus(write ? `Saving roaming party ${target}...` : `Previewing roaming party changes for ${target}...`);
+      try {
+        await mutate('roaming-party', target, payload, write);
+      } catch (error) {
+        setStatus(error.message, 'bad');
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
     async function validateContent() {
       setBusy(true);
-      setStatus('Validating content packs...');
+      setStatus('Checking content packs...');
       try {
         const payload = await apiFetch('/validate', { method:'POST', body:'{}' });
         if (payload.errors.length) {
-          setStatus(`Validation found ${payload.errors.length} issue(s).`, 'bad');
-          output.textContent = payload.errors.join('
-');
+          setStatus(`Content check found ${payload.errors.length} issue(s).`, 'bad');
+          output.textContent = payload.errors.join('\n');
         } else {
-          setStatus('Content validation passed.', 'good');
+          setStatus('Content check passed.', 'good');
           output.textContent = JSON.stringify(payload, null, 2);
         }
       } catch (error) {
@@ -523,6 +917,7 @@ Validation errors:
         await loadReferences();
         if (selectedRoom) await loadEncounterPreview();
         if (selectedEnemy) await loadEnemyPreview();
+        if (selectedParty) await loadPartyPreview();
       } catch (error) {
         setStatus(error.message, 'bad');
         output.textContent = error.stack || error.message;
@@ -531,23 +926,51 @@ Validation errors:
       }
     }
 
+    document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => activateTab(tab.dataset.tab)));
+    document.querySelectorAll('.clear-enemy').forEach((button) => button.addEventListener('click', () => {
+      const select = $(button.dataset.target);
+      if (select) select.value = '';
+      if (button.dataset.target.startsWith('party-')) {
+        updatePartySummary(readPartyFormPayload());
+      } else {
+        renderEncounterPreview();
+        updateEncounterSummary();
+      }
+    }));
     roomSearch.addEventListener('input', () => renderList(roomList, rooms, selectedRoom && selectedRoom.id, roomSearch.value, selectRoom));
     enemySearch.addEventListener('input', () => renderList(enemyList, enemies, selectedEnemy && selectedEnemy.id, enemySearch.value, selectEnemy));
-    loadPreviewsButton.addEventListener('click', async () => { if (selectedRoom) await loadEncounterPreview(); if (selectedEnemy) await loadEnemyPreview(); });
-    newEncounterButton.addEventListener('click', createEncounter);
-    removeEncounterButton.addEventListener('click', removeEncounter);
-    syncEncounterButton.addEventListener('click', () => { if (syncEncounterFormToState()) setStatus('Encounter list synced to JSON.', 'good'); });
-    diffEncountersButton.addEventListener('click', () => mutateEncounters(false));
-    writeEncountersButton.addEventListener('click', () => mutateEncounters(true));
-    newEnemyButton.addEventListener('click', createEnemyDraft);
-    syncEnemyButton.addEventListener('click', () => { if (syncEnemyFormToJson()) setStatus('Enemy form synced to JSON.', 'good'); });
-    diffEnemyButton.addEventListener('click', () => mutateEnemy(false));
-    writeEnemyButton.addEventListener('click', () => mutateEnemy(true));
+    partySearch.addEventListener('input', () => renderList(partyList, parties, selectedParty && selectedParty.id, partySearch.value, selectParty));
+    encounterFields.enemies.forEach((select) => select.addEventListener('change', () => { renderEncounterPreview(); updateEncounterSummary(); }));
+    partyFields.enemies.forEach((select) => select.addEventListener('change', () => updatePartySummary(readPartyFormPayload())));
+    loadPreviewsButton.addEventListener('click', async () => { if (selectedRoom && !$('room-panel').hidden) await loadEncounterPreview(); if (selectedEnemy && !$('enemy-panel').hidden) await loadEnemyPreview(); if (selectedParty && !$('party-panel').hidden) await loadPartyPreview(); });
+    $('new-encounter').addEventListener('click', createEncounter);
+    $('remove-encounter').addEventListener('click', removeEncounter);
+    $('diff-encounters').addEventListener('click', () => mutateEncounters(false));
+    $('write-encounters').addEventListener('click', () => mutateEncounters(true));
+    $('sync-encounter-source').addEventListener('click', syncEncounterSourceToState);
+    $('new-enemy').addEventListener('click', createEnemyDraft);
+    $('diff-enemy').addEventListener('click', () => mutateEnemy(false));
+    $('write-enemy').addEventListener('click', () => mutateEnemy(true));
+    $('sync-enemy-source').addEventListener('click', syncEnemySourceToForm);
+    $('add-loot').addEventListener('click', () => { collectLootRows(); lootRows.push({ item:'', chance:1, quantity:1 }); renderLootRows(); });
+    $('loot-list').addEventListener('input', collectLootRows);
+    $('loot-list').addEventListener('click', (event) => {
+      const target = event.target.closest('[data-remove-loot]');
+      if (!target) return;
+      lootRows.splice(Number(target.dataset.removeLoot), 1);
+      renderLootRows();
+      syncEnemyFormToSource();
+    });
+    $('new-party').addEventListener('click', createPartyDraft);
+    $('diff-party').addEventListener('click', () => mutateParty(false));
+    $('write-party').addEventListener('click', () => mutateParty(true));
+    $('sync-party-source').addEventListener('click', syncPartySourceToForm);
     validateButton.addEventListener('click', validateContent);
     reloadButton.addEventListener('click', reloadContent);
+
     populateEncounterForm(buildEncounterDraft());
     populateEnemyForm('new_enemy', buildEnemyDraft());
-    syncEncounterStateToJson();
+    populatePartyForm(buildPartyDraft());
     renderEncounterList();
     loadReferences().catch((error) => { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; });
   </script>

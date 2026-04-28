@@ -26,6 +26,10 @@ class ContentPreviewTests(unittest.TestCase):
         self.assertEqual("brambleford_town_green", preview["room"]["id"])
         self.assertTrue(any(entity["id"] == "town_notice_board" for entity in preview["entities"]))
         self.assertTrue(preview["exits"])
+        self.assertTrue(any("aliases" in exit_data for exit_data in preview["exits"]))
+        notice_board = next(entity for entity in preview["entities"] if entity["id"] == "town_notice_board")
+        self.assertIn("aliases", notice_board)
+        self.assertIn("desc", notice_board)
 
     def test_preview_quest_resolves_region_and_objectives(self):
         preview = preview_quest("practice_makes_heroes")

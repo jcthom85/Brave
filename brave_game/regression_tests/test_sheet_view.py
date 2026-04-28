@@ -90,8 +90,8 @@ class SheetViewTests(unittest.TestCase):
         ability_items = {item.get("text"): item for item in abilities.get("items", [])}
         passive_items = {item.get("text"): item for item in passives.get("items", [])}
 
-        self.assertIn("Mark Prey", ability_items["Mark Prey I"].get("tooltip", ""))
-        self.assertIn("Choose a quarry", ability_items["Mark Prey I"].get("tooltip", ""))
+        self.assertIn("Mark Prey", ability_items["Mark Prey"].get("tooltip", ""))
+        self.assertIn("Choose a quarry", ability_items["Mark Prey"].get("tooltip", ""))
         self.assertIn("Trailwise", passive_items["Trailwise"].get("tooltip", ""))
         self.assertIn("Fieldcraft and steady footing", passive_items["Trailwise"].get("tooltip", ""))
 
@@ -152,7 +152,7 @@ class SheetViewTests(unittest.TestCase):
         self.assertEqual("stats", attributes.get("variant"))
         self.assertEqual("stats", stats.get("variant"))
         self.assertEqual("Martial Mastery", class_features.get("items", [])[0].get("title"))
-        self.assertEqual(["Shield Bash I", "War Cry I"], [item.get("text") for item in abilities.get("items", [])])
+        self.assertEqual(["Shield Bash", "War Cry"], [item.get("text") for item in abilities.get("items", [])])
         self.assertEqual(["Resolve", "Iron Stance"], [item.get("text") for item in passives.get("items", [])])
         self.assertTrue(abilities.get("items", [])[0].get("picker"))
         self.assertIn("Costs", abilities.get("items", [])[0].get("tooltip", ""))

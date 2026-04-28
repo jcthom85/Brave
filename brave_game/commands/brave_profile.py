@@ -37,7 +37,7 @@ from world.resonance import (
     get_stat_label,
 )
 from world.screen_text import format_entry, format_pairs, render_screen, wrap_text
-from world.tutorial import record_command_event
+from world.tutorial import ensure_tutorial_state, record_command_event
 
 CONTENT = get_content_registry()
 CHARACTER_CONTENT = CONTENT.characters
@@ -468,6 +468,7 @@ class CmdSheet(BraveCharacterCommand):
             sections=sections,
         )
         self.scene_msg(screen, panel=build_sheet_panel(character), view=build_sheet_view(character))
+        record_command_event(character, "sheet")
 
 
 class CmdMastery(BraveCharacterCommand):
@@ -645,7 +646,7 @@ class CmdGear(BraveCharacterCommand):
     aliases = ["equipment", "kit"]
     help_category = "Brave"
 
-    def _render_gear(self, character):
+    def _render_gear(self, character, feedback=None):
         equipment = character.db.brave_equipment or {}
         slot_blocks = []
         for slot in ITEM_CONTENT.equipment_slots:
@@ -664,12 +665,14 @@ class CmdGear(BraveCharacterCommand):
         ]
         if total_bonus_text:
             sections.append(("Current Kit Bonus", wrap_text(total_bonus_text, indent="  ")))
+        if feedback:
+            sections.insert(0, ("Power Feedback", wrap_text(feedback, indent="  ")))
 
         screen = render_screen(
             "Equipment",
             sections=sections,
         )
-        self.scene_msg(screen, panel=build_gear_panel(character), view=build_gear_view(character))
+        self.scene_msg(screen, panel=build_gear_panel(character), view=build_gear_view(character, feedback=feedback))
         record_command_event(character, "gear")
 
     def _resolve_slot(self, query):
@@ -716,6 +719,7 @@ class CmdGear(BraveCharacterCommand):
             self.msg(f"You are not carrying any matching gear for {slot.replace('_', ' ').title()}.")
             return
 
+        previous_derived = dict(character.db.brave_derived_stats or {})
         success, result = character.equip_inventory_item(template_id, slot=slot)
         if not success:
             self.msg(result)
@@ -728,7 +732,19 @@ class CmdGear(BraveCharacterCommand):
             self.msg(f"You swap in |w{equipped_name}|n and stow |w{replaced_name}|n.")
         else:
             self.msg(f"You equip |w{equipped_name}|n.")
-        self._render_gear(character)
+        current_derived = dict(character.db.brave_derived_stats or {})
+        improved = []
+        for stat in ("max_hp", "armor", "attack_power", "spell_power", "accuracy", "dodge", "max_stamina", "max_mana"):
+            delta = int(current_derived.get(stat, 0) or 0) - int(previous_derived.get(stat, 0) or 0)
+            if delta > 0:
+                improved.append(f"+{delta} {get_stat_label(stat, character)}")
+        if improved:
+            feedback = "You feel the difference: " + ", ".join(improved[:4]) + "."
+            self.msg("|g" + feedback + "|n")
+        else:
+            feedback = None
+        record_command_event(character, "equip_gear")
+        self._render_gear(character, feedback=feedback)
 
     def _unequip(self, character, slot_query):
         slot = self._resolve_slot(slot_query)
@@ -981,7 +997,12 @@ class CmdQuests(BraveCharacterCommand):
     def _render_journal(self, character):
         journal_mode = _get_journal_mode(character)
         tracked_key = get_tracked_quest(character)
-        tutorial_block = _format_tutorial_screen_block(character)
+        tutorial_state = ensure_tutorial_state(character)
+        tutorial_active = tutorial_state.get("status") == "active"
+        tutorial_completed = tutorial_state.get("status") == "completed"
+        
+        tutorial_block = _format_tutorial_screen_block(character, completed_only=(journal_mode == "completed"))
+
         active_blocks = {}
         completed_blocks = {}
         tracked_block = None
@@ -992,7 +1013,7 @@ class CmdQuests(BraveCharacterCommand):
             block = _format_quest_screen_block(character, quest_key, tracked_key=tracked_key)
             if not block:
                 continue
-            if quest_key == tracked_key and state.get("status") == "active":
+            if not tutorial_active and quest_key == tracked_key and state.get("status") == "active":
                 tracked_block = block
                 continue
             region = QUEST_CONTENT.get_quest_region(quest_key)
@@ -1007,15 +1028,21 @@ class CmdQuests(BraveCharacterCommand):
 
         sections = []
         if journal_mode == "active":
-            if tracked_block:
+            if tutorial_active and tutorial_block:
+                sections.append(("Tracked Quest", tutorial_block))
+            elif tracked_block:
                 sections.append(("Tracked Quest", tracked_block))
-            if tutorial_block:
-                sections.append(("Tutorial", tutorial_block))
             for region, region_blocks in active_blocks.items():
                 sections.append((region, _stack_blocks(region_blocks)))
             if not sections:
                 sections.append(("Active Quests", ["  No active quests right now."]))
         else:
+            if tutorial_block:
+                if isinstance(tutorial_block, list):
+                    for block in tutorial_block:
+                        sections.append(("Tutorial", block))
+                else:
+                    sections.append(("Tutorial", tutorial_block))
             for region, region_blocks in completed_blocks.items():
                 sections.append((region, _stack_blocks(region_blocks)))
             if not sections:
@@ -1026,6 +1053,7 @@ class CmdQuests(BraveCharacterCommand):
             sections=sections,
         )
         self.scene_msg(screen, panel=build_quests_panel(character), view=build_quests_view(character))
+        record_command_event(character, "quests")
 
     def _track(self, character, query):
         if not query:

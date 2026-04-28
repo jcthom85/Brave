@@ -50,7 +50,8 @@ def _ensure_room(room_data):
     room.db.brave_map_x = room_data.get("map_x", 0)
     room.db.brave_map_y = room_data.get("map_y", 0)
     room.db.brave_map_icon = room_data.get("map_icon", room_data["key"][:1].upper())
-    room.db.brave_safe = room_data["safe"]
+    room.db.brave_safe = bool(room_data.get("safe", False))
+    room.db.brave_rest_allowed = bool(room_data.get("rest_allowed", False))
     room.db.brave_activities = list(room_data.get("activities", []))
     room.db.brave_portal_hub = bool(room_data.get("portal_hub", False))
     room.tags.add(room_data["id"], category=ROOM_TAG_CATEGORY)

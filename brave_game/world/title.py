@@ -30,12 +30,6 @@ def build_connection_screen():
     return "\n".join(lines)
 
 
-def _character_status(character):
-    if character.sessions.all():
-        return "|Gin play|n"
-    return "|gready|n"
-
-
 def _character_location(character):
     if character.location:
         return character.location.key
@@ -49,14 +43,13 @@ def format_character_line(character, index, *, last_played=False):
     race_name = RACES[character.db.brave_race]["name"]
     class_name = CLASSES[character.db.brave_class]["name"]
     last_tag = "  |  |yLast played|n" if last_played else ""
-    status_parts = [_character_status(character)]
-    if location := _character_location(character):
-        status_parts.append(location)
+    location = _character_location(character)
+    location_part = f"  | {location}" if location else ""
     return (
         f"|w{index}.|n |c{character.key}|n"
         f"  | {race_name} {class_name}"
         f"  | Level {character.db.brave_level}"
-        f"  | {'  | '.join(status_parts)}"
+        f"{location_part}"
         f"{last_tag}"
     )
 

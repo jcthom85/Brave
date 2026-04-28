@@ -5,144 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ page_title }}</title>
   <style>
-    :root {
-      --ink: #1b2330;
-      --accent: #8d4f27;
-      --panel: #fff9ef;
-      --line: #d9c8ac;
-      --muted: #6d6254;
-      --good: #2f6d4c;
-      --bad: #8d3122;
-      --shadow: rgba(27, 35, 48, 0.12);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at top right, rgba(141, 79, 39, 0.15), transparent 28%),
-        linear-gradient(180deg, #f2ead9 0%, #f8f2e8 40%, #efe2ce 100%);
-      min-height: 100vh;
-    }
-    .shell {
-      width: min(1560px, calc(100vw - 32px));
-      margin: 24px auto;
-      display: grid;
-      grid-template-columns: 320px minmax(0, 1fr);
-      gap: 20px;
-    }
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      box-shadow: 0 16px 48px var(--shadow);
-      overflow: hidden;
-    }
-    .panel-head {
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(135deg, rgba(141, 79, 39, 0.12), rgba(217, 200, 172, 0.22));
-    }
-    .panel-head h1, .panel-head h2, .panel-head h3 { margin: 0; font-weight: 700; letter-spacing: 0.02em; }
-    .panel-head p { margin: 8px 0 0; color: var(--muted); line-height: 1.4; }
-    .panel-body { padding: 18px 20px 20px; }
-    .search, .field input, .field select, textarea {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font: inherit;
-      background: #fff;
-    }
-    .search { margin-bottom: 12px; }
-    .quest-list {
-      display: grid;
-      gap: 8px;
-      max-height: calc(100vh - 260px);
-      overflow: auto;
-      padding-right: 4px;
-    }
-    .quest-row {
-      width: 100%;
-      text-align: left;
-      border: 1px solid var(--line);
-      background: #fff;
-      border-radius: 12px;
-      padding: 12px;
-      cursor: pointer;
-      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
-    }
-    .quest-row:hover, .quest-row.active {
-      transform: translateY(-1px);
-      border-color: var(--accent);
-      background: #fff8f2;
-    }
-    .quest-row strong, .quest-row span { display: block; }
-    .quest-row span { color: var(--muted); font-size: 0.92rem; margin-top: 4px; }
-    .workspace { display: grid; grid-template-rows: auto auto minmax(400px, auto) minmax(240px, auto); gap: 16px; }
-    .toolbar, .editor-toolbar, .pill-row { display: flex; flex-wrap: wrap; gap: 10px; }
-    .meta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 0.94rem; }
-    .editor-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px; }
-    .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .field { display: grid; gap: 6px; }
-    .field.full { grid-column: 1 / -1; }
-    .field label { font-size: 0.88rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    button {
-      border: 0;
-      border-radius: 999px;
-      padding: 10px 16px;
-      font: inherit;
-      cursor: pointer;
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 10px 24px rgba(141, 79, 39, 0.24);
-    }
-    button.secondary { background: #fff; color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
-    button:disabled { opacity: 0.55; cursor: progress; }
-    .chip {
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 8px 12px;
-      background: #fff;
-      color: var(--ink);
-      font-size: 0.92rem;
-    }
-    textarea, pre {
-      width: 100%;
-      margin: 0;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: #fffdfa;
-      font: 0.95rem/1.45 "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-    }
-    textarea { min-height: 300px; padding: 16px; resize: vertical; }
-    pre { min-height: 220px; padding: 16px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
-    .status {
-      padding: 12px 14px;
-      border-radius: 12px;
-      background: #fff6e7;
-      color: var(--ink);
-      border: 1px solid var(--line);
-    }
-    .status.good { background: #eef8f1; color: var(--good); border-color: rgba(47, 109, 76, 0.24); }
-    .status.bad { background: #fff0ed; color: var(--bad); border-color: rgba(141, 49, 34, 0.24); }
-    @media (max-width: 1180px) { .editor-grid { grid-template-columns: 1fr; } }
-    @media (max-width: 980px) { .shell { grid-template-columns: 1fr; } .quest-list { max-height: 280px; } .field-grid { grid-template-columns: 1fr; } }
-  
-    .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
+    :root { --ink:#1b2330; --accent:#8d4f27; --panel:#fff9ef; --line:#d9c8ac; --muted:#6d6254; --good:#2f6d4c; --bad:#8d3122; --shadow:rgba(27,35,48,0.12); }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:radial-gradient(circle at top right, rgba(141,79,39,.15), transparent 28%),linear-gradient(180deg,#f2ead9 0%,#f8f2e8 40%,#efe2ce 100%); min-height:100vh; }
+    .shell { width:min(1680px,calc(100vw - 32px)); margin:24px auto; display:grid; grid-template-columns:320px minmax(0,1fr); gap:20px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
+    .panel-head { padding:18px 20px; border-bottom:1px solid var(--line); background:linear-gradient(135deg, rgba(141,79,39,.12), rgba(217,200,172,.22)); }
+    .panel-head h1,.panel-head h2,.panel-head h3 { margin:0; font-weight:700; letter-spacing:0; }
+    .panel-head p { margin:8px 0 0; color:var(--muted); line-height:1.4; }
+    .panel-body { padding:18px 20px 20px; }
+    .workspace { display:grid; gap:16px; }
+    .stack { display:grid; gap:12px; }
+    .toolbar,.editor-toolbar,.pill-row,.summary-grid,.chip-row,.row-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .meta { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.94rem; }
+    .tabs { border-bottom:1px solid var(--line); padding:0 20px; background:#fff8f2; }
+    .search,.field input,.field select,textarea { width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font:inherit; background:#fff; color:var(--ink); }
+    .search { margin-bottom:12px; }
+    .quest-list { display:grid; gap:8px; max-height:calc(100vh - 260px); overflow:auto; padding-right:4px; }
+    .quest-row { width:100%; text-align:left; border:1px solid var(--line); background:#fff; border-radius:8px; padding:12px; cursor:pointer; transition:transform 120ms ease,border-color 120ms ease,background 120ms ease; }
+    .quest-row:hover,.quest-row.active { transform:translateY(-1px); border-color:var(--accent); background:#fff8f2; }
+    .quest-row strong,.quest-row span { display:block; }
+    .quest-row span { color:var(--muted); font-size:.92rem; margin-top:4px; }
+    .builder-grid { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:16px; }
+    .summary-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .summary-card { border:1px solid var(--line); border-radius:8px; background:#fffdfa; padding:12px; min-height:76px; }
+    .summary-card strong { display:block; font-size:1.25rem; }
+    .summary-card span { display:block; color:var(--muted); margin-top:4px; font-size:.9rem; }
+    .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .field { display:grid; gap:6px; }
+    .field.full { grid-column:1/-1; }
+    .field label { font-size:.82rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+    .subsection { border:1px solid var(--line); border-radius:8px; background:#fffdfa; overflow:hidden; }
+    .subsection-head { padding:12px 14px; border-bottom:1px solid var(--line); background:#fff7ef; display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    .subsection-head h3 { margin:0; font-size:1rem; }
+    .subsection-head p { margin:4px 0 0; color:var(--muted); font-size:.92rem; line-height:1.4; }
+    .subsection-body { padding:14px; }
+    button { border:0; border-radius:999px; padding:10px 16px; font:inherit; cursor:pointer; background:var(--accent); color:#fff; box-shadow:0 10px 24px rgba(141,79,39,.24); }
+    button.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none; }
+    button.danger { background:#fff0ed; color:var(--bad); border:1px solid rgba(141,49,34,.2); box-shadow:none; }
+    button:disabled { opacity:.55; cursor:progress; }
+    .chip,.pill { border:1px solid var(--line); border-radius:999px; padding:8px 12px; background:#fff; color:var(--ink); font-size:.92rem; }
+    .pill.good { border-color:rgba(47,109,76,.28); color:var(--good); background:#eef8f1; }
+    .pill.bad { border-color:rgba(141,49,34,.28); color:var(--bad); background:#fff0ed; }
+    textarea,pre { width:100%; margin:0; border:1px solid var(--line); border-radius:8px; background:#fffdfa; font:.92rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
+    textarea { min-height:220px; padding:14px; resize:vertical; }
+    pre { min-height:180px; padding:14px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+    .status { padding:12px 14px; border-radius:8px; background:#fff6e7; color:var(--ink); border:1px solid var(--line); }
+    .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
+    .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
+    .validation-notes { padding:12px 14px; border-radius:8px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
     .validation-notes[hidden] { display:none; }
     .validation-notes strong { display:block; margin-bottom:8px; }
     .validation-notes ul { margin:0; padding-left:20px; display:grid; gap:6px; }
-
+    .prereq-list,.objective-list,.reward-list,.preview-list { display:grid; gap:10px; }
+    .mini-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:end; }
+    .objective-card,.reward-card { border:1px solid var(--line); border-radius:8px; background:#fff; padding:12px; display:grid; gap:10px; }
+    .objective-head,.reward-head { display:flex; justify-content:space-between; gap:10px; align-items:center; }
+    .objective-head strong,.reward-head strong { font-size:.96rem; }
+    .objective-target { display:grid; gap:8px; grid-template-columns:minmax(0,1fr); }
+    .objective-target.two { grid-template-columns:minmax(0,1fr) 120px; }
+    .objective-target .field { min-width:0; }
+    .objective-hint { color:var(--muted); font-size:.9rem; }
+    .reward-grid { display:grid; grid-template-columns:minmax(0,1fr) 120px auto; gap:8px; align-items:end; }
+    details { border:1px solid var(--line); border-radius:8px; background:#fffdfa; }
+    details summary { cursor:pointer; padding:12px 14px; color:var(--muted); }
+    details .details-body { padding:0 14px 14px; }
+    .preview-block { border:1px solid var(--line); border-radius:8px; background:#fffdfa; padding:12px; display:grid; gap:8px; }
+    .preview-block strong { display:block; }
+    @media (max-width:1180px) { .builder-grid { grid-template-columns:1fr; } }
+    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .field-grid,.reward-grid,.objective-target.two,.mini-row { grid-template-columns:1fr; } .quest-list { max-height:240px; } .summary-grid { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
   <div class="shell">
     <section class="panel">
       <div class="panel-head">
-        <h1>Quest Lines</h1>
-        <p>Browse authored quests, then edit their structure with pickers for regions, prerequisites, room objectives, item objectives, and reward items.</p>
+        <h1>Quest Builder</h1>
+        <p>Build quest chains with structured objectives, prerequisites, and rewards. Raw payload is hidden unless you open it.</p>
       </div>
       <div class="panel-body">
         <input id="quest-search" class="search" type="search" placeholder="Search quests by key, title, or region">
@@ -153,8 +92,8 @@
     <section class="workspace">
       <div class="panel">
         <div class="panel-head">
-          <h2 id="editor-title">Quest Editor</h2>
-          <p id="editor-subtitle">Select a quest from the left to load its structured fields and raw authored payload.</p>
+          <h2 id="editor-title">Quest Builder</h2>
+          <p id="editor-subtitle">Pick a quest or start a new draft. The form is the primary editing surface.</p>
         </div>
         <div class="panel-body">
           <div class="meta">
@@ -165,89 +104,131 @@
       </div>
 
       <div class="toolbar">
-        <button id="load-quest" class="secondary" type="button">Reload Quest Preview</button>
+        <button id="load-quest" class="secondary" type="button">Refresh Selection</button>
         <button id="new-quest" class="secondary" type="button">New Quest Draft</button>
-        <button id="validate-content" class="secondary" type="button">Validate Packs</button>
+        <button id="validate-content" class="secondary" type="button">Check Content</button>
         <button id="reload-content" class="secondary" type="button">Reload Registry</button>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-card"><strong id="quest-summary-title">-</strong><span>Quest</span></div>
+        <div class="summary-card"><strong id="quest-summary-region">-</strong><span>Region</span></div>
+        <div class="summary-card"><strong id="quest-summary-objectives">0</strong><span>Objectives</span></div>
+        <div class="summary-card"><strong id="quest-summary-rewards">0</strong><span>Reward items</span></div>
       </div>
 
       <div id="validation-notes" class="validation-notes" hidden></div>
 
-      <div class="editor-grid">
-        <section class="panel">
-          <div class="panel-head">
-            <h3>Structured Quest Form</h3>
-            <p>Use the form first, then sync it to the raw payload before diffing or writing.</p>
-          </div>
-          <div class="panel-body stack">
-            <div class="field-grid">
-              <div class="field"><label for="quest-key">Quest Key</label><input id="quest-key" type="text"></div>
-              <div class="field"><label for="quest-title">Quest Title</label><input id="quest-title" type="text"></div>
-              <div class="field"><label for="quest-giver">Quest Giver</label><input id="quest-giver" type="text"></div>
-              <div class="field"><label for="quest-region">Region</label><input id="quest-region" type="text"></div>
-              <div class="field full"><label for="quest-summary">Summary</label><input id="quest-summary" type="text"></div>
-            </div>
-
-            <div class="field-grid">
-              <div class="field"><label for="quest-prerequisite">Prerequisite Quest</label><select id="quest-prerequisite"></select></div>
-              <div class="field"><label for="quest-starting">Starting Quest</label><select id="quest-starting"><option value="false">No</option><option value="true">Yes</option></select></div>
-            </div>
-
-            <div class="panel">
-              <div class="panel-head"><h3>Objective One</h3><p>Visit-room objective.</p></div>
-              <div class="panel-body field-grid">
-                <div class="field full"><label for="objective-one-description">Description</label><input id="objective-one-description" type="text"></div>
-                <div class="field"><label for="objective-one-room">Room</label><select id="objective-one-room"></select></div>
+      <div class="builder-grid">
+        <section class="stack">
+          <section class="subsection">
+            <div class="subsection-head">
+              <div>
+                <h3>Quest Basics</h3>
+                <p>Key fields that define the quest record and where it belongs.</p>
               </div>
             </div>
-
-            <div class="panel">
-              <div class="panel-head"><h3>Objective Two</h3><p>Optional collect-item objective.</p></div>
-              <div class="panel-body field-grid">
-                <div class="field full"><label for="objective-two-description">Description</label><input id="objective-two-description" type="text"></div>
-                <div class="field"><label for="objective-two-item">Item</label><select id="objective-two-item"></select></div>
-                <div class="field"><label for="objective-two-count">Count</label><input id="objective-two-count" type="number" min="1" value="1"></div>
+            <div class="subsection-body stack">
+              <div class="field-grid">
+                <div class="field"><label for="quest-key">Quest Key</label><input id="quest-key" type="text"></div>
+                <div class="field"><label for="quest-title">Quest Title</label><input id="quest-title" type="text"></div>
+                <div class="field"><label for="quest-giver">Quest Giver</label><input id="quest-giver" type="text"></div>
+                <div class="field"><label for="quest-region">Region</label><input id="quest-region" type="text" list="quest-region-options"></div>
+                <div class="field full"><label for="quest-summary">Summary</label><input id="quest-summary" type="text"></div>
+                <div class="field"><label for="quest-starting">Starting Quest</label><select id="quest-starting"><option value="false">No</option><option value="true">Yes</option></select></div>
               </div>
             </div>
+          </section>
 
-            <div class="panel">
-              <div class="panel-head"><h3>Rewards</h3><p>XP, silver, and one optional item reward.</p></div>
-              <div class="panel-body field-grid">
+          <section class="subsection">
+            <div class="subsection-head">
+              <div>
+                <h3>Prerequisites</h3>
+                <p>Add one or more quests that must be completed first.</p>
+              </div>
+              <button id="add-prerequisite" class="secondary" type="button">Add Prerequisite</button>
+            </div>
+            <div class="subsection-body">
+              <div id="prereq-list" class="prereq-list"></div>
+            </div>
+          </section>
+
+          <section class="subsection">
+            <div class="subsection-head">
+              <div>
+                <h3>Objectives</h3>
+                <p>Each objective can target a room, item, or enemy tag.</p>
+              </div>
+              <button id="add-objective" class="secondary" type="button">Add Objective</button>
+            </div>
+            <div class="subsection-body">
+              <div id="objective-list" class="objective-list"></div>
+            </div>
+          </section>
+
+          <section class="subsection">
+            <div class="subsection-head">
+              <div>
+                <h3>Rewards</h3>
+                <p>Quest rewards support XP, silver, and any number of item rewards.</p>
+              </div>
+              <button id="add-reward" class="secondary" type="button">Add Reward Item</button>
+            </div>
+            <div class="subsection-body stack">
+              <div class="field-grid">
                 <div class="field"><label for="reward-xp">XP</label><input id="reward-xp" type="number" min="0" value="0"></div>
                 <div class="field"><label for="reward-silver">Silver</label><input id="reward-silver" type="number" min="0" value="0"></div>
-                <div class="field"><label for="reward-item">Reward Item</label><select id="reward-item"></select></div>
-                <div class="field"><label for="reward-item-quantity">Reward Quantity</label><input id="reward-item-quantity" type="number" min="1" value="1"></div>
               </div>
+              <div id="reward-list" class="reward-list"></div>
             </div>
+          </section>
 
-            <div class="editor-toolbar">
-              <button id="sync-quest-form" class="secondary" type="button">Sync Quest Form To JSON</button>
-              <button id="diff-quest" type="button">Dry-Run Quest</button>
-              <button id="write-quest" type="button">Write Quest</button>
-            </div>
+          <div class="editor-toolbar">
+            <button id="sync-quest-form" class="secondary" type="button">Sync Builder To Source</button>
+            <button id="diff-quest" type="button">Preview Quest Changes</button>
+            <button id="write-quest" type="button">Save Quest</button>
           </div>
         </section>
 
-        <section class="panel">
-          <div class="panel-head">
-            <h3>Raw Quest Payload</h3>
-            <p>This stays visible for exact pack output and manual adjustments.</p>
-          </div>
-          <div class="panel-body stack">
-            <textarea id="quest-json" spellcheck="false"></textarea>
-            <div class="pill-row">
-              <div id="quest-region-chip" class="chip">Region: -</div>
-              <div id="quest-starting-chip" class="chip">Starting: No</div>
-              <div id="quest-prereq-chip" class="chip">Prerequisite: None</div>
+        <section class="stack">
+          <section class="subsection">
+            <div class="subsection-head">
+              <div>
+                <h3>Quest Snapshot</h3>
+                <p>Resolved state from the live registry and the current staged fields.</p>
+              </div>
             </div>
-          </div>
+            <div class="subsection-body stack">
+              <div class="chip-row">
+                <div id="quest-region-chip" class="chip">Region: -</div>
+                <div id="quest-starting-chip" class="chip">Starting: No</div>
+                <div id="quest-prereq-chip" class="chip">Prerequisites: 0</div>
+              </div>
+              <div class="preview-block">
+                <strong>Objectives</strong>
+                <div id="quest-objective-preview" class="preview-list"></div>
+              </div>
+              <div class="preview-block">
+                <strong>Rewards</strong>
+                <div id="quest-reward-preview" class="preview-list"></div>
+              </div>
+            </div>
+          </section>
+
+          <details>
+            <summary>Advanced Source</summary>
+            <div class="details-body stack">
+              <textarea id="quest-json" spellcheck="false"></textarea>
+              <button id="sync-quest-source" class="secondary" type="button">Apply Source To Builder</button>
+            </div>
+          </details>
         </section>
       </div>
 
       <div class="panel">
         <div class="panel-head">
           <h2>Preview / Diff Output</h2>
-          <p>Quest preview resolves rooms and reward items through the live content registry.</p>
+          <p>Quest preview resolves rooms, items, and enemy tags through the live content registry.</p>
         </div>
         <div class="panel-body">
           <div id="status" class="status">Waiting for quest selection.</div>
@@ -257,62 +238,70 @@
     </section>
   </div>
 
+  <datalist id="quest-region-options"></datalist>
+  <datalist id="enemy-tag-options"></datalist>
+
   <script src="/static/website/js/creator_common.js"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
-    const REGIONS = ["Brambleford", "Goblin Warrens", "Blackfen", "Junk-Yard Planet", "Road Country", "Testing"];
-
-    const questList = document.getElementById("quest-list");
-    const questSearch = document.getElementById("quest-search");
-    const questJson = document.getElementById("quest-json");
-    const output = document.getElementById("output");
-    const statusBox = document.getElementById("status");
-    const validationNotes = document.getElementById("validation-notes");
+    const $ = (id) => document.getElementById(id);
+    const questList = $('quest-list');
+    const questSearch = $('quest-search');
+    const output = $('output');
+    const statusBox = $('status');
+    const validationNotes = $('validation-notes');
     const creatorTools = window.BraveCreator.bind(API_ROOT, statusBox, validationNotes);
-    const editorTitle = document.getElementById("editor-title");
-    const editorSubtitle = document.getElementById("editor-subtitle");
-    const regionChip = document.getElementById("quest-region-chip");
-    const startingChip = document.getElementById("quest-starting-chip");
-    const prereqChip = document.getElementById("quest-prereq-chip");
-
-    const loadQuestButton = document.getElementById("load-quest");
-    const newQuestButton = document.getElementById("new-quest");
-    const syncQuestFormButton = document.getElementById("sync-quest-form");
-    const diffQuestButton = document.getElementById("diff-quest");
-    const writeQuestButton = document.getElementById("write-quest");
-    const validateButton = document.getElementById("validate-content");
-    const reloadButton = document.getElementById("reload-content");
-
-    const questKeyInput = document.getElementById("quest-key");
-    const questTitleInput = document.getElementById("quest-title");
-    const questGiverInput = document.getElementById("quest-giver");
-    const questRegionInput = document.getElementById("quest-region");
-    const questSummaryInput = document.getElementById("quest-summary");
-    const questPrerequisiteSelect = document.getElementById("quest-prerequisite");
-    const questStartingSelect = document.getElementById("quest-starting");
-    const objectiveOneDescription = document.getElementById("objective-one-description");
-    const objectiveOneRoom = document.getElementById("objective-one-room");
-    const objectiveTwoDescription = document.getElementById("objective-two-description");
-    const objectiveTwoItem = document.getElementById("objective-two-item");
-    const objectiveTwoCount = document.getElementById("objective-two-count");
-    const rewardXp = document.getElementById("reward-xp");
-    const rewardSilver = document.getElementById("reward-silver");
-    const rewardItem = document.getElementById("reward-item");
-    const rewardItemQuantity = document.getElementById("reward-item-quantity");
+    const editorTitle = $('editor-title');
+    const editorSubtitle = $('editor-subtitle');
+    const questSummaryTitle = $('quest-summary-title');
+    const questSummaryRegion = $('quest-summary-region');
+    const questSummaryObjectives = $('quest-summary-objectives');
+    const questSummaryRewards = $('quest-summary-rewards');
+    const questRegionChip = $('quest-region-chip');
+    const questStartingChip = $('quest-starting-chip');
+    const questPrereqChip = $('quest-prereq-chip');
+    const questJson = $('quest-json');
+    const questKeyInput = $('quest-key');
+    const questTitleInput = $('quest-title');
+    const questGiverInput = $('quest-giver');
+    const questRegionInput = $('quest-region');
+    const questSummaryInput = $('quest-summary');
+    const questStartingSelect = $('quest-starting');
+    const rewardXp = $('reward-xp');
+    const rewardSilver = $('reward-silver');
+    const objectiveList = $('objective-list');
+    const prereqList = $('prereq-list');
+    const rewardList = $('reward-list');
+    const objectivePreview = $('quest-objective-preview');
+    const rewardPreview = $('quest-reward-preview');
+    const loadQuestButton = $('load-quest');
+    const newQuestButton = $('new-quest');
+    const addObjectiveButton = $('add-objective');
+    const addPrerequisiteButton = $('add-prerequisite');
+    const addRewardButton = $('add-reward');
+    const syncQuestFormButton = $('sync-quest-form');
+    const syncQuestSourceButton = $('sync-quest-source');
+    const diffQuestButton = $('diff-quest');
+    const writeQuestButton = $('write-quest');
+    const validateButton = $('validate-content');
+    const reloadButton = $('reload-content');
 
     let quests = [];
     let rooms = [];
     let items = [];
-    let selectedQuestKey = "";
-    let previewPayload = null;
+    let enemyTags = [];
+    let selectedQuestKey = '';
+    let objectiveRows = [];
+    let prerequisiteRows = [];
+    let rewardRows = [];
 
     function setBusy(isBusy) {
-      for (const button of [loadQuestButton, newQuestButton, syncQuestFormButton, diffQuestButton, writeQuestButton, validateButton, reloadButton]) {
+      for (const button of [loadQuestButton, newQuestButton, addObjectiveButton, addPrerequisiteButton, addRewardButton, syncQuestFormButton, syncQuestSourceButton, diffQuestButton, writeQuestButton, validateButton, reloadButton]) {
         button.disabled = isBusy;
       }
     }
 
-    function setStatus(message, tone = "") {
+    function setStatus(message, tone = '') {
       creatorTools.setStatus(message, tone);
     }
 
@@ -320,105 +309,439 @@
       return creatorTools.showValidation(messages);
     }
 
-    function setChipState(region, starting, prerequisite) {
-      regionChip.textContent = `Region: ${region || "-"}`;
-      startingChip.textContent = `Starting: ${starting ? "Yes" : "No"}`;
-      prereqChip.textContent = `Prerequisite: ${prerequisite || "None"}`;
-    }
-
     async function apiFetch(path, options = {}) {
       const response = await fetch(`${API_ROOT}${path}`, {
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
         ...options,
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload.ok === false) {
-        throw new Error(payload.error || `Request failed with ${response.status}`);
-      }
+      if (!response.ok || payload.ok === false) throw new Error(payload.error || `Request failed with ${response.status}`);
       return payload;
     }
 
-    function fillSelect(select, entries, { placeholder = "None", valueKey = "id", labelBuilder = (entry) => entry.label || entry.id, includeBlank = true, selectedValue = "" } = {}) {
-      const chosen = selectedValue || select.value || "";
-      select.innerHTML = "";
+    function fillSelect(select, entries, config = {}) {
+      const placeholder = config.placeholder ?? 'None';
+      const includeBlank = config.includeBlank !== false;
+      const selectedValue = config.selectedValue || select.value || '';
+      const labelBuilder = config.labelBuilder || ((entry) => entry.label || entry.id);
+      select.innerHTML = '';
       if (includeBlank) {
-        const blank = document.createElement("option");
-        blank.value = "";
+        const blank = document.createElement('option');
+        blank.value = '';
         blank.textContent = placeholder;
         select.appendChild(blank);
       }
-      for (const entry of entries) {
-        const option = document.createElement("option");
-        option.value = entry[valueKey];
+      for (const entry of entries || []) {
+        const option = document.createElement('option');
+        option.value = entry.id;
         option.textContent = labelBuilder(entry);
-        if (option.value === chosen) option.selected = true;
+        if (option.value === selectedValue) option.selected = true;
         select.appendChild(option);
       }
     }
 
-    function fillStaticOptions() {
-      fillSelect(questPrerequisiteSelect, quests, { placeholder: "No prerequisite", labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`, selectedValue: questPrerequisiteSelect.value });
-      fillSelect(objectiveOneRoom, rooms, { placeholder: "Select room", includeBlank: false, labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`, selectedValue: objectiveOneRoom.value });
-      fillSelect(objectiveTwoItem, items, { placeholder: "No collect-item objective", labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`, selectedValue: objectiveTwoItem.value });
-      fillSelect(rewardItem, items, { placeholder: "No reward item", labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`, selectedValue: rewardItem.value });
-    }
-
-    function renderQuestList(filter = "") {
+    function renderQuestList(filter = '') {
       const token = filter.trim().toLowerCase();
-      const filtered = quests.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || "").toLowerCase().includes(token)));
-      questList.innerHTML = "";
+      const filtered = quests.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || '').toLowerCase().includes(token)));
+      questList.innerHTML = '';
       for (const entry of filtered) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "quest-row" + (entry.id === selectedQuestKey ? " active" : "");
-        button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id}${entry.meta ? ` · ${entry.meta}` : ""}</span>`;
-        button.addEventListener("click", () => selectQuest(entry.id, entry.label, entry.meta));
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'quest-row' + (entry.id === selectedQuestKey ? ' active' : '');
+        const suffix = `${entry.region || entry.meta || 'Other Fronts'}${entry.starting ? ' · Starting' : ''}${entry.objective_count != null ? ` · ${entry.objective_count} objectives` : ''}`;
+        button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id} · ${suffix}</span>`;
+        button.addEventListener('click', () => selectQuest(entry.id, entry.label, entry.region || entry.meta));
         questList.appendChild(button);
       }
     }
 
+    function setSummary(wrapper) {
+      const quest = wrapper.quest || {};
+      questSummaryTitle.textContent = quest.title || wrapper.key || '-';
+      questSummaryRegion.textContent = wrapper.region || '-';
+      questSummaryObjectives.textContent = String((quest.objectives || []).length);
+      questSummaryRewards.textContent = String((quest.rewards && quest.rewards.items ? quest.rewards.items.length : 0));
+      questRegionChip.textContent = `Region: ${wrapper.region || '-'}`;
+      questStartingChip.textContent = `Starting: ${wrapper.add_starting ? 'Yes' : 'No'}`;
+      questPrereqChip.textContent = `Prerequisites: ${(quest.prerequisites || []).length}`;
+    }
+
     function buildQuestDraft() {
       return {
+        key: 'new_quest',
         quest: {
-          title: "New Quest",
-          giver: "Quest Giver",
-          summary: "Summarize the quest hook and route.",
-          objectives: [
-            { type: "visit_room", description: "Reach the next room on the route.", room_id: rooms[0] ? rooms[0].id : "" }
-          ],
+          title: 'New Quest',
+          giver: 'Quest Giver',
+          summary: 'Summarize the quest hook and route.',
+          objectives: [{ type: 'visit_room', description: 'Reach the selected room.', room_id: rooms[0] ? rooms[0].id : '' }],
           prerequisites: [],
-          rewards: { xp: 0, silver: 0, items: [] }
+          rewards: { xp: 0, silver: 0, items: [] },
         },
-        region: REGIONS[0],
+        region: quests[0] ? (quests[0].region || quests[0].meta || 'Other Fronts') : 'Other Fronts',
         add_starting: false,
       };
     }
 
+    function createPrerequisiteRow(value = '') {
+      return { value };
+    }
+
+    function createObjectiveRow(data = {}) {
+      return {
+        type: data.type || 'visit_room',
+        description: data.description || '',
+        room_id: data.room_id || '',
+        item_id: data.item_id || '',
+        count: data.count || 1,
+        enemy_tag: data.enemy_tag || '',
+      };
+    }
+
+    function createRewardRow(data = {}) {
+      return { item: data.item || '', quantity: data.quantity || 1 };
+    }
+
+    function renderPrerequisiteRows() {
+      prereqList.innerHTML = '';
+      if (!prerequisiteRows.length) {
+        const empty = document.createElement('div');
+        empty.className = 'pill';
+        empty.textContent = 'No prerequisites configured.';
+        prereqList.appendChild(empty);
+        return;
+      }
+      prerequisiteRows.forEach((row, index) => {
+        const container = document.createElement('div');
+        container.className = 'mini-row';
+        const select = document.createElement('select');
+        fillSelect(select, quests, {
+          placeholder: 'No prerequisite',
+          selectedValue: row.value,
+          labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`,
+        });
+        select.addEventListener('change', () => { row.value = select.value; updateQuestSummary(); });
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'danger';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', () => {
+          prerequisiteRows.splice(index, 1);
+          renderPrerequisiteRows();
+          updateQuestSummary();
+        });
+        container.appendChild(select);
+        container.appendChild(remove);
+        prereqList.appendChild(container);
+      });
+    }
+
+    function renderObjectiveRow(row, index) {
+      const card = document.createElement('div');
+      card.className = 'objective-card';
+
+      const head = document.createElement('div');
+      head.className = 'objective-head';
+      const label = document.createElement('strong');
+      label.textContent = `Objective ${index + 1}`;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'danger';
+      remove.textContent = 'Remove';
+      remove.addEventListener('click', () => {
+        objectiveRows.splice(index, 1);
+        renderObjectiveRows();
+        updateQuestSummary();
+      });
+      head.appendChild(label);
+      head.appendChild(remove);
+      card.appendChild(head);
+
+      const typeGrid = document.createElement('div');
+      typeGrid.className = 'field-grid';
+
+      const typeField = document.createElement('div');
+      typeField.className = 'field';
+      typeField.innerHTML = '<label>Objective Type</label>';
+      const typeSelect = document.createElement('select');
+      for (const value of ['visit_room', 'collect_item', 'defeat_enemy']) {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value.replace(/_/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase());
+        if (value === row.type) option.selected = true;
+        typeSelect.appendChild(option);
+      }
+      typeSelect.addEventListener('change', () => {
+        row.type = typeSelect.value;
+        if (row.type === 'visit_room') {
+          row.item_id = '';
+          row.enemy_tag = '';
+        } else if (row.type === 'collect_item') {
+          row.room_id = '';
+          row.enemy_tag = '';
+        } else {
+          row.room_id = '';
+          row.item_id = '';
+        }
+        renderObjectiveRows();
+        updateQuestSummary();
+      });
+      typeField.appendChild(typeSelect);
+      typeGrid.appendChild(typeField);
+
+      const descField = document.createElement('div');
+      descField.className = 'field';
+      descField.innerHTML = '<label>Description</label>';
+      const descInput = document.createElement('input');
+      descInput.type = 'text';
+      descInput.value = row.description || '';
+      descInput.placeholder = 'Explain the goal to the player';
+      descInput.addEventListener('input', () => { row.description = descInput.value; updateQuestSummary(); });
+      descField.appendChild(descInput);
+      typeGrid.appendChild(descField);
+      card.appendChild(typeGrid);
+
+      const targetRow = document.createElement('div');
+      targetRow.className = row.type === 'collect_item' ? 'objective-target two' : 'objective-target';
+      if (row.type === 'visit_room') {
+        const targetField = document.createElement('div');
+        targetField.className = 'field';
+        targetField.innerHTML = '<label>Room Target</label>';
+        const select = document.createElement('select');
+        fillSelect(select, rooms, {
+          placeholder: 'Select room',
+          includeBlank: true,
+          selectedValue: row.room_id,
+          labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`,
+        });
+        select.addEventListener('change', () => { row.room_id = select.value; updateQuestSummary(); });
+        targetField.appendChild(select);
+        targetRow.appendChild(targetField);
+      } else if (row.type === 'collect_item') {
+        const itemField = document.createElement('div');
+        itemField.className = 'field';
+        itemField.innerHTML = '<label>Item Target</label>';
+        const itemSelect = document.createElement('select');
+        fillSelect(itemSelect, items, {
+          placeholder: 'Select item',
+          includeBlank: true,
+          selectedValue: row.item_id,
+          labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`,
+        });
+        itemSelect.addEventListener('change', () => { row.item_id = itemSelect.value; updateQuestSummary(); });
+        itemField.appendChild(itemSelect);
+
+        const countField = document.createElement('div');
+        countField.className = 'field';
+        countField.innerHTML = '<label>Count</label>';
+        const countInput = document.createElement('input');
+        countInput.type = 'number';
+        countInput.min = '1';
+        countInput.value = row.count || 1;
+        countInput.addEventListener('input', () => { row.count = Math.max(1, Number(countInput.value || 1)); updateQuestSummary(); });
+        countField.appendChild(countInput);
+
+        targetRow.appendChild(itemField);
+        targetRow.appendChild(countField);
+      } else {
+        const tagField = document.createElement('div');
+        tagField.className = 'field';
+        tagField.innerHTML = '<label>Enemy Tag</label>';
+        const tagInput = document.createElement('input');
+        tagInput.type = 'text';
+        tagInput.value = row.enemy_tag || '';
+        tagInput.setAttribute('list', 'enemy-tag-options');
+        tagInput.placeholder = 'bandit, goblin, undead...';
+        tagInput.addEventListener('input', () => { row.enemy_tag = tagInput.value; updateQuestSummary(); });
+        tagField.appendChild(tagInput);
+        targetRow.appendChild(tagField);
+      }
+      card.appendChild(targetRow);
+
+      const hint = document.createElement('div');
+      hint.className = 'objective-hint';
+      hint.textContent = row.type === 'visit_room' ? 'The player must reach a specific room.' : row.type === 'collect_item' ? 'The player must collect a specific item.' : 'The player must defeat enemies with the matching tag.';
+      card.appendChild(hint);
+      objectiveList.appendChild(card);
+    }
+
+    function renderObjectiveRows() {
+      objectiveList.innerHTML = '';
+      if (!objectiveRows.length) {
+        const empty = document.createElement('div');
+        empty.className = 'pill';
+        empty.textContent = 'No objectives configured.';
+        objectiveList.appendChild(empty);
+        return;
+      }
+      objectiveRows.forEach((row, index) => renderObjectiveRow(row, index));
+    }
+
+    function renderRewardRows() {
+      rewardList.innerHTML = '';
+      if (!rewardRows.length) {
+        const empty = document.createElement('div');
+        empty.className = 'pill';
+        empty.textContent = 'No item rewards configured.';
+        rewardList.appendChild(empty);
+        return;
+      }
+      rewardRows.forEach((row, index) => {
+        const card = document.createElement('div');
+        card.className = 'reward-card';
+        const head = document.createElement('div');
+        head.className = 'reward-head';
+        const label = document.createElement('strong');
+        label.textContent = `Reward Item ${index + 1}`;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'danger';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', () => {
+          rewardRows.splice(index, 1);
+          renderRewardRows();
+          updateQuestSummary();
+        });
+        head.appendChild(label);
+        head.appendChild(remove);
+        card.appendChild(head);
+
+        const grid = document.createElement('div');
+        grid.className = 'reward-grid';
+
+        const itemField = document.createElement('div');
+        itemField.className = 'field';
+        itemField.innerHTML = '<label>Item</label>';
+        const itemSelect = document.createElement('select');
+        fillSelect(itemSelect, items, {
+          placeholder: 'Select item',
+          includeBlank: true,
+          selectedValue: row.item,
+          labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`,
+        });
+        itemSelect.addEventListener('change', () => { row.item = itemSelect.value; updateQuestSummary(); });
+        itemField.appendChild(itemSelect);
+
+        const quantityField = document.createElement('div');
+        quantityField.className = 'field';
+        quantityField.innerHTML = '<label>Quantity</label>';
+        const quantityInput = document.createElement('input');
+        quantityInput.type = 'number';
+        quantityInput.min = '1';
+        quantityInput.value = row.quantity || 1;
+        quantityInput.addEventListener('input', () => { row.quantity = Math.max(1, Number(quantityInput.value || 1)); updateQuestSummary(); });
+        quantityField.appendChild(quantityInput);
+
+        grid.appendChild(itemField);
+        grid.appendChild(quantityField);
+        card.appendChild(grid);
+        rewardList.appendChild(card);
+      });
+    }
+
+    function updateQuestSummary() {
+      const quest = buildQuestFromState();
+      setSummary({
+        key: questKeyInput.value.trim() || selectedQuestKey || 'draft',
+        quest,
+        region: questRegionInput.value.trim(),
+        add_starting: questStartingSelect.value === 'true',
+      });
+      renderQuestSnapshot();
+    }
+
+    function renderQuestSnapshot() {
+      objectivePreview.innerHTML = '';
+      rewardPreview.innerHTML = '';
+      for (const row of objectiveRows) {
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        if (row.type === 'visit_room') {
+          const room = rooms.find((entry) => entry.id === row.room_id);
+          pill.textContent = `${row.description || 'Visit room'} · ${(room && room.label) || row.room_id || 'no room selected'}`;
+        } else if (row.type === 'collect_item') {
+          const item = items.find((entry) => entry.id === row.item_id);
+          pill.textContent = `${row.description || 'Collect item'} · ${(item && item.label) || row.item_id || 'no item selected'} x${Math.max(1, Number(row.count || 1))}`;
+        } else {
+          const tag = row.enemy_tag || 'no enemy tag selected';
+          const suggestion = enemyTags.find((entry) => entry.id === tag.toLowerCase());
+          pill.textContent = `${row.description || 'Defeat enemy'} · ${suggestion ? suggestion.label : tag}`;
+        }
+        objectivePreview.appendChild(pill);
+      }
+      for (const row of rewardRows) {
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        const item = items.find((entry) => entry.id === row.item);
+        pill.textContent = `${(item && item.label) || row.item || 'No item'} x${Math.max(1, Number(row.quantity || 1))}`;
+        rewardPreview.appendChild(pill);
+      }
+      if (!objectiveRows.length) {
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        pill.textContent = 'No objectives yet.';
+        objectivePreview.appendChild(pill);
+      }
+      if (!rewardRows.length) {
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        pill.textContent = 'No item rewards yet.';
+        rewardPreview.appendChild(pill);
+      }
+    }
+
+    function buildQuestFromState() {
+      return {
+        title: questTitleInput.value.trim(),
+        giver: questGiverInput.value.trim(),
+        summary: questSummaryInput.value.trim(),
+        objectives: objectiveRows.map((row) => {
+          const payload = {
+            type: row.type,
+            description: row.description.trim(),
+          };
+          if (row.type === 'visit_room') {
+            payload.room_id = row.room_id;
+          } else if (row.type === 'collect_item') {
+            payload.item_id = row.item_id;
+            payload.count = Math.max(1, Number(row.count || 1));
+          } else {
+            payload.enemy_tag = row.enemy_tag.trim();
+          }
+          return payload;
+        }),
+        prerequisites: prerequisiteRows.map((row) => row.value).filter(Boolean),
+        rewards: {
+          xp: Math.max(0, Number(rewardXp.value || 0)),
+          silver: Math.max(0, Number(rewardSilver.value || 0)),
+          items: rewardRows.filter((row) => row.item).map((row) => ({ item: row.item, quantity: Math.max(1, Number(row.quantity || 1)) })),
+        },
+      };
+    }
+
     function populateQuestForm(wrapper) {
-      const payload = wrapper.quest || {};
-      const objectives = payload.objectives || [];
-      const first = objectives[0] || {};
-      const second = objectives[1] || {};
-      const rewardItems = (payload.rewards && payload.rewards.items) || [];
-      const reward = rewardItems[0] || {};
-      questKeyInput.value = wrapper.key || selectedQuestKey || "";
-      questTitleInput.value = payload.title || "";
-      questGiverInput.value = payload.giver || "";
-      questRegionInput.value = wrapper.region || "";
-      questSummaryInput.value = payload.summary || "";
-      questPrerequisiteSelect.value = (payload.prerequisites || [])[0] || "";
-      questStartingSelect.value = wrapper.add_starting ? "true" : "false";
-      objectiveOneDescription.value = first.description || "";
-      objectiveOneRoom.value = first.room_id || "";
-      objectiveTwoDescription.value = second.description || "";
-      objectiveTwoItem.value = second.item_id || "";
-      objectiveTwoCount.value = second.count || 1;
-      rewardXp.value = (payload.rewards && payload.rewards.xp) || 0;
-      rewardSilver.value = (payload.rewards && payload.rewards.silver) || 0;
-      rewardItem.value = reward.item || "";
-      rewardItemQuantity.value = reward.quantity || 1;
-      setChipState(wrapper.region, wrapper.add_starting, (payload.prerequisites || [])[0] || "None");
+      const quest = wrapper.quest || {};
+      const objectives = quest.objectives || [];
+      const prerequisites = quest.prerequisites || [];
+      const rewards = quest.rewards || {};
+      const rewardItems = rewards.items || [];
+      questKeyInput.value = wrapper.key || selectedQuestKey || 'new_quest';
+      questTitleInput.value = quest.title || '';
+      questGiverInput.value = quest.giver || '';
+      questRegionInput.value = wrapper.region || '';
+      questSummaryInput.value = quest.summary || '';
+      questStartingSelect.value = wrapper.add_starting ? 'true' : 'false';
+      rewardXp.value = rewards.xp || 0;
+      rewardSilver.value = rewards.silver || 0;
+      objectiveRows = objectives.map((entry) => createObjectiveRow(entry));
+      prerequisiteRows = prerequisites.map((entry) => createPrerequisiteRow(entry));
+      rewardRows = rewardItems.map((entry) => createRewardRow(entry));
+      if (!objectiveRows.length) objectiveRows = [createObjectiveRow()];
+      renderPrerequisiteRows();
+      renderObjectiveRows();
+      renderRewardRows();
+      updateQuestSummary();
+      questJson.value = JSON.stringify(wrapper, null, 2);
     }
 
     function syncQuestFormToJson() {
@@ -427,72 +750,72 @@
       const giver = questGiverInput.value.trim();
       const region = questRegionInput.value.trim();
       const summary = questSummaryInput.value.trim();
-      const roomId = objectiveOneRoom.value;
       const messages = creatorTools.requireFields([
-        { label: "Quest key", value: key },
-        { label: "Quest title", value: title },
-        { label: "Quest giver", value: giver },
-        { label: "Quest region", value: region },
-        { label: "Quest summary", value: summary },
-        { label: "Objective one room", value: roomId },
+        { label: 'Quest key', value: key },
+        { label: 'Quest title', value: title },
+        { label: 'Quest giver', value: giver },
+        { label: 'Quest region', value: region },
+        { label: 'Quest summary', value: summary },
       ]);
+      if (!objectiveRows.length) messages.push('At least one objective is required.');
+      objectiveRows.forEach((row, index) => {
+        if (!row.description.trim()) messages.push(`Objective ${index + 1} description is required.`);
+        if (row.type === 'visit_room' && !row.room_id) messages.push(`Objective ${index + 1} room is required.`);
+        if (row.type === 'collect_item') {
+          if (!row.item_id) messages.push(`Objective ${index + 1} item is required.`);
+          if (Number(row.count || 0) < 1) messages.push(`Objective ${index + 1} count must be at least 1.`);
+        }
+        if (row.type === 'defeat_enemy' && !String(row.enemy_tag || '').trim()) messages.push(`Objective ${index + 1} enemy tag is required.`);
+      });
       if (!showValidation(messages)) {
-        setStatus("Quest form is incomplete.", "bad");
+        setStatus('Quest form is incomplete.', 'bad');
         return null;
       }
-
-      const payload = {
-        quest: {
-          title,
-          giver,
-          summary,
-          objectives: [
-            {
-              type: "visit_room",
-              description: objectiveOneDescription.value.trim() || "Reach the selected room.",
-              room_id: roomId,
-            }
-          ],
-          prerequisites: questPrerequisiteSelect.value ? [questPrerequisiteSelect.value] : [],
-          rewards: {
-            xp: Number(rewardXp.value || 0),
-            silver: Number(rewardSilver.value || 0),
-            items: [],
-          },
-        },
+      const wrapper = {
+        key,
+        quest: buildQuestFromState(),
         region,
-        add_starting: questStartingSelect.value === "true",
+        add_starting: questStartingSelect.value === 'true',
       };
-
-      if (objectiveTwoItem.value) {
-        payload.quest.objectives.push({
-          type: "collect_item",
-          description: objectiveTwoDescription.value.trim() || "Recover the required item.",
-          item_id: objectiveTwoItem.value,
-          count: Math.max(1, Number(objectiveTwoCount.value || 1)),
-        });
-      }
-
-      if (rewardItem.value) {
-        payload.quest.rewards.items.push({
-          item: rewardItem.value,
-          quantity: Math.max(1, Number(rewardItemQuantity.value || 1)),
-        });
-      }
-
-      questJson.value = JSON.stringify(payload, null, 2);
-      setChipState(region, payload.add_starting, payload.quest.prerequisites[0] || "None");
+      questJson.value = JSON.stringify(wrapper, null, 2);
+      setSummary(wrapper);
       selectedQuestKey = key;
-      return payload;
+      return wrapper;
+    }
+
+    function syncQuestSourceToForm() {
+      try {
+        const wrapper = creatorTools.parseJsonField(questJson, {}, { label: 'Quest source', expect: 'object' });
+        populateQuestForm(wrapper);
+        setStatus('Advanced source applied to the quest builder.', 'good');
+      } catch (error) {
+        setStatus(error.message, 'bad');
+      }
     }
 
     async function loadReferences() {
-      [quests, rooms, items] = await Promise.all([
-        creatorTools.fetchReferences("quests"),
-        creatorTools.fetchReferences("rooms"),
-        creatorTools.fetchReferences("items"),
+      [quests, rooms, items, enemyTags] = await Promise.all([
+        creatorTools.fetchReferences('quests', { limit: 1000 }),
+        creatorTools.fetchReferences('rooms', { limit: 1000 }),
+        creatorTools.fetchReferences('items', { limit: 1000 }),
+        creatorTools.fetchReferences('enemy-tags', { limit: 1000 }),
       ]);
-      fillStaticOptions();
+      const regionOptions = $('quest-region-options');
+      regionOptions.innerHTML = '';
+      const regions = [...new Set(quests.map((entry) => entry.region || entry.meta || 'Other Fronts'))].sort();
+      for (const region of regions) {
+        const option = document.createElement('option');
+        option.value = region;
+        regionOptions.appendChild(option);
+      }
+      const tagOptions = $('enemy-tag-options');
+      tagOptions.innerHTML = '';
+      for (const tag of enemyTags) {
+        const option = document.createElement('option');
+        option.value = tag.id;
+        option.label = `${tag.label || tag.id} (${tag.meta})`;
+        tagOptions.appendChild(option);
+      }
       renderQuestList(questSearch.value);
     }
 
@@ -500,36 +823,52 @@
       selectedQuestKey = questKey;
       renderQuestList(questSearch.value);
       editorTitle.textContent = label || questKey;
-      editorSubtitle.textContent = `${questKey}${meta ? ` · ${meta}` : ""}`;
+      editorSubtitle.textContent = `${questKey}${meta ? ` · ${meta}` : ''}`;
       await loadPreview();
     }
 
     async function loadPreview() {
       if (!selectedQuestKey) {
-        setStatus("Choose a quest first.", "bad");
+        setStatus('Choose a quest first.', 'bad');
         return;
       }
       setBusy(true);
       setStatus(`Loading preview for ${selectedQuestKey}...`);
       try {
-        const payload = await apiFetch("/preview", { method: "POST", body: JSON.stringify({ kind: "quest", args: [selectedQuestKey] }) });
-        previewPayload = payload.preview;
+        const payload = await apiFetch('/preview', { method: 'POST', body: JSON.stringify({ kind: 'quest', args: [selectedQuestKey] }) });
         const wrapper = {
           key: selectedQuestKey,
           quest: payload.preview.quest,
           region: payload.preview.region,
-          add_starting: quests.some((entry) => entry.id === selectedQuestKey && entry.meta === payload.preview.region),
+          add_starting: !!payload.preview.is_starting,
         };
-        questJson.value = JSON.stringify(wrapper, null, 2);
         populateQuestForm(wrapper);
         output.textContent = JSON.stringify(payload.preview, null, 2);
-        setStatus(`Loaded quest preview for ${selectedQuestKey}.`, "good");
+        setStatus(`Loaded quest preview for ${selectedQuestKey}.`, 'good');
       } catch (error) {
-        setStatus(error.message, "bad");
+        setStatus(error.message, 'bad');
         output.textContent = error.stack || error.message;
       } finally {
         setBusy(false);
       }
+    }
+
+    function addObjective() {
+      objectiveRows.push(createObjectiveRow());
+      renderObjectiveRows();
+      updateQuestSummary();
+    }
+
+    function addPrerequisite() {
+      prerequisiteRows.push(createPrerequisiteRow());
+      renderPrerequisiteRows();
+      updateQuestSummary();
+    }
+
+    function addRewardItem() {
+      rewardRows.push(createRewardRow());
+      renderRewardRows();
+      updateQuestSummary();
     }
 
     async function mutateQuest(write) {
@@ -537,29 +876,25 @@
       if (!wrapper) return;
       const target = questKeyInput.value.trim();
       setBusy(true);
-      setStatus(write ? `Writing quest ${target}...` : `Generating quest diff for ${target}...`);
+      setStatus(write ? `Saving quest ${target}...` : `Previewing quest changes for ${target}...`);
       try {
-        const result = await apiFetch("/mutate", { method: "POST", body: JSON.stringify({ kind: "quest", target, payload: wrapper, write }) });
+        const result = await apiFetch('/mutate', { method: 'POST', body: JSON.stringify({ kind: 'quest', target, payload: wrapper, write }) });
         output.textContent = result.diff || JSON.stringify(result, null, 2);
         if (write) {
           const errors = result.validation_errors || [];
           if (errors.length) {
-            setStatus(`Write completed with ${errors.length} validation issue(s).`, "bad");
-            output.textContent = `${result.diff || ""}
-
-Validation errors:
-- ${errors.join("
-- ")}`.trim();
+            setStatus(`Save completed with ${errors.length} validation issue(s).`, 'bad');
+            output.textContent = `${result.diff || ''}\n\nValidation errors:\n- ${errors.join('\n- ')}`.trim();
           } else {
-            setStatus(`Wrote quest ${target} and revalidated content.`, "good");
+            setStatus(`Saved quest ${target}.`, 'good');
             await loadReferences();
             await selectQuest(target, questTitleInput.value.trim(), questRegionInput.value.trim());
           }
         } else {
-          setStatus(`Dry-run diff ready for quest ${target}.`, "good");
+          setStatus(`Preview ready for quest ${target}.`, 'good');
         }
       } catch (error) {
-        setStatus(error.message, "bad");
+        setStatus(error.message, 'bad');
         output.textContent = error.stack || error.message;
       } finally {
         setBusy(false);
@@ -568,19 +903,18 @@ Validation errors:
 
     async function validateContent() {
       setBusy(true);
-      setStatus("Validating content packs...");
+      setStatus('Checking content packs...');
       try {
-        const payload = await apiFetch("/validate", { method: "POST", body: "{}" });
+        const payload = await apiFetch('/validate', { method: 'POST', body: '{}' });
         if (payload.errors.length) {
-          setStatus(`Validation found ${payload.errors.length} issue(s).`, "bad");
-          output.textContent = payload.errors.join("
-");
+          setStatus(`Content check found ${payload.errors.length} issue(s).`, 'bad');
+          output.textContent = payload.errors.join('\n');
         } else {
-          setStatus("Content validation passed.", "good");
+          setStatus('Content check passed.', 'good');
           output.textContent = JSON.stringify(payload, null, 2);
         }
       } catch (error) {
-        setStatus(error.message, "bad");
+        setStatus(error.message, 'bad');
         output.textContent = error.stack || error.message;
       } finally {
         setBusy(false);
@@ -589,45 +923,45 @@ Validation errors:
 
     async function reloadContent() {
       setBusy(true);
-      setStatus("Reloading registry from disk...");
+      setStatus('Reloading registry from disk...');
       try {
-        const payload = await apiFetch("/reload", { method: "POST", body: "{}" });
-        setStatus("Content registry reloaded.", "good");
+        const payload = await apiFetch('/reload', { method: 'POST', body: '{}' });
+        setStatus('Content registry reloaded.', 'good');
         output.textContent = JSON.stringify(payload, null, 2);
         await loadReferences();
         if (selectedQuestKey) await loadPreview();
       } catch (error) {
-        setStatus(error.message, "bad");
+        setStatus(error.message, 'bad');
         output.textContent = error.stack || error.message;
       } finally {
         setBusy(false);
       }
     }
 
-    function createDraft() {
-      selectedQuestKey = "";
+    questSearch.addEventListener('input', () => renderQuestList(questSearch.value));
+    loadQuestButton.addEventListener('click', async () => { if (selectedQuestKey) await loadPreview(); });
+    newQuestButton.addEventListener('click', () => {
       const draft = buildQuestDraft();
-      questJson.value = JSON.stringify(draft, null, 2);
-      populateQuestForm({ key: "new_quest_key", ...draft });
-      editorTitle.textContent = "New Quest Draft";
-      editorSubtitle.textContent = "Unsaved quest payload";
-      output.textContent = JSON.stringify(draft, null, 2);
-      setStatus("Quest draft ready.", "good");
-    }
-
-    questSearch.addEventListener("input", () => renderQuestList(questSearch.value));
-    loadQuestButton.addEventListener("click", loadPreview);
-    newQuestButton.addEventListener("click", createDraft);
-    syncQuestFormButton.addEventListener("click", () => { if (syncQuestFormToJson()) setStatus("Quest form synced to JSON.", "good"); });
-    diffQuestButton.addEventListener("click", () => mutateQuest(false));
-    writeQuestButton.addEventListener("click", () => mutateQuest(true));
-    validateButton.addEventListener("click", validateContent);
-    reloadButton.addEventListener("click", reloadContent);
-
-    loadReferences().then(createDraft).catch((error) => {
-      setStatus(error.message, "bad");
-      output.textContent = error.stack || error.message;
+      selectedQuestKey = '';
+      populateQuestForm(draft);
+      renderQuestList(questSearch.value);
+      editorTitle.textContent = 'New Quest Draft';
+      editorSubtitle.textContent = 'A staged quest draft is ready to be filled out.';
+      setStatus('New quest draft staged in the builder.', 'good');
     });
+    addObjectiveButton.addEventListener('click', addObjective);
+    addPrerequisiteButton.addEventListener('click', addPrerequisite);
+    addRewardButton.addEventListener('click', addRewardItem);
+    syncQuestFormButton.addEventListener('click', () => { if (syncQuestFormToJson()) setStatus('Quest builder synced to source.', 'good'); });
+    syncQuestSourceButton.addEventListener('click', syncQuestSourceToForm);
+    diffQuestButton.addEventListener('click', () => mutateQuest(false));
+    writeQuestButton.addEventListener('click', () => mutateQuest(true));
+    validateButton.addEventListener('click', validateContent);
+    reloadButton.addEventListener('click', reloadContent);
+
+    populateQuestForm(buildQuestDraft());
+    renderQuestList();
+    loadReferences().catch((error) => { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; });
   </script>
 </body>
 </html>

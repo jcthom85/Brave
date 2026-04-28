@@ -16,4 +16,6 @@ does what you expect it to.
 
 
 def at_initial_setup():
-    pass
+    from world.bootstrap import ensure_brave_world
+
+    ensure_brave_world()

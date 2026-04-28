@@ -15,13 +15,16 @@ Recommended early reference parties:
 
 ## Character Creation
 
-Recommended phase-1 flow:
+Current flow:
 
 1. Choose player name
 2. Choose race
 3. Choose class
-4. Receive starter kit and two level-1 abilities
-5. Spawn in Brambleford with the starter quest line available
+4. Choose gender identity
+5. Confirm and create the character
+6. Receive starter kit and two level-1 abilities
+7. First character on an account starts in Wayfarer's Yard tutorial
+8. Tutorial completion hands the player into Brambleford and the starter quest line
 
 Keep race bonuses meaningful but smaller than class identity.
 
@@ -194,30 +197,28 @@ Level progression:
 - Level 9: Passive: Nature's Memory
 - Level 10: Wrath of the Grove
 
-## Class Implementation Order
+## Class Roster
 
-Use this order unless a later technical decision forces a change:
+The live class roster is:
 
-1. Warrior
-2. Cleric
-3. Ranger
-4. Mage
-5. Rogue
-6. Paladin
-7. Druid
-
-This delivers the clearest fantasy RPG core first.
+- Warrior
+- Cleric
+- Ranger
+- Mage
+- Rogue
+- Paladin
+- Druid
 
 ## Multiverse Resonance (Genre Scaling)
 
-To support portals (Star Wars, Dragonball, etc.), the core stats map to genre-specific "skins."
+To support portal worlds, the core stats map to genre-specific "skins."
 
 | Core Stat | Fantasy (Default) | Sci-Fi / Tech | Martial / Ki |
 | --- | --- | --- | --- |
 | **Strength** | Strength | Physical Might | Martial Power |
 | **Agility** | Agility | Reflexes | Speed |
 | **Intellect** | Intellect | Tech Skill | Focus |
-| **Spirit** | Spirit | Force / Energy | Ki Level |
+| **Spirit** | Spirit | Signal Attunement | Ki Level |
 | **Vitality** | Vitality | Durability | Endurance |
 
 ## Minigame Hooks
@@ -260,7 +261,7 @@ Derived stats:
 - Threat
 - Resistances
 
-Phase-1 stat resolution:
+Current stat resolution:
 
 - Keep five primary stats for implementation simplicity
 - Treat `Precision` as a derived offensive stat driven mainly by Agility, gear, and class passives
@@ -280,7 +281,7 @@ Mana classes:
 - Cleric
 - Druid
 
-Phase-1 default: keep Paladin stamina-based for simplicity, with holy effort abstracted into stamina costs.
+Current default: Paladin is stamina-based, with holy effort abstracted into stamina costs.
 
 ## Gear Model
 
@@ -317,16 +318,16 @@ Sample item names:
 
 ## Progression Model
 
-- Phase-1 level cap: 10
+- Current fantasy ladder target: level 10 through the main chapter arc
 - Players begin with two class abilities
 - Each level should grant a meaningful reward, either active, passive, or access-driven
 - Early levels should arrive quickly
 - Midgame should slow slightly
-- Level 10 should align with completion of the phase-1 story arc
+- Level 10 should align with completion of the main fantasy chapter arc
 
 ## System Boundaries
 
-Keep phase-1 progression focused on:
+Keep progression focused on:
 
 - Levels
 - Ability unlocks

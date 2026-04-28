@@ -14,12 +14,20 @@ from regression_tests.combat_balance_simulation import (
     _queue_pending_actions,
     analyze_interrupt_opportunities,
     analyze_trace,
+    build_first_hour_route_report,
+    build_progression_runs,
     build_interrupt_opportunity_report,
+    build_summary,
     classify_encounter_rank,
     collect_authored_encounters,
     choose_player_action,
+    infer_expected_level,
     render_interrupt_opportunity_markdown,
+    render_first_hour_route_markdown,
+    render_markdown,
     simulate_encounter,
+    DummyRoom,
+    SimulationEncounter,
     SimulatedCharacter,
 )
 
@@ -46,6 +54,42 @@ class CombatBalanceSimulationTests(unittest.TestCase):
         self.assertEqual(first["player_remaining_hp_ratio"], second["player_remaining_hp_ratio"])
         self.assertEqual(first["damage_done_by_players"], second["damage_done_by_players"])
 
+    def test_progression_level_inference_uses_zone_band(self):
+        authored = {
+            "room_id": "goblin_warrens_feast_hall",
+            "encounter_data": {"key": "hall_press"},
+        }
+
+        self.assertEqual(8, infer_expected_level(authored))
+
+    def test_simulation_can_run_at_explicit_progression_level(self):
+        authored = collect_authored_encounters()[0]
+        scenario = next(entry for entry in PARTY_SCENARIOS if entry["key"] == "solo_warrior")
+
+        run = simulate_encounter(authored, scenario, base_seed=11, max_rounds=60, level=2)
+
+        self.assertEqual(2, run["character_level"])
+        self.assertIn("expected_level", run)
+
+    def test_progression_runs_use_inferred_levels(self):
+        runs = build_progression_runs(base_seed=3, max_rounds=20, limit=1)
+
+        self.assertEqual(len(PARTY_SCENARIOS), len(runs))
+        self.assertTrue(all(run["character_level"] == run["expected_level"] for run in runs))
+
+    def test_first_hour_route_tracks_xp_level_and_post_ruk_lead(self):
+        report = build_first_hour_route_report(scenario_key="solo_warrior", base_seed=7, max_rounds=120)
+
+        self.assertEqual(4, report["final_level"])
+        self.assertLess(report["final_xp"], 350)
+        self.assertEqual("what_whispers_in_the_wood", report["post_ruk_unlock_order"][0])
+        self.assertTrue(all(step.get("outcome", "victory") == "victory" for step in report["steps"]))
+        ruk_step = next(step for step in report["steps"] if step["key"] == "ruks_stand")
+        self.assertGreater(ruk_step["telegraphed_actions"], 0)
+        markdown = render_first_hour_route_markdown(report)
+        self.assertIn("First Hour Route Summary", markdown)
+        self.assertIn("what_whispers_in_the_wood", markdown)
+
     def test_ranger_companion_scenario_spawns_companion_actor(self):
         authored = collect_authored_encounters()[0]
         scenario = next(entry for entry in PARTY_SCENARIOS if entry["key"] == "solo_ranger_with_companion")
@@ -56,6 +100,48 @@ class CombatBalanceSimulationTests(unittest.TestCase):
         self.assertEqual(["ranger"], run["party_classes"])
         self.assertTrue(run["companion_enabled"])
         self.assertGreaterEqual(run["companion_count"], 1)
+
+    def test_drowned_weir_solo_scaling_is_targeted(self):
+        encounter_data = {
+            "key": "lock_surge",
+            "title": "Scale Check",
+            "intro": "Testing scaling.",
+            "enemies": ["hollow_lantern"],
+        }
+        outlier_data = {
+            **encounter_data,
+            "key": "the_hollow_lantern",
+        }
+        solo = SimulationEncounter(
+            DummyRoom("drowned_weir_blackwater_lamp_house"),
+            encounter_data,
+            expected_party_size=1,
+            seed=1,
+        )
+        duo = SimulationEncounter(
+            DummyRoom("drowned_weir_blackwater_lamp_house"),
+            encounter_data,
+            expected_party_size=2,
+            seed=1,
+        )
+        early_solo = SimulationEncounter(
+            DummyRoom("goblin_road_trailhead"),
+            encounter_data,
+            expected_party_size=1,
+            seed=1,
+        )
+        outlier_solo = SimulationEncounter(
+            DummyRoom("drowned_weir_blackwater_lamp_house"),
+            outlier_data,
+            expected_party_size=1,
+            seed=1,
+        )
+
+        self.assertEqual("Solo Drowned Weir", solo._get_scaling_profile()["label"])
+        self.assertLess(solo._get_scaling_profile()["power"], early_solo._get_scaling_profile()["power"])
+        self.assertLess(outlier_solo._get_scaling_profile()["power"], solo._get_scaling_profile()["power"])
+        self.assertEqual("Duo", duo._get_scaling_profile()["label"])
+        self.assertEqual("Solo", early_solo._get_scaling_profile()["label"])
 
     def test_simulation_trace_emits_tick_snapshots_when_enabled(self):
         authored = collect_authored_encounters()[0]
@@ -68,6 +154,19 @@ class CombatBalanceSimulationTests(unittest.TestCase):
         self.assertIn("players", run["trace"][0])
         self.assertIn("enemies", run["trace"][0])
         self.assertIn("telegraph", run["trace"][0])
+
+    def test_simulation_counts_telegraph_outcomes(self):
+        authored = next(
+            entry
+            for entry in collect_authored_encounters()
+            if entry["encounter_data"].get("key") == "greymaws_stand"
+        )
+        scenario = next(entry for entry in PARTY_SCENARIOS if entry["key"] == "duo_warrior_cleric")
+
+        run = simulate_encounter(authored, scenario, base_seed=24, max_rounds=40)
+
+        self.assertGreater(run["telegraphed_actions"], 0)
+        self.assertGreater(run["telegraphed_unanswered"], 0)
 
     def test_trace_analysis_marks_late_interrupt_actor(self):
         trace = [
@@ -181,6 +280,89 @@ class CombatBalanceSimulationTests(unittest.TestCase):
         self.assertIn("Interrupt Opportunity Summary", markdown)
         self.assertIn("boss_b__trio_warrior_cleric_mage", markdown)
 
+    def test_summary_surfaces_risk_and_telegraph_metrics(self):
+        base_run = {
+            "source": "room:test",
+            "source_kind": "room",
+            "room_id": "test_room",
+            "encounter_key": "test_boss",
+            "encounter_title": "Test Boss",
+            "enemy_templates": ["old_greymaw"],
+            "rank_bucket": "boss",
+            "max_rank": 5,
+            "scenario_key": "solo_warrior",
+            "scenario_label": "Solo Warrior",
+            "character_level": 10,
+            "expected_level": 10,
+            "party_size": 1,
+            "party_classes": ["warrior"],
+            "companion_enabled": False,
+            "seed": 1,
+            "outcome": "victory",
+            "rounds": 42,
+            "player_remaining_hp": 10,
+            "player_remaining_hp_ratio": 0.1,
+            "enemy_remaining_hp": 0,
+            "enemy_remaining_hp_ratio": 0.0,
+            "surviving_players": 1,
+            "enemy_count": 1,
+            "companion_count": 0,
+            "damage_done_by_players": 100,
+            "damage_done_by_companions": 0,
+            "healing_done": 12,
+            "mitigation_done": 8,
+            "damage_taken": 55,
+            "meaningful_actions": 7,
+            "telegraphed_actions": 2,
+            "telegraphed_interrupts": 0,
+            "telegraphed_redirects": 0,
+            "telegraphed_mitigations": 0,
+            "telegraphed_unanswered": 2,
+            "telegraphed_response_actions": 0,
+            "held_actions": 0,
+            "combat_fx_events": 3,
+            "near_wipe": True,
+            "trace": None,
+        }
+        companion_run = {
+            **base_run,
+            "scenario_key": "solo_ranger_with_companion",
+            "scenario_label": "Solo Ranger + Companion",
+            "party_classes": ["ranger"],
+            "companion_enabled": True,
+            "damage_done_by_companions": 25,
+            "near_wipe": False,
+            "player_remaining_hp_ratio": 0.75,
+            "telegraphed_interrupts": 1,
+            "telegraphed_unanswered": 1,
+        }
+        no_companion_run = {
+            **base_run,
+            "scenario_key": "solo_ranger_no_companion",
+            "scenario_label": "Solo Ranger",
+            "party_classes": ["ranger"],
+            "companion_enabled": False,
+            "outcome": "defeat",
+            "rounds": 50,
+            "player_remaining_hp": 0,
+            "player_remaining_hp_ratio": 0.0,
+            "near_wipe": False,
+            "telegraphed_actions": 0,
+            "telegraphed_unanswered": 0,
+        }
+
+        summary = build_summary([base_run, companion_run, no_companion_run])
+        markdown = render_markdown(summary)
+
+        self.assertEqual(3, summary["totals"]["runs"])
+        self.assertEqual(1, summary["totals"]["near_wipes"])
+        self.assertIn("encounter_summary", summary)
+        self.assertEqual(1, len(summary["telegraph_risks"]))
+        self.assertEqual("test_boss", summary["encounter_risks"][0]["encounter_key"])
+        self.assertIn("## Encounter Risk List", markdown)
+        self.assertIn("## Telegraph Risks", markdown)
+        self.assertIn("telegraph answer rate", markdown)
+
     def test_warrior_prefers_interrupt_on_telegraphed_enemy(self):
         warrior = SimulatedCharacter(1, "warrior")
         warrior.db.brave_resources["stamina"] = 99
@@ -218,6 +400,29 @@ class CombatBalanceSimulationTests(unittest.TestCase):
 
         self.assertEqual("ability", action["kind"])
         self.assertEqual("guardianlight", action["ability"])
+        self.assertEqual(warrior.id, action["target"])
+
+    def test_cleric_cleanses_afflicted_ally_outside_telegraph(self):
+        warrior = SimulatedCharacter(1, "warrior")
+        cleric = SimulatedCharacter(2, "cleric")
+        enemy = {"id": "e1", "key": "Bog Wolf", "template_key": "road_wolf", "hp": 40, "dodge": 8, "target_strategy": "highest_threat"}
+        states = {
+            str(warrior.id): {"stealth_turns": 0, "poison_turns": 2},
+            str(cleric.id): {"stealth_turns": 0},
+        }
+        encounter = SimpleNamespace(
+            db=SimpleNamespace(threat={"1": 12, "2": 2}),
+            get_active_enemies=lambda: [enemy],
+            get_active_participants=lambda: [warrior, cleric],
+            get_active_player_participants=lambda: [warrior, cleric],
+            _enemy_reaction_state=lambda current_enemy: {"phase": "charging", "telegraphed": False, "interruptible": False},
+            _get_participant_state=lambda actor: states.get(str(actor.id), {"stealth_turns": 0}),
+        )
+
+        action = choose_player_action(encounter, cleric)
+
+        self.assertEqual("ability", action["kind"])
+        self.assertEqual("cleanse", action["ability"])
         self.assertEqual(warrior.id, action["target"])
 
     def test_telegraph_planner_only_assigns_response_when_actor_can_resolve_in_time(self):

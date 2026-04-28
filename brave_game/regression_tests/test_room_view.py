@@ -16,7 +16,13 @@ chargen_stub.get_next_chargen_step = lambda *args, **kwargs: None
 chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
-from world.browser_views import WELCOME_PAGES, build_map_view, build_room_view, build_talk_view
+from world.browser_views import (
+    RECAP_PAGES,
+    WELCOME_PAGES,
+    _build_world_interaction_picker,
+    build_map_view,
+    build_room_view,
+)
 from world.navigation import build_map_snapshot, build_minimap_snapshot, discover_region, discover_room
 from typeclasses.scripts import BraveEncounter
 
@@ -45,6 +51,7 @@ class DummyRoom:
             brave_world="Brave",
             brave_zone="Brambleford",
             brave_safe=True,
+            brave_rest_allowed=True,
             brave_room_id="lantern_rest",
             brave_activities=[],
             desc="Warm light, steady conversation, and a clean path to the street.",
@@ -103,6 +110,7 @@ class DummyCharacter:
             brave_discovered_regions=[],
         )
         self.ndb = SimpleNamespace()
+        self.sessions = SimpleNamespace(count=lambda: 1)
 
     def get_active_encounter(self):
         return None
@@ -244,6 +252,21 @@ class RoomViewTests(unittest.TestCase):
             [option.get("label") for option in vicinity_items[1].get("picker", {}).get("options", [])],
         )
 
+    def test_room_view_tutorial_npc_card_opens_popup_and_advances_on_open(self):
+        room = DummyRoom()
+        viewer = DummyCharacter()
+        tamsin = DummyEntity("Sergeant Tamsin Vale", "npc", entity_id="sergeant_tamsin_vale")
+
+        view = build_room_view(room, viewer, visible_entities=[tamsin])
+        vicinity_items = _section(view, "The Vicinity").get("items", [])
+
+        self.assertEqual(1, len(vicinity_items))
+        self.assertEqual("Sergeant Tamsin Vale", vicinity_items[0].get("text"))
+        self.assertEqual("talk Sergeant Tamsin Vale", vicinity_items[0].get("command"))
+        self.assertEqual("forum", vicinity_items[0].get("picker", {}).get("title_icon"))
+        self.assertEqual("_bravepopup talk Sergeant Tamsin Vale", vicinity_items[0].get("on_open_command"))
+        self.assertEqual("Sergeant Tamsin Vale", vicinity_items[0].get("dismiss_bubble_speaker"))
+
     def test_room_view_arcade_entity_opens_inspect_view(self):
         room = DummyRoom()
         viewer = DummyCharacter()
@@ -267,11 +290,12 @@ class RoomViewTests(unittest.TestCase):
 
     def test_talk_view_uses_short_mastery_action_label(self):
         target = DummyEntity("Mistress Elira Thorne", "npc", entity_id="mistress_elira_thorne")
-        view = build_talk_view(target, "Focus your study.")
+        viewer = DummyCharacter()
+        picker = _build_world_interaction_picker(viewer, target)
 
         self.assertEqual(
             ["Mastery"],
-            [action.get("label") for action in view.get("actions", [])],
+            [action.get("label") for action in picker.get("options", []) if action.get("label") == "Mastery"],
         )
 
     def test_room_view_includes_mobile_pack_summary_and_navpad(self):
@@ -318,12 +342,44 @@ class RoomViewTests(unittest.TestCase):
         character = DummyCharacter()
         tutorial_state = {"status": "active", "step": "first_steps", "flags": {}}
 
-        with patch("world.browser_views.ensure_tutorial_state", return_value=tutorial_state):
+        with patch("world.browser_views.ensure_tutorial_state", return_value=tutorial_state), patch(
+            "world.browser_views.is_tutorial_active", return_value=True
+        ):
             view = build_room_view(DummyRoom(), character)
 
-        self.assertGreater(len(view.get("guidance", [])), 1)
+        self.assertEqual([], view.get("guidance", []))
         self.assertEqual(WELCOME_PAGES, view.get("welcome_pages"))
+        self.assertEqual("Lanternfall", view["welcome_pages"][1]["title"])
         self.assertTrue(character.db.brave_welcome_shown)
+        self.assertTrue(character.db.brave_lanternfall_intro_shown)
+
+    def test_room_view_includes_lanternfall_recap_for_tutorial_skipped_character(self):
+        room = DummyRoom()
+        room.db.brave_room_id = "brambleford_training_yard"
+        character = DummyCharacter()
+        character.location = room
+        character.db.brave_tutorial = {"status": "completed", "step": None, "flags": {}}
+        character.db.brave_quests = {
+            "practice_makes_heroes": {
+                "status": "active",
+                "objectives": [
+                    {
+                        "description": "Report to Captain Harl Rowan after Wayfarer's Yard.",
+                        "completed": False,
+                        "progress": 0,
+                        "required": 1,
+                    }
+                ],
+            }
+        }
+        character.db.brave_lanternfall_intro_shown = False
+
+        view = build_room_view(room, character)
+
+        self.assertEqual(RECAP_PAGES, view.get("welcome_pages"))
+        self.assertEqual("Report In", view["welcome_pages"][2]["title"])
+        self.assertTrue(character.db.brave_welcome_shown)
+        self.assertTrue(character.db.brave_lanternfall_intro_shown)
 
     def test_room_view_renders_compact_grouped_threat_card(self):
         room = DummyRoom()
@@ -632,7 +688,8 @@ class RoomViewTests(unittest.TestCase):
         character.ndb.brave_first_region_discovery = True
         room = DummyMappedRoom("current_room", key="Current Room", x=0, y=0)
 
-        view = build_room_view(room, character)
+        with patch("world.browser_views.build_minimap_snapshot", return_value={}):
+            view = build_room_view(room, character)
 
         self.assertTrue(view.get("first_region_discovery"))
 

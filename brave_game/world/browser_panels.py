@@ -15,7 +15,7 @@ from world.navigation import format_route_hint, sort_exits
 from world.party import get_follow_target, get_party_leader, get_party_members
 from world.questing import get_active_quests, get_completed_quests, get_tracked_quest
 from world.resonance import get_resource_label, get_resonance_label, get_stat_label
-from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
+from world.tutorial import get_tutorial_objective_entries
 
 CONTENT = get_content_registry()
 CHARACTER_CONTENT = CONTENT.characters
@@ -56,14 +56,6 @@ GEAR_PANEL_ICONS = {
 }
 
 CHARGEN_STEP_META = {
-    "menunode_welcome": {
-        "title": "Overview",
-        "title_icon": "person_add",
-        "guidance": [
-            ("review your draft and open slots", "overview"),
-            ("pick a race, class, and name", "checklist"),
-        ],
-    },
     "menunode_choose_race": {
         "title": "Choose a Race",
         "title_icon": "diversity_3",
@@ -154,6 +146,38 @@ def send_webclient_event(target, session=None, **payload):
         target.msg(session=web_sessions, **payload)
 
 
+def send_objectives_refresh(target):
+    """Trigger a refresh of the tutorial and tracked quest UI components."""
+    from world.tutorial import get_tutorial_mechanical_guidance
+    from world.questing import get_tracked_quest_payload
+
+    payload = {}
+    
+    # 1. Mechanical Tutorial Guidance
+    mechanical = get_tutorial_mechanical_guidance(target)
+    if mechanical:
+        payload["tutorial"] = mechanical
+
+    # 2. Narrative Tracked Quest
+    tracked = get_tracked_quest_payload(target)
+    if tracked:
+        payload["tracked_quest"] = tracked
+
+    if payload:
+        send_webclient_event(target, brave_objectives_update=payload)
+
+
+def send_quest_complete_event(target, quest_title, rewards=None):
+    """Send a specialized quest completion event to webclient sessions."""
+    send_webclient_event(
+        target,
+        brave_quest_complete={
+            "title": quest_title,
+            "rewards": rewards or {},
+        },
+    )
+
+
 def send_browser_notice_event(
     target,
     message,
@@ -227,6 +251,38 @@ def send_room_activity_event(target, text, *, cls="out", category=None):
     non_web_sessions = _get_non_web_sessions(target)
     if non_web_sessions and hasattr(target, "msg"):
         target.msg(text, session=non_web_sessions)
+
+
+def format_speech_activity(speaker, line, *, verb="says"):
+    """Return room activity text that the webclient renders as a speech bubble."""
+
+    speaker_name = str(speaker or "Someone").strip() or "Someone"
+    speech_line = str(line or "").strip()
+    speech_verb = str(verb or "says").strip() or "says"
+    if not speech_line:
+        return ""
+    speech_line = speech_line.strip('"')
+    return f'{speaker_name} {speech_verb}, "{speech_line}"'
+
+
+def send_npc_speech_event(target, speaker, line, *, verb="says"):
+    """Send one NPC speech line to a target using the room speech-bubble channel."""
+
+    text = format_speech_activity(speaker, line, verb=verb)
+    if not text:
+        return False
+    send_room_activity_event(target, text, cls="out", category="speech")
+    return True
+
+
+def broadcast_npc_speech(room, speaker, line, *, verb="says", exclude=None):
+    """Broadcast one NPC speech line to a room using speech-bubble activity."""
+
+    text = format_speech_activity(speaker, line, verb=verb)
+    if not text:
+        return False
+    broadcast_room_activity(room, text, exclude=exclude, cls="out", category="speech")
+    return True
 
 
 def broadcast_room_activity(room, text, *, exclude=None, cls="out", category=None):
@@ -383,8 +439,8 @@ def build_account_panel(account):
 def build_chargen_panel(account, state):
     """Build the browser-side companion panel for chargen."""
 
-    step_key = state.get("step") or "menunode_welcome"
-    step_meta = CHARGEN_STEP_META.get(step_key, CHARGEN_STEP_META["menunode_welcome"])
+    step_key = state.get("step") or "menunode_choose_race"
+    step_meta = CHARGEN_STEP_META.get(step_key, CHARGEN_STEP_META["menunode_choose_race"])
     slots_left = account.get_available_character_slots()
     slot_text = "unlimited" if slots_left is None else str(slots_left)
 
@@ -929,7 +985,7 @@ def build_quests_panel(character):
     completed_keys = get_completed_quests(character)
     quest_log = character.db.brave_quests or {}
     tracked_key = get_tracked_quest(character)
-    tutorial_state = ensure_tutorial_state(character)
+    tutorial_payload = get_tutorial_objective_entries(character)
 
     view_items = [
         _item("quests active", icon="assignment", badge="ON" if journal_mode == "active" else None),
@@ -937,7 +993,13 @@ def build_quests_panel(character):
     ]
     sections = [_section("View", "menu", view_items)]
 
-    if journal_mode == "active" and tracked_key:
+    if journal_mode == "active" and tutorial_payload:
+        remaining = [objective for objective in tutorial_payload.get("objectives", []) if not objective.get("completed")]
+        tracked_lines = [tutorial_payload["title"]]
+        if remaining:
+            tracked_lines.append(f"Next: {remaining[0]['text']}")
+        sections.append(_section("Tracked", "school", [_item(" · ".join(tracked_lines), icon="check_box_outline_blank")]))
+    elif journal_mode == "active" and tracked_key:
         tracked_definition = QUESTS[tracked_key]
         tracked_state = quest_log.get(tracked_key, {})
         remaining = [
@@ -954,18 +1016,6 @@ def build_quests_panel(character):
                 suffix = f" ({objective.get('progress', 0)}/{required})"
             tracked_lines.append(f"Next: {objective['description']}{suffix}")
         sections.append(_section("Tracked", "flag", [_item(" · ".join(tracked_lines), icon="check_box_outline_blank")]))
-
-    if journal_mode == "active" and tutorial_state.get("status") == "active":
-        step_key = tutorial_state.get("step") or "first_steps"
-        step = TUTORIAL_STEPS.get(step_key)
-        if step:
-            sections.append(
-                _section(
-                    "Tutorial",
-                    "school",
-                    [_item(f"{step['title']} · {step['summary']}", icon="flag")],
-                ),
-            )
 
     region_source = active_keys if journal_mode == "active" else completed_keys
     region_items = []
@@ -1126,26 +1176,3 @@ def build_combat_panel(encounter):
     )
 
 
-def build_talk_panel(target):
-    """Build a browser-side companion panel for NPC dialogue."""
-
-    return _make_panel(
-        "",
-        target.key,
-        eyebrow_icon=None,
-        title_icon="person",
-        sections=[_section("Actions", "flag", [_item(f"talk {target.key}", icon="forum")])],
-    )
-
-
-def build_read_panel(target):
-    """Build a browser-side companion panel for readable text."""
-
-    return _make_panel(
-        "Readable",
-        target.key,
-        eyebrow_icon="menu_book",
-        title_icon="article",
-        chips=[_chip("Readable", "menu_book", "muted")],
-        sections=[_section("Actions", "flag", [_item(f"read {target.key}", icon="menu_book")])],
-    )

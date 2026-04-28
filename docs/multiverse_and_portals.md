@@ -1,50 +1,70 @@
-# Multiverse And Portals: The Nexus System
+# Multiverse And Portals
 
-The **Nexus** is the heart of the game's creative expansion. It is a mystical location (often accessed via the Great Observatory in Brambleford) that contains portals to infinite "Pocket Dimensions." This system allows the family to jump between genres while maintaining their core characters.
+The Nexus is Brave's expansion framework. It lets the game change genre while keeping the player's hero, party, progression, and core command vocabulary intact.
 
-## The Design Philosophy
-1. **Genre Fluidity:** The engine supports different "skins" for stats and abilities depending on the portal world.
-2. **Creative Sandbox:** Portals are the primary way for the kids to learn game design by building their own small worlds.
-3. **The "Anchor" Rule:** Players always return to the "Brave" fantasy world (the Home Base) to spend their rewards and rest.
+## Current Live Portal
 
-## Portal Types
+The live portal branch is **Junk-Yard Planet**.
 
-### 1. Curated Guest Worlds
-Pre-built worlds (like the Star Wars or Dragonball equivalents) that have established rules, quests, and NPCs. These serve as inspiration for the kids.
+It begins from Brambleford's observatory and Nexus Gate, then moves through:
 
-### 2. The Sandbox Dimensions
-Empty "rooms" or zones where the kids can experiment with building. As they "level up" their real-world design skills, they unlock more tools in these dimensions.
+- `junkyard_planet_landing_pad`
+- `junkyard_planet_scrapway`
+- `junkyard_planet_relay_trench`
+- `junkyard_planet_crane_grave`
+- `junkyard_planet_anchor_pit`
 
-## Universal Stat Mapping (The "Resonance" System)
-To prevent players from having to create new characters for every world, we use a "Resonance" system that maps core fantasy stats to genre-specific values.
+Current quest chain:
 
-| Core Stat | Star Wars Equivalent | Dragonball Equivalent | Purpose |
-| --- | --- | --- | --- |
-| **Strength** | Physical Might | Martial Power | Raw physical force/damage |
-| **Agility** | Reflexes | Speed / Flight | Evasion and speed |
-| **Intellect** | Tech / Strategy | Energy Control | Solving puzzles / Special moves |
-| **Spirit** | Force Sensitivity | Ki Level | "Magic" or energy pool |
-| **Vitality** | Constitution | Durability | Health and endurance |
+1. `bridgework_for_joss`
+2. `signal_in_the_scrap`
+3. `foreman_coilback`
 
-## World-Specific Abilities (The "Grip" System)
-While core stats map across worlds, specific abilities (like "Force Push" or "Kamehameha") are "Gripped" to that specific portal.
-- When you enter a Star Wars world, your "Firebolt" might transform into "Mind Trick."
-- When you leave, the ability is stored in your "Port-folio" and can only be used in that genre (unless a very rare "Cross-World Rune" is found).
+Current boss: Foreman Coilback.
 
-## The Portal Hub: The Great Observatory
-Located on the highest hill of Brambleford, the Observatory is run by **Joss Veller**, the town lamplighter.
-- **The Lens:** A giant telescope used to "scout" new worlds.
-- **The Gate:** A shimmering ring of light where players step through.
-- **The Trophy Hall:** A shared family space where relics from other worlds (a lightsaber hilt, a Dragon Ball, a piece of space-ship hull) are displayed.
+## Design Rule
 
-## The Architect's Guide: "Building the Bridge"
-To encourage creative world-building, we introduce the **"Bridge-Building"** process:
-1. **Step 1: The Sketch (Description):** The kid writes a description for the first room of their world.
-2. **Step 2: The Denizen (NPC):** They describe one person who lives there.
-3. **Step 3: The Challenge (Logic):** They decide what the player has to do to "unlock" the next room (e.g., find a key, solve a riddle).
-4. **Step 4: The Sound (Audio):** They choose an ambient soundscape (e.g., "Space Station Hum" or "Jungle Birds").
+Portals should change presentation and encounter flavor before they change the player's mental model.
 
-## Phase-1 Portals (Prototypes)
-- **The Junk-Yard Planet:** A small sci-fi zone for testing "Tech" versions of abilities.
-- **The Training Island:** A high-energy martial arts zone for testing "Ki" mechanics.
-- **The Drafting Table:** A blank white room where kids can type `/create room` to see their first text appear.
+The player should still understand:
+
+- where they are
+- what their party is doing
+- what their core stats mean
+- how to fight
+- how to return home
+- why the trophy or reward matters back in Brambleford
+
+## Resonance
+
+Resonance is the concept that lets a fantasy character make sense in another genre.
+
+Example mapping:
+
+| Core Stat | Fantasy Read | Tech Read |
+| --- | --- | --- |
+| Strength | raw might | actuator force |
+| Agility | speed and footwork | reflex and handling |
+| Intellect | study and spellcraft | technical sense |
+| Spirit | will and magic | signal attunement |
+| Vitality | toughness | field durability |
+
+Use resonance lightly. A portal should feel different, but the player should not feel like they created a second character.
+
+## Portal Writing Rules
+
+- Anchor every portal branch through Joss, the Observatory, or the Nexus Gate.
+- Give each portal one strong visual and one strong mechanical identity.
+- Keep the first room safe enough to orient.
+- Always preserve a clear route home.
+- Let portal trophies live in the Trophy Hall so the strange world still feeds the family story.
+
+## Future Portal Criteria
+
+Do not add another portal branch until it can answer all of these:
+
+- What fantasy-system idea does it reskin?
+- What new encounter behavior does it teach?
+- What town reward or trophy comes back from it?
+- Why should the family choose this branch instead of the next fantasy zone?
+- Can it be completed as a small chapter rather than a vague novelty?

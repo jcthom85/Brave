@@ -146,9 +146,14 @@ class ChargenViewTests(unittest.TestCase):
 
         action_commands = [action.get("command") for action in view.get("actions", [])]
         self.assertIn("finish play", action_commands)
-        ready = _section(view, "Ready")
+        ready = _section(view, "Begin Your Journey")
         titles = [entry.get("title") for entry in ready.get("items", [])]
-        self.assertIn("Create And Play", titles)
+        self.assertIn("Begin Your Journey", titles)
+        self.assertNotIn("Fastest Start", [entry.get("meta") for entry in ready.get("items", [])])
+        self.assertNotIn(
+            "Recommended",
+            [chip.get("label") for entry in ready.get("items", []) for chip in entry.get("chips", [])],
+        )
 
     def test_class_step_adds_playstyle_chips_without_extra_guide_card(self):
         view = build_chargen_view(
@@ -179,8 +184,8 @@ class ChargenViewTests(unittest.TestCase):
 
         chip_labels = [chip.get("label") for chip in view.get("chips", [])]
         self.assertIn("Step 4 / 5", chip_labels)
-        gender_section = _section(view, "Gender")
-        self.assertEqual(3, len(gender_section.get("items", [])))
+        section_labels = [section.get("label") for section in view.get("sections", [])]
+        self.assertNotIn("Gender", section_labels)
 
     def test_confirm_step_includes_gender_identity(self):
         view = build_chargen_view(
@@ -204,7 +209,7 @@ class WebclientTestLoginViewTests(unittest.TestCase):
         factory = RequestFactory()
         request = factory.get("/webclient/test")
         SessionMiddleware(lambda req: None).process_request(request)
-        request.session.save()
+        request.session.save = lambda *args, **kwargs: None
         request.user = types.SimpleNamespace(is_authenticated=False)
         account = types.SimpleNamespace(pk=7)
 
