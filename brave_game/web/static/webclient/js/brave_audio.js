@@ -888,6 +888,9 @@
         if (scene === "combat") {
             return boss ? "music.combat.boss" : "music.combat.standard";
         }
+        if (scene === "account" || scene === "chargen" || scene === "connection") {
+            return "music.title";
+        }
         if (tone === "nexus" || tone === "portal" || tone === "junkyard") {
             return "music.portal";
         }

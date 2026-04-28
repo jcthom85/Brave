@@ -26,6 +26,7 @@ class AudioSystemFilesTests(unittest.TestCase):
         for cue_id in (
             "ambience.brambleford",
             "music.explore.safe",
+            "music.title",
             "music.rest",
             "music.combat.standard",
             "music.combat.boss",
@@ -64,6 +65,7 @@ class AudioSystemFilesTests(unittest.TestCase):
             "setSetting: setSetting",
             "function loadAudioBuffer(assetPath)",
             "function playFileCue(cue, cueId, options)",
+            'return "music.title";',
         ):
             self.assertIn(snippet, source)
 

@@ -63,6 +63,19 @@
         { "waveform": "sine", "frequency": 330, "gain": 0.012, "lfo_rate": 0.11, "lfo_depth": 0.05, "filter_type": "lowpass", "filter_frequency": 1400 }
       ]
     },
+    "music.title": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.78,
+      "fade_in_sec": 1.6,
+      "fade_out_sec": 1.1,
+      "voices": [
+        { "waveform": "sine", "frequency": 146.83, "gain": 0.026, "attack_sec": 1.4, "lfo_rate": 0.05, "lfo_depth": 0.18, "filter_type": "lowpass", "filter_frequency": 900 },
+        { "waveform": "triangle", "frequency": 220, "gain": 0.017, "attack_sec": 1.9, "lfo_rate": 0.07, "lfo_depth": 0.12, "filter_type": "lowpass", "filter_frequency": 1250 },
+        { "waveform": "sine", "frequency": 293.66, "gain": 0.012, "attack_sec": 2.4, "frequency_lfo_rate": 0.03, "frequency_lfo_depth": 1.8, "filter_type": "lowpass", "filter_frequency": 1500 },
+        { "waveform": "triangle", "frequency": 440, "gain": 0.006, "attack_sec": 3.2, "lfo_rate": 0.04, "lfo_depth": 0.16, "filter_type": "lowpass", "filter_frequency": 1800 }
+      ]
+    },
     "music.explore.danger": {
       "bus": "music",
       "loop": true,
