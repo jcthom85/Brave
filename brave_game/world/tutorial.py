@@ -373,7 +373,10 @@ def _determine_step(flags):
 
 
 def _set_flag(character, flag):
-    state = ensure_tutorial_state(character)
+    state = _get_normalized_tutorial_state(character)
+    existing = getattr(getattr(character, "db", None), "brave_tutorial", None) or {}
+    if state.get("status") == "completed" and existing.get("status") != "completed":
+        return complete_tutorial(character)
     if state.get("status") != "active":
         return state
 

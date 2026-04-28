@@ -227,6 +227,29 @@ class TutorialOnboardingTests(unittest.TestCase):
         record_command_event(character, "rest")
         self.assertEqual("through_the_gate", ensure_tutorial_state(character)["step"])
 
+    def test_kit_before_gate_completes_immediately_on_final_flag(self):
+        character = DummyCharacter()
+        begin_tutorial(character)
+        state = ensure_tutorial_state(character)
+        state["flags"].update(
+            {
+                "talked_tamsin": True,
+                "visited_quartermaster_shed": True,
+                "returned_to_wayfarers_yard": True,
+                "talked_nella": True,
+                "viewed_gear": True,
+                "viewed_pack": True,
+                "read_supply_board": False,
+            }
+        )
+        state["step"] = "pack_before_walk"
+        character.db.brave_tutorial = state
+
+        get_tutorial_entity_response(character, _entity("tutorial_supply_board"), "read", is_action=True)
+
+        self.assertEqual("stand_your_ground", character.db.brave_tutorial["step"])
+        self.assertTrue(character.db.brave_tutorial["flags"]["read_supply_board"])
+
     def test_tutorial_combat_is_solo_and_adds_combat_focus(self):
         character = DummyCharacter()
         begin_tutorial(character)
