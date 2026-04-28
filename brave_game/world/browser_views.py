@@ -1104,7 +1104,7 @@ def build_chargen_view(account, state, *, error=None):
                 "entries",
                 items=[
                     _entry(
-                        "Begin Your Journey",
+                        "Create Character",
                         lines=["Create this character and enter the world immediately."],
                         icon="login",
                         command="finish play",

@@ -148,7 +148,7 @@ class ChargenViewTests(unittest.TestCase):
         self.assertIn("finish play", action_commands)
         ready = _section(view, "Begin Your Journey")
         titles = [entry.get("title") for entry in ready.get("items", [])]
-        self.assertIn("Begin Your Journey", titles)
+        self.assertIn("Create Character", titles)
         self.assertNotIn("Fastest Start", [entry.get("meta") for entry in ready.get("items", [])])
         self.assertNotIn(
             "Recommended",
