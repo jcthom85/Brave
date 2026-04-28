@@ -59,6 +59,17 @@ class QuestPopupTests(unittest.TestCase):
         self.assertIn("body.brave-objectives-welcome-active #mobile-nav-dock", css_source)
         self.assertIn("body.brave-objectives-welcome-active #mobile-utility-sheet", css_source)
 
+    def test_tutorial_overlay_icons_have_frontend_mappings(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        for snippet in (
+            '"help_outline": "help"',
+            '"monitor_heart": "hearts"',
+            '"my_location": "targeted"',
+            '"groups": "double-team"',
+        ):
+            self.assertIn(snippet, default_out_source)
+
 
 if __name__ == "__main__":
     unittest.main()
