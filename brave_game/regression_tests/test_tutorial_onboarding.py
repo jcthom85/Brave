@@ -12,7 +12,7 @@ from world.resting import room_allows_rest
 from world.browser_views import build_combat_view
 from world.content import get_content_registry
 from world.interactions import get_entity_response
-from world.questing import advance_room_visit, ensure_starter_quests
+from world.questing import advance_enemy_defeat, advance_room_visit, ensure_starter_quests
 from world.questing import get_tracked_quest_payload
 from world.tutorial import (
     LANTERNFALL_WELCOME_PAGES,
@@ -426,6 +426,55 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertEqual("Lanternfall", payload["title"])
         self.assertEqual("Wayfarer's Yard", payload["giver"])
         self.assertTrue(any("Tamsin" in objective["text"] for objective in payload["objectives"]))
+
+    def test_first_hour_route_tracks_clear_handoffs_through_ruk(self):
+        character = DummyCharacter()
+        character.db.brave_tutorial = {"status": "completed", "step": None, "flags": {}}
+        character.location = _room("brambleford_training_yard")
+        ensure_starter_quests(character)
+
+        get_entity_response(character, _entity("captain_harl_rowan"), "talk", is_action=True)
+        self.assertEqual("rats_in_the_kettle", character.db.brave_tracked_quest)
+        self.assertIn("stores matter", get_entity_response(character, _entity("uncle_pib_underbough"), "talk"))
+
+        advance_room_visit(character, _room("brambleford_rat_and_kettle_cellar", safe=False))
+        for _index in range(3):
+            advance_enemy_defeat(character, {"rat"})
+        self.assertEqual("completed", character.db.brave_quests["rats_in_the_kettle"]["status"])
+        self.assertEqual("roadside_howls", character.db.brave_tracked_quest)
+        self.assertIn("Mira", get_tracked_quest_payload(character)["objectives"][0]["text"])
+
+        advance_room_visit(character, _room("brambleford_east_gate"))
+        advance_room_visit(character, _room("goblin_road_old_fence_line", safe=False))
+        advance_room_visit(character, _room("goblin_road_wolf_turn", safe=False))
+        self.assertEqual("completed", character.db.brave_quests["roadside_howls"]["status"])
+        self.assertEqual("fencebreakers", character.db.brave_tracked_quest)
+
+        advance_enemy_defeat(character, {"goblin"})
+        advance_enemy_defeat(character, {"goblin"})
+        self.assertEqual("completed", character.db.brave_quests["fencebreakers"]["status"])
+        self.assertEqual("ruk_the_fence_cutter", character.db.brave_tracked_quest)
+        self.assertIn("Ruk's camp", get_entity_response(character, _entity("mira_fenleaf"), "talk"))
+
+        advance_room_visit(character, _room("goblin_road_fencebreaker_camp", safe=False))
+        advance_enemy_defeat(character, {"ruk", "boss"})
+
+        self.assertEqual("completed", character.db.brave_quests["ruk_the_fence_cutter"]["status"])
+        self.assertEqual("what_whispers_in_the_wood", character.db.brave_tracked_quest)
+        self.assertEqual("active", character.db.brave_quests["what_whispers_in_the_wood"]["status"])
+        self.assertEqual("active", character.db.brave_quests["bridgework_for_joss"]["status"])
+
+        board = get_entity_response(
+            character,
+            SimpleNamespace(
+                key="Town Notice Board",
+                db=SimpleNamespace(brave_entity_id="town_notice_board", brave_entity_kind="readable"),
+            ),
+            "read",
+        )
+        self.assertIn("Ruk is dead", board)
+        self.assertIn("road might breathe again", board)
+        self.assertIn("woods have gone strange", get_entity_response(character, _entity("mira_fenleaf"), "talk"))
 
 
 if __name__ == "__main__":

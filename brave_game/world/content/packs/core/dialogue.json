@@ -319,7 +319,7 @@
           "what_whispers_in_the_wood",
           "herbs_for_sister_maybelle"
         ],
-        "text": "\"The woods trail starts just south of the gate. Watch for briar imps and the bigger wolf tracks. If a fight looks ugly, check your enemies before you commit.\""
+        "text": "\"Goblin Road can breathe again, but the woods have gone strange. The trail starts just south of the gate. Watch for briar imps and the bigger wolf tracks, and check your enemies before you commit.\""
       },
       {
         "completed": "the_hollow_lantern",
@@ -389,7 +389,7 @@
     "uncle_pib_underbough": [
       {
         "active": "rats_in_the_kettle",
-        "text": "\"I would love to say the bell scared the rats into good manners. It did not. They are chewing grain like the road might stay closed for a week, which is rude and strategically alarming. Head down to the cellar, clear them out, then come back when the scratching stops.\""
+        "text": "\"I would love to say the bell scared the rats into good manners. It did not. They are chewing grain like the road might stay closed for a week, which is rude and strategically alarming because the stores matter now. Head down to the cellar, clear them out, then come back when the scratching stops.\""
       },
       {
         "active": "roadside_howls",

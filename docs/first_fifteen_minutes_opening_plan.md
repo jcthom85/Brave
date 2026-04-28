@@ -10,12 +10,12 @@ The problem is presentation and sequencing.
 
 A new player should not feel like they have been dropped into `Training Yard` with a quest list and no reason to care. They need an immediate event, a person addressing them, and a clear first action. If the first visible goal is `Rats in the Kettle`, the game risks feeling like a generic RPG chore before it has earned the player's attention.
 
-The current live logic appears to distinguish two cases:
+The older live logic distinguished two cases:
 
 - First-account characters start in `Wayfarer's Yard` with tutorial state active.
 - Later characters on an account that has completed the tutorial start in `Training Yard`.
 
-That second case explains the bad experience: a new character can still feel like a new player moment, but the game treats them as tutorial-skipped and gives them a quiet handoff. Even if the account has seen the tutorial before, the character still needs a dramatic first beat.
+That second case explained the bad experience: a new character can still feel like a new player moment, but the game treated them as tutorial-skipped and gave them a quiet handoff. The current implementation now starts later characters in Wayfarer's Yard too, preserving the dramatic first beat instead of silently appearing in the yard.
 
 Quest state also needs sharper staging. `Practice Makes Heroes` should be the visible opening objective. `Rats in the Kettle` can be the first town job, but it should not read as the character's starting premise. The rat cellar should be framed as consequence: the alarm has stirred the stores, the road may be cut, and food now matters.
 

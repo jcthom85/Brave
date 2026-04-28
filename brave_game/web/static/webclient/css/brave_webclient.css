@@ -17161,7 +17161,7 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
 #brave-objectives-sheet {
     position: fixed;
     inset: 0;
-    z-index: 5000;
+    z-index: 5010;
     pointer-events: none;
     display: flex;
     justify-content: flex-end;

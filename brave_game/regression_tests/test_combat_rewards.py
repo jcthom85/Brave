@@ -145,6 +145,62 @@ class CombatRewardTests(unittest.TestCase):
         self.assertTrue(late.ndb.brave_showing_combat_result)
         self.assertTrue(idle.ndb.brave_showing_combat_result)
 
+    @patch("world.browser_panels.send_webclient_event")
+    @patch("world.browser_views.build_combat_victory_view", return_value={"view": "victory"})
+    @patch("typeclasses.scripts.pop_recent_quest_updates", return_value=[])
+    @patch("typeclasses.scripts.record_encounter_victory")
+    @patch("typeclasses.scripts.roll_enemy_rewards", return_value={"silver": 12, "items": [("wolf_fang", 1)]})
+    def test_knocked_out_meaningful_party_member_still_receives_victory_share(
+        self,
+        _roll_enemy_rewards,
+        record_encounter_victory,
+        _pop_recent_quest_updates,
+        _build_combat_victory_view,
+        _send_webclient_event,
+    ):
+        standing = DummyRewardCharacter(1, "Standing")
+        knocked_out = DummyRewardCharacter(2, "KnockedOut")
+        knocked_out.db.brave_resources = {"hp": 0}
+        encounter = SimpleNamespace(
+            db=SimpleNamespace(
+                round=3,
+                enemies=[{"template_key": "ruk_the_fence_cutter", "xp": 60, "tags": ["ruk", "boss"]}],
+                participant_contributions={
+                    "1": {
+                        "joined_round": 0,
+                        "meaningful_actions": 2,
+                        "damage_done": 40,
+                        "healing_done": 0,
+                        "damage_prevented": 0,
+                        "utility_points": 0,
+                        "hits_taken": 1,
+                        "boss_credit_eligible": True,
+                    },
+                    "2": {
+                        "joined_round": 0,
+                        "meaningful_actions": 1,
+                        "damage_done": 12,
+                        "healing_done": 0,
+                        "damage_prevented": 0,
+                        "utility_points": 0,
+                        "hits_taken": 2,
+                        "boss_credit_eligible": True,
+                    },
+                },
+            ),
+            obj=SimpleNamespace(),
+            _get_scaling_profile=lambda: {"xp": 1.0},
+            get_active_participants=lambda: [standing],
+            get_registered_participants=lambda: [standing, knocked_out],
+        )
+        self._bind_reward_helpers(encounter)
+
+        BraveEncounter._reward_victory(encounter)
+
+        self.assertTrue(knocked_out.xp_awards)
+        self.assertTrue(any("victory still holds" in message.lower() for message in knocked_out.messages))
+        self.assertIn(knocked_out, [call.args[0] for call in record_encounter_victory.call_args_list])
+
     @patch("typeclasses.scripts.advance_enemy_defeat")
     def test_boss_defeat_credit_requires_meaningful_action_and_cutoff_eligibility(self, advance_enemy_defeat):
         starter = DummyRewardCharacter(1, "Starter")

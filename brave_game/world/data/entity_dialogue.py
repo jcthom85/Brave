@@ -96,7 +96,7 @@ TALK_RULES = {
     ],
     "uncle_pib_underbough": [
         _rule(
-            "\"If you're looking for work that smells worse but hurts less than Goblin Road, head west into the inn and then down to the cellar. Clear it out, then come back upstairs once the scratching stops.\"",
+            "\"If you're looking for work that smells worse but hurts less than Goblin Road, head west into the inn and then down to the cellar. The stores matter now, so clear it out, then come back upstairs once the scratching stops.\"",
             active="rats_in_the_kettle",
         ),
         _rule(
@@ -182,7 +182,7 @@ TALK_RULES = {
             completed="fencebreakers",
         ),
         _rule(
-            "\"The woods trail starts just south of the gate. Watch for briar imps and the bigger wolf tracks. If a fight looks ugly, check your enemies before you commit.\"",
+            "\"Goblin Road can breathe again, but the woods have gone strange. The trail starts just south of the gate. Watch for briar imps and the bigger wolf tracks, and check your enemies before you commit.\"",
             active_any=("what_whispers_in_the_wood", "herbs_for_sister_maybelle"),
         ),
         _rule(
