@@ -25,12 +25,28 @@ class QuestPopupTests(unittest.TestCase):
         self.assertIn('overlay.addEventListener("click", dismissOverlay);', default_out_source)
         self.assertIn('if (payload.next_step) rewardItems.push({ label: "Lead", value: payload.next_step });', default_out_source)
 
+    def test_default_out_wires_rest_overlay(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("var renderRestOverlay = function (payload)", default_out_source)
+        self.assertIn('if (cmdname === "brave_rest")', default_out_source)
+        self.assertIn('overlay.className = "brave-rest-overlay";', default_out_source)
+        self.assertIn('braveAudio.handleRest(payload);', default_out_source)
+        self.assertIn('overlay.addEventListener("click", dismissOverlay);', default_out_source)
+
     def test_quest_popup_overlay_accepts_clicks_for_dismissal(self):
         css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
 
         self.assertIn(".brave-quest-complete-overlay {", css_source)
         self.assertIn("pointer-events: auto;", css_source)
         self.assertIn("cursor: pointer;", css_source)
+
+    def test_rest_overlay_styles_full_screen_animation(self):
+        css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
+
+        self.assertIn(".brave-rest-overlay {", css_source)
+        self.assertIn(".brave-rest-overlay__moon", css_source)
+        self.assertIn("@keyframes brave-rest-meter-fill", css_source)
 
 
 if __name__ == "__main__":

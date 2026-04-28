@@ -95,6 +95,18 @@
       "fade_out_sec": 0.7,
       "files": ["music/victory_fanfare.ogg"]
     },
+    "music.rest": {
+      "bus": "music",
+      "gain": 0.7,
+      "duration_sec": 2.3,
+      "fade_in_sec": 0.12,
+      "fade_out_sec": 0.8,
+      "voices": [
+        { "waveform": "sine", "frequency": 261.63, "gain": 0.045, "attack_sec": 0.18, "release_sec": 1.1, "filter_type": "lowpass", "filter_frequency": 1200 },
+        { "waveform": "sine", "frequency": 329.63, "gain": 0.032, "attack_sec": 0.3, "release_sec": 1.0, "filter_type": "lowpass", "filter_frequency": 1400 },
+        { "waveform": "triangle", "frequency": 392, "gain": 0.02, "attack_sec": 0.48, "release_sec": 1.2, "filter_type": "lowpass", "filter_frequency": 1000 }
+      ]
+    },
     "music.portal": {
       "bus": "music",
       "loop": true,

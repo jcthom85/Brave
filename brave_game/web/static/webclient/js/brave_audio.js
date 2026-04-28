@@ -1032,6 +1032,20 @@
         playCue(cueId);
     }
 
+    function handleRest(payload) {
+        if (!contextUnlocked) {
+            unlock().then(function (didUnlock) {
+                if (didUnlock || contextUnlocked) {
+                    playCue("music.rest", { force: true });
+                    playCue("sfx.combat.heal", { force: true });
+                }
+            });
+            return;
+        }
+        playCue("music.rest", { force: true });
+        playCue("sfx.combat.heal", { force: true });
+    }
+
     function previewCue(cueId) {
         if (isProbablyMobile()) {
             mobilePlaybackArmed = true;
@@ -1177,6 +1191,7 @@
         clearReactiveState: clearReactiveState,
         handleCombatFx: handleCombatFx,
         handleNotice: handleNotice,
+        handleRest: handleRest,
         handleRoomActivity: handleRoomActivity,
         handleUiAction: handleUiAction,
         previewCue: previewCue,

@@ -186,6 +186,17 @@ def send_quest_started_event(target, quest_title, next_step=None):
     send_webclient_event(target, brave_quest_started=payload)
 
 
+def send_rest_event(target, location_name=None):
+    """Send the JRPG-style rest recovery event to webclient sessions."""
+    payload = {
+        "title": "Rest Complete",
+        "message": "HP, mana, and stamina restored.",
+    }
+    if location_name:
+        payload["location"] = str(location_name)
+    send_webclient_event(target, brave_rest=payload)
+
+
 def send_browser_notice_event(
     target,
     message,

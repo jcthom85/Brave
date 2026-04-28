@@ -26,6 +26,7 @@ class AudioSystemFilesTests(unittest.TestCase):
         for cue_id in (
             "ambience.brambleford",
             "music.explore.safe",
+            "music.rest",
             "music.combat.standard",
             "music.combat.boss",
             "sfx.ui.click",
@@ -58,6 +59,7 @@ class AudioSystemFilesTests(unittest.TestCase):
             "setReactiveState: setReactiveState",
             "handleCombatFx: handleCombatFx",
             "handleNotice: handleNotice",
+            "handleRest: handleRest",
             "handleRoomActivity: handleRoomActivity",
             "setSetting: setSetting",
             "function loadAudioBuffer(assetPath)",

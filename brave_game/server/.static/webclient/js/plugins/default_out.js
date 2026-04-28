@@ -3415,6 +3415,63 @@ let defaultout_plugin = (function () {
         renderQuestOverlay(payload, { eyebrow: "New Quest", sound: "select" });
     };
 
+    var renderRestOverlay = function (payload) {
+        payload = payload || {};
+        var overlay = document.createElement("div");
+        overlay.className = "brave-rest-overlay";
+        overlay.setAttribute("role", "status");
+        overlay.setAttribute("aria-live", "polite");
+        overlay.setAttribute("aria-atomic", "true");
+        overlay.innerHTML =
+            "<div class='brave-rest-overlay__veil'></div>"
+            + "<div class='brave-rest-overlay__panel'>"
+            + "<div class='brave-rest-overlay__moon'>"
+            + "<span class='brave-rest-overlay__spark brave-rest-overlay__spark--one'></span>"
+            + "<span class='brave-rest-overlay__spark brave-rest-overlay__spark--two'></span>"
+            + "<span class='brave-rest-overlay__spark brave-rest-overlay__spark--three'></span>"
+            + "</div>"
+            + "<div class='brave-rest-overlay__eyebrow'>" + escapeHtml(payload.location || "Safe Rest") + "</div>"
+            + "<div class='brave-rest-overlay__title'>" + escapeHtml(payload.title || "Rest Complete") + "</div>"
+            + "<div class='brave-rest-overlay__message'>" + escapeHtml(payload.message || "HP, mana, and stamina restored.") + "</div>"
+            + "<div class='brave-rest-overlay__meters'>"
+            + "<span></span><span></span><span></span>"
+            + "</div>"
+            + "</div>";
+        document.body.appendChild(overlay);
+
+        var dismissed = false;
+        var dismissTimer = null;
+        var dismissOverlay = function () {
+            if (dismissed) {
+                return;
+            }
+            dismissed = true;
+            if (dismissTimer) {
+                window.clearTimeout(dismissTimer);
+            }
+            overlay.classList.remove("brave-rest-overlay--active");
+            window.setTimeout(function () {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+            }, 700);
+        };
+        overlay.addEventListener("click", dismissOverlay);
+
+        window.setTimeout(function () {
+            overlay.classList.add("brave-rest-overlay--active");
+        }, 30);
+
+        var braveAudio = getBraveAudio();
+        if (braveAudio && typeof braveAudio.handleRest === "function") {
+            braveAudio.handleRest(payload);
+        }
+
+        dismissTimer = window.setTimeout(function () {
+            dismissOverlay();
+        }, 3400);
+    };
+
     var buildAudioSettingsPicker = function () {
         return {
             picker_id: "audio-settings",
@@ -11468,6 +11525,11 @@ let defaultout_plugin = (function () {
         if (cmdname === "brave_quest_started") {
             var questStartedPayload = getOobPayload(args, kwargs, "brave_quest_started", {}) || {};
             renderQuestStartedOverlay(questStartedPayload);
+            return true;
+        }
+
+        if (cmdname === "brave_rest") {
+            renderRestOverlay(getOobPayload(args, kwargs, "brave_rest", {}) || {});
             return true;
         }
 

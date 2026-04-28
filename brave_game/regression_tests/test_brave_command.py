@@ -1,6 +1,7 @@
 import os
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import django
 
@@ -188,7 +189,7 @@ class BraveCharacterCommandTests(unittest.TestCase):
 
     def test_rest_restores_at_authored_rest_site(self):
         command = object.__new__(CmdRest)
-        room = SimpleNamespace(db=SimpleNamespace(brave_room_id="tutorial_wayfarers_yard", brave_safe=True, brave_rest_allowed=True))
+        room = SimpleNamespace(key="Wayfarer's Yard", db=SimpleNamespace(brave_room_id="tutorial_wayfarers_yard", brave_safe=True, brave_rest_allowed=True))
         character = SimpleNamespace(
             key="Dad",
             location=room,
@@ -210,8 +211,17 @@ class BraveCharacterCommandTests(unittest.TestCase):
         sent = []
         command.msg = lambda message, **_kwargs: sent.append(str(message))
 
-        command.func()
+        with patch("commands.brave_explore.send_rest_event") as send_rest_event, patch("commands.brave_explore.broadcast_room_activity") as broadcast_room_activity:
+            command.func()
 
         self.assertEqual([True], restored)
+        send_rest_event.assert_called_once_with(character, location_name="Wayfarer's Yard")
+        broadcast_room_activity.assert_called_once_with(
+            room,
+            "Dad takes a moment to rest and recover.",
+            exclude=[character],
+            cls="out",
+            category="rest",
+        )
         self.assertEqual(["You take a moment to recover your strength."], sent)
         self.assertTrue(character.db.brave_tutorial["flags"]["rested_after_fight"])

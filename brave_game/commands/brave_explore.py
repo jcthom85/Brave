@@ -22,7 +22,15 @@ from world.activities import (
     start_fishing,
     start_fishing_minigame,
 )
-from world.browser_panels import build_cook_panel, build_fishing_panel, build_map_panel, build_travel_panel, send_webclient_event
+from world.browser_panels import (
+    broadcast_room_activity,
+    build_cook_panel,
+    build_fishing_panel,
+    build_map_panel,
+    build_travel_panel,
+    send_rest_event,
+    send_webclient_event,
+)
 from world.browser_views import build_cook_view, build_fishing_view, build_map_view, build_travel_view
 from world.navigation import render_map, render_minimap, sort_exits
 from world.resting import room_allows_rest
@@ -551,4 +559,12 @@ class CmdRest(BraveCharacterCommand):
 
         character.restore_resources()
         record_command_event(character, "rest")
+        send_rest_event(character, location_name=getattr(character.location, "key", None))
+        broadcast_room_activity(
+            character.location,
+            f"{character.key} takes a moment to rest and recover.",
+            exclude=[character],
+            cls="out",
+            category="rest",
+        )
         self.msg("You take a moment to recover your strength.")

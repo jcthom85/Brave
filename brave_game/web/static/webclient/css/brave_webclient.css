@@ -17564,3 +17564,156 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
     0% { letter-spacing: -0.2em; opacity: 0; }
     100% { letter-spacing: 0.24em; opacity: 1; }
 }
+
+/* Rest Overlay */
+.brave-rest-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10020;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    pointer-events: auto;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brave-rest-overlay--active {
+    opacity: 1;
+}
+
+.brave-rest-overlay__veil {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 42%, rgba(244, 212, 139, 0.2), rgba(10, 15, 18, 0.9) 58%, rgba(4, 7, 9, 0.98)),
+        linear-gradient(180deg, rgba(17, 28, 35, 0.78), rgba(5, 7, 10, 0.96));
+}
+
+.brave-rest-overlay__panel {
+    position: relative;
+    width: min(520px, 100%);
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+    color: var(--brave-text-bright);
+    transform: translateY(20px) scale(0.96);
+    opacity: 0;
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brave-rest-overlay--active .brave-rest-overlay__panel {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.brave-rest-overlay__moon {
+    position: relative;
+    width: 104px;
+    height: 104px;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 42% 34%, rgba(255, 247, 213, 0.98), rgba(240, 204, 130, 0.84) 52%, rgba(180, 123, 54, 0.35) 100%);
+    box-shadow:
+        0 0 36px rgba(244, 212, 139, 0.42),
+        0 0 92px rgba(102, 166, 191, 0.18);
+    animation: brave-rest-moon-breathe 2.4s ease-in-out infinite;
+}
+
+.brave-rest-overlay__spark {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 244, 196, 0.95);
+    box-shadow: 0 0 18px rgba(255, 244, 196, 0.75);
+    animation: brave-rest-spark 2.6s ease-in-out infinite;
+}
+
+.brave-rest-overlay__spark--one {
+    left: -34px;
+    top: 22px;
+}
+
+.brave-rest-overlay__spark--two {
+    right: -40px;
+    top: 48px;
+    animation-delay: 0.45s;
+}
+
+.brave-rest-overlay__spark--three {
+    left: 26px;
+    bottom: -34px;
+    animation-delay: 0.9s;
+}
+
+.brave-rest-overlay__eyebrow {
+    font-family: var(--brave-ui-font-family);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgba(244, 212, 139, 0.92);
+}
+
+.brave-rest-overlay__title {
+    font-family: var(--brave-dialogue-font-family);
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    line-height: 1;
+    text-transform: uppercase;
+    text-shadow: 0 0 28px rgba(244, 212, 139, 0.34);
+}
+
+.brave-rest-overlay__message {
+    max-width: 34rem;
+    font-family: var(--brave-ui-font-family);
+    font-size: 1rem;
+    color: var(--brave-text-muted);
+}
+
+.brave-rest-overlay__meters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(54px, 1fr));
+    gap: 10px;
+    width: min(280px, 80%);
+    margin-top: 18px;
+}
+
+.brave-rest-overlay__meters span {
+    height: 8px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(104, 185, 139, 0.95), rgba(244, 212, 139, 0.95));
+    box-shadow: 0 0 16px rgba(104, 185, 139, 0.28);
+    transform-origin: left center;
+    animation: brave-rest-meter-fill 1.1s ease-out both;
+}
+
+.brave-rest-overlay__meters span:nth-child(2) {
+    animation-delay: 0.14s;
+}
+
+.brave-rest-overlay__meters span:nth-child(3) {
+    animation-delay: 0.28s;
+}
+
+@keyframes brave-rest-moon-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+@keyframes brave-rest-spark {
+    0%, 100% { opacity: 0.34; transform: translateY(0) scale(0.8); }
+    50% { opacity: 1; transform: translateY(-12px) scale(1); }
+}
+
+@keyframes brave-rest-meter-fill {
+    0% { transform: scaleX(0); opacity: 0.35; }
+    100% { transform: scaleX(1); opacity: 1; }
+}
