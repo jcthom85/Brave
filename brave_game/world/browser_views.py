@@ -144,10 +144,10 @@ GEAR_SLOT_LABELS = {
 GEAR_SLOT_ICONS = {
     "main_hand": "swords",
     "off_hand": "shield",
-    "head": "face",
-    "chest": "security",
+    "head": "helmet",
+    "chest": "checkroom",
     "hands": "back_hand",
-    "legs": "accessibility_new",
+    "legs": "airline_seat_legroom_extra",
     "feet": "hiking",
     "ring": "diamond",
     "trinket": "auto_awesome",
@@ -2635,7 +2635,10 @@ def _build_journal_quest_picker(character, quest_key, *, tracked_key=None, nearb
 
     body = [definition["summary"]]
     body.extend(
-        ("[x] " if objective.get("completed") else "[ ] ") + _format_objective_progress(objective)
+        _line(
+            _format_objective_progress(objective),
+            icon="check_box" if objective.get("completed") else "check_box_outline_blank",
+        )
         for objective in all_objectives[:8]
     )
 
@@ -4215,19 +4218,112 @@ def build_combat_victory_view(
     """Return a browser-first victory screen for completed encounters."""
 
     reward_items = reward_items or []
-    progress_messages = [message for message in (progress_messages or []) if message]
-    level_up_messages = [message for message in progress_messages if "you are now level" in message.lower()]
-    companion_reward_messages = [
-        message
-        for message in progress_messages
-        if " bond +" in message.lower()
-    ]
-    other_progress_messages = [
-        message
-        for message in progress_messages
+    raw_progress_messages = [message for message in (progress_messages or []) if message]
+
+    # 1. Extract XP and Silver from progress messages to consolidate them in Rewards
+    quest_xp = 0
+    quest_silver = 0
+    filtered_messages = []
+    
+    import re
+    xp_pattern = re.compile(r"gain\s+\|w?(\d+)\|?n?\s+xp", re.IGNORECASE)
+    silver_pattern = re.compile(r"receive\s+\|w?(\d+)\|?n?\s+silver", re.IGNORECASE)
+
+    for msg in raw_progress_messages:
+        lowered = msg.lower()
+        xp_match = xp_pattern.search(lowered)
+        if xp_match:
+            quest_xp += int(xp_match.group(1))
+            continue
+        silver_match = silver_pattern.search(lowered)
+        if silver_match:
+            quest_silver += int(silver_match.group(1))
+            continue
+        
+        # Filter out purely informational tracking messages that are redundant on Victory
+        if "tracked quest:" in lowered:
+            continue
+            
+        filtered_messages.append(msg)
+
+    # 2. Consolidate Quest Progress by Title
+    # quest_states: { title: { 'latest_progress': str, 'completed': bool, 'new': bool, 'leads': [str] } }
+    quest_states = {}
+    other_messages = []
+    
+    for msg in filtered_messages:
+        if ":" in msg:
+            prefix, detail = [part.strip() for part in msg.split(":", 1)]
+            prefix_lowered = prefix.lower()
+        else:
+            prefix, detail = "", msg
+            prefix_lowered = ""
+
+        if prefix_lowered == "quest updated":
+            title = detail.split(" - ")[0] if " - " in detail else detail
+            state = quest_states.setdefault(title, {"completed": False, "new": False, "leads": []})
+            state["latest_progress"] = detail
+        elif prefix_lowered == "quest complete":
+            state = quest_states.setdefault(detail, {"completed": False, "new": False, "leads": []})
+            state["completed"] = True
+        elif prefix_lowered == "new quest":
+            state = quest_states.setdefault(detail, {"completed": False, "new": False, "leads": []})
+            state["new"] = True
+        elif prefix_lowered == "next lead":
+            # Associate with the most recent quest entry
+            if quest_states:
+                last_title = list(quest_states.keys())[-1]
+                quest_states[last_title]["leads"].append(detail)
+            else:
+                other_messages.append(msg)
+        else:
+            other_messages.append(msg)
+
+    # Reconstruct consolidated progress messages
+    consolidated_entries = []
+    for title, state in quest_states.items():
+        lines = []
+        if state["completed"]:
+            meta = "Quest Complete"
+            icon = "task_alt"
+            display_title = title
+        elif state["new"]:
+            meta = "New Quest"
+            icon = "flag"
+            display_title = title
+            lines.append("A new thread is ready to follow.")
+        else:
+            meta = "Quest Updated"
+            icon = "assignment"
+            display_title = state.get("latest_progress", title)
+        
+        lines.extend(state["leads"])
+        consolidated_entries.append(_entry(display_title, meta=meta, icon=icon, lines=lines))
+
+    level_up_messages = [message for message in other_messages if "you are now level" in message.lower()]
+    companion_reward_messages = [message for message in other_messages if " bond +" in message.lower()]
+    final_other_messages = [
+        message for message in other_messages 
         if message not in level_up_messages and message not in companion_reward_messages
     ]
+    
     is_capstone = (getattr(encounter.db, "encounter_title", "") or "").strip().lower() == "the hollow lantern"
+
+    reward_pairs = [
+        _pair("XP Earned", xp_total + quest_xp, "auto_awesome"),
+        _pair("Silver", (reward_silver or 0) + quest_silver, "savings"),
+    ]
+
+    for message in companion_reward_messages:
+        text = str(message or "").strip().rstrip(".")
+        lowered = text.lower()
+        split_index = lowered.find(" bond +")
+        if split_index > 0:
+            companion_name = text[:split_index].strip()
+            bond_gain = text[split_index + 6 :].strip()
+            reward_pairs.append(_pair(f"{companion_name} Bond", bond_gain, "pets"))
+        else:
+            reward_pairs.append(_pair("Companion Bond", text, "pets"))
 
     loot_items_list = []
     for template_id, quantity in reward_items:
@@ -4241,39 +4337,7 @@ def build_combat_victory_view(
         }.get(kind, "category")
         text = f"{item_name} x{quantity}" if quantity > 1 else item_name
         loot_items_list.append(_item(text, icon=icon))
-    reward_pairs = [
-        _pair("XP Earned", xp_total, "auto_awesome"),
-        _pair("Silver", reward_silver or 0, "savings"),
-    ]
-    for message in companion_reward_messages:
-        text = str(message or "").strip().rstrip(".")
-        lowered = text.lower()
-        split_index = lowered.find(" bond +")
-        if split_index > 0:
-            companion_name = text[:split_index].strip()
-            bond_gain = text[split_index + 6 :].strip()
-            reward_pairs.append(_pair(f"{companion_name} Bond", bond_gain, "pets"))
-        else:
-            reward_pairs.append(_pair("Companion Bond", text, "pets"))
-
-    def build_progress_entry(message):
-        text = str(message or "").strip()
-        lowered = text.lower()
-        if ":" in text:
-            prefix, detail = [part.strip() for part in text.split(":", 1)]
-        else:
-            prefix, detail = "", text
-
-        if lowered.startswith("quest updated:"):
-            return _entry(detail or "Quest updated", meta="Quest Updated", icon="assignment", lines=["Objective progress recorded."])
-        if lowered.startswith("new quest:"):
-            return _entry(detail or "New quest", meta="New Quest", icon="flag", lines=["A new thread is ready to follow."])
-        if lowered.startswith("tracked quest:"):
-            return _entry(detail or "Tracked quest", meta="Tracked Quest", icon="checklist", lines=["This is now your active lead."])
-        if lowered.startswith("lead:"):
-            return _entry("Next Lead", icon="travel_explore", lines=[detail or text])
-        return _entry(detail or text, meta=prefix.title() if prefix else "Progress", icon="task_alt")
-
+    
     sections = [
         _section(
             "Rewards",
@@ -4283,6 +4347,7 @@ def build_combat_victory_view(
             variant="receipt",
         )
     ]
+    
     if is_capstone:
         sections.append(
             _section(
@@ -4297,25 +4362,24 @@ def build_combat_victory_view(
                 variant="receipt",
             )
         )
+    
     if loot_items_list:
         sections.append(_section("Recovered Loot", "inventory_2", "list", items=loot_items_list, variant="receipt"))
+    
     if level_up_messages:
-        sections.append(
-            _section(
-                "LEVEL UP",
-                "north",
-                "lines",
-                lines=level_up_messages,
-                variant="receipt",
-            )
-        )
-    if other_progress_messages:
+        sections.append(_section("LEVEL UP", "north", "lines", lines=level_up_messages, variant="receipt"))
+    
+    progress_items = consolidated_entries + [
+        _entry(msg, meta="Progress", icon="task_alt") for msg in final_other_messages
+    ]
+    
+    if progress_items:
         sections.append(
             _section(
                 "Chapter Progress" if is_capstone else "Progress",
                 "flag",
                 "entries",
-                items=[build_progress_entry(message) for message in other_progress_messages],
+                items=progress_items,
                 variant="receipt",
             )
         )

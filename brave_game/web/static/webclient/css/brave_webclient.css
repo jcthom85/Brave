@@ -1537,11 +1537,24 @@ body.brave-objectives-welcome-active #brave-picker-sheet {
 }
 
 .brave-picker-sheet__bodyline {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
     font-family: var(--brave-body-font-family);
     letter-spacing: var(--brave-body-letter-spacing);
     color: var(--brave-text-soft);
     font-size: calc(0.8rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.45;
+}
+
+.brave-picker-sheet__bodyline-icon {
+    flex-shrink: 0;
+    margin-top: -1px;
+    color: var(--brave-text-muted);
+}
+
+.brave-picker-sheet__bodyline-icon .material-symbols-outlined {
+    font-size: 1.1rem;
 }
 
 .brave-picker-sheet__option {

@@ -118,7 +118,7 @@ TUTORIAL_STEPS = {
         "order": 2,
         "title": "Kit Before The Gate",
         "summary": "Nella is issuing field checks. Check your gear, open your pack, read the supply board, then return west to the yard.",
-        "how_to": "Click highlighted icons in the bottom toolbar to open your Gear and Pack.",
+        "how_to": "Click the MENU button to check your Gear and Pack",
     },
     "stand_your_ground": {
         "order": 3,

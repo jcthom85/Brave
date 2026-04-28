@@ -3931,7 +3931,14 @@ let defaultout_plugin = (function () {
                 + (pickerBody.length
                     ? "<div class='brave-picker-sheet__bodycopy'>"
                         + pickerBody.map(function (line) {
-                            return "<div class='brave-picker-sheet__bodyline'>" + escapeHtml(line) + "</div>";
+                            var lineText = typeof line === "object" && line !== null ? line.text : line;
+                            var lineIcon = typeof line === "object" && line !== null ? line.icon : null;
+                            return (
+                                "<div class='brave-picker-sheet__bodyline'>"
+                                + (lineIcon ? "<span class='brave-picker-sheet__bodyline-icon'>" + icon(lineIcon) + "</span>" : "")
+                                + "<span>" + escapeHtml(lineText || "") + "</span>"
+                                + "</div>"
+                            );
                         }).join("")
                         + "</div>"
                     : "")
@@ -11369,21 +11376,20 @@ let defaultout_plugin = (function () {
         ) {
             clearTextOutput(getRoomRefreshPopupPreservationOptions());
         }
-        var combatFx = null;
+        var combatFx = extractCombatFxMarkers(rawText);
         var shouldRouteToCombatLog = combatActiveAtTextStart || isCombatUiActive();
         if (shouldRouteToCombatLog) {
-            combatFx = extractCombatFxMarkers(rawText);
             appendTarget = ensureCombatLog() || mwin;
         } else if (
             currentViewData
             && isRoomLikeView(currentViewData)
         ) {
-            if (shouldLogRoomActivity(rawText, cls, kwargs)) {
-                pushRoomFeedEntry(cls || "out", rawText, kwargs || {});
+            if (shouldLogRoomActivity(combatFx.html, cls, kwargs)) {
+                pushRoomFeedEntry(cls || "out", combatFx.html, kwargs || {});
             }
             return true;
         }
-        var displayHtml = combatFx ? combatFx.html : rawText;
+        var displayHtml = combatFx.html;
         appendTarget.append("<div class='" + cls + "'>" + displayHtml + "</div>");
         if (shouldRouteToCombatLog) {
             var appended = appendTarget.children().last().get(0);
