@@ -669,7 +669,7 @@ class CmdGear(BraveCharacterCommand):
             sections.insert(0, ("Power Feedback", wrap_text(feedback, indent="  ")))
 
         screen = render_screen(
-            "Equipment",
+            "Gear",
             sections=sections,
         )
         self.scene_msg(screen, panel=build_gear_panel(character), view=build_gear_view(character, feedback=feedback))

@@ -255,6 +255,12 @@ def _unlock_available_quests(character, quest_log, messages):
             continue
         state["status"] = "active"
         changed = True
+        try:
+            from world.browser_panels import send_quest_started_event
+
+            send_quest_started_event(character, definition["title"], next_step=definition.get("next_step"))
+        except Exception:
+            pass
         messages.append(f"|cNew quest:|n {definition['title']}")
         if definition.get("next_step"):
             messages.append(f"|cLead:|n {definition['next_step']}")
@@ -405,6 +411,12 @@ def unlock_quest(character, quest_key):
         return False
 
     state["status"] = "active"
+    try:
+        from world.browser_panels import send_quest_started_event
+
+        send_quest_started_event(character, definition["title"], next_step=definition.get("next_step"))
+    except Exception:
+        pass
     messages.append(f"|cNew quest:|n {definition['title']}")
     if definition.get("next_step"):
         messages.append(f"|cLead:|n {definition['next_step']}")

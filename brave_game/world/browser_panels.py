@@ -178,6 +178,14 @@ def send_quest_complete_event(target, quest_title, rewards=None):
     )
 
 
+def send_quest_started_event(target, quest_title, next_step=None):
+    """Send a specialized quest start event to webclient sessions."""
+    payload = {"title": quest_title}
+    if next_step:
+        payload["next_step"] = next_step
+    send_webclient_event(target, brave_quest_started=payload)
+
+
 def send_browser_notice_event(
     target,
     message,
@@ -599,7 +607,7 @@ def build_gear_panel(character):
 
     return _make_panel(
         "",
-        "Equipment",
+        "Gear",
         eyebrow_icon=None,
         title_icon="shield",
         chips=[],
@@ -1174,5 +1182,3 @@ def build_combat_panel(encounter):
         ],
         sections=sections,
     )
-
-

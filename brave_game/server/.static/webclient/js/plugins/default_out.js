@@ -2959,7 +2959,7 @@ let defaultout_plugin = (function () {
             + "</div>"
             + "<div class='brave-mobile-sheet__section'>"
             + buildMobilePrimaryActionMarkup("Open Character Sheet", "sheet")
-            + buildMobilePrimaryActionMarkup("Open Equipment", "gear")
+            + buildMobilePrimaryActionMarkup("Open Gear", "gear")
             + "</div>"
         );
     };
@@ -3334,23 +3334,29 @@ let defaultout_plugin = (function () {
         return true;
     };
 
-    var renderQuestCompleteOverlay = function (payload) {
-        console.log("DEBUG: renderQuestCompleteOverlay called with", payload);
+    var renderQuestOverlay = function (payload, options) {
         if (!payload || !payload.title) {
             return;
         }
+        options = options || {};
+        var eyebrow = options.eyebrow || "Quest Complete";
+        var sound = options.sound || "success";
 
         var overlay = document.createElement("div");
         overlay.className = "brave-quest-complete-overlay";
+        overlay.setAttribute("role", "status");
+        overlay.setAttribute("aria-live", "polite");
+        overlay.setAttribute("aria-atomic", "true");
 
         var rewardItems = [];
         var rewards = payload.rewards || {};
         if (rewards.xp) rewardItems.push({ label: "Experience", value: "+" + rewards.xp });
         if (rewards.silver) rewardItems.push({ label: "Silver", value: "+" + rewards.silver });
+        if (payload.next_step) rewardItems.push({ label: "Lead", value: payload.next_step });
 
         overlay.innerHTML =
             "<div class='brave-quest-complete-overlay__panel'>"
-            + "<div class='brave-quest-complete-overlay__eyebrow'>Quest Complete</div>"
+            + "<div class='brave-quest-complete-overlay__eyebrow'>" + escapeHtml(eyebrow) + "</div>"
             + "<div class='brave-quest-complete-overlay__title'>" + escapeHtml(payload.title) + "</div>"
             + (rewardItems.length ?
                 "<div class='brave-quest-complete-overlay__rewards'>"
@@ -3368,25 +3374,45 @@ let defaultout_plugin = (function () {
 
         document.body.appendChild(overlay);
 
-        // Trigger entrance animation with a small delay for better browser reliability
-        window.setTimeout(function () {
-            overlay.classList.add("brave-quest-complete-overlay--active");
-        }, 50);
-
-        var braveAudio = getBraveAudio();
-        if (braveAudio && typeof braveAudio.handleUiAction === "function") {
-            braveAudio.handleUiAction("success");
-        }
-
-        // Automatic dismissal
-        window.setTimeout(function () {
+        var dismissed = false;
+        var dismissTimer = null;
+        var dismissOverlay = function () {
+            if (dismissed) {
+                return;
+            }
+            dismissed = true;
+            if (dismissTimer) {
+                window.clearTimeout(dismissTimer);
+            }
             overlay.classList.remove("brave-quest-complete-overlay--active");
             window.setTimeout(function () {
                 if (overlay.parentNode) {
                     overlay.parentNode.removeChild(overlay);
                 }
             }, 600);
+        };
+        overlay.addEventListener("click", dismissOverlay);
+
+        window.setTimeout(function () {
+            overlay.classList.add("brave-quest-complete-overlay--active");
+        }, 50);
+
+        var braveAudio = getBraveAudio();
+        if (braveAudio && typeof braveAudio.handleUiAction === "function") {
+            braveAudio.handleUiAction(sound);
+        }
+
+        dismissTimer = window.setTimeout(function () {
+            dismissOverlay();
         }, 5000);
+    };
+
+    var renderQuestCompleteOverlay = function (payload) {
+        renderQuestOverlay(payload, { eyebrow: "Quest Complete", sound: "success" });
+    };
+
+    var renderQuestStartedOverlay = function (payload) {
+        renderQuestOverlay(payload, { eyebrow: "New Quest", sound: "select" });
     };
 
     var buildAudioSettingsPicker = function () {
@@ -4139,7 +4165,7 @@ let defaultout_plugin = (function () {
             title: "Menu",
             options: [
                 { label: "Character Sheet", icon: "person", command: "sheet" },
-                { label: "Equipment", icon: "shield", command: "gear" },
+                { label: "Gear", icon: "shield", command: "gear" },
                 { label: "Pack", icon: "backpack", command: "pack" },
                 { label: "Journal", icon: "menu_book", command: "quests" },
                 { label: "Map", icon: "map", command: "map" },
@@ -11435,8 +11461,13 @@ let defaultout_plugin = (function () {
 
         if (cmdname === "brave_quest_complete") {
             var questPayload = getOobPayload(args, kwargs, "brave_quest_complete", {}) || {};
-            console.log("DEBUG: Quest Complete payload:", questPayload);
             renderQuestCompleteOverlay(questPayload);
+            return true;
+        }
+
+        if (cmdname === "brave_quest_started") {
+            var questStartedPayload = getOobPayload(args, kwargs, "brave_quest_started", {}) || {};
+            renderQuestStartedOverlay(questStartedPayload);
             return true;
         }
 

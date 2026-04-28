@@ -4726,7 +4726,7 @@ def build_gear_view(character, feedback=None):
     return {
         **_make_view(
             "",
-            "Equipment",
+            "Gear",
             eyebrow_icon=None,
             title_icon="shield",
             subtitle="",

@@ -17477,7 +17477,7 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
     pointer-events: auto;
 }
 
-/* Quest Complete Overlay */
+/* Quest Popups */
 .brave-quest-complete-overlay {
     position: fixed;
     inset: 0;
@@ -17485,7 +17485,8 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
     background: radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, transparent 70%);
 }
 
@@ -17500,6 +17501,7 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
     opacity: 0;
     transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     backdrop-filter: blur(16px);
+    cursor: pointer;
 }
 
 .brave-quest-complete-overlay--active .brave-quest-complete-overlay__panel {

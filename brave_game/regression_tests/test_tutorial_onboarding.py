@@ -1,6 +1,7 @@
 import os
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import django
 
@@ -12,7 +13,7 @@ from world.resting import room_allows_rest
 from world.browser_views import build_combat_view
 from world.content import get_content_registry
 from world.interactions import get_entity_response
-from world.questing import advance_enemy_defeat, advance_room_visit, ensure_starter_quests
+from world.questing import advance_enemy_defeat, advance_room_visit, ensure_starter_quests, unlock_quest
 from world.questing import get_tracked_quest_payload
 from world.tutorial import (
     LANTERNFALL_WELCOME_PAGES,
@@ -122,6 +123,27 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertEqual("completed", character.db.brave_quests["practice_makes_heroes"]["status"])
         self.assertEqual("active", character.db.brave_quests["rats_in_the_kettle"]["status"])
         self.assertEqual("rats_in_the_kettle", character.db.brave_tracked_quest)
+
+    def test_unlocking_quest_sends_new_quest_popup_payload(self):
+        character = DummyCharacter()
+
+        with patch("world.browser_panels.send_webclient_event") as send_webclient_event:
+            self.assertTrue(unlock_quest(character, "roadside_howls"))
+
+        popup_payloads = [
+            call.kwargs["brave_quest_started"]
+            for call in send_webclient_event.call_args_list
+            if "brave_quest_started" in call.kwargs
+        ]
+        self.assertEqual(
+            [
+                {
+                    "title": "Roadside Howls",
+                    "next_step": "Follow the cut fences east and thin the goblin cutters still working along Goblin Road.",
+                }
+            ],
+            popup_payloads,
+        )
 
     def test_entering_training_yard_does_not_complete_practice_before_harl(self):
         character = DummyCharacter()

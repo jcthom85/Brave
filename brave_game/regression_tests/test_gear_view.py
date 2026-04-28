@@ -87,7 +87,7 @@ class GearViewTests(unittest.TestCase):
 
         self.assertEqual("gear", view.get("variant"))
         self.assertEqual("", view.get("eyebrow"))
-        self.assertEqual("Equipment", view.get("title"))
+        self.assertEqual("Gear", view.get("title"))
         self.assertEqual("Close", view.get("back_action", {}).get("label"))
         self.assertEqual([], view.get("chips"))
         self.assertEqual("shield", view.get("title_icon"))
@@ -139,7 +139,7 @@ class GearViewTests(unittest.TestCase):
         panel = build_gear_panel(character)
 
         self.assertEqual("", panel.get("eyebrow"))
-        self.assertEqual("Equipment", panel.get("title"))
+        self.assertEqual("Gear", panel.get("title"))
         self.assertEqual([], panel.get("chips"))
         self.assertEqual("shield", panel.get("title_icon"))
         self.assertEqual("Slots", panel.get("sections", [])[0].get("label"))
