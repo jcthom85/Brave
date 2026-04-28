@@ -48,6 +48,17 @@ class QuestPopupTests(unittest.TestCase):
         self.assertIn(".brave-rest-overlay__moon", css_source)
         self.assertIn("@keyframes brave-rest-meter-fill", css_source)
 
+    def test_menu_surfaces_stack_above_tutorial_objectives(self):
+        css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("#brave-objectives-sheet {\n    position: fixed;\n    inset: 0;\n    z-index: 5010;", css_source)
+        self.assertIn("#brave-picker-sheet {\n    position: fixed;\n    inset: 0;\n    z-index: 5030;", css_source)
+        self.assertIn("z-index: 5020;\n        pointer-events: none;", css_source)
+        self.assertIn("z-index: 5025;\n        pointer-events: none;", css_source)
+        self.assertIn("body.brave-objectives-welcome-active #brave-picker-sheet", css_source)
+        self.assertIn("body.brave-objectives-welcome-active #mobile-nav-dock", css_source)
+        self.assertIn("body.brave-objectives-welcome-active #mobile-utility-sheet", css_source)
+
 
 if __name__ == "__main__":
     unittest.main()

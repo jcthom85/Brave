@@ -1369,7 +1369,7 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 #brave-picker-sheet {
     position: fixed;
     inset: 0;
-    z-index: 1200;
+    z-index: 5030;
     display: none;
 }
 
@@ -1389,6 +1389,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
 
 #brave-picker-sheet[aria-hidden="false"] {
     display: block;
+}
+
+body.brave-objectives-welcome-active #brave-picker-sheet {
+    z-index: 5000;
 }
 
 .brave-picker-sheet__backdrop {
@@ -13558,8 +13562,12 @@ body.brave-combat-return-active .scene-card {
         right: 16px;
         bottom: 12px;
         display: block;
-        z-index: 5001;
+        z-index: 5020;
         pointer-events: none;
+    }
+
+    body.brave-objectives-welcome-active #mobile-nav-dock {
+        z-index: 5001;
     }
 
     body[data-brave-scene="combat"] #mobile-nav-dock {
@@ -13760,8 +13768,12 @@ body.brave-combat-return-active .scene-card {
         right: 16px;
         top: 16px;
         bottom: 16px;
-        z-index: 5002;
+        z-index: 5025;
         pointer-events: none;
+    }
+
+    body.brave-objectives-welcome-active #mobile-utility-sheet {
+        z-index: 5002;
     }
 
     #mobile-utility-sheet[aria-hidden="true"] {
