@@ -17287,10 +17287,10 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
     position: absolute;
     top: 16px;
     right: 16px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(var(--brave-obj-accent-rgb), 0.08);
+    border: 1px solid rgba(var(--brave-obj-accent-rgb), 0.22);
     border-radius: 6px;
-    color: var(--brave-text-dim);
+    color: color-mix(in srgb, var(--brave-obj-accent) 74%, var(--brave-text-soft));
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -17299,8 +17299,13 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
 }
 
 .brave-objectives-sheet__close:hover {
-    color: var(--brave-text-soft);
-    background: rgba(255, 255, 255, 0.08);
+    color: var(--brave-obj-accent);
+    background: rgba(var(--brave-obj-accent-rgb), 0.14);
+    border-color: rgba(var(--brave-obj-accent-rgb), 0.38);
+}
+
+.brave-objectives-sheet__close-icon {
+    color: inherit;
 }
 
 .brave-objectives-sheet__close span {

@@ -3838,7 +3838,7 @@ let defaultout_plugin = (function () {
             + "<div class='brave-objectives-sheet__title'>" + escapeHtml(objectivesTitle) + "</div>"
             + "<button type='button' class='brave-objectives-sheet__close' data-brave-objectives-toggle='1'>"
             + icon("close", "brave-objectives-sheet__close-icon")
-            + "<span>Close Guide</span>"
+            + "<span>Close</span>"
             + "</button>"
             + "</div>"
             + "<div class='brave-objectives-sheet__body'>"

@@ -70,6 +70,17 @@ class QuestPopupTests(unittest.TestCase):
         ):
             self.assertIn(snippet, default_out_source)
 
+    def test_tutorial_close_button_uses_short_label_and_accent_colors(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+        css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
+
+        self.assertIn('icon("close", "brave-objectives-sheet__close-icon")\n            + "<span>Close</span>"', default_out_source)
+        self.assertNotIn("Close Guide", default_out_source)
+        self.assertIn("background: rgba(var(--brave-obj-accent-rgb), 0.08);", css_source)
+        self.assertIn("border: 1px solid rgba(var(--brave-obj-accent-rgb), 0.22);", css_source)
+        self.assertIn("color: color-mix(in srgb, var(--brave-obj-accent) 74%, var(--brave-text-soft));", css_source)
+        self.assertIn(".brave-objectives-sheet__close-icon {\n    color: inherit;\n}", css_source)
+
 
 if __name__ == "__main__":
     unittest.main()
