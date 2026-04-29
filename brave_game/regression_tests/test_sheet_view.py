@@ -78,10 +78,10 @@ class SheetViewTests(unittest.TestCase):
         character.db.brave_level = 6
 
         with (
-            patch("world.browser_views.format_ability_display", side_effect=lambda ability, _: ability),
-            patch("world.browser_views.get_resonance_key", return_value="fantasy"),
-            patch("world.browser_views.get_resonance_label", return_value="Fantasy Resonance"),
-            patch("world.browser_views.get_active_blessing", return_value=None),
+            patch("world.browser_character_views.format_ability_display", side_effect=lambda ability, _: ability),
+            patch("world.browser_character_views.get_resonance_key", return_value="fantasy"),
+            patch("world.browser_character_views.get_resonance_label", return_value="Fantasy Resonance"),
+            patch("world.browser_character_views.get_active_blessing", return_value=None),
         ):
             view = build_sheet_view(character)
 
@@ -99,11 +99,11 @@ class SheetViewTests(unittest.TestCase):
         character = DummyCharacter()
 
         with (
-            patch("world.browser_views.split_unlocked_abilities", return_value=(["Shield Bash", "War Cry"], ["Iron Stance"], [])),
-            patch("world.browser_views.format_ability_display", side_effect=lambda ability, _: ability),
-            patch("world.browser_views.get_resonance_key", return_value="fantasy"),
-            patch("world.browser_views.get_resonance_label", return_value="Fantasy Resonance"),
-            patch("world.browser_views.get_active_blessing", return_value=None),
+            patch("world.browser_character_views.split_unlocked_abilities", return_value=(["Shield Bash", "War Cry"], ["Iron Stance"], [])),
+            patch("world.browser_character_views.format_ability_display", side_effect=lambda ability, _: ability),
+            patch("world.browser_character_views.get_resonance_key", return_value="fantasy"),
+            patch("world.browser_character_views.get_resonance_label", return_value="Fantasy Resonance"),
+            patch("world.browser_character_views.get_active_blessing", return_value=None),
         ):
             view = build_sheet_view(character)
 
@@ -163,12 +163,12 @@ class SheetViewTests(unittest.TestCase):
         character = DummyCharacter(meal_buff={"name": "Camp Stew", "cozy": True})
 
         with (
-            patch("world.browser_views.split_unlocked_abilities", return_value=([], [], ["Mystery Edge"])),
-            patch("world.browser_views.format_ability_display", side_effect=lambda ability, _: ability),
-            patch("world.browser_views.get_resonance_key", return_value="clockwork"),
-            patch("world.browser_views.get_resonance_label", return_value="Clockwork Resonance"),
+            patch("world.browser_character_views.split_unlocked_abilities", return_value=([], [], ["Mystery Edge"])),
+            patch("world.browser_character_views.format_ability_display", side_effect=lambda ability, _: ability),
+            patch("world.browser_character_views.get_resonance_key", return_value="clockwork"),
+            patch("world.browser_character_views.get_resonance_label", return_value="Clockwork Resonance"),
             patch(
-                "world.browser_views.get_active_blessing",
+                "world.browser_character_views.get_active_blessing",
                 return_value={
                     "name": "Dawn Ward",
                     "duration": "Until sunset.",
@@ -176,7 +176,7 @@ class SheetViewTests(unittest.TestCase):
                 },
             ),
             patch(
-                "world.browser_views._format_context_bonus_summary",
+                "world.browser_character_views._format_context_bonus_summary",
                 side_effect=[
                     "HP +8, MP +8, STA +8",
                     "Stamina +5",

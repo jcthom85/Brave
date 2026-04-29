@@ -282,7 +282,7 @@ class CombatViewTests(unittest.TestCase):
             },
         )
 
-        with patch("world.browser_views.build_combat_action_payload") as payload:
+        with patch("world.browser_combat_views.build_combat_action_payload") as payload:
             payload.return_value = {
                 "abilities": [
                     {
@@ -563,7 +563,7 @@ class CombatViewTests(unittest.TestCase):
             },
         )
 
-        with patch("world.browser_views.time.time", return_value=3.0):
+        with patch("world.browser_combat_views.time.time", return_value=3.0):
             view = build_combat_view(encounter, warrior)
 
         party_section = _section(view, "Heroes")

@@ -1,24 +1,29 @@
 """Room-focused browser view payload builders for Brave."""
 
-import world.browser_views as browser_views
-from world.browser_views import (
-    LANTERNFALL_RECAP_PAGES,
-    LANTERNFALL_WELCOME_PAGES,
+from world.browser_mobile_views import (
     _build_mobile_pack_payload,
     _build_mobile_room_payload,
+)
+from world.browser_room_helpers import (
     _build_room_social_presence,
     _format_room_context_action_items,
     _format_room_entity_items,
     _format_room_threat_items,
+    _movement_command,
+    _short_direction,
+)
+from world.browser_ui import (
     _item,
     _make_view,
-    _movement_command,
     _reactive_view,
     _section,
-    _short_direction,
-    get_exit_direction,
-    get_exit_label,
-    sort_exits,
+)
+from world.navigation import build_minimap_snapshot, get_exit_direction, get_exit_label, sort_exits
+from world.tutorial import (
+    LANTERNFALL_RECAP_PAGES,
+    LANTERNFALL_WELCOME_PAGES,
+    get_tutorial_mechanical_guidance,
+    is_tutorial_active,
 )
 
 
@@ -65,7 +70,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
     room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
 
     if not welcome_shown:
-        if browser_views.is_tutorial_active(looker):
+        if is_tutorial_active(looker):
             welcome_pages = LANTERNFALL_WELCOME_PAGES
         elif room_id == "brambleford_training_yard":
             welcome_pages = LANTERNFALL_RECAP_PAGES
@@ -101,8 +106,8 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
 
     guidance_eyebrow = None
     guidance_title = None
-    if browser_views.is_tutorial_active(looker):
-        mechanical = browser_views.get_tutorial_mechanical_guidance(looker)
+    if is_tutorial_active(looker):
+        mechanical = get_tutorial_mechanical_guidance(looker)
         if mechanical:
             tutorial_guidance = mechanical["guidance"]
             guidance_eyebrow = mechanical["eyebrow"]
@@ -137,7 +142,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         "room_id": str(getattr(room, "id", "") or ""),
         "region_name": str(region_name or ""),
         "first_region_discovery": bool(getattr(getattr(looker, "ndb", None), "brave_first_region_discovery", False)),
-        "micromap": browser_views.build_minimap_snapshot(room, radius=2, character=looker),
+        "micromap": build_minimap_snapshot(room, radius=2, character=looker),
         "mobile_pack": _build_mobile_pack_payload(looker),
         "mobile_panels": _build_mobile_room_payload(
             room,

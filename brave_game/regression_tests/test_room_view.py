@@ -342,9 +342,7 @@ class RoomViewTests(unittest.TestCase):
         character = DummyCharacter()
         tutorial_state = {"status": "active", "step": "first_steps", "flags": {}}
 
-        with patch("world.browser_views.ensure_tutorial_state", return_value=tutorial_state), patch(
-            "world.browser_views.is_tutorial_active", return_value=True
-        ):
+        with patch("world.browser_room_views.is_tutorial_active", return_value=True):
             view = build_room_view(DummyRoom(), character)
 
         self.assertEqual([], view.get("guidance", []))
@@ -664,7 +662,7 @@ class RoomViewTests(unittest.TestCase):
         character.db.brave_discovered_rooms = ["current_room", "discovered_room"]
 
         with patch(
-            "world.browser_views.build_minimap_snapshot",
+            "world.browser_room_views.build_minimap_snapshot",
             wraps=build_minimap_snapshot,
         ), patch(
             "world.navigation.get_rooms_in_map_region",
@@ -688,7 +686,7 @@ class RoomViewTests(unittest.TestCase):
         character.ndb.brave_first_region_discovery = True
         room = DummyMappedRoom("current_room", key="Current Room", x=0, y=0)
 
-        with patch("world.browser_views.build_minimap_snapshot", return_value={}):
+        with patch("world.browser_room_views.build_minimap_snapshot", return_value={}):
             view = build_room_view(room, character)
 
         self.assertTrue(view.get("first_region_discovery"))

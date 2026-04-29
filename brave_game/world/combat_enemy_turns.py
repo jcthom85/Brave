@@ -2,7 +2,7 @@
 
 import random
 
-from typeclasses.scripts import (
+from world.combat_actor_utils import (
     _combat_entry_ref,
     _combat_target_name,
     _enemy_damage_type,

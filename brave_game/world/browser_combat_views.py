@@ -1,13 +1,10 @@
 """Combat-focused browser view payload builders for Brave."""
 
-import world.browser_views as browser_views
+import time
+
 from world.ability_icons import get_ability_icon_name
-from world.character_icons import get_class_icon
-from world.combat_atb import render_atb_state
-from world.resonance import get_resource_label
-from world.browser_views import (
-    CLASSES,
-    ITEM_TEMPLATES,
+from world.browser_context import ABILITY_LIBRARY, CLASSES, ITEM_TEMPLATES, get_item_use_profile
+from world.browser_ui import (
     _action,
     _chip,
     _combat_card_size_class,
@@ -19,14 +16,15 @@ from world.browser_views import (
     _picker,
     _reactive_view,
     _section,
-    get_item_use_profile,
 )
+from world.character_icons import get_class_icon
+from world.combat_actions import build_combat_action_payload
+from world.combat_atb import render_atb_state
+from world.resonance import get_resource_label
 
 
 def build_combat_view(encounter, character):
     """Return a browser-first sticky combat view with clickable actions."""
-
-    from typeclasses.scripts import ABILITY_LIBRARY
 
     condition_telegraph_enemies = {
         "briar_imp",
@@ -57,7 +55,7 @@ def build_combat_view(encounter, character):
             return 0
         return max(1, (raw_ticks + timing_scale - 1) // timing_scale)
 
-    render_now_ms = int(round(browser_views.time.time() * 1000))
+    render_now_ms = int(round(time.time() * 1000))
     render_tick_ms = max(1, int(round(float(getattr(encounter, "interval", 1) or 1) * 1000)))
 
     def participant_id(participant):
@@ -398,7 +396,7 @@ def build_combat_view(encounter, character):
         selected_target_kind = selected_use.get("target")
 
     reaction_window = build_reaction_window()
-    combat_actions = browser_views.build_combat_action_payload(encounter, character)
+    combat_actions = build_combat_action_payload(encounter, character)
     reaction_roles = set(reaction_window.get("roles") or [])
     mark_reaction_actions(combat_actions.get("abilities", []), reaction_roles)
     mark_reaction_actions(combat_actions.get("items", []), reaction_roles)

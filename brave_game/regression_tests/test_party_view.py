@@ -49,9 +49,9 @@ class DummyCharacter:
 
 
 class PartyViewTests(unittest.TestCase):
-    @patch("world.browser_views.get_follow_target", return_value=None)
-    @patch("world.browser_views.get_party_leader", return_value=None)
-    @patch("world.browser_views.get_party_members", return_value=[])
+    @patch("world.browser_party_views.get_follow_target", return_value=None)
+    @patch("world.browser_party_views.get_party_leader", return_value=None)
+    @patch("world.browser_party_views.get_party_members", return_value=[])
     def test_party_view_lists_nearby_players_for_invites(self, _members, _leader, _follow):
         room = DummyLocation()
         viewer = DummyCharacter(7, "Dad", room)

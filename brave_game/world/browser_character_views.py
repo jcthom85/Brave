@@ -1,22 +1,19 @@
 """Character-focused browser view payload builders for Brave."""
 
-import world.browser_views as browser_views
-from world.character_icons import get_class_icon, get_race_icon
-from world.class_features import get_class_features
-from world.druid_forms import get_druid_form
-from world.genders import get_brave_gender_label
-from world.resonance import (
-    get_resource_label,
-    get_stat_label,
-)
-from world.browser_views import (
+from world.ability_icons import get_ability_icon_name, get_passive_icon_name
+from world.browser_context import (
     ABILITY_LIBRARY,
     CHARACTER_CONTENT,
     CLASSES,
     PASSIVE_ABILITY_BONUSES,
     RACES,
-    _build_sheet_ability_item,
-    _build_sheet_passive_item,
+    ability_key,
+    split_unlocked_abilities,
+    xp_needed_for_next_level,
+)
+from world.browser_formatting import _format_context_bonus_summary
+from world.browser_inventory_views import _sheet_detail_tooltip
+from world.browser_ui import (
     _chip,
     _entry,
     _hp_meter_tone,
@@ -24,11 +21,80 @@ from world.browser_views import (
     _make_view,
     _meter,
     _pair,
+    _picker,
     _reactive_from_character,
     _section,
-    ability_key,
-    xp_needed_for_next_level,
 )
+from world.chapel import get_active_blessing
+from world.character_icons import get_class_icon, get_race_icon
+from world.class_features import get_class_features
+from world.druid_forms import get_druid_form
+from world.genders import get_brave_gender_label
+from world.resonance import (
+    format_ability_display,
+    get_resource_label,
+    get_resonance_key,
+    get_resonance_label,
+    get_stat_label,
+)
+from world.mastery import format_mastery_name
+
+
+def _build_sheet_ability_item(character, ability_name):
+    display_name = format_ability_display(ability_name, character)
+    key = ability_key(ability_name)
+    rank = getattr(character, "get_ability_mastery_rank", lambda _key: 1)(key)
+    display_name = format_mastery_name(display_name, rank)
+    ability = ABILITY_LIBRARY.get(key, {})
+    target_label = {
+        "enemy": "Targets one enemy",
+        "ally": "Targets one ally",
+        "self": "Targets yourself",
+        "none": "No direct target",
+    }.get(ability.get("target"), "Combat ability")
+    subtitle_parts = []
+    if ability.get("cost") and ability.get("resource"):
+        subtitle_parts.append(f"Costs {ability['cost']} {get_resource_label(ability['resource'], character)}")
+    if target_label:
+        subtitle_parts.append(target_label)
+    subtitle = " · ".join(subtitle_parts)
+    body = [
+        ability.get("summary")
+        or {
+            "enemy": "A combat technique aimed at a single foe.",
+            "ally": "A supportive combat technique used on one ally.",
+            "self": "A defensive or empowering combat technique you use on yourself.",
+            "none": "A battlefield technique that does not require a single target.",
+        }.get(ability.get("target"), "A combat technique available to your build."),
+    ]
+    tooltip = _sheet_detail_tooltip(display_name, subtitle, body)
+    return _item(
+        display_name,
+        icon=get_ability_icon_name(key, ability),
+        picker=_picker(display_name, subtitle=subtitle, body=body),
+        tooltip=tooltip,
+    )
+
+
+def _build_sheet_passive_item(character, passive_name, *, icon_name="passive", summary_line=None, bonus_map=None):
+    display_name = format_ability_display(passive_name, character)
+    passive_key = ability_key(passive_name)
+    passive = PASSIVE_ABILITY_BONUSES.get(passive_key, {})
+    body = []
+    if summary_line:
+        body.append(summary_line)
+    else:
+        body.append(passive.get("summary") or "A passive trait that is always active.")
+    bonus_text = _format_context_bonus_summary(bonus_map or {}, character)
+    if bonus_text:
+        body.append("Bonuses: " + bonus_text)
+    tooltip = _sheet_detail_tooltip(display_name, "Passive trait", body)
+    return _item(
+        display_name,
+        icon=get_passive_icon_name(passive_key, passive) if icon_name == "passive" else icon_name,
+        picker=_picker(display_name, subtitle="Passive trait", body=body),
+        tooltip=tooltip,
+    )
 
 
 def build_sheet_view(character):
@@ -40,7 +106,7 @@ def build_sheet_view(character):
     primary = character.db.brave_primary_stats or {}
     derived = character.db.brave_derived_stats or {}
     resources = character.db.brave_resources or {}
-    class_actions, passives, unknown_abilities = browser_views.split_unlocked_abilities(character.db.brave_class, level)
+    class_actions, passives, unknown_abilities = split_unlocked_abilities(character.db.brave_class, level)
     get_unlocked = getattr(character, "get_unlocked_abilities", None)
     if callable(get_unlocked):
         unlocked_names = list(get_unlocked())
@@ -57,11 +123,11 @@ def build_sheet_view(character):
     current_xp = character.db.brave_xp or 0
     xp_meter_max = next_level_xp or max(1, current_xp)
     xp_meter_value = min(current_xp, xp_meter_max)
-    resonance_key = browser_views.get_resonance_key(character)
-    resonance_label = browser_views.get_resonance_label(character)
+    resonance_key = get_resonance_key(character)
+    resonance_label = get_resonance_label(character)
 
     meal_buff = character.db.brave_meal_buff or {}
-    blessing = browser_views.get_active_blessing(character)
+    blessing = get_active_blessing(character)
 
     combat_pairs = [
         _pair(get_stat_label("attack_power", character), derived.get("attack_power", 0), "swords"),
@@ -303,7 +369,7 @@ def build_sheet_view(character):
     effect_entries = []
     if meal_buff:
         meal_lines = []
-        meal_bonus_text = browser_views._format_context_bonus_summary(character.get_active_meal_bonuses(), character)
+        meal_bonus_text = _format_context_bonus_summary(character.get_active_meal_bonuses(), character)
         if meal_bonus_text:
             meal_lines.append("Bonuses: " + meal_bonus_text)
         effect_entries.append(
@@ -318,7 +384,7 @@ def build_sheet_view(character):
 
     if blessing:
         blessing_lines = [blessing.get("duration", "Until your next encounter ends.")]
-        blessing_bonus_text = browser_views._format_context_bonus_summary(blessing.get("bonuses", {}), character)
+        blessing_bonus_text = _format_context_bonus_summary(blessing.get("bonuses", {}), character)
         if blessing_bonus_text:
             blessing_lines.append("Bonuses: " + blessing_bonus_text)
         if (blessing.get("rite") or {}).get("name"):
