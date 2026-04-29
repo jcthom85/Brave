@@ -89,7 +89,6 @@ class Character(ObjectParent, DefaultCharacter):
         if not self.location or not sessions:
             return
 
-        # print(f"DEBUG: sending opening cinematic for {self.key}")
         room_id = getattr(getattr(self.location, "db", None), "brave_room_id", None)
         from world.browser_panels import send_npc_speech_event
 
@@ -118,7 +117,6 @@ class Character(ObjectParent, DefaultCharacter):
         return LEGACY_RACE_KEYS.get(race_key, race_key)
 
     def at_object_creation(self):
-        print(f"!!! URGENT: CHARACTER created: {self.key} !!!")
         super().at_object_creation()
         self.ensure_brave_character()
 
@@ -150,8 +148,6 @@ class Character(ObjectParent, DefaultCharacter):
         sessions = self.sessions.all()
         session = sessions[-1] if sessions else None
         protocol = str(getattr(session, "protocol_key", "") or "").lower() if session else ""
-        
-        print(f"\n{'#'*60}\n### CHARACTER AT_POST_PUPPET: {self.key} (protocol={protocol})\n{'#'*60}\n")
         
         if self.account:
             self.account.db._last_puppet = self
@@ -187,12 +183,10 @@ class Character(ObjectParent, DefaultCharacter):
 
     def at_post_unpuppet(self, account, **kwargs):
         """Called just after unpuppeting."""
-        print(f"\n!!! URGENT: at_post_unpuppet for {self.key} !!!\n")
         super().at_post_unpuppet(account, **kwargs)
 
     def ensure_brave_character(self):
         """Initialize Brave-specific state if missing."""
-        print(f"DEBUG: ensuring brave state for {self.key}")
         if not self.db.brave_race:
             self.db.brave_race = CHARACTER_CONTENT.starting_race
         else:

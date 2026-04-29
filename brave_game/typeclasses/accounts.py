@@ -149,7 +149,6 @@ class Account(DefaultAccount):
 
     def at_post_puppet(self, character, session=None, **kwargs):
         """Called just after puppeting is complete."""
-        print(f"\n!!! URGENT: ACCOUNT at_post_puppet for {character.key} !!!\n")
         super().at_post_puppet(character, session=session, **kwargs)
 
     def at_look(self, target=None, session=None, **kwargs):

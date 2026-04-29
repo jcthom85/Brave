@@ -84,10 +84,27 @@ class CombatBalanceSimulationTests(unittest.TestCase):
         self.assertLess(report["final_xp"], 350)
         self.assertEqual("what_whispers_in_the_wood", report["post_ruk_unlock_order"][0])
         self.assertTrue(all(step.get("outcome", "victory") == "victory" for step in report["steps"]))
+        self.assertGreater(report["final_silver_min"], 0)
+        self.assertGreaterEqual(report["final_silver_max"], report["final_silver_min"])
+        self.assertTrue(report["guaranteed_items"])
+        self.assertTrue(report["possible_items"])
+        self.assertFalse(any(flag["kind"] in {"missing_next_step", "missing_post_ruk_next_step"} for flag in report["pacing_flags"]))
+        self.assertTrue(all(step.get("next_step") for step in report["steps"] if step["kind"] == "quest"))
         ruk_step = next(step for step in report["steps"] if step["key"] == "ruks_stand")
         self.assertGreater(ruk_step["telegraphed_actions"], 0)
+        self.assertGreater(ruk_step["telegraphed_unanswered"], 0)
+        self.assertTrue(any(lead["next_step"] for lead in report["post_ruk_leads"] if lead["key"] == "what_whispers_in_the_wood"))
+        self.assertEqual(
+            ("ruk_the_fence_cutter", "what_whispers_in_the_wood"),
+            (
+                report["tracked_quest_transitions"][-1]["before"],
+                report["tracked_quest_transitions"][-1]["after"],
+            ),
+        )
         markdown = render_first_hour_route_markdown(report)
         self.assertIn("First Hour Route Summary", markdown)
+        self.assertIn("Tracked Quest Transitions", markdown)
+        self.assertIn("Pacing Flags", markdown)
         self.assertIn("what_whispers_in_the_wood", markdown)
 
     def test_ranger_companion_scenario_spawns_companion_actor(self):

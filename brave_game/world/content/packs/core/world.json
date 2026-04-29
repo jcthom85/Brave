@@ -2981,17 +2981,6 @@
       "zone": "Junk-Yard Planet"
     },
     {
-      "desc": "Test",
-      "id": "new_room_0_3",
-      "key": "New Room",
-      "map_region": "brambleford",
-      "map_x": 0,
-      "map_y": 3,
-      "safe": false,
-      "world": "Brave",
-      "zone": "brambleford"
-    },
-    {
       "desc": "Standing stones ring an old burial center packed with broken offerings, guttered lamps, and a hush that feels observed. The ground inside the circle is trampled by feet that should not still exist.",
       "id": "old_barrow_field_barrow_circle",
       "key": "Barrow Circle",

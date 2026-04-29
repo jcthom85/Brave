@@ -1430,9 +1430,133 @@ def _encounter_xp(encounter_data):
     return total
 
 
-def _quest_xp(quest_key):
+def _merge_item_rewards(entries):
+    totals = {}
+    for template_id, quantity in entries:
+        if not template_id:
+            continue
+        totals[template_id] = totals.get(template_id, 0) + max(1, int(quantity or 1))
+    return [
+        {"item": template_id, "quantity": totals[template_id]}
+        for template_id in sorted(totals)
+    ]
+
+
+def _quest_reward_profile(quest_key):
     definition = CONTENT.quests.get(quest_key) or {}
-    return int((definition.get("rewards") or {}).get("xp", 0) or 0)
+    rewards = definition.get("rewards") or {}
+    return {
+        "xp": int(rewards.get("xp", 0) or 0),
+        "silver": int(rewards.get("silver", 0) or 0),
+        "items": [
+            {"item": entry.get("item"), "quantity": int(entry.get("quantity", 1) or 1)}
+            for entry in rewards.get("items", [])
+            if entry.get("item")
+        ],
+    }
+
+
+def _encounter_reward_profile(encounter_data):
+    silver_min = 0
+    silver_max = 0
+    guaranteed_items = []
+    possible_items = []
+    for template_key in encounter_data.get("enemies") or []:
+        template = ENCOUNTER_CONTENT.get_enemy_template(template_key) or {}
+        min_silver, max_silver = template.get("silver", (0, 0))
+        silver_min += int(min_silver or 0)
+        silver_max += int(max_silver or 0)
+        for drop in template.get("loot", []):
+            item_id = drop.get("item")
+            if not item_id:
+                continue
+            quantity = int(drop.get("min", 1) or 1)
+            if float(drop.get("chance", 0) or 0) >= 1.0:
+                guaranteed_items.append((item_id, quantity))
+            else:
+                possible_items.append((item_id, quantity))
+    return {
+        "xp": _encounter_xp(encounter_data),
+        "silver_min": silver_min,
+        "silver_max": silver_max,
+        "guaranteed_items": _merge_item_rewards(guaranteed_items),
+        "possible_items": _merge_item_rewards(possible_items),
+    }
+
+
+def _quest_xp(quest_key):
+    return _quest_reward_profile(quest_key)["xp"]
+
+
+def _quests_unlocked_by(quest_key):
+    return [
+        candidate_key
+        for candidate_key in CONTENT.quests.starting_quests
+        if quest_key in (CONTENT.quests.get(candidate_key) or {}).get("prerequisites", [])
+    ]
+
+
+def _quest_next_step(quest_key):
+    return str((CONTENT.quests.get(quest_key) or {}).get("next_step") or "").strip()
+
+
+def _first_hour_pacing_flags(steps, post_ruk_unlock_order):
+    flags = []
+    for step in steps:
+        if step["kind"] == "quest":
+            if not step.get("next_step"):
+                flags.append(
+                    {
+                        "kind": "missing_next_step",
+                        "step": step["key"],
+                        "message": f"Quest {step['key']} has no next_step handoff.",
+                    }
+                )
+            continue
+
+        if step.get("outcome") != "victory":
+            flags.append(
+                {
+                    "kind": "encounter_not_victory",
+                    "step": step["key"],
+                    "message": f"Encounter {step['key']} ended with {step.get('outcome')}.",
+                }
+            )
+        if float(step.get("remaining_hp_ratio") or 0) < 0.35:
+            flags.append(
+                {
+                    "kind": "low_remaining_hp",
+                    "step": step["key"],
+                    "message": f"Encounter {step['key']} ended below 35% HP.",
+                }
+            )
+        if int(step.get("rounds") or 0) > 45:
+            flags.append(
+                {
+                    "kind": "long_encounter",
+                    "step": step["key"],
+                    "message": f"Encounter {step['key']} took {step['rounds']} rounds.",
+                }
+            )
+        if int(step.get("telegraphed_unanswered") or 0) > 0:
+            flags.append(
+                {
+                    "kind": "unanswered_telegraphs",
+                    "step": step["key"],
+                    "message": f"Encounter {step['key']} had {step['telegraphed_unanswered']} unanswered telegraphs.",
+                }
+            )
+
+    for quest_key in post_ruk_unlock_order:
+        if not _quest_next_step(quest_key):
+            flags.append(
+                {
+                    "kind": "missing_post_ruk_next_step",
+                    "step": quest_key,
+                    "message": f"Post-Ruk lead {quest_key} has no next_step handoff.",
+                }
+            )
+    return flags
 
 
 def build_first_hour_route_report(*, scenario_key="solo_warrior", base_seed=1, max_rounds=160):
@@ -1440,9 +1564,15 @@ def build_first_hour_route_report(*, scenario_key="solo_warrior", base_seed=1, m
 
     scenario = next(entry for entry in PARTY_SCENARIOS if entry["key"] == scenario_key)
     xp_total = 0
+    silver_total_min = 0
+    silver_total_max = 0
+    guaranteed_items_total = []
+    possible_items_total = []
     level = 1
     steps = []
     encounter_outcomes = {}
+    tracked_quest = next((step["key"] for step in FIRST_HOUR_ROUTE_STEPS if step["kind"] == "quest"), None)
+    tracked_quest_transitions = []
     unlock_order_after_ruk = [
         quest_key
         for quest_key in CONTENT.quests.starting_quests
@@ -1451,10 +1581,13 @@ def build_first_hour_route_report(*, scenario_key="solo_warrior", base_seed=1, m
 
     for index, step in enumerate(FIRST_HOUR_ROUTE_STEPS, start=1):
         before_xp = xp_total
+        before_silver_min = silver_total_min
+        before_silver_max = silver_total_max
         before_level = level
         if step["kind"] == "quest":
             quest_key = step["key"]
             required_victory = step.get("requires_victory")
+            tracked_before = tracked_quest
             if required_victory and encounter_outcomes.get(required_victory) != "victory":
                 steps.append(
                     {
@@ -1465,16 +1598,40 @@ def build_first_hour_route_report(*, scenario_key="solo_warrior", base_seed=1, m
                         "blocked": True,
                         "blocked_by": required_victory,
                         "xp_awarded": 0,
+                        "silver_awarded": 0,
+                        "item_rewards": [],
                         "xp_before": before_xp,
                         "xp_after": xp_total,
+                        "silver_before_min": before_silver_min,
+                        "silver_before_max": before_silver_max,
+                        "silver_after_min": silver_total_min,
+                        "silver_after_max": silver_total_max,
                         "level_before": before_level,
                         "level_after": level,
+                        "next_step": _quest_next_step(quest_key),
+                        "unlocks": _quests_unlocked_by(quest_key),
+                        "tracked_quest_before": tracked_before,
+                        "tracked_quest_after": tracked_quest,
                     }
                 )
                 continue
-            xp_awarded = _quest_xp(quest_key)
+            rewards = _quest_reward_profile(quest_key)
+            xp_awarded = rewards["xp"]
             xp_total += xp_awarded
+            silver_total_min += rewards["silver"]
+            silver_total_max += rewards["silver"]
+            guaranteed_items_total.extend((entry["item"], entry["quantity"]) for entry in rewards["items"])
             level = _level_for_xp(xp_total)
+            unlocks = _quests_unlocked_by(quest_key)
+            tracked_quest = unlocks[0] if unlocks else tracked_quest
+            tracked_quest_transitions.append(
+                {
+                    "step": quest_key,
+                    "before": tracked_before,
+                    "after": tracked_quest,
+                    "unlocks": unlocks,
+                }
+            )
             steps.append(
                 {
                     "index": index,
@@ -1482,10 +1639,20 @@ def build_first_hour_route_report(*, scenario_key="solo_warrior", base_seed=1, m
                     "key": quest_key,
                     "title": (CONTENT.quests.get(quest_key) or {}).get("title", quest_key),
                     "xp_awarded": xp_awarded,
+                    "silver_awarded": rewards["silver"],
+                    "item_rewards": rewards["items"],
                     "xp_before": before_xp,
                     "xp_after": xp_total,
+                    "silver_before_min": before_silver_min,
+                    "silver_before_max": before_silver_max,
+                    "silver_after_min": silver_total_min,
+                    "silver_after_max": silver_total_max,
                     "level_before": before_level,
                     "level_after": level,
+                    "next_step": _quest_next_step(quest_key),
+                    "unlocks": unlocks,
+                    "tracked_quest_before": tracked_before,
+                    "tracked_quest_after": tracked_quest,
                 }
             )
             continue
@@ -1493,8 +1660,16 @@ def build_first_hour_route_report(*, scenario_key="solo_warrior", base_seed=1, m
         authored = _find_authored_encounter(step["key"])
         run = simulate_encounter(authored, scenario, base_seed=base_seed, max_rounds=max_rounds, level=level)
         encounter_outcomes[step["key"]] = run["outcome"]
-        xp_awarded = _encounter_xp(authored["encounter_data"]) if run["outcome"] == "victory" else 0
+        rewards = _encounter_reward_profile(authored["encounter_data"])
+        xp_awarded = rewards["xp"] if run["outcome"] == "victory" else 0
+        silver_min_awarded = rewards["silver_min"] if run["outcome"] == "victory" else 0
+        silver_max_awarded = rewards["silver_max"] if run["outcome"] == "victory" else 0
         xp_total += xp_awarded
+        silver_total_min += silver_min_awarded
+        silver_total_max += silver_max_awarded
+        if run["outcome"] == "victory":
+            guaranteed_items_total.extend((entry["item"], entry["quantity"]) for entry in rewards["guaranteed_items"])
+            possible_items_total.extend((entry["item"], entry["quantity"]) for entry in rewards["possible_items"])
         level = _level_for_xp(xp_total)
         steps.append(
             {
@@ -1504,8 +1679,16 @@ def build_first_hour_route_report(*, scenario_key="solo_warrior", base_seed=1, m
                 "title": authored["encounter_data"].get("title") or step.get("label"),
                 "source": authored["source"],
                 "xp_awarded": xp_awarded,
+                "silver_awarded_min": silver_min_awarded,
+                "silver_awarded_max": silver_max_awarded,
+                "guaranteed_item_rewards": rewards["guaranteed_items"] if run["outcome"] == "victory" else [],
+                "possible_item_rewards": rewards["possible_items"] if run["outcome"] == "victory" else [],
                 "xp_before": before_xp,
                 "xp_after": xp_total,
+                "silver_before_min": before_silver_min,
+                "silver_before_max": before_silver_max,
+                "silver_after_min": silver_total_min,
+                "silver_after_max": silver_total_max,
                 "level_before": before_level,
                 "level_after": level,
                 "outcome": run["outcome"],
@@ -1513,24 +1696,48 @@ def build_first_hour_route_report(*, scenario_key="solo_warrior", base_seed=1, m
                 "remaining_hp_ratio": run["player_remaining_hp_ratio"],
                 "telegraphed_actions": run["telegraphed_actions"],
                 "telegraphed_answers": run["telegraphed_interrupts"] + run["telegraphed_redirects"] + run["telegraphed_mitigations"],
+                "telegraphed_unanswered": run["telegraphed_unanswered"],
             }
         )
 
+    pacing_flags = _first_hour_pacing_flags(steps, unlock_order_after_ruk)
     return {
         "scenario_key": scenario_key,
         "final_xp": xp_total,
+        "final_silver_min": silver_total_min,
+        "final_silver_max": silver_total_max,
+        "guaranteed_items": _merge_item_rewards(guaranteed_items_total),
+        "possible_items": _merge_item_rewards(possible_items_total),
         "final_level": level,
         "steps": steps,
         "post_ruk_unlock_order": unlock_order_after_ruk,
+        "post_ruk_leads": [
+            {
+                "key": quest_key,
+                "title": (CONTENT.quests.get(quest_key) or {}).get("title", quest_key),
+                "next_step": _quest_next_step(quest_key),
+            }
+            for quest_key in unlock_order_after_ruk
+        ],
+        "tracked_quest_transitions": tracked_quest_transitions,
+        "pacing_flags": pacing_flags,
     }
 
 
 def render_first_hour_route_markdown(report):
+    silver_total = (
+        str(report["final_silver_min"])
+        if report["final_silver_min"] == report["final_silver_max"]
+        else f"{report['final_silver_min']}-{report['final_silver_max']}"
+    )
     lines = [
         "# First Hour Route Summary",
         "",
         f"- Scenario: `{report['scenario_key']}`",
         f"- Final XP/level: {report['final_xp']} XP, level {report['final_level']}",
+        f"- Reward totals: {silver_total} silver, "
+        f"{len(report.get('guaranteed_items') or [])} guaranteed item type(s), "
+        f"{len(report.get('possible_items') or [])} possible drop type(s)",
         f"- First post-Ruk lead: `{(report.get('post_ruk_unlock_order') or [''])[0]}`",
         "",
         "## Route",
@@ -1538,6 +1745,11 @@ def render_first_hour_route_markdown(report):
     ]
     for step in report["steps"]:
         if step["kind"] == "quest":
+            item_text = ""
+            if step.get("item_rewards"):
+                item_text = ", items " + ", ".join(
+                    f"{entry['item']} x{entry['quantity']}" for entry in step["item_rewards"]
+                )
             if step.get("blocked"):
                 lines.append(
                     f"- {step['index']}. Quest `{step['key']}`: blocked by `{step['blocked_by']}`, "
@@ -1546,14 +1758,37 @@ def render_first_hour_route_markdown(report):
                 continue
             lines.append(
                 f"- {step['index']}. Quest `{step['key']}`: +{step['xp_awarded']} XP, "
-                f"level {step['level_before']} -> {step['level_after']}"
+                f"+{step['silver_awarded']} silver{item_text}, "
+                f"level {step['level_before']} -> {step['level_after']}, "
+                f"tracked `{step.get('tracked_quest_before')}` -> `{step.get('tracked_quest_after')}`, "
+                f"unlocks {step.get('unlocks') or []}"
             )
         else:
+            silver = (
+                str(step["silver_awarded_min"])
+                if step["silver_awarded_min"] == step["silver_awarded_max"]
+                else f"{step['silver_awarded_min']}-{step['silver_awarded_max']}"
+            )
             lines.append(
                 f"- {step['index']}. Encounter `{step['key']}`: {step['outcome']}, "
-                f"+{step['xp_awarded']} XP, level {step['level_before']} -> {step['level_after']}, "
-                f"HP {step['remaining_hp_ratio']}, telegraphs {step['telegraphed_answers']}/{step['telegraphed_actions']}"
+                f"+{step['xp_awarded']} XP, {silver} silver, "
+                f"level {step['level_before']} -> {step['level_after']}, "
+                f"{step['rounds']} rounds, HP {step['remaining_hp_ratio']}, "
+                f"telegraphs {step['telegraphed_answers']}/{step['telegraphed_actions']} "
+                f"({step['telegraphed_unanswered']} unanswered)"
             )
+    lines.extend(["", "## Post-Ruk Leads", ""])
+    for lead in report.get("post_ruk_leads") or []:
+        lines.append(f"- `{lead['key']}`: {lead.get('next_step') or 'MISSING next_step'}")
+    lines.extend(["", "## Tracked Quest Transitions", ""])
+    for transition in report.get("tracked_quest_transitions") or []:
+        lines.append(f"- `{transition['step']}`: `{transition['before']}` -> `{transition['after']}`")
+    lines.extend(["", "## Pacing Flags", ""])
+    if not report.get("pacing_flags"):
+        lines.append("- No pacing flags.")
+    else:
+        for flag in report["pacing_flags"]:
+            lines.append(f"- `{flag['kind']}` on `{flag['step']}`: {flag['message']}")
     lines.append("")
     return "\n".join(lines)
 

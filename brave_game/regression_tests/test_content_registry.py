@@ -11,6 +11,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
 from world.content import get_content_registry
+from world.content.registry import reload_content_registry
+from world.data import items as legacy_items
+from world.data import quests as legacy_quests
 
 
 class DummyInventoryCharacter:
@@ -154,3 +157,9 @@ class ContentRegistryTests(unittest.TestCase):
         self.assertIn("latchwire_ward_pattern", goblin_cutter_loot)
         self.assertIn("lockfin_skillet_note", hollow_wisp_loot)
         self.assertIn("fenlight_talisman_pattern", drowned_warder_loot)
+
+    def test_legacy_item_and_quest_exports_stay_registry_backed_after_reload(self):
+        registry = reload_content_registry()
+
+        self.assertIs(legacy_items.ITEM_TEMPLATES, registry.items.item_templates)
+        self.assertIs(legacy_quests.QUESTS, registry.quests.quests)

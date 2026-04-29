@@ -10,6 +10,11 @@ from world.content import get_content_registry
 from world.genders import VALID_BRAVE_GENDERS, normalize_brave_gender
 
 
+WORLD_START_ROOM_IDS = ("brambleford_training_yard", "brambleford_town_green")
+PLACEHOLDER_ROOM_ID_PREFIXES = ("new_", "test_", "tmp_", "placeholder_")
+PLACEHOLDER_ROOM_LABELS = {"new room", "test", "todo", "placeholder"}
+
+
 def validate_content_registry(registry=None):
     registry = registry or get_content_registry()
     errors = []
@@ -138,16 +143,79 @@ def _validate_quest_content(registry, errors):
 def _validate_world_content(registry, errors):
     world = registry.world
     room_ids = {room.get("id") for room in world.rooms}
+    inbound_exits = {room_id: [] for room_id in room_ids}
+    outbound_exits = {room_id: [] for room_id in room_ids}
+    zones_by_region = {}
+
+    for room in world.rooms:
+        room_id = str(room.get("id") or "")
+        room_key = str(room.get("key") or "")
+        room_desc = str(room.get("desc") or "")
+        normalized_key = room_key.strip().lower()
+        normalized_desc = room_desc.strip().lower()
+
+        if room_id.startswith(PLACEHOLDER_ROOM_ID_PREFIXES):
+            errors.append(f"Room {room_id} uses a placeholder id")
+        if normalized_key in PLACEHOLDER_ROOM_LABELS or "todo" in normalized_key or "placeholder" in normalized_key:
+            errors.append(f"Room {room_id} uses a placeholder key: {room_key}")
+        if (
+            not normalized_desc
+            or normalized_desc in PLACEHOLDER_ROOM_LABELS
+            or "todo" in normalized_desc
+            or "placeholder" in normalized_desc
+            or len(normalized_desc) < 20
+        ):
+            errors.append(f"Room {room_id} uses a placeholder or too-short description")
+
+        map_region = room.get("map_region")
+        zone = room.get("zone")
+        if map_region and zone:
+            zones_by_region.setdefault(map_region, {}).setdefault(str(zone).lower(), set()).add(str(zone))
 
     for exit_data in world.exits:
-        if exit_data.get("source") not in room_ids:
-            errors.append(f"Exit {exit_data.get('id')} has unknown source room: {exit_data.get('source')}")
-        if exit_data.get("destination") not in room_ids:
-            errors.append(f"Exit {exit_data.get('id')} has unknown destination room: {exit_data.get('destination')}")
+        source = exit_data.get("source")
+        destination = exit_data.get("destination")
+        if source not in room_ids:
+            errors.append(f"Exit {exit_data.get('id')} has unknown source room: {source}")
+        else:
+            outbound_exits[source].append(destination)
+        if destination not in room_ids:
+            errors.append(f"Exit {exit_data.get('id')} has unknown destination room: {destination}")
+        else:
+            inbound_exits[destination].append(source)
 
     for entity_data in world.entities:
         if entity_data.get("location") not in room_ids:
             errors.append(f"Entity {entity_data.get('id')} has unknown location room: {entity_data.get('location')}")
+
+    allowed_isolated_room_ids = {
+        room.get("id")
+        for room in world.rooms
+        if (room.get("validation") or {}).get("allow_isolated") is True
+    }
+    for room in world.rooms:
+        room_id = room.get("id")
+        if room_id in allowed_isolated_room_ids:
+            continue
+        if not inbound_exits.get(room_id) and not outbound_exits.get(room_id):
+            errors.append(f"Room {room_id} is isolated without validation.allow_isolated")
+
+    reachable_room_ids = set()
+    stack = [room_id for room_id in WORLD_START_ROOM_IDS if room_id in room_ids]
+    while stack:
+        room_id = stack.pop()
+        if room_id in reachable_room_ids:
+            continue
+        reachable_room_ids.add(room_id)
+        stack.extend(destination for destination in outbound_exits.get(room_id, []) if destination in room_ids)
+
+    for room_id in sorted(room_ids - reachable_room_ids - allowed_isolated_room_ids):
+        errors.append(f"Room {room_id} is unreachable from live start roots")
+
+    for map_region, zone_groups in zones_by_region.items():
+        for _normalized_zone, labels in zone_groups.items():
+            if len(labels) > 1:
+                errors.append(f"Map region {map_region} has inconsistent zone label casing: {', '.join(sorted(labels))}")
 
 
 def _validate_encounter_content(registry, errors):

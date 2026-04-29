@@ -139,3 +139,79 @@ class ContentValidationTests(unittest.TestCase):
         self.assertTrue(any("Portal broken_portal references unknown entry room" in error for error in errors))
         self.assertTrue(any("Trophy broken_trophy is missing a name" in error for error in errors))
         self.assertTrue(any("Trophy broken_trophy is missing a placeholder" in error for error in errors))
+
+    def test_validator_reports_world_shippability_errors(self):
+        registry = get_content_registry()
+        broken_world = replace(
+            registry.world,
+            rooms=[
+                *registry.world.rooms,
+                {
+                    "id": "new_room_0_3",
+                    "key": "New Room",
+                    "desc": "Test",
+                    "map_region": "brambleford",
+                    "map_x": 0,
+                    "map_y": 3,
+                    "safe": False,
+                    "zone": "brambleford",
+                },
+                {
+                    "id": "hidden_draft_room",
+                    "key": "Hidden Draft Room",
+                    "desc": "A finished-sounding room with a valid label that is not connected from the start roots.",
+                    "map_region": "brambleford",
+                    "map_x": 9,
+                    "map_y": 9,
+                    "safe": False,
+                    "zone": "Brambleford",
+                },
+                {
+                    "id": "hidden_draft_room_exit",
+                    "key": "Hidden Draft Exit",
+                    "desc": "A second hidden room keeps the draft area from being isolated while remaining unreachable.",
+                    "map_region": "brambleford",
+                    "map_x": 10,
+                    "map_y": 9,
+                    "safe": False,
+                    "zone": "Brambleford",
+                },
+                {
+                    "id": "waivered_isolated_room",
+                    "key": "Waivered Isolated Room",
+                    "desc": "A finished isolated room that explicitly opts out of graph shipping checks.",
+                    "map_region": "brambleford",
+                    "map_x": 11,
+                    "map_y": 9,
+                    "safe": False,
+                    "validation": {"allow_isolated": True},
+                    "zone": "Brambleford",
+                },
+            ],
+            exits=[
+                *registry.world.exits,
+                {
+                    "id": "hidden_draft_room_to_exit",
+                    "source": "hidden_draft_room",
+                    "destination": "hidden_draft_room_exit",
+                    "key": "east",
+                },
+                {
+                    "id": "hidden_draft_room_exit_to_room",
+                    "source": "hidden_draft_room_exit",
+                    "destination": "hidden_draft_room",
+                    "key": "west",
+                },
+            ],
+        )
+        broken_registry = replace(registry, world=broken_world)
+
+        errors = validate_content_registry(broken_registry)
+
+        self.assertTrue(any("Room new_room_0_3 uses a placeholder id" in error for error in errors))
+        self.assertTrue(any("Room new_room_0_3 uses a placeholder key" in error for error in errors))
+        self.assertTrue(any("Room new_room_0_3 uses a placeholder or too-short description" in error for error in errors))
+        self.assertTrue(any("Room new_room_0_3 is isolated without validation.allow_isolated" in error for error in errors))
+        self.assertTrue(any("Room hidden_draft_room is unreachable from live start roots" in error for error in errors))
+        self.assertTrue(any("Map region brambleford has inconsistent zone label casing" in error for error in errors))
+        self.assertFalse(any("waivered_isolated_room" in error for error in errors))

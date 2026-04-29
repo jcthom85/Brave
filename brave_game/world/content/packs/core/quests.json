@@ -91,6 +91,7 @@
           "type": "collect_item"
         }
       ],
+      "next_step": "Find Joss Veller at the observatory by the Nexus Gate, then use the gate route to reach the Junk-Yard Planet relay trench.",
       "prerequisites": [
         "ruk_the_fence_cutter"
       ],
@@ -724,6 +725,7 @@
           "type": "visit_room"
         }
       ],
+      "next_step": "Go east from Brambleford toward the old wood trail, then press into Whispering Woods until you reach the Briar Glade.",
       "prerequisites": [
         "ruk_the_fence_cutter"
       ],
