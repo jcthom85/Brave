@@ -346,10 +346,9 @@ def _load_json_pack(path):
 
 
 
-def _build_character_registry():
-    payload = _load_json_pack(CHARACTERS_PACK_PATH)
+def _build_character_registry_from_payload(payload, source_path):
     return CharacterContentRegistry(
-        source_path=str(CHARACTERS_PACK_PATH),
+        source_path=str(source_path),
         primary_stats=tuple(payload.get("primary_stats", ())),
         starting_race=str(payload.get("starting_race", "")),
         starting_class=str(payload.get("starting_class", "")),
@@ -364,11 +363,13 @@ def _build_character_registry():
     )
 
 
+def _build_character_registry():
+    return _build_character_registry_from_payload(_load_json_pack(CHARACTERS_PACK_PATH), CHARACTERS_PACK_PATH)
 
-def _build_item_registry():
-    payload = _load_json_pack(ITEMS_PACK_PATH)
+
+def _build_item_registry_from_payload(payload, source_path):
     return ItemContentRegistry(
-        source_path=str(ITEMS_PACK_PATH),
+        source_path=str(source_path),
         equipment_slots=tuple(payload.get("equipment_slots", ())),
         item_templates=dict(payload.get("item_templates", {})),
         starter_consumables=tuple(tuple(entry) for entry in payload.get("starter_consumables", [])),
@@ -377,38 +378,44 @@ def _build_item_registry():
     )
 
 
+def _build_item_registry():
+    return _build_item_registry_from_payload(_load_json_pack(ITEMS_PACK_PATH), ITEMS_PACK_PATH)
 
-def _build_quest_registry():
-    payload = _load_json_pack(QUESTS_PACK_PATH)
+
+def _build_quest_registry_from_payload(payload, source_path):
     return QuestContentRegistry(
-        source_path=str(QUESTS_PACK_PATH),
+        source_path=str(source_path),
         starting_quests=list(payload.get("starting_quests", [])),
         quest_regions=dict(payload.get("quest_regions", {})),
         quests=dict(payload.get("quests", {})),
     )
 
 
+def _build_quest_registry():
+    return _build_quest_registry_from_payload(_load_json_pack(QUESTS_PACK_PATH), QUESTS_PACK_PATH)
 
-def _build_world_registry():
-    payload = _load_json_pack(WORLD_PACK_PATH)
+
+def _build_world_registry_from_payload(payload, source_path):
     return WorldContentRegistry(
-        source_path=str(WORLD_PACK_PATH),
+        source_path=str(source_path),
         rooms=list(payload.get("rooms", [])),
         exits=list(payload.get("exits", [])),
         entities=list(payload.get("entities", [])),
     )
 
 
+def _build_world_registry():
+    return _build_world_registry_from_payload(_load_json_pack(WORLD_PACK_PATH), WORLD_PACK_PATH)
 
-def _build_encounter_registry():
-    payload = _load_json_pack(ENCOUNTERS_PACK_PATH)
+
+def _build_encounter_registry_from_payload(payload, source_path):
     roaming_parties = {}
     for party in payload.get("roaming_parties", []):
         party_key = party.get("key")
         if party_key:
             roaming_parties[party_key] = dict(party)
     return EncounterContentRegistry(
-        source_path=str(ENCOUNTERS_PACK_PATH),
+        source_path=str(source_path),
         enemy_templates=dict(payload.get("enemy_templates", {})),
         room_encounters=dict(payload.get("room_encounters", {})),
         roaming_parties=roaming_parties,
@@ -417,24 +424,30 @@ def _build_encounter_registry():
     )
 
 
-def _build_dialogue_registry():
-    payload = _load_json_pack(DIALOGUE_PACK_PATH)
+def _build_encounter_registry():
+    return _build_encounter_registry_from_payload(_load_json_pack(ENCOUNTERS_PACK_PATH), ENCOUNTERS_PACK_PATH)
+
+
+def _build_dialogue_registry_from_payload(payload, source_path):
     return DialogueContentRegistry(
-        source_path=str(DIALOGUE_PACK_PATH),
+        source_path=str(source_path),
         talk_rules=dict(payload.get("talk_rules", {})),
         static_read_responses=dict(payload.get("static_read_responses", {})),
     )
 
 
-def _build_systems_registry():
-    payload = _load_json_pack(SYSTEMS_PACK_PATH)
+def _build_dialogue_registry():
+    return _build_dialogue_registry_from_payload(_load_json_pack(DIALOGUE_PACK_PATH), DIALOGUE_PACK_PATH)
+
+
+def _build_systems_registry_from_payload(payload, source_path):
     activities = dict(payload.get("activities", {}))
     commerce = dict(payload.get("commerce", {}))
     forging = dict(payload.get("forging", {}))
     portals = dict(payload.get("portals", {}))
     trophies = dict(payload.get("trophies", {}))
     return SystemsContentRegistry(
-        source_path=str(SYSTEMS_PACK_PATH),
+        source_path=str(source_path),
         fishing_spots=dict(activities.get("fishing_spots", {})),
         fishing_rods=dict(activities.get("fishing_rods", {})),
         fishing_lures=dict(activities.get("fishing_lures", {})),
@@ -449,6 +462,25 @@ def _build_systems_registry():
         portals=dict(portals.get("portals", {})),
         portal_status_labels=dict(portals.get("portal_status_labels", {})),
         trophies=dict(trophies.get("trophies", {})),
+    )
+
+
+def _build_systems_registry():
+    return _build_systems_registry_from_payload(_load_json_pack(SYSTEMS_PACK_PATH), SYSTEMS_PACK_PATH)
+
+
+def build_content_registry_from_payloads(payloads, *, source_paths=None):
+    """Build a standalone registry from already-loaded pack payloads."""
+
+    source_paths = source_paths or {}
+    return BraveContentRegistry(
+        characters=_build_character_registry_from_payload(payloads["characters"], source_paths.get("characters", CHARACTERS_PACK_PATH)),
+        items=_build_item_registry_from_payload(payloads["items"], source_paths.get("items", ITEMS_PACK_PATH)),
+        quests=_build_quest_registry_from_payload(payloads["quests"], source_paths.get("quests", QUESTS_PACK_PATH)),
+        world=_build_world_registry_from_payload(payloads["world"], source_paths.get("world", WORLD_PACK_PATH)),
+        encounters=_build_encounter_registry_from_payload(payloads["encounters"], source_paths.get("encounters", ENCOUNTERS_PACK_PATH)),
+        dialogue=_build_dialogue_registry_from_payload(payloads["dialogue"], source_paths.get("dialogue", DIALOGUE_PACK_PATH)),
+        systems=_build_systems_registry_from_payload(payloads["systems"], source_paths.get("systems", SYSTEMS_PACK_PATH)),
     )
 
 

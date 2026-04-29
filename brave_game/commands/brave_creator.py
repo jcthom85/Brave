@@ -4,6 +4,7 @@ import json
 
 from world.content import (
     ContentEditor,
+    ContentPublishValidationError,
     preview_character_config,
     preview_class,
     preview_dialogue,
@@ -427,7 +428,13 @@ class CmdContent(BraveCharacterCommand):
 
     def _handle_publish(self, tokens):
         domain = tokens[0] if tokens else None
-        mutations = publish_content(domain, author=self._author())
+        try:
+            mutations = publish_content(domain, author=self._author())
+        except ContentPublishValidationError as exc:
+            lines = [f"Publish blocked. Draft content failed validation for {', '.join(exc.domains)}:"]
+            lines.extend(f"- {entry}" for entry in exc.errors)
+            self.msg("\n".join(lines))
+            return
         if not mutations:
             self.msg("No draft pack changes were available to publish.")
             return

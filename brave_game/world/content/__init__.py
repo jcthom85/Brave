@@ -1,6 +1,6 @@
 """Content registry and tooling entry points for Brave."""
 
-from .editor import ContentEditor, ContentMutation
+from .editor import ContentEditor, ContentMutation, ContentPublishValidationError
 from .history import ContentHistoryStore
 from .preview import (
     preview_character_config,
@@ -25,6 +25,7 @@ __all__ = [
     "ContentEditor",
     "ContentHistoryStore",
     "ContentMutation",
+    "ContentPublishValidationError",
     "get_content_registry",
     "reload_content_registry",
     "preview_character_config",

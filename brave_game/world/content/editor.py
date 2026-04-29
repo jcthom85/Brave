@@ -23,6 +23,7 @@ from world.content.registry import (
     QUESTS_PACK_PATH,
     SYSTEMS_PACK_PATH,
     WORLD_PACK_PATH,
+    build_content_registry_from_payloads,
 )
 
 
@@ -46,6 +47,15 @@ class ContentMutation:
     stage: str = "live"
     entry_id: str = ""
     history_path: str = ""
+
+
+class ContentPublishValidationError(ValueError):
+    """Raised when draft content cannot be promoted without breaking live validation."""
+
+    def __init__(self, errors, *, domains):
+        self.errors = list(errors)
+        self.domains = list(domains)
+        super().__init__("Content publish failed validation.")
 
 
 class ContentEditor:
@@ -144,29 +154,74 @@ class ContentEditor:
 
     def publish_stage(self, domain=None, *, author="system"):
         domains = [domain] if domain else list(self.pack_paths)
-        mutations = []
+        plans = []
+        candidate_payloads = {
+            current_domain: self.load_pack(current_domain, stage="live")
+            for current_domain in self.pack_paths
+        }
         for current_domain in domains:
             draft_path = self._path_for(current_domain, stage="draft")
             if not draft_path.exists():
                 continue
             live_before = self.load_pack(current_domain, stage="live")
+            live_before_text = self._path_for(current_domain, stage="live").read_text(encoding="utf-8")
             draft_payload = self.load_pack(current_domain, stage="draft")
             persisted = self._stamp_payload(draft_payload, author=author, action="publish", target=current_domain, stage="live")
             diff = self.diff_pack(current_domain, persisted, stage="live")
-            self.write_pack(current_domain, persisted, stage="live")
-            history_entry, recorded_path = self.history.record(
-                domain=current_domain,
-                stage="live",
-                action="publish",
-                target=current_domain,
-                path=str(self._path_for(current_domain, stage="live")),
-                diff=diff,
-                before=live_before,
-                after=persisted,
-                author=author,
-                extra={"source_stage": "draft"},
+            candidate_payloads[current_domain] = persisted
+            plans.append(
+                {
+                    "domain": current_domain,
+                    "live_before": live_before,
+                    "live_before_text": live_before_text,
+                    "persisted": persisted,
+                    "diff": diff,
+                    "path": self._path_for(current_domain, stage="live"),
+                }
             )
-            mutations.append(ContentMutation(domain=current_domain, path=str(self._path_for(current_domain, stage="live")), diff=diff, payload=persisted, stage="live", entry_id=history_entry["entry_id"], history_path=str(recorded_path)))
+
+        if not plans:
+            return []
+
+        from world.content.validation import validate_content_registry
+
+        candidate_registry = build_content_registry_from_payloads(
+            candidate_payloads,
+            source_paths={key: self._path_for(key, stage="live") for key in self.pack_paths},
+        )
+        errors = validate_content_registry(candidate_registry)
+        if errors:
+            raise ContentPublishValidationError(errors, domains=[plan["domain"] for plan in plans])
+
+        mutations = []
+        recorded_paths = []
+        try:
+            for plan in plans:
+                self.write_pack(plan["domain"], plan["persisted"], stage="live")
+            for plan in plans:
+                history_entry, recorded_path = self.history.record(
+                    domain=plan["domain"],
+                    stage="live",
+                    action="publish",
+                    target=plan["domain"],
+                    path=str(plan["path"]),
+                    diff=plan["diff"],
+                    before=plan["live_before"],
+                    after=plan["persisted"],
+                    author=author,
+                    extra={"source_stage": "draft"},
+                )
+                recorded_paths.append(recorded_path)
+                mutations.append(ContentMutation(domain=plan["domain"], path=str(plan["path"]), diff=plan["diff"], payload=plan["persisted"], stage="live", entry_id=history_entry["entry_id"], history_path=str(recorded_path)))
+        except Exception:
+            for plan in plans:
+                plan["path"].write_text(plan["live_before_text"], encoding="utf-8")
+            for recorded_path in recorded_paths:
+                try:
+                    recorded_path.unlink()
+                except FileNotFoundError:
+                    pass
+            raise
         return mutations
 
     def upsert_room(self, room_data, *, write=False, stage="live", author="system"):

@@ -13,7 +13,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
 from web.api import views
-from world.content.editor import ContentEditor
+from world.content.editor import ContentEditor, ContentPublishValidationError
 
 
 class _DummyUser:
@@ -236,6 +236,20 @@ class CreatorApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(1, len(payload["published"]))
         self.assertEqual("items", payload["published"][0]["domain"])
+
+    def test_publish_endpoint_blocks_invalid_draft_without_reload(self):
+        request = self.factory.post("/api/content/publish", data=json.dumps({"domain": "world"}), content_type="application/json")
+        request.user = self.user
+        error = ContentPublishValidationError(["Room new_bad uses a placeholder id"], domains=["world"])
+        with patch("web.api.views.publish_content", side_effect=error), patch("web.api.views.reload_content_registry") as reload_mock:
+            response = views.content_publish(request)
+        payload = json.loads(response.content)
+        self.assertEqual(400, response.status_code)
+        self.assertFalse(payload["ok"])
+        self.assertEqual([], payload["published"])
+        self.assertEqual(["world"], payload["domains"])
+        self.assertEqual(["Room new_bad uses a placeholder id"], payload["validation_errors"])
+        reload_mock.assert_not_called()
 
     def test_validate_returns_ok_payload(self):
         request = self.factory.post("/api/content/validate", data=b"{}", content_type="application/json")

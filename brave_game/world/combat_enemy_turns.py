@@ -11,6 +11,14 @@ from typeclasses.scripts import (
 )
 
 
+ENEMY_HEAL_ACTIONS = {
+    "mossling": ("Mend Spores", (8, 12), ""),
+    "barrow_wisp": ("Grave Light", (7, 11), "|m{source} feeds cold grave-light into {target}.|n"),
+    "fen_wisp": ("Marsh Light", (8, 12), "|g{source} sheds sick marsh light over {target}.|n"),
+    "hollow_wisp": ("Lamp Light", (9, 13), "|y{source} spills drowned lamp-light into {target}.|n"),
+}
+
+
 def execute_enemy_turn(encounter, enemy):
     """Resolve one enemy turn for an active combat encounter."""
 
@@ -28,40 +36,17 @@ def execute_enemy_turn(encounter, enemy):
             self.obj.msg_contents("|rOld Greymaw slips unseen through the brush.|n")
         return
 
-    if enemy["template_key"] == "mossling":
+    heal_action = ENEMY_HEAL_ACTIONS.get(enemy["template_key"])
+    if heal_action:
+        action_label, heal_range, message_template = heal_action
         ally = self._find_wounded_enemy(exclude_id=enemy["id"])
         if ally and ally["hp"] <= (ally["max_hp"] * 3) // 4:
-            self._announce_combat_action(enemy, "Mend Spores")
-            heal_amount = random.randint(8, 12)
+            self._announce_combat_action(enemy, action_label)
+            heal_amount = random.randint(*heal_range)
             if self._heal_enemy(enemy, ally, heal_amount):
+                if message_template:
+                    self.obj.msg_contents(message_template.format(source=enemy["key"], target=ally["key"]))
                 return
-
-        if enemy["template_key"] == "barrow_wisp":
-            ally = self._find_wounded_enemy(exclude_id=enemy["id"])
-            if ally and ally["hp"] <= (ally["max_hp"] * 3) // 4:
-                self._announce_combat_action(enemy, "Grave Light")
-                heal_amount = random.randint(7, 11)
-                if self._heal_enemy(enemy, ally, heal_amount):
-                    self.obj.msg_contents(f"|m{enemy['key']} feeds cold grave-light into {ally['key']}.|n")
-                    return
-
-        if enemy["template_key"] == "fen_wisp":
-            ally = self._find_wounded_enemy(exclude_id=enemy["id"])
-            if ally and ally["hp"] <= (ally["max_hp"] * 3) // 4:
-                self._announce_combat_action(enemy, "Marsh Light")
-                heal_amount = random.randint(8, 12)
-                if self._heal_enemy(enemy, ally, heal_amount):
-                    self.obj.msg_contents(f"|g{enemy['key']} sheds sick marsh light over {ally['key']}.|n")
-                    return
-
-        if enemy["template_key"] == "hollow_wisp":
-            ally = self._find_wounded_enemy(exclude_id=enemy["id"])
-            if ally and ally["hp"] <= (ally["max_hp"] * 3) // 4:
-                self._announce_combat_action(enemy, "Lamp Light")
-                heal_amount = random.randint(9, 13)
-                if self._heal_enemy(enemy, ally, heal_amount):
-                    self.obj.msg_contents(f"|y{enemy['key']} spills drowned lamp-light into {ally['key']}.|n")
-                    return
 
     target = self._choose_enemy_target(enemy)
     if not target:

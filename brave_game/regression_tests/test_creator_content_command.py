@@ -20,6 +20,7 @@ from commands.brave_creator import (
     revert_content,
 )
 from world.content.editor import ContentEditor
+from world.content.editor import ContentPublishValidationError
 
 
 ROOT = Path("/home/jcthom85/Brave/brave_game/world/content/packs/core")
@@ -158,6 +159,24 @@ class CreatorContentCommandTests(unittest.TestCase):
         persisted = json.loads(self.pack_paths["characters"].read_text(encoding="utf-8"))
         self.assertIn("creator_publish_class", persisted["classes"])
         self.assertEqual("publisher", persisted["_meta"]["last_modified_by"])
+
+    def test_publish_content_raises_before_live_write_when_draft_is_invalid(self):
+        live_before = self.pack_paths["world"].read_text(encoding="utf-8")
+        mutate_content(
+            "room",
+            "placeholder_publish_room",
+            json.dumps({"key": "Placeholder", "desc": "TODO", "zone": "Testing", "world": "Brave"}),
+            write=True,
+            stage="draft",
+            editor=self.editor,
+            author="draft-author",
+        )
+
+        with self.assertRaises(ContentPublishValidationError) as raised:
+            publish_content("world", editor=self.editor, author="publisher")
+
+        self.assertTrue(any("placeholder" in error.lower() for error in raised.exception.errors))
+        self.assertEqual(live_before, self.pack_paths["world"].read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

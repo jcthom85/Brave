@@ -15,7 +15,7 @@ from commands.brave_creator import (
     remove_content,
     revert_content,
 )
-from world.content import ContentEditor, get_content_registry
+from world.content import ContentEditor, ContentPublishValidationError, get_content_registry
 from world.content.registry import reload_content_registry
 from world.content.validation import validate_content_registry
 
@@ -331,6 +331,17 @@ def content_publish(request):
     try:
         payload = _load_json_body(request)
         mutations = publish_content(payload.get("domain"), author=_author_from_user(getattr(request, "user", None)))
+    except ContentPublishValidationError as exc:
+        return JsonResponse(
+            {
+                "ok": False,
+                "published": [],
+                "validation_errors": exc.errors,
+                "domains": exc.domains,
+                "error": "Draft content failed validation. Nothing was published.",
+            },
+            status=400,
+        )
     except ValueError as exc:
         return _json_error(exc)
 

@@ -11,6 +11,7 @@ django.setup()
 
 from typeclasses.scripts import BraveEncounter
 from world.combat_execution import execute_combat_ability
+from world.combat_enemy_turns import execute_enemy_turn
 from world.ranger_companions import get_companion
 
 
@@ -49,6 +50,65 @@ class DummyFighter:
 
 
 class ClassExecutionTests(unittest.TestCase):
+    def _enemy_heal_fixture(self, template_key):
+        messages = []
+        healer = {"id": "healer", "template_key": template_key, "key": template_key.replace("_", " ").title()}
+        ally = {"id": "ally", "template_key": "wounded_ally", "key": "Wounded Ally", "hp": 10, "max_hp": 40}
+        encounter = SimpleNamespace(
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: messages.append(message)),
+            _enemy_reaction_state=lambda current: {"telegraphed": False, "label": "Attack"},
+            _handle_enemy_specials=lambda current: current,
+            _find_wounded_enemy=lambda exclude_id=None: ally,
+            _announce_combat_action=lambda actor, label: BraveEncounter._announce_combat_action(encounter, actor, label),
+            _heal_enemy=lambda source, target, amount: BraveEncounter._heal_enemy(encounter, source, target, amount),
+            _save_enemy=lambda target: None,
+            _choose_enemy_target=lambda current: (_ for _ in ()).throw(AssertionError("healer should not fall through to attack")),
+        )
+        return encounter, healer, ally, messages
+
+    def test_mossling_heals_wounded_ally(self):
+        encounter, healer, ally, messages = self._enemy_heal_fixture("mossling")
+
+        with patch("world.combat_enemy_turns.random.randint", return_value=9):
+            execute_enemy_turn(encounter, healer)
+
+        self.assertEqual(19, ally["hp"])
+        self.assertTrue(messages[0].startswith("|cMossling uses Mend Spores!|n"))
+        self.assertIn("mends Wounded Ally for 9 HP", messages[1])
+
+    def test_barrow_wisp_heals_wounded_ally(self):
+        encounter, healer, ally, messages = self._enemy_heal_fixture("barrow_wisp")
+
+        with patch("world.combat_enemy_turns.random.randint", return_value=8):
+            execute_enemy_turn(encounter, healer)
+
+        self.assertEqual(18, ally["hp"])
+        self.assertTrue(messages[0].startswith("|cBarrow Wisp uses Grave Light!|n"))
+        self.assertIn("mends Wounded Ally for 8 HP", messages[1])
+        self.assertIn("feeds cold grave-light", messages[2])
+
+    def test_fen_wisp_heals_wounded_ally(self):
+        encounter, healer, ally, messages = self._enemy_heal_fixture("fen_wisp")
+
+        with patch("world.combat_enemy_turns.random.randint", return_value=10):
+            execute_enemy_turn(encounter, healer)
+
+        self.assertEqual(20, ally["hp"])
+        self.assertTrue(messages[0].startswith("|cFen Wisp uses Marsh Light!|n"))
+        self.assertIn("mends Wounded Ally for 10 HP", messages[1])
+        self.assertIn("sheds sick marsh light", messages[2])
+
+    def test_hollow_wisp_heals_wounded_ally(self):
+        encounter, healer, ally, messages = self._enemy_heal_fixture("hollow_wisp")
+
+        with patch("world.combat_enemy_turns.random.randint", return_value=11):
+            execute_enemy_turn(encounter, healer)
+
+        self.assertEqual(21, ally["hp"])
+        self.assertTrue(messages[0].startswith("|cHollow Wisp uses Lamp Light!|n"))
+        self.assertIn("mends Wounded Ally for 11 HP", messages[1])
+        self.assertIn("spills drowned lamp-light", messages[2])
+
     def test_player_ability_announces_name_before_resolution(self):
         messages = []
         cleric = DummyFighter(1, "Tamsin", "cleric")
