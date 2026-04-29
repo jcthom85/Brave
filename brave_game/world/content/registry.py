@@ -463,16 +463,42 @@ _CONTENT_REGISTRY = BraveContentRegistry(
 )
 
 
+def _sync_value_in_place(current, replacement):
+    """Refresh mutable content containers without breaking cached references."""
+
+    if isinstance(current, dict) and isinstance(replacement, dict):
+        current.clear()
+        current.update(replacement)
+        return current
+    if isinstance(current, list) and isinstance(replacement, list):
+        current[:] = replacement
+        return current
+    if isinstance(current, set) and isinstance(replacement, set):
+        current.clear()
+        current.update(replacement)
+        return current
+    return replacement
+
+
+def _sync_registry_in_place(current, replacement):
+    """Refresh a frozen registry dataclass while preserving its object identity."""
+
+    for field_name in getattr(replacement, "__dataclass_fields__", ()):
+        value = _sync_value_in_place(getattr(current, field_name), getattr(replacement, field_name))
+        object.__setattr__(current, field_name, value)
+    return current
+
+
 def reload_content_registry():
     """Reload the process-wide Brave content registry in place."""
 
-    object.__setattr__(_CONTENT_REGISTRY, "characters", _build_character_registry())
-    object.__setattr__(_CONTENT_REGISTRY, "items", _build_item_registry())
-    object.__setattr__(_CONTENT_REGISTRY, "quests", _build_quest_registry())
-    object.__setattr__(_CONTENT_REGISTRY, "world", _build_world_registry())
-    object.__setattr__(_CONTENT_REGISTRY, "encounters", _build_encounter_registry())
-    object.__setattr__(_CONTENT_REGISTRY, "dialogue", _build_dialogue_registry())
-    object.__setattr__(_CONTENT_REGISTRY, "systems", _build_systems_registry())
+    _sync_registry_in_place(_CONTENT_REGISTRY.characters, _build_character_registry())
+    _sync_registry_in_place(_CONTENT_REGISTRY.items, _build_item_registry())
+    _sync_registry_in_place(_CONTENT_REGISTRY.quests, _build_quest_registry())
+    _sync_registry_in_place(_CONTENT_REGISTRY.world, _build_world_registry())
+    _sync_registry_in_place(_CONTENT_REGISTRY.encounters, _build_encounter_registry())
+    _sync_registry_in_place(_CONTENT_REGISTRY.dialogue, _build_dialogue_registry())
+    _sync_registry_in_place(_CONTENT_REGISTRY.systems, _build_systems_registry())
     return _CONTENT_REGISTRY
 
 

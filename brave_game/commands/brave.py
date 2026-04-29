@@ -10,9 +10,9 @@ from world.activities import (
     use_consumable_template,
 )
 from world.data.items import ITEM_TEMPLATES, get_item_category, get_item_use_profile, match_inventory_item
+from world.content.registry import get_content_registry
 from world.interactions import get_entity_emote_response
 from world.party import get_present_party_members
-from world.data.quests import QUESTS
 from world.genders import get_brave_pronoun
 from world.resonance import get_resource_label, get_stat_label
 from world.screen_text import format_entry, wrap_text
@@ -206,6 +206,10 @@ def _stack_blocks(blocks):
             lines.append("")
         lines.extend(block)
     return lines
+
+
+def _quest_definitions():
+    return get_content_registry().quests.quests
 
 
 def _format_restore_summary(restore, character):
@@ -404,7 +408,7 @@ def _format_tutorial_screen_block(character, completed_only=False):
 def _format_quest_screen_block(character, quest_key, tracked_key=None):
     """Return structured journal lines for one active or completed quest."""
 
-    definition = QUESTS[quest_key]
+    definition = _quest_definitions()[quest_key]
     state = (character.db.brave_quests or {}).get(quest_key)
     if not state or state.get("status") == "locked":
         return []

@@ -614,3 +614,13 @@ QUESTS = {
         },
     },
 }
+
+
+# Compatibility exports for older runtime imports. Quest definitions and
+# regions are registry-backed so JSON packs remain authoritative.
+from world.content.registry import get_content_registry
+
+_QUEST_CONTENT = get_content_registry().quests
+STARTING_QUESTS = _QUEST_CONTENT.starting_quests
+QUEST_REGIONS = _QUEST_CONTENT.quest_regions
+QUESTS = _QUEST_CONTENT.quests

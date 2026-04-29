@@ -1369,3 +1369,15 @@ def format_allowed_class_summary(item_or_template):
     if not allowed:
         return ""
     return "Allowed: " + ", ".join(class_key.replace("_", " ").title() for class_key in allowed)
+
+
+# Compatibility exports for older runtime imports. Item templates and related
+# authored fields are registry-backed so JSON packs remain authoritative.
+from world.content.registry import get_content_registry
+
+_ITEM_CONTENT = get_content_registry().items
+EQUIPMENT_SLOTS = _ITEM_CONTENT.equipment_slots
+ITEM_TEMPLATES = _ITEM_CONTENT.item_templates
+STARTER_CONSUMABLES = _ITEM_CONTENT.starter_consumables
+STARTER_LOADOUTS = _ITEM_CONTENT.starter_loadouts
+BONUS_LABELS = _ITEM_CONTENT.bonus_labels

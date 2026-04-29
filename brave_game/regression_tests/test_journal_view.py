@@ -2,6 +2,8 @@ import os
 import sys
 import types
 import unittest
+import json
+import tempfile
 from types import SimpleNamespace
 
 import django
@@ -16,7 +18,10 @@ chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
 from world.browser_views import build_quests_view
+from world.content import registry as content_registry
+from world.content.registry import reload_content_registry
 from world.data.quests import QUESTS, STARTING_QUESTS
+from commands.brave import _format_quest_screen_block
 
 
 def _quest_state(quest_key, status):
@@ -142,6 +147,34 @@ class JournalViewTests(unittest.TestCase):
         character.db.brave_journal_tab = "completed"
         completed = _section(build_quests_view(character), "Completed Quests")
         self.assertEqual("No completed quests yet.", completed.get("items", [])[0].get("title"))
+
+    def test_command_journal_uses_reloaded_json_quest_content(self):
+        quest_key = "roadside_howls"
+        original_path = content_registry.QUESTS_PACK_PATH
+        original_payload = json.loads(original_path.read_text(encoding="utf-8"))
+        updated_payload = json.loads(json.dumps(original_payload))
+        updated_payload["quests"][quest_key]["rewards"]["silver"] = 999
+
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".json") as temp_pack:
+            json.dump(updated_payload, temp_pack)
+            temp_pack.flush()
+            content_registry.QUESTS_PACK_PATH = type(original_path)(temp_pack.name)
+            try:
+                reload_content_registry()
+                character = DummyCharacter(
+                    quests={
+                        quest_key: {
+                            "status": "active",
+                            "objectives": [],
+                        }
+                    },
+                    tracked=quest_key,
+                )
+                lines = _format_quest_screen_block(character, quest_key, tracked_key=quest_key)
+                self.assertTrue(any("Rewards:" in line and "999 silver" in line for line in lines))
+            finally:
+                content_registry.QUESTS_PACK_PATH = original_path
+                reload_content_registry()
 
 
 if __name__ == "__main__":
