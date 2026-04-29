@@ -13,37 +13,6 @@ OUTFITTERS_ROOM_ID = SYSTEMS_CONTENT.outfitters_room_id
 SHIFT_OUTCOMES = list(SYSTEMS_CONTENT.shift_outcomes)
 
 
-_UNUSED_SHIFT_OUTCOMES = [
-    {
-        "name": "Counter Rhythm",
-        "bonus_pct": 10,
-        "sales_left": 3,
-        "text": (
-            "You spend a while sorting boots by size, straightening cloak pegs, and handing out rope "
-            "without letting anyone call it an adventure tax. Leda nods once. That counts as praise."
-        ),
-    },
-    {
-        "name": "Sharp Eye",
-        "bonus_pct": 15,
-        "sales_left": 3,
-        "text": (
-            "You help fit a farmer's boy for rain gear, catch a split seam before it becomes an argument, "
-            "and steer two customers toward sturdier travel kit. Leda's pricing chalk looks friendlier after that."
-        ),
-    },
-    {
-        "name": "Shopkeeper's Eye",
-        "bonus_pct": 20,
-        "sales_left": 3,
-        "text": (
-            "You talk one anxious traveler out of the wrong boots, find the exact strap a scout came in for, "
-            "and keep the front counter moving without losing track of a single order. Leda decides you can be trusted with margins."
-        ),
-    },
-]
-
-
 def is_outfitters_room(room):
     """Return whether the given room is Brambleford Outfitters."""
 

@@ -29,6 +29,194 @@
     "trinket",
     "snack"
   ],
+  "item_class_requirements": {
+    "ashwood_bow": [
+      "ranger"
+    ],
+    "bellguard_bastion": [
+      "paladin",
+      "warrior"
+    ],
+    "bellkeeper_mail": [
+      "paladin",
+      "warrior"
+    ],
+    "bellwarden_icon": [
+      "cleric"
+    ],
+    "briarpath_raiment": [
+      "druid"
+    ],
+    "brushrunner_leathers": [
+      "ranger",
+      "rogue"
+    ],
+    "chapel_blade": [
+      "paladin",
+      "warrior"
+    ],
+    "cinderwire_staff": [
+      "mage"
+    ],
+    "dawnbell_mace": [
+      "cleric",
+      "paladin"
+    ],
+    "ember_lantern_focus": [
+      "mage"
+    ],
+    "emberglass_staff": [
+      "mage"
+    ],
+    "fenlight_talisman": [
+      "druid"
+    ],
+    "field_leathers": [
+      "ranger",
+      "rogue"
+    ],
+    "grove_talisman": [
+      "druid"
+    ],
+    "gutterfang_pair": [
+      "rogue"
+    ],
+    "hedgeweave_robes": [
+      "mage"
+    ],
+    "hookknife_pair": [
+      "rogue"
+    ],
+    "ironroot_longblade": [
+      "warrior",
+      "paladin"
+    ],
+    "ironroot_recurve": [
+      "ranger"
+    ],
+    "kingshiv_pair": [
+      "rogue"
+    ],
+    "lamplight_harness": [
+      "paladin",
+      "warrior"
+    ],
+    "lantern_focus": [
+      "mage"
+    ],
+    "lanternlined_robes": [
+      "mage"
+    ],
+    "locklight_blade": [
+      "paladin",
+      "warrior"
+    ],
+    "marshsong_staff": [
+      "druid"
+    ],
+    "militia_blade": [
+      "warrior",
+      "paladin"
+    ],
+    "mossweave_wraps": [
+      "druid"
+    ],
+    "nailbound_heater": [
+      "warrior",
+      "paladin"
+    ],
+    "nightpath_leathers": [
+      "rogue",
+      "ranger"
+    ],
+    "oakbound_shield": [
+      "warrior",
+      "paladin"
+    ],
+    "parrying_dagger": [
+      "rogue",
+      "ranger"
+    ],
+    "pilgrim_mace": [
+      "cleric"
+    ],
+    "reedwoven_raiment": [
+      "druid"
+    ],
+    "ridgebreaker_blade": [
+      "warrior",
+      "paladin"
+    ],
+    "rivetmail_coat": [
+      "warrior",
+      "paladin"
+    ],
+    "roadchapel_vestments": [
+      "cleric"
+    ],
+    "roadwarden_mail": [
+      "warrior",
+      "paladin"
+    ],
+    "rootwood_staff": [
+      "druid"
+    ],
+    "shadowtrail_leathers": [
+      "rogue",
+      "ranger"
+    ],
+    "slagglass_rod": [
+      "mage"
+    ],
+    "smokeglass_dagger": [
+      "rogue",
+      "ranger"
+    ],
+    "sun_prayer_icon": [
+      "cleric"
+    ],
+    "sunforged_blade": [
+      "paladin",
+      "warrior"
+    ],
+    "sunwake_maul": [
+      "cleric",
+      "paladin",
+      "warrior"
+    ],
+    "thorncall_staff": [
+      "druid"
+    ],
+    "thornline_knife": [
+      "ranger",
+      "rogue"
+    ],
+    "trail_knife": [
+      "ranger",
+      "rogue"
+    ],
+    "warded_kite": [
+      "paladin",
+      "warrior"
+    ],
+    "wardens_cuirass": [
+      "paladin",
+      "warrior"
+    ],
+    "warrenspine_recurve": [
+      "ranger"
+    ],
+    "wayfarer_vestments": [
+      "cleric"
+    ],
+    "weirward_bulwark": [
+      "paladin",
+      "warrior"
+    ],
+    "wildbloom_talisman": [
+      "druid"
+    ]
+  },
   "item_templates": {
     "anchor_glass_shard": {
       "kind": "loot",

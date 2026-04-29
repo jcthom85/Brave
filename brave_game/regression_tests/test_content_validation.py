@@ -30,6 +30,12 @@ class ContentValidationTests(unittest.TestCase):
                     "use": {"effect_type": "unlock_recipe", "recipe_domain": "cooking", "unlock_recipe": "missing_recipe"},
                 },
             },
+            item_class_requirements={
+                **registry.items.item_class_requirements,
+                "missing_restriction_item": ("warrior",),
+                "field_bandage": ("warrior",),
+                "militia_blade": ("missing_class",),
+            },
         )
         broken_quests = replace(
             registry.quests,
@@ -105,6 +111,9 @@ class ContentValidationTests(unittest.TestCase):
 
         self.assertTrue(any("Starter consumable references unknown item" in error for error in errors))
         self.assertTrue(any("unlocks unknown cooking recipe" in error for error in errors))
+        self.assertTrue(any("Item class restriction references unknown item" in error for error in errors))
+        self.assertTrue(any("Item class restriction references non-equipment item" in error for error in errors))
+        self.assertTrue(any("Item militia_blade references unknown allowed class" in error for error in errors))
         self.assertTrue(any("has unknown prerequisite" in error for error in errors))
         self.assertTrue(any("collects unknown item" in error for error in errors))
         self.assertTrue(any("rewards unknown item" in error for error in errors))

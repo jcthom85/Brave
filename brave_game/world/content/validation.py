@@ -100,6 +100,17 @@ def _validate_item_content(registry, errors):
         if template_id not in items.item_templates:
             errors.append(f"Starter consumable references unknown item: {template_id}")
 
+    for template_id, class_keys in items.item_class_requirements.items():
+        item_data = items.item_templates.get(template_id)
+        if not item_data:
+            errors.append(f"Item class restriction references unknown item: {template_id}")
+            continue
+        if item_data.get("kind") != "equipment":
+            errors.append(f"Item class restriction references non-equipment item: {template_id}")
+        for class_key in class_keys:
+            if class_key not in registry.characters.classes:
+                errors.append(f"Item {template_id} references unknown allowed class: {class_key}")
+
 
 def _validate_quest_content(registry, errors):
     items = registry.items

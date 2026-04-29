@@ -57,6 +57,7 @@ class ContentRegistryTests(unittest.TestCase):
         self.assertEqual(tuple(payload["equipment_slots"]), registry.items.equipment_slots)
         self.assertEqual(payload["item_templates"]["militia_blade"]["name"], registry.items.get("militia_blade")["name"])
         self.assertEqual(payload["bonus_labels"]["armor"], registry.items.bonus_labels["armor"])
+        self.assertEqual(tuple(payload["item_class_requirements"]["militia_blade"]), registry.items.item_class_requirements["militia_blade"])
 
     def test_item_registry_helpers_run_against_pack_backed_data(self):
         registry = get_content_registry()
@@ -69,6 +70,9 @@ class ContentRegistryTests(unittest.TestCase):
         self.assertEqual("eat", registry.items.get_item_use_profile("riverlight_chowder", context="combat")["verb"])
         self.assertEqual("riverlight_chowder", registry.items.match_inventory_item(character, "chowder", context="combat"))
         self.assertIn("Armor", registry.items.format_bonus_summary({"bonuses": {"armor": 4}}))
+        self.assertEqual(("ranger",), registry.items.get_item_allowed_classes("ashwood_bow"))
+        self.assertFalse(registry.items.is_equipment_allowed_for_class("ashwood_bow", "mage"))
+        self.assertIn("Ranger", registry.items.format_allowed_class_summary("ashwood_bow"))
 
     def test_quest_registry_loads_from_pack_file(self):
         registry = get_content_registry()
@@ -162,4 +166,5 @@ class ContentRegistryTests(unittest.TestCase):
         registry = reload_content_registry()
 
         self.assertIs(legacy_items.ITEM_TEMPLATES, registry.items.item_templates)
+        self.assertIs(legacy_items.ITEM_CLASS_REQUIREMENTS, registry.items.item_class_requirements)
         self.assertIs(legacy_quests.QUESTS, registry.quests.quests)

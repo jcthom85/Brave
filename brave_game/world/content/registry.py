@@ -88,6 +88,7 @@ class CharacterContentRegistry:
 class ItemContentRegistry:
     source_path: str
     equipment_slots: tuple
+    item_class_requirements: dict
     item_templates: dict
     starter_consumables: tuple
     starter_loadouts: dict
@@ -171,6 +172,39 @@ class ItemContentRegistry:
             sign = "+" if value >= 0 else ""
             parts.append(f"{label} {sign}{value}")
         return ", ".join(parts)
+
+    def get_item_allowed_classes(self, item_or_template):
+        item = item_or_template if isinstance(item_or_template, dict) else self.get(item_or_template)
+        if not item or item.get("kind") != "equipment":
+            return ()
+
+        template_id = None
+        if not isinstance(item_or_template, dict):
+            template_id = item_or_template
+        else:
+            template_id = item.get("template") or item.get("id")
+            if not template_id:
+                for key, value in self.item_templates.items():
+                    if value is item or value == item:
+                        template_id = key
+                        break
+        return tuple(self.item_class_requirements.get(template_id, ()))
+
+    def is_equipment_allowed_for_class(self, item_or_template, class_key):
+        item = item_or_template if isinstance(item_or_template, dict) else self.get(item_or_template)
+        if not item or item.get("kind") != "equipment":
+            return True
+        if str(class_key or "").lower() == "warrior":
+            return True
+
+        allowed = self.get_item_allowed_classes(item_or_template)
+        return not allowed or str(class_key or "").lower() in allowed
+
+    def format_allowed_class_summary(self, item_or_template):
+        allowed = self.get_item_allowed_classes(item_or_template)
+        if not allowed:
+            return ""
+        return "Allowed: " + ", ".join(class_key.replace("_", " ").title() for class_key in allowed)
 
     @staticmethod
     def _normalize_item_token(value):
@@ -371,6 +405,10 @@ def _build_item_registry_from_payload(payload, source_path):
     return ItemContentRegistry(
         source_path=str(source_path),
         equipment_slots=tuple(payload.get("equipment_slots", ())),
+        item_class_requirements={
+            template_id: tuple(class_keys or ())
+            for template_id, class_keys in payload.get("item_class_requirements", {}).items()
+        },
         item_templates=dict(payload.get("item_templates", {})),
         starter_consumables=tuple(tuple(entry) for entry in payload.get("starter_consumables", [])),
         starter_loadouts=dict(payload.get("starter_loadouts", {})),

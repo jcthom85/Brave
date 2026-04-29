@@ -7,40 +7,6 @@ CONTENT = get_content_registry()
 TROPHIES = CONTENT.systems.trophies
 
 
-_UNUSED_TROPHIES = {
-    "junkyard_beacon_core": {
-        "name": "Beacon Core",
-        "world": "Junk-Yard Planet",
-        "summary": "The first recovered heart-core from beyond the Nexus, still faintly warm with route light.",
-        "placeholder": "A brass label waits for the first relic from Junk-Yard Planet.",
-    },
-    "blackreed_battle_standard": {
-        "name": "Blackreed Battle Standard",
-        "world": "Ruined Watchtower",
-        "summary": "The rain-dark standard Captain Varn flew over the tower, hung now as proof the ridge does not belong to him anymore.",
-        "placeholder": "A wall hook waits for whatever proof finally comes down from the old watchtower.",
-    },
-    "potking_battered_lid": {
-        "name": "Pot-King's Battered Lid",
-        "world": "Goblin Warrens",
-        "summary": "The dented iron lid Grubnak treated like a crown, hung now as proof the warrens no longer rule the road below.",
-        "placeholder": "An empty bracket waits for whatever ugly prize finally comes up from the goblin warrens.",
-    },
-    "miretooth_fen_jaw": {
-        "name": "Miretooth's Fen Jaw",
-        "world": "Blackfen Approach",
-        "summary": "The hooked lower jaw of the marsh predator stalking Blackfen, mounted now as proof the bog edge does not answer only to hunger.",
-        "placeholder": "A narrow iron cradle waits for whatever proof finally comes back from the Blackfen edge.",
-    },
-    "hollow_lantern_prism": {
-        "name": "Hollow Lantern Prism",
-        "world": "Drowned Weir",
-        "summary": "The pale prism taken from the wrong south light at the drowned weir, hung now as proof Brambleford's first hard chapter ended with the lamp finally dark.",
-        "placeholder": "A black-brass frame waits for whatever finally comes back from the drowned weir beyond Blackfen.",
-    },
-}
-
-
 def _get_vitrine():
     return get_entity("trophy_vitrine")
 
