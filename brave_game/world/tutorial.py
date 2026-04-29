@@ -853,38 +853,38 @@ def _talk_tamsin(character, is_action=False):
 
     if step == "first_steps" and not flags.get("visited_quartermaster_shed"):
         return (
-            "Hear that bell? South road lantern went black before dawn, and the gate crew just dragged in a cart full of cut harness and clawed mud. "
-            "You can help, but first I need you steady and equipped. Head east to Nella in the shed. She checks every road kit before anyone gets pointed at real trouble."
+            "\"Hear that bell? South road lantern went black before dawn, and the gate crew just dragged in a cart full of cut harness and clawed mud. "
+            "You can help, but first I need you steady and equipped. Head east to Nella in the shed. She checks every road kit before anyone gets pointed at real trouble.\""
         )
 
     if step == "first_steps" and not flags.get("visited_quartermaster_shed"):
-        return "East to the shed. Nella is already opening crates, and the road is not waiting for anyone to remember their own pockets."
+        return "\"East to the shed. Nella is already opening crates, and the road is not waiting for anyone to remember their own pockets.\""
 
     if step == "first_steps":
-        return "Stay with Nella until your kit is squared away. Gear, pack, board, then back west to me."
+        return "\"Stay with Nella until your kit is squared away. Gear, pack, board, then back west to me.\""
 
     if step == "pack_before_walk":
-        return "Finish Nella's kit check, then come back west. Brask can test your hands after we know your straps are tight."
+        return "\"Finish Nella's kit check, then come back west. Brask can test your hands after we know your straps are tight.\""
 
     if step == "stand_your_ground":
-        return "You know where your gear is now. Good. Brask is waiting west. The pens started rattling when the south bell did."
+        return "\"You know where your gear is now. Good. Brask is waiting west. The pens started rattling when the south bell did.\""
 
     if step == "clear_the_pens":
         return (
-            "The pens are live enough to sting and small enough not to kill your confidence. Start the fight when you're ready, "
-            "size up your enemies, use your class skill, finish it clean, then come back here and rest."
+            "\"The pens are live enough to sting and small enough not to kill your confidence. Start the fight when you're ready, "
+            "size up your enemies, use your class skill, finish it clean, then come back here and rest.\""
         )
 
     if step == "fit_your_clasp":
         return (
-            "That clasp is small, but small kit still changes the numbers. Equip the clasp in your gear, then check your sheet, map, or objectives "
-            "if you want your bearings before you rest."
+            "\"That clasp is small, but small kit still changes the numbers. Equip the clasp in your gear, then check your sheet, map, or objectives "
+            "if you want your bearings before you rest.\""
         )
 
     if step == "catch_your_breath":
-        return "Good work. Now learn the other half of surviving: recover before you swagger. Rest here in the yard, then south to Harl. He has the cellar first and the road after."
+        return "\"Good work. Now learn the other half of surviving: recover before you swagger. Rest here in the yard, then south to Harl. He has the cellar first and the road after.\""
 
-    return "That's enough hand-holding. South takes you to Captain Harl and the rest of town. That dead lantern is going to become someone's problem, and Harl prefers problems with names."
+    return "\"That's enough hand-holding. South takes you to Captain Harl and the rest of town. That dead lantern is going to become someone's problem, and Harl prefers problems with names.\""
 
 
 def _talk_nella(character, is_action=False):
@@ -897,16 +897,16 @@ def _talk_nella(character, is_action=False):
     remaining = _remaining_pack_tasks(flags)
     if not flags.get("viewed_gear"):
         return (
-            "Before anyone points you at a damaged road, know what you're wearing. Check your gear and look over your kit. "
-            "After that, open your pack."
+            "\"Before anyone points you at a damaged road, know what you're wearing. Check your gear and look over your kit. "
+            "After that, open your pack.\""
         )
     if not flags.get("viewed_pack"):
-        return "Good. Now open your pack and see what you're carrying before the road gets an opinion."
+        return "\"Good. Now open your pack and see what you're carrying before the road gets an opinion.\""
     if not flags.get("read_supply_board"):
-        return "One last thing. Read the supply board. If a bell is ringing, the board usually knows why."
+        return "\"One last thing. Read the supply board. If a bell is ringing, the board usually knows why.\""
     if remaining:
-        return "You're nearly done here. Finish the last bit of kit-checking before you go chasing instructions elsewhere."
-    return "That will do. Back west to the yard. Tamsin will point you at Brask once she sees you can move with your kit sorted."
+        return "\"You're nearly done here. Finish the last bit of kit-checking before you go chasing instructions elsewhere.\""
+    return "\"That will do. Back west to the yard. Tamsin will point you at Brask once she sees you can move with your kit sorted.\""
 
 
 def _talk_peep(character, is_action=False):
@@ -920,12 +920,12 @@ def _talk_peep(character, is_action=False):
     if others:
         names = ", ".join(others)
         return (
-            f"You're not alone out here. If you mean to travel with {names}, form a party first. "
-            "Invite them to group up, and check your map if anyone slips off."
+            f"\"You're not alone out here. If you mean to travel with {names}, form a party first. "
+            "Invite them to group up, and check your map if anyone slips off.\""
         )
     return (
-        "If family turns up later, don't just shout and hope. Invite them to your party to group up, stay together, "
-        "and check your map when the road makes a liar out of your memory."
+        "\"If family turns up later, don't just shout and hope. Invite them to your party to group up, stay together, "
+        "and check your map when the road makes a liar out of your memory.\""
     )
 
 
@@ -936,9 +936,9 @@ def _talk_brask(character, is_action=False):
     state = _get_normalized_tutorial_state(character)
     ability_name = CLASS_ABILITY_HINTS.get(character.db.brave_class, CLASSES[character.db.brave_class]["progression"][0][1])
     return (
-        "Road bell spooked the pens, so we make the first mistake here where the fence is short and I'm watching. "
+        "\"Road bell spooked the pens, so we make the first mistake here where the fence is short and I'm watching. "
         "Go south, start the controlled fight, and keep your eyes on the field. Before you leave, I need to see your own trick land: "
-        f"{ability_name}. The fight itself will show you the target."
+        f"{ability_name}. The fight itself will show you the target.\""
     )
 
 
@@ -947,8 +947,8 @@ def _talk_harl(character, is_action=False):
     step = state.get("step")
     if step != "through_the_gate":
         return (
-            "You're not done with the north yard yet. Tamsin and Brask are there to keep the first mistakes cheap, and nobody reports in properly without catching their breath first. "
-            "Finish with them, then come back."
+            "\"You're not done with the north yard yet. Tamsin and Brask are there to keep the first mistakes cheap, and nobody reports in properly without catching their breath first. "
+            "Finish with them, then come back.\""
         )
 
     if is_action:
@@ -962,9 +962,9 @@ def _talk_harl(character, is_action=False):
         ensure_starter_quests(character)
 
     return (
-        "Tamsin sent you through with your head on straight. Good. The south lantern going dark is not your first job; surviving long enough to reach it is. "
+        "\"Tamsin sent you through with your head on straight. Good. The south lantern going dark is not your first job; surviving long enough to reach it is. "
         "Start close: head south to the green, then west to the inn. Uncle Pib's cellar is tearing itself apart, and the stores matter if the road stays cut. "
-        "Clear that, then Mira will put a name to what hit the fences."
+        "Clear that, then Mira will put a name to what hit the fences.\""
     )
 
 
