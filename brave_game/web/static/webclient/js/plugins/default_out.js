@@ -75,6 +75,8 @@ let defaultout_plugin = (function () {
     var pendingArcadeRoomRestore = false;
     var pendingMainScrollRestore = null;
     var currentMobileUtilityTab = null;
+    var currentMobileUtilityPresentation = "sheet";
+    var mobileNavDockExpanded = false;
     var mobileRoomActivityUnreadCount = 0;
     var currentCombatActionTab = "abilities";
     var currentMobileSwipe = null;
@@ -2773,7 +2775,7 @@ let defaultout_plugin = (function () {
             ? "<span class='brave-mobile-tools__button-badge' aria-label='" + escapeHtml(String(badgeCount)) + " new activity messages'>" + escapeHtml(String(badgeCount > 9 ? "9+" : badgeCount)) + "</span>"
             : "";
         return (
-            "<button type='button' class='brave-mobile-tools__button" + activeClass + "' data-brave-mobile-panel='" + escapeHtml(key) + "'>"
+            "<button type='button' class='brave-mobile-tools__button" + activeClass + "' data-brave-mobile-panel='" + escapeHtml(key) + "' aria-label='" + escapeHtml(label) + "'>"
             + icon(iconName, "brave-mobile-tools__button-icon")
             + "<span>" + escapeHtml(label) + "</span>"
             + badgeMarkup
@@ -2799,9 +2801,9 @@ let defaultout_plugin = (function () {
         var presence = getRoomSocialPresence(roomView);
         return (
             "<div class='brave-mobile-tools'>"
-            + buildMobileUtilityButton("activity", "Activity", "timeline", currentMobileUtilityTab === "activity", mobileRoomActivityUnreadCount)
+            + buildMobileUtilityButton("activity", "Activity", "article", currentMobileUtilityTab === "activity", mobileRoomActivityUnreadCount)
             + buildMobileUtilityButton("nearby", "Nearby", "groups", currentMobileUtilityTab === "nearby", presence.nearby_total)
-            + buildMobileUtilityButton("menu", "Menu", "menu", currentMobileUtilityTab === "menu")
+            + buildMobileUtilityButton("menu", "Menu", "settings", currentMobileUtilityTab === "menu")
             + "</div>"
         );
     };
@@ -3123,6 +3125,14 @@ let defaultout_plugin = (function () {
                 + currentRoomFeedEntries.map(renderRoomFeedEntryMarkup).join("")
                 + "</div>"
                 + "</div>"
+                + "</div>"
+                + "<div class='brave-mobile-sheet__section brave-mobile-sheet__section--chat-input'>"
+                + "<div class='brave-mobile-chat-input'>"
+                + "<button type='button' class='brave-mobile-chat-input__trigger brave-click' data-brave-chat-open='1'>"
+                + icon("forum", "brave-mobile-chat-input__icon")
+                + "<span>Say something nearby...</span>"
+                + "</button>"
+                + "</div>"
                 + "</div>";
         } else if (tab === "room") {
             bodyMarkup = buildMobileRoomPanelMarkup(roomView);
@@ -3164,8 +3174,10 @@ let defaultout_plugin = (function () {
         if (host) {
             host.innerHTML = "";
             host.setAttribute("aria-hidden", "true");
+            host.classList.remove("mobile-utility-sheet--drawer");
         }
         document.body.classList.remove("brave-mobile-sheet-active");
+        document.body.classList.remove("brave-mobile-sheet-drawer");
     };
 
     var renderMobileUtilitySheet = function () {
@@ -3182,7 +3194,9 @@ let defaultout_plugin = (function () {
 
         host.innerHTML = buildMobileUtilitySheetMarkup(currentMobileUtilityTab, roomView);
         host.setAttribute("aria-hidden", "false");
+        host.classList.toggle("mobile-utility-sheet--drawer", currentMobileUtilityPresentation === "drawer");
         document.body.classList.add("brave-mobile-sheet-active");
+        document.body.classList.toggle("brave-mobile-sheet-drawer", currentMobileUtilityPresentation === "drawer");
         syncRoomActivityCardSurface(host, roomView, { mobile: true });
         syncRoomVoiceBubbleHosts();
         if (currentMobileUtilityTab === "activity") {
@@ -3221,6 +3235,7 @@ let defaultout_plugin = (function () {
         }
         if (document.body) {
             document.body.classList.remove("brave-notice-active");
+            document.body.classList.remove("brave-quest-notice-active");
         }
     };
 
@@ -3296,24 +3311,39 @@ let defaultout_plugin = (function () {
         var duration = noticeData.duration_ms === 0
             ? 0
             : Math.max(1800, parseInt(noticeData.duration_ms || (tone === "danger" ? 5600 : 4200), 10) || 0);
+        var kind = noticeData.kind ? String(noticeData.kind) : "";
+        var kindClass = kind ? " brave-notice--kind-" + escapeHtml(kind.replace(/[^a-zA-Z0-9_-]/g, "")) : "";
+        var questUpdate = kind === "quest-update";
+        var noticeTitle = questUpdate && noticeData.quest_title ? noticeData.quest_title : (noticeData.title || "Notice");
+        var noticeEyebrow = questUpdate ? (noticeData.title || "Quest Updated") : "";
+        var bodyLines = lines.slice();
+        if (questUpdate) {
+            bodyLines = [];
+            if (noticeData.quest_detail) {
+                bodyLines.push(noticeData.quest_detail);
+            }
+        }
 
         host.innerHTML =
-            "<div class='brave-notice brave-notice--" + escapeHtml(tone) + "' role='status' aria-live='polite' aria-atomic='true'>"
+            "<div class='brave-notice brave-notice--" + escapeHtml(tone) + kindClass + "' role='status' aria-live='polite' aria-atomic='true'>"
             + "<div class='brave-notice__head'>"
             + "<div class='brave-notice__titlebar'>"
             + "<span class='brave-notice__icon'>"
             + icon(getNoticeIcon(noticeData))
             + "</span>"
-            + "<div class='brave-notice__title'>" + escapeHtml(noticeData.title || "Notice") + "</div>"
+            + "<div class='brave-notice__titlecopy'>"
+            + (noticeEyebrow ? "<div class='brave-notice__eyebrow'>" + escapeHtml(noticeEyebrow) + "</div>" : "")
+            + "<div class='brave-notice__title'>" + escapeHtml(noticeTitle) + "</div>"
+            + "</div>"
             + "</div>"
             + "<button type='button' class='brave-notice__close brave-view__action brave-view__action--muted brave-view__back' data-brave-notice-close='1' aria-label='Close notice'>"
             + icon("close", "brave-view__action-icon")
             + "<span>Close</span>"
             + "</button>"
             + "</div>"
-            + (lines.length
+            + (bodyLines.length
                 ? "<div class='brave-notice__body'>"
-                    + lines.map(function (line) {
+                    + bodyLines.map(function (line) {
                         return "<div class='brave-notice__line'>" + escapeHtml(line) + "</div>";
                     }).join("")
                     + "</div>"
@@ -3321,6 +3351,7 @@ let defaultout_plugin = (function () {
             + "</div>";
         host.setAttribute("aria-hidden", "false");
         document.body.classList.add("brave-notice-active");
+        document.body.classList.toggle("brave-quest-notice-active", questUpdate);
 
         if (!noticeData.sticky && duration > 0) {
             currentNoticeTimer = window.setTimeout(function () {
@@ -3760,6 +3791,14 @@ let defaultout_plugin = (function () {
                 currentViewData.welcome_pages = [];
             }
         }
+        if (active) {
+            mobileNavDockExpanded = false;
+            if (typeof clearMobileNavDock === "function") {
+                clearMobileNavDock({ preserveMobileSheet: true });
+            }
+        } else if (typeof renderMobileNavDock === "function") {
+            renderMobileNavDock();
+        }
     };
 
     var renderWelcomePage = function () {
@@ -4180,6 +4219,7 @@ let defaultout_plugin = (function () {
             tabKey = "quests";
         }
         closeMobileCommandTray();
+        currentMobileUtilityPresentation = "sheet";
         currentMobileUtilityTab = currentMobileUtilityTab === tabKey ? null : tabKey;
         if (currentMobileUtilityTab === "activity") {
             mobileRoomActivityUnreadCount = 0;
@@ -4188,9 +4228,34 @@ let defaultout_plugin = (function () {
         renderMobileNavDock();
     };
 
+    var openMobileJournalDrawer = function () {
+        if (!isMobileViewport() || !getCurrentRoomView()) {
+            return;
+        }
+        closeMobileCommandTray();
+        clearPickerSheet();
+        currentMobileUtilityTab = "quests";
+        currentMobileUtilityPresentation = "drawer";
+        renderMobileUtilitySheet();
+        renderMobileNavDock();
+    };
+
+    var setMobileNavDockExpanded = function (expanded) {
+        if (!isMobileViewport()) {
+            return;
+        }
+        mobileNavDockExpanded = !!expanded;
+        renderMobileNavDock();
+    };
+
+    var toggleMobileNavDockExpanded = function () {
+        setMobileNavDockExpanded(!mobileNavDockExpanded);
+    };
+
     var handleMobileUtilityAction = function (action) {
         if (action === "command") {
             currentMobileUtilityTab = null;
+            currentMobileUtilityPresentation = "sheet";
             renderMobileUtilitySheet();
             if (isMobileCommandTrayOpen()) {
                 closeMobileCommandTray();
@@ -4203,6 +4268,7 @@ let defaultout_plugin = (function () {
         }
         if (action === "close") {
             currentMobileUtilityTab = null;
+            currentMobileUtilityPresentation = "sheet";
             renderMobileUtilitySheet();
             renderMobileNavDock();
         }
@@ -4542,7 +4608,8 @@ let defaultout_plugin = (function () {
         "help_outline": "help",
         "search": "searching",
         "close": "cancel",
-        "menu": "hamburger",
+        "menu": "gears",
+        "timeline": "scroll-unfurled",
         "more_vert": "dots-vertical",
         "more_horiz": "dots-horizontal",
         "login": "key",
@@ -4830,6 +4897,16 @@ let defaultout_plugin = (function () {
         );
     };
 
+    var buildMobileNavToggleMarkup = function (hasNavSection) {
+        var label = mobileNavDockExpanded ? "Hide movement" : "Show movement";
+        var stateClass = mobileNavDockExpanded ? " brave-mobile-nav-toggle--expanded" : "";
+        return (
+            "<button type='button' class='brave-mobile-nav-toggle" + stateClass + "' data-brave-mobile-nav-toggle='1' aria-label='" + escapeHtml(label) + "' aria-expanded='" + (mobileNavDockExpanded ? "true" : "false") + "'>"
+            + (hasNavSection ? icon("explore", "brave-mobile-nav-toggle__icon") : icon("near_me", "brave-mobile-nav-toggle__icon"))
+            + "</button>"
+        );
+    };
+
     var renderMobileNavPad = function (section) {
         var entryMap = {};
         (section && section.items ? section.items : []).forEach(function (entry) {
@@ -4837,9 +4914,20 @@ let defaultout_plugin = (function () {
                 entryMap[entry.direction] = entry;
             }
         });
+        var swipeAttrs = " data-brave-swipe-surface='1'";
+        [
+            { axis: "up", entry: entryMap.north },
+            { axis: "left", entry: entryMap.west },
+            { axis: "right", entry: entryMap.east },
+            { axis: "down", entry: entryMap.south },
+        ].forEach(function (item) {
+            if (item.entry && item.entry.command) {
+                swipeAttrs += " data-brave-swipe-" + item.axis + "='" + escapeHtml(item.entry.command) + "'";
+            }
+        });
 
         return (
-            "<div class='brave-view__navpad brave-view__navpad--mobile'>"
+            "<div class='brave-view__navpad brave-view__navpad--mobile'" + swipeAttrs + ">"
             + "<div class='brave-view__navgrid brave-view__navgrid--mobile'>"
             + renderMobileNavButton(entryMap.north, "brave-view__navcard--north")
             + renderMobileNavButton(entryMap.west, "brave-view__navcard--west")
@@ -7639,7 +7727,6 @@ let defaultout_plugin = (function () {
         if (emoteAction) {
             orderedActions.push(emoteAction);
         }
-        orderedActions.push(chatAction);
         return (
             "<div class='brave-room-actions' aria-label='Room actions'>"
             + orderedActions.map(function (action) {
@@ -9109,6 +9196,10 @@ let defaultout_plugin = (function () {
     var updateMobileDockClearance = function () {
         var body = document.body;
         var dock = document.getElementById("mobile-nav-dock");
+        if (body && body.classList.contains("brave-objectives-active")) {
+            body.style.removeProperty("--brave-mobile-dock-clearance");
+            return;
+        }
         if (!body || !dock || !dock.innerHTML.trim()) {
             if (body) {
                 body.style.removeProperty("--brave-mobile-dock-clearance");
@@ -9140,6 +9231,13 @@ let defaultout_plugin = (function () {
             clearMobileNavDock();
             return;
         }
+        if (document.body.classList.contains("brave-objectives-active")) {
+            dock.innerHTML = "";
+            document.body.style.removeProperty("--brave-mobile-dock-clearance");
+            document.body.classList.remove("brave-mobile-nav-active");
+            document.body.classList.remove("brave-mobile-command-dock-active");
+            return;
+        }
 
         if (combatViewTransitionActive || (currentViewData && currentViewData.variant === "combat")) {
             dock.innerHTML = "";
@@ -9162,8 +9260,10 @@ let defaultout_plugin = (function () {
 
         document.body.classList.remove("brave-mobile-command-dock-active");
 
+        var dockStateClass = mobileNavDockExpanded ? " brave-mobile-nav-dock__inner--expanded" : " brave-mobile-nav-dock__inner--collapsed";
         dock.innerHTML =
-            "<div class='brave-mobile-nav-dock__inner'>"
+            "<div class='brave-mobile-nav-dock__inner" + dockStateClass + "' data-brave-mobile-nav-dock='1'>"
+            + buildMobileNavToggleMarkup(!!navSection)
             + buildMobileDockToolsMarkup()
             + (navSection ? renderMobileNavPad(navSection) : "")
             + "</div>";
@@ -9258,6 +9358,7 @@ let defaultout_plugin = (function () {
         if (isMobileViewport()) {
             if (currentMobileUtilityTab) {
                 currentMobileUtilityTab = null;
+                currentMobileUtilityPresentation = "sheet";
                 renderMobileUtilitySheet();
                 renderMobileNavDock();
             }
@@ -10426,7 +10527,7 @@ let defaultout_plugin = (function () {
 
     var startMobileSwipe = function (surface, x, y, identifier, mode, options) {
         options = options || {};
-        if (!surface && !hasAnySwipeCommands(options.commands)) {
+        if (!surface && !hasAnySwipeCommands(options.commands) && typeof options.action !== "function") {
             currentMobileSwipe = null;
             return;
         }
@@ -10437,6 +10538,8 @@ let defaultout_plugin = (function () {
             y: y,
             surface: surface,
             commands: options.commands || null,
+            action: typeof options.action === "function" ? options.action : null,
+            directionLock: options.directionLock || "",
             flashSurface: options.flashSurface || surface || null,
         };
     };
@@ -10467,6 +10570,8 @@ let defaultout_plugin = (function () {
 
         var swipeSurface = currentMobileSwipe.surface;
         var swipeCommands = currentMobileSwipe.commands;
+        var swipeAction = currentMobileSwipe.action;
+        var directionLock = currentMobileSwipe.directionLock;
         var flashSurface = currentMobileSwipe.flashSurface || swipeSurface;
         var dx = x - currentMobileSwipe.x;
         var dy = y - currentMobileSwipe.y;
@@ -10487,12 +10592,18 @@ let defaultout_plugin = (function () {
         if (!direction) {
             return false;
         }
+        if (directionLock === "horizontal" && absX < absY * 1.35) {
+            return false;
+        }
+        if (directionLock === "vertical" && absY < absX * 1.2) {
+            return false;
+        }
 
         var command = swipeSurface ? swipeSurface.getAttribute("data-brave-swipe-" + direction) : null;
         if (!command && swipeCommands) {
             command = swipeCommands[direction] || null;
         }
-        if (!command) {
+        if (!command && !swipeAction) {
             return false;
         }
 
@@ -10509,7 +10620,11 @@ let defaultout_plugin = (function () {
                 flashSurface.classList.remove("brave-view__swipe-surface--flash");
             }, 180);
         }
-        sendBrowserCommand(command);
+        if (command) {
+            sendBrowserCommand(command);
+        } else if (swipeAction) {
+            swipeAction(direction);
+        }
         return true;
     };
 
@@ -10691,6 +10806,13 @@ let defaultout_plugin = (function () {
                 toggleObjectives();
                 return;
             }
+            var mobileNavToggleTarget = event.target.closest("[data-brave-mobile-nav-toggle]");
+            if (mobileNavToggleTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleMobileNavDockExpanded();
+                return;
+            }
             var mobileTarget = event.target.closest("[data-brave-mobile-panel], [data-brave-mobile-action]");
             if (mobileTarget) {
                 event.preventDefault();
@@ -10753,6 +10875,7 @@ let defaultout_plugin = (function () {
                 }
                 if (isMobileViewport()) {
                     currentMobileUtilityTab = null;
+                    currentMobileUtilityPresentation = "sheet";
                     clearMobileUtilitySheet();
                     renderMobileNavDock();
                 }
@@ -10862,8 +10985,37 @@ let defaultout_plugin = (function () {
                         // Ignore pointer-capture failures; the gesture still works without it.
                     }
                 }
-                event.preventDefault();
-                event.stopPropagation();
+                return;
+            }
+            var mobileNavToggle = event.target.closest("[data-brave-mobile-nav-toggle]");
+            if (mobileNavToggle && (!event.pointerType || event.pointerType === "touch" || event.pointerType === "pen")) {
+                startMobileSwipe(mobileNavToggle, event.clientX, event.clientY, event.pointerId, "pointer", {
+                    action: function (direction) {
+                        if (direction === "up") {
+                            setMobileNavDockExpanded(true);
+                        } else if (direction === "down") {
+                            setMobileNavDockExpanded(false);
+                        }
+                    },
+                    directionLock: "vertical",
+                    flashSurface: mobileNavToggle,
+                });
+                return;
+            }
+            var openDrawer = event.target.closest("#mobile-utility-sheet.mobile-utility-sheet--drawer");
+            if (openDrawer && (!event.pointerType || event.pointerType === "touch" || event.pointerType === "pen")) {
+                startMobileSwipe(openDrawer, event.clientX, event.clientY, event.pointerId, "pointer", {
+                    action: function (direction) {
+                        if (direction === "right") {
+                            currentMobileUtilityTab = null;
+                            currentMobileUtilityPresentation = "sheet";
+                            renderMobileUtilitySheet();
+                            renderMobileNavDock();
+                        }
+                    },
+                    directionLock: "horizontal",
+                    flashSurface: openDrawer,
+                });
                 return;
             }
             if ((!event.pointerType || event.pointerType === "touch" || event.pointerType === "pen") && canStartGlobalRoomSwipe(event.target)) {
@@ -10964,6 +11116,7 @@ let defaultout_plugin = (function () {
         if (!window.PointerEvent) {
             document.addEventListener("touchstart", function (event) {
                 var surface = event.target.closest("[data-brave-swipe-surface]");
+                var mobileNavToggleSurface = event.target.closest("[data-brave-mobile-nav-toggle]");
                 if (!event.touches || event.touches.length !== 1) {
                     cancelMobileSwipe("touch");
                     return;
@@ -10971,6 +11124,36 @@ let defaultout_plugin = (function () {
                 var touch = event.touches[0];
                 if (surface) {
                     startMobileSwipe(surface, touch.clientX, touch.clientY, touch.identifier, "touch");
+                    return;
+                }
+                if (mobileNavToggleSurface) {
+                    startMobileSwipe(mobileNavToggleSurface, touch.clientX, touch.clientY, touch.identifier, "touch", {
+                        action: function (direction) {
+                            if (direction === "up") {
+                                setMobileNavDockExpanded(true);
+                            } else if (direction === "down") {
+                                setMobileNavDockExpanded(false);
+                            }
+                        },
+                        directionLock: "vertical",
+                        flashSurface: mobileNavToggleSurface,
+                    });
+                    return;
+                }
+                var drawerSurface = event.target.closest("#mobile-utility-sheet.mobile-utility-sheet--drawer");
+                if (drawerSurface) {
+                    startMobileSwipe(drawerSurface, touch.clientX, touch.clientY, touch.identifier, "touch", {
+                        action: function (direction) {
+                            if (direction === "right") {
+                                currentMobileUtilityTab = null;
+                                currentMobileUtilityPresentation = "sheet";
+                                renderMobileUtilitySheet();
+                                renderMobileNavDock();
+                            }
+                        },
+                        directionLock: "horizontal",
+                        flashSurface: drawerSurface,
+                    });
                     return;
                 }
                 if (canStartGlobalRoomSwipe(event.target)) {

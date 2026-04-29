@@ -198,7 +198,7 @@ class CombatViewTests(unittest.TestCase):
         self.assertEqual(["Abilities", "Items", "Flee"], [action.get("label") for action in view.get("actions", [])])
         self.assertIsNot(_action(view, "Flee").get("icon_only"), True)
 
-        party = _section(view, "Party")
+        party = _section(view, "Heroes")
         dad_entry = _entry(party, "Dad")
         peep_entry = _entry(party, "Peep")
         self.assertEqual("hospital-cross", dad_entry.get("background_icon"))
@@ -243,7 +243,7 @@ class CombatViewTests(unittest.TestCase):
         encounter = DummyEncounter(room, party, enemies)
 
         view = build_combat_view(encounter, party[0])
-        party_section = _section(view, "Party")
+        party_section = _section(view, "Heroes")
         enemies_section = _section(view, "Enemies")
 
         self.assertEqual(4, view.get("party_count"))
@@ -306,7 +306,7 @@ class CombatViewTests(unittest.TestCase):
 
         self.assertEqual("1 Ally • 1 Pet • 1 Foe", view.get("subtitle", ""))
 
-        party = _section(view, "Party")
+        party = _section(view, "Heroes")
         ranger_entry = _entry(party, "Kest")
         hound_entry = _sidecar(ranger_entry, "Marsh Hound")
         self.assertEqual("pets", hound_entry.get("background_icon"))
@@ -521,7 +521,7 @@ class CombatViewTests(unittest.TestCase):
         )
 
         view = build_combat_view(encounter, warrior)
-        party_section = _section(view, "Party")
+        party_section = _section(view, "Heroes")
         enemies_section = _section(view, "Enemies")
         warrior_entry = _entry(party_section, "Dad")
         enemy_entry = _entry(enemies_section, "Old Greymaw")
@@ -566,7 +566,7 @@ class CombatViewTests(unittest.TestCase):
         with patch("world.browser_views.time.time", return_value=3.0):
             view = build_combat_view(encounter, warrior)
 
-        party_section = _section(view, "Party")
+        party_section = _section(view, "Heroes")
         warrior_entry = _entry(party_section, "Dad")
         self.assertEqual(
             [("ATB", "50 / 100"), ("HP", "20 / 24"), ("STA", "12 / 14")],
@@ -644,8 +644,8 @@ class CombatViewTests(unittest.TestCase):
         crow_one = _entry(enemies_section, "Grave Crow 1")
         crow_two = _entry(enemies_section, "Grave Crow 2")
 
-        self.assertEqual("attack e1", crow_one.get("command"))
-        self.assertEqual("attack e2", crow_two.get("command"))
+        self.assertEqual("target e1", crow_one.get("command"))
+        self.assertEqual("target e2", crow_two.get("command"))
         self.assertIsNone(crow_one.get("meta"))
         self.assertIsNone(crow_one.get("badge"))
 
@@ -727,7 +727,7 @@ class CombatViewTests(unittest.TestCase):
         )
 
         view = build_combat_view(encounter, rogue)
-        party = _section(view, "Party")
+        party = _section(view, "Heroes")
         enemies = _section(view, "Enemies")
         rogue_entry = _entry(party, "Dad")
         enemy_entry = _entry(enemies, "Bog Wolf")

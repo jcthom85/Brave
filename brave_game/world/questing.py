@@ -3,6 +3,7 @@
 from copy import deepcopy
 
 from evennia.utils import logger
+from evennia.utils.ansi import strip_ansi
 from world.content import get_content_registry
 from world.trophies import unlock_trophy
 
@@ -59,6 +60,41 @@ def _record_recent_updates(character, messages):
     character.ndb.brave_recent_quest_updates = recent[-12:]
 
 
+def _build_quest_update_notice(messages):
+    """Return structured notice fields for non-blocking quest progress toasts."""
+
+    details_by_title = {}
+    for message in messages or []:
+        plain = strip_ansi(str(message or "")).replace("||", "|").strip()
+        if ":" not in plain:
+            continue
+        prefix, detail = [part.strip() for part in plain.split(":", 1)]
+        if prefix.lower() != "quest updated" or not detail:
+            continue
+        if " - " in detail:
+            quest_title, progress_detail = [part.strip() for part in detail.split(" - ", 1)]
+        else:
+            quest_title, progress_detail = detail, ""
+        if not quest_title:
+            continue
+        details_by_title.setdefault(quest_title, [])
+        if progress_detail:
+            details_by_title[quest_title].append(progress_detail)
+
+    if not details_by_title:
+        return {}
+
+    quest_title = next(iter(details_by_title))
+    details = details_by_title[quest_title]
+    if len(details_by_title) > 1:
+        details.append(f"+{len(details_by_title) - 1} more quest update{'s' if len(details_by_title) != 2 else ''}")
+    return {
+        "kind": "quest-update",
+        "quest_title": quest_title,
+        "quest_detail": " / ".join(details) if details else "Objective advanced.",
+    }
+
+
 def _refresh_tracked_quest_scene(character):
     """Refresh the exploration tracked-quest card for active webclient sessions."""
 
@@ -87,13 +123,15 @@ def _send_progress_notice(character, messages):
             character.msg(message)
         return
 
+    notice_fields = _build_quest_update_notice(messages)
     send_browser_notice_event(
         character,
         "\n".join(messages),
         title="Quest Updated",
         tone="good",
-        icon="task_alt",
+        icon="menu_book" if notice_fields else "task_alt",
         duration_ms=4600,
+        **notice_fields,
     )
 
 

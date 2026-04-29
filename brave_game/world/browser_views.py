@@ -4135,7 +4135,7 @@ def build_combat_view(encounter, character):
                 icon=_enemy_icon(enemy),
                 background_icon=_enemy_icon(enemy),
                 size_class=_combat_card_size_class(enemy, enemy=True),
-                command=f"attack {enemy['id']}",
+                command=f"target {enemy['id']}",
                 chips=status_chips,
                 meters=[atb_meter(atb_state, enemy=True), hp_meter(enemy["hp"], enemy["max_hp"])],
                 selected=bool(selected_target_kind == "enemy" and selected_target_id == enemy.get("id")),
@@ -4187,7 +4187,7 @@ def build_combat_view(encounter, character):
                 _action("Flee", "flee", "logout", tone="danger"),
             ],
             sections=[
-                _section("Party", "groups", "entries", items=party_entries or [_entry("No active party members.", icon="person_off")], variant="party", span="compact" if party_count >= 3 else None),
+                _section("Heroes", "groups", "entries", items=party_entries or [_entry("No active heroes.", icon="person_off")], variant="party", span="compact" if party_count >= 3 else None),
                 _section("Enemies", "warning", "entries", items=enemy_entries or [_entry("No enemies remain.", icon="task_alt")], variant="targets"),
             ],
             reactive=_reactive_view(encounter.obj, scene="combat", danger="combat"),

@@ -75,7 +75,7 @@ class CombatRewardTests(unittest.TestCase):
     @patch("typeclasses.scripts.pop_recent_quest_updates", return_value=[])
     @patch("typeclasses.scripts.record_encounter_victory")
     @patch("typeclasses.scripts.roll_enemy_rewards", return_value={"silver": 30, "items": [("wolf_fang", 1), ("greymaw_pelt", 1)]})
-    def test_reward_victory_scales_late_joiners_and_blocks_idle_leech(
+    def test_reward_victory_splits_eligible_rewards_evenly_and_blocks_idle_leech(
         self,
         _roll_enemy_rewards,
         record_encounter_victory,
@@ -133,9 +133,11 @@ class CombatRewardTests(unittest.TestCase):
         rewarded = BraveEncounter._reward_victory(encounter)
 
         self.assertEqual([starter, late, idle], rewarded)
-        self.assertGreater(starter.xp_awards[0], late.xp_awards[0])
+        self.assertEqual([60], starter.xp_awards)
+        self.assertEqual([60], late.xp_awards)
         self.assertEqual([], idle.xp_awards)
-        self.assertGreater(starter.db.brave_silver, late.db.brave_silver)
+        self.assertEqual(15, starter.db.brave_silver)
+        self.assertEqual(15, late.db.brave_silver)
         self.assertEqual(0, idle.db.brave_silver)
         self.assertEqual(2, len(starter.items) + len(late.items))
         self.assertEqual([], idle.items)
@@ -144,6 +146,19 @@ class CombatRewardTests(unittest.TestCase):
         self.assertTrue(starter.ndb.brave_showing_combat_result)
         self.assertTrue(late.ndb.brave_showing_combat_result)
         self.assertTrue(idle.ndb.brave_showing_combat_result)
+        victory_kwargs_by_character = {
+            call.args[1]: call.kwargs
+            for call in _build_combat_victory_view.call_args_list
+        }
+        self.assertEqual(60, victory_kwargs_by_character[starter]["xp_total"])
+        self.assertEqual(15, victory_kwargs_by_character[starter]["reward_silver"])
+        self.assertEqual(starter.items, victory_kwargs_by_character[starter]["reward_items"])
+        self.assertEqual(60, victory_kwargs_by_character[late]["xp_total"])
+        self.assertEqual(15, victory_kwargs_by_character[late]["reward_silver"])
+        self.assertEqual(late.items, victory_kwargs_by_character[late]["reward_items"])
+        self.assertEqual(0, victory_kwargs_by_character[idle]["xp_total"])
+        self.assertEqual(0, victory_kwargs_by_character[idle]["reward_silver"])
+        self.assertEqual([], victory_kwargs_by_character[idle]["reward_items"])
 
     @patch("world.browser_panels.send_webclient_event")
     @patch("world.browser_views.build_combat_victory_view", return_value={"view": "victory"})

@@ -507,7 +507,7 @@ def get_tutorial_combat_focus(character, encounter):
     prompts.append(
         {
             "title": "Finish The Target",
-            "text": "Use attack e1 when your action is ready.",
+            "text": "Select the enemy target when your action is ready.",
             "icon": "my_location",
         }
     )
@@ -723,7 +723,7 @@ def get_tutorial_focus(character, room):
             return ["Head west to the Sparring Ring", "The pens are rattling"]
 
     if step == "clear_the_pens":
-        hints = ["Use enemies to read the fight", "Use attack e1", "Use your class skill on e1"]
+        hints = ["Use enemies to read the fight", "Select the enemy target", "Use your class skill on e1"]
         if room_id == "tutorial_sparring_ring":
             return ["Head south into the Vermin Pens"]
         if room_id == TUTORIAL_VERMIN_ROOM_ID:

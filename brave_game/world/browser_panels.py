@@ -206,6 +206,9 @@ def send_browser_notice_event(
     icon=None,
     duration_ms=None,
     sticky=False,
+    kind=None,
+    quest_title=None,
+    quest_detail=None,
 ):
     """Send a browser notice to web sessions and plain text to non-web sessions."""
 
@@ -219,6 +222,12 @@ def send_browser_notice_event(
         }
         if icon:
             payload["icon"] = icon
+        if kind:
+            payload["kind"] = str(kind)
+        if quest_title:
+            payload["quest_title"] = str(quest_title)
+        if quest_detail:
+            payload["quest_detail"] = str(quest_detail)
         if duration_ms is not None:
             payload["duration_ms"] = max(0, int(duration_ms))
         if sticky:

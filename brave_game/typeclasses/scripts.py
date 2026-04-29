@@ -2062,7 +2062,7 @@ class BraveEncounter(Script):
             "\n" + f"{cb}" + "=" * 70 + "|n",
             f"  {header}".ljust(79) + f"{cb}|n",
             f"{cb}" + "=" * 70 + "|n",
-            "  |wPARTY STATUS|n",
+            "  |wHEROES|n",
             self.format_party_status(),
             "\n  |x" + "-" * 66 + "|n",
             "  |wENEMIES|n",
@@ -3740,21 +3740,16 @@ class BraveEncounter(Script):
             return []
 
         eligible = [participant for participant in participants if self._participant_reward_eligible(participant)]
-        top_impact = max((self._participant_impact_score(participant) for participant in eligible), default=0)
-        max_round = max(1, int(self.db.round or 1))
-        weighted_entries = [
-            (participant.id, self._participant_reward_weight(participant, max_round=max_round, top_impact=top_impact))
-            for participant in eligible
-        ]
-        xp_shares = self._allocate_weighted_pool(xp_total, weighted_entries, minimum=1)
+        reward_entries = [(participant.id, 1.0) for participant in eligible]
+        xp_shares = self._allocate_weighted_pool(xp_total, reward_entries, minimum=1)
 
         reward_bundles = [roll_enemy_rewards(enemy) for enemy in (self.db.enemies or [])]
         silver_total = sum(bundle["silver"] for bundle in reward_bundles)
-        silver_shares = self._allocate_weighted_pool(silver_total, weighted_entries)
+        silver_shares = self._allocate_weighted_pool(silver_total, reward_entries)
         reward_items = []
         for bundle in reward_bundles:
             reward_items.extend(bundle["items"])
-        item_shares = self._distribute_reward_items(reward_items, weighted_entries)
+        item_shares = self._distribute_reward_items(reward_items, reward_entries)
         companion_progress = self._award_companion_bond_progress()
 
         for participant in participants:

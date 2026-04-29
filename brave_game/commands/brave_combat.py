@@ -376,86 +376,38 @@ class CmdEnemies(BraveCharacterCommand):
             if detail:
                 summary += f" · {detail}"
             lines.append(summary)
-        self.msg("Threats here:\n  " + "\n  ".join(lines) + "\nUse |wattack <name>|n to open a fight or |wfight|n to join the current one.")
+        self.msg("Threats here:\n  " + "\n  ".join(lines) + "\nUse |wfight|n to start or join the current fight.")
 
 
-class CmdAttack(BraveCharacterCommand):
+class CmdTarget(BraveCharacterCommand):
     """
-    Queue a basic attack in combat.
+    Queue a basic attack target in combat.
 
     Usage:
-      attack
-      attack <enemy>
+      target
+      target <enemy>
 
-    Readies a basic attack against the nearest enemy or a chosen target.
+    Readies a basic attack against the nearest enemy or a chosen target. The
+    legacy `attack` alias is accepted for old clients and typed commands, but
+    `fight` is the only command that starts or joins an encounter.
     """
 
-    key = "attack"
+    key = "target"
+    aliases = ["attack"]
     help_category = "Brave"
 
     def _refresh_combat_scene(self, encounter, character):
         _refresh_combat_scene(self, encounter, character)
 
     def func(self):
-        from typeclasses.scripts import BraveEncounter
-
         character = self.get_character()
         if not character:
             return
 
         encounter = self.get_encounter(character, require=False)
-        started_from_room = not encounter or not encounter.is_participant(character)
-        if started_from_room:
-            if not character.location:
-                self.msg("You have no location to fight in.")
-                return
-            if character.location.db.brave_safe:
-                self.msg("This is a safe place. No immediate fight is pressing in here.")
-                return
-
-            threat_query = None
-            if self.args.strip():
-                preview = BraveEncounter.resolve_room_threat_preview(character.location, self.args.strip())
-                if isinstance(preview, list):
-                    self.msg("Be more specific. That could mean: " + ", ".join(str(option.get("display_name") or option.get("party_name") or "threat") for option in preview))
-                    return
-                if preview:
-                    threat_query = preview.get("threat_query") or preview.get("encounter_key")
-                else:
-                    preview_match = BraveEncounter.find_room_threat(character.location, self.args.strip())
-                    if isinstance(preview_match, list):
-                        self.msg("Be more specific. That could mean: " + ", ".join(enemy["key"] for enemy in preview_match))
-                        return
-                    if not preview_match:
-                        self.msg("No visible threat here matches that target.")
-                        return
-                    preview = BraveEncounter.resolve_room_threat_preview(character.location, preview_match.get("key"))
-                    if isinstance(preview, list):
-                        self.msg("Be more specific. That could mean: " + ", ".join(str(option.get("display_name") or option.get("party_name") or "threat") for option in preview))
-                        return
-                    if preview:
-                        threat_query = preview.get("threat_query") or preview.get("encounter_key")
-            else:
-                preview = BraveEncounter.resolve_room_threat_preview(character.location)
-                if isinstance(preview, list):
-                    self.msg("Choose which threat to open on first: " + ", ".join(str(option.get("display_name") or option.get("party_name") or "threat") for option in preview))
-                    return
-
-            solo_tutorial = is_tutorial_solo_combat_room(character.location)
-            encounter, _created = BraveEncounter.start_for_room(
-                character.location,
-                expected_party_size=1 if solo_tutorial else self.get_present_party_size(character),
-                threat_query=threat_query,
-            )
-            if not encounter:
-                self.msg("Nothing hostile stirs here right now.")
-                return
-
-            encounter.add_participant(character)
-            if getattr(character.db, "brave_party_id", None) and not solo_tutorial:
-                for other in get_present_party_members(character):
-                    if other != character and getattr(other, "is_connected", False):
-                        encounter.add_participant(other)
+        if not encounter or not encounter.is_participant(character):
+            self.msg("Use |wfight|n to start or join the fight first.")
+            return
 
         ok, message = encounter.queue_attack(character, self.args.strip() or None)
         if not ok:
