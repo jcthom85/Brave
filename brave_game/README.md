@@ -33,6 +33,22 @@ Connect from another device on the same network with the host machine's LAN IP:
 - Web client: `http://<host-lan-ip>:4001/webclient`
 - Telnet client: `<host-lan-ip>:4000`
 
+## Test Lanes
+
+Fast non-Django checks from this directory:
+
+```bash
+../.venv/bin/python scripts/fast_check.py
+```
+
+This compiles core Python packages, runs the JSON content build, and runs
+`regression_tests/fast/`. Use the full regression suite when Django/Evennia is
+available:
+
+```bash
+../.venv/bin/python -m pytest
+```
+
 ## Runtime Layout
 
 - `commands/`: player, combat, exploration, creator, town, profile, party, and arcade commands.
