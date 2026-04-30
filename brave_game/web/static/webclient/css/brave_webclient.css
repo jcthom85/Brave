@@ -13767,7 +13767,6 @@ body.brave-combat-return-active .scene-card {
         pointer-events: none;
     }
 
-    body.brave-objectives-active #mobile-nav-dock,
     body.brave-objectives-welcome-active #mobile-nav-dock {
         display: none !important;
     }
@@ -17579,7 +17578,19 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
     --brave-obj-glow: 0 32px 64px rgba(0, 0, 0, 0.48);
 }
 
+#brave-objectives-sheet[aria-hidden="true"] {
+    display: none;
+}
+
 #brave-objectives-sheet.brave-objectives-sheet--tutorial {
+    --brave-obj-accent: #00f2ff;
+    --brave-obj-accent-rgb: 0, 242, 255;
+    --brave-obj-bg: linear-gradient(180deg, rgba(10, 20, 30, 0.96), rgba(8, 16, 24, 0.98));
+    --brave-obj-border: rgba(0, 242, 255, 0.32);
+    --brave-obj-glow: 0 0 40px rgba(0, 242, 255, 0.08), 0 32px 64px rgba(0, 0, 0, 0.6);
+}
+
+#brave-objectives-sheet.brave-objectives-sheet--welcome {
     --brave-obj-accent: #00f2ff;
     --brave-obj-accent-rgb: 0, 242, 255;
     --brave-obj-bg: linear-gradient(180deg, rgba(10, 20, 30, 0.96), rgba(8, 16, 24, 0.98));
@@ -17647,6 +17658,52 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
     padding: 24px 24px 18px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     position: relative;
+}
+
+.brave-objectives-sheet__summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.brave-objectives-sheet__summary-copy {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.brave-objectives-sheet__count {
+    display: none;
+    flex: 0 0 auto;
+    min-width: 1.65rem;
+    min-height: 1.65rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(var(--brave-obj-accent-rgb), 0.28);
+    border-radius: 999px;
+    background: rgba(var(--brave-obj-accent-rgb), 0.1);
+    color: var(--brave-obj-accent);
+    font-family: var(--brave-ui-font-family);
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.brave-objectives-sheet__expand-icon {
+    display: none;
+    flex: 0 0 auto;
+    color: var(--brave-obj-accent);
 }
 
 .brave-objectives-sheet__panel--welcome .brave-objectives-sheet__head {
@@ -17817,13 +17874,22 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
     #brave-objectives-sheet {
         justify-content: center;
         align-items: flex-end;
-        padding: 12px;
+        padding: 12px 12px calc(var(--brave-mobile-dock-clearance, 116px) + env(safe-area-inset-bottom, 0px) + 10px);
     }
 
     .brave-objectives-sheet__panel {
         width: min(100%, 420px);
-        max-height: min(36vh, 260px);
+        max-height: min(38vh, 280px);
         transform: translateY(20px);
+    }
+
+    #brave-objectives-sheet.brave-objectives-sheet--mobile-collapsed:not(.brave-objectives-sheet--welcome) .brave-objectives-sheet__panel {
+        max-height: 58px;
+        overflow: hidden;
+    }
+
+    #brave-objectives-sheet.brave-objectives-sheet--mobile-collapsed:not(.brave-objectives-sheet--welcome) .brave-objectives-sheet__body {
+        display: none;
     }
 
     .brave-objectives-sheet__panel--welcome {
@@ -17832,12 +17898,73 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
         align-self: center;
     }
 
+    .brave-objectives-sheet__panel--welcome .brave-objectives-sheet__head {
+        display: block;
+        padding: 32px 32px 24px;
+    }
+
+    .brave-objectives-sheet__panel--welcome .brave-objectives-sheet__title {
+        display: block;
+        overflow: visible;
+        font-size: 1.55rem;
+        line-height: 1.18;
+        text-overflow: clip;
+        white-space: normal;
+    }
+
+    .brave-objectives-sheet__panel--welcome .brave-objectives-sheet__eyebrow {
+        margin-bottom: 8px;
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+    }
+
     .brave-objectives-sheet__head {
-        padding: 16px 18px 12px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        align-items: center;
+        padding: 10px 12px;
     }
 
     .brave-objectives-sheet__title {
-        font-size: 1.12rem;
+        display: block;
+        overflow: hidden;
+        font-size: 0.92rem;
+        line-height: 1.16;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .brave-objectives-sheet__eyebrow {
+        margin-bottom: 2px;
+        font-size: 0.6rem;
+        letter-spacing: 0.1em;
+    }
+
+    .brave-objectives-sheet__summary {
+        min-height: 36px;
+    }
+
+    .brave-objectives-sheet__count,
+    .brave-objectives-sheet__expand-icon {
+        display: inline-flex;
+    }
+
+    .brave-objectives-sheet__close {
+        position: static;
+        width: 36px;
+        min-width: 36px;
+        height: 36px;
+        padding: 0;
+    }
+
+    .brave-objectives-sheet__close span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
     }
 
     .brave-objectives-sheet__body {

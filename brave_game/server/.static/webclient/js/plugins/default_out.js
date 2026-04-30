@@ -77,6 +77,7 @@ let defaultout_plugin = (function () {
     var currentMobileUtilityTab = null;
     var currentMobileUtilityPresentation = "sheet";
     var mobileNavDockExpanded = true;
+    var mobileObjectivesExpanded = false;
     var mobileRoomActivityUnreadCount = 0;
     var currentCombatActionTab = "abilities";
     var currentMobileSwipe = null;
@@ -3785,23 +3786,43 @@ let defaultout_plugin = (function () {
         var sheet = document.getElementById("brave-objectives-sheet");
         if (sheet) {
             sheet.setAttribute("aria-hidden", String(!active));
+            if (active) {
+                sheet.style.removeProperty("display");
+            }
             if (!active) {
-                sheet.classList.remove("brave-objectives-sheet--tutorial", "brave-objectives-sheet--welcome");
+                sheet.innerHTML = "";
+                sheet.style.display = "none";
+                sheet.classList.remove(
+                    "brave-objectives-sheet--tutorial",
+                    "brave-objectives-sheet--welcome",
+                    "brave-objectives-sheet--mobile-expanded",
+                    "brave-objectives-sheet--mobile-collapsed"
+                );
             }
         }
         if (!active) {
             body.classList.remove("brave-objectives-welcome-active");
+            mobileObjectivesExpanded = false;
             currentWelcomePages = [];
             if (currentViewData && Array.isArray(currentViewData.welcome_pages)) {
                 currentViewData.welcome_pages = [];
             }
         }
-        if (active) {
+        if (active && body.classList.contains("brave-objectives-welcome-active")) {
             if (typeof clearMobileNavDock === "function") {
                 clearMobileNavDock({ preserveMobileSheet: true });
             }
         } else if (typeof renderMobileNavDock === "function") {
             renderMobileNavDock();
+        }
+    };
+
+    var setMobileObjectivesExpanded = function (expanded) {
+        mobileObjectivesExpanded = !!expanded;
+        var host = document.getElementById("brave-objectives-sheet");
+        if (host) {
+            host.classList.toggle("brave-objectives-sheet--mobile-expanded", mobileObjectivesExpanded);
+            host.classList.toggle("brave-objectives-sheet--mobile-collapsed", isMobileViewport() && !mobileObjectivesExpanded);
         }
     };
 
@@ -3811,7 +3832,14 @@ let defaultout_plugin = (function () {
             return;
         }
         finishGameIntroVeil();
-        host.classList.add("brave-objectives-sheet--tutorial", "brave-objectives-sheet--welcome");
+        host.style.removeProperty("display");
+        host.classList.add("brave-objectives-sheet--welcome");
+        host.classList.remove(
+            "brave-objectives-sheet--tutorial",
+            "brave-objectives-sheet--mobile-expanded",
+            "brave-objectives-sheet--mobile-collapsed"
+        );
+        mobileObjectivesExpanded = false;
         document.body.classList.add("brave-objectives-welcome-active");
         var page = currentWelcomePages[currentWelcomePageIndex];
         var isLast = currentWelcomePageIndex === currentWelcomePages.length - 1;
@@ -3864,22 +3892,46 @@ let defaultout_plugin = (function () {
         if (!Array.isArray(objectives) || !objectives.length) {
             host.innerHTML = "";
             host.setAttribute("aria-hidden", "true");
+            host.style.display = "none";
+            host.classList.remove(
+                "brave-objectives-sheet--tutorial",
+                "brave-objectives-sheet--welcome",
+                "brave-objectives-sheet--mobile-expanded",
+                "brave-objectives-sheet--mobile-collapsed"
+            );
             document.body.classList.remove("brave-objectives-active");
+            document.body.classList.remove("brave-objectives-welcome-active");
+            mobileObjectivesExpanded = false;
+            if (typeof renderMobileNavDock === "function") {
+                renderMobileNavDock();
+            }
             return;
         }
 
         var objectivesEyebrow = viewData && viewData.guidance_eyebrow ? viewData.guidance_eyebrow : "TUTORIAL";
         var objectivesTitle = viewData && viewData.guidance_title ? viewData.guidance_title : (viewData.title || viewData.eyebrow || "Current Tasks");
+        var remainingCount = objectives.filter(function (entry) {
+            return !(Array.isArray(entry) && entry[1] === "check_circle");
+        }).length;
 
         host.classList.add("brave-objectives-sheet--tutorial");
+        host.style.removeProperty("display");
+        host.classList.toggle("brave-objectives-sheet--mobile-expanded", mobileObjectivesExpanded);
+        host.classList.toggle("brave-objectives-sheet--mobile-collapsed", isMobileViewport() && !mobileObjectivesExpanded);
         host.classList.remove("brave-objectives-sheet--welcome");
         document.body.classList.remove("brave-objectives-welcome-active");
         host.innerHTML =
             "<div class='brave-objectives-sheet__backdrop' data-brave-objectives-toggle='1'></div>"
-            + "<div class='brave-objectives-sheet__panel' role='dialog' aria-modal='true' aria-label='Current Objectives'>"
+            + "<div class='brave-objectives-sheet__panel' role='region' aria-label='Current Objectives'>"
             + "<div class='brave-objectives-sheet__head'>"
-            + "<div class='brave-objectives-sheet__eyebrow'>" + escapeHtml(objectivesEyebrow) + "</div>"
-            + "<div class='brave-objectives-sheet__title'>" + escapeHtml(objectivesTitle) + "</div>"
+            + "<button type='button' class='brave-objectives-sheet__summary brave-click' data-brave-objectives-expand='1' aria-expanded='" + (mobileObjectivesExpanded ? "true" : "false") + "'>"
+            + "<span class='brave-objectives-sheet__summary-copy'>"
+            + "<span class='brave-objectives-sheet__eyebrow'>" + escapeHtml(objectivesEyebrow) + "</span>"
+            + "<span class='brave-objectives-sheet__title'>" + escapeHtml(objectivesTitle) + "</span>"
+            + "</span>"
+            + "<span class='brave-objectives-sheet__count'>" + escapeHtml(String(remainingCount || objectives.length)) + "</span>"
+            + icon(mobileObjectivesExpanded ? "expand_more" : "expand_less", "brave-objectives-sheet__expand-icon")
+            + "</button>"
             + "<button type='button' class='brave-objectives-sheet__close' data-brave-objectives-toggle='1'>"
             + icon("close", "brave-objectives-sheet__close-icon")
             + "<span>Close</span>"
@@ -9212,7 +9264,7 @@ let defaultout_plugin = (function () {
     var updateMobileDockClearance = function () {
         var body = document.body;
         var dock = document.getElementById("mobile-nav-dock");
-        if (body && body.classList.contains("brave-objectives-active")) {
+        if (body && body.classList.contains("brave-objectives-welcome-active")) {
             body.style.removeProperty("--brave-mobile-dock-clearance");
             return;
         }
@@ -9247,7 +9299,7 @@ let defaultout_plugin = (function () {
             clearMobileNavDock();
             return;
         }
-        if (document.body.classList.contains("brave-objectives-active")) {
+        if (document.body.classList.contains("brave-objectives-welcome-active")) {
             dock.innerHTML = "";
             document.body.style.removeProperty("--brave-mobile-dock-clearance");
             document.body.classList.remove("brave-mobile-nav-active");
@@ -10822,6 +10874,13 @@ let defaultout_plugin = (function () {
                 event.stopPropagation();
                 currentWelcomePageIndex--;
                 renderWelcomePage();
+                return;
+            }
+            var objectivesExpandTarget = event.target.closest("[data-brave-objectives-expand]");
+            if (objectivesExpandTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                setMobileObjectivesExpanded(!mobileObjectivesExpanded);
                 return;
             }
             var objectivesTarget = event.target.closest("[data-brave-objectives-toggle]");
