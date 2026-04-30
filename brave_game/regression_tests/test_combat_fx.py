@@ -2,6 +2,7 @@ import os
 import sys
 import types
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
 
 import django
@@ -16,6 +17,11 @@ chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
 from typeclasses.scripts import BraveEncounter, _combat_entry_ref
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_OUT_PATH = REPO_ROOT / "web/static/webclient/js/plugins/default_out.js"
+WEBCLIENT_CSS_PATH = REPO_ROOT / "web/static/webclient/css/brave_webclient.css"
 
 
 class DummyFxEncounter:
@@ -62,7 +68,11 @@ class CombatFxTests(unittest.TestCase):
 
         self.assertEqual(["|cDad uses Strike!|n"], messages)
         self.assertNotIn("BRAVEFX", messages[0])
-        self.assertEqual([{"kind": "action", "actor": "Dad", "label": "Strike"}], events)
+        self.assertEqual("action", events[0].get("kind"))
+        self.assertEqual("Dad", events[0].get("actor"))
+        self.assertEqual("Dad", events[0].get("source"))
+        self.assertEqual("Strike", events[0].get("label"))
+        self.assertEqual("ability", events[0].get("style"))
 
     def test_lethal_damage_fx_marks_defeat_on_damage_event(self):
         events = []
@@ -85,6 +95,7 @@ class CombatFxTests(unittest.TestCase):
             _save_enemy=lambda _enemy: None,
             _add_threat=lambda *_args, **_kwargs: None,
             _record_participant_contribution=lambda *_args, **_kwargs: None,
+            _roll_critical=lambda _attacker: False,
             _emit_combat_fx=lambda **event: events.append(event),
             _emit_defeat_fx=lambda _target, text="DOWN": None,
             _award_enemy_defeat_credit=lambda _enemy: None,
@@ -96,6 +107,70 @@ class CombatFxTests(unittest.TestCase):
 
         self.assertTrue(events[0].get("defeat"))
         self.assertEqual("e:e2", events[0].get("target_ref"))
+
+    def test_critical_damage_fx_uses_crit_multiplier(self):
+        events = []
+        attacker = SimpleNamespace(
+            id=17,
+            key="Dad",
+            db=SimpleNamespace(brave_class="rogue"),
+        )
+        enemy = {
+            "id": "e2",
+            "key": "Bog Wolf",
+            "hp": 30,
+            "max_hp": 30,
+            "armor": 0,
+            "marked_turns": 0,
+            "shielded": False,
+        }
+        encounter = SimpleNamespace(
+            obj=SimpleNamespace(msg_contents=lambda *_args, **_kwargs: None),
+            _save_enemy=lambda _enemy: None,
+            _add_threat=lambda *_args, **_kwargs: None,
+            _record_participant_contribution=lambda *_args, **_kwargs: None,
+            _roll_critical=lambda _attacker: True,
+            _critical_damage=lambda base: BraveEncounter._critical_damage(encounter, base),
+            _emit_combat_fx=lambda **event: events.append(event),
+            _emit_defeat_fx=lambda _target, text="DOWN": None,
+            _award_enemy_defeat_credit=lambda _enemy: None,
+            get_active_enemies=lambda: [enemy],
+        )
+
+        BraveEncounter._damage_enemy(encounter, attacker, enemy, 5)
+
+        self.assertEqual(8, events[0].get("amount"))
+        self.assertTrue(events[0].get("critical"))
+        self.assertEqual("critical", events[0].get("impact"))
+        self.assertEqual("subtle", events[0].get("shake"))
+
+    def test_defend_fx_includes_source_and_protected_refs(self):
+        events = []
+        source = SimpleNamespace(id=17, key="Dad")
+        target = SimpleNamespace(id=23, key="Ally")
+        encounter = SimpleNamespace(
+            _emit_combat_fx=lambda **event: events.append(event),
+        )
+
+        BraveEncounter._emit_defend_fx(encounter, source, target, text="Defend")
+
+        self.assertEqual("defend", events[0].get("kind"))
+        self.assertEqual("p:17", events[0].get("source_ref"))
+        self.assertEqual("p:23", events[0].get("target_ref"))
+        self.assertEqual("DEFEND", events[0].get("text"))
+
+    def test_static_combat_fx_handlers_cover_action_defend_miss_and_crit(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+        css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
+
+        self.assertIn('event.kind === "action"', default_out_source)
+        self.assertIn("animateCombatSourceFxFromSnapshot", default_out_source)
+        self.assertIn('mapped.kind === "defend" ? "guard"', default_out_source)
+        self.assertIn('mapped.kind === "miss" ? "miss"', default_out_source)
+        self.assertIn("brave-combat-floater--critical", css_source)
+        self.assertIn("brave-combat-impact-critical", css_source)
+        self.assertIn("brave-combat-screen-shake-subtle", css_source)
+        self.assertIn('body[data-brave-motion="reduced"] .brave-combat-ghost', css_source)
 
 
 if __name__ == "__main__":

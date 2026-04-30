@@ -8500,6 +8500,17 @@ body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-mobile {
     color: #ffd7cf;
 }
 
+.brave-combat-floater--critical {
+    color: #ffe37c;
+    font-size: calc(1.52rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    -webkit-text-stroke: 1px rgba(47, 22, 7, 0.94);
+    text-shadow:
+        0 1px 0 rgba(38, 13, 4, 0.98),
+        0 0 10px rgba(255, 214, 80, 0.46),
+        0 10px 24px rgba(0, 0, 0, 0.34);
+    animation-name: brave-combat-floater-rise-critical;
+}
+
 .brave-combat-floater--element-physical {
     color: #ffe0d4;
 }
@@ -8563,6 +8574,10 @@ body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-mobile {
     animation: brave-combat-impact-damage 320ms ease-out 1;
 }
 
+.brave-view--combat .brave-view__entry--impact-critical {
+    animation: brave-combat-impact-critical 380ms ease-out 1;
+}
+
 .brave-view--combat .brave-view__entry--impact-heal {
     animation: brave-combat-impact-heal 320ms ease-out 1;
 }
@@ -8615,6 +8630,10 @@ body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-mobile {
 .brave-view--combat .brave-view__entry--impact-element-bleed,
 .brave-view--combat .brave-view__entry--impact-element-physical {
     --brave-impact-rgb: 199, 55, 44;
+}
+
+.brave-view--combat.brave-view--combat-shake-subtle {
+    animation: brave-combat-screen-shake-subtle 190ms ease-out 1;
 }
 
 .brave-view--combat .brave-view__section--targets .brave-view__entry.brave-view__entry--selected {
@@ -9072,6 +9091,25 @@ body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-mobile {
     }
 }
 
+@keyframes brave-combat-floater-rise-critical {
+    0% {
+        opacity: 0;
+        transform: translate(calc(-50% - (var(--brave-floater-drift-x, 0px) * 0.24)), -6%) scale(0.5);
+    }
+    10% {
+        opacity: 1;
+        transform: translate(calc(-50% + (var(--brave-floater-drift-x, 0px) * 0.1)), -22%) scale(1.32);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(calc(-50% + (var(--brave-floater-drift-x, 0px) * 0.3)), -28%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + (var(--brave-floater-drift-x, 0px) * 0.74)), calc(-24% - var(--brave-floater-rise-y, 26px))) scale(0.9);
+    }
+}
+
 @keyframes brave-combat-card-lunge {
     0% {
         transform: translate3d(0, 0, 0);
@@ -9081,6 +9119,55 @@ body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-mobile {
     }
     100% {
         transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes brave-combat-source-cast {
+    0% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 104, 196, 224), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1);
+        transform: scale(1);
+    }
+    42% {
+        box-shadow:
+            inset 0 0 0 999px rgba(var(--brave-impact-rgb, 104, 196, 224), 0.18),
+            0 0 22px rgba(var(--brave-impact-rgb, 104, 196, 224), 0.32),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1.16) saturate(1.18);
+        transform: scale(1.025);
+    }
+    100% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 104, 196, 224), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1);
+        transform: scale(1);
+    }
+}
+
+@keyframes brave-combat-source-ability {
+    0% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 199, 55, 44), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1);
+        transform: translateY(0);
+    }
+    34% {
+        box-shadow:
+            inset 0 0 0 999px rgba(var(--brave-impact-rgb, 199, 55, 44), 0.13),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1.1) contrast(1.06);
+        transform: translateY(-3px);
+    }
+    100% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 199, 55, 44), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1);
+        transform: translateY(0);
     }
 }
 
@@ -9100,6 +9187,34 @@ body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-mobile {
     100% {
         box-shadow:
             inset 0 0 0 rgba(var(--brave-impact-rgb, 199, 55, 44), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1);
+    }
+}
+
+@keyframes brave-combat-impact-critical {
+    0% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 255, 220, 122), 0),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1);
+    }
+    30% {
+        box-shadow:
+            inset 0 0 0 999px rgba(var(--brave-impact-rgb, 255, 220, 122), 0.24),
+            0 0 20px rgba(var(--brave-impact-rgb, 255, 220, 122), 0.24),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1.18) contrast(1.08);
+    }
+    58% {
+        box-shadow:
+            inset 0 0 0 999px rgba(199, 55, 44, 0.12),
+            0 16px 28px rgba(0, 0, 0, 0.22);
+        filter: brightness(1.04);
+    }
+    100% {
+        box-shadow:
+            inset 0 0 0 rgba(var(--brave-impact-rgb, 255, 220, 122), 0),
             0 16px 28px rgba(0, 0, 0, 0.22);
         filter: brightness(1);
     }
@@ -9178,6 +9293,24 @@ body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-mobile {
     100% {
         transform: translateX(0);
         filter: brightness(1);
+    }
+}
+
+@keyframes brave-combat-screen-shake-subtle {
+    0%, 100% {
+        transform: translate3d(0, 0, 0);
+    }
+    20% {
+        transform: translate3d(-3px, 1px, 0);
+    }
+    42% {
+        transform: translate3d(3px, -1px, 0);
+    }
+    64% {
+        transform: translate3d(-2px, 0, 0);
+    }
+    82% {
+        transform: translate3d(2px, 1px, 0);
     }
 }
 
@@ -13122,6 +13255,9 @@ body.brave-combat-return-active .scene-card {
     .brave-view__hero,
     .brave-view__section,
     .brave-view__entry,
+    .brave-view--combat.brave-view--combat-shake-subtle,
+    .brave-combat-floater,
+    .brave-combat-ghost,
     .brave-view__action,
     .brave-view__mini-action,
     .brave-view__arcade-char,
@@ -13136,6 +13272,14 @@ body.brave-combat-return-active .scene-card {
         animation: none !important;
         transition: none !important;
     }
+}
+
+body[data-brave-motion="reduced"] .brave-view--combat.brave-view--combat-shake-subtle,
+body[data-brave-motion="reduced"] .brave-view--combat .brave-view__entry--lunge,
+body[data-brave-motion="reduced"] .brave-combat-floater,
+body[data-brave-motion="reduced"] .brave-combat-ghost {
+    animation: none !important;
+    transition: none !important;
 }
 
 .brave-view__nav-extra {

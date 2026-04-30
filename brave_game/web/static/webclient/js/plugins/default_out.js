@@ -129,6 +129,7 @@ let defaultout_plugin = (function () {
     var currentVideoSettings = null;
     var COMBAT_IMPACT_RGB = {
         damage: "199, 55, 44",
+        critical: "255, 220, 122",
         heal: "65, 160, 100",
         guard: "70, 134, 181",
         break: "201, 145, 38",
@@ -5653,7 +5654,7 @@ let defaultout_plugin = (function () {
         }, Math.max(0, delayMs || 0));
     };
 
-    var spawnCombatFloaterFromSnapshot = function (snapshot, text, tone, element) {
+    var spawnCombatFloaterFromSnapshot = function (snapshot, text, tone, element, critical) {
         if (!snapshot || !text) {
             return;
         }
@@ -5664,6 +5665,9 @@ let defaultout_plugin = (function () {
         host.style.zIndex = "997";
         var floater = document.createElement("span");
         floater.className = "brave-combat-floater brave-combat-floater--" + (tone || "neutral");
+        if (critical) {
+            floater.classList.add("brave-combat-floater--critical");
+        }
         var driftX = ((Math.random() * 18) - 9).toFixed(2) + "px";
         var driftY = (18 + (Math.random() * 12)).toFixed(2) + "px";
         var popScale = (1.06 + (Math.random() * 0.16)).toFixed(2);
@@ -5689,9 +5693,10 @@ let defaultout_plugin = (function () {
         var ghost = created.ghost;
         var host = created.host;
         var impactTone = tone || "damage";
-        var durationMs = impactTone === "break" ? 340 : impactTone === "miss" ? 280 : 320;
+        var durationMs = impactTone === "break" ? 340 : impactTone === "miss" ? 280 : impactTone === "critical" ? 380 : 320;
         var animationName = {
             damage: "brave-combat-impact-damage",
+            critical: "brave-combat-impact-critical",
             heal: "brave-combat-impact-heal",
             guard: "brave-combat-impact-guard",
             break: "brave-combat-impact-break",
@@ -5703,6 +5708,40 @@ let defaultout_plugin = (function () {
         }
         ghost.style.animation = animationName + " " + durationMs + "ms ease-out 1";
         removeCombatOverlayNodeLater(host, durationMs + 80);
+    };
+
+    var animateCombatSourceFxFromSnapshot = function (snapshot, style, element) {
+        if (!snapshot) {
+            return;
+        }
+        var created = createCombatGhostElement(snapshot);
+        if (!created || !created.ghost) {
+            return;
+        }
+        var fxStyle = style === "cast" ? "cast" : "ability";
+        var rgbKey = element || (fxStyle === "cast" ? "frost" : "physical");
+        if (COMBAT_IMPACT_RGB[rgbKey]) {
+            created.ghost.style.setProperty("--brave-impact-rgb", COMBAT_IMPACT_RGB[rgbKey]);
+        }
+        created.ghost.classList.add("brave-combat-ghost--source-" + fxStyle);
+        created.ghost.style.animation = (fxStyle === "cast" ? "brave-combat-source-cast" : "brave-combat-source-ability") + " 420ms ease-out 1";
+        removeCombatOverlayNodeLater(created.host, 500);
+    };
+
+    var triggerCombatScreenShake = function (kind) {
+        if (kind !== "subtle" || prefersReducedMotion()) {
+            return;
+        }
+        var combatNode = document.querySelector(".brave-view--combat");
+        if (!combatNode) {
+            return;
+        }
+        combatNode.classList.remove("brave-view--combat-shake-subtle");
+        void combatNode.offsetWidth;
+        combatNode.classList.add("brave-view--combat-shake-subtle");
+        window.setTimeout(function () {
+            combatNode.classList.remove("brave-view--combat-shake-subtle");
+        }, 240);
     };
 
     var animateCombatLungeFromSnapshots = function (attackerSnapshot, targetSnapshot) {
@@ -5929,12 +5968,15 @@ let defaultout_plugin = (function () {
         return true;
     };
 
-    var spawnCombatFloater = function (node, text, tone, element) {
+    var spawnCombatFloater = function (node, text, tone, element, critical) {
         if (!node || !text) {
             return;
         }
         var floater = document.createElement("span");
         floater.className = "brave-combat-floater brave-combat-floater--" + (tone || "neutral");
+        if (critical) {
+            floater.classList.add("brave-combat-floater--critical");
+        }
         var driftX = ((Math.random() * 18) - 9).toFixed(2) + "px";
         var driftY = (18 + (Math.random() * 12)).toFixed(2) + "px";
         var popScale = (1.06 + (Math.random() * 0.16)).toFixed(2);
@@ -5958,7 +6000,7 @@ let defaultout_plugin = (function () {
             return;
         }
         var impactTone = tone || "damage";
-        node.classList.remove("brave-view__entry--impact-damage", "brave-view__entry--impact-heal", "brave-view__entry--impact-guard", "brave-view__entry--impact-break", "brave-view__entry--impact-miss");
+        node.classList.remove("brave-view__entry--impact-damage", "brave-view__entry--impact-critical", "brave-view__entry--impact-heal", "brave-view__entry--impact-guard", "brave-view__entry--impact-break", "brave-view__entry--impact-miss");
         Array.prototype.slice.call(node.classList).forEach(function (className) {
             if (className.indexOf("brave-view__entry--impact-element-") === 0) {
                 node.classList.remove(className);
@@ -5969,12 +6011,13 @@ let defaultout_plugin = (function () {
         if (element) {
             node.classList.add("brave-view__entry--impact-element-" + element);
         }
+        var durationMs = impactTone === "break" ? 340 : impactTone === "miss" ? 280 : impactTone === "critical" ? 380 : 320;
         window.setTimeout(function () {
             node.classList.remove("brave-view__entry--impact-" + impactTone);
             if (element) {
                 node.classList.remove("brave-view__entry--impact-element-" + element);
             }
-        }, 360);
+        }, durationMs + 40);
     };
 
     var animateCombatLunge = function (attackerNode, targetNode) {
@@ -6097,8 +6140,9 @@ let defaultout_plugin = (function () {
         if (mapped.amount && !mapped.text) {
             mapped.text = mapped.amount;
         }
-        mapped.tone = mapped.tone || (mapped.kind === "heal" ? "heal" : "damage");
-        mapped.impact = mapped.impact || (mapped.kind === "heal" ? "heal" : "damage");
+        mapped.critical = mapped.critical === "1" || mapped.critical === "true" || mapped.critical === true;
+        mapped.tone = mapped.tone || (mapped.critical ? "critical" : mapped.kind === "heal" ? "heal" : mapped.kind === "defend" ? "guard" : mapped.kind === "miss" ? "warn" : "damage");
+        mapped.impact = mapped.impact || (mapped.critical ? "critical" : mapped.kind === "heal" ? "heal" : mapped.kind === "defend" ? "guard" : mapped.kind === "miss" ? "miss" : "damage");
         mapped.lunge = mapped.lunge === "1" || mapped.lunge === "true" || mapped.lunge === true;
         return mapped;
     };
@@ -6108,15 +6152,18 @@ let defaultout_plugin = (function () {
             return;
         }
         if (targetSnapshot) {
-            spawnCombatFloaterFromSnapshot(targetSnapshot, event.text, event.tone, event.element);
+            spawnCombatFloaterFromSnapshot(targetSnapshot, event.text, event.tone, event.element, event.critical);
         } else {
-            spawnCombatFloater(targetNode, event.text, event.tone, event.element);
+            spawnCombatFloater(targetNode, event.text, event.tone, event.element, event.critical);
         }
         if (event.impact) {
             animateCombatImpact(targetNode, event.impact, event.element);
         }
         if (event.defeat) {
             animateCombatDefeat(targetSnapshot || targetNode);
+        }
+        if (event.shake) {
+            triggerCombatScreenShake(event.shake);
         }
         event._appliedTarget = true;
     };
@@ -6151,8 +6198,14 @@ let defaultout_plugin = (function () {
         if (event.defeat) {
             return 900;
         }
+        if (event.kind === "action") {
+            return 460;
+        }
         if (event.lunge) {
             return 360;
+        }
+        if (event.critical) {
+            return 380;
         }
         if (event.impact) {
             return 220;
@@ -6192,6 +6245,18 @@ let defaultout_plugin = (function () {
         var attackerNode = event.source || event.source_ref ? findCombatEntryForEvent(event, "source") : null;
         var targetSnapshot = targetNode ? captureCombatEntrySnapshot(targetNode) : null;
         var attackerSnapshot = attackerNode ? captureCombatEntrySnapshot(attackerNode) : null;
+        if (event.kind === "action") {
+            if (!attackerNode) {
+                if (!requeueUnresolvedCombatFxEvent(event)) {
+                    flushQueuedCombatResultView();
+                    scheduleCombatFxFlush(0);
+                }
+                return;
+            }
+            animateCombatSourceFxFromSnapshot(attackerSnapshot, event.style, event.element);
+            finishCombatFxEvent(combatFxEventDelay(event));
+            return;
+        }
         if (!targetNode) {
             if (!requeueUnresolvedCombatFxEvent(event)) {
                 flushQueuedCombatResultView();

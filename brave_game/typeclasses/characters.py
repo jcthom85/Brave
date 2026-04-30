@@ -59,6 +59,15 @@ LEGACY_RACE_KEYS = {
     "halfling": "mosskin",
     "half_orc": "ashborn",
 }
+CLASS_CRIT_BASES = {
+    "rogue": 8,
+    "ranger": 5,
+    "warrior": 4,
+    "paladin": 4,
+    "druid": 4,
+    "mage": 3,
+    "cleric": 3,
+}
 
 
 def _get_puppet_session(character, kwargs=None):
@@ -302,6 +311,7 @@ class Character(ObjectParent, DefaultCharacter):
         for stat in CHARACTER_CONTENT.primary_stats:
             primary[stat] += chapel_bonuses.get(stat, 0)
 
+        class_key = self.db.brave_class
         derived = {
             "max_hp": 55 + (primary["vitality"] * 10) + (level * 8),
             "max_mana": 12 + (primary["intellect"] + primary["spirit"]) * 5 + (level * 4),
@@ -311,9 +321,9 @@ class Character(ObjectParent, DefaultCharacter):
             "armor": primary["vitality"] * 2 + primary["strength"] + level,
             "accuracy": 65 + primary["agility"] * 2 + level,
             "precision": primary["agility"] * 2 + (level // 2),
-            "crit_chance": 5 + (primary["agility"] // 2),
+            "crit_chance": 0,
             "dodge": 3 + primary["agility"] + (level // 2),
-            "threat": 5 + primary["vitality"] + (5 if self.db.brave_class in ("warrior", "paladin") else 0),
+            "threat": 5 + primary["vitality"] + (5 if class_key in ("warrior", "paladin") else 0),
             "healing_power": 0,
         }
         for stat, bonus in race_perk_bonuses.items():
@@ -338,6 +348,16 @@ class Character(ObjectParent, DefaultCharacter):
             if stat in CHARACTER_CONTENT.primary_stats:
                 continue
             derived[stat] = derived.get(stat, 0) + bonus
+
+        direct_crit_bonus = int(derived.get("crit_chance", 0) or 0)
+        precision = int(derived.get("precision", 0) or 0)
+        crit_chance = (
+            CLASS_CRIT_BASES.get(class_key, 4)
+            + (int(primary.get("agility", 0) or 0) // 2)
+            + (precision // 5)
+            + direct_crit_bonus
+        )
+        derived["crit_chance"] = max(0, min(50, crit_chance))
 
         self.db.brave_primary_stats = primary
         self.db.brave_derived_stats = derived

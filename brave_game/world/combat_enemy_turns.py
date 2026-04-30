@@ -127,6 +127,10 @@ def execute_enemy_turn(encounter, enemy):
         damage = self._spell_damage(enemy.get("spell_power", enemy["attack_power"]), derived["armor"], bonus=damage_bonus)
     else:
         damage = self._weapon_damage(enemy["attack_power"], derived["armor"], bonus=damage_bonus)
+    roller = getattr(self, "_roll_critical", None)
+    critical = bool(callable(roller) and roller(enemy))
+    if critical:
+        damage = self._critical_damage(damage)
     state = self._get_participant_state(target)
     reaction_prevented = 0
     reaction_source = None
@@ -167,7 +171,8 @@ def execute_enemy_turn(encounter, enemy):
     if telegraphed and reaction_prevented > 0:
         self._record_participant_contribution(reaction_source or target, mitigation=reaction_prevented, utility=1)
     self._record_participant_contribution(target, hits_taken=damage)
-    self.obj.msg_contents(hit_text.format(damage=damage))
+    crit_text = " Critical hit!" if critical else ""
+    self.obj.msg_contents(hit_text.format(damage=damage) + crit_text)
     self._emit_combat_fx(
         kind="damage",
         source=enemy["key"],
@@ -177,8 +182,10 @@ def execute_enemy_turn(encounter, enemy):
         amount=damage,
         text=str(damage),
         tone="damage",
-        impact="damage",
+        impact="critical" if critical else "damage",
         element=_enemy_damage_type(enemy),
+        critical=critical,
+        shake="subtle" if critical else None,
         lunge=True,
     )
     sacred_turns = int(state.get("sacred_aegis_turns", 0) or 0)

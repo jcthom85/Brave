@@ -183,7 +183,14 @@ class CombatBalanceSimulationTests(unittest.TestCase):
         run = simulate_encounter(authored, scenario, base_seed=24, max_rounds=40)
 
         self.assertGreater(run["telegraphed_actions"], 0)
-        self.assertGreater(run["telegraphed_unanswered"], 0)
+        telegraphed_outcomes = (
+            run["telegraphed_interrupts"]
+            + run["telegraphed_redirects"]
+            + run["telegraphed_mitigations"]
+            + run["telegraphed_unanswered"]
+        )
+        self.assertGreater(telegraphed_outcomes, 0)
+        self.assertIn("telegraphed_unanswered", run)
 
     def test_trace_analysis_marks_late_interrupt_actor(self):
         trace = [

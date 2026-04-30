@@ -25,6 +25,15 @@ ENCOUNTER_CONTENT = CONTENT.encounters
 DEFAULT_LEVEL = 10
 DEFAULT_RACE = CHARACTER_CONTENT.starting_race
 DEFAULT_OUTPUT_DIR = Path("/home/jcthom85/Brave/tmp/combat-simulation")
+CLASS_CRIT_BASES = {
+    "rogue": 8,
+    "ranger": 5,
+    "warrior": 4,
+    "paladin": 4,
+    "druid": 4,
+    "mage": 3,
+    "cleric": 3,
+}
 ZONE_LEVEL_BANDS = (
     ("tutorial_", 1),
     ("brambleford_", 1),
@@ -278,7 +287,7 @@ class SimulatedCharacter:
             "armor": primary["vitality"] * 2 + primary["strength"] + level,
             "accuracy": 65 + primary["agility"] * 2 + level,
             "precision": primary["agility"] * 2 + (level // 2),
-            "crit_chance": 5 + (primary["agility"] // 2),
+            "crit_chance": 0,
             "dodge": 3 + primary["agility"] + (level // 2),
             "threat": 5 + primary["vitality"] + (5 if self.db.brave_class in {"warrior", "paladin"} else 0),
             "healing_power": 0,
@@ -289,6 +298,19 @@ class SimulatedCharacter:
         for stat, bonus in passive_bonuses.items():
             if stat not in CHARACTER_CONTENT.primary_stats:
                 derived[stat] = derived.get(stat, 0) + bonus
+
+        direct_crit_bonus = int(derived.get("crit_chance", 0) or 0)
+        precision = int(derived.get("precision", 0) or 0)
+        derived["crit_chance"] = max(
+            0,
+            min(
+                50,
+                CLASS_CRIT_BASES.get(self.db.brave_class, 4)
+                + (int(primary.get("agility", 0) or 0) // 2)
+                + (precision // 5)
+                + direct_crit_bonus,
+            ),
+        )
 
         self.db.brave_primary_stats = primary
         self.db.brave_derived_stats = derived

@@ -12,6 +12,7 @@ just overloads its hooks to have it perform its function.
 
 """
 
+import math
 import random
 import time
 from collections.abc import Mapping
@@ -1562,6 +1563,9 @@ class BraveEncounter(Script):
         state["reaction_label"] = label
         state["reaction_redirect_to"] = redirect_to
         self._save_participant_state(target, state)
+        emitter = getattr(self, "_emit_defend_fx", None)
+        if callable(emitter):
+            emitter(source, target, text=label or "GUARD")
 
     def _clear_reaction_state(self, state):
         """Clear one participant's temporary reaction metadata."""
@@ -1652,6 +1656,25 @@ class BraveEncounter(Script):
             lunge=True,
         )
 
+    def _emit_defend_fx(self, source, target=None, text="GUARD"):
+        """Emit a guard/defend event on the protected combat card."""
+
+        protected = target or source
+        source_name = source.get("key") if isinstance(source, dict) else getattr(source, "key", None)
+        target_name = protected.get("key") if isinstance(protected, dict) else getattr(protected, "key", None)
+        if not source_name or not target_name:
+            return
+        self._emit_combat_fx(
+            kind="defend",
+            source=source_name,
+            source_ref=_combat_entry_ref(source),
+            target=target_name,
+            target_ref=_combat_entry_ref(protected),
+            text=str(text or "GUARD").upper(),
+            tone="guard",
+            impact="guard",
+        )
+
     def _emit_defeat_fx(self, target, text="DOWN"):
         """Emit a defeat event so removals still animate on the battle board."""
 
@@ -1668,14 +1691,24 @@ class BraveEncounter(Script):
             defeat=True,
         )
 
-    def _announce_combat_action(self, actor, label):
+    def _announce_combat_action(self, actor, label, style=None, element=None):
         """Emit a short JRPG-style action banner into the battle feed."""
 
         if not self.obj or not label:
             return
         actor_name = _combat_target_name(actor, "Companion")
         self.obj.msg_contents(f"|c{actor_name} uses {label}!|n")
-        self._emit_combat_fx(kind="action", actor=actor_name, label=label)
+        emitter = getattr(self, "_emit_combat_fx", None)
+        if callable(emitter):
+            emitter(
+                kind="action",
+                actor=actor_name,
+                label=label,
+                source=actor_name,
+                source_ref=_combat_entry_ref(actor),
+                style=style or "ability",
+                element=element,
+            )
 
     def _clear_browser_combat_views(self, participants=None):
         """Remove any sticky browser combat UI for participants."""
@@ -1769,13 +1802,13 @@ class BraveEncounter(Script):
     def _default_atb_fill_rate(self, *, character=None, enemy=None, companion=None):
         if character is not None:
             class_base = {
-                "rogue": 104,
-                "ranger": 96,
-                "warrior": 82,
-                "paladin": 76,
-                "cleric": 74,
-                "mage": 78,
-                "druid": 84,
+                "rogue": 98,
+                "ranger": 88,
+                "druid": 82,
+                "warrior": 80,
+                "paladin": 78,
+                "cleric": 76,
+                "mage": 74,
             }.get(getattr(character.db, "brave_class", ""), 84)
             primary = dict(getattr(character.db, "brave_primary_stats", {}) or {})
             agility = int(primary.get("agility", 0) or 0)
@@ -1785,7 +1818,7 @@ class BraveEncounter(Script):
                 + get_atb_fill_rate_bonus(character)
                 + get_wounded_atb_fill_rate_bonus(character)
             )
-            return max(68, min(168, fill_rate))
+            return max(68, min(176, fill_rate))
         if enemy is not None:
             fill_rate = 78 + (int(enemy.get("dodge", 0) or 0) * 5) + (int(enemy.get("accuracy", 0) or 0) // 20)
             tags = set(enemy.get("tags", []) or [])
@@ -2420,6 +2453,29 @@ class BraveEncounter(Script):
     def _spell_damage(self, spell_power, armor, bonus=0):
         return max(1, spell_power // 2 + random.randint(3, 7) + bonus - armor // 5)
 
+    def _crit_chance_for_actor(self, actor):
+        """Return clamped crit chance for an actor that is allowed to crit."""
+
+        if isinstance(actor, dict) and actor.get("template_key"):
+            if "crit_chance" not in actor:
+                return 0
+            chance = actor.get("crit_chance", 0)
+        else:
+            chance = self._get_effective_derived(actor).get("crit_chance", 0)
+        try:
+            chance = int(chance or 0)
+        except (TypeError, ValueError):
+            chance = 0
+        return max(0, min(50, chance))
+
+    def _roll_critical(self, actor):
+        chance = self._crit_chance_for_actor(actor)
+        return chance > 0 and random.randint(1, 100) <= chance
+
+    def _critical_damage(self, base_damage):
+        base_damage = max(1, int(base_damage or 0))
+        return max(base_damage + 1, int(math.ceil(base_damage * 1.5)))
+
     def _spend_resource(self, character, resource, amount):
         if _is_companion_actor(character):
             return
@@ -2435,6 +2491,7 @@ class BraveEncounter(Script):
                 "armor": int(character.get("armor", 0) or 0),
                 "accuracy": int(character.get("accuracy", 0) or 0),
                 "dodge": int(character.get("dodge", 0) or 0),
+                "crit_chance": int(character.get("crit_chance", 0) or 0),
                 "spell_power": 0,
                 "healing_power": 0,
             }
@@ -2518,6 +2575,10 @@ class BraveEncounter(Script):
         if enemy.get("shielded"):
             damage = max(1, damage // 2)
             extra_text = " The ward absorbs part of the blow." + extra_text
+        roller = getattr(self, "_roll_critical", None)
+        critical = bool(callable(roller) and roller(attacker))
+        if critical:
+            damage = self._critical_damage(damage)
         enemy["hp"] = max(0, enemy["hp"] - damage)
         defeated = enemy["hp"] <= 0
         self._save_enemy(enemy)
@@ -2526,7 +2587,8 @@ class BraveEncounter(Script):
         self._record_participant_contribution(attacker, meaningful=True, damage=damage)
         marked_text = " The mark flares." if enemy["marked_turns"] > 0 else ""
         attacker_name = _combat_target_name(attacker, "Companion")
-        self.obj.msg_contents(f"{attacker_name} hits {enemy['key']} for {damage} damage.{marked_text}{extra_text}")
+        crit_text = " Critical hit!" if critical else ""
+        self.obj.msg_contents(f"{attacker_name} hits {enemy['key']} for {damage} damage.{crit_text}{marked_text}{extra_text}")
         self._emit_combat_fx(
             kind="damage",
             source=attacker_name,
@@ -2536,8 +2598,10 @@ class BraveEncounter(Script):
             amount=damage,
             text=str(damage),
             tone="damage",
-            impact="damage",
+            impact="critical" if critical else "damage",
             element=damage_type,
+            critical=critical,
+            shake="subtle" if critical else None,
             defeat=defeated,
             lunge=True,
         )
@@ -3091,7 +3155,12 @@ class BraveEncounter(Script):
         if ability["target"] != "none" and not target:
             return
 
-        self._announce_combat_action(character, ability_name)
+        action_style = "cast" if ability.get("resource") == "mana" else "ability"
+        action_element = ability.get("icon_role") if ability.get("icon_role") in {"fire", "frost", "lightning", "holy", "nature", "poison", "shadow"} else None
+        try:
+            self._announce_combat_action(character, ability_name, style=action_style, element=action_element)
+        except TypeError:
+            self._announce_combat_action(character, ability_name)
         self._spend_resource(character, ability["resource"], ability["cost"])
         derived = self._get_effective_derived(character)
         level = max(1, int(character.db.brave_level or 1))
@@ -3177,6 +3246,8 @@ class BraveEncounter(Script):
             elif effect_type == "guard":
                 if target is not None:
                     self._apply_reaction_guard(character, target, amount=int(result.get("guard_amount", 0) or 0), label=item.get("name", "Guard Item"))
+                else:
+                    self._emit_defend_fx(character, character, text=item.get("name", "GUARD"))
                 self._record_participant_contribution(
                     character,
                     meaningful=True,
