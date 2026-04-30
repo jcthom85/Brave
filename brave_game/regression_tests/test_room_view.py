@@ -599,6 +599,23 @@ class RoomViewTests(unittest.TestCase):
             [entry.get("label") for entry in snapshot.get("legend")],
         )
 
+    def test_map_snapshot_leaves_unmarked_rooms_without_generic_icon(self):
+        current_room = DummyMappedRoom("current_room", key="Current Room", x=0, y=0)
+        side_room = DummyMappedRoom("side_room", key="Side Room", x=1, y=0)
+
+        with patch("world.navigation.get_rooms_in_map_region", return_value=[current_room, side_room]):
+            snapshot = build_map_snapshot(current_room, character=None)
+
+        side_cell = next(
+            cell
+            for row in snapshot["map_tiles"]["rows"]
+            for cell in row
+            if cell.get("kind") == "room" and cell.get("title") == "Side Room"
+        )
+        self.assertEqual("", side_cell.get("symbol"))
+        self.assertEqual("", side_cell.get("primary_marker"))
+        self.assertEqual([], side_cell.get("markers"))
+
     def test_minimap_snapshot_uses_simple_symbols_without_marker_stack(self):
         character = DummyCharacter()
         character.db.brave_tracked_quest = "captain_varn_blackreed"

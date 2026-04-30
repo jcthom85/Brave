@@ -521,7 +521,7 @@ def build_map_snapshot(room, radius=None, character=None):
         )
         markers = [_map_marker(marker_key) for marker_key in marker_keys]
         primary_marker = markers[0] if markers else None
-        symbol = primary_marker["icon"] if primary_marker else "radio_button_unchecked"
+        symbol = primary_marker["icon"] if primary_marker else ""
         members_here = party_names_by_room.get(candidate.id, [])
         tooltip = candidate.key
         if markers:

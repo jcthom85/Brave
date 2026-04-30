@@ -1,22 +1,28 @@
 {
   "version": 1,
   "buses": {
-    "master": { "default_volume": 0.9 },
-    "ambience": { "default_volume": 0.55 },
-    "music": { "default_volume": 0.45 },
-    "sfx": { "default_volume": 0.8 }
+    "master": {
+      "default_volume": 0.9
+    },
+    "ambience": {
+      "default_volume": 0.55
+    },
+    "music": {
+      "default_volume": 0.45
+    },
+    "sfx": {
+      "default_volume": 0.8
+    }
   },
   "cues": {
     "ambience.brambleford": {
       "bus": "ambience",
       "loop": true,
       "gain": 0.62,
-      "fade_in_sec": 1.4,
-      "fade_out_sec": 1.1,
-      "files": ["ambience/forest_ambience.mp3"],
-      "voices": [
-        { "waveform": "triangle", "frequency": 264, "gain": 0.008, "lfo_rate": 0.09, "lfo_depth": 0.14, "filter_type": "lowpass", "filter_frequency": 1200 },
-        { "waveform": "sine", "frequency": 396, "gain": 0.005, "lfo_rate": 0.14, "lfo_depth": 0.1, "filter_type": "lowpass", "filter_frequency": 1680 }
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/brambleford/sunny_birds_loop.mp3"
       ]
     },
     "ambience.goblinroad": {
@@ -25,55 +31,88 @@
       "gain": 0.68,
       "fade_in_sec": 1.2,
       "fade_out_sec": 1.0,
-      "files": ["ambience/forest_ambience.mp3"]
+      "files": [
+        "ambience/first_hour/goblin_road_trailhead_loop.mp3"
+      ]
+    },
+    "ambience.wayfarers_yard": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.62,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/first_hour/wayfarers_yard_training_loop.mp3"
+      ]
+    },
+    "ambience.brambleford.cellar": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.66,
+      "fade_in_sec": 1.0,
+      "fade_out_sec": 0.9,
+      "files": [
+        "ambience/first_hour/rat_cellar_loop.mp3"
+      ]
+    },
+    "ambience.goblin_road.camp": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.0,
+      "fade_out_sec": 0.9,
+      "files": [
+        "ambience/first_hour/fencebreaker_camp_loop.mp3"
+      ]
     },
     "ambience.whisperingwoods": {
       "bus": "ambience",
       "loop": true,
-      "gain": 0.66,
-      "fade_in_sec": 1.3,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
       "fade_out_sec": 1.0,
-      "files": ["ambience/forest_ambience.mp3"]
+      "files": [
+        "ambience/regions/whispering_woods/trail_loop.mp3"
+      ]
     },
     "ambience.oldbarrow": {
       "bus": "ambience",
       "loop": true,
-      "gain": 0.72,
-      "fade_in_sec": 1.5,
-      "fade_out_sec": 1.1,
-      "files": ["ambience/dark_cavern_loop.ogg"]
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/old_barrow/field_loop.mp3"
+      ]
     },
     "ambience.portal": {
       "bus": "ambience",
       "loop": true,
-      "gain": 0.62,
-      "fade_in_sec": 1.4,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
       "fade_out_sec": 1.0,
-      "files": ["ambience/portal_forest_loop.ogg"]
+      "files": [
+        "ambience/regions/brambleford/nexus_gate_loop.mp3"
+      ]
     },
     "music.explore.safe": {
       "bus": "music",
       "loop": true,
-      "gain": 0.92,
+      "gain": 0.52,
       "fade_in_sec": 1.8,
       "fade_out_sec": 1.2,
-      "files": ["music/town_theme_rpg.mp3"],
-      "voices": [
-        { "waveform": "triangle", "frequency": 220, "gain": 0.02, "lfo_rate": 0.08, "lfo_depth": 0.08, "filter_type": "lowpass", "filter_frequency": 1100 },
-        { "waveform": "sine", "frequency": 330, "gain": 0.012, "lfo_rate": 0.11, "lfo_depth": 0.05, "filter_type": "lowpass", "filter_frequency": 1400 }
+      "files": [
+        "music/elevenlabs_tests/brambleford_safe_test.mp3"
       ]
     },
     "music.title": {
       "bus": "music",
       "loop": true,
-      "gain": 0.78,
+      "gain": 0.58,
       "fade_in_sec": 1.6,
       "fade_out_sec": 1.1,
-      "voices": [
-        { "waveform": "sine", "frequency": 146.83, "gain": 0.026, "attack_sec": 1.4, "lfo_rate": 0.05, "lfo_depth": 0.18, "filter_type": "lowpass", "filter_frequency": 900 },
-        { "waveform": "triangle", "frequency": 220, "gain": 0.017, "attack_sec": 1.9, "lfo_rate": 0.07, "lfo_depth": 0.12, "filter_type": "lowpass", "filter_frequency": 1250 },
-        { "waveform": "sine", "frequency": 293.66, "gain": 0.012, "attack_sec": 2.4, "frequency_lfo_rate": 0.03, "frequency_lfo_depth": 1.8, "filter_type": "lowpass", "filter_frequency": 1500 },
-        { "waveform": "triangle", "frequency": 440, "gain": 0.006, "attack_sec": 3.2, "lfo_rate": 0.04, "lfo_depth": 0.16, "filter_type": "lowpass", "filter_frequency": 1800 }
+      "files": [
+        "music/elevenlabs_tests/title_test.mp3"
       ]
     },
     "music.explore.danger": {
@@ -82,31 +121,39 @@
       "gain": 0.9,
       "fade_in_sec": 1.2,
       "fade_out_sec": 0.9,
-      "files": ["music/dark_place_loop.ogg"]
+      "files": [
+        "music/dark_place_loop.ogg"
+      ]
     },
     "music.combat.standard": {
       "bus": "music",
       "loop": true,
-      "gain": 0.9,
+      "gain": 0.62,
       "fade_in_sec": 0.8,
       "fade_out_sec": 0.7,
-      "files": ["music/medieval_battle.mp3"]
+      "files": [
+        "music/elevenlabs_tests/combat_standard_test.mp3"
+      ]
     },
     "music.combat.boss": {
       "bus": "music",
       "loop": true,
-      "gain": 0.88,
+      "gain": 0.64,
       "fade_in_sec": 0.7,
       "fade_out_sec": 0.6,
-      "files": ["music/boss_battle_theme.ogg"]
+      "files": [
+        "music/elevenlabs_tests/boss_ruk_test.mp3"
+      ]
     },
     "music.victory": {
       "bus": "music",
       "loop": true,
-      "gain": 0.92,
-      "fade_in_sec": 0.08,
-      "fade_out_sec": 0.7,
-      "files": ["music/victory_fanfare.ogg"]
+      "gain": 0.68,
+      "fade_in_sec": 0.05,
+      "fade_out_sec": 0.8,
+      "files": [
+        "music/elevenlabs_tests/victory_stinger_test.mp3"
+      ]
     },
     "music.rest": {
       "bus": "music",
@@ -115,9 +162,33 @@
       "fade_in_sec": 0.12,
       "fade_out_sec": 0.8,
       "voices": [
-        { "waveform": "sine", "frequency": 261.63, "gain": 0.045, "attack_sec": 0.18, "release_sec": 1.1, "filter_type": "lowpass", "filter_frequency": 1200 },
-        { "waveform": "sine", "frequency": 329.63, "gain": 0.032, "attack_sec": 0.3, "release_sec": 1.0, "filter_type": "lowpass", "filter_frequency": 1400 },
-        { "waveform": "triangle", "frequency": 392, "gain": 0.02, "attack_sec": 0.48, "release_sec": 1.2, "filter_type": "lowpass", "filter_frequency": 1000 }
+        {
+          "waveform": "sine",
+          "frequency": 261.63,
+          "gain": 0.045,
+          "attack_sec": 0.18,
+          "release_sec": 1.1,
+          "filter_type": "lowpass",
+          "filter_frequency": 1200
+        },
+        {
+          "waveform": "sine",
+          "frequency": 329.63,
+          "gain": 0.032,
+          "attack_sec": 0.3,
+          "release_sec": 1.0,
+          "filter_type": "lowpass",
+          "filter_frequency": 1400
+        },
+        {
+          "waveform": "triangle",
+          "frequency": 392,
+          "gain": 0.02,
+          "attack_sec": 0.48,
+          "release_sec": 1.2,
+          "filter_type": "lowpass",
+          "filter_frequency": 1000
+        }
       ]
     },
     "music.portal": {
@@ -126,104 +197,179 @@
       "gain": 0.88,
       "fade_in_sec": 1.0,
       "fade_out_sec": 0.8,
-      "files": ["music/dark_place_loop.ogg"]
+      "files": [
+        "music/dark_place_loop.ogg"
+      ]
     },
     "sfx.ui.click": {
       "bus": "sfx",
-      "gain": 0.85,
-      "duration_sec": 0.09,
+      "gain": 0.74,
+      "duration_sec": 0.1,
       "cooldown_ms": 45,
-      "files": ["sfx/ui_click.wav"],
-      "voices": [
-        { "waveform": "square", "frequency": 780, "gain": 0.028, "attack_sec": 0.003, "release_sec": 0.07, "filter_type": "lowpass", "filter_frequency": 1800 }
+      "files": [
+        "sfx/ui/click.mp3"
       ]
     },
     "sfx.ui.error": {
       "bus": "sfx",
-      "gain": 0.75,
+      "gain": 0.76,
       "duration_sec": 0.2,
       "cooldown_ms": 120,
-      "files": ["sfx/erase_escape.wav"],
-      "voices": [
-        { "waveform": "sawtooth", "frequency": 210, "gain": 0.03, "attack_sec": 0.005, "release_sec": 0.14, "filter_type": "lowpass", "filter_frequency": 920 }
+      "files": [
+        "sfx/ui/error.mp3"
       ]
     },
     "sfx.travel.step": {
       "bus": "sfx",
-      "gain": 0.78,
-      "duration_sec": 0.11,
+      "gain": 0.72,
+      "duration_sec": 0.15,
       "cooldown_ms": 160,
-      "files": ["sfx/footstep_01.ogg", "sfx/footstep_03.ogg"],
-      "voices": [
-        { "waveform": "triangle", "frequency": 280, "gain": 0.016, "attack_sec": 0.003, "release_sec": 0.09, "filter_type": "bandpass", "filter_frequency": 720 }
+      "files": [
+        "sfx/travel/step_dirt.mp3"
       ]
     },
     "sfx.loot.reward": {
       "bus": "sfx",
-      "gain": 0.9,
+      "gain": 0.84,
       "duration_sec": 0.34,
       "cooldown_ms": 180,
-      "files": ["sfx/coin_sounds.ogg"]
+      "files": [
+        "sfx/inventory/loot.mp3"
+      ]
     },
     "sfx.notice.good": {
       "bus": "sfx",
-      "gain": 0.82,
+      "gain": 0.8,
       "duration_sec": 0.32,
       "cooldown_ms": 180,
-      "files": ["sfx/magic_words.wav"],
-      "voices": [
-        { "waveform": "triangle", "frequency": 520, "gain": 0.02, "attack_sec": 0.004, "release_sec": 0.16, "filter_type": "lowpass", "filter_frequency": 1600 }
+      "files": [
+        "sfx/notice/good.mp3"
       ]
     },
     "sfx.notice.warn": {
       "bus": "sfx",
-      "gain": 0.72,
-      "duration_sec": 0.22,
+      "gain": 0.74,
+      "duration_sec": 0.24,
       "cooldown_ms": 180,
-      "files": ["sfx/erase_escape.wav"],
-      "voices": [
-        { "waveform": "triangle", "frequency": 360, "gain": 0.02, "attack_sec": 0.004, "release_sec": 0.14, "filter_type": "lowpass", "filter_frequency": 1400 }
+      "files": [
+        "sfx/notice/warn.mp3"
       ]
     },
     "sfx.notice.danger": {
       "bus": "sfx",
       "gain": 0.82,
-      "duration_sec": 0.28,
+      "duration_sec": 0.3,
       "cooldown_ms": 180,
-      "files": ["sfx/erase_escape.wav"],
-      "voices": [
-        { "waveform": "sawtooth", "frequency": 240, "gain": 0.022, "attack_sec": 0.004, "release_sec": 0.16, "filter_type": "lowpass", "filter_frequency": 1000 }
+      "files": [
+        "sfx/notice/danger.mp3"
       ]
     },
     "sfx.activity.arrival": {
       "bus": "sfx",
-      "gain": 0.7,
-      "duration_sec": 0.12,
+      "gain": 0.72,
+      "duration_sec": 0.16,
       "cooldown_ms": 160,
-      "files": ["sfx/footstep_01.ogg"]
+      "files": [
+        "sfx/activity/arrival.mp3"
+      ]
     },
     "sfx.activity.threat": {
       "bus": "sfx",
       "gain": 0.8,
-      "duration_sec": 0.2,
+      "duration_sec": 0.28,
       "cooldown_ms": 200,
-      "files": ["sfx/swish_preview.mp3"]
+      "files": [
+        "sfx/activity/threat.mp3"
+      ]
     },
     "sfx.activity.loot": {
       "bus": "sfx",
       "gain": 0.85,
       "duration_sec": 0.28,
       "cooldown_ms": 180,
-      "files": ["sfx/coin_sounds.ogg"]
+      "files": [
+        "sfx/coin_sounds.ogg"
+      ]
+    },
+    "sfx.story.lanternfall.alarm": {
+      "bus": "sfx",
+      "gain": 0.82,
+      "duration_sec": 3.0,
+      "cooldown_ms": 500,
+      "files": [
+        "sfx/story/lanternfall_alarm_bell.mp3"
+      ]
+    },
+    "sfx.story.dead_lantern": {
+      "bus": "sfx",
+      "gain": 0.82,
+      "duration_sec": 2.2,
+      "cooldown_ms": 400,
+      "files": [
+        "sfx/story/dead_lantern_glass.mp3"
+      ]
+    },
+    "sfx.story.cart_reveal": {
+      "bus": "sfx",
+      "gain": 0.82,
+      "duration_sec": 2.0,
+      "cooldown_ms": 400,
+      "files": [
+        "sfx/story/cart_reveal.mp3"
+      ]
+    },
+    "sfx.story.cellar_threat": {
+      "bus": "sfx",
+      "gain": 0.82,
+      "duration_sec": 1.6,
+      "cooldown_ms": 300,
+      "files": [
+        "sfx/story/cellar_threat_sting.mp3"
+      ]
+    },
+    "sfx.story.road_danger": {
+      "bus": "sfx",
+      "gain": 0.82,
+      "duration_sec": 1.8,
+      "cooldown_ms": 300,
+      "files": [
+        "sfx/story/road_danger_sting.mp3"
+      ]
+    },
+    "sfx.story.ruk_boss_start": {
+      "bus": "sfx",
+      "gain": 0.86,
+      "duration_sec": 2.5,
+      "cooldown_ms": 500,
+      "files": [
+        "sfx/story/ruk_boss_start.mp3"
+      ]
+    },
+    "sfx.story.ruk_defeat": {
+      "bus": "sfx",
+      "gain": 0.84,
+      "duration_sec": 3.0,
+      "cooldown_ms": 500,
+      "files": [
+        "sfx/story/ruk_defeat_chapter.mp3"
+      ]
+    },
+    "sfx.combat.boss_intro": {
+      "bus": "sfx",
+      "gain": 0.86,
+      "duration_sec": 2.5,
+      "cooldown_ms": 500,
+      "files": [
+        "sfx/combat/boss_intro.mp3"
+      ]
     },
     "sfx.combat.hit.melee": {
       "bus": "sfx",
-      "gain": 0.86,
-      "duration_sec": 0.18,
+      "gain": 0.84,
+      "duration_sec": 0.22,
       "cooldown_ms": 75,
-      "files": ["sfx/sword_swing.wav"],
-      "voices": [
-        { "waveform": "square", "frequency": 210, "gain": 0.028, "attack_sec": 0.003, "release_sec": 0.09, "filter_type": "bandpass", "filter_frequency": 760 }
+      "files": [
+        "sfx/combat/hit_melee.mp3"
       ]
     },
     "sfx.combat.hit.magic": {
@@ -231,9 +377,19 @@
       "gain": 0.82,
       "duration_sec": 0.24,
       "cooldown_ms": 90,
-      "files": ["sfx/magic_words.wav"],
+      "files": [
+        "sfx/magic_words.wav"
+      ],
       "voices": [
-        { "waveform": "triangle", "frequency": 430, "gain": 0.02, "attack_sec": 0.004, "release_sec": 0.14, "filter_type": "lowpass", "filter_frequency": 1700 }
+        {
+          "waveform": "triangle",
+          "frequency": 430,
+          "gain": 0.02,
+          "attack_sec": 0.004,
+          "release_sec": 0.14,
+          "filter_type": "lowpass",
+          "filter_frequency": 1700
+        }
       ]
     },
     "sfx.combat.hit.fire": {
@@ -241,40 +397,46 @@
       "gain": 0.86,
       "duration_sec": 0.18,
       "cooldown_ms": 90,
-      "files": ["sfx/flame.ogg"],
+      "files": [
+        "sfx/flame.ogg"
+      ],
       "voices": [
-        { "waveform": "sawtooth", "frequency": 320, "gain": 0.024, "attack_sec": 0.004, "release_sec": 0.16, "filter_type": "lowpass", "filter_frequency": 1280 }
+        {
+          "waveform": "sawtooth",
+          "frequency": 320,
+          "gain": 0.024,
+          "attack_sec": 0.004,
+          "release_sec": 0.16,
+          "filter_type": "lowpass",
+          "filter_frequency": 1280
+        }
       ]
     },
     "sfx.combat.heal": {
       "bus": "sfx",
-      "gain": 0.84,
+      "gain": 0.82,
       "duration_sec": 0.34,
       "cooldown_ms": 100,
-      "files": ["sfx/health_restore.wav"],
-      "voices": [
-        { "waveform": "sine", "frequency": 520, "gain": 0.02, "attack_sec": 0.006, "release_sec": 0.18, "filter_type": "lowpass", "filter_frequency": 1700 },
-        { "waveform": "triangle", "frequency": 780, "gain": 0.01, "attack_sec": 0.008, "release_sec": 0.18, "filter_type": "lowpass", "filter_frequency": 2200 }
+      "files": [
+        "sfx/status/heal.mp3"
       ]
     },
     "sfx.combat.miss": {
       "bus": "sfx",
       "gain": 0.72,
-      "duration_sec": 0.16,
+      "duration_sec": 0.18,
       "cooldown_ms": 80,
-      "files": ["sfx/swish_preview.mp3"],
-      "voices": [
-        { "waveform": "square", "frequency": 180, "gain": 0.016, "attack_sec": 0.002, "release_sec": 0.08, "filter_type": "lowpass", "filter_frequency": 720 }
+      "files": [
+        "sfx/combat/miss.mp3"
       ]
     },
     "sfx.combat.defeat": {
       "bus": "sfx",
       "gain": 0.82,
-      "duration_sec": 0.3,
+      "duration_sec": 0.36,
       "cooldown_ms": 160,
-      "files": ["sfx/erase_escape.wav"],
-      "voices": [
-        { "waveform": "triangle", "frequency": 150, "gain": 0.022, "attack_sec": 0.004, "release_sec": 0.22, "filter_type": "lowpass", "filter_frequency": 840 }
+      "files": [
+        "sfx/combat/defeat.mp3"
       ]
     },
     "sfx.portal.warp": {
@@ -282,10 +444,490 @@
       "gain": 0.86,
       "duration_sec": 0.36,
       "cooldown_ms": 240,
-      "files": ["sfx/erase_escape.wav"],
+      "files": [
+        "sfx/erase_escape.wav"
+      ],
       "voices": [
-        { "waveform": "triangle", "frequency": 260, "gain": 0.022, "attack_sec": 0.01, "release_sec": 0.26, "filter_type": "bandpass", "filter_frequency": 1200 },
-        { "waveform": "sine", "frequency": 520, "gain": 0.012, "attack_sec": 0.02, "release_sec": 0.24, "filter_type": "lowpass", "filter_frequency": 2200 }
+        {
+          "waveform": "triangle",
+          "frequency": 260,
+          "gain": 0.022,
+          "attack_sec": 0.01,
+          "release_sec": 0.26,
+          "filter_type": "bandpass",
+          "filter_frequency": 1200
+        },
+        {
+          "waveform": "sine",
+          "frequency": 520,
+          "gain": 0.012,
+          "attack_sec": 0.02,
+          "release_sec": 0.24,
+          "filter_type": "lowpass",
+          "filter_frequency": 2200
+        }
+      ]
+    },
+    "sfx.ui.confirm": {
+      "bus": "sfx",
+      "gain": 0.76,
+      "duration_sec": 0.16,
+      "cooldown_ms": 80,
+      "files": [
+        "sfx/ui/select_confirm.mp3"
+      ]
+    },
+    "sfx.ui.back": {
+      "bus": "sfx",
+      "gain": 0.72,
+      "duration_sec": 0.14,
+      "cooldown_ms": 80,
+      "files": [
+        "sfx/ui/back_close.mp3"
+      ]
+    },
+    "sfx.ui.menu_open": {
+      "bus": "sfx",
+      "gain": 0.72,
+      "duration_sec": 0.16,
+      "cooldown_ms": 80,
+      "files": [
+        "sfx/ui/menu_open.mp3"
+      ]
+    },
+    "sfx.quest.started": {
+      "bus": "sfx",
+      "gain": 0.8,
+      "duration_sec": 0.42,
+      "cooldown_ms": 220,
+      "files": [
+        "sfx/quest/started.mp3"
+      ]
+    },
+    "sfx.quest.updated": {
+      "bus": "sfx",
+      "gain": 0.78,
+      "duration_sec": 0.36,
+      "cooldown_ms": 200,
+      "files": [
+        "sfx/quest/updated.mp3"
+      ]
+    },
+    "sfx.quest.complete": {
+      "bus": "sfx",
+      "gain": 0.84,
+      "duration_sec": 0.7,
+      "cooldown_ms": 320,
+      "files": [
+        "sfx/quest/complete.mp3"
+      ]
+    },
+    "sfx.loot.rare": {
+      "bus": "sfx",
+      "gain": 0.88,
+      "duration_sec": 0.58,
+      "cooldown_ms": 260,
+      "files": [
+        "sfx/inventory/rare_loot.mp3"
+      ]
+    },
+    "sfx.inventory.equip": {
+      "bus": "sfx",
+      "gain": 0.82,
+      "duration_sec": 0.34,
+      "cooldown_ms": 160,
+      "files": [
+        "sfx/inventory/equip.mp3"
+      ]
+    },
+    "sfx.travel.step.mud": {
+      "bus": "sfx",
+      "gain": 0.72,
+      "duration_sec": 0.16,
+      "cooldown_ms": 160,
+      "files": [
+        "sfx/travel/step_mud.mp3"
+      ]
+    },
+    "sfx.travel.step.stone": {
+      "bus": "sfx",
+      "gain": 0.72,
+      "duration_sec": 0.14,
+      "cooldown_ms": 160,
+      "files": [
+        "sfx/travel/step_stone.mp3"
+      ]
+    },
+    "sfx.travel.step.wood": {
+      "bus": "sfx",
+      "gain": 0.72,
+      "duration_sec": 0.14,
+      "cooldown_ms": 160,
+      "files": [
+        "sfx/travel/step_wood.mp3"
+      ]
+    },
+    "sfx.travel.step.metal_grate": {
+      "bus": "sfx",
+      "gain": 0.7,
+      "duration_sec": 0.16,
+      "cooldown_ms": 160,
+      "files": [
+        "sfx/travel/step_metal_grate.mp3"
+      ]
+    },
+    "sfx.activity.departure": {
+      "bus": "sfx",
+      "gain": 0.72,
+      "duration_sec": 0.16,
+      "cooldown_ms": 160,
+      "files": [
+        "sfx/activity/departure.mp3"
+      ]
+    },
+    "sfx.combat.swing": {
+      "bus": "sfx",
+      "gain": 0.78,
+      "duration_sec": 0.18,
+      "cooldown_ms": 75,
+      "files": [
+        "sfx/combat/swing.mp3"
+      ]
+    },
+    "sfx.combat.hit.heavy": {
+      "bus": "sfx",
+      "gain": 0.86,
+      "duration_sec": 0.3,
+      "cooldown_ms": 90,
+      "files": [
+        "sfx/combat/hit_heavy.mp3"
+      ]
+    },
+    "sfx.combat.block.shield": {
+      "bus": "sfx",
+      "gain": 0.82,
+      "duration_sec": 0.22,
+      "cooldown_ms": 90,
+      "files": [
+        "sfx/combat/block_shield.mp3"
+      ]
+    },
+    "sfx.combat.critical": {
+      "bus": "sfx",
+      "gain": 0.88,
+      "duration_sec": 0.36,
+      "cooldown_ms": 120,
+      "files": [
+        "sfx/combat/critical.mp3"
+      ]
+    },
+    "sfx.status.cleanse": {
+      "bus": "sfx",
+      "gain": 0.8,
+      "duration_sec": 0.36,
+      "cooldown_ms": 140,
+      "files": [
+        "sfx/status/cleanse.mp3"
+      ]
+    },
+    "sfx.status.buff": {
+      "bus": "sfx",
+      "gain": 0.78,
+      "duration_sec": 0.34,
+      "cooldown_ms": 140,
+      "files": [
+        "sfx/status/buff.mp3"
+      ]
+    },
+    "sfx.status.shield": {
+      "bus": "sfx",
+      "gain": 0.8,
+      "duration_sec": 0.34,
+      "cooldown_ms": 140,
+      "files": [
+        "sfx/status/shield.mp3"
+      ]
+    },
+    "sfx.status.bleed": {
+      "bus": "sfx",
+      "gain": 0.76,
+      "duration_sec": 0.28,
+      "cooldown_ms": 140,
+      "files": [
+        "sfx/status/bleed.mp3"
+      ]
+    },
+    "sfx.status.burn": {
+      "bus": "sfx",
+      "gain": 0.78,
+      "duration_sec": 0.3,
+      "cooldown_ms": 140,
+      "files": [
+        "sfx/status/burn.mp3"
+      ]
+    },
+    "sfx.status.poison": {
+      "bus": "sfx",
+      "gain": 0.76,
+      "duration_sec": 0.34,
+      "cooldown_ms": 140,
+      "files": [
+        "sfx/status/poison.mp3"
+      ]
+    },
+    "sfx.status.root_slow": {
+      "bus": "sfx",
+      "gain": 0.76,
+      "duration_sec": 0.34,
+      "cooldown_ms": 140,
+      "files": [
+        "sfx/status/root_slow.mp3"
+      ]
+    },
+    "sfx.status.curse": {
+      "bus": "sfx",
+      "gain": 0.78,
+      "duration_sec": 0.4,
+      "cooldown_ms": 160,
+      "files": [
+        "sfx/status/curse.mp3"
+      ]
+    },
+    "ambience.brambleford.inn": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.62,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/brambleford/lantern_rest_inn_loop.mp3"
+      ]
+    },
+    "ambience.brambleford.chapel": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.62,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/brambleford/chapel_dawn_bell_loop.mp3"
+      ]
+    },
+    "ambience.brambleford.forge": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.62,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/brambleford/forge_loop.mp3"
+      ]
+    },
+    "ambience.brambleford.wharf": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.62,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/brambleford/wharf_loop.mp3"
+      ]
+    },
+    "ambience.brambleford.observatory": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.62,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/brambleford/observatory_loop.mp3"
+      ]
+    },
+    "ambience.brambleford.mender": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.62,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/brambleford/menders_shed_loop.mp3"
+      ]
+    },
+    "ambience.old_barrow.circle": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/old_barrow/circle_loop.mp3"
+      ]
+    },
+    "ambience.whispering_woods.briar": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/whispering_woods/briar_glade_loop.mp3"
+      ]
+    },
+    "ambience.blackfen.reedflats": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/blackfen/reedflats_loop.mp3"
+      ]
+    },
+    "ambience.blackfen.boglight": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/blackfen/boglight_hollow_loop.mp3"
+      ]
+    },
+    "ambience.drowned_weir.causeway": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/drowned_weir/causeway_loop.mp3"
+      ]
+    },
+    "ambience.drowned_weir.sluice": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/drowned_weir/sluice_walk_loop.mp3"
+      ]
+    },
+    "ambience.ruined_watchtower.approach": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/ruined_watchtower/approach_loop.mp3"
+      ]
+    },
+    "ambience.ruined_watchtower.roost": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/ruined_watchtower/roost_loop.mp3"
+      ]
+    },
+    "ambience.goblin_warrens.tunnel": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/goblin_warrens/torchgut_tunnel_loop.mp3"
+      ]
+    },
+    "ambience.goblin_warrens.feast": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/goblin_warrens/feast_hall_loop.mp3"
+      ]
+    },
+    "ambience.goblin_warrens.sludge": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/goblin_warrens/sludge_run_loop.mp3"
+      ]
+    },
+    "ambience.junkyard.landing": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/junkyard/landing_loop.mp3"
+      ]
+    },
+    "ambience.junkyard.relay": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/junkyard/relay_trench_loop.mp3"
+      ]
+    },
+    "ambience.junkyard.anchor_pit": {
+      "bus": "ambience",
+      "loop": true,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
+      "fade_out_sec": 1.0,
+      "files": [
+        "ambience/regions/junkyard/anchor_pit_loop.mp3"
+      ]
+    },
+    "sfx.ui.navigate": {
+      "bus": "sfx",
+      "gain": 0.72,
+      "duration_sec": 0.16,
+      "cooldown_ms": 90,
+      "files": [
+        "sfx/ui/navigate.mp3"
+      ]
+    },
+    "sfx.inventory.unequip": {
+      "bus": "sfx",
+      "gain": 0.76,
+      "duration_sec": 0.25,
+      "cooldown_ms": 160,
+      "files": [
+        "sfx/inventory/unequip.mp3"
+      ]
+    },
+    "sfx.ui.journal_tab": {
+      "bus": "sfx",
+      "gain": 0.74,
+      "duration_sec": 0.18,
+      "cooldown_ms": 90,
+      "files": [
+        "sfx/ui/journal_tab.mp3"
+      ]
+    },
+    "music.region.goblin_road": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.54,
+      "fade_in_sec": 1.4,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/elevenlabs_tests/goblin_road_test.mp3"
       ]
     }
   }

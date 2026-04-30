@@ -18154,7 +18154,7 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
 
 #brave-intro-veil.brave-intro-veil--active {
     opacity: 1;
-    pointer-events: auto;
+    pointer-events: none;
 }
 
 /* Quest Popups */

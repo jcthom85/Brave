@@ -67,6 +67,7 @@
     var unlockHandlersBound = false;
     var unlockInFlight = null;
     var manifestLoaded = false;
+    var manifestLoadPromise = null;
     var contextUnlocked = false;
     var mobilePlaybackArmed = false;
     var initialized = false;
@@ -93,8 +94,12 @@
         return /android|iphone|ipad|ipod|mobile/.test(userAgent);
     }
 
+    function isContextRunning() {
+        return !!(context && context.state === "running");
+    }
+
     function canAttemptImmediatePlayback() {
-        return contextUnlocked || mobilePlaybackArmed || isProbablyMobile();
+        return contextUnlocked || mobilePlaybackArmed || isProbablyMobile() || isContextRunning();
     }
 
     function loadSettings() {
@@ -261,6 +266,26 @@
             return null;
         }
         return manifest.cues[cueId] || null;
+    }
+
+    function chooseAvailableCue(cueIds) {
+        if (!Array.isArray(cueIds)) {
+            return "";
+        }
+        for (var index = 0; index < cueIds.length; index += 1) {
+            if (getCue(cueIds[index])) {
+                return cueIds[index];
+            }
+        }
+        return cueIds.length ? cueIds[cueIds.length - 1] : "";
+    }
+
+    function playFirstCue(cueIds, options) {
+        var cueId = chooseAvailableCue(cueIds);
+        if (!cueId) {
+            return false;
+        }
+        return playCue(cueId, options);
     }
 
     function getCueCooldownMs(cueId, cue) {
@@ -850,6 +875,7 @@
     function chooseAmbienceCue(reactive) {
         var scene = String((reactive && reactive.scene) || "system").toLowerCase();
         var tone = String((reactive && reactive.world_tone) || "neutral").toLowerCase();
+        var sourceId = String((reactive && reactive.source_id) || "").toLowerCase();
         if (
             scene !== "explore"
             && scene !== "travel"
@@ -859,20 +885,119 @@
         ) {
             return "";
         }
+        if (sourceId.indexOf("rat_and_kettle_cellar") >= 0 || sourceId.indexOf("cellar") >= 0) {
+            return chooseAvailableCue(["ambience.brambleford.cellar", "ambience.brambleford"]);
+        }
+        if (sourceId.indexOf("lantern_rest_inn") >= 0) {
+            return chooseAvailableCue(["ambience.brambleford.inn", "ambience.brambleford"]);
+        }
+        if (sourceId.indexOf("chapel") >= 0) {
+            return chooseAvailableCue(["ambience.brambleford.chapel", "ambience.brambleford"]);
+        }
+        if (sourceId.indexOf("ironroot_forge") >= 0 || sourceId.indexOf("forge") >= 0) {
+            return chooseAvailableCue(["ambience.brambleford.forge", "ambience.brambleford"]);
+        }
+        if (sourceId.indexOf("hobbyists_wharf") >= 0 || sourceId.indexOf("wharf") >= 0) {
+            return chooseAvailableCue(["ambience.brambleford.wharf", "ambience.brambleford"]);
+        }
+        if (sourceId.indexOf("observatory") >= 0) {
+            return chooseAvailableCue(["ambience.brambleford.observatory", "ambience.brambleford"]);
+        }
+        if (sourceId.indexOf("menders_shed") >= 0 || sourceId.indexOf("mender") >= 0) {
+            return chooseAvailableCue(["ambience.brambleford.mender", "ambience.brambleford"]);
+        }
+        if (sourceId.indexOf("nexus_gate") >= 0) {
+            return chooseAvailableCue(["ambience.portal", "ambience.brambleford"]);
+        }
+        if (sourceId.indexOf("wayfarer") >= 0 || sourceId.indexOf("sparring") >= 0 || sourceId.indexOf("quartermaster") >= 0 || sourceId.indexOf("vermin_pens") >= 0) {
+            return chooseAvailableCue(["ambience.wayfarers_yard", "ambience.brambleford"]);
+        }
+        if (sourceId.indexOf("brambleford_") >= 0) {
+            return chooseAvailableCue(["ambience.brambleford"]);
+        }
+        if (sourceId.indexOf("fencebreaker_camp") >= 0) {
+            return chooseAvailableCue(["ambience.goblin_road.camp", "ambience.goblinroad"]);
+        }
+        if (sourceId.indexOf("briar_glade") >= 0 || sourceId.indexOf("greymaw") >= 0) {
+            return chooseAvailableCue(["ambience.whispering_woods.briar", "ambience.whisperingwoods"]);
+        }
+        if (sourceId.indexOf("whispering_woods") >= 0) {
+            return chooseAvailableCue(["ambience.whisperingwoods"]);
+        }
+        if (sourceId.indexOf("boglight") >= 0 || sourceId.indexOf("miretooth") >= 0) {
+            return chooseAvailableCue(["ambience.blackfen.boglight", "ambience.blackfen.reedflats"]);
+        }
+        if (sourceId.indexOf("blackfen") >= 0) {
+            return chooseAvailableCue(["ambience.blackfen.reedflats"]);
+        }
+        if (sourceId.indexOf("barrow_circle") >= 0 || sourceId.indexOf("sunken_dais") >= 0) {
+            return chooseAvailableCue(["ambience.old_barrow.circle", "ambience.oldbarrow"]);
+        }
+        if (sourceId.indexOf("old_barrow") >= 0) {
+            return chooseAvailableCue(["ambience.oldbarrow"]);
+        }
+        if (sourceId.indexOf("sluice") >= 0 || sourceId.indexOf("sunken_lock") >= 0 || sourceId.indexOf("lamp_house") >= 0) {
+            return chooseAvailableCue(["ambience.drowned_weir.sluice", "ambience.drowned_weir.causeway"]);
+        }
+        if (sourceId.indexOf("drowned_weir") >= 0) {
+            return chooseAvailableCue(["ambience.drowned_weir.causeway"]);
+        }
+        if (sourceId.indexOf("blackreed_roost") >= 0 || sourceId.indexOf("archers_ledge") >= 0) {
+            return chooseAvailableCue(["ambience.ruined_watchtower.roost", "ambience.ruined_watchtower.approach"]);
+        }
+        if (sourceId.indexOf("ruined_watchtower") >= 0) {
+            return chooseAvailableCue(["ambience.ruined_watchtower.approach"]);
+        }
+        if (sourceId.indexOf("feast_hall") >= 0 || sourceId.indexOf("pot_kings_court") >= 0) {
+            return chooseAvailableCue(["ambience.goblin_warrens.feast", "ambience.goblin_warrens.tunnel"]);
+        }
+        if (sourceId.indexOf("sludge_run") >= 0 || sourceId.indexOf("bone_midden") >= 0) {
+            return chooseAvailableCue(["ambience.goblin_warrens.sludge", "ambience.goblin_warrens.tunnel"]);
+        }
+        if (sourceId.indexOf("goblin_warrens") >= 0) {
+            return chooseAvailableCue(["ambience.goblin_warrens.tunnel"]);
+        }
+        if (sourceId.indexOf("relay_trench") >= 0 || sourceId.indexOf("scrapway") >= 0) {
+            return chooseAvailableCue(["ambience.junkyard.relay", "ambience.junkyard.landing"]);
+        }
+        if (sourceId.indexOf("anchor_pit") >= 0 || sourceId.indexOf("crane_grave") >= 0) {
+            return chooseAvailableCue(["ambience.junkyard.anchor_pit", "ambience.junkyard.landing"]);
+        }
+        if (sourceId.indexOf("junkyard") >= 0) {
+            return chooseAvailableCue(["ambience.junkyard.landing"]);
+        }
         if (tone === "brambleford") {
-            return "ambience.brambleford";
+            return chooseAvailableCue(["ambience.brambleford"]);
+        }
+        if (tone === "wayfarersyard" || tone === "wayfarers_yard" || tone === "training") {
+            return chooseAvailableCue(["ambience.wayfarers_yard", "ambience.brambleford"]);
         }
         if (tone === "goblinroad" || tone === "watchtower") {
-            return "ambience.goblinroad";
+            return chooseAvailableCue([
+                tone === "watchtower" ? "ambience.ruined_watchtower.approach" : "ambience.goblinroad",
+                "ambience.goblinroad"
+            ]);
         }
-        if (tone === "woods" || tone === "blackfen") {
-            return "ambience.whisperingwoods";
+        if (tone === "woods") {
+            return chooseAvailableCue(["ambience.whispering_woods.briar", "ambience.whisperingwoods"]);
         }
-        if (tone === "oldbarrow" || tone === "drownedweir" || tone === "warrens") {
-            return "ambience.oldbarrow";
+        if (tone === "blackfen") {
+            return chooseAvailableCue(["ambience.blackfen.reedflats", "ambience.whisperingwoods"]);
+        }
+        if (tone === "oldbarrow") {
+            return chooseAvailableCue(["ambience.old_barrow.circle", "ambience.oldbarrow"]);
+        }
+        if (tone === "drownedweir") {
+            return chooseAvailableCue(["ambience.drowned_weir.causeway", "ambience.oldbarrow"]);
+        }
+        if (tone === "warrens") {
+            return chooseAvailableCue(["ambience.goblin_warrens.tunnel", "ambience.oldbarrow"]);
         }
         if (tone === "nexus" || tone === "portal" || tone === "junkyard") {
-            return "ambience.portal";
+            return chooseAvailableCue([
+                tone === "junkyard" ? "ambience.junkyard.landing" : "ambience.nexus_gate",
+                "ambience.portal"
+            ]);
         }
         return "ambience.brambleford";
     }
@@ -883,21 +1008,47 @@
         var danger = String((reactive && reactive.danger) || "").toLowerCase();
         var boss = !!(reactive && reactive.boss);
         if (scene === "victory") {
-            return "music.victory";
+            return chooseAvailableCue(["music.victory"]);
         }
         if (scene === "combat") {
-            return boss ? "music.combat.boss" : "music.combat.standard";
+            return chooseAvailableCue([boss ? "music.combat.boss" : "music.combat.standard"]);
         }
         if (scene === "account" || scene === "chargen" || scene === "connection") {
-            return "music.title";
+            return chooseAvailableCue(["music.title"]);
         }
         if (tone === "nexus" || tone === "portal" || tone === "junkyard") {
-            return "music.portal";
+            return chooseAvailableCue(["music.region.junkyard_planet", "music.portal"]);
+        }
+        if (tone === "goblinroad") {
+            return chooseAvailableCue(["music.region.goblin_road", "music.explore.danger"]);
+        }
+        if (tone === "oldbarrow") {
+            return chooseAvailableCue(["music.region.old_barrow", "music.explore.danger"]);
+        }
+        if (tone === "woods") {
+            return chooseAvailableCue(["music.region.whispering_woods", "music.explore.danger"]);
+        }
+        if (tone === "blackfen") {
+            return chooseAvailableCue(["music.region.blackfen", "music.explore.danger"]);
+        }
+        if (tone === "drownedweir") {
+            return chooseAvailableCue(["music.region.drowned_weir", "music.explore.danger"]);
+        }
+        if (tone === "watchtower") {
+            return chooseAvailableCue(["music.region.ruined_watchtower", "music.explore.danger"]);
+        }
+        if (tone === "warrens") {
+            return chooseAvailableCue(["music.region.goblin_warrens", "music.explore.danger"]);
         }
         if (danger === "danger" || danger === "combat") {
-            return "music.explore.danger";
+            return chooseAvailableCue(["music.explore.danger"]);
         }
         return "music.explore.safe";
+    }
+
+    function isTitleExperienceScene(scene) {
+        scene = String(scene || "").toLowerCase();
+        return scene === "account" || scene === "chargen" || scene === "connection";
     }
 
     function setReactiveState(reactive) {
@@ -913,7 +1064,7 @@
             && String(previousState.source_id) !== String(nextState.source_id)
             && String(nextState.scene || "").toLowerCase() === "explore"
         ) {
-            playCue("sfx.travel.step", { force: true });
+            playFirstCue(["sfx.travel.step"], { force: true });
         }
         if (
             previousState
@@ -921,18 +1072,22 @@
             && nextState.boss
             && String(nextState.scene || "").toLowerCase() === "combat"
         ) {
-            playCue("sfx.portal.warp", { force: true });
+            playFirstCue(["sfx.combat.boss_intro", "sfx.portal.warp"], { force: true });
         }
         refreshLayerTargets();
         dispatchStateChange();
     }
 
     function clearReactiveState() {
+        var preserveTitleMusic = isTitleExperienceScene(currentReactiveState && currentReactiveState.scene)
+            && (desiredLayers.music === "music.title" || (activeLayers.music && activeLayers.music.cueId === "music.title"));
         currentReactiveState = {};
         desiredLayers.ambience = "";
-        desiredLayers.music = "";
+        desiredLayers.music = preserveTitleMusic ? "music.title" : "";
         stopLayer("ambience", 450);
-        stopLayer("music", 450);
+        if (!preserveTitleMusic) {
+            stopLayer("music", 450);
+        }
         dispatchStateChange();
     }
 
@@ -950,7 +1105,12 @@
         }
         if (!canAttemptImmediatePlayback()) {
             lastPlayback.error = "playback blocked pending unlock for " + cueId;
-            return false;
+            unlock().then(function (didUnlock) {
+                if (didUnlock && settings.enabled && !settings.muted && !shouldThrottleCue(cueId, cue, true)) {
+                    playCueInternal(cueId, cue, options);
+                }
+            });
+            return true;
         }
         playCueInternal(cueId, cue, options).then(function (playback) {
             if (cue.loop && playback && !options.layer) {
@@ -967,86 +1127,165 @@
         var kind = String(event.kind || "").toLowerCase();
         var element = String(event.element || "").toLowerCase();
         if (kind === "heal") {
-            playCue("sfx.combat.heal");
+            playFirstCue(["sfx.class.cleric.heal", "sfx.combat.heal"]);
+            return;
+        }
+        if (kind === "defend") {
+            playFirstCue(["sfx.combat.block.shield", "sfx.status.shield"]);
             return;
         }
         if (kind === "miss") {
-            playCue("sfx.combat.miss");
+            playFirstCue(["sfx.combat.miss"]);
             return;
         }
         if (kind === "defeat") {
-            playCue("sfx.combat.defeat");
+            playFirstCue(["sfx.combat.defeat"]);
             return;
         }
         if (kind === "damage") {
+            if (event.critical) {
+                playFirstCue(["sfx.combat.critical", "sfx.combat.hit.heavy", "sfx.combat.hit.melee"]);
+                return;
+            }
+            if (element === "bleed") {
+                playFirstCue(["sfx.status.bleed", "sfx.combat.hit.melee"]);
+                return;
+            }
+            if (element === "burn") {
+                playFirstCue(["sfx.status.burn", "sfx.combat.hit.fire"]);
+                return;
+            }
+            if (element === "poison") {
+                playFirstCue(["sfx.status.poison", "sfx.combat.hit.magic"]);
+                return;
+            }
+            if (element === "curse") {
+                playFirstCue(["sfx.status.curse", "sfx.combat.hit.magic"]);
+                return;
+            }
             if (element === "fire") {
-                playCue("sfx.combat.hit.fire");
+                playFirstCue(["sfx.class.mage.firebolt", "sfx.combat.hit.fire"]);
                 return;
             }
-            if (element === "holy" || element === "nature" || element === "shadow" || element === "frost" || element === "lightning") {
-                playCue("sfx.combat.hit.magic");
+            if (element === "holy") {
+                playFirstCue(["sfx.class.paladin.holy_strike", "sfx.combat.hit.magic"]);
                 return;
             }
-            playCue("sfx.combat.hit.melee");
+            if (element === "nature") {
+                playFirstCue(["sfx.class.druid.roots", "sfx.combat.hit.magic"]);
+                return;
+            }
+            if (element === "frost") {
+                playFirstCue(["sfx.class.mage.frostbind", "sfx.combat.hit.magic"]);
+                return;
+            }
+            if (element === "lightning") {
+                playFirstCue(["sfx.class.mage.arcspark", "sfx.combat.hit.magic"]);
+                return;
+            }
+            if (element === "shadow") {
+                playFirstCue(["sfx.class.rogue.shadowstep", "sfx.combat.hit.magic"]);
+                return;
+            }
+            playFirstCue(["sfx.combat.hit.melee"]);
+            return;
+        }
+        if (kind === "action") {
+            playFirstCue(["sfx.combat.swing"]);
         }
     }
 
     function handleNotice(payload) {
         var tone = String((payload && payload.tone) || "muted").toLowerCase();
         if (tone === "good") {
-            playCue("sfx.notice.good");
+            playFirstCue(["sfx.notice.good"]);
             return;
         }
         if (tone === "warn") {
-            playCue("sfx.notice.warn");
+            playFirstCue(["sfx.notice.warn"]);
             return;
         }
         if (tone === "danger") {
-            playCue("sfx.notice.danger");
+            playFirstCue(["sfx.notice.danger"]);
         }
     }
 
     function handleRoomActivity(payload) {
         var category = String((payload && payload.category) || "").toLowerCase();
         if (category === "threat") {
-            playCue("sfx.activity.threat");
+            playFirstCue(["sfx.activity.threat"]);
             return;
         }
         if (category === "arrival") {
-            playCue("sfx.activity.arrival");
+            playFirstCue(["sfx.activity.arrival"]);
+            return;
+        }
+        if (category === "departure") {
+            playFirstCue(["sfx.activity.departure", "sfx.activity.arrival"]);
             return;
         }
         if (category === "loot") {
-            playCue("sfx.activity.loot");
+            playFirstCue(["sfx.activity.loot", "sfx.loot.reward"]);
         }
     }
 
     function handleUiAction(kind) {
+        if (!initialized) {
+            init({ manifestUrl: window.BRAVE_AUDIO_MANIFEST_URL || "" }).then(function () {
+                handleUiAction(kind);
+            });
+            return;
+        }
+        if (!manifestLoaded && manifestLoadPromise) {
+            manifestLoadPromise.then(function () {
+                handleUiAction(kind);
+            });
+            return;
+        }
         var normalized = String(kind || "").toLowerCase();
-        var cueId = normalized === "error" ? "sfx.ui.error" : "sfx.ui.click";
+        var cueIds = ["sfx.ui.click"];
+        if (normalized === "error") {
+            cueIds = ["sfx.ui.error"];
+        } else if (normalized === "success") {
+            cueIds = ["sfx.quest.complete", "sfx.notice.good", "sfx.ui.confirm", "sfx.ui.click"];
+        } else if (normalized === "select") {
+            cueIds = ["sfx.ui.confirm", "sfx.quest.started", "sfx.ui.click"];
+        } else if (normalized === "equip") {
+            cueIds = ["sfx.inventory.equip", "sfx.ui.confirm", "sfx.ui.click"];
+        } else if (normalized === "unequip") {
+            cueIds = ["sfx.inventory.unequip", "sfx.inventory.equip", "sfx.ui.back", "sfx.ui.click"];
+        } else if (normalized === "menu" || normalized === "open") {
+            cueIds = ["sfx.ui.menu_open", "sfx.ui.click"];
+        } else if (normalized === "journal_tab" || normalized === "tab") {
+            cueIds = ["sfx.ui.journal_tab", "sfx.ui.menu_open", "sfx.ui.click"];
+        } else if (normalized === "navigate" || normalized === "move") {
+            cueIds = ["sfx.ui.navigate", "sfx.ui.click"];
+        } else if (normalized === "back" || normalized === "close") {
+            cueIds = ["sfx.ui.back", "sfx.ui.click"];
+        }
         if (!contextUnlocked) {
             unlock().then(function (didUnlock) {
                 if (didUnlock || contextUnlocked) {
-                    playCue(cueId, { force: true });
+                    playFirstCue(cueIds, { force: true });
                 }
             });
             return;
         }
-        playCue(cueId);
+        playFirstCue(cueIds);
     }
 
     function handleRest(payload) {
         if (!contextUnlocked) {
             unlock().then(function (didUnlock) {
                 if (didUnlock || contextUnlocked) {
-                    playCue("music.rest", { force: true });
-                    playCue("sfx.combat.heal", { force: true });
+                    playFirstCue(["music.rest"], { force: true });
+                    playFirstCue(["sfx.activity.rest", "sfx.combat.heal"], { force: true });
                 }
             });
             return;
         }
-        playCue("music.rest", { force: true });
-        playCue("sfx.combat.heal", { force: true });
+        playFirstCue(["music.rest"], { force: true });
+        playFirstCue(["sfx.activity.rest", "sfx.combat.heal"], { force: true });
     }
 
     function previewCue(cueId) {
@@ -1174,16 +1413,26 @@
     function init(options) {
         options = options || {};
         if (initialized) {
+            if (manifestLoadPromise && !manifestLoaded) {
+                return manifestLoadPromise.then(function () {
+                    return getState();
+                });
+            }
             return Promise.resolve(getState());
         }
         initialized = true;
         manifestUrl = options.manifestUrl || window.BRAVE_AUDIO_MANIFEST_URL || "";
         getAudioContext();
+        if (isContextRunning()) {
+            contextUnlocked = true;
+            mobilePlaybackArmed = true;
+        }
         bindUnlockHandlers();
         dispatchStateChange();
-        return loadManifest(manifestUrl).then(function () {
+        manifestLoadPromise = loadManifest(manifestUrl).then(function () {
             return getState();
         });
+        return manifestLoadPromise;
     }
 
     window.BraveAudio = {
@@ -1197,6 +1446,7 @@
         handleRest: handleRest,
         handleRoomActivity: handleRoomActivity,
         handleUiAction: handleUiAction,
+        play: playCue,
         previewCue: previewCue,
         setSetting: setSetting,
         toggleSetting: toggleSetting

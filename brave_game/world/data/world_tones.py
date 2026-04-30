@@ -75,6 +75,8 @@ def get_world_tone_key(source):
 
     world = str(getattr(room.db, "brave_world", "Brave") or "Brave").strip()
     zone = str(getattr(room.db, "brave_zone", "") or "").strip()
+    room_id = str(getattr(room.db, "brave_room_id", "") or "").strip().lower()
+    map_region = str(getattr(room.db, "brave_map_region", "") or "").strip().lower()
     room_key = str(getattr(room, "key", "") or "").strip()
     combined = " ".join(part for part in (world, zone, room_key) if part).lower()
 
@@ -98,6 +100,8 @@ def get_world_tone_key(source):
         return "oldbarrow"
     if any(token in combined for token in ("whispering", "greymaw", "briar", "stone path")):
         return "woods"
+    if map_region == "brambleford" or room_id.startswith("brambleford_"):
+        return "brambleford"
     if any(token in combined for token in ("goblin road", "east gate", "fencebreaker", "old fence line", "wolf turn")):
         return "goblinroad"
 

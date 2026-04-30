@@ -237,9 +237,11 @@ def _complete_quest(character, definition, state, messages):
         return False
 
     try:
-        from world.browser_panels import send_quest_complete_event
+        from world.browser_panels import send_audio_cue_once, send_quest_complete_event
 
         send_quest_complete_event(character, definition["title"], rewards=definition.get("rewards", {}))
+        if definition.get("title") == "Ruk the Fence-Cutter":
+            send_audio_cue_once(character, "sfx.story.ruk_defeat", key="quest_ruk_defeat", force=True, delay_ms=350)
     except Exception:
         pass
 

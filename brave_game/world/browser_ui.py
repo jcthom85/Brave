@@ -386,7 +386,8 @@ def _reactive_view(source=None, *, scene="system", danger=None, boss=False):
         "scene": scene,
         "world_tone": get_world_tone_key(source),
     }
-    source_id = getattr(source, "id", None)
+    source_db = getattr(source, "db", None)
+    source_id = getattr(source_db, "brave_room_id", None) or getattr(source, "id", None)
     if source_id is not None:
         reactive["source_id"] = str(source_id)
     if danger:

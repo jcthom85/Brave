@@ -6525,6 +6525,75 @@ let defaultout_plugin = (function () {
             || normalized === "down";
     };
 
+    var getUiSoundForCommand = function (command) {
+        var normalized = String(command || "").trim().toLowerCase();
+        if (isRoomNavigationCommand(normalized) || normalized.indexOf("go ") === 0) {
+            return "";
+        }
+        if (
+            normalized === "map"
+            || normalized === "pack"
+            || normalized === "quest"
+            || normalized === "character"
+            || normalized === "skills"
+            || normalized === "party"
+            || normalized === "settings"
+            || normalized === "help"
+            || normalized.indexOf("open ") === 0
+        ) {
+            return "menu";
+        }
+        if (
+            normalized === "quests"
+            || normalized === "journal"
+            || normalized === "quests active"
+            || normalized === "quests completed"
+            || normalized === "journal active"
+            || normalized === "journal completed"
+        ) {
+            return normalized === "quests active"
+                || normalized === "quests completed"
+                || normalized === "journal active"
+                || normalized === "journal completed"
+                ? "journal_tab"
+                : "menu";
+        }
+        if (normalized.indexOf("gear equip ") === 0) {
+            return "equip";
+        }
+        if (normalized.indexOf("gear unequip ") === 0) {
+            return "unequip";
+        }
+        if (
+            normalized === "look"
+            || normalized === "back"
+            || normalized === "close"
+            || normalized.indexOf("close ") === 0
+            || normalized.indexOf("back ") === 0
+        ) {
+            return "back";
+        }
+        if (
+            normalized.indexOf("choose ") === 0
+            || normalized.indexOf("select ") === 0
+            || normalized.indexOf("confirm") === 0
+            || normalized.indexOf("buy ") === 0
+            || normalized.indexOf("equip ") === 0
+            || normalized.indexOf("unequip ") === 0
+            || normalized.indexOf("use ") === 0
+        ) {
+            return normalized.indexOf("equip ") === 0 || normalized.indexOf("unequip ") === 0 ? "equip" : "select";
+        }
+        return "";
+    };
+
+    var playUiSound = function (kind) {
+        var braveAudio = getBraveAudio();
+        if (braveAudio && typeof braveAudio.handleUiAction === "function") {
+            braveAudio.handleUiAction(kind || "click");
+        }
+    };
+
     var suppressMobileRoomNavScroll = function (durationMs) {
         if (!isMobileViewport()) {
             return;
@@ -6868,6 +6937,14 @@ let defaultout_plugin = (function () {
             document.body.classList.toggle("brave-combat-return-active", mode === "return");
         }
         showCombatTransitionOverlay(viewData, mode);
+        if (mode === "enter") {
+            var transitionReactive = {};
+            Object.keys(viewData.reactive || {}).forEach(function (key) {
+                transitionReactive[key] = viewData.reactive[key];
+            });
+            transitionReactive.scene = "combat";
+            applyReactiveState(transitionReactive);
+        }
         var revealDelay = getCombatTransitionRevealDelay(mode);
         pendingCombatTransitionTimeout = window.setTimeout(function () {
             var queuedViewData = pendingCombatTransitionViewData;
@@ -8530,9 +8607,11 @@ let defaultout_plugin = (function () {
                             : "")
                         + "</span>";
                 }
-                body = "<span class='brave-view__map-room-primary'>"
-                    + icon(tile.symbol || "guarded-tower", "brave-view__map-room-icon")
-                    + "</span>"
+                body = (tile.symbol
+                    ? "<span class='brave-view__map-room-primary'>"
+                        + icon(tile.symbol, "brave-view__map-room-icon")
+                        + "</span>"
+                    : "")
                     + badgeMarkup;
             } else if (kind === "connector") {
                 var axis = tile.axis === "vertical" ? "vertical" : "horizontal";
@@ -9511,8 +9590,9 @@ let defaultout_plugin = (function () {
         ) {
             allowNextRoomRefreshNavigationUntil = Date.now() + 1500;
         }
-        if (braveAudio && typeof braveAudio.handleUiAction === "function") {
-            braveAudio.handleUiAction("click");
+        var uiSound = getUiSoundForCommand(normalizedCommand);
+        if (uiSound && braveAudio && typeof braveAudio.handleUiAction === "function") {
+            braveAudio.handleUiAction(uiSound);
         }
         plugin_handler.onSend(command);
     };
@@ -10788,6 +10868,7 @@ let defaultout_plugin = (function () {
             }
         });
         if (firstEmptyField) {
+            playUiSound("error");
             if (typeof firstEmptyField.focus === "function") {
                 firstEmptyField.focus();
             }
@@ -10808,6 +10889,7 @@ let defaultout_plugin = (function () {
             command = singleValue;
         }
         if (!command) {
+            playUiSound("error");
             if (firstField && typeof firstField.focus === "function") {
                 firstField.focus();
             }
@@ -10829,6 +10911,7 @@ let defaultout_plugin = (function () {
                 return;
             }
             event.preventDefault();
+            playUiSound("menu");
             openPickerFromTarget(pickerTarget);
         }, true);
 
@@ -10879,6 +10962,7 @@ let defaultout_plugin = (function () {
             if (pickerCloseTarget) {
                 event.preventDefault();
                 event.stopPropagation();
+                playUiSound("close");
                 clearPickerSheet();
                 return;
             }
@@ -10886,6 +10970,7 @@ let defaultout_plugin = (function () {
             if (noticeCloseTarget) {
                 event.preventDefault();
                 event.stopPropagation();
+                playUiSound("close");
                 clearBrowserNotice();
                 return;
             }
@@ -10893,6 +10978,7 @@ let defaultout_plugin = (function () {
             if (voiceBubbleTarget) {
                 event.preventDefault();
                 event.stopPropagation();
+                playUiSound("close");
                 dismissRoomVoiceBubble(Number(voiceBubbleTarget.getAttribute("data-brave-room-voice-id")));
                 return;
             }
@@ -10900,6 +10986,7 @@ let defaultout_plugin = (function () {
             if (chatOpenTarget) {
                 event.preventDefault();
                 event.stopPropagation();
+                playUiSound(chatOpenTarget.hasAttribute("data-brave-prefill") ? "select" : "menu");
                 if (chatOpenTarget.hasAttribute("data-brave-prefill")) {
                     var inputPlugin = getDefaultInPlugin();
                     clearPickerSheet();
@@ -10922,6 +11009,7 @@ let defaultout_plugin = (function () {
             if (activityTabTarget) {
                 event.preventDefault();
                 event.stopPropagation();
+                playUiSound("select");
                 setRoomActivityTab(activityTabTarget.getAttribute("data-brave-activity-tab"));
                 return;
             }
@@ -10929,6 +11017,7 @@ let defaultout_plugin = (function () {
             if (welcomeNext) {
                 event.preventDefault();
                 event.stopPropagation();
+                playUiSound("select");
                 currentWelcomePageIndex++;
                 renderWelcomePage();
                 return;
@@ -10937,6 +11026,7 @@ let defaultout_plugin = (function () {
             if (welcomePrev) {
                 event.preventDefault();
                 event.stopPropagation();
+                playUiSound("back");
                 currentWelcomePageIndex--;
                 renderWelcomePage();
                 return;
@@ -10945,6 +11035,7 @@ let defaultout_plugin = (function () {
             if (objectivesExpandTarget) {
                 event.preventDefault();
                 event.stopPropagation();
+                playUiSound("menu");
                 setMobileObjectivesExpanded(!mobileObjectivesExpanded);
                 return;
             }
@@ -10952,6 +11043,7 @@ let defaultout_plugin = (function () {
             if (objectivesTarget) {
                 event.preventDefault();
                 event.stopPropagation();
+                playUiSound("close");
                 toggleObjectives();
                 return;
             }
@@ -10959,6 +11051,7 @@ let defaultout_plugin = (function () {
             if (mobileNavToggleTarget) {
                 event.preventDefault();
                 event.stopPropagation();
+                playUiSound("menu");
                 toggleMobileNavDockExpanded();
                 return;
             }
@@ -10967,9 +11060,11 @@ let defaultout_plugin = (function () {
                 event.preventDefault();
                 event.stopPropagation();
                 if (mobileTarget.hasAttribute("data-brave-mobile-panel")) {
+                    playUiSound("menu");
                     toggleMobileUtilityTab(mobileTarget.getAttribute("data-brave-mobile-panel"));
                     return;
                 }
+                playUiSound(mobileTarget.getAttribute("data-brave-mobile-action") === "close" ? "close" : "select");
                 handleMobileUtilityAction(mobileTarget.getAttribute("data-brave-mobile-action"));
                 return;
             }
@@ -10992,8 +11087,10 @@ let defaultout_plugin = (function () {
                 event.preventDefault();
                 event.stopPropagation();
                 if (combatTabTarget.disabled) {
+                    playUiSound("error");
                     return;
                 }
+                playUiSound("select");
                 currentCombatActionTab = combatTabTarget.getAttribute("data-brave-combat-tab") || "abilities";
                 syncCombatActionTray();
                 return;
@@ -11010,18 +11107,12 @@ let defaultout_plugin = (function () {
             event.preventDefault();
             event.stopPropagation();
             if (target.hasAttribute("data-brave-connection-screen")) {
-                var braveAudioConnection = getBraveAudio();
-                if (braveAudioConnection && typeof braveAudioConnection.handleUiAction === "function") {
-                    braveAudioConnection.handleUiAction("click");
-                }
+                playUiSound("menu");
                 openConnectionScreen(target.getAttribute("data-brave-connection-screen"));
                 return;
             }
             if (target.hasAttribute("data-brave-picker")) {
-                var braveAudioPicker = getBraveAudio();
-                if (braveAudioPicker && typeof braveAudioPicker.handleUiAction === "function") {
-                    braveAudioPicker.handleUiAction("click");
-                }
+                playUiSound("menu");
                 if (isMobileViewport()) {
                     currentMobileUtilityTab = null;
                     currentMobileUtilityPresentation = "sheet";
@@ -11033,10 +11124,7 @@ let defaultout_plugin = (function () {
             }
             if (target.hasAttribute("data-brave-prefill")) {
                 clearPickerSheet();
-                var braveAudioPrefill = getBraveAudio();
-                if (braveAudioPrefill && typeof braveAudioPrefill.handleUiAction === "function") {
-                    braveAudioPrefill.handleUiAction("click");
-                }
+                playUiSound("select");
                 prefillBrowserInput(target.getAttribute("data-brave-prefill"));
                 return;
             }
@@ -11121,6 +11209,7 @@ let defaultout_plugin = (function () {
                 event.stopPropagation();
                 suppressBrowserClickUntil = Date.now() + 320;
                 clearPickerSheet();
+                playUiSound("select");
                 prefillBrowserInput(directPrefillTarget.getAttribute("data-brave-prefill"));
                 return;
             }
@@ -11252,15 +11341,18 @@ let defaultout_plugin = (function () {
             event.stopPropagation();
             suppressBrowserClickUntil = Date.now() + 320;
             if (directTarget.hasAttribute("data-brave-connection-screen")) {
+                playUiSound("menu");
                 openConnectionScreen(directTarget.getAttribute("data-brave-connection-screen"));
                 return;
             }
             if (directTarget.hasAttribute("data-brave-picker")) {
+                playUiSound("menu");
                 openPickerFromTarget(directTarget);
                 return;
             }
             if (directTarget.hasAttribute("data-brave-prefill")) {
                 clearPickerSheet();
+                playUiSound("select");
                 prefillBrowserInput(directTarget.getAttribute("data-brave-prefill"));
                 return;
             }
@@ -11381,15 +11473,18 @@ let defaultout_plugin = (function () {
                 event.stopPropagation();
                 suppressBrowserClickUntil = Date.now() + 320;
                 if (directTarget.hasAttribute("data-brave-connection-screen")) {
+                    playUiSound("menu");
                     openConnectionScreen(directTarget.getAttribute("data-brave-connection-screen"));
                     return;
                 }
                 if (directTarget.hasAttribute("data-brave-picker")) {
+                    playUiSound("menu");
                     openPickerFromTarget(directTarget);
                     return;
                 }
                 if (directTarget.hasAttribute("data-brave-prefill")) {
                     clearPickerSheet();
+                    playUiSound("select");
                     prefillBrowserInput(directTarget.getAttribute("data-brave-prefill"));
                     return;
                 }
@@ -11432,9 +11527,11 @@ let defaultout_plugin = (function () {
                 event.preventDefault();
                 event.stopPropagation();
                 if (mobileTarget.hasAttribute("data-brave-mobile-panel")) {
+                    playUiSound("menu");
                     toggleMobileUtilityTab(mobileTarget.getAttribute("data-brave-mobile-panel"));
                     return;
                 }
+                playUiSound(mobileTarget.getAttribute("data-brave-mobile-action") === "close" ? "close" : "select");
                 handleMobileUtilityAction(mobileTarget.getAttribute("data-brave-mobile-action"));
                 return;
             }
@@ -11443,13 +11540,17 @@ let defaultout_plugin = (function () {
                 event.preventDefault();
                 event.stopPropagation();
                 if (!combatTabTarget.disabled) {
+                    playUiSound("select");
                     currentCombatActionTab = combatTabTarget.getAttribute("data-brave-combat-tab") || "abilities";
                     syncCombatActionTray();
+                } else {
+                    playUiSound("error");
                 }
                 return;
             }
             var pickerCloseButton = event.target.closest("[data-brave-picker-close]");
             if (pickerCloseButton) {
+                playUiSound("close");
                 clearPickerSheet();
                 event.preventDefault();
                 event.stopPropagation();
@@ -11457,6 +11558,7 @@ let defaultout_plugin = (function () {
             }
             var noticeCloseButton = event.target.closest("[data-brave-notice-close]");
             if (noticeCloseButton) {
+                playUiSound("close");
                 clearBrowserNotice();
                 event.preventDefault();
                 event.stopPropagation();
@@ -11853,6 +11955,18 @@ let defaultout_plugin = (function () {
             var braveAudioCombat = getBraveAudio();
             if (braveAudioCombat && typeof braveAudioCombat.handleCombatFx === "function") {
                 braveAudioCombat.handleCombatFx(combatFxPayload);
+            }
+            return true;
+        }
+
+        if (cmdname === "brave_audio_cue") {
+            var audioCuePayload = getOobPayload(args, kwargs, "brave_audio_cue", {}) || {};
+            var audioCueId = audioCuePayload.cue_id || audioCuePayload.cue || "";
+            var braveAudioCue = getBraveAudio();
+            if (braveAudioCue && audioCueId && typeof braveAudioCue.play === "function") {
+                window.setTimeout(function () {
+                    braveAudioCue.play(audioCueId, { force: !!audioCuePayload.force });
+                }, Math.max(0, parseInt(audioCuePayload.delay_ms || 0, 10) || 0));
             }
             return true;
         }

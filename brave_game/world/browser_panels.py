@@ -198,6 +198,34 @@ def send_rest_event(target, location_name=None):
     send_webclient_event(target, brave_rest=payload)
 
 
+def send_audio_cue_event(target, cue_id, *, force=False, delay_ms=0):
+    """Ask webclient sessions to play a specific audio cue."""
+
+    cue_id = str(cue_id or "").strip()
+    if not cue_id:
+        return
+    payload = {"cue_id": cue_id}
+    if force:
+        payload["force"] = True
+    if delay_ms:
+        payload["delay_ms"] = max(0, int(delay_ms))
+    send_webclient_event(target, brave_audio_cue=payload)
+
+
+def send_audio_cue_once(target, cue_id, *, key=None, force=False, delay_ms=0):
+    """Play a story cue once per character unless its key is cleared."""
+
+    cue_key = str(key or cue_id or "").strip()
+    if not cue_key:
+        return
+    played = set(getattr(target.db, "brave_audio_cues_played", []) or [])
+    if cue_key in played:
+        return
+    played.add(cue_key)
+    target.db.brave_audio_cues_played = sorted(played)
+    send_audio_cue_event(target, cue_id, force=force, delay_ms=delay_ms)
+
+
 def send_browser_notice_event(
     target,
     message,

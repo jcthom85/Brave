@@ -12,6 +12,7 @@ django.setup()
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT_PATH = REPO_ROOT / "brave_game/web/static/webclient/js/plugins/default_out.js"
 WEBCLIENT_CSS_PATH = REPO_ROOT / "brave_game/web/static/webclient/css/brave_webclient.css"
+AUDIO_JS_PATH = REPO_ROOT / "brave_game/web/static/webclient/js/brave_audio.js"
 
 
 class QuestPopupTests(unittest.TestCase):
@@ -86,6 +87,15 @@ class QuestPopupTests(unittest.TestCase):
         self.assertIn(".brave-quest-complete-overlay {", css_source)
         self.assertIn("pointer-events: auto;", css_source)
         self.assertIn("cursor: pointer;", css_source)
+
+    def test_intro_veil_does_not_block_early_audio_interactions(self):
+        css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
+        audio_source = AUDIO_JS_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("#brave-intro-veil.brave-intro-veil--active {", css_source)
+        self.assertIn("pointer-events: none;", css_source)
+        self.assertIn("playback blocked pending unlock", audio_source)
+        self.assertIn("playCueInternal(cueId, cue, options);", audio_source)
 
     def test_rest_overlay_styles_full_screen_animation(self):
         css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")

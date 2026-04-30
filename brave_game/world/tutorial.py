@@ -827,6 +827,13 @@ def get_tutorial_entity_response(character, entity, action, is_action=False):
                 "Someone has added a smaller note beneath it: IF YOU GET LOST, GO BACK TO TAMSIN."
             )
         if entity_id == "tutorial_damaged_cart":
+            if is_action:
+                try:
+                    from world.browser_panels import send_audio_cue_once
+
+                    send_audio_cue_once(character, "sfx.story.cart_reveal", key="read_tutorial_damaged_cart", force=True)
+                except Exception:
+                    pass
             return (
                 "The cart tells the story better than a speech: clawed mud on the wheel, split fence rail in the axle, "
                 "and harness leather cut in two clean strokes. Whatever hit the south road had tools, not just teeth."

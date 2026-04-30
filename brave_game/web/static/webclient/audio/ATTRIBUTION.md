@@ -2,6 +2,10 @@
 
 Brave's shipped web audio assets are sourced from OpenGameArt.
 
+Generated first-hour candidate replacements are sourced from ElevenLabs through
+the project owner's ElevenLabs account. Keep the matching generation JSON under
+`tmp/audio-generation/elevenlabs/` for prompt and date provenance.
+
 ## Music
 
 - `music/town_theme_rpg.mp3`
@@ -105,3 +109,102 @@ Brave's shipped web audio assets are sourced from OpenGameArt.
   - Title: `Sword Swing`
   - Author: DavidW
   - License: OGA-BY 4.0
+
+## Generated Audio
+
+- `ambience/first_hour/brambleford_town_green_alarm_loop.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `ambience.brambleford.town_green_alarm`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `ambience/first_hour/wayfarers_yard_training_loop.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `ambience.wayfarers_yard.training`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `ambience/first_hour/rat_cellar_loop.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `ambience.rat_cellar`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `ambience/first_hour/goblin_road_trailhead_loop.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `ambience.goblin_road.trailhead`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `ambience/first_hour/fencebreaker_camp_loop.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `ambience.goblin_road.fencebreaker_camp`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `ambience/regions/brambleford/sunny_birds_loop.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `ambience.brambleford.sunny_birds`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/story/lanternfall_alarm_bell.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `story.lanternfall.alarm_bell`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/story/dead_lantern_glass.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `story.lanternfall.dead_lantern.glass`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/story/cart_reveal.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `story.cart_reveal`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/story/cellar_threat_sting.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `story.cellar_threat_sting`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/story/road_danger_sting.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `story.road_danger_sting`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/story/ruk_boss_start.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `story.ruk_boss_start`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/story/ruk_defeat_chapter.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `story.ruk_defeat_chapter`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/ui/*.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation IDs: `ui.click`, `ui.select_confirm`, `ui.back_close`, `ui.navigate`, `ui.journal_tab`, `ui.error`, `ui.menu_open`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/notice/*.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation IDs: `notice.good`, `notice.warn`, `notice.danger`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/quest/*.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation IDs: `quest.started`, `quest.updated`, `quest.complete`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/inventory/*.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation IDs: `inventory.loot`, `inventory.rare_loot`, `inventory.equip`; `sfx/inventory/unequip.mp3` preserves the earlier approved `inventory.equip` generation.
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/travel/*.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation IDs: `travel.step.dirt`, `travel.step.mud`, `travel.step.stone`, `travel.step.wood`, `travel.step.metal_grate`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/activity/*.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation IDs: `activity.arrival`, `activity.departure`, `activity.threat`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/combat/*.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation IDs: `combat.swing`, `combat.hit.melee`, `combat.hit.heavy`, `combat.block.shield`, `combat.miss`, `combat.defeat`, `combat.critical`, `combat.boss_intro`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `sfx/status/*.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation IDs: `status.heal`, `status.cleanse`, `status.buff`, `status.shield`, `status.bleed`, `status.burn`, `status.poison`, `status.root_slow`, `status.curse`
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `ambience/regions/**/*.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation IDs: regional ambience batch, including Brambleford interiors, Nexus Gate, Old Barrow, Whispering Woods, Blackfen, Drowned Weir, Ruined Watchtower, Goblin Warrens, and Junkyard loops.
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `music/theme_sketches/*.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation IDs: `music_themes` batch, including main motif, regional motifs, combat motifs, boss motifs, victory, and rest sketches.
+  - License: ElevenLabs account output; verify active subscription terms before release.
+- `music/elevenlabs_tests/*.mp3`
+  - Source: ElevenLabs Music API
+  - Generation IDs: `music.title`, `music.brambleford.safe`, `music.goblin_road`, `music.combat.standard`, `music.boss.ruk`, `music.victory.stinger`
+  - License: ElevenLabs account output; verify active subscription and music rights before commercial release.

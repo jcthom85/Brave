@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "provider": "ElevenLabs Music API",
+  "purpose": "Five-track test pass for Brave's full music direction. These are review candidates before replacing live gameplay music.",
+  "shared_motif": "Use an original Brave leitmotif: a clear rising perfect fourth, a held warm note, then a gentle three-note stepwise fall. Keep it recognizable but transform it by region and combat intensity.",
+  "global_negative_style": "No vocals, no lyrics, no copyrighted artist references, no modern pop beat, no EDM drop, no bright synthetic beeps, no comedy, no horror stinger spam, no long fade-out; suitable for seamless game looping.",
+  "tracks": [
+    {
+      "id": "music.title",
+      "target_cue": "music.title",
+      "filename": "title_test.mp3",
+      "music_length_ms": 90000,
+      "prompt": "Instrumental high fantasy title-screen music for Brave, a frontier RPG about lantern roads, family parties, small-town courage, and strange portals. Establish the original Brave leitmotif clearly: a rising perfect fourth, a held warm note, then a gentle three-note stepwise fall. Use warm low strings, wooden flute, soft horn, hammered dulcimer, and restrained frame drum. Mood is hopeful, grounded, adventurous, with a little mystery under the warmth. Structure: 8 second intro, main motif statement, quieter middle with lantern-road atmosphere, confident return of the motif, loop-friendly ending that can return to the opening. No vocals, no lyrics, no copyrighted references, no modern pop beat, no EDM, no bright synth beeps, no long fade-out."
+    },
+    {
+      "id": "music.brambleford.safe",
+      "target_cue": "music.explore.safe",
+      "filename": "brambleford_safe_test.mp3",
+      "music_length_ms": 90000,
+      "prompt": "Instrumental peaceful town exploration loop evoking a cozy medieval frontier town recovering from danger: hearth smoke, lantern posts, worn wood, friendly but practical people. Create a warm and soft melodic motif featuring a rising perfect fourth, a held warm note, and a gentle three-note fall, played by wooden flute and dulcimer with low strings underneath. Keep percussion minimal, maybe soft hand drum or brushed frame drum. Mood is safe, useful, bright but not childish. Structure should be loop-friendly: gentle intro, motif variation, quiet middle, warm return, ending that reconnects naturally to the start. No vocals, no lyrics, no modern instruments, no bright synth, no tavern comedy, no long fade-out."
+    },
+    {
+      "id": "music.goblin_road",
+      "target_cue": "music.region.goblin_road",
+      "filename": "goblin_road_test.mp3",
+      "music_length_ms": 90000,
+      "prompt": "Instrumental dangerous outdoor exploration loop for Goblin Road in Brave. Muddy road beyond town, cut fences, thorn brush, damaged carts, distant wolves, crude goblin camp pressure. Transform the Brave leitmotif into a wary travel motif: rising perfect fourth in low strings or horn, held tense note, three-note fall answered by plucked dulcimer or low woodwind. Use frame drums, muted hand percussion, low strings, rough wooden hits, and sparse horn. Mood is alert and uneasy, not full combat yet. Structure: short tense intro, stealthy motif, rhythmic travel section, brief suspense break, return to motif, loop-friendly ending. No vocals, no lyrics, no horror jump scare, no modern drums, no EDM, no long fade-out."
+    },
+    {
+      "id": "music.combat.standard",
+      "target_cue": "music.combat.standard",
+      "filename": "combat_standard_test.mp3",
+      "music_length_ms": 75000,
+      "prompt": "Instrumental standard combat loop for Brave, high fantasy tactical battle with grounded frontier heroes. Use the Brave leitmotif as a battle call: rising perfect fourth in low brass or strings, held note turned into a rhythmic accent, three-note fall answered by drums. Use driving frame drums, low strings, short brass calls, hammered dulcimer accents, and tight percussion. Energy should be urgent and readable for repeated game combat, not huge cinematic finale. Structure: 4 second pickup, main combat groove, motif call, short breakdown, stronger return, loop-friendly ending that can restart cleanly. No vocals, no lyrics, no modern rock kit, no EDM, no trailer risers, no long fade-out."
+    },
+        {
+            "id": "music.boss.ruk",
+            "target_cue": "music.combat.boss",
+            "filename": "boss_ruk_test.mp3",
+            "music_length_ms": 90000,
+            "prompt": "Instrumental boss battle loop for Ruk the Fence-Cutter in Brave. Early-game goblin brute, heavy axe, stolen fence rails, broken wagons, mud, lantern glass, crude confidence. The Brave leitmotif should appear in a rough corrupted form: rising perfect fourth stomped by low brass or low strings, held note strained with drum pressure, three-note fall hammered by dulcimer and wooden percussion. Use heavy frame drums, low strings, rough horn, wood blocks, metal hits, and tense rhythmic ostinato. Mood is dangerous and personal but still chapter-one scale, not apocalyptic. Structure: heavy entrance, boss groove, corrupted motif, pressure build, brief break with axe-drag feeling, full return, loop-friendly ending. No vocals, no lyrics, no modern metal, no EDM, no horror scream, no long fade-out."
+        },
+        {
+            "id": "music.victory.stinger",
+            "target_cue": "music.victory",
+            "filename": "victory_stinger_test.mp3",
+            "music_length_ms": 18000,
+            "prompt": "Instrumental high fantasy victory stinger loop for Brave after winning combat. It should feel earned, relieved, and courageous rather than cheesy or huge. State the original Brave leitmotif clearly in a bright form: rising perfect fourth, held warm note, then gentle three-note stepwise fall. Use warm horn, low strings resolving upward, wooden flute answer, hammered dulcimer shimmer, soft frame drum cadence, and a small bell accent that suggests lantern light returning. Structure: immediate 2 second victory hit, 8 second warm motif statement, 5 second calmer afterglow, final cadence that can loop back naturally without a long fade. No vocals, no lyrics, no copyrighted references, no modern pop beat, no EDM, no synthetic beeps, no comedy fanfare, no long fade-out."
+        }
+    ]
+}

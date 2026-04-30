@@ -232,6 +232,12 @@ let defaultInPlugin = (function () {
         return window.getSelection().toString().length > 0;
     };
 
+    var playUiSound = function (kind) {
+        if (window.BraveAudio && typeof window.BraveAudio.handleUiAction === "function") {
+            window.BraveAudio.handleUiAction(kind || "click");
+        }
+    };
+
     var setReadyState = function (activeOverride) {
         var inputAvailable = getResolvedInputContext() === INPUT_CONTEXT_PLAY;
         var focused = inputAvailable && $(".inputfield:focus, #inputfield:focus").length > 0;
@@ -715,6 +721,7 @@ let defaultInPlugin = (function () {
         $(document)
             .on("click.default_in", "[data-brave-input-mode]", function (event) {
                 event.preventDefault();
+                playUiSound("select");
                 setInputMode($(this).attr("data-brave-input-mode"));
                 focusInput({ force: true, moveCaret: true });
             })
@@ -733,6 +740,7 @@ let defaultInPlugin = (function () {
             })
             .on("click.default_in touchend.default_in", "#brave-chat-overlay-backdrop", function (event) {
                 event.preventDefault();
+                playUiSound("close");
                 setMobileInputOpen(false);
             });
     };
@@ -759,6 +767,7 @@ let defaultInPlugin = (function () {
     var init = function () {
         $("#inputsend")
             .bind("click", function () {
+                playUiSound("select");
                 var e = $.Event("keydown");
                 e.which = 13;
                 focusInput({ force: true }).trigger(e);

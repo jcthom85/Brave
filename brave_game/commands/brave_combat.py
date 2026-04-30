@@ -322,6 +322,16 @@ class CmdFight(BraveCharacterCommand):
                 for other in get_present_party_members(character):
                     if other != character and getattr(other, "is_connected", False):
                         encounter.add_participant(other)
+            try:
+                from world.browser_panels import send_audio_cue_once
+
+                room_id = str(getattr(character.location.db, "brave_room_id", "") or "")
+                if room_id == "brambleford_rat_and_kettle_cellar":
+                    send_audio_cue_once(character, "sfx.story.cellar_threat", key="combat_cellar_threat", force=True)
+                elif room_id.startswith("goblin_road_") and room_id != "goblin_road_fencebreaker_camp":
+                    send_audio_cue_once(character, "sfx.story.road_danger", key="combat_goblin_road_danger", force=True)
+            except Exception:
+                pass
         else:
             ok, error = encounter.add_participant(character)
             if not ok:

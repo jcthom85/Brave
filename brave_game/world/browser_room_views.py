@@ -76,10 +76,18 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
             welcome_pages = LANTERNFALL_RECAP_PAGES
 
         if welcome_pages:
-             sessions = getattr(looker, "sessions", None)
-             if sessions and sessions.count() > 0:
-                 looker.db.brave_welcome_shown = True
-                 looker.db.brave_lanternfall_intro_shown = True
+            sessions = getattr(looker, "sessions", None)
+            if sessions and sessions.count() > 0:
+                looker.db.brave_welcome_shown = True
+                looker.db.brave_lanternfall_intro_shown = True
+                try:
+                    from world.browser_panels import send_audio_cue_event
+
+                    send_audio_cue_event(looker, "sfx.story.lanternfall.alarm", force=True)
+                    send_audio_cue_event(looker, "sfx.story.dead_lantern", force=True, delay_ms=900)
+                    send_audio_cue_event(looker, "sfx.story.cart_reveal", force=True, delay_ms=1700)
+                except Exception:
+                    pass
 
     sections.append(
         _section(

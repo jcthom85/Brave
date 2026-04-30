@@ -1,8 +1,10 @@
 .venv
 .venv_incomplete_mountfs/
+.env.local
 chrome-ui-test/
 chrome-ui-test-2/
 tmp_ui_debug/
+tmp/audio-generation/
 brave-webclient-ui*.png
 Screenshot*.png
 share_*.png
