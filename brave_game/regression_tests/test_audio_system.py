@@ -75,6 +75,9 @@ class AudioSystemFilesTests(unittest.TestCase):
 
         self.assertIn("BRAVE_AUDIO_MANIFEST_URL", template_source)
         self.assertIn("webclient/js/brave_audio.js", template_source)
+        self.assertIn("?v=20260429a", template_source)
+        self.assertIn("brave-intro-veil", template_source)
+        self.assertIn("clearIntroVeil", template_source)
         self.assertIn("buildSettingsPicker", default_out_source)
         self.assertIn("buildVideoSettingsPicker", default_out_source)
         self.assertIn("buildAudioSettingsPicker", default_out_source)

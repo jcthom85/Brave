@@ -56,6 +56,7 @@ from .brave import (
     _format_tutorial_screen_block,
     _stack_blocks,
     _wrap_paragraphs,
+    match_inventory_item,
 )
 
 
@@ -806,6 +807,33 @@ class CmdPack(BraveCharacterCommand):
         character = self.get_character()
         if not character:
             return
+
+        if self.args:
+            # Handle item inspection
+            target, items = match_inventory_item(character, self.args.strip())
+            if target:
+                from world.browser_inventory_views import _pack_item_subtitle, _pack_item_body
+                from world.item_rarity import build_item_rarity_chip, build_item_rarity_display
+                from world.browser_ui import _picker
+
+                template_id = target["template"]
+                item = ITEM_CONTENT.item_templates[template_id]
+                title = item.get("name", template_id.replace("_", " ").title())
+                subtitle = _pack_item_subtitle(item)
+                body = _pack_item_body(character, item, target.get("quantity", 1))
+
+                picker = _picker(
+                    title,
+                    subtitle=subtitle,
+                    body=body,
+                    chips=[build_item_rarity_chip(item)],
+                    **build_item_rarity_display(item),
+                )
+                self.scene_msg(None, picker=picker)
+                return
+            else:
+                self.msg(f"You aren't carrying anything named '{self.args}'.")
+                return
 
         inventory = list(character.db.brave_inventory or [])
         total_pieces = sum(entry.get("quantity", 0) for entry in inventory)

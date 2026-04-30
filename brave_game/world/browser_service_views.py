@@ -19,6 +19,7 @@ from world.browser_ui import (
 )
 from world.commerce import format_shop_bonus, get_reserved_entries, get_sellable_entries, get_shop_bonus
 from world.forging import get_forge_entries
+from world.item_rarity import build_item_rarity_display
 from world.tinkering import get_tinkering_entries
 
 def build_shop_view(character):
@@ -41,6 +42,7 @@ def build_shop_view(character):
                 summary=template.get("summary"),
                 icon="sell",
                 command=f"sell {entry['name']}",
+                **build_item_rarity_display(template),
                 actions=[
                     _action("Sell 1", f"sell {entry['name']}", "sell")
                 ] + (

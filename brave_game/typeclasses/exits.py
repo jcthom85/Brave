@@ -26,7 +26,12 @@ class Exit(ObjectParent, DefaultExit):
     def at_traverse(self, traversing_object, target_location, **kwargs):
         """Block active tutorial characters from leaving before the yard is done."""
 
+        from world.navigation import get_exit_block_message, is_exit_available
         from world.tutorial import get_tutorial_exit_block
+
+        if not is_exit_available(self, traversing_object):
+            traversing_object.msg(get_exit_block_message(self))
+            return
 
         block_message = get_tutorial_exit_block(traversing_object, target_location)
         if block_message:

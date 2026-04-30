@@ -104,9 +104,18 @@ class GearViewTests(unittest.TestCase):
             ["Militia Blade", "Oakbound Shield", "Empty", "Roadwarden Mail", "Empty", "Empty", "Empty", "Empty", "Empty", "Empty"],
             [item.get("meta") for item in slots.get("items", [])],
         )
+        self.assertEqual("Rare", slots.get("items", [])[0].get("rarity_label"))
+        self.assertEqual("meta", slots.get("items", [])[0].get("rarity_target"))
+        self.assertEqual("Uncommon", slots.get("items", [])[3].get("rarity_label"))
+        self.assertEqual("rarity-uncommon", slots.get("items", [])[3].get("rarity_tone"))
+        self.assertNotIn("chips", slots.get("items", [])[3])
         main_hand_picker = slots.get("items", [])[0].get("picker", {})
         self.assertEqual("Main Hand", main_hand_picker.get("title"))
         self.assertEqual("Militia Blade", main_hand_picker.get("subtitle"))
+        self.assertEqual("Rare", main_hand_picker.get("chips", [])[0].get("label"))
+        self.assertEqual("subtitle", main_hand_picker.get("rarity_target"))
+        self.assertEqual("rarity-rare", main_hand_picker.get("rarity_tone"))
+        self.assertNotIn("Rarity: Rare", main_hand_picker.get("body", []))
         self.assertEqual(
             ["Unequip Militia Blade", "Ironroot Longblade"],
             [option.get("label") for option in main_hand_picker.get("options", [])],
@@ -158,6 +167,8 @@ class GearViewTests(unittest.TestCase):
             ],
             [item.get("text") for item in panel.get("sections", [])[0].get("items", [])],
         )
+        self.assertEqual("Rare", panel.get("sections", [])[0].get("items", [])[0].get("rarity_label"))
+        self.assertEqual("Epic", panel.get("sections", [])[0].get("items", [])[1].get("rarity_label"))
 
     def test_character_equips_inventory_item_and_stows_previous_one(self):
         character = DummyEquipmentCharacter(

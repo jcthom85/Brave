@@ -26,6 +26,8 @@ from world.browser_ui import (
     _reactive_from_character,
     _section,
 )
+from world.data.items import get_item_rarity_label
+from world.item_rarity import build_item_rarity_chip, build_item_rarity_display
 from world.resonance import format_ability_display
 
 PACK_KIND_ORDER = ("consumable", "ingredient", "loot", "equipment")
@@ -122,6 +124,7 @@ def _build_gear_slot_picker(character, slot, equipped_template_id=None):
     candidates.sort()
     for _name_sort, template_id, quantity, template in candidates:
         option_meta = " · ".join(_format_equipment_effect_lines(template, character)) or "Equip from pack"
+        option_meta = f"{get_item_rarity_label(template)} · {option_meta}"
         if quantity > 1:
             option_meta = f"x{quantity} · {option_meta}"
         options.append(
@@ -131,13 +134,21 @@ def _build_gear_slot_picker(character, slot, equipped_template_id=None):
                 icon="north_east",
                 meta=option_meta,
                 tone="accent",
+                **build_item_rarity_display(template),
             )
         )
 
     if not candidates:
         body.append("No compatible gear in your pack.")
 
-    return _picker(slot_label, subtitle=subtitle, options=options, body=body)
+    picker_kwargs = {}
+    if equipped_item:
+        picker_kwargs = {
+            **build_item_rarity_display(equipped_item),
+            "rarity_target": "subtitle",
+            "chips": [build_item_rarity_chip(equipped_item)],
+        }
+    return _picker(slot_label, subtitle=subtitle, options=options, body=body, **picker_kwargs)
 
 def _build_gear_entry(character, slot, template_id):
     item = ITEM_TEMPLATES.get(template_id, {})
@@ -152,6 +163,8 @@ def _build_gear_entry(character, slot, template_id):
         meta=item_name,
         lines=detail_lines,
         icon=GEAR_SLOT_ICONS.get(slot, "shield"),
+        rarity_target="meta",
+        **build_item_rarity_display(item),
         picker=_build_gear_slot_picker(character, slot, equipped_template_id=template_id),
         tooltip=tooltip,
     )
@@ -389,8 +402,15 @@ def _build_pack_item(character, template_id, quantity):
     entry = _item(
         title,
         badge=str(max(1, int(quantity or 1))),
-        picker=_picker(title, subtitle=subtitle, body=body),
+        picker=_picker(
+            title,
+            subtitle=subtitle,
+            body=body,
+            chips=[build_item_rarity_chip(item)],
+            **build_item_rarity_display(item),
+        ),
         tooltip=tooltip,
+        **build_item_rarity_display(item),
     )
     if kind == "consumable":
         action = _build_pack_consumable_action(character, template_id, item)

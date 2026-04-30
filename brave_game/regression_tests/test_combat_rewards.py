@@ -10,6 +10,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
 from typeclasses.scripts import BraveEncounter, COMBAT_FINISH_FX_DELAY
+from world.browser_views import build_combat_victory_view
 
 
 class DummyRewardCharacter:
@@ -215,6 +216,41 @@ class CombatRewardTests(unittest.TestCase):
         self.assertTrue(knocked_out.xp_awards)
         self.assertTrue(any("victory still holds" in message.lower() for message in knocked_out.messages))
         self.assertIn(knocked_out, [call.args[0] for call in record_encounter_victory.call_args_list])
+
+    def test_victory_view_moves_quest_rewards_out_of_progress(self):
+        encounter = SimpleNamespace(db=SimpleNamespace(encounter_title="Roadside Fight"), obj=SimpleNamespace())
+        view = build_combat_victory_view(
+            encounter,
+            DummyRewardCharacter(1, "Starter"),
+            xp_total=36,
+            reward_silver=1,
+            reward_items=[("thorn_rat_tail", 3)],
+            progress_messages=[
+                "Quest complete: Rats in the Kettle",
+                "New quest: Roadside Howls",
+                "You gain 35 XP.",
+                "You receive 8 silver.",
+                "You receive Innkeeper's Fish Pie.",
+                "Lead: Follow the cut fences east.",
+            ],
+        )
+
+        sections = {section["label"]: section for section in view["sections"]}
+        reward_pairs = sections["Rewards"]["items"]
+        self.assertEqual("71", reward_pairs[0]["value"])
+        self.assertEqual("9", reward_pairs[1]["value"])
+
+        loot_labels = [item["text"] for item in sections["Recovered Loot"]["items"]]
+        self.assertIn("Thorn Rat Tail x3", loot_labels)
+        self.assertIn("Innkeeper's Fish Pie", loot_labels)
+
+        progress_text = str(sections["Progress"])
+        self.assertIn("Rats in the Kettle", progress_text)
+        self.assertIn("Roadside Howls", progress_text)
+        self.assertNotIn("You gain 35 XP", progress_text)
+        self.assertNotIn("You receive 8 silver", progress_text)
+        self.assertNotIn("Innkeeper's Fish Pie", progress_text)
+        self.assertNotIn("Follow the cut fences", progress_text)
 
     @patch("typeclasses.scripts.advance_enemy_defeat")
     def test_boss_defeat_credit_requires_meaningful_action_and_cutoff_eligibility(self, advance_enemy_defeat):

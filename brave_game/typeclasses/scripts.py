@@ -91,6 +91,7 @@ COMBAT_MAX_BOSS_ENEMIES = 3
 # headroom for network/render latency plus a brief beat before victory.
 COMBAT_FINISH_FX_DELAY = 1.6
 COMBAT_DEFEAT_REFRESH_DELAY = 1.3
+COMBAT_DEFEAT_SILVER_LOSS = 5
 
 
 def _normalize_token(value):
@@ -1186,6 +1187,27 @@ class BraveEncounter(Script):
             "stealth_turns": 0,
         }
 
+    def _mark_defeat_consequence(self, character):
+        """Apply the soft silver consequence for a non-tutorial defeat."""
+
+        if not character or _is_companion_actor(character):
+            return 0
+        current = max(0, int(getattr(character.db, "brave_silver", 0) or 0))
+        lost = min(COMBAT_DEFEAT_SILVER_LOSS, current)
+        character.db.brave_silver = current - lost
+        return lost
+
+    def _set_defeat_resources(self, character):
+        """Leave a defeated character barely standing until they rest."""
+
+        if not character or _is_companion_actor(character):
+            return
+        character.db.brave_resources = {
+            "hp": 1,
+            "mana": 1,
+            "stamina": 1,
+        }
+
     def _get_companion(self, companion_id):
         """Return one active encounter companion by id."""
 
@@ -1652,8 +1674,8 @@ class BraveEncounter(Script):
         if not self.obj or not label:
             return
         actor_name = _combat_target_name(actor, "Companion")
-        marker = _combat_fx_marker(kind="action", actor=actor_name, label=label)
-        self.obj.msg_contents(f"|c{actor_name} uses {label}!|n{marker}")
+        self.obj.msg_contents(f"|c{actor_name} uses {label}!|n")
+        self._emit_combat_fx(kind="action", actor=actor_name, label=label)
 
     def _clear_browser_combat_views(self, participants=None):
         """Remove any sticky browser combat UI for participants."""
@@ -2963,12 +2985,19 @@ class BraveEncounter(Script):
         return enemy
 
     def _defeat_character(self, character):
-        from world.browser_panels import send_browser_notice_event, send_text_to_non_web_sessions, send_webclient_event
+        from world.browser_panels import send_text_to_non_web_sessions, send_webclient_event
+        from world.browser_views import build_combat_defeat_view
+        from world.resting import room_allows_rest
 
         self._emit_defeat_fx(character)
-        start_room = get_tutorial_defeat_room(character) or get_room("brambleford_town_green")
+        tutorial_recovery_room = get_tutorial_defeat_room(character)
+        start_room = tutorial_recovery_room or get_room("brambleford_lantern_rest_inn") or get_room("brambleford_town_green")
         character.clear_chapel_blessing()
         character.restore_resources()
+        self._set_defeat_resources(character)
+        silver_lost = 0
+        if not tutorial_recovery_room:
+            silver_lost = self._mark_defeat_consequence(character)
         self._mark_defeated_participant(character)
         self.remove_participant(character, refresh=False)
         if start_room:
@@ -2977,24 +3006,23 @@ class BraveEncounter(Script):
         if character.location:
             send_text_to_non_web_sessions(character, character.at_look(character.location))
         delay(COMBAT_DEFEAT_REFRESH_DELAY, self._refresh_browser_combat_views, persistent=False)
-        if get_tutorial_defeat_room(character):
-            send_browser_notice_event(
-                character,
-                "|rThe lesson lands hard, but not fatally. You are hauled back to Wayfarer's Yard to catch your breath and try again.|n",
-                title="Defeat",
-                tone="danger",
-                icon="warning",
-                duration_ms=5200,
-            )
+        if tutorial_recovery_room:
+            recovery_message = "|rThe lesson lands hard, but not fatally. You are hauled back to Wayfarer's Yard, barely standing. Rest before you try again.|n"
         else:
-            send_browser_notice_event(
+            recovery_message = "|rYou are overwhelmed and carried back to Brambleford, barely standing. Rest before heading out again.|n"
+            if silver_lost:
+                recovery_message += f" Recovery costs you {silver_lost} silver."
+        send_text_to_non_web_sessions(character, recovery_message)
+        send_webclient_event(
+            character,
+            brave_view=build_combat_defeat_view(
                 character,
-                "|rYou are overwhelmed and carried back to Brambleford to recover.|n",
-                title="Defeat",
-                tone="danger",
-                icon="warning",
-                duration_ms=5200,
-            )
+                recovery_room=character.location,
+                silver_lost=silver_lost,
+                tutorial=bool(tutorial_recovery_room),
+                can_rest=room_allows_rest(character.location),
+            ),
+        )
 
     def remove_participant(self, character, *, refresh=True):
         """Remove a participant from the fight."""
@@ -3543,14 +3571,31 @@ class BraveEncounter(Script):
             persistent=False,
         )
 
+    def _finish_party_defeat(self, room_message):
+        """Resolve a full party defeat with explicit cleanup and recovery messaging."""
+
+        from world.browser_panels import send_browser_notice_event
+
+        if self.obj and room_message:
+            self.obj.msg_contents(room_message)
+        for participant in self.get_defeated_participants():
+            send_browser_notice_event(
+                participant,
+                "|rThe whole line breaks. Regroup, catch your breath, and choose when to return.|n",
+                title="Party Defeated",
+                tone="danger",
+                icon="warning",
+                duration_ms=5600,
+            )
+        self.stop()
+
     def at_repeat(self):
         self.db.round += 1
         active_participants = self.get_active_player_participants()
         active_enemies = self.get_active_enemies()
 
         if not active_participants:
-            self.obj.msg_contents("|rThe fight breaks wrong, and the danger keeps the road.|n")
-            self.stop()
+            self._finish_party_defeat("|rThe fight breaks wrong, and the danger keeps the road.|n")
             return
         if not active_enemies:
             self._schedule_victory_sequence("|gThe last of them falls. The way is clear for now.|n")
@@ -3558,8 +3603,7 @@ class BraveEncounter(Script):
 
         self._apply_participant_effects()
         if not self.get_active_player_participants():
-            self.obj.msg_contents("|rThe line breaks and the party is driven back toward town.|n")
-            self.stop()
+            self._finish_party_defeat("|rThe line breaks and the party is driven back toward town.|n")
             return
         self._apply_enemy_effects()
         if not self.get_active_enemies():
@@ -3570,8 +3614,7 @@ class BraveEncounter(Script):
         for participant in active_participants:
             self._advance_player_atb(participant)
         if not self.get_active_player_participants():
-            self.obj.msg_contents("The fight ends with the road still dangerous.")
-            self.stop()
+            self._finish_party_defeat("|rThe fight ends with the road still dangerous.|n")
             return
         if not self.get_active_enemies():
             self._schedule_victory_sequence("|gThe encounter is over. The road is clear for now.|n")
@@ -3586,8 +3629,7 @@ class BraveEncounter(Script):
         for enemy in self.get_active_enemies():
             self._advance_enemy_atb(enemy)
         if not self.get_active_player_participants():
-            self.obj.msg_contents("|rThe party is driven back toward town.|n")
-            self.stop()
+            self._finish_party_defeat("|rThe party is driven back toward town.|n")
             return
 
         self._clear_round_states()

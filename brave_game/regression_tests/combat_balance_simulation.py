@@ -450,6 +450,11 @@ class SimulationEncounter:
         self.ended = True
         self.ndb.brave_victory_pending = True
 
+    def _finish_party_defeat(self, room_message):
+        self.defeat_message = str(room_message or "")
+        self.outcome = "defeat"
+        self.ended = True
+
     def _award_enemy_defeat_credit(self, enemy):
         return None
 

@@ -48,7 +48,8 @@ class TalkViewTests(unittest.TestCase):
         self.assertIn("The road's quieter than it was", " ".join(picker.get("body", [])))
         
         options = picker.get("options", [])
-        self.assertEqual(["Emote At"], [opt.get("label") for opt in options])
+        self.assertEqual(["Continue"], [opt.get("label") for opt in options])
+        self.assertTrue(options[0].get("close_picker"))
 
     def test_readable_interaction_picker_renders_text(self):
         character = DummyCharacter()

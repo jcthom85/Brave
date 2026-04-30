@@ -10,7 +10,7 @@ import textwrap
 from evennia.objects.objects import DefaultRoom
 
 from world.browser_views import build_room_view
-from world.navigation import build_minimap_snapshot, format_exit_summary, sort_exits
+from world.navigation import build_minimap_snapshot, format_exit_summary, visible_exits
 from world.questing import get_tracked_quest_payload
 from world.resonance import get_resonance_label, get_world_label
 
@@ -244,7 +244,7 @@ class Room(ObjectParent, DefaultRoom):
         if looker:
             _send_webclient_event(looker, brave_scene=_build_scene_payload(self, looker, visible_entities=visible_entities))
 
-        exits = sort_exits(list(self.exits))
+        exits = visible_exits(self, looker)
         if exits:
             raw_exit_lines = textwrap.wrap(
                 format_exit_summary(exits),

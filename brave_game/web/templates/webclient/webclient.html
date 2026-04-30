@@ -26,10 +26,33 @@
 {% endblock %}
 
 {% block scripts %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rpg-awesome@0.2.0/css/rpg-awesome.min.css"><link rel="stylesheet" href="{% static 'webclient/css/brave_webclient.css' %}?v=20260423l">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rpg-awesome@0.2.0/css/rpg-awesome.min.css"><link rel="stylesheet" href="{% static 'webclient/css/brave_webclient.css' %}?v=20260430e">
 <script>
-window.BRAVE_AUDIO_MANIFEST_URL = "{% static 'webclient/audio/manifest.json' %}?v=20260423j";
+window.BRAVE_AUDIO_MANIFEST_URL = "{% static 'webclient/audio/manifest.json' %}?v=20260430e";
+(function () {
+  var clearIntroVeil = function () {
+    var veil = document.getElementById("brave-intro-veil");
+    if (veil) {
+      veil.classList.remove("brave-intro-veil--active");
+    }
+  };
+  var watchdog = window.setInterval(function () {
+    var body = document.body;
+    var sheet = document.getElementById("brave-objectives-sheet");
+    var hasVisibleWelcome = !!(sheet && sheet.getAttribute("aria-hidden") === "false");
+    var scene = body ? body.getAttribute("data-brave-scene") : "";
+    var view = body ? body.getAttribute("data-brave-view") : "";
+    if (hasVisibleWelcome || scene === "explore" || view === "room") {
+      clearIntroVeil();
+      window.clearInterval(watchdog);
+    }
+  }, 250);
+  window.setTimeout(function () {
+    clearIntroVeil();
+    window.clearInterval(watchdog);
+  }, 8000);
+})();
 </script>
-<script src="{% static 'webclient/js/brave_audio.js' %}?v=20260423l"></script>
-<script src="{% static 'webclient/js/brave_bootstrap.js' %}?v=20260423l"></script>
+<script src="{% static 'webclient/js/brave_audio.js' %}?v=20260430e"></script>
+<script src="{% static 'webclient/js/brave_bootstrap.js' %}?v=20260430e"></script>
 {% endblock %}

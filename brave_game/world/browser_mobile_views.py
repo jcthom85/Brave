@@ -9,10 +9,13 @@ from world.browser_context import (
     get_item_category,
     get_quest_region,
 )
-from world.browser_inventory_views import PACK_KIND_LABELS, PACK_KIND_ORDER, _pack_item_subtitle
+from world.browser_inventory_views import PACK_KIND_LABELS, PACK_KIND_ORDER, _pack_item_body, _pack_item_subtitle
 from world.browser_journal_views import _format_objective_progress
 from world.chapel import get_active_blessing
 from world.class_features import get_class_features
+from world.data.items import get_item_rarity_key, get_item_rarity_label, get_item_rarity_tone
+from world.item_rarity import build_item_rarity_chip, build_item_rarity_display
+from world.browser_ui import _picker
 from world.party import get_character_by_id, get_follow_target, get_party_leader, get_party_members
 from world.questing import get_tracked_quest
 from world.resonance import get_resource_label, get_stat_label
@@ -54,19 +57,35 @@ def _build_mobile_pack_payload(character):
         else:
             icon_name = "backpack"
 
+        item_name = template.get("name", template_id.replace("_", " ").title())
+        picker = _picker(
+            item_name,
+            subtitle=_pack_item_subtitle(template),
+            body=_pack_item_body(character, template, quantity),
+            chips=[build_item_rarity_chip(template)],
+            **build_item_rarity_display(template),
+        )
         if item_types <= 60:
             preview.append(
                 {
-                    "label": template.get("name", template_id.replace("_", " ").title()),
+                    "label": item_name,
                     "quantity": quantity,
                     "icon": icon_name,
+                    "picker": picker,
+                    "rarity": get_item_rarity_key(template),
+                    "rarity_label": get_item_rarity_label(template),
+                    "rarity_tone": get_item_rarity_tone(template),
                 }
             )
         packed_item = {
-            "label": template.get("name", template_id.replace("_", " ").title()),
+            "label": item_name,
             "quantity": quantity,
             "icon": icon_name,
             "meta": _pack_item_subtitle(template),
+            "picker": picker,
+            "rarity": get_item_rarity_key(template),
+            "rarity_label": get_item_rarity_label(template),
+            "rarity_tone": get_item_rarity_tone(template),
         }
         if category in grouped:
             grouped[category].append(packed_item)
@@ -102,7 +121,7 @@ def _build_mobile_pack_payload(character):
         "item_types": item_types,
         "consumables": consumables,
         "ingredients": ingredients,
-        "preview": [{"label": entry["label"], "quantity": entry["quantity"]} for entry in preview[:4]],
+        "preview": preview[:4],
         "items": preview,
         "overflow": max(0, item_types - len(preview)),
         "sections": sections,

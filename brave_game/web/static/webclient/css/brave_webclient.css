@@ -3702,6 +3702,42 @@ body.brave-objectives-welcome-active #brave-picker-sheet {
     color: #f1ddb1;
 }
 
+.scene-card__chip--rarity-common {
+    border-color: rgba(190, 186, 174, 0.2);
+    background: rgba(190, 186, 174, 0.08);
+    color: #d7d1c3;
+}
+
+.scene-card__chip--rarity-uncommon {
+    border-color: rgba(96, 190, 126, 0.34);
+    background: rgba(96, 190, 126, 0.12);
+    color: #aee5ba;
+}
+
+.scene-card__chip--rarity-rare {
+    border-color: rgba(88, 166, 255, 0.36);
+    background: rgba(88, 166, 255, 0.13);
+    color: #b9d8ff;
+}
+
+.scene-card__chip--rarity-epic {
+    border-color: rgba(184, 120, 255, 0.38);
+    background: rgba(184, 120, 255, 0.14);
+    color: #dfc3ff;
+}
+
+.scene-card__chip--rarity-legendary {
+    border-color: rgba(245, 175, 76, 0.4);
+    background: rgba(245, 175, 76, 0.15);
+    color: #f8d59b;
+}
+
+.scene-card__chip--rarity-story {
+    border-color: rgba(238, 214, 127, 0.4);
+    background: rgba(238, 214, 127, 0.14);
+    color: #f4e6ae;
+}
+
 .scene-card__section {
     display: flex;
     flex-direction: column;
@@ -7289,6 +7325,29 @@ body:not([data-brave-scene="explore"]) #brave-room-voice-overlay-mobile {
     gap: 1px;
 }
 
+@media screen and (max-width: 640px) {
+    .brave-view--room .brave-view__section--vicinity .brave-view__inline-actions {
+        gap: 5px;
+    }
+
+    .brave-view--room .brave-view__section--vicinity .brave-view__mini-action {
+        min-width: 2.35rem;
+        width: 2.35rem;
+        min-height: 2.35rem;
+        padding: 0;
+        gap: 0;
+        border-radius: var(--brave-radius-control);
+    }
+
+    .brave-view--room .brave-view__section--vicinity .brave-view__mini-action span:not(.brave-view__mini-action-icon):not(.brave-icon) {
+        display: none;
+    }
+
+    .brave-view--room .brave-view__section--vicinity .brave-view__mini-action-icon {
+        font-size: 1rem;
+    }
+}
+
 .brave-view--room .brave-view__section--entities {
     grid-area: entities;
     min-height: 178px;
@@ -10721,6 +10780,75 @@ body[data-brave-scene="arcade"] .brave-view--arcade .brave-view__actions {
     text-transform: none;
 }
 
+.brave-view__list-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.brave-view__list-chips .scene-card__chip {
+    padding: 4px 7px;
+    font-size: calc(0.58rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-rarity-name {
+    font-weight: 700;
+}
+
+.brave-rarity-name--rarity-common,
+.brave-view .brave-view__entry-title.brave-rarity-name--rarity-common,
+.brave-view .brave-view__entry-meta.brave-rarity-name--rarity-common,
+.brave-view .brave-view__list-text.brave-rarity-name--rarity-common {
+    color: #d7d1c3 !important;
+}
+
+.brave-rarity-name--rarity-uncommon,
+.brave-view .brave-view__entry-title.brave-rarity-name--rarity-uncommon,
+.brave-view .brave-view__entry-meta.brave-rarity-name--rarity-uncommon,
+.brave-view .brave-view__list-text.brave-rarity-name--rarity-uncommon {
+    color: #9ee6b0 !important;
+}
+
+.brave-rarity-name--rarity-rare,
+.brave-view .brave-view__entry-title.brave-rarity-name--rarity-rare,
+.brave-view .brave-view__entry-meta.brave-rarity-name--rarity-rare,
+.brave-view .brave-view__list-text.brave-rarity-name--rarity-rare {
+    color: #9dccff !important;
+}
+
+.brave-rarity-name--rarity-epic,
+.brave-view .brave-view__entry-title.brave-rarity-name--rarity-epic,
+.brave-view .brave-view__entry-meta.brave-rarity-name--rarity-epic,
+.brave-view .brave-view__list-text.brave-rarity-name--rarity-epic {
+    color: #d6b0ff !important;
+}
+
+.brave-rarity-name--rarity-legendary,
+.brave-view .brave-view__entry-title.brave-rarity-name--rarity-legendary,
+.brave-view .brave-view__entry-meta.brave-rarity-name--rarity-legendary,
+.brave-view .brave-view__list-text.brave-rarity-name--rarity-legendary {
+    color: #f5bd69 !important;
+}
+
+.brave-rarity-name--rarity-story,
+.brave-view .brave-view__entry-title.brave-rarity-name--rarity-story,
+.brave-view .brave-view__entry-meta.brave-rarity-name--rarity-story,
+.brave-view .brave-view__list-text.brave-rarity-name--rarity-story {
+    color: #ecd77c !important;
+}
+
+.brave-picker-sheet__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.brave-picker-sheet__chips .scene-card__chip {
+    padding: 5px 8px;
+    font-size: calc(0.62rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
 .brave-view__list-marker {
     display: inline-flex;
     align-items: center;
@@ -12361,6 +12489,25 @@ body[data-brave-scene="victory"] .brave-view__hero {
 
 body[data-brave-scene="victory"] .brave-view--combat-result .brave-view__section {
     border-color: color-mix(in srgb, rgba(var(--brave-accent-rgb), 0.18) 58%, var(--brave-world-line));
+}
+
+body[data-brave-scene="defeat"] .content,
+body[data-brave-scene="defeat"] #messagewindow,
+body[data-brave-scene="defeat"] .inputwrap {
+    border-color: color-mix(in srgb, var(--brave-room-danger-border) 64%, rgba(var(--brave-accent-rgb), 0.16));
+}
+
+body[data-brave-scene="defeat"] .brave-view__hero {
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--brave-room-danger-surface) 54%, var(--brave-surface-soft-top)),
+            color-mix(in srgb, rgba(28, 25, 23, 0.24) 52%, var(--brave-surface-soft-bottom))
+        );
+}
+
+body[data-brave-scene="defeat"] .brave-view--combat-result .brave-view__section {
+    border-color: color-mix(in srgb, var(--brave-room-danger-border) 56%, var(--brave-world-line));
 }
 
 body[data-brave-scene="arcade"] .content,
@@ -14388,6 +14535,12 @@ body.brave-combat-return-active .scene-card {
         color: var(--brave-text-dim);
         font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
         line-height: 1.28;
+    }
+
+    .brave-mobile-sheet__bullet .scene-card__chip {
+        justify-self: start;
+        padding: 4px 7px;
+        font-size: calc(0.58rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     }
 
     .brave-mobile-sheet__bullet-badge {

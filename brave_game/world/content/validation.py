@@ -79,7 +79,13 @@ def _validate_character_content(registry, errors):
 def _validate_item_content(registry, errors):
     items = registry.items
 
+    if "common" not in items.rarities:
+        errors.append("Item rarity catalog is missing common")
+
     for template_id, item_data in items.item_templates.items():
+        rarity = str(item_data.get("rarity") or "common").strip().lower()
+        if rarity not in items.rarities:
+            errors.append(f"Item {template_id} uses unknown rarity: {rarity}")
         slot = item_data.get("slot")
         if slot and slot not in items.equipment_slots:
             errors.append(f"Item {template_id} uses unknown equipment slot: {slot}")
@@ -194,6 +200,9 @@ def _validate_world_content(registry, errors):
             errors.append(f"Exit {exit_data.get('id')} has unknown destination room: {destination}")
         else:
             inbound_exits[destination].append(source)
+        required_quest = exit_data.get("required_quest")
+        if required_quest and required_quest not in registry.quests.quests:
+            errors.append(f"Exit {exit_data.get('id')} requires unknown quest: {required_quest}")
 
     for entity_data in world.entities:
         if entity_data.get("location") not in room_ids:

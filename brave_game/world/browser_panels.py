@@ -11,7 +11,8 @@ from world.enemy_icons import get_enemy_icon_name
 from world.commerce import get_reserved_entries, get_sellable_entries, get_shop_bonus
 from world.content import get_content_registry
 from world.forging import get_forge_entries
-from world.navigation import format_route_hint, sort_exits
+from world.item_rarity import build_item_rarity_display
+from world.navigation import format_route_hint, visible_exits
 from world.party import get_follow_target, get_party_leader, get_party_members
 from world.questing import get_active_quests, get_completed_quests, get_tracked_quest
 from world.resonance import get_resource_label, get_resonance_label, get_stat_label
@@ -356,12 +357,14 @@ def _meter(current, maximum, tone="accent"):
     return {"value": f"{current_value}/{maximum_value}", "percent": percent, "tone": tone}
 
 
-def _item(text, icon=None, badge=None, meta=None, meter=None):
+def _item(text, icon=None, badge=None, meta=None, meter=None, **extra):
     item = {"text": text, "icon": icon, "badge": badge}
     if meta:
         item["meta"] = meta
     if meter:
         item["meter"] = meter
+    if extra:
+        item.update({key: value for key, value in extra.items() if value})
     return item
 
 
@@ -622,8 +625,15 @@ def build_gear_panel(character):
     for slot in EQUIPMENT_SLOTS:
         label = slot.replace("_", " ").title()
         template_id = equipment.get(slot)
-        item_name = ITEM_TEMPLATES.get(template_id, {}).get("name", template_id) if template_id else "Empty"
-        slot_items.append(_item(f"{label} · {item_name}", icon=GEAR_PANEL_ICONS.get(slot, "shield")))
+        template = ITEM_TEMPLATES.get(template_id, {}) if template_id else {}
+        item_name = template.get("name", template_id) if template_id else "Empty"
+        slot_items.append(
+            _item(
+                f"{label} · {item_name}",
+                icon=GEAR_PANEL_ICONS.get(slot, "shield"),
+                **build_item_rarity_display(template),
+            )
+        )
 
     return _make_panel(
         "",
@@ -809,7 +819,7 @@ def build_travel_panel(character):
     """Build the browser-side companion panel for route browsing."""
 
     room = character.location
-    exits = sort_exits(list(room.exits)) if room else []
+    exits = visible_exits(room, character) if room else []
     exit_items = [
         _item(
             getattr(exit_obj.destination, "key", exit_obj.key),

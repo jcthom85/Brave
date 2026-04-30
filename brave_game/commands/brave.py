@@ -474,6 +474,15 @@ class BraveCharacterCommand(MuxCommand):
         if view and session:
             self.msg(brave_view=view, session=session)
 
+    def send_browser_picker(self, picker):
+        """Send a browser-only picker popup for the current session."""
+
+        session = self.get_web_session()
+        if picker and session:
+            self.msg(brave_picker=picker, session=session)
+            return True
+        return False
+
     def send_browser_notice(self, title, *, lines=None, tone="muted", icon=None, duration_ms=None, sticky=False):
         """Send a browser-only popup notice for the current session."""
 
@@ -523,8 +532,13 @@ class BraveCharacterCommand(MuxCommand):
         if session:
             self.msg(brave_clear={}, session=session)
 
-    def scene_msg(self, text, panel=None, view=None):
+    def scene_msg(self, text, panel=None, view=None, picker=None):
         """Replace the current scene with a new full-screen output block."""
+
+        if picker and self.get_web_session():
+            self.send_browser_picker(picker)
+            self.send_other_sessions(text)
+            return
 
         if view and self.get_web_session():
             self.send_browser_view(view)

@@ -27,6 +27,7 @@ class ContentValidationTests(unittest.TestCase):
                 "broken_recipe_note": {
                     "kind": "consumable",
                     "name": "Broken Recipe Note",
+                    "rarity": "mythic",
                     "use": {"effect_type": "unlock_recipe", "recipe_domain": "cooking", "unlock_recipe": "missing_recipe"},
                 },
             },
@@ -110,6 +111,7 @@ class ContentValidationTests(unittest.TestCase):
         errors = validate_content_registry(broken_registry)
 
         self.assertTrue(any("Starter consumable references unknown item" in error for error in errors))
+        self.assertTrue(any("uses unknown rarity" in error for error in errors))
         self.assertTrue(any("unlocks unknown cooking recipe" in error for error in errors))
         self.assertTrue(any("Item class restriction references unknown item" in error for error in errors))
         self.assertTrue(any("Item class restriction references non-equipment item" in error for error in errors))

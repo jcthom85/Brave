@@ -64,7 +64,7 @@ HELP_ENTRY_DICTS = [
 
             The live slice is still compact, but the core loop is in place. You can already:
 
-            - Explore Brambleford, the current fantasy ladder through Drowned Weir, and the first portal world
+            - Explore Brambleford and the current fantasy ladder through Drowned Weir
             - Review your race and class to set your starting identity
             - Check your sheet, gear, and pack to inspect your adventurer and loot
             - Fish and reel at Hobbyist's Wharf for the first town activity loop
@@ -72,7 +72,7 @@ HELP_ENTRY_DICTS = [
             - Shop, sell, and use shifts at Brambleford Outfitters for the first town trade loop
             - Use the forge at Ironroot Forge to turn field loot and silver into better gear
             - Pray at the Chapel of the Dawn Bell for a modest one-encounter blessing
-            - Inspect portals at the Nexus Gate to check the first guest-world bridge
+            - Return to the Observatory later when Joss has a stranger route ready
             - Form a family party before tougher fights
             - Check your party's location or follow others to stay together
             - Track your quests to see your current objectives
@@ -97,8 +97,7 @@ HELP_ENTRY_DICTS = [
             Go south again from the wharf to reach Ironroot Forge for gear upgrades.
             Pray at the Chapel of the Dawn Bell when you want a modest one-run blessing before a harder push.
             Cook in the inn to see simple fish recipes, then eat the meal to carry a buff into the field.
-            Go north to reach the Training Yard, then east to reach the Great Observatory and the Nexus Gate.
-            At the ring, inspect portals and then step through to enter the first guest world.
+            Go north to reach the Training Yard, then east to reach the Great Observatory when Joss's work becomes relevant.
             Review your party members or invite allies standing in the same room.
             Check party locations for route hints to your family or follow when you want someone to lead.
             Shop to review prices, sell your pack items, and use shifts to improve your next few sales.
@@ -120,7 +119,6 @@ HELP_ENTRY_DICTS = [
             - Hobbyist's Wharf
             - Ironroot Forge
             - Great Observatory
-            - Nexus Gate
             - Mayor's Hall
             - Chapel of the Dawn Bell
             - Training Yard

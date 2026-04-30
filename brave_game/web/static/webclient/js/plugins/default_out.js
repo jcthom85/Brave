@@ -76,10 +76,11 @@ let defaultout_plugin = (function () {
     var pendingMainScrollRestore = null;
     var currentMobileUtilityTab = null;
     var currentMobileUtilityPresentation = "sheet";
-    var mobileNavDockExpanded = false;
+    var mobileNavDockExpanded = true;
     var mobileRoomActivityUnreadCount = 0;
     var currentCombatActionTab = "abilities";
     var currentMobileSwipe = null;
+    var introVeilFailsafeTimer = null;
     var currentPickerData = null;
     var currentPickerAnchorRect = null;
     var currentPickerSourceId = "";
@@ -2859,10 +2860,10 @@ let defaultout_plugin = (function () {
         return (
             "<div class='brave-mobile-sheet__list'>"
             + items.map(function (item) {
-                var interactive = !!(item && item.command);
+                var interactive = !!(item && (item.command || item.picker || item.prefill || item.connection_screen));
                 var tag = interactive ? "button" : "div";
                 var className = "brave-mobile-sheet__row" + (interactive ? " brave-click brave-mobile-sheet__row--action" : "");
-                var attrs = interactive ? commandAttrs({ command: item.command }, false) : "";
+                var attrs = interactive ? commandAttrs(item, false) : "";
                 return (
                     "<" + tag + (interactive ? " type='button'" : "") + " class='" + className + "'" + attrs + ">"
                     + "<span class='brave-mobile-sheet__row-label'>" + escapeHtml(item && item.label ? item.label : "") + "</span>"
@@ -2881,15 +2882,16 @@ let defaultout_plugin = (function () {
         return (
             "<div class='brave-mobile-sheet__list'>"
             + items.map(function (item) {
-                var interactive = !!(item && item.command);
+                var interactive = !!(item && (item.command || item.picker || item.prefill || item.connection_screen));
                 var tag = interactive ? "button" : "div";
                 var className = "brave-mobile-sheet__bullet" + (interactive ? " brave-click brave-mobile-sheet__bullet--action" : "");
-                var attrs = interactive ? commandAttrs({ command: item.command }, false) : "";
+                var attrs = interactive ? commandAttrs(item, false) : "";
+                var rarityNameClass = item && item.rarity_tone ? " brave-rarity-name brave-rarity-name--" + escapeHtml(item.rarity_tone) : "";
                 return (
                     "<" + tag + (interactive ? " type='button'" : "") + " class='" + className + "'" + attrs + ">"
                     + (item && item.badge ? "<span class='brave-mobile-sheet__bullet-badge'>" + escapeHtml(String(item.badge)) + "</span>" : "")
                     + "<span class='brave-mobile-sheet__bullet-copy'>"
-                    + "<span class='brave-mobile-sheet__bullet-text'>" + escapeHtml(item && (item.text || item.label || item.title || item.name) ? (item.text || item.label || item.title || item.name) : "") + "</span>"
+                    + "<span class='brave-mobile-sheet__bullet-text" + rarityNameClass + "'>" + escapeHtml(item && (item.text || item.label || item.title || item.name) ? (item.text || item.label || item.title || item.name) : "") + "</span>"
                     + ((item && (item.detail || item.meta || item.line || item.resource))
                         ? "<span class='brave-mobile-sheet__bullet-detail'>" + escapeHtml(item.detail || item.meta || item.line || item.resource) + "</span>"
                         : "")
@@ -2979,6 +2981,9 @@ let defaultout_plugin = (function () {
                 items.push({
                     text: item.label || "",
                     detail: "x" + String(item.quantity || 0) + (item.meta ? " · " + item.meta : ""),
+                    picker: item.picker || null,
+                    rarity_label: item.rarity_label || "",
+                    rarity_tone: item.rarity_tone || "rarity-common",
                 });
             });
             if (section.overflow) {
@@ -3792,7 +3797,6 @@ let defaultout_plugin = (function () {
             }
         }
         if (active) {
-            mobileNavDockExpanded = false;
             if (typeof clearMobileNavDock === "function") {
                 clearMobileNavDock({ preserveMobileSheet: true });
             }
@@ -3806,6 +3810,7 @@ let defaultout_plugin = (function () {
         if (!host || !currentWelcomePages.length) {
             return;
         }
+        finishGameIntroVeil();
         host.classList.add("brave-objectives-sheet--tutorial", "brave-objectives-sheet--welcome");
         document.body.classList.add("brave-objectives-welcome-active");
         var page = currentWelcomePages[currentWelcomePageIndex];
@@ -3908,6 +3913,7 @@ let defaultout_plugin = (function () {
         var pickerBody = pickerData && Array.isArray(pickerData.body)
             ? pickerData.body.filter(Boolean)
             : (pickerData && pickerData.body ? [pickerData.body] : []);
+        var pickerChips = pickerData && Array.isArray(pickerData.chips) ? pickerData.chips : [];
         var anchoredMenu = !!(
             pickerData
             && pickerData.anchor === "toolbar"
@@ -3953,19 +3959,26 @@ let defaultout_plugin = (function () {
         } else if (pickerData.picker_kind === "accessibility-settings") {
             host.innerHTML = renderAccessibilitySettingsPickerMarkup(pickerData, panelClass, backdropClass, panelStyle);
         } else {
+            var titleRarityClass = pickerData && pickerData.rarity_tone && pickerData.rarity_target !== "subtitle" ? " brave-rarity-name brave-rarity-name--" + escapeHtml(pickerData.rarity_tone) : "";
+            var subtitleRarityClass = pickerData && pickerData.rarity_tone && pickerData.rarity_target === "subtitle" ? " brave-rarity-name brave-rarity-name--" + escapeHtml(pickerData.rarity_tone) : "";
+            var renderPickerChip = function (entry) {
+                var tone = entry && entry.tone ? "scene-card__chip--" + escapeHtml(entry.tone) : "";
+                return chip(entry && entry.label ? entry.label : "", entry && entry.icon ? entry.icon : "label", tone);
+            };
             host.innerHTML =
                 "<div class='" + backdropClass + "' data-brave-picker-close='1'></div>"
                 + "<div class='" + panelClass + "' role='dialog' aria-modal='true' aria-label='" + escapeHtml(pickerData.title || "Details") + "'" + panelStyle + ">"
                 + "<div class='brave-picker-sheet__head'>"
                 + "<div class='brave-picker-sheet__titlebar'>"
                 + (pickerData.title_icon ? "<span class='brave-picker-sheet__title-icon'>" + icon(pickerData.title_icon) + "</span>" : "")
-                + "<div class='brave-picker-sheet__title'>" + escapeHtml(pickerData.title || "") + "</div>"
+                + "<div class='brave-picker-sheet__title" + titleRarityClass + "'>" + escapeHtml(pickerData.title || "") + "</div>"
                 + "<button type='button' class='brave-picker-sheet__close brave-view__action brave-view__action--muted brave-view__back' data-brave-picker-close='1'>"
                 + icon("close", "brave-view__action-icon")
                 + "<span>Close</span>"
                 + "</button>"
                 + "</div>"
-                + (pickerData.subtitle ? "<div class='brave-picker-sheet__subtitle'>" + escapeHtml(pickerData.subtitle) + "</div>" : "")
+                + (pickerData.subtitle ? "<div class='brave-picker-sheet__subtitle" + subtitleRarityClass + "'>" + escapeHtml(pickerData.subtitle) + "</div>" : "")
+                + (pickerChips.length ? "<div class='brave-picker-sheet__chips'>" + pickerChips.map(renderPickerChip).join("") + "</div>" : "")
                 + "</div>"
                 + (pickerBody.length
                     ? "<div class='brave-picker-sheet__bodycopy'>"
@@ -3985,6 +3998,7 @@ let defaultout_plugin = (function () {
                     ? "<div class='brave-picker-sheet__options'>"
                         + pickerOptions.map(function (option) {
                             var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
+                            var optionRarityClass = option && option.rarity_tone ? " brave-rarity-name brave-rarity-name--" + escapeHtml(option.rarity_tone) : "";
                             return (
                                 "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + "'"
                                 + commandAttrs(option, false)
@@ -3993,7 +4007,7 @@ let defaultout_plugin = (function () {
                                 + icon(option && option.icon ? option.icon : "arrow_right_alt")
                                 + "</span>"
                                 + "<span class='brave-picker-sheet__option-body'>"
-                                + "<span class='brave-picker-sheet__option-label'>" + escapeHtml(option && option.label ? option.label : "") + "</span>"
+                                + "<span class='brave-picker-sheet__option-label" + optionRarityClass + "'>" + escapeHtml(option && option.label ? option.label : "") + "</span>"
                                 + (option && option.meta ? "<span class='brave-picker-sheet__option-meta'>" + escapeHtml(option.meta) + "</span>" : "")
                                 + "</span>"
                                 + "</button>"
@@ -4738,7 +4752,7 @@ let defaultout_plugin = (function () {
     };
 
     var commandAttrs = function (entry, includeRole) {
-        if (!entry || (!entry.command && !entry.prefill && !entry.picker && !entry.connection_screen && !entry.chat_open)) {
+        if (!entry || (!entry.command && !entry.prefill && !entry.picker && !entry.connection_screen && !entry.chat_open && !entry.close_picker)) {
             return "";
         }
         var attrs = "";
@@ -4760,6 +4774,9 @@ let defaultout_plugin = (function () {
         }
         if (entry.chat_prompt) {
             attrs += " data-brave-chat-prompt='" + escapeHtml(entry.chat_prompt) + "'";
+        }
+        if (entry.close_picker) {
+            attrs += " data-brave-picker-close='1'";
         }
         if (entry.picker) {
             attrs += " data-brave-picker='" + escapeHtml(JSON.stringify(entry.picker)) + "'";
@@ -5280,6 +5297,13 @@ let defaultout_plugin = (function () {
 
         logBody.append(strayEntries);
         strayEntries.each(function () {
+            var combatFx = extractCombatFxMarkers(this.textContent || "");
+            if (combatFx.events.length && this.dataset) {
+                this.dataset.braveFx = JSON.stringify(combatFx.events);
+            }
+            if (combatFx.events.length || String(this.textContent || "").indexOf("[[BRAVEFX ") !== -1) {
+                this.innerHTML = this.innerHTML.replace(/\s*\[\[BRAVEFX [^\]]+\]\]/g, "");
+            }
             applyCombatFloatersFromNode(this);
         });
         claimedCount = strayEntries.length;
@@ -6252,6 +6276,10 @@ let defaultout_plugin = (function () {
 
     var finishGameIntroVeil = function () {
         var veil = document.getElementById("brave-intro-veil");
+        if (introVeilFailsafeTimer) {
+            window.clearTimeout(introVeilFailsafeTimer);
+            introVeilFailsafeTimer = null;
+        }
         if (veil) {
             veil.classList.remove("brave-intro-veil--active");
         }
@@ -6262,6 +6290,10 @@ let defaultout_plugin = (function () {
         if (veil) {
             veil.classList.add("brave-intro-veil--active");
             braveGameLoaded = false;
+            if (introVeilFailsafeTimer) {
+                window.clearTimeout(introVeilFailsafeTimer);
+            }
+            introVeilFailsafeTimer = window.setTimeout(finishGameIntroVeil, 8000);
         }
     };
 
@@ -6882,35 +6914,12 @@ let defaultout_plugin = (function () {
     };
 
     var shouldToastActivity = function (entry) {
-        if (!entry) {
-            return false;
-        }
-        if (
-            currentPickerData
-            || isCombatUiActive()
-            || currentMobileUtilityTab
-            || (document.body && document.body.classList.contains("brave-notice-active"))
-            || document.getElementById("brave-activity-overlay")
-            || document.getElementById("brave-fishing-minigame")
-            || document.getElementById("brave-arcade-overlay")
-        ) {
-            return false;
-        }
-        if (entry.category === "threat") {
-            return false;
-        }
-        if (!isMobileViewport() || currentMobileUtilityTab === "activity") {
-            return false;
-        }
-        return entry.category === "speech" || entry.category === "arrival";
+        return false;
     };
 
     var getActivityToastTitle = function (entry) {
         if (!entry) {
             return "Activity";
-        }
-        if (entry.category === "speech") {
-            return "Voices";
         }
         if (entry.category === "threat") {
             return "Danger";
@@ -7791,6 +7800,7 @@ let defaultout_plugin = (function () {
                             command: entry && entry.command ? entry.command : "",
                             prefill: entry && entry.prefill ? entry.prefill : "",
                             picker: entry && entry.picker ? entry.picker : null,
+                            actions: entry && Array.isArray(entry.actions) ? entry.actions : [],
                             on_open_command: entry && entry.on_open_command ? entry.on_open_command : "",
                             dismiss_bubble_speaker: entry && entry.dismiss_bubble_speaker ? entry.dismiss_bubble_speaker : "",
                             connection_screen: entry && entry.connection_screen ? entry.connection_screen : "",
@@ -8213,6 +8223,7 @@ let defaultout_plugin = (function () {
                 + (items || []).map(function (entry) {
                     var lead = "";
                     var marker = "";
+                    var rarityNameClass = entry && entry.rarity_tone ? " brave-rarity-name brave-rarity-name--" + escapeHtml(entry.rarity_tone) : "";
                     if (entry && entry.badge) {
                         lead = "<span class='brave-view__badge'>" + escapeHtml(entry.badge) + "</span>";
                     } else {
@@ -8226,7 +8237,7 @@ let defaultout_plugin = (function () {
                             + "</span>";
                     }
                     var textBody = "<span class='brave-view__list-copy'>"
-                        + "<span class='brave-view__list-text'>" + escapeHtml(entry && entry.text ? entry.text : "") + "</span>"
+                        + "<span class='brave-view__list-text" + rarityNameClass + "'>" + escapeHtml(entry && entry.text ? entry.text : "") + "</span>"
                         + ((entry && entry.detail)
                             ? "<span class='brave-view__list-detail'>" + escapeHtml(entry.detail) + "</span>"
                             : "")
@@ -8678,6 +8689,8 @@ let defaultout_plugin = (function () {
                 if (entry && entry.entry_ref) {
                     combatRefAttr = " data-entry-ref='" + escapeHtml(entry.entry_ref) + "'";
                 }
+                var titleRarityClass = entry && entry.rarity_tone && entry.rarity_target !== "meta" ? " brave-rarity-name brave-rarity-name--" + escapeHtml(entry.rarity_tone) : "";
+                var metaRarityClass = entry && entry.rarity_tone && entry.rarity_target === "meta" ? " brave-rarity-name brave-rarity-name--" + escapeHtml(entry.rarity_tone) : "";
                 return (
                     "<div class='" + rowClass + "'" + combatStateAttr + combatRefAttr + commandAttrs(entry, !disableMobileCombatEntryFocus) + ">"
                     + (backgroundIcon ? icon(backgroundIcon, "brave-view__entry-ornament") : "")
@@ -8688,8 +8701,8 @@ let defaultout_plugin = (function () {
                             ? "<span class='brave-view__entry-icon-wrap'>" + icon(entry && entry.icon ? entry.icon : "pets", "brave-view__entry-icon") + "</span>"
                             : "")
                     + "<div class='brave-view__entry-heading'>"
-                    + "<div class='brave-view__entry-title'>" + escapeHtml(entry && entry.title ? entry.title : "") + "</div>"
-                    + (entry && entry.meta ? "<div class='brave-view__entry-meta'>" + escapeHtml(entry.meta) + "</div>" : "")
+                    + "<div class='brave-view__entry-title" + titleRarityClass + "'>" + escapeHtml(entry && entry.title ? entry.title : "") + "</div>"
+                    + (entry && entry.meta ? "<div class='brave-view__entry-meta" + metaRarityClass + "'>" + escapeHtml(entry.meta) + "</div>" : "")
                     + "</div>"
                     + "</div>"
                     + renderMeters(entry && entry.meters)
@@ -8744,6 +8757,8 @@ let defaultout_plugin = (function () {
                     if (useButtonRoot) {
                         rowClass += " brave-view__entry--button";
                     }
+                    var titleRarityClass = entry && entry.rarity_tone && entry.rarity_target !== "meta" ? " brave-rarity-name brave-rarity-name--" + escapeHtml(entry.rarity_tone) : "";
+                    var metaRarityClass = entry && entry.rarity_tone && entry.rarity_target === "meta" ? " brave-rarity-name brave-rarity-name--" + escapeHtml(entry.rarity_tone) : "";
                     var entryMarkup = (
                         "<" + tagName + " class='" + rowClass + "'"
                         + extraAttrs
@@ -8755,8 +8770,8 @@ let defaultout_plugin = (function () {
                         + "<div class='brave-view__entry-head'>"
                         + lead
                         + "<div class='brave-view__entry-heading'>"
-                        + "<div class='brave-view__entry-title'>" + escapeHtml(entry && entry.title ? entry.title : "") + "</div>"
-                        + (entry && entry.meta ? "<div class='brave-view__entry-meta'>" + escapeHtml(entry.meta) + "</div>" : "")
+                        + "<div class='brave-view__entry-title" + titleRarityClass + "'>" + escapeHtml(entry && entry.title ? entry.title : "") + "</div>"
+                        + (entry && entry.meta ? "<div class='brave-view__entry-meta" + metaRarityClass + "'>" + escapeHtml(entry.meta) + "</div>" : "")
                         + "</div>"
                         + "</div>"
                         + renderMeters(entry && entry.meters)
@@ -9129,6 +9144,7 @@ let defaultout_plugin = (function () {
             }
             if (!braveGameLoaded && isRoomLikeView(viewData)) {
                 braveGameLoaded = true;
+                finishGameIntroVeil();
                 window.setTimeout(finishGameIntroVeil, 400);
             }
             if (isRoomLikeView(viewData)) {
@@ -10690,6 +10706,15 @@ let defaultout_plugin = (function () {
         }
         browserInteractionHandlersBound = true;
 
+        document.addEventListener("click", function (event) {
+            var pickerTarget = event.target.closest("[data-brave-picker]");
+            if (!pickerTarget || pickerTarget.closest("#brave-picker-sheet")) {
+                return;
+            }
+            event.preventDefault();
+            openPickerFromTarget(pickerTarget);
+        }, true);
+
         document.addEventListener("pointerdown", function (event) {
             if (!isMobileViewport()) {
                 return;
@@ -11087,7 +11112,16 @@ let defaultout_plugin = (function () {
                 + ".scene-card__item-button[data-brave-picker], "
                 + ".scene-card__item-button[data-brave-connection-screen]"
             );
-            if (!directTarget || (event.pointerType && event.pointerType !== "touch" && event.pointerType !== "pen")) {
+            var directPointerPicker = !!(directTarget && directTarget.hasAttribute("data-brave-picker"));
+            if (
+                !directTarget
+                || (
+                    event.pointerType
+                    && event.pointerType !== "touch"
+                    && event.pointerType !== "pen"
+                    && !(event.pointerType === "mouse" && directPointerPicker)
+                )
+            ) {
                 return;
             }
             event.preventDefault();
@@ -11655,6 +11689,11 @@ let defaultout_plugin = (function () {
                 return true;
             }
             renderMainView(viewPayload || {});
+            return true;
+        }
+
+        if (cmdname === "brave_picker") {
+            openPickerSheet(getOobPayload(args, kwargs, "brave_picker", {}) || {});
             return true;
         }
 

@@ -17,6 +17,44 @@
     "threat": "Threat",
     "vitality": "Vitality"
   },
+  "rarities": {
+    "common": {
+      "icon": "radio_button_unchecked",
+      "label": "Common",
+      "order": 10,
+      "tone": "rarity-common"
+    },
+    "uncommon": {
+      "icon": "change_history",
+      "label": "Uncommon",
+      "order": 20,
+      "tone": "rarity-uncommon"
+    },
+    "rare": {
+      "icon": "diamond",
+      "label": "Rare",
+      "order": 30,
+      "tone": "rarity-rare"
+    },
+    "epic": {
+      "icon": "auto_awesome",
+      "label": "Epic",
+      "order": 40,
+      "tone": "rarity-epic"
+    },
+    "legendary": {
+      "icon": "workspace_premium",
+      "label": "Legendary",
+      "order": 50,
+      "tone": "rarity-legendary"
+    },
+    "story": {
+      "icon": "bookmark",
+      "label": "Story",
+      "order": 60,
+      "tone": "rarity-story"
+    }
+  },
   "equipment_slots": [
     "main_hand",
     "off_hand",
@@ -221,6 +259,7 @@
     "anchor_glass_shard": {
       "kind": "loot",
       "name": "Anchor Glass Shard",
+      "rarity": "rare",
       "stackable": true,
       "summary": "A blue-white shard of route glass that thrums faintly when held near the Nexus.",
       "value": 14
@@ -232,6 +271,7 @@
       },
       "kind": "equipment",
       "name": "Ashwood Bow",
+      "rarity": "rare",
       "slot": "main_hand",
       "summary": "A travel bow with a quick draw and a forgiving pull."
     },
@@ -259,6 +299,7 @@
     "beacon_core": {
       "kind": "loot",
       "name": "Beacon Core",
+      "rarity": "epic",
       "stackable": true,
       "summary": "A heavy heart-core from the Junk-Yard beacon network, fit for a trophy shelf more than a pocket.",
       "value": 28
@@ -273,6 +314,7 @@
       },
       "kind": "equipment",
       "name": "Bellguard Bastion",
+      "rarity": "rare",
       "slot": "off_hand",
       "summary": "A heavier shield re-rimmed in clean iron and chapel brass, built to keep the line intact even when courage gets uneven."
     },
@@ -285,6 +327,7 @@
       },
       "kind": "equipment",
       "name": "Bellkeeper Mail",
+      "rarity": "uncommon",
       "slot": "chest",
       "summary": "Ring-backed mail built for patrol, prayer, and hauling frightened people behind you."
     },
@@ -296,12 +339,14 @@
       },
       "kind": "equipment",
       "name": "Bellwarden Icon",
+      "rarity": "rare",
       "slot": "off_hand",
       "summary": "A brass-braced devotional icon fitted to hold steadier light and steadier prayers."
     },
     "boar_keeper_charm": {
       "kind": "consumable",
       "name": "Boar-Keeper Charm",
+      "rarity": "story",
       "stackable": true,
       "summary": "A resin-bound charm of tusk and thorn cord used by old brush hands to earn the respect of a briar boar.",
       "use": {
@@ -400,6 +445,7 @@
       },
       "kind": "equipment",
       "name": "Chapel Blade",
+      "rarity": "rare",
       "slot": "main_hand",
       "summary": "A straight practical sword kept for road duty, oath work, and the sort of bad nights that require both."
     },
@@ -411,6 +457,7 @@
       },
       "kind": "equipment",
       "name": "Cinderwire Staff",
+      "rarity": "rare",
       "slot": "main_hand",
       "summary": "A reworked emberglass staff bound in black wire that keeps heat like a grudge."
     },
@@ -535,6 +582,7 @@
       },
       "kind": "equipment",
       "name": "Emberglass Staff",
+      "rarity": "epic",
       "slot": "main_hand",
       "summary": "A slim ash staff tipped with red glass that holds heat longer than it should."
     },
@@ -576,6 +624,7 @@
     "field_bandage": {
       "kind": "consumable",
       "name": "Field Bandage",
+      "rarity": "uncommon",
       "stackable": true,
       "summary": "A clean wrap and tincture packet meant to stop the worst bleeding before it becomes the whole story.",
       "use": {
@@ -599,6 +648,7 @@
       },
       "kind": "equipment",
       "name": "Field Leathers",
+      "rarity": "uncommon",
       "slot": "chest",
       "summary": "Light leather layers treated to turn rain, brush, and shallow cuts."
     },
@@ -683,6 +733,7 @@
     "focus_tonic": {
       "kind": "consumable",
       "name": "Focus Tonic",
+      "rarity": "rare",
       "stackable": true,
       "summary": "A bitter vial that steadies the hands, clears the head, and puts a little fire back in the limbs.",
       "use": {
@@ -822,6 +873,7 @@
       },
       "kind": "equipment",
       "name": "Grove Talisman",
+      "rarity": "story",
       "slot": "off_hand",
       "summary": "A twine-wrapped charm of seed, bone, and river-smoothed wood that steadies the breath and the will."
     },
@@ -845,6 +897,7 @@
       },
       "kind": "equipment",
       "name": "Hedgeweave Robes",
+      "rarity": "uncommon",
       "slot": "chest",
       "summary": "Practical apprentice robes lined against cold drafts and stray sparks."
     },
@@ -865,6 +918,7 @@
     "hollow_lantern_prism": {
       "kind": "loot",
       "name": "Hollow Lantern Prism",
+      "rarity": "epic",
       "stackable": true,
       "summary": "A white-black prism from the drowned south light, cold in the hand and still too eager to catch any stray gleam.",
       "value": 48
@@ -877,6 +931,7 @@
       },
       "kind": "equipment",
       "name": "Hookknife Pair",
+      "rarity": "epic",
       "slot": "main_hand",
       "summary": "A matched set of compact hookknives made for ugly work in close quarters and quicker exits after."
     },
@@ -948,6 +1003,7 @@
       },
       "kind": "equipment",
       "name": "Ironroot Longblade",
+      "rarity": "uncommon",
       "slot": "main_hand",
       "summary": "Torren's reworked frontier blade, ground cleaner and balanced for harder work."
     },
@@ -1001,6 +1057,7 @@
       },
       "kind": "equipment",
       "name": "Lantern Focus",
+      "rarity": "rare",
       "slot": "off_hand",
       "summary": "A palm-sized focus crystal wrapped in brass wire from old Brambleford lanterns."
     },
@@ -1062,6 +1119,7 @@
       },
       "kind": "equipment",
       "name": "Militia Blade",
+      "rarity": "rare",
       "slot": "main_hand",
       "summary": "A sturdy frontier sword with just enough weight behind it."
     },
@@ -1075,6 +1133,7 @@
     "miretooth_fang": {
       "kind": "loot",
       "name": "Miretooth Fang",
+      "rarity": "rare",
       "stackable": true,
       "summary": "A hooked predator fang from the beast ruling the fen edge, still carrying a sick green stain near the root.",
       "value": 42
@@ -1096,6 +1155,7 @@
       },
       "kind": "equipment",
       "name": "Mossweave Wraps",
+      "rarity": "uncommon",
       "slot": "chest",
       "summary": "Soft layered wraps stitched for damp trails, hedge work, and anyone who expects weather more than applause."
     },
@@ -1125,6 +1185,7 @@
       },
       "kind": "equipment",
       "name": "Nightpath Leathers",
+      "rarity": "rare",
       "slot": "chest",
       "summary": "Dark fitted leathers cut light through the shoulder and quiet through the buckle."
     },
@@ -1136,6 +1197,7 @@
       },
       "kind": "equipment",
       "name": "Oakbound Shield",
+      "rarity": "epic",
       "slot": "off_hand",
       "summary": "A scarred but reliable shield reinforced by practical iron bands."
     },
@@ -1147,6 +1209,7 @@
       },
       "kind": "equipment",
       "name": "Parrying Dagger",
+      "rarity": "legendary",
       "slot": "off_hand",
       "summary": "A narrow off-hand blade balanced to catch steel, hands, or attention at exactly the wrong moment for the other person."
     },
@@ -1158,12 +1221,14 @@
       },
       "kind": "equipment",
       "name": "Pilgrim Mace",
+      "rarity": "rare",
       "slot": "main_hand",
       "summary": "A compact mace carried as much for certainty as ceremony."
     },
     "potking_ladle": {
       "kind": "loot",
       "name": "Pot-King Ladle",
+      "rarity": "rare",
       "stackable": true,
       "summary": "Grubnak's iron ladle-scepter, dented, greasy, and somehow still threatening on principle alone.",
       "value": 34
@@ -1239,6 +1304,7 @@
       },
       "kind": "equipment",
       "name": "Ridgebreaker Blade",
+      "rarity": "rare",
       "slot": "main_hand",
       "summary": "A longblade reforged with tower iron and goblin chain, built to end arguments before they reach your back line."
     },
@@ -1282,6 +1348,7 @@
       },
       "kind": "equipment",
       "name": "Rivetmail Coat",
+      "rarity": "uncommon",
       "slot": "chest",
       "summary": "A roadwarden coat rebuilt with better rings, firmer leather, and less patience for sharp edges."
     },
@@ -1311,6 +1378,7 @@
       },
       "kind": "equipment",
       "name": "Roadwarden Mail",
+      "rarity": "uncommon",
       "slot": "chest",
       "summary": "A patched shirt of mail that favors endurance over elegance."
     },
@@ -1322,6 +1390,7 @@
       },
       "kind": "equipment",
       "name": "Rootwood Staff",
+      "rarity": "rare",
       "slot": "main_hand",
       "summary": "A living wood staff polished by use rather than ceremony, light in the hand and stubborn in the grain."
     },
@@ -1409,6 +1478,7 @@
       },
       "kind": "equipment",
       "name": "Sun Prayer Icon",
+      "rarity": "story",
       "slot": "off_hand",
       "summary": "A worn devotional icon that steadies the hand and focuses the spirit."
     },
@@ -1422,6 +1492,7 @@
       },
       "kind": "equipment",
       "name": "Sunforged Blade",
+      "rarity": "rare",
       "slot": "main_hand",
       "summary": "A cleaner, brighter chapel sword with a brass sun-mark hidden beneath the fuller and more certainty in the edge."
     },
@@ -1481,6 +1552,7 @@
       },
       "kind": "equipment",
       "name": "Trail Knife",
+      "rarity": "epic",
       "slot": "off_hand",
       "summary": "A belt knife meant for camp work, skinning, and close trouble."
     },
@@ -1490,12 +1562,14 @@
       "granted_ability_name": "Trail Mix",
       "kind": "equipment",
       "name": "Trail Mix Satchel",
+      "rarity": "uncommon",
       "slot": "snack",
       "summary": "A waxed trail pouch packed with nuts, berries, and enough salt to pull you back into the fight."
     },
     "stormlance_codex": {
       "kind": "consumable",
       "name": "Stormlance Codex",
+      "rarity": "story",
       "stackable": true,
       "summary": "A weather-stained codex of line-casting diagrams, each page more interested in disciplined lightning than safe eyebrows.",
       "use": {
@@ -1531,6 +1605,7 @@
     "ward_dust": {
       "kind": "consumable",
       "name": "Ward Dust",
+      "rarity": "epic",
       "stackable": true,
       "summary": "A pinch of ash-bright chapel dust that settles over skin and cloth like a quick ward against the next bad hit.",
       "use": {
@@ -1566,6 +1641,7 @@
       },
       "kind": "equipment",
       "name": "Warded Kite",
+      "rarity": "epic",
       "slot": "off_hand",
       "summary": "A chapel-kept kite shield marked in chalk prayer and brass nailwork."
     },
@@ -1601,6 +1677,7 @@
       },
       "kind": "equipment",
       "name": "Wayfarer Vestments",
+      "rarity": "uncommon",
       "slot": "chest",
       "summary": "Travel-ready robes stitched for mud, weather, and long prayers."
     },

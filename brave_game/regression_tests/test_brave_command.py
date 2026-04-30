@@ -171,6 +171,29 @@ class BraveCharacterCommandTests(unittest.TestCase):
             [[other_session]],
         )
 
+    def test_scene_msg_sends_browser_picker_without_clearing_scene(self):
+        web_session = SimpleNamespace(protocol_key="websocket")
+        other_session = SimpleNamespace(protocol_key="telnet")
+        command = object.__new__(BraveCharacterCommand)
+        command.session = web_session
+        command.caller = SimpleNamespace(sessions=_DummySessions([web_session, other_session]))
+
+        sent = []
+        command.msg = lambda *args, **kwargs: sent.append({"args": args, "kwargs": kwargs})
+
+        picker = {"title": "Field Bandage", "body": ["Restore: HP+18"]}
+        command.scene_msg("inspect", picker=picker)
+
+        self.assertFalse(any("brave_clear" in event["kwargs"] for event in sent))
+        self.assertEqual(
+            [event["kwargs"].get("brave_picker") for event in sent if "brave_picker" in event["kwargs"]],
+            [picker],
+        )
+        self.assertEqual(
+            [event["kwargs"].get("session") for event in sent if event["args"] == ("inspect",)],
+            [[other_session]],
+        )
+
     def test_rest_requires_authored_rest_site(self):
         command = object.__new__(CmdRest)
         room = SimpleNamespace(db=SimpleNamespace(brave_room_id="brambleford_town_green", brave_safe=True, brave_rest_allowed=False))

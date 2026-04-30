@@ -18,7 +18,7 @@ from world.browser_ui import (
     _reactive_view,
     _section,
 )
-from world.navigation import build_minimap_snapshot, get_exit_direction, get_exit_label, sort_exits
+from world.navigation import build_minimap_snapshot, get_exit_direction, get_exit_label, visible_exits
 from world.tutorial import (
     LANTERNFALL_RECAP_PAGES,
     LANTERNFALL_WELCOME_PAGES,
@@ -36,7 +36,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
     primary_exits = {}
     vertical_exits = []
     special_exits = []
-    for exit_obj in sort_exits(list(room.exits)):
+    for exit_obj in visible_exits(room, looker):
         direction = get_exit_direction(exit_obj)
         entry = {
             "direction": direction,

@@ -16,7 +16,20 @@ def _display_name(obj):
 def _chip(label, icon, tone="muted"):
     return {"label": label, "icon": icon, "tone": tone}
 
-def _action(label, command, icon, *, tone=None, confirm=None, icon_only=False, aria_label=None, picker=None, no_icon=False):
+def _action(
+    label,
+    command,
+    icon,
+    *,
+    tone=None,
+    confirm=None,
+    icon_only=False,
+    aria_label=None,
+    picker=None,
+    no_icon=False,
+    on_open_command=None,
+    dismiss_bubble_speaker=None,
+):
     action = {"label": label, "icon": icon}
     if command:
         action["command"] = command
@@ -32,6 +45,10 @@ def _action(label, command, icon, *, tone=None, confirm=None, icon_only=False, a
         action["picker"] = picker
     if no_icon:
         action["no_icon"] = True
+    if on_open_command:
+        action["on_open_command"] = on_open_command
+    if dismiss_bubble_speaker:
+        action["dismiss_bubble_speaker"] = dismiss_bubble_speaker
     return action
 
 def _item(
@@ -47,6 +64,10 @@ def _item(
     picker=None,
     tooltip=None,
     detail=None,
+    chips=None,
+    rarity_key=None,
+    rarity_label=None,
+    rarity_tone=None,
     marker_icon=None,
     on_open_command=None,
     dismiss_bubble_speaker=None,
@@ -70,6 +91,14 @@ def _item(
         item["tooltip"] = tooltip
     if detail:
         item["detail"] = detail
+    if chips:
+        item["chips"] = [chip for chip in chips if chip]
+    if rarity_key:
+        item["rarity_key"] = rarity_key
+    if rarity_label:
+        item["rarity_label"] = rarity_label
+    if rarity_tone:
+        item["rarity_tone"] = rarity_tone
     if marker_icon:
         item["marker_icon"] = marker_icon
     if on_open_command:
@@ -166,6 +195,10 @@ def _entry(
     attachments=None,
     sidecars=None,
     cluster_ref=None,
+    rarity_key=None,
+    rarity_label=None,
+    rarity_tone=None,
+    rarity_target=None,
 ):
     entry = {
         "title": title,
@@ -197,6 +230,14 @@ def _entry(
         entry["picker"] = picker
     if chips:
         entry["chips"] = chips
+    if rarity_key:
+        entry["rarity_key"] = rarity_key
+    if rarity_label:
+        entry["rarity_label"] = rarity_label
+    if rarity_tone:
+        entry["rarity_tone"] = rarity_tone
+    if rarity_target:
+        entry["rarity_target"] = rarity_target
     if meters:
         entry["meters"] = meters
     if tooltip:
@@ -211,7 +252,22 @@ def _entry(
         entry["cluster_ref"] = str(cluster_ref)
     return entry
 
-def _picker_option(label, *, command=None, prefill=None, icon=None, meta=None, tone=None, picker=None, chat_open=False, chat_prompt=None):
+def _picker_option(
+    label,
+    *,
+    command=None,
+    prefill=None,
+    icon=None,
+    meta=None,
+    tone=None,
+    picker=None,
+    chat_open=False,
+    chat_prompt=None,
+    close_picker=False,
+    rarity_key=None,
+    rarity_label=None,
+    rarity_tone=None,
+):
     option = {"label": label}
     if command:
         option["command"] = command
@@ -229,9 +285,30 @@ def _picker_option(label, *, command=None, prefill=None, icon=None, meta=None, t
         option["chat_open"] = True
     if chat_prompt:
         option["chat_prompt"] = chat_prompt
+    if close_picker:
+        option["close_picker"] = True
+    if rarity_key:
+        option["rarity_key"] = rarity_key
+    if rarity_label:
+        option["rarity_label"] = rarity_label
+    if rarity_tone:
+        option["rarity_tone"] = rarity_tone
     return option
 
-def _picker(title, *, subtitle=None, options=None, body=None, picker_id=None, title_icon=None):
+def _picker(
+    title,
+    *,
+    subtitle=None,
+    options=None,
+    body=None,
+    picker_id=None,
+    title_icon=None,
+    chips=None,
+    rarity_key=None,
+    rarity_label=None,
+    rarity_tone=None,
+    rarity_target=None,
+):
     picker = {
         "title": title,
         "options": [option for option in (options or []) if option],
@@ -244,6 +321,16 @@ def _picker(title, *, subtitle=None, options=None, body=None, picker_id=None, ti
         picker["subtitle"] = subtitle
     if body:
         picker["body"] = [line for line in body if line]
+    if chips:
+        picker["chips"] = [chip for chip in chips if chip]
+    if rarity_key:
+        picker["rarity_key"] = rarity_key
+    if rarity_label:
+        picker["rarity_label"] = rarity_label
+    if rarity_tone:
+        picker["rarity_tone"] = rarity_tone
+    if rarity_target:
+        picker["rarity_target"] = rarity_target
     return picker
 
 def _section(label, icon, kind, items=None, lines=None, span=None, **extra):

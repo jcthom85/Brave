@@ -109,8 +109,17 @@ class PackViewTests(unittest.TestCase):
         self.assertTrue(
             all(item.get("picker") for item in spare_gear.get("items", []))
         )
+        self.assertTrue(
+            all("command" not in item for item in spare_gear.get("items", []))
+        )
         self.assertEqual("Chest", spare_gear.get("items", [])[0].get("picker", {}).get("subtitle"))
         self.assertEqual("Snack", spare_gear.get("items", [])[1].get("picker", {}).get("subtitle"))
+        self.assertEqual("Uncommon", spare_gear.get("items", [])[0].get("rarity_label"))
+        self.assertEqual("rarity-uncommon", spare_gear.get("items", [])[0].get("rarity_tone"))
+        self.assertNotIn("chips", spare_gear.get("items", [])[0])
+        self.assertEqual("Uncommon", spare_gear.get("items", [])[0].get("picker", {}).get("chips", [])[0].get("label"))
+        self.assertEqual("rarity-uncommon", spare_gear.get("items", [])[0].get("picker", {}).get("rarity_tone"))
+        self.assertNotIn("Rarity: Uncommon", spare_gear.get("items", [])[0].get("picker", {}).get("body", []))
         self.assertIn("A patched shirt of mail", spare_gear.get("items", [])[0].get("tooltip", ""))
         self.assertTrue(
             any(
@@ -131,6 +140,10 @@ class PackViewTests(unittest.TestCase):
         self.assertEqual(["Field Bandage"], [item.get("text") for item in consumables.get("items", [])])
         self.assertEqual("2", consumables.get("items", [])[0].get("badge"))
         self.assertEqual("Consumable", consumables.get("items", [])[0].get("picker", {}).get("subtitle"))
+        self.assertIn(
+            consumables.get("items", [])[0].get("rarity_label"),
+            {"Common", "Uncommon"},
+        )
         self.assertEqual(
             "Use",
             consumables.get("items", [])[0].get("actions", [])[0].get("label"),

@@ -76,7 +76,7 @@ def _build_world_interaction_picker(viewer, target):
             )
             for action in _build_talk_actions(target)
         ]
-        options.append(_picker_option("Emote At", icon="sentiment_satisfied", picker=_build_targeted_room_emote_picker(target.key)))
+        options.append(_picker_option("Continue", icon="check_circle", tone="accent", close_picker=True))
         return _picker(title, body=body, options=options, title_icon="forum")
 
     if kind == "readable":
@@ -227,6 +227,24 @@ def _format_room_entity_items(viewer, visible_entities, visible_chars):
                 icon=ROOM_ENTITY_ID_ICONS.get(entity_id, ROOM_ENTITY_KIND_ICONS.get(kind, "category")),
                 command=command,
                 picker=picker,
+                actions=[
+                    _action(
+                        "Emote At",
+                        None,
+                        "sentiment_satisfied",
+                        tone="muted",
+                        picker=_build_targeted_room_emote_picker(obj.key),
+                    ),
+                    _action(
+                        "Talk",
+                        command,
+                        "forum",
+                        tone="accent",
+                        picker=picker,
+                        on_open_command=on_open_command,
+                        dismiss_bubble_speaker=dismiss_bubble_speaker,
+                    ),
+                ] if kind == "npc" else None,
                 on_open_command=on_open_command,
                 dismiss_bubble_speaker=dismiss_bubble_speaker,
             )

@@ -377,6 +377,22 @@
     },
     {
       "aliases": [
+        "notice",
+        "sign",
+        "brass notice",
+        "nexus notice",
+        "gate notice",
+        "lower gate sign",
+        "lower gate notice"
+      ],
+      "desc": "Joss's brass notice plate hangs from the chained east arch. It reads: LOWER GATE CHAMBER SEALED. NO NEXUS WORK, NO JUNK-YARD JUMPS, NO EXCEPTIONS UNTIL THE BRIDGEWORK IS STABLE.",
+      "id": "observatory_nexus_notice",
+      "key": "nexus gate notice",
+      "kind": "readable",
+      "location": "brambleford_great_observatory"
+    },
+    {
+      "aliases": [
         "ledger",
         "civic ledger",
         "petition book"
@@ -1643,6 +1659,8 @@
       "id": "nexus_gate_to_junkyard",
       "key": "east",
       "label": "Junk-Yard Planet",
+      "lock_message": "The Junk-Yard bridge is dark. Joss needs to tune the Nexus route before anyone steps through.",
+      "required_quest": "bridgework_for_joss",
       "source": "brambleford_nexus_gate"
     },
     {
@@ -1672,6 +1690,8 @@
       "id": "observatory_to_nexus_gate",
       "key": "east",
       "label": "Nexus Gate",
+      "lock_message": "Joss has the lower gate chamber chained shut until the bridgework is stable.",
+      "required_quest": "bridgework_for_joss",
       "source": "brambleford_great_observatory"
     },
     {
@@ -2591,7 +2611,7 @@
       "zone": "Brambleford"
     },
     {
-      "desc": "The observatory crowns Brambleford's highest rise, all brass braces, stone arches, and lantern glass polished brighter than the road probably deserves. A great telescope points upward through the open dome while a lower chamber hums with stranger work below.",
+      "desc": "The observatory crowns Brambleford's highest rise, all brass braces, stone arches, and lantern glass polished brighter than the road probably deserves. A great telescope points upward through the open dome while a lower east arch drops toward stranger work below. Joss has chained that arch shut with a brass notice plate until the bridgework is stable.",
       "id": "brambleford_great_observatory",
       "key": "Great Observatory",
       "map_icon": "O",

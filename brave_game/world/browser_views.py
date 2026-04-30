@@ -7,7 +7,7 @@ from world.chapel import get_active_blessing
 from world.character_icons import get_class_icon, get_race_icon
 from world.class_features import get_class_features
 from world.genders import BRAVE_GENDER_LABELS, get_brave_gender_label
-from world.navigation import build_map_snapshot, sort_exits
+from world.navigation import build_map_snapshot, visible_exits
 from world.tutorial import LANTERNFALL_RECAP_PAGES, LANTERNFALL_WELCOME_PAGES
 
 from world.browser_context import (
@@ -73,6 +73,7 @@ from world.browser_service_views import (
     build_shop_view,
     build_tinker_view,
 )
+from world.item_rarity import build_item_rarity_display
 from world.browser_ui import (
     _action,
     _chip,
@@ -1028,7 +1029,7 @@ def build_travel_view(character):
     """Return a browser-first main view for travel fallback."""
 
     room = getattr(character, "location", None)
-    exits = sort_exits(list(room.exits)) if room else []
+    exits = visible_exits(room, character) if room else []
     route_entries = []
     for exit_obj in exits:
         direction = getattr(exit_obj.db, "brave_direction", exit_obj.key).lower()
@@ -1162,14 +1163,24 @@ def build_combat_victory_view(
     reward_items = reward_items or []
     raw_progress_messages = [message for message in (progress_messages or []) if message]
 
-    # 1. Extract XP and Silver from progress messages to consolidate them in Rewards
+    # 1. Extract quest rewards from progress messages so Victory does not
+    # show the same reward information in two different sections.
     quest_xp = 0
     quest_silver = 0
+    quest_reward_items = []
     filtered_messages = []
     
     import re
-    xp_pattern = re.compile(r"gain\s+\|w?(\d+)\|?n?\s+xp", re.IGNORECASE)
-    silver_pattern = re.compile(r"receive\s+\|w?(\d+)\|?n?\s+silver", re.IGNORECASE)
+    xp_pattern = re.compile(r"^\s*you\s+gain\s+(?:\|w)?(\d+)(?:\|n)?\s+xp\.?\s*$", re.IGNORECASE)
+    silver_pattern = re.compile(r"^\s*you\s+receive\s+(?:\|w)?(\d+)(?:\|n)?\s+silver\.?\s*$", re.IGNORECASE)
+    item_reward_pattern = re.compile(
+        r"^\s*you\s+receive\s+(?:\|w)?(.+?)(?:\|n)?(?:\s+x(\d+))?\.?\s*$",
+        re.IGNORECASE,
+    )
+    item_names = {
+        str(template.get("name") or template_id).strip().lower(): template_id
+        for template_id, template in ITEM_TEMPLATES.items()
+    }
 
     for msg in raw_progress_messages:
         lowered = msg.lower()
@@ -1181,6 +1192,14 @@ def build_combat_victory_view(
         if silver_match:
             quest_silver += int(silver_match.group(1))
             continue
+
+        item_match = item_reward_pattern.search(str(msg or ""))
+        if item_match:
+            item_name = re.sub(r"\|[a-zA-Z]", "", item_match.group(1) or "").strip().lower()
+            template_id = item_names.get(item_name)
+            if template_id:
+                quest_reward_items.append((template_id, int(item_match.group(2) or 1)))
+                continue
         
         # Filter out purely informational tracking messages that are redundant on Victory
         if "tracked quest:" in lowered:
@@ -1211,13 +1230,8 @@ def build_combat_victory_view(
         elif prefix_lowered == "new quest":
             state = quest_states.setdefault(detail, {"completed": False, "new": False, "leads": []})
             state["new"] = True
-        elif prefix_lowered == "next lead":
-            # Associate with the most recent quest entry
-            if quest_states:
-                last_title = list(quest_states.keys())[-1]
-                quest_states[last_title]["leads"].append(detail)
-            else:
-                other_messages.append(msg)
+        elif prefix_lowered in {"lead", "next lead"}:
+            continue
         else:
             other_messages.append(msg)
 
@@ -1268,7 +1282,13 @@ def build_combat_victory_view(
             reward_pairs.append(_pair("Companion Bond", text, "pets"))
 
     loot_items_list = []
-    for template_id, quantity in reward_items:
+    merged_loot_items = {}
+    for template_id, quantity in list(reward_items) + quest_reward_items:
+        merged_loot_items[template_id] = merged_loot_items.get(template_id, 0) + int(quantity or 0)
+
+    for template_id, quantity in merged_loot_items.items():
+        if quantity <= 0:
+            continue
         template = ITEM_TEMPLATES.get(template_id, {})
         item_name = template.get("name", template_id.replace("_", " ").title())
         kind = template.get("kind")
@@ -1278,7 +1298,7 @@ def build_combat_victory_view(
             "equipment": "checkroom",
         }.get(kind, "category")
         text = f"{item_name} x{quantity}" if quantity > 1 else item_name
-        loot_items_list.append(_item(text, icon=icon))
+        loot_items_list.append(_item(text, icon=icon, **build_item_rarity_display(template)))
     
     sections = [
         _section(
@@ -1340,6 +1360,67 @@ def build_combat_victory_view(
                 danger="safe",
                 boss=is_capstone,
             ),
+        ),
+        "variant": "combat-result",
+    }
+
+
+def build_combat_defeat_view(
+    character,
+    *,
+    recovery_room=None,
+    silver_lost=0,
+    tutorial=False,
+    can_rest=False,
+):
+    """Return a browser-first defeat screen for combat recovery."""
+
+    recovery_name = getattr(recovery_room, "key", None) or "safety"
+    subtitle = (
+        f"You are carried back to {recovery_name}, barely standing. Rest before you try again."
+        if tutorial
+        else f"You are carried back to {recovery_name}, barely standing. Rest before heading out again."
+    )
+    outcome_pairs = [
+        _pair("HP", "1", "favorite"),
+        _pair("Mana", "1", "auto_awesome"),
+        _pair("Stamina", "1", "bolt"),
+        _pair("Silver Lost", silver_lost, "savings"),
+    ]
+    sections = [
+        _section(
+            "Recovery",
+            "healing",
+            "pairs",
+            items=outcome_pairs,
+            variant="receipt",
+        ),
+        _section(
+            "Next Step",
+            "campfire",
+            "lines",
+            lines=[
+                "Rest here to refill HP, mana, and stamina.",
+                "Your progress is intact. The road can wait until you are ready.",
+            ],
+            variant="receipt",
+        ),
+    ]
+    actions = []
+    if can_rest:
+        actions.append(_action("Rest", "rest", "campfire", tone="accent"))
+    actions.append(_action("Continue", "look", None, tone="muted", no_icon=True))
+
+    return {
+        **_make_view(
+            "",
+            "DEFEATED",
+            eyebrow_icon=None,
+            title_icon="shield",
+            subtitle=subtitle,
+            sections=sections,
+            actions=actions,
+            reactive=_reactive_from_character(character, scene="defeat", danger="safe"),
         ),
         "variant": "combat-result",
     }

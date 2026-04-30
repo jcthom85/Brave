@@ -57,6 +57,7 @@ class ContentRegistryTests(unittest.TestCase):
         self.assertEqual(tuple(payload["equipment_slots"]), registry.items.equipment_slots)
         self.assertEqual(payload["item_templates"]["militia_blade"]["name"], registry.items.get("militia_blade")["name"])
         self.assertEqual(payload["bonus_labels"]["armor"], registry.items.bonus_labels["armor"])
+        self.assertEqual(payload["rarities"]["uncommon"]["label"], registry.items.rarities["uncommon"]["label"])
         self.assertEqual(tuple(payload["item_class_requirements"]["militia_blade"]), registry.items.item_class_requirements["militia_blade"])
 
     def test_item_registry_helpers_run_against_pack_backed_data(self):
@@ -67,6 +68,9 @@ class ContentRegistryTests(unittest.TestCase):
         ])
         self.assertEqual("equipment", registry.items.get_item_category("militia_blade"))
         self.assertEqual("consumable", registry.items.get_item_category("riverlight_chowder"))
+        self.assertIn(registry.items.get_item_rarity_key("field_bandage"), {"common", "uncommon"})
+        self.assertEqual("Uncommon", registry.items.get_item_rarity_label("roadwarden_mail"))
+        self.assertEqual("rarity-uncommon", registry.items.get_item_rarity_tone("roadwarden_mail"))
         self.assertEqual("eat", registry.items.get_item_use_profile("riverlight_chowder", context="combat")["verb"])
         self.assertEqual("riverlight_chowder", registry.items.match_inventory_item(character, "chowder", context="combat"))
         self.assertIn("Armor", registry.items.format_bonus_summary({"bonuses": {"armor": 4}}))

@@ -120,6 +120,22 @@ def _resolve_character_selection(account, query, allow_default=False):
     return None, "You do not have a character by that name."
 
 
+def _release_existing_puppets_for_play(account, session, character):
+    """Free any current puppet that would block entering the requested character."""
+
+    if not account or not character or not hasattr(account, "get_all_puppets"):
+        return
+
+    current_session_puppet = getattr(session, "puppet", None)
+    existing_puppets = list(account.get_all_puppets() or [])
+    if current_session_puppet is character and existing_puppets == [character]:
+        return
+    if any(puppet is not character for puppet in existing_puppets) or (
+        current_session_puppet and current_session_puppet is not character
+    ):
+        account.unpuppet_all()
+
+
 class CmdBraveOOCLook(default_account.CmdOOCLook):
     """
     Show the Brave title screen.
@@ -154,6 +170,7 @@ class CmdBravePlay(default_account.CmdIC):
         if error:
             self.msg(error)
             return
+        _release_existing_puppets_for_play(account, self.session, character)
         self.args = character.key
         super().func()
 

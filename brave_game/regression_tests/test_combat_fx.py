@@ -49,6 +49,21 @@ class CombatFxTests(unittest.TestCase):
         self.assertEqual("e:e2", event.get("target_ref"))
         self.assertTrue(event.get("lunge"))
 
+    def test_action_announcement_does_not_leak_fx_marker(self):
+        messages = []
+        events = []
+        encounter = SimpleNamespace(
+            obj=SimpleNamespace(msg_contents=lambda message: messages.append(message)),
+            _emit_combat_fx=lambda **event: events.append(event),
+        )
+        character = SimpleNamespace(key="Dad")
+
+        BraveEncounter._announce_combat_action(encounter, character, "Strike")
+
+        self.assertEqual(["|cDad uses Strike!|n"], messages)
+        self.assertNotIn("BRAVEFX", messages[0])
+        self.assertEqual([{"kind": "action", "actor": "Dad", "label": "Strike"}], events)
+
     def test_lethal_damage_fx_marks_defeat_on_damage_event(self):
         events = []
         attacker = SimpleNamespace(

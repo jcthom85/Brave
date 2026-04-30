@@ -34,6 +34,52 @@ class QuestPopupTests(unittest.TestCase):
         self.assertIn('braveAudio.handleRest(payload);', default_out_source)
         self.assertIn('overlay.addEventListener("click", dismissOverlay);', default_out_source)
 
+    def test_default_out_opens_server_sent_picker_payloads(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn('if (cmdname === "brave_picker")', default_out_source)
+        self.assertIn('openPickerSheet(getOobPayload(args, kwargs, "brave_picker", {}) || {});', default_out_source)
+        self.assertIn("var interactive = !!(item && (item.command || item.picker || item.prefill || item.connection_screen));", default_out_source)
+        self.assertIn("var attrs = interactive ? commandAttrs(item, false) : \"\";", default_out_source)
+        self.assertIn('var directPointerPicker = !!(directTarget && directTarget.hasAttribute("data-brave-picker"));', default_out_source)
+        self.assertIn('&& !(event.pointerType === "mouse" && directPointerPicker)', default_out_source)
+        self.assertIn('var pickerTarget = event.target.closest("[data-brave-picker]");', default_out_source)
+        self.assertIn('openPickerFromTarget(pickerTarget);', default_out_source)
+        self.assertIn("var renderPickerChip = function (entry)", default_out_source)
+        self.assertIn("pickerChips.map(renderPickerChip).join(\"\")", default_out_source)
+
+    def test_welcome_popup_clears_intro_veil(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("var introVeilFailsafeTimer = null;", default_out_source)
+        self.assertIn("introVeilFailsafeTimer = window.setTimeout(finishGameIntroVeil, 8000);", default_out_source)
+        self.assertIn(
+            "var renderWelcomePage = function () {\n"
+            "        var host = document.getElementById(\"brave-objectives-sheet\");\n"
+            "        if (!host || !currentWelcomePages.length) {\n"
+            "            return;\n"
+            "        }\n"
+            "        finishGameIntroVeil();",
+            default_out_source,
+        )
+
+    def test_room_activity_speech_does_not_spawn_mobile_voice_toast(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn(
+            "var shouldToastActivity = function (entry) {\n"
+            "        return false;\n"
+            "    };",
+            default_out_source,
+        )
+        self.assertNotIn('return "Voices";', default_out_source)
+        self.assertIn(
+            "if (!braveGameLoaded && isRoomLikeView(viewData)) {\n"
+            "                braveGameLoaded = true;\n"
+            "                finishGameIntroVeil();",
+            default_out_source,
+        )
+
     def test_quest_popup_overlay_accepts_clicks_for_dismissal(self):
         css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
 
@@ -69,6 +115,13 @@ class QuestPopupTests(unittest.TestCase):
             '"groups": "double-team"',
         ):
             self.assertIn(snippet, default_out_source)
+
+    def test_mobile_vicinity_inline_actions_are_icon_only(self):
+        css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("@media screen and (max-width: 640px)", css_source)
+        self.assertIn(".brave-view--room .brave-view__section--vicinity .brave-view__mini-action span:not(.brave-view__mini-action-icon):not(.brave-icon)", css_source)
+        self.assertIn("min-width: 2.35rem;", css_source)
 
     def test_tutorial_close_button_uses_short_label_and_accent_colors(self):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")

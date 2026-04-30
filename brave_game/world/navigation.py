@@ -106,6 +106,48 @@ def sort_exits(exits):
     return sorted(exits, key=sort_key)
 
 
+def character_has_quest_state(character, quest_key, statuses=("active", "completed")):
+    """Return whether a character has a quest in one of the requested states."""
+
+    if not character or not quest_key:
+        return False
+    quest_state = getattr(getattr(character, "db", None), "brave_quests", None) or {}
+    if not isinstance(quest_state, dict):
+        return False
+    state = quest_state.get(str(quest_key)) or {}
+    return state.get("status") in set(statuses)
+
+
+def is_exit_available(exit_obj, character=None):
+    """Return whether a player-facing exit should be shown/traversed."""
+
+    required_quest = getattr(getattr(exit_obj, "db", None), "brave_required_quest", None)
+    if not required_quest:
+        return True
+    return character_has_quest_state(character, required_quest)
+
+
+def get_exit_block_message(exit_obj):
+    """Return the player-facing message for a locked authored route."""
+
+    return (
+        getattr(getattr(exit_obj, "db", None), "brave_lock_message", None)
+        or "That route is not ready for you yet."
+    )
+
+
+def visible_exits(room, character=None):
+    """Return sorted exits available to a character in normal play."""
+
+    return sort_exits(
+        [
+            exit_obj
+            for exit_obj in list(getattr(room, "exits", []) or [])
+            if is_exit_available(exit_obj, character)
+        ]
+    )
+
+
 def format_exit_summary(exits):
     """Return a compact one-line exit summary."""
 
@@ -561,7 +603,7 @@ def build_map_snapshot(room, radius=None, character=None):
             }
         )
 
-    current_exits = sort_exits(room.exits)
+    current_exits = visible_exits(room, character)
     party_status = []
     for member in party_members:
         status = "online" if getattr(member, "is_connected", False) else "offline"

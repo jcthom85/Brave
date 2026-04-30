@@ -32,7 +32,7 @@ from world.browser_panels import (
     send_webclient_event,
 )
 from world.browser_views import build_cook_view, build_fishing_view, build_map_view, build_travel_view
-from world.navigation import render_map, render_minimap, sort_exits
+from world.navigation import get_exit_block_message, render_map, render_minimap, sort_exits, visible_exits
 from world.resting import room_allows_rest
 from world.screen_text import format_entry, render_screen, wrap_text
 from world.tutorial import record_command_event
@@ -411,7 +411,7 @@ class CmdTravel(BraveCharacterCommand):
             self.msg("You have no location to travel from.")
             return
 
-        exits = sort_exits(list(character.location.exits))
+        exits = visible_exits(character.location, character)
         if not exits:
             self.msg("There are no clear paths onward from here.")
             return
@@ -463,7 +463,7 @@ class CmdTravel(BraveCharacterCommand):
         if exit_obj.access(character, "traverse"):
             exit_obj.at_traverse(character, exit_obj.destination)
         else:
-            self.msg("You can't travel that way right now.")
+            self.msg(get_exit_block_message(exit_obj))
 
 
 class CmdMap(BraveCharacterCommand):

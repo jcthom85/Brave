@@ -61,6 +61,21 @@ LEGACY_RACE_KEYS = {
 }
 
 
+def _get_puppet_session(character, kwargs=None):
+    """Return the session that just puppeted this character, if available."""
+
+    kwargs = kwargs or {}
+    session = kwargs.get("session")
+    if session:
+        return session
+
+    sessions = getattr(character, "sessions", None)
+    if not sessions or not hasattr(sessions, "all"):
+        return None
+    active_sessions = sessions.all()
+    return active_sessions[-1] if active_sessions else None
+
+
 class Character(ObjectParent, DefaultCharacter):
     """
     The Character just re-implements some of the Object's methods and hooks
@@ -145,8 +160,7 @@ class Character(ObjectParent, DefaultCharacter):
 
     def at_post_puppet(self, **kwargs):
         """Called just after puppeting is complete."""
-        sessions = self.sessions.all()
-        session = sessions[-1] if sessions else None
+        session = _get_puppet_session(self, kwargs)
         protocol = str(getattr(session, "protocol_key", "") or "").lower() if session else ""
         
         if self.account:

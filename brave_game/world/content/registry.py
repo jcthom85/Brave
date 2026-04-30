@@ -93,6 +93,7 @@ class ItemContentRegistry:
     starter_consumables: tuple
     starter_loadouts: dict
     bonus_labels: dict
+    rarities: dict
 
     def get(self, template_id):
         return self.item_templates.get(template_id)
@@ -131,6 +132,32 @@ class ItemContentRegistry:
             return None
         use["contexts"] = contexts
         return use
+
+    def get_item_rarity_key(self, item_or_template):
+        item = item_or_template if isinstance(item_or_template, dict) else self.get(item_or_template)
+        rarity_key = str((item or {}).get("rarity") or "common").strip().lower()
+        return rarity_key if rarity_key in self.rarities else "common"
+
+    def get_item_rarity(self, item_or_template):
+        rarity_key = self.get_item_rarity_key(item_or_template)
+        return self.rarities.get(rarity_key) or self.rarities.get("common") or {
+            "label": rarity_key.title(),
+            "tone": "rarity-common",
+            "icon": "diamond",
+            "order": 0,
+        }
+
+    def get_item_rarity_label(self, item_or_template):
+        rarity = self.get_item_rarity(item_or_template)
+        return str(rarity.get("label") or self.get_item_rarity_key(item_or_template).title())
+
+    def get_item_rarity_tone(self, item_or_template):
+        rarity = self.get_item_rarity(item_or_template)
+        return str(rarity.get("tone") or f"rarity-{self.get_item_rarity_key(item_or_template)}")
+
+    def get_item_rarity_icon(self, item_or_template):
+        rarity = self.get_item_rarity(item_or_template)
+        return str(rarity.get("icon") or "diamond")
 
     def is_consumable_item(self, item_or_template, *, context=None):
         return self.get_item_use_profile(item_or_template, context=context) is not None
@@ -413,6 +440,7 @@ def _build_item_registry_from_payload(payload, source_path):
         starter_consumables=tuple(tuple(entry) for entry in payload.get("starter_consumables", [])),
         starter_loadouts=dict(payload.get("starter_loadouts", {})),
         bonus_labels=dict(payload.get("bonus_labels", {})),
+        rarities=dict(payload.get("rarities", {})),
     )
 
 

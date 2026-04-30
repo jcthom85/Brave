@@ -244,12 +244,21 @@ class RoomViewTests(unittest.TestCase):
         self.assertIsNone(vicinity_items[0].get("picker", {}).get("subtitle"))
         self.assertIsNone(vicinity_items[1].get("picker", {}).get("subtitle"))
         self.assertEqual(
-            ["Mastery", "Emote At"],
+            ["Mastery", "Continue"],
             [option.get("label") for option in vicinity_items[0].get("picker", {}).get("options", [])],
         )
+        self.assertTrue(vicinity_items[0].get("picker", {}).get("options", [])[1].get("close_picker"))
         self.assertEqual(
             ["Cook"],
             [option.get("label") for option in vicinity_items[1].get("picker", {}).get("options", [])],
+        )
+        self.assertEqual(
+            ["Emote At", "Talk"],
+            [action.get("label") for action in vicinity_items[0].get("actions", [])],
+        )
+        self.assertEqual(
+            "forum",
+            vicinity_items[0].get("actions", [])[1].get("picker", {}).get("title_icon"),
         )
 
     def test_room_view_tutorial_npc_card_opens_popup_and_advances_on_open(self):
@@ -266,6 +275,12 @@ class RoomViewTests(unittest.TestCase):
         self.assertEqual("forum", vicinity_items[0].get("picker", {}).get("title_icon"))
         self.assertEqual("_bravepopup talk Sergeant Tamsin Vale", vicinity_items[0].get("on_open_command"))
         self.assertEqual("Sergeant Tamsin Vale", vicinity_items[0].get("dismiss_bubble_speaker"))
+        self.assertEqual(
+            ["Emote At", "Talk"],
+            [action.get("label") for action in vicinity_items[0].get("actions", [])],
+        )
+        self.assertEqual("_bravepopup talk Sergeant Tamsin Vale", vicinity_items[0]["actions"][1].get("on_open_command"))
+        self.assertEqual("Sergeant Tamsin Vale", vicinity_items[0]["actions"][1].get("dismiss_bubble_speaker"))
 
     def test_room_view_arcade_entity_opens_inspect_view(self):
         room = DummyRoom()
@@ -314,7 +329,20 @@ class RoomViewTests(unittest.TestCase):
                 {"label": "Innkeeper's Fish Pie", "quantity": 2},
                 {"label": "Lantern Carp", "quantity": 3},
             ],
-            view.get("mobile_pack", {}).get("preview"),
+            [
+                {"label": item.get("label"), "quantity": item.get("quantity")}
+                for item in view.get("mobile_pack", {}).get("preview", [])
+            ],
+        )
+        self.assertTrue(
+            all(item.get("picker", {}).get("body") for item in view.get("mobile_pack", {}).get("preview", []))
+        )
+        self.assertTrue(
+            all(
+                item.get("picker", {}).get("body")
+                for section in view.get("mobile_pack", {}).get("sections", [])
+                for item in section.get("items", [])
+            )
         )
         mobile_panels = view.get("mobile_panels", {})
         self.assertEqual("Lantern Rest", mobile_panels.get("title"))
