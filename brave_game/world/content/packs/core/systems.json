@@ -1,4 +1,21 @@
 {
+  "boss_gates": {
+    "ruk_fence_cutter": {
+      "key": "ruk_fence_cutter",
+      "name": "Ruk the Fence-Cutter",
+      "summary": "A hard encounter guards the road beyond Fencebreaker Camp.",
+      "trigger_room_id": "goblin_road_fencebreaker_camp",
+      "encounter_key": "ruks_stand",
+      "boss_enemy_key": "ruk_fence_cutter",
+      "entry_room_id": "goblin_road_fencebreaker_camp",
+      "success_room_id": "goblin_warrens_sinkmouth_cut",
+      "failure_room_id": "goblin_road_fencebreaker_camp",
+      "max_participants": 4,
+      "allow_non_party_helpers": true,
+      "requires_personal_clear": true,
+      "instance_desc": "Ruk's stand tightens into a ring of chopped rails, mud, and lantern-glass grit. The road waits on the other side of him."
+    }
+  },
   "activities": {
     "cooking_recipes": {
       "crisped_perch_plate": {

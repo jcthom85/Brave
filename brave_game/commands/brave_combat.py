@@ -305,6 +305,18 @@ class CmdFight(BraveCharacterCommand):
             if not preview:
                 self.msg("Nothing stirs here right now.")
                 return
+            from world.boss_gates import find_gate_for_preview, start_gate_ready_check
+
+            gate_key, gate = find_gate_for_preview(character.location, preview)
+            if gate:
+                ok, message = start_gate_ready_check(character, gate_key)
+                if ok and self.get_web_session():
+                    self.send_other_sessions(message)
+                elif ok:
+                    self.msg(message)
+                else:
+                    self.msg(message)
+                return
 
         solo_tutorial = is_tutorial_solo_combat_room(character.location)
         encounter, created = BraveEncounter.start_for_room(
@@ -343,6 +355,104 @@ class CmdFight(BraveCharacterCommand):
             panel=build_combat_panel(encounter),
             view=build_combat_view(encounter, character),
         )
+
+
+class CmdBossGate(BraveCharacterCommand):
+    """
+    Stage or join a room-roster boss gate run.
+
+    Usage:
+      bossgate new <gate>
+      bossgate join <run_id>
+      bossgate leave <run_id>
+      bossgate remove <run_id> <character_id>
+      bossgate start <run_id>
+      bossgate cancel <run_id>
+    """
+
+    key = "bossgate"
+    aliases = ["boss"]
+    help_category = "Brave"
+
+    def func(self):
+        from world.boss_gates import (
+            cancel_gate,
+            create_gate_run,
+            join_gate_run,
+            leave_gate_run,
+            launch_gate_run,
+            remove_gate_run_member,
+            send_gate_choice_payload,
+            send_gate_run_payload,
+        )
+
+        character = self.get_character()
+        if not character or not character.location:
+            return
+
+        parts = [part for part in (self.args or "").split() if part]
+        action = parts[0].lower() if parts else ""
+        if action in {"choose", "runs"}:
+            if len(parts) < 2:
+                self.msg("No boss gate selected.")
+                return
+            send_gate_choice_payload(character, parts[1])
+            return
+        if action == "new":
+            if len(parts) < 2:
+                self.msg("No boss gate selected.")
+                return
+            ok, result = create_gate_run(character, parts[1])
+            if not ok:
+                self.msg(result)
+            return
+        if action in {"join", "ready", "assist"}:
+            if len(parts) < 2:
+                self.msg("No boss run selected.")
+                return
+            ok, message = join_gate_run(character, parts[1])
+            if not ok:
+                self.msg(message)
+            return
+        if action == "leave":
+            if len(parts) < 2:
+                self.msg("No boss run selected.")
+                return
+            ok, message = leave_gate_run(character, parts[1])
+            if not ok:
+                self.msg(message)
+            return
+        if action == "remove":
+            if len(parts) < 3:
+                self.msg("No boss run member selected.")
+                return
+            ok, message = remove_gate_run_member(character, parts[1], parts[2])
+            if not ok:
+                self.msg(message)
+            return
+        if action in {"start", "launch", "begin"}:
+            run_id = parts[1] if len(parts) >= 2 else None
+            ok, result = launch_gate_run(character, run_id)
+            if not ok:
+                self.msg(result)
+                return
+            encounter = result
+            self.scene_msg(
+                encounter.format_combat_snapshot(),
+                panel=build_combat_panel(encounter),
+                view=build_combat_view(encounter, character),
+            )
+            return
+        if action in {"cancel", "stop"}:
+            run_id = parts[1] if len(parts) >= 2 else None
+            ok, message = cancel_gate(character, run_id)
+            if not ok:
+                self.msg(message)
+            return
+        if action == "show" and len(parts) >= 2:
+            send_gate_run_payload(character, parts[1])
+            return
+        self.msg("No boss run selected.")
 
 
 class CmdEnemies(BraveCharacterCommand):

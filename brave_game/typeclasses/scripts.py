@@ -3610,6 +3610,11 @@ class BraveEncounter(Script):
                 participant.ndb.brave_showing_combat_result = True
             participant.clear_chapel_blessing()
 
+        if getattr(getattr(self, "db", None), "boss_gate_key", None):
+            from world.boss_gates import resolve_gate_victory
+
+            resolve_gate_victory(self, participants)
+
         return participants
 
     def _finish_victory_sequence(self, room_message, *, exclude_rewarded=True):
@@ -3626,6 +3631,10 @@ class BraveEncounter(Script):
         if hasattr(self, "ndb"):
             self.ndb.brave_skip_combat_done = True
         self.stop()
+        if getattr(getattr(self, "db", None), "boss_gate_key", None):
+            from world.boss_gates import cleanup_gate_instance
+
+            cleanup_gate_instance(self)
 
     def _schedule_victory_sequence(self, room_message, *, exclude_rewarded=True):
         """Wait for final defeat FX before swapping away from combat."""
@@ -3649,6 +3658,10 @@ class BraveEncounter(Script):
 
         if self.obj and room_message:
             self.obj.msg_contents(room_message)
+        if getattr(getattr(self, "db", None), "boss_gate_key", None):
+            from world.boss_gates import resolve_gate_defeat
+
+            resolve_gate_defeat(self)
         for participant in self.get_defeated_participants():
             send_browser_notice_event(
                 participant,
@@ -3659,6 +3672,10 @@ class BraveEncounter(Script):
                 duration_ms=5600,
             )
         self.stop()
+        if getattr(getattr(self, "db", None), "boss_gate_key", None):
+            from world.boss_gates import cleanup_gate_instance
+
+            cleanup_gate_instance(self)
 
     def at_repeat(self):
         self.db.round += 1

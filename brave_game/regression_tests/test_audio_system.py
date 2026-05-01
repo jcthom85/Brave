@@ -138,6 +138,11 @@ class AudioSystemFilesTests(unittest.TestCase):
             base_template_source.index("webclient/js/plugins/default_out.js"),
         )
         self.assertIn("var getUiSoundForCommand = function (command) {", default_out_source)
+        self.assertIn("var getTitleUiSoundForCommand = function (command) {", default_out_source)
+        self.assertIn("var getTitleUiCueId = function (kind) {", default_out_source)
+        self.assertIn('return "sfx.ui.confirm";', default_out_source)
+        self.assertIn("braveAudio.play(getTitleUiCueId(kind), { force: true })", default_out_source)
+        self.assertIn("uiSound = getTitleUiSoundForCommand(normalizedCommand);", default_out_source)
         self.assertIn("var playUiSound = function (kind) {", default_out_source)
         self.assertIn('return "";', default_out_source)
         self.assertIn('normalized.indexOf("gear equip ") === 0', default_out_source)

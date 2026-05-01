@@ -29,7 +29,7 @@ from .account import (
 )
 from .brave import CmdFinishPlaySilent
 from .brave_arcade import CmdArcade, CmdArcadeSubmit
-from .brave_combat import CmdCombatPreview, CmdEnemies, CmdFight, CmdFlee, CmdTarget, CmdUse
+from .brave_combat import CmdBossGate, CmdCombatPreview, CmdEnemies, CmdFight, CmdFlee, CmdTarget, CmdUse
 from .brave_creator import CmdContent
 from .brave_explore import CmdCook, CmdEat, CmdEmote, CmdFish, CmdItem, CmdMap, CmdReel, CmdRest, CmdTravel
 from .brave_party import CmdParty
@@ -93,6 +93,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdPray())
         self.add(CmdTravel())
         self.add(CmdFight())
+        self.add(CmdBossGate())
         self.add(CmdEnemies())
         self.add(CmdTarget())
         self.add(CmdUse())

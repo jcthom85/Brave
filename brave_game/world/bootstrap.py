@@ -82,6 +82,7 @@ def _ensure_exit(exit_data, rooms_by_id):
     exit_obj.db.brave_direction = exit_data.get("direction", exit_data["key"])
     exit_obj.db.brave_exit_label = exit_data.get("label", destination.key)
     exit_obj.db.brave_required_quest = exit_data.get("required_quest")
+    exit_obj.db.brave_boss_gate = exit_data.get("boss_gate")
     exit_obj.db.brave_lock_message = exit_data.get("lock_message")
     exit_obj.tags.add(exit_data["id"], category=EXIT_TAG_CATEGORY)
     exit_obj.aliases.clear()

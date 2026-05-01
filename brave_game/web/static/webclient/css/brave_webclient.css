@@ -1640,6 +1640,316 @@ body.brave-objectives-welcome-active #brave-picker-sheet {
     border-radius: var(--brave-radius-card-tight);
 }
 
+.brave-boss-gate__backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: rgba(4, 6, 8, 0.76);
+    backdrop-filter: blur(10px);
+}
+
+.brave-boss-gate {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    width: min(540px, calc(100% - 32px));
+    max-height: min(92vh, 720px);
+    transform: translate(-50%, -50%);
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 72%, rgba(var(--brave-accent-rgb), 0.24));
+    border-radius: var(--brave-radius-panel);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-accent-rgb), 0.16), transparent 44%),
+        linear-gradient(180deg, var(--brave-surface-soft-top), var(--brave-surface-soft-bottom));
+    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.42);
+    overflow: hidden;
+}
+
+.brave-boss-gate__head {
+    display: grid;
+    gap: 6px;
+}
+
+.brave-boss-gate__titlebar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.brave-boss-gate__title-icon,
+.brave-boss-gate__choice-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    background: rgba(var(--brave-accent-rgb), 0.14);
+    color: var(--brave-text-bright);
+}
+
+.brave-boss-gate__titlewrap {
+    min-width: 0;
+}
+
+.brave-boss-gate__title {
+    margin: 0;
+    color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
+    font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: var(--brave-dialogue-letter-spacing);
+    line-height: 1.15;
+    text-transform: uppercase;
+}
+
+.brave-boss-gate__summary,
+.brave-boss-gate__status,
+.brave-boss-gate__slot-meta,
+.brave-boss-gate__choice-meta {
+    color: var(--brave-text-soft);
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.76rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.35;
+}
+
+.brave-boss-gate__summary {
+    margin: 2px 0 0;
+}
+
+.brave-boss-gate__status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 5px 10px;
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.28);
+    border-radius: 999px;
+    background: rgba(var(--brave-accent-rgb), 0.1);
+    color: var(--brave-text-bright);
+    white-space: nowrap;
+}
+
+.brave-boss-gate__close,
+.brave-boss-gate__remove,
+.brave-boss-gate__action {
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 70%, transparent);
+    border-radius: var(--brave-radius-control);
+    background: color-mix(in srgb, var(--brave-panel-soft) 78%, transparent);
+    color: var(--brave-text-bright);
+    cursor: pointer;
+}
+
+.brave-boss-gate__close {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+}
+
+.brave-boss-gate__slots {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    align-items: start;
+    justify-content: center;
+}
+
+.brave-boss-gate__slot {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: min(100%, 186px);
+    gap: 6px;
+    padding: 10px;
+    justify-self: center;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 76%, rgba(var(--brave-accent-rgb), 0.18));
+    border-radius: var(--brave-radius-card);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 42%),
+        color-mix(in srgb, var(--brave-panel-deep) 90%, transparent);
+    overflow: hidden;
+}
+
+.brave-boss-gate__slot--empty {
+    justify-content: center;
+    align-items: center;
+    border-style: dashed;
+    opacity: 0.78;
+    text-align: center;
+}
+
+.brave-boss-gate__slot-bg {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    color: rgba(var(--brave-accent-rgb), 0.11);
+    transform: translate(-50%, -50%) scale(6.6);
+    transform-origin: center;
+    pointer-events: none;
+}
+
+.brave-boss-gate__slot-main {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 5px;
+    justify-items: center;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0;
+    text-align: center;
+}
+
+.brave-boss-gate__slot-kicker {
+    position: relative;
+    z-index: 1;
+    color: var(--brave-text-muted);
+    font-size: calc(0.64rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    text-transform: uppercase;
+}
+
+.brave-boss-gate__slot-name,
+.brave-boss-gate__choice-title {
+    position: relative;
+    z-index: 1;
+    color: var(--brave-text-bright);
+    font-family: var(--brave-dialogue-font-family);
+    font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.brave-boss-gate__slot-name {
+    display: block;
+    max-width: 100%;
+    font-size: calc(0.92rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    text-align: center;
+}
+
+.brave-boss-gate__slot-meta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3px;
+    max-width: 100%;
+    text-align: center;
+}
+
+.brave-boss-gate__slot-meta span {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.brave-boss-gate__remove {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 7px;
+    font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-boss-gate__choices,
+.brave-boss-gate__actions {
+    display: grid;
+    gap: 10px;
+}
+
+.brave-boss-gate__choice {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-height: 62px;
+    padding: 12px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 72%, rgba(var(--brave-accent-rgb), 0.16));
+    border-radius: var(--brave-radius-card);
+    background: color-mix(in srgb, var(--brave-panel-soft) 84%, transparent);
+    color: var(--brave-text-bright);
+    text-align: left;
+}
+
+.brave-boss-gate__choice--disabled,
+.brave-boss-gate__action--disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.brave-boss-gate__choice-body {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.brave-boss-gate__actions {
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+}
+
+.brave-boss-gate__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 8px 10px;
+}
+
+.brave-boss-gate__action--danger {
+    border-color: rgba(181, 86, 71, 0.42);
+    background: color-mix(in srgb, #8f352f 54%, var(--brave-panel-soft));
+}
+
+.brave-boss-gate__action--accent {
+    border-color: rgba(var(--brave-accent-rgb), 0.38);
+    background: color-mix(in srgb, var(--brave-accent) 36%, var(--brave-panel-soft));
+}
+
+.brave-boss-gate__empty-state {
+    padding: 14px;
+    border: 1px dashed color-mix(in srgb, var(--brave-world-line) 72%, transparent);
+    border-radius: var(--brave-radius-card);
+    color: var(--brave-text-soft);
+    font-family: var(--brave-body-font-family);
+    font-size: calc(0.96rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 500;
+    letter-spacing: var(--brave-body-letter-spacing);
+    line-height: 1.45;
+}
+
+@media (max-width: 680px) {
+    .brave-boss-gate {
+        width: min(360px, calc(100% - 20px));
+        max-height: min(94vh, 720px);
+        padding: 12px;
+    }
+
+    .brave-boss-gate__slots {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .brave-boss-gate__slot {
+        width: min(100%, 154px);
+    }
+
+    .brave-boss-gate__close {
+        justify-self: end;
+    }
+}
+
 .brave-audio-settings {
     display: grid;
     gap: 14px;

@@ -374,6 +374,7 @@ class SystemsContentRegistry:
     portals: dict
     portal_status_labels: dict
     trophies: dict
+    boss_gates: dict
 
     def format_ingredient_list(self, ingredients, item_lookup):
         parts = []
@@ -387,6 +388,9 @@ class SystemsContentRegistry:
 
     def get_portal_status_label(self, status_key):
         return self.portal_status_labels.get(status_key, str(status_key or "").title())
+
+    def get_boss_gate(self, gate_key):
+        return self.boss_gates.get(gate_key)
 
 
 @dataclass(frozen=True)
@@ -512,6 +516,7 @@ def _build_systems_registry_from_payload(payload, source_path):
     forging = dict(payload.get("forging", {}))
     portals = dict(payload.get("portals", {}))
     trophies = dict(payload.get("trophies", {}))
+    boss_gates = dict(payload.get("boss_gates", {}))
     return SystemsContentRegistry(
         source_path=str(source_path),
         fishing_spots=dict(activities.get("fishing_spots", {})),
@@ -528,6 +533,7 @@ def _build_systems_registry_from_payload(payload, source_path):
         portals=dict(portals.get("portals", {})),
         portal_status_labels=dict(portals.get("portal_status_labels", {})),
         trophies=dict(trophies.get("trophies", {})),
+        boss_gates=dict(boss_gates.get("boss_gates", boss_gates)),
     )
 
 

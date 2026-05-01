@@ -84,6 +84,7 @@ let defaultout_plugin = (function () {
     var currentMobileSwipe = null;
     var introVeilFailsafeTimer = null;
     var currentPickerData = null;
+    var currentBossGateData = null;
     var currentPickerAnchorRect = null;
     var currentPickerSourceId = "";
     var currentNoticeTimer = null;
@@ -3220,6 +3221,7 @@ let defaultout_plugin = (function () {
     var clearPickerSheet = function () {
         var host = document.getElementById("brave-picker-sheet");
         currentPickerData = null;
+        currentBossGateData = null;
         currentPickerAnchorRect = null;
         currentPickerSourceId = "";
         if (host) {
@@ -4097,6 +4099,7 @@ let defaultout_plugin = (function () {
             return false;
         }
         currentPickerData = pickerData;
+        currentBossGateData = null;
         currentPickerAnchorRect = pickerData && pickerData.anchorRect ? pickerData.anchorRect : null;
         if (pickerData && pickerData.picker_id) {
             currentPickerSourceId = String(pickerData.picker_id);
@@ -4138,6 +4141,136 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var bossGateActionAttrs = function (action) {
+        if (!action || action.disabled) {
+            return " disabled aria-disabled='true'";
+        }
+        if (action.close) {
+            return " data-brave-picker-close='1'";
+        }
+        if (action.command) {
+            return " data-brave-command='" + escapeHtml(action.command) + "'";
+        }
+        return "";
+    };
+
+    var renderBossGateActionButton = function (action, extraClass) {
+        var toneClass = action && action.tone ? " brave-boss-gate__action--" + escapeHtml(action.tone) : "";
+        var disabledClass = action && action.disabled ? " brave-boss-gate__action--disabled" : "";
+        return (
+            "<button type='button' class='brave-boss-gate__action brave-click" + toneClass + disabledClass + (extraClass ? " " + extraClass : "") + "'"
+            + bossGateActionAttrs(action)
+            + ">"
+            + icon(action && action.icon ? action.icon : "arrow_right_alt", "brave-boss-gate__action-icon")
+            + "<span>" + escapeHtml(action && action.label ? action.label : "") + "</span>"
+            + "</button>"
+        );
+    };
+
+    var renderBossGateSlot = function (slot) {
+        if (!slot || slot.empty) {
+            return (
+                "<div class='brave-boss-gate__slot brave-boss-gate__slot--empty'>"
+                + "<span class='brave-boss-gate__slot-bg'>" + icon("add_circle") + "</span>"
+                + "<span class='brave-boss-gate__slot-kicker'>Open Slot</span>"
+                + "<span class='brave-boss-gate__slot-name'>" + escapeHtml(slot && slot.label ? slot.label : "Open Slot") + "</span>"
+                + "</div>"
+            );
+        }
+        return (
+            "<div class='brave-boss-gate__slot'>"
+            + "<span class='brave-boss-gate__slot-bg'>" + icon(slot.class_icon || "player") + "</span>"
+            + "<div class='brave-boss-gate__slot-main'>"
+            + "<span class='brave-boss-gate__slot-kicker'>" + escapeHtml(slot.caller ? "Caller" : "Ready") + "</span>"
+            + "<span class='brave-boss-gate__slot-name'>" + escapeHtml(slot.name || "Someone") + "</span>"
+            + "<span class='brave-boss-gate__slot-meta'>"
+            + "<span>" + escapeHtml(slot.race_name || "Unknown") + "</span>"
+            + "<span>" + escapeHtml(slot.class_name || "Unknown") + "</span>"
+            + "</span>"
+            + "</div>"
+            + (slot.can_remove
+                ? "<button type='button' class='brave-boss-gate__remove brave-click' data-brave-command='" + escapeHtml(slot.remove_command || "") + "' title='Remove'>"
+                    + icon("close", "brave-boss-gate__remove-icon")
+                    + "<span>Remove</span>"
+                    + "</button>"
+                : "")
+            + "</div>"
+        );
+    };
+
+    var renderBossGateRunChoice = function (payload) {
+        var runs = Array.isArray(payload.runs) ? payload.runs : [];
+        return (
+            "<div class='brave-boss-gate__choices'>"
+            + runs.map(function (run) {
+                var action = {
+                    label: run.caller || "Waiting Run",
+                    command: run.command || "",
+                    icon: "groups",
+                    tone: run.disabled ? "muted" : "accent",
+                    disabled: !!run.disabled,
+                };
+                return (
+                    "<button type='button' class='brave-boss-gate__choice brave-click" + (run.disabled ? " brave-boss-gate__choice--disabled" : "") + "'"
+                    + bossGateActionAttrs(action)
+                    + ">"
+                    + "<span class='brave-boss-gate__choice-icon'>" + icon("groups") + "</span>"
+                    + "<span class='brave-boss-gate__choice-body'>"
+                    + "<span class='brave-boss-gate__choice-title'>" + escapeHtml(run.caller || "Waiting Run") + "</span>"
+                    + "<span class='brave-boss-gate__choice-meta'>" + escapeHtml(run.meta || ((run.filled || 0) + "/" + (run.max_slots || 4) + " slots")) + "</span>"
+                    + "</span>"
+                    + "</button>"
+                );
+            }).join("")
+            + (!runs.length ? "<div class='brave-boss-gate__empty-state'>No waiting runs right now.</div>" : "")
+            + "</div>"
+        );
+    };
+
+    var openBossGateOverlay = function (payload) {
+        var host = document.getElementById("brave-picker-sheet");
+        if (!host) {
+            return false;
+        }
+        payload = payload || {};
+        currentPickerData = null;
+        currentBossGateData = payload;
+        currentPickerSourceId = "";
+        currentPickerAnchorRect = null;
+        var actions = Array.isArray(payload.actions) ? payload.actions : [];
+        var isRun = payload.kind === "run";
+        var isChoice = payload.kind === "choice";
+        var isClosed = payload.kind === "closed" || payload.kind === "removed";
+        var headerSummary = isClosed ? (payload.summary || "") : (payload.summary || payload.message || "");
+        var closeCommand = isRun && payload.is_initiator && payload.run_id ? "bossgate cancel " + String(payload.run_id) : "";
+        var closeAttrs = closeCommand ? " data-brave-command='" + escapeHtml(closeCommand) + "'" : " data-brave-picker-close='1'";
+        host.innerHTML =
+            "<div class='brave-boss-gate__backdrop'></div>"
+            + "<section class='brave-boss-gate' role='dialog' aria-modal='true' aria-label='" + escapeHtml(payload.title || "Boss Run") + "'>"
+            + "<header class='brave-boss-gate__head'>"
+            + "<div class='brave-boss-gate__titlebar'>"
+            + "<span class='brave-boss-gate__title-icon'>" + icon("skull") + "</span>"
+            + "<div class='brave-boss-gate__titlewrap'>"
+            + "<h2 class='brave-boss-gate__title'>" + escapeHtml(payload.title || "Boss Run") + "</h2>"
+            + (headerSummary ? "<p class='brave-boss-gate__summary'>" + escapeHtml(headerSummary) + "</p>" : "")
+            + "</div>"
+            + (isRun ? "<div class='brave-boss-gate__status'>" + escapeHtml((payload.filled || 0) + "/" + (payload.max_slots || 4) + " slots") + "</div>" : "")
+            + "<button type='button' class='brave-boss-gate__close brave-click'" + closeAttrs + ">"
+            + icon("close", "brave-boss-gate__close-icon")
+            + "<span>Close</span>"
+            + "</button>"
+            + "</div>"
+            + "</header>"
+            + (isRun ? "<div class='brave-boss-gate__slots'>" + (Array.isArray(payload.slots) ? payload.slots : []).map(renderBossGateSlot).join("") + "</div>" : "")
+            + (isChoice ? renderBossGateRunChoice(payload) : "")
+            + (isClosed ? "<div class='brave-boss-gate__empty-state'>" + escapeHtml(payload.message || "This run is no longer waiting.") + "</div>" : "")
+            + (actions.length ? "<footer class='brave-boss-gate__actions'>" + actions.map(function (action) { return renderBossGateActionButton(action); }).join("") + "</footer>" : "")
+            + "</section>";
+        host.setAttribute("aria-hidden", "false");
+        document.body.classList.add("brave-picker-active");
+        return true;
+    };
+
     var preserveCombatPickerOnViewRefresh = function (viewData) {
         return !!(
             currentPickerData
@@ -4174,6 +4307,9 @@ let defaultout_plugin = (function () {
         if (preserveCombatPickerOnViewRefresh(viewData)) {
             return true;
         }
+        if (currentBossGateData && isRoomLikeView(viewData)) {
+            return true;
+        }
         return !!(
             currentPickerData
             && isRoomLikeView(viewData)
@@ -4191,7 +4327,7 @@ let defaultout_plugin = (function () {
     var getRoomRefreshPopupPreservationOptions = function () {
         var roomRefreshActive = isRoomRefreshContextActive();
         return {
-            preservePicker: !!(roomRefreshActive && currentPickerData),
+            preservePicker: !!(roomRefreshActive && (currentPickerData || currentBossGateData)),
             preserveMobileSheet: !!(roomRefreshActive && currentMobileUtilityTab),
             preserveScroll: !!roomRefreshActive,
         };
@@ -6602,6 +6738,25 @@ let defaultout_plugin = (function () {
         return "";
     };
 
+    var getTitleUiSoundForCommand = function (command) {
+        var normalized = String(command || "").trim().toLowerCase();
+        if (!normalized) {
+            return "";
+        }
+        if (normalized.indexOf("connect ") === 0) {
+            return "";
+        }
+        if (
+            normalized === "back"
+            || normalized === "logout"
+            || normalized.indexOf("delete ") === 0
+            || normalized.indexOf("create discard") === 0
+        ) {
+            return "back";
+        }
+        return "select";
+    };
+
     var isTitleExperienceView = function (viewData) {
         if (!viewData || typeof viewData !== "object") {
             return false;
@@ -6626,11 +6781,45 @@ let defaultout_plugin = (function () {
         return { scene: "account", world_tone: "neutral" };
     };
 
+    var getTitleUiCueId = function (kind) {
+        var normalized = String(kind || "select").toLowerCase();
+        if (normalized === "back" || normalized === "close") {
+            return "sfx.ui.back";
+        }
+        if (normalized === "menu" || normalized === "open") {
+            return "sfx.ui.menu_open";
+        }
+        if (normalized === "error") {
+            return "sfx.ui.error";
+        }
+        return "sfx.ui.confirm";
+    };
+
+    var playTitleUiSound = function (kind) {
+        var braveAudio = getBraveAudio();
+        if (!braveAudio) {
+            return false;
+        }
+        if (typeof braveAudio.setReactiveState === "function") {
+            braveAudio.setReactiveState(getTitleReactiveState());
+        }
+        if (typeof braveAudio.play === "function") {
+            if (braveAudio.play(getTitleUiCueId(kind), { force: true })) {
+                return true;
+            }
+        }
+        if (typeof braveAudio.handleUiAction === "function") {
+            braveAudio.handleUiAction(kind || "select");
+            return true;
+        }
+        return false;
+    };
+
     var playUiSound = function (kind) {
         var braveAudio = getBraveAudio();
         if (braveAudio && typeof braveAudio.handleUiAction === "function") {
-            if (isTitleExperienceView(currentViewData) && typeof braveAudio.setReactiveState === "function") {
-                braveAudio.setReactiveState(getTitleReactiveState());
+            if (isTitleExperienceView(currentViewData) && playTitleUiSound(kind || "select")) {
+                return;
             }
             braveAudio.handleUiAction(kind || "click");
         }
@@ -9684,7 +9873,9 @@ let defaultout_plugin = (function () {
         if (normalizedCommand.indexOf("play ") === 0 || normalizedCommand === "finish play") {
             startGameIntroVeil();
         }
-        clearPickerSheet();
+        if (normalizedCommand.indexOf("bossgate ") !== 0 && normalizedCommand !== "bossgate") {
+            clearPickerSheet();
+        }
         clearBrowserNotice();
         if (isMobileViewport()) {
             if (currentMobileUtilityTab) {
@@ -9710,8 +9901,11 @@ let defaultout_plugin = (function () {
             allowNextRoomRefreshNavigationUntil = Date.now() + 1500;
         }
         var uiSound = getUiSoundForCommand(normalizedCommand);
+        if (!uiSound && isTitleExperienceView(currentViewData)) {
+            uiSound = getTitleUiSoundForCommand(normalizedCommand);
+        }
         if (uiSound && braveAudio && typeof braveAudio.handleUiAction === "function") {
-            braveAudio.handleUiAction(uiSound);
+            playUiSound(uiSound);
         }
         plugin_handler.onSend(command);
     };
@@ -12044,6 +12238,11 @@ let defaultout_plugin = (function () {
 
         if (cmdname === "brave_picker") {
             openPickerSheet(getOobPayload(args, kwargs, "brave_picker", {}) || {});
+            return true;
+        }
+
+        if (cmdname === "brave_boss_gate") {
+            openBossGateOverlay(getOobPayload(args, kwargs, "brave_boss_gate", {}) || {});
             return true;
         }
 

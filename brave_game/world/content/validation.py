@@ -434,3 +434,21 @@ def _validate_systems_content(registry, errors):
             errors.append(f"Trophy {trophy_key} is missing a name")
         if not trophy.get("placeholder"):
             errors.append(f"Trophy {trophy_key} is missing a placeholder")
+
+    encounter_rooms = registry.encounters.room_encounters
+    enemy_templates = registry.encounters.enemy_templates
+    for gate_key, gate in systems.boss_gates.items():
+        trigger_room = gate.get("trigger_room_id")
+        if trigger_room not in room_ids:
+            errors.append(f"Boss gate {gate_key} references unknown trigger room: {trigger_room}")
+        for field in ("entry_room_id", "success_room_id", "failure_room_id"):
+            room_id = gate.get(field)
+            if room_id and room_id not in room_ids:
+                errors.append(f"Boss gate {gate_key} references unknown {field}: {room_id}")
+        encounter_key = gate.get("encounter_key")
+        if trigger_room in encounter_rooms and encounter_key:
+            if not any(encounter.get("key") == encounter_key for encounter in encounter_rooms.get(trigger_room, [])):
+                errors.append(f"Boss gate {gate_key} references unknown encounter: {encounter_key}")
+        boss_enemy_key = gate.get("boss_enemy_key")
+        if boss_enemy_key and boss_enemy_key not in enemy_templates:
+            errors.append(f"Boss gate {gate_key} references unknown boss enemy: {boss_enemy_key}")
