@@ -2456,7 +2456,7 @@ class BraveEncounter(Script):
     def _crit_chance_for_actor(self, actor):
         """Return clamped crit chance for an actor that is allowed to crit."""
 
-        if isinstance(actor, dict) and actor.get("template_key"):
+        if isinstance(actor, Mapping) and actor.get("template_key"):
             if "crit_chance" not in actor:
                 return 0
             chance = actor.get("crit_chance", 0)

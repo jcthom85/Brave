@@ -23,6 +23,33 @@ ROAMING_TICK_INTERVAL = 10
 ROAMING_REGIONS = {party.get("region") for party in ROAMING_CONTENT.get_roaming_parties() if party.get("region")}
 
 
+def _enemy_template_is_stationary(template_key):
+    template = ROAMING_CONTENT.enemy_templates.get(str(template_key or "")) or {}
+    return bool(template.get("stationary") or template.get("immobile"))
+
+
+def _party_is_stationary(party):
+    if not party:
+        return False
+    if party.get("stationary") or party.get("immobile"):
+        return True
+    encounter = dict(party.get("encounter") or {})
+    return any(_enemy_template_is_stationary(template_key) for template_key in encounter.get("enemies") or [])
+
+
+def _room_has_static_stationary_boss(room):
+    room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+    if not room_id:
+        return False
+    for encounter_data in ROAMING_CONTENT.room_encounters.get(room_id, []):
+        for template_key in encounter_data.get("enemies", []):
+            template = ROAMING_CONTENT.enemy_templates.get(template_key) or {}
+            tags = set(template.get("tags", []) or [])
+            if "boss" in tags and _enemy_template_is_stationary(template_key):
+                return True
+    return False
+
+
 def _is_connected_character(obj):
     return bool(
         obj
@@ -58,6 +85,11 @@ def _party_definition_to_state(party_definition):
         "region": str(party_definition.get("region") or "").strip(),
         "start_room_id": start_room_id,
         "room_id": start_room_id,
+        "stationary": bool(
+            party_definition.get("stationary")
+            or party_definition.get("immobile")
+            or _party_is_stationary({"encounter": encounter})
+        ),
         "avoid_safe": bool(party_definition.get("avoid_safe", True)),
         "interval": interval,
         "respawn_delay": respawn_delay,
@@ -275,7 +307,7 @@ class BraveRoamingPartyManager(DefaultScript):
     def _normalize_state(self, state, party_definition):
         changed = False
         defaults = _party_definition_to_state(party_definition)
-        sync_keys = {"region", "start_room_id", "avoid_safe", "interval", "respawn_delay", "encounter"}
+        sync_keys = {"region", "start_room_id", "stationary", "avoid_safe", "interval", "respawn_delay", "encounter"}
         for key, value in defaults.items():
             if key not in state:
                 state[key] = value
@@ -333,6 +365,8 @@ class BraveRoamingPartyManager(DefaultScript):
             return True
         if getattr(room.db, "brave_safe", False):
             return True
+        if _room_has_static_stationary_boss(room):
+            return True
         from typeclasses.scripts import BraveEncounter
 
         return bool(BraveEncounter.get_for_room(room))
@@ -384,6 +418,14 @@ class BraveRoamingPartyManager(DefaultScript):
                 party["next_move_at"] = now + random.randint(8, max(12, party["interval"]))
                 party["respawn_at"] = 0.0
                 changed_rooms.add(party.get("room_id"))
+                continue
+
+            if _party_is_stationary(party):
+                if not party.get("room_id"):
+                    party["room_id"] = party.get("start_room_id")
+                    party["last_room_id"] = party.get("room_id")
+                    changed_rooms.add(party.get("room_id"))
+                party["next_move_at"] = now + max(60, int(party.get("interval", 30) or 30))
                 continue
 
             next_move_at = float(party.get("next_move_at", 0) or 0)

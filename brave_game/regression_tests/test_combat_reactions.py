@@ -1,6 +1,7 @@
 import os
 import random
 import unittest
+from collections import UserDict
 from types import SimpleNamespace
 
 import django
@@ -35,6 +36,14 @@ class CombatReactionTests(unittest.TestCase):
         self._bind_telegraph_helpers(encounter)
         encounter._get_participant_target = lambda target_id: BraveEncounter._get_participant_target(encounter, target_id)
         encounter._announce_combat_action = lambda enemy, label: BraveEncounter._announce_combat_action(encounter, enemy, label)
+
+    def test_enemy_mapping_without_crit_chance_does_not_touch_character_stats(self):
+        enemy = UserDict({"id": "e1", "key": "Road Wolf", "template_key": "road_wolf"})
+        encounter = SimpleNamespace(
+            _get_effective_derived=lambda actor: (_ for _ in ()).throw(AssertionError("enemy crit should not read character stats")),
+        )
+
+        self.assertEqual(0, BraveEncounter._crit_chance_for_actor(encounter, enemy))
 
     def test_interrupt_tool_cancels_winding_enemy_action(self):
         messages = []

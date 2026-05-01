@@ -1074,6 +1074,7 @@
       "max_hp": 190,
       "gender": "male",
       "name": "Ruk the Fence-Cutter",
+      "stationary": true,
       "silver": [
         10,
         14
