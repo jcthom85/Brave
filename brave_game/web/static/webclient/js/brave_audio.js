@@ -117,7 +117,7 @@
     }
 
     function canAttemptImmediatePlayback() {
-        return contextUnlocked || mobilePlaybackArmed || isProbablyMobile() || isContextRunning();
+        return contextUnlocked || mobilePlaybackArmed || isContextRunning();
     }
 
     function loadSettings() {
@@ -731,6 +731,9 @@
         }
         var ctx = getAudioContext();
         if (!ctx) {
+            return Promise.resolve(null);
+        }
+        if (isProbablyMobile() && ctx.state === "suspended" && !contextUnlocked) {
             return Promise.resolve(null);
         }
         var busName = cue.bus || options.bus || "sfx";

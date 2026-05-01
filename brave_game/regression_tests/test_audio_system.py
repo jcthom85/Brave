@@ -126,7 +126,7 @@ class AudioSystemFilesTests(unittest.TestCase):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
         default_in_source = DEFAULT_IN_PATH.read_text(encoding="utf-8")
 
-        self.assertIn('brave_static_v="20260430ai"', base_template_source)
+        self.assertIn('brave_static_v="20260501a"', base_template_source)
         self.assertIn("BRAVE_AUDIO_MANIFEST_URL", base_template_source)
         self.assertIn("webclient/js/brave_audio.js", base_template_source)
         self.assertLess(
@@ -161,6 +161,8 @@ class AudioSystemFilesTests(unittest.TestCase):
         self.assertIn("isTitleExperienceScene(currentReactiveState", audio_source)
         self.assertIn("var unlockPromise = null;", audio_source)
         self.assertIn("if (!canAttemptImmediatePlayback())", audio_source)
+        self.assertIn("return contextUnlocked || mobilePlaybackArmed || isContextRunning();", audio_source)
+        self.assertIn('ctx.state === "suspended" && !contextUnlocked', audio_source)
         self.assertIn("refreshLayerTargets();\n        playFirstCue(cueIds);", audio_source)
         self.assertIn("refreshLayerTargets();\n                    playFirstCue(cueIds, { force: true });", audio_source)
         self.assertIn("function startTitleMusic()", audio_source)
@@ -176,6 +178,8 @@ class AudioSystemFilesTests(unittest.TestCase):
         self.assertIn("startTitleMusic: startTitleMusic", audio_source)
         self.assertIn("var isTitleExperienceView = function (viewData) {", default_out_source)
         self.assertIn("var startLoginAudio = function (options) {", default_out_source)
+        self.assertIn("var playTitleMenuSound = function ()", default_out_source)
+        self.assertIn("startLoginAudio({ musicFirst: true });", default_out_source)
         self.assertIn("var startLoginAudioFromSubmitControl = function (target) {", default_out_source)
         self.assertIn("startLoginAudioFromSubmitControl(event.target);", default_out_source)
         self.assertIn("lastLoginAudioStartedAt", default_out_source)

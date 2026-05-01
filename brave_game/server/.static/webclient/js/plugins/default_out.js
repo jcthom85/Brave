@@ -6636,6 +6636,14 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var playTitleMenuSound = function () {
+        if (isTitleExperienceView(currentViewData) && isMobileAudioStart()) {
+            startLoginAudio({ musicFirst: true });
+            return;
+        }
+        playUiSound("menu");
+    };
+
     var isLoginSubmitCommand = function (command) {
         return String(command || "").trim().toLowerCase().indexOf("connect ") === 0;
     };
@@ -11222,7 +11230,7 @@ let defaultout_plugin = (function () {
             event.preventDefault();
             event.stopPropagation();
             if (target.hasAttribute("data-brave-connection-screen")) {
-                playUiSound("menu");
+                playTitleMenuSound();
                 openConnectionScreen(target.getAttribute("data-brave-connection-screen"));
                 return;
             }
@@ -11456,7 +11464,7 @@ let defaultout_plugin = (function () {
             event.stopPropagation();
             suppressBrowserClickUntil = Date.now() + 320;
             if (directTarget.hasAttribute("data-brave-connection-screen")) {
-                playUiSound("menu");
+                playTitleMenuSound();
                 openConnectionScreen(directTarget.getAttribute("data-brave-connection-screen"));
                 return;
             }
@@ -11589,7 +11597,7 @@ let defaultout_plugin = (function () {
                 event.stopPropagation();
                 suppressBrowserClickUntil = Date.now() + 320;
                 if (directTarget.hasAttribute("data-brave-connection-screen")) {
-                    playUiSound("menu");
+                    playTitleMenuSound();
                     openConnectionScreen(directTarget.getAttribute("data-brave-connection-screen"));
                     return;
                 }
