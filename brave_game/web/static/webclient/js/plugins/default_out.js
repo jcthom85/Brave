@@ -39,6 +39,7 @@ let defaultout_plugin = (function () {
     };
     var suppressNextLookText = false;
     var browserInteractionHandlersBound = false;
+    var lastLoginAudioStartedAt = 0;
     var connectionBoilerplateObserver = null;
     var roomActivityObserver = null;
     var combatLogObserver = null;
@@ -6587,10 +6588,103 @@ let defaultout_plugin = (function () {
         return "";
     };
 
+    var isTitleExperienceView = function (viewData) {
+        if (!viewData || typeof viewData !== "object") {
+            return false;
+        }
+        if (
+            viewData.variant === "connection"
+            || viewData.variant === "account"
+            || viewData.variant === "chargen"
+            || viewData.variant === "character-select"
+            || viewData.variant === "charselect"
+        ) {
+            return true;
+        }
+        var reactiveScene = viewData.reactive && viewData.reactive.scene ? viewData.reactive.scene : "";
+        return reactiveScene === "account" || reactiveScene === "chargen" || reactiveScene === "connection";
+    };
+
+    var getTitleReactiveState = function () {
+        if (currentViewData && currentViewData.reactive) {
+            return currentViewData.reactive;
+        }
+        return { scene: "account", world_tone: "neutral" };
+    };
+
     var playUiSound = function (kind) {
         var braveAudio = getBraveAudio();
         if (braveAudio && typeof braveAudio.handleUiAction === "function") {
+            if (isTitleExperienceView(currentViewData) && typeof braveAudio.setReactiveState === "function") {
+                braveAudio.setReactiveState(getTitleReactiveState());
+            }
             braveAudio.handleUiAction(kind || "click");
+        }
+    };
+
+    var isLoginSubmitCommand = function (command) {
+        return String(command || "").trim().toLowerCase().indexOf("connect ") === 0;
+    };
+
+    var isLoginSubmitForm = function (form) {
+        if (!form || !isTitleExperienceView(currentViewData)) {
+            return false;
+        }
+        var submitTemplate = form.getAttribute("data-brave-submit-template") || "";
+        var submitCommand = form.getAttribute("data-brave-submit-command") || "";
+        return isLoginSubmitCommand(submitTemplate) || isLoginSubmitCommand(submitCommand);
+    };
+
+    var isMobileAudioStart = function () {
+        return typeof window !== "undefined"
+            && window.matchMedia
+            && window.matchMedia("(hover: none), (pointer: coarse), (max-width: 820px)").matches;
+    };
+
+    var startLoginAudio = function (options) {
+        options = options || {};
+        var braveAudio = getBraveAudio();
+        if (!braveAudio) {
+            return;
+        }
+        var now = Date.now();
+        if (now - lastLoginAudioStartedAt < 360) {
+            return;
+        }
+        lastLoginAudioStartedAt = now;
+        if (typeof braveAudio.startTitleMusic === "function") {
+            braveAudio.startTitleMusic();
+        } else if (typeof braveAudio.setReactiveState === "function") {
+            braveAudio.setReactiveState({ scene: "account", world_tone: "neutral" });
+        }
+        if (!options.musicFirst || !isMobileAudioStart()) {
+            if (typeof braveAudio.handleUiAction === "function") {
+                braveAudio.handleUiAction("select");
+            }
+            return;
+        }
+        if (typeof braveAudio.handleUiAction === "function") {
+            window.setTimeout(function () {
+                braveAudio.handleUiAction("select");
+            }, 180);
+        }
+    };
+
+    var startLoginSubmitAudio = function (options) {
+        options = options || {};
+        startLoginAudio({
+            musicFirst: !!options.musicFirst,
+        });
+    };
+
+    var startLoginAudioFromSubmitControl = function (target) {
+        var submitTarget = target && target.closest ? target.closest(".brave-view__form-submit") : null;
+        if (!submitTarget) {
+            return;
+        }
+        var form = submitTarget.closest("form[data-brave-form='1']");
+        if (isLoginSubmitForm(form)) {
+            startLoginSubmitAudio({ musicFirst: true });
         }
     };
 
@@ -10895,6 +10989,9 @@ let defaultout_plugin = (function () {
             }
             return false;
         }
+        if (isLoginSubmitCommand(command) && isTitleExperienceView(currentViewData)) {
+            startLoginSubmitAudio({ musicFirst: isMobileAudioStart() });
+        }
         sendBrowserCommand(command);
         return true;
     };
@@ -10919,6 +11016,7 @@ let defaultout_plugin = (function () {
             if (!isMobileViewport()) {
                 return;
             }
+            startLoginAudioFromSubmitControl(event.target);
             var navTarget = event.target.closest(
                 "#mobile-nav-dock .brave-view__navcard, "
                 + "#mobile-nav-dock .brave-view__nav-centercard, "
@@ -11365,6 +11463,7 @@ let defaultout_plugin = (function () {
 
         if (!window.PointerEvent) {
             document.addEventListener("touchstart", function (event) {
+                startLoginAudioFromSubmitControl(event.target);
                 var surface = event.target.closest("[data-brave-swipe-surface]");
                 var mobileNavToggleSurface = event.target.closest("[data-brave-mobile-nav-toggle]");
                 if (!event.touches || event.touches.length !== 1) {

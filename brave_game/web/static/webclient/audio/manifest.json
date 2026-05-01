@@ -700,7 +700,7 @@
       "fade_in_sec": 1.2,
       "fade_out_sec": 1.0,
       "files": [
-        "ambience/regions/brambleford/lantern_rest_inn_loop.mp3"
+        "ambience/regions/brambleford/inn_common_room_loop.mp3"
       ]
     },
     "ambience.brambleford.chapel": {

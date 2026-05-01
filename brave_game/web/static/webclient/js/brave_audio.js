@@ -11,6 +11,17 @@
         music: 0.45,
         sfx: 0.8
     };
+    var TITLE_MUSIC_CUE_ID = "music.title";
+    var TITLE_MUSIC_FALLBACK_CUE = {
+        bus: "music",
+        loop: true,
+        gain: 0.58,
+        fade_in_sec: 1.6,
+        fade_out_sec: 1.1,
+        files: [
+            "music/elevenlabs_tests/title_test.mp3"
+        ]
+    };
     var FALLBACK_MANIFEST = {
         version: 1,
         buses: {
@@ -71,6 +82,7 @@
     var contextUnlocked = false;
     var mobilePlaybackArmed = false;
     var initialized = false;
+    var mobileTitleStartPendingCue = "";
     var lastPlayback = {
         cue: "",
         mode: "",
@@ -91,7 +103,13 @@
 
     function isProbablyMobile() {
         var userAgent = String((window.navigator && window.navigator.userAgent) || "").toLowerCase();
-        return /android|iphone|ipad|ipod|mobile/.test(userAgent);
+        if (/android|iphone|ipad|ipod|mobile/.test(userAgent)) {
+            return true;
+        }
+        return !!(
+            window.matchMedia
+            && window.matchMedia("(hover: none), (pointer: coarse), (max-width: 820px)").matches
+        );
     }
 
     function isContextRunning() {
@@ -837,14 +855,59 @@
         });
     }
 
+    function startMobileTitleLayer(cueId) {
+        cueId = cueId || TITLE_MUSIC_CUE_ID;
+        var cue = getCue(cueId) || (cueId === TITLE_MUSIC_CUE_ID ? TITLE_MUSIC_FALLBACK_CUE : null);
+        if (!cue || !cue.loop || !isProbablyMobile()) {
+            return Promise.resolve(null);
+        }
+        if (!manifestBaseUrl && window.BRAVE_AUDIO_MANIFEST_URL) {
+            manifestBaseUrl = getManifestBase(window.BRAVE_AUDIO_MANIFEST_URL);
+        }
+        var active = activeLayers.music;
+        if (active && active.cueId === cueId) {
+            return Promise.resolve(active);
+        }
+        stopLayer("music", 120);
+        layerTokens.music = (layerTokens.music || 0) + 1;
+        var token = layerTokens.music;
+        mobileTitleStartPendingCue = cueId;
+        return playMediaCue(cue, cueId, { bus: "music", force: true, layer: true }).then(function (playback) {
+            if (!playback) {
+                if (token === layerTokens.music && mobileTitleStartPendingCue === cueId) {
+                    mobileTitleStartPendingCue = "";
+                    refreshLayerTargets();
+                }
+                return null;
+            }
+            if (token !== layerTokens.music || desiredLayers.music !== cueId) {
+                if (mobileTitleStartPendingCue === cueId) {
+                    mobileTitleStartPendingCue = "";
+                }
+                playback.stop(60);
+                return null;
+            }
+            mobileTitleStartPendingCue = "";
+            activeLayers.music = playback;
+            dispatchStateChange();
+            return playback;
+        });
+    }
+
     function stopLayer(busName, fadeMs) {
         layerTokens[busName] = (layerTokens[busName] || 0) + 1;
         var active = activeLayers[busName];
         if (!active) {
+            if (busName === "music") {
+                mobileTitleStartPendingCue = "";
+            }
             return;
         }
         active.stop(fadeMs);
         activeLayers[busName] = null;
+        if (busName === "music") {
+            mobileTitleStartPendingCue = "";
+        }
     }
 
     function refreshLayerTargets() {
@@ -863,6 +926,9 @@
             var desiredCueId = desiredLayers[busName] || "";
             var active = activeLayers[busName];
             if (active && active.cueId === desiredCueId) {
+                return;
+            }
+            if (busName === "music" && mobileTitleStartPendingCue && mobileTitleStartPendingCue === desiredCueId) {
                 return;
             }
             stopLayer(busName, 700);
@@ -1078,6 +1144,53 @@
         dispatchStateChange();
     }
 
+    function startTitleMusic() {
+        var titleState = { scene: "account", world_tone: "neutral" };
+        var applyTitleState = function () {
+            var startedMobileTitle = false;
+            currentReactiveState = cloneJsonSafe(titleState);
+            desiredLayers.ambience = "";
+            desiredLayers.music = chooseAvailableCue([TITLE_MUSIC_CUE_ID]);
+            if (isProbablyMobile() && desiredLayers.music) {
+                mobilePlaybackArmed = true;
+                startedMobileTitle = true;
+                startMobileTitleLayer(desiredLayers.music);
+            }
+            if (startedMobileTitle) {
+                stopLayer("ambience", 300);
+            } else {
+                refreshLayerTargets();
+            }
+            dispatchStateChange();
+            return getState();
+        };
+        if (isProbablyMobile()) {
+            var mobileState = applyTitleState();
+            if (!initialized) {
+                init({ manifestUrl: window.BRAVE_AUDIO_MANIFEST_URL || "" });
+            }
+            return Promise.resolve(mobileState);
+        }
+        if (!initialized) {
+            var initialUnlockPromise = unlock();
+            return init({ manifestUrl: window.BRAVE_AUDIO_MANIFEST_URL || "" }).then(function () {
+                return initialUnlockPromise.then(applyTitleState);
+            });
+        }
+        if (!manifestLoaded && manifestLoadPromise) {
+            var unlockPromise = unlock();
+            return manifestLoadPromise.then(function () {
+                return unlockPromise.then(applyTitleState);
+            });
+        }
+        if (!canAttemptImmediatePlayback()) {
+            return unlock().then(function () {
+                return applyTitleState();
+            });
+        }
+        return Promise.resolve(applyTitleState());
+    }
+
     function clearReactiveState() {
         var preserveTitleMusic = isTitleExperienceScene(currentReactiveState && currentReactiveState.scene)
             && (desiredLayers.music === "music.title" || (activeLayers.music && activeLayers.music.cueId === "music.title"));
@@ -1230,16 +1343,29 @@
     }
 
     function handleUiAction(kind) {
+        var unlockPromise = null;
         if (!initialized) {
+            unlockPromise = unlock();
             init({ manifestUrl: window.BRAVE_AUDIO_MANIFEST_URL || "" }).then(function () {
                 handleUiAction(kind);
             });
+            if (unlockPromise && typeof unlockPromise.then === "function") {
+                unlockPromise.then(function () {
+                    refreshLayerTargets();
+                });
+            }
             return;
         }
         if (!manifestLoaded && manifestLoadPromise) {
+            unlockPromise = unlock();
             manifestLoadPromise.then(function () {
                 handleUiAction(kind);
             });
+            if (unlockPromise && typeof unlockPromise.then === "function") {
+                unlockPromise.then(function () {
+                    refreshLayerTargets();
+                });
+            }
             return;
         }
         var normalized = String(kind || "").toLowerCase();
@@ -1263,14 +1389,16 @@
         } else if (normalized === "back" || normalized === "close") {
             cueIds = ["sfx.ui.back", "sfx.ui.click"];
         }
-        if (!contextUnlocked) {
+        if (!canAttemptImmediatePlayback()) {
             unlock().then(function (didUnlock) {
-                if (didUnlock || contextUnlocked) {
+                if (didUnlock || canAttemptImmediatePlayback()) {
+                    refreshLayerTargets();
                     playFirstCue(cueIds, { force: true });
                 }
             });
             return;
         }
+        refreshLayerTargets();
         playFirstCue(cueIds);
     }
 
@@ -1440,6 +1568,7 @@
         unlock: unlock,
         getState: getState,
         setReactiveState: setReactiveState,
+        startTitleMusic: startTitleMusic,
         clearReactiveState: clearReactiveState,
         handleCombatFx: handleCombatFx,
         handleNotice: handleNotice,

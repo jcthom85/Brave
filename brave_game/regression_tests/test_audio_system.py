@@ -118,7 +118,7 @@ class AudioSystemFilesTests(unittest.TestCase):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
         default_in_source = DEFAULT_IN_PATH.read_text(encoding="utf-8")
 
-        self.assertIn('brave_static_v="20260430x"', base_template_source)
+        self.assertIn('brave_static_v="20260430ai"', base_template_source)
         self.assertIn("BRAVE_AUDIO_MANIFEST_URL", base_template_source)
         self.assertIn("webclient/js/brave_audio.js", base_template_source)
         self.assertLess(
@@ -151,6 +151,29 @@ class AudioSystemFilesTests(unittest.TestCase):
         self.assertIn("braveAudioCue.play(audioCueId", default_out_source)
         self.assertIn('transitionReactive.scene = "combat";', default_out_source)
         self.assertIn("isTitleExperienceScene(currentReactiveState", audio_source)
+        self.assertIn("var unlockPromise = null;", audio_source)
+        self.assertIn("if (!canAttemptImmediatePlayback())", audio_source)
+        self.assertIn("refreshLayerTargets();\n        playFirstCue(cueIds);", audio_source)
+        self.assertIn("refreshLayerTargets();\n                    playFirstCue(cueIds, { force: true });", audio_source)
+        self.assertIn("function startTitleMusic()", audio_source)
+        self.assertIn('window.matchMedia("(hover: none), (pointer: coarse), (max-width: 820px)").matches', audio_source)
+        self.assertIn('var TITLE_MUSIC_CUE_ID = "music.title";', audio_source)
+        self.assertIn("TITLE_MUSIC_FALLBACK_CUE", audio_source)
+        self.assertIn("music/elevenlabs_tests/title_test.mp3", audio_source)
+        self.assertIn("function startMobileTitleLayer(cueId)", audio_source)
+        self.assertIn('var mobileTitleStartPendingCue = "";', audio_source)
+        self.assertIn("mobileTitleStartPendingCue === desiredCueId", audio_source)
+        self.assertIn("var mobileState = applyTitleState();", audio_source)
+        self.assertIn("startMobileTitleLayer(desiredLayers.music);", audio_source)
+        self.assertIn("startTitleMusic: startTitleMusic", audio_source)
+        self.assertIn("var isTitleExperienceView = function (viewData) {", default_out_source)
+        self.assertIn("var startLoginAudio = function (options) {", default_out_source)
+        self.assertIn("var startLoginAudioFromSubmitControl = function (target) {", default_out_source)
+        self.assertIn("startLoginAudioFromSubmitControl(event.target);", default_out_source)
+        self.assertIn("lastLoginAudioStartedAt", default_out_source)
+        self.assertIn("startLoginSubmitAudio({ musicFirst: isMobileAudioStart() });", default_out_source)
+        self.assertIn("isLoginSubmitCommand(command) && isTitleExperienceView(currentViewData)", default_out_source)
+        self.assertNotIn("data-brave-title-audio-unlock", default_out_source)
 
     def test_browser_reactive_state_uses_authored_room_id_for_audio(self):
         import sys

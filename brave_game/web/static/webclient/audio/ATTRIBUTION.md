@@ -136,6 +136,10 @@ the project owner's ElevenLabs account. Keep the matching generation JSON under
   - Source: ElevenLabs Sound Effects API
   - Generation ID: `ambience.brambleford.sunny_birds`
   - License: ElevenLabs account output; verify active subscription terms before release.
+- `ambience/regions/brambleford/inn_common_room_loop.mp3`
+  - Source: ElevenLabs Sound Effects API
+  - Generation ID: `ambience.brambleford.inn_common_room`
+  - License: ElevenLabs account output; verify active subscription terms before release.
 - `sfx/story/lanternfall_alarm_bell.mp3`
   - Source: ElevenLabs Sound Effects API
   - Generation ID: `story.lanternfall.alarm_bell`
