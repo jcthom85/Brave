@@ -6415,6 +6415,20 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var isCharacterLoadHoldingView = function (viewData) {
+        if (braveGameLoaded || !viewData || typeof viewData !== "object") {
+            return false;
+        }
+        var veil = document.getElementById("brave-intro-veil");
+        if (!veil || !veil.classList.contains("brave-intro-veil--active")) {
+            return false;
+        }
+        return viewData.variant === "account"
+            || viewData.variant === "chargen"
+            || viewData.variant === "character-select"
+            || viewData.variant === "charselect";
+    };
+
     var renderConnectionView = function () {
         renderMainView(buildConnectionViewData());
         pruneLegacyConnectionBoilerplate();
@@ -8309,6 +8323,9 @@ let defaultout_plugin = (function () {
             clearCombatTransitionState();
             clearTextOutput();
             clearSceneCard();
+            return;
+        }
+        if (isCharacterLoadHoldingView(viewData)) {
             return;
         }
         if (

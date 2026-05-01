@@ -1061,7 +1061,7 @@
         }
         if (tone === "nexus" || tone === "portal" || tone === "junkyard") {
             return chooseAvailableCue([
-                tone === "junkyard" ? "ambience.junkyard.landing" : "ambience.nexus_gate",
+                tone === "junkyard" ? "ambience.junkyard.landing" : "ambience.portal",
                 "ambience.portal"
             ]);
         }

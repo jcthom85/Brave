@@ -595,6 +595,7 @@ class CombatViewTests(unittest.TestCase):
         captain = _entry(enemies_section, "Captain Varn Blackreed")
         self.assertEqual("boss", captain.get("size_class"))
         self.assertEqual("knight-helmet", captain.get("background_icon"))
+        self.assertTrue(view.get("reactive", {}).get("boss"))
 
     def test_elite_enemy_gets_elite_size_class(self):
         room = DummyRoom()

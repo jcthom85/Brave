@@ -33,6 +33,14 @@ class AudioSystemFilesTests(unittest.TestCase):
             "music.rest",
             "music.combat.standard",
             "music.combat.boss",
+            "music.region.goblin_road",
+            "music.region.old_barrow",
+            "music.region.whispering_woods",
+            "music.region.blackfen",
+            "music.region.drowned_weir",
+            "music.region.ruined_watchtower",
+            "music.region.goblin_warrens",
+            "music.region.junkyard_planet",
             "sfx.ui.click",
             "sfx.ui.journal_tab",
             "sfx.inventory.equip",
@@ -174,6 +182,7 @@ class AudioSystemFilesTests(unittest.TestCase):
         self.assertIn("startLoginSubmitAudio({ musicFirst: isMobileAudioStart() });", default_out_source)
         self.assertIn("isLoginSubmitCommand(command) && isTitleExperienceView(currentViewData)", default_out_source)
         self.assertNotIn("data-brave-title-audio-unlock", default_out_source)
+        self.assertIn('tone === "junkyard" ? "ambience.junkyard.landing" : "ambience.portal"', audio_source)
 
     def test_browser_reactive_state_uses_authored_room_id_for_audio(self):
         import sys

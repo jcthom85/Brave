@@ -355,6 +355,10 @@ def build_combat_view(encounter, character):
     enemies = encounter.get_active_enemies()
     participants = encounter.get_active_participants()
     encounter_title = (getattr(encounter.db, "encounter_title", "") or "").strip() or "Combat"
+    has_boss_enemy = any(
+        "boss" in set(enemy.get("tags", []) or []) or _combat_card_size_class(enemy, enemy=True) == "boss"
+        for enemy in enemies
+    )
 
     ordered_participants = sorted(
         participants,
@@ -578,7 +582,7 @@ def build_combat_view(encounter, character):
                 _section("Heroes", "groups", "entries", items=party_entries or [_entry("No active heroes.", icon="person_off")], variant="party", span="compact" if party_count >= 3 else None),
                 _section("Enemies", "warning", "entries", items=enemy_entries or [_entry("No enemies remain.", icon="task_alt")], variant="targets"),
             ],
-            reactive=_reactive_view(encounter.obj, scene="combat", danger="combat"),
+            reactive=_reactive_view(encounter.obj, scene="combat", danger="combat", boss=has_boss_enemy),
         ),
         "variant": "combat",
         "guidance": tutorial_guidance,

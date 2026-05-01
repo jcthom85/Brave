@@ -81,6 +81,19 @@ class QuestPopupTests(unittest.TestCase):
             default_out_source,
         )
 
+    def test_character_load_veil_holds_intermediate_account_views(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("var isCharacterLoadHoldingView = function (viewData)", default_out_source)
+        self.assertIn("viewData.variant === \"account\"", default_out_source)
+        self.assertIn("viewData.variant === \"character-select\"", default_out_source)
+        self.assertIn(
+            "if (isCharacterLoadHoldingView(viewData)) {\n"
+            "            return;\n"
+            "        }",
+            default_out_source,
+        )
+
     def test_quest_popup_overlay_accepts_clicks_for_dismissal(self):
         css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
 

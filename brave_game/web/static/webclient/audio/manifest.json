@@ -929,6 +929,76 @@
       "files": [
         "music/elevenlabs_tests/goblin_road_test.mp3"
       ]
+    },
+    "music.region.old_barrow": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.54,
+      "fade_in_sec": 1.4,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/theme_sketches/theme.old_barrow.mp3"
+      ]
+    },
+    "music.region.whispering_woods": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.54,
+      "fade_in_sec": 1.4,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/theme_sketches/theme.whispering_woods.mp3"
+      ]
+    },
+    "music.region.blackfen": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.54,
+      "fade_in_sec": 1.4,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/theme_sketches/theme.blackfen.mp3"
+      ]
+    },
+    "music.region.drowned_weir": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.54,
+      "fade_in_sec": 1.4,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/theme_sketches/theme.drowned_weir.mp3"
+      ]
+    },
+    "music.region.ruined_watchtower": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.54,
+      "fade_in_sec": 1.4,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/theme_sketches/theme.ruined_watchtower.mp3"
+      ]
+    },
+    "music.region.goblin_warrens": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.54,
+      "fade_in_sec": 1.4,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/theme_sketches/theme.goblin_warrens.mp3"
+      ]
+    },
+    "music.region.junkyard_planet": {
+      "bus": "music",
+      "loop": true,
+      "gain": 0.56,
+      "fade_in_sec": 1.4,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/theme_sketches/theme.junkyard_planet.mp3"
+      ]
     }
   }
 }
