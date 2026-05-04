@@ -51,6 +51,7 @@ let defaultout_plugin = (function () {
     var currentRoomFeedEntries = [];
     var currentRoomVoiceBubbles = [];
     var currentWelcomePages = [];
+    var lastTutorialContentHash = "";
     var currentWelcomePageIndex = 0;
     var currentRoomVoiceBubbleTimers = {};
     var currentRoomVoiceBubbleRemovalTimers = {};
@@ -83,6 +84,12 @@ let defaultout_plugin = (function () {
     var currentCombatActionTab = "abilities";
     var currentMobileSwipe = null;
     var introVeilFailsafeTimer = null;
+    var characterLoadVeilStartedAt = 0;
+    var pendingCharacterLoadRoomViewData = null;
+    var pendingCharacterLoadRoomViewOptions = null;
+    var pendingCharacterLoadRoomViewTimeout = null;
+    var CHARACTER_LOAD_MIN_VISIBLE_MS = 2200;
+    var pendingTutorialFireworks = false;
     var currentPickerData = null;
     var currentBossGateData = null;
     var currentPickerAnchorRect = null;
@@ -110,6 +117,10 @@ let defaultout_plugin = (function () {
     var pendingCombatTransitionCleanupTimeout = null;
     var pendingCombatTransitionMode = "";
     var pendingCombatResultReturnTransition = false;
+    var pendingVictoryTransitionTimeout = null;
+    var pendingVictoryTransitionCleanupTimeout = null;
+    var pendingVictoryTransitionViewData = null;
+    var victoryTransitionActive = false;
     var suppressMobileNonInputFocusUntil = 0;
     var suppressMobileRoomNavScrollUntil = 0;
     var pendingRegionTransitionViewData = null;
@@ -420,6 +431,15 @@ let defaultout_plugin = (function () {
             && viewData.variant === "combat-result"
             && isCombatUiActive()
             && hasCombatFxWork()
+        );
+    };
+
+    var isVictoryResultView = function (viewData) {
+        return !!(
+            viewData
+            && viewData.variant === "combat-result"
+            && viewData.reactive
+            && viewData.reactive.scene === "victory"
         );
     };
 
@@ -1275,7 +1295,7 @@ let defaultout_plugin = (function () {
             return false;
         }
         if (
-            document.body.classList.contains("brave-objectives-active")
+            document.body.classList.contains("brave-objectives-welcome-active")
             || document.body.classList.contains("brave-picker-active")
             || document.body.classList.contains("brave-activity-active")
             || document.body.classList.contains("brave-fishing-active")
@@ -3788,6 +3808,7 @@ let defaultout_plugin = (function () {
         var active = typeof force === "boolean" ? force : !body.classList.contains("brave-objectives-active");
         body.classList.toggle("brave-objectives-active", active);
         var sheet = document.getElementById("brave-objectives-sheet");
+        var shouldRenderGuidanceAfterWelcome = !active && currentWelcomePages.length > 0;
         if (sheet) {
             sheet.setAttribute("aria-hidden", String(!active));
             if (active) {
@@ -3810,6 +3831,16 @@ let defaultout_plugin = (function () {
             currentWelcomePages = [];
             if (currentViewData && Array.isArray(currentViewData.welcome_pages)) {
                 currentViewData.welcome_pages = [];
+            }
+            if (
+                shouldRenderGuidanceAfterWelcome
+                && currentViewData
+                && Array.isArray(currentViewData.guidance)
+                && currentViewData.guidance.length
+            ) {
+                window.setTimeout(function () {
+                    renderObjectives(currentViewData);
+                }, 0);
             }
         }
         if (active && body.classList.contains("brave-objectives-welcome-active")) {
@@ -3847,6 +3878,7 @@ let defaultout_plugin = (function () {
         document.body.classList.add("brave-objectives-welcome-active");
         var page = currentWelcomePages[currentWelcomePageIndex];
         var isLast = currentWelcomePageIndex === currentWelcomePages.length - 1;
+        var ctaLabel = isLast ? (page.cta_label || "Begin Adventure") : "Next";
 
         host.innerHTML =
             "<div class='brave-objectives-sheet__backdrop brave-objectives-sheet__backdrop--welcome' data-brave-objectives-toggle='1'></div>"
@@ -3865,10 +3897,63 @@ let defaultout_plugin = (function () {
             + (currentWelcomePageIndex > 0 ? "<button type='button' class='brave-objectives-sheet__nav-btn brave-click' data-brave-welcome-prev='1'>Back</button>" : "<div></div>")
             + "<button type='button' class='brave-objectives-sheet__nav-btn brave-objectives-sheet__nav-btn--primary brave-click' "
             + (isLast ? "data-brave-objectives-toggle='1'" : "data-brave-welcome-next='1'") + ">"
-            + (isLast ? "Begin Adventure" : "Next")
+            + escapeHtml(ctaLabel)
             + "</button>"
             + "</div>"
             + "</div>";
+    };
+
+    var triggerTutorialFireworks = function () {
+        if (
+            document.body
+            && (
+                document.body.classList.contains("brave-character-load-transition-active")
+                || document.body.classList.contains("brave-victory-transition-active")
+            )
+        ) {
+            pendingTutorialFireworks = true;
+            return;
+        }
+        var panel = document.querySelector("#brave-objectives-sheet .brave-objectives-sheet__panel");
+        if (!panel) {
+            return;
+        }
+        var rect = panel.getBoundingClientRect();
+        var corners = [
+            { x: rect.left, y: rect.top },
+            { x: rect.right, y: rect.top },
+            { x: rect.left, y: rect.bottom },
+            { x: rect.right, y: rect.bottom }
+        ];
+
+        var colors = ["#00f2ff", "#ffffff", "#76b6c8", "#9bd4df", "#ffeb3b"];
+
+        corners.forEach(function (corner) {
+            for (var i = 0; i < 8; i++) {
+                var particle = document.createElement("div");
+                particle.className = "brave-pixel-particle";
+                var color = colors[Math.floor(Math.random() * colors.length)];
+                var dx = (Math.random() - 0.5) * 200;
+                var dy = (Math.random() - 0.5) * 200;
+                var duration = 0.6 + Math.random() * 0.4;
+                var rotate = Math.random() * 360;
+
+                particle.style.left = corner.x + "px";
+                particle.style.top = corner.y + "px";
+                particle.style.setProperty("--p-color", color);
+                particle.style.setProperty("--p-x", dx + "px");
+                particle.style.setProperty("--p-y", dy + "px");
+                particle.style.setProperty("--p-duration", duration + "s");
+                particle.style.setProperty("--p-rotate", rotate + "deg");
+
+                document.body.appendChild(particle);
+                window.setTimeout(function (p) {
+                    if (p && p.parentNode) {
+                        p.parentNode.removeChild(p);
+                    }
+                }, duration * 1000, particle);
+            }
+        });
     };
 
     var renderObjectives = function (viewData) {
@@ -3894,6 +3979,7 @@ let defaultout_plugin = (function () {
 
         var objectives = viewData && viewData.guidance;
         if (!Array.isArray(objectives) || !objectives.length) {
+            lastTutorialContentHash = "";
             host.innerHTML = "";
             host.setAttribute("aria-hidden", "true");
             host.style.display = "none";
@@ -3918,6 +4004,24 @@ let defaultout_plugin = (function () {
             return !(Array.isArray(entry) && entry[1] === "check_circle");
         }).length;
 
+        var currentHash = JSON.stringify({
+            title: objectivesTitle,
+            eyebrow: objectivesEyebrow,
+            items: objectives
+        });
+        var hasChanged = currentHash !== lastTutorialContentHash;
+        lastTutorialContentHash = currentHash;
+
+        if (
+            !hasChanged
+            && host.classList.contains("brave-objectives-sheet--tutorial")
+            && !host.classList.contains("brave-objectives-sheet--welcome")
+        ) {
+            host.classList.toggle("brave-objectives-sheet--mobile-expanded", mobileObjectivesExpanded);
+            host.classList.toggle("brave-objectives-sheet--mobile-collapsed", isMobileViewport() && !mobileObjectivesExpanded);
+            return;
+        }
+
         host.classList.add("brave-objectives-sheet--tutorial");
         host.style.removeProperty("display");
         host.classList.toggle("brave-objectives-sheet--mobile-expanded", mobileObjectivesExpanded);
@@ -3925,7 +4029,7 @@ let defaultout_plugin = (function () {
         host.classList.remove("brave-objectives-sheet--welcome");
         document.body.classList.remove("brave-objectives-welcome-active");
         host.innerHTML =
-            "<div class='brave-objectives-sheet__backdrop' data-brave-objectives-toggle='1'></div>"
+            "<div class='brave-objectives-sheet__backdrop'></div>"
             + "<div class='brave-objectives-sheet__panel' role='region' aria-label='Current Objectives'>"
             + "<div class='brave-objectives-sheet__head'>"
             + "<button type='button' class='brave-objectives-sheet__summary brave-click' data-brave-objectives-expand='1' aria-expanded='" + (mobileObjectivesExpanded ? "true" : "false") + "'>"
@@ -3960,6 +4064,9 @@ let defaultout_plugin = (function () {
             + "</div>";
 
         toggleObjectives(true);
+        if (hasChanged) {
+            window.setTimeout(triggerTutorialFireworks, 100);
+        }
     };
 
     var renderPickerSheet = function () {
@@ -6530,25 +6637,140 @@ let defaultout_plugin = (function () {
 
     var finishGameIntroVeil = function () {
         var veil = document.getElementById("brave-intro-veil");
+        var isCharacterLoadVeil = !!(veil && veil.classList.contains("brave-intro-veil--character-load"));
+        if (
+            isCharacterLoadVeil
+            && veil.classList.contains("brave-intro-veil--active")
+            && characterLoadVeilStartedAt
+            && Date.now() - characterLoadVeilStartedAt < CHARACTER_LOAD_MIN_VISIBLE_MS
+        ) {
+            window.setTimeout(finishGameIntroVeil, CHARACTER_LOAD_MIN_VISIBLE_MS - (Date.now() - characterLoadVeilStartedAt));
+            return;
+        }
         if (introVeilFailsafeTimer) {
             window.clearTimeout(introVeilFailsafeTimer);
             introVeilFailsafeTimer = null;
         }
         if (veil) {
             veil.classList.remove("brave-intro-veil--active");
+            window.setTimeout(function () {
+                veil.classList.remove("brave-intro-veil--character-load");
+                if (isCharacterLoadVeil) {
+                    characterLoadVeilStartedAt = 0;
+                    document.body.classList.remove("brave-character-load-transition-active");
+                    if (pendingTutorialFireworks) {
+                        pendingTutorialFireworks = false;
+                        window.setTimeout(triggerTutorialFireworks, 80);
+                    }
+                }
+            }, 1500);
         }
+    };
+
+    var renderCharacterLoadHold = function () {
+        var mwin = $("#messagewindow");
+        var objectivesSheet = document.getElementById("brave-objectives-sheet");
+        if (!mwin.length) {
+            return;
+        }
+        teardownArcadeMode();
+        clearPickerSheet();
+        clearBrowserNotice();
+        clearSceneRail();
+        clearReactiveState();
+        clearMobileNavDock();
+        clearMobileUtilitySheet();
+        document.body.classList.add("brave-character-load-transition-active");
+        removePixelParticles();
+        pendingTutorialFireworks = false;
+        if (objectivesSheet) {
+            objectivesSheet.innerHTML = "";
+            objectivesSheet.setAttribute("aria-hidden", "true");
+            objectivesSheet.style.display = "none";
+            objectivesSheet.classList.remove(
+                "brave-objectives-sheet--tutorial",
+                "brave-objectives-sheet--welcome",
+                "brave-objectives-sheet--mobile-expanded",
+                "brave-objectives-sheet--mobile-collapsed"
+            );
+        }
+        document.body.classList.remove("brave-objectives-active");
+        document.body.classList.remove("brave-objectives-welcome-active");
+        currentWelcomePages = [];
+        currentWelcomePageIndex = 0;
+        mobileObjectivesExpanded = false;
+        currentViewData = {
+            variant: "character-loading",
+            reactive: { scene: "loading", world_tone: "neutral" },
+        };
+        currentRoomViewData = null;
+        setMainViewMode(true);
+        setStickyViewMode(false);
+        setBodyState("view", "character-loading");
+        setBodyState("scene", "loading");
+        mwin.html("<article class='brave-view brave-view--character-loading' aria-live='polite'></article>");
+        resetAllScrollPositions();
     };
 
     var startGameIntroVeil = function () {
         var veil = document.getElementById("brave-intro-veil");
         if (veil) {
+            renderCharacterLoadHold();
+            pendingCharacterLoadRoomViewData = null;
+            pendingCharacterLoadRoomViewOptions = null;
+            if (pendingCharacterLoadRoomViewTimeout) {
+                window.clearTimeout(pendingCharacterLoadRoomViewTimeout);
+                pendingCharacterLoadRoomViewTimeout = null;
+            }
+            veil.classList.add("brave-intro-veil--character-load");
+            void veil.offsetWidth;
+            characterLoadVeilStartedAt = Date.now();
             veil.classList.add("brave-intro-veil--active");
             braveGameLoaded = false;
             if (introVeilFailsafeTimer) {
                 window.clearTimeout(introVeilFailsafeTimer);
             }
-            introVeilFailsafeTimer = window.setTimeout(finishGameIntroVeil, 8000);
+            introVeilFailsafeTimer = window.setTimeout(function () {
+                if (!braveGameLoaded && currentViewData && currentViewData.variant === "character-loading") {
+                    return;
+                }
+                finishGameIntroVeil();
+            }, 8000);
         }
+    };
+
+    var shouldDelayCharacterLoadRoomReveal = function (viewData, options) {
+        var veil = document.getElementById("brave-intro-veil");
+        if (!isRoomLikeView(viewData) || (options && options.skipCharacterLoadQueue)) {
+            return false;
+        }
+        return !!(
+            veil
+            && veil.classList.contains("brave-intro-veil--character-load")
+            && veil.classList.contains("brave-intro-veil--active")
+            && characterLoadVeilStartedAt
+            && Date.now() - characterLoadVeilStartedAt < CHARACTER_LOAD_MIN_VISIBLE_MS
+        );
+    };
+
+    var queueCharacterLoadRoomReveal = function (viewData, options) {
+        var elapsed = characterLoadVeilStartedAt ? Date.now() - characterLoadVeilStartedAt : CHARACTER_LOAD_MIN_VISIBLE_MS;
+        var delayMs = Math.max(0, CHARACTER_LOAD_MIN_VISIBLE_MS - elapsed);
+        pendingCharacterLoadRoomViewData = viewData;
+        pendingCharacterLoadRoomViewOptions = Object.assign({}, options || {}, { skipCharacterLoadQueue: true });
+        if (pendingCharacterLoadRoomViewTimeout) {
+            window.clearTimeout(pendingCharacterLoadRoomViewTimeout);
+        }
+        pendingCharacterLoadRoomViewTimeout = window.setTimeout(function () {
+            var queuedViewData = pendingCharacterLoadRoomViewData;
+            var queuedOptions = pendingCharacterLoadRoomViewOptions;
+            pendingCharacterLoadRoomViewTimeout = null;
+            pendingCharacterLoadRoomViewData = null;
+            pendingCharacterLoadRoomViewOptions = null;
+            if (queuedViewData) {
+                renderMainView(queuedViewData, queuedOptions);
+            }
+        }, delayMs);
     };
 
     var isCharacterLoadHoldingView = function (viewData) {
@@ -6944,6 +7166,21 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var clearVictoryTransitionOverlay = function () {
+        var overlay = document.getElementById("brave-victory-transition");
+        if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+        }
+    };
+
+    var removePixelParticles = function () {
+        Array.prototype.forEach.call(document.querySelectorAll(".brave-pixel-particle"), function (particle) {
+            if (particle && particle.parentNode) {
+                particle.parentNode.removeChild(particle);
+            }
+        });
+    };
+
     var getRoomSceneMeta = function (viewData) {
         if (!isRoomLikeView(viewData)) {
             return null;
@@ -7154,6 +7391,95 @@ let defaultout_plugin = (function () {
                         + "</div>"
             );
         document.body.appendChild(overlay);
+    };
+
+    var showVictoryTransitionOverlay = function (viewData) {
+        if (!document.body) {
+            return;
+        }
+        clearVictoryTransitionOverlay();
+        var overlay = document.createElement("div");
+        overlay.id = "brave-victory-transition";
+        overlay.className = "brave-victory-transition";
+        var title = viewData && viewData.title ? String(viewData.title) : "VICTORY!";
+        overlay.innerHTML =
+            "<div class='brave-victory-transition__wash'></div>"
+            + "<div class='brave-victory-transition__glow'></div>"
+            + "<div class='brave-victory-transition__card'>"
+                + "<div class='brave-victory-transition__eyebrow'>"
+                    + icon("military_tech", "brave-victory-transition__eyebrow-icon")
+                    + "<span>Encounter Clear</span>"
+                + "</div>"
+                + "<div class='brave-victory-transition__title'>" + escapeHtml(title) + "</div>"
+            + "</div>";
+        document.body.appendChild(overlay);
+    };
+
+    var clearVictoryTransitionState = function () {
+        if (pendingVictoryTransitionTimeout) {
+            window.clearTimeout(pendingVictoryTransitionTimeout);
+            pendingVictoryTransitionTimeout = null;
+        }
+        if (pendingVictoryTransitionCleanupTimeout) {
+            window.clearTimeout(pendingVictoryTransitionCleanupTimeout);
+            pendingVictoryTransitionCleanupTimeout = null;
+        }
+        pendingVictoryTransitionViewData = null;
+        victoryTransitionActive = false;
+        if (document.body) {
+            document.body.classList.remove("brave-victory-transition-active");
+        }
+        clearVictoryTransitionOverlay();
+    };
+
+    var finishVictoryTransitionOverlay = function () {
+        var overlay = document.getElementById("brave-victory-transition");
+        if (overlay) {
+            overlay.classList.add("brave-victory-transition--out");
+        }
+        if (pendingVictoryTransitionCleanupTimeout) {
+            window.clearTimeout(pendingVictoryTransitionCleanupTimeout);
+        }
+        pendingVictoryTransitionCleanupTimeout = window.setTimeout(function () {
+            pendingVictoryTransitionCleanupTimeout = null;
+            victoryTransitionActive = false;
+            if (document.body) {
+                document.body.classList.remove("brave-victory-transition-active");
+            }
+            clearVictoryTransitionOverlay();
+            if (pendingTutorialFireworks) {
+                pendingTutorialFireworks = false;
+                window.setTimeout(triggerTutorialFireworks, 80);
+            }
+        }, 900);
+    };
+
+    var startVictoryTransition = function (viewData) {
+        if (!isVictoryResultView(viewData) || prefersReducedMotion()) {
+            return false;
+        }
+        clearVictoryTransitionState();
+        removePixelParticles();
+        pendingVictoryTransitionViewData = viewData;
+        victoryTransitionActive = true;
+        combatViewTransitionActive = false;
+        pendingCombatResultReturnTransition = true;
+        if (document.body) {
+            document.body.classList.add("brave-victory-transition-active");
+        }
+        showVictoryTransitionOverlay(viewData);
+        pendingVictoryTransitionTimeout = window.setTimeout(function () {
+            var queuedViewData = pendingVictoryTransitionViewData;
+            pendingVictoryTransitionTimeout = null;
+            pendingVictoryTransitionViewData = null;
+            if (!queuedViewData) {
+                clearVictoryTransitionState();
+                return;
+            }
+            renderMainView(queuedViewData, { skipVictoryTransition: true });
+            finishVictoryTransitionOverlay();
+        }, 780);
+        return true;
     };
 
     var clearCombatTransitionState = function () {
@@ -8525,6 +8851,10 @@ let defaultout_plugin = (function () {
         if (isCharacterLoadHoldingView(viewData)) {
             return;
         }
+        if (shouldDelayCharacterLoadRoomReveal(viewData, options)) {
+            queueCharacterLoadRoomReveal(viewData, options);
+            return;
+        }
         if (
             !options.skipRoomPreserve
             && !(pendingArcadeRoomRestore && isRoomLikeView(viewData))
@@ -8563,6 +8893,11 @@ let defaultout_plugin = (function () {
             deferCombatViewRender(viewData);
             scheduleCombatFxFlush(0);
             return;
+        }
+        if (!options.skipVictoryTransition && isVictoryResultView(viewData) && isCombatUiActive()) {
+            if (startVictoryTransition(viewData)) {
+                return;
+            }
         }
         if (viewData.variant !== "combat-result" && !isRoomLikeView(viewData)) {
             pendingCombatResultReturnTransition = false;
@@ -9870,7 +10205,15 @@ let defaultout_plugin = (function () {
             suppressMobileRoomNavScroll(900);
             resetAllScrollPositions();
         }
-        if (normalizedCommand.indexOf("play ") === 0 || normalizedCommand === "finish play") {
+        if (
+            normalizedCommand === "play"
+            || normalizedCommand.indexOf("play ") === 0
+            || normalizedCommand === "ic"
+            || normalizedCommand.indexOf("ic ") === 0
+            || normalizedCommand === "puppet"
+            || normalizedCommand.indexOf("puppet ") === 0
+            || normalizedCommand === "finish play"
+        ) {
             startGameIntroVeil();
         }
         if (normalizedCommand.indexOf("bossgate ") !== 0 && normalizedCommand !== "bossgate") {
@@ -12468,8 +12811,12 @@ let defaultout_plugin = (function () {
         clearSceneRail();
         renderDesktopToolbar();
         resetAllScrollPositions();
-        finishGameIntroVeil();
+        if (!isCharacterLoadHoldingView(currentViewData)) {
+            finishGameIntroVeil();
+        }
         if (currentViewData && currentViewData.variant === "connection") {
+            setBodyState("view", "account");
+            setBodyState("scene", "account");
             window.setTimeout(function () {
                 if (currentViewData && currentViewData.variant === "connection") {
                     sendBrowserCommand("look");

@@ -469,7 +469,7 @@ body[data-brave-world-tone="drownedweir"] {
     --brave-room-danger-icon: #9cd5dd;
 }
 
-body[data-brave-world-tone="nexus"] {
+body[data-brave-world-tone="lanternworks"] {
     --brave-accent: #7cb7d7;
     --brave-accent-deep: #476d8d;
     --brave-accent-rgb: 124, 183, 215;
@@ -482,21 +482,6 @@ body[data-brave-world-tone="nexus"] {
     --brave-world-surface-tint: rgba(var(--brave-accent-rgb), 0.085);
     --brave-world-surface-tint-soft: rgba(var(--brave-accent-rgb), 0.052);
     --brave-world-surface-tint-strong: rgba(var(--brave-accent-rgb), 0.13);
-}
-
-body[data-brave-world-tone="junkyard"] {
-    --brave-accent: #dd8f52;
-    --brave-accent-deep: #8d532a;
-    --brave-accent-rgb: 221, 143, 82;
-    --brave-accent-mid: #af6e37;
-    --brave-accent-dark: #7a4b26;
-    --brave-link: #f0b276;
-    --brave-prompt: #efc18f;
-    --brave-bg-warm-glow: rgba(178, 105, 46, 0.2);
-    --brave-bg-cool-glow: rgba(58, 118, 132, 0.18);
-    --brave-world-surface-tint: rgba(var(--brave-accent-rgb), 0.09);
-    --brave-world-surface-tint-soft: rgba(var(--brave-accent-rgb), 0.056);
-    --brave-world-surface-tint-strong: rgba(var(--brave-accent-rgb), 0.135);
 }
 
 body[data-brave-world-tone="portal"] {
@@ -557,6 +542,12 @@ body[data-brave-world-tone="portal"] {
 @font-face {
     font-family: "Brave Fira Mono";
     src: url("../fonts/FiraMono-Regular.ttf") format("truetype");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Brave Share Tech Mono";
+    src: url("../fonts/ShareTechMono-Regular.ttf") format("truetype");
     font-display: swap;
 }
 
@@ -762,9 +753,9 @@ body {
     width: 100%;
     height: 100%;
     min-height: 100%;
-    overflow: hidden;
+    overflow: hidden !important;
     overscroll-behavior: none;
-    scrollbar-width: none;
+    scrollbar-width: none !important;
     position: fixed;
     inset: 0;
     background:
@@ -779,7 +770,7 @@ body {
     margin: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden;
+    overflow: hidden !important;
     background:
         radial-gradient(circle at 18% 0, var(--brave-bg-warm-glow), transparent 30%),
         radial-gradient(circle at 82% 0, var(--brave-bg-cool-glow), transparent 26%),
@@ -890,8 +881,8 @@ body[data-brave-theme="atlas"]::after {
     inset: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    scrollbar-width: none;
+    overflow: hidden !important;
+    scrollbar-width: none !important;
 }
 
 html::-webkit-scrollbar,
@@ -942,6 +933,16 @@ body::-webkit-scrollbar,
 .split,
 .split-sub {
     background: transparent !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.split, .split-sub {
+    overflow-y: auto !important;
+}
+
+.lm_content {
+    overflow: hidden !important;
 }
 
 .split-sub {
@@ -13072,6 +13073,108 @@ body.brave-scene-combat-enter .inputwrap {
     z-index: 1180;
 }
 
+#brave-victory-transition {
+    position: fixed;
+    inset: 0;
+    z-index: 1210;
+    pointer-events: auto;
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity 900ms cubic-bezier(0.16, 0.84, 0.18, 1);
+}
+
+#brave-victory-transition.brave-victory-transition--out {
+    opacity: 0;
+}
+
+.brave-victory-transition__wash {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 42%, rgba(var(--brave-accent-rgb), 0.12), transparent 26%),
+        radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--brave-good) 14%, transparent), transparent 42%),
+        linear-gradient(180deg, var(--brave-bg-top), var(--brave-bg-bottom));
+    backdrop-filter: blur(12px) saturate(0.8);
+    animation: brave-victory-wash 1240ms cubic-bezier(0.16, 0.84, 0.18, 1) forwards;
+}
+
+.brave-victory-transition__glow {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(72vw, 780px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.12);
+    background:
+        radial-gradient(circle, rgba(var(--brave-accent-rgb), 0.16), color-mix(in srgb, var(--brave-good) 6%, transparent) 34%, transparent 62%);
+    box-shadow:
+        0 0 60px rgba(var(--brave-accent-rgb), 0.08),
+        inset 0 0 48px rgba(255, 255, 255, 0.03);
+    animation: brave-victory-glow 1240ms cubic-bezier(0.16, 0.84, 0.18, 1) forwards;
+}
+
+.brave-victory-transition__card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(520px, calc(100vw - 40px));
+    padding: 22px 24px 24px;
+    border: 1px solid var(--brave-border);
+    border-radius: var(--brave-radius-card);
+    background:
+        radial-gradient(circle at 50% 0, rgba(var(--brave-accent-rgb), 0.08), transparent 42%),
+        linear-gradient(180deg, var(--brave-surface-top), var(--brave-surface-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        var(--brave-shadow);
+    text-align: center;
+    animation: brave-victory-card 1240ms cubic-bezier(0.16, 0.84, 0.18, 1) forwards;
+}
+
+.brave-victory-transition__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--brave-text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: calc(0.66rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+}
+
+.brave-victory-transition__eyebrow-icon {
+    color: var(--brave-accent);
+}
+
+.brave-victory-transition__title {
+    margin-top: 12px;
+    color: var(--brave-text-bright);
+    font-size: calc(2rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-shadow:
+        0 0 22px rgba(var(--brave-accent-rgb), 0.16),
+        0 12px 30px rgba(0, 0, 0, 0.48);
+}
+
+body.brave-victory-transition-active .content,
+body.brave-victory-transition-active #messagewindow,
+body.brave-victory-transition-active .inputwrap {
+    filter: saturate(0.84) brightness(0.72);
+}
+
+body.brave-victory-transition-active #brave-objectives-sheet,
+body.brave-victory-transition-active .brave-pixel-particle {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
 #brave-region-transition {
     position: fixed;
     inset: 0;
@@ -13300,6 +13403,55 @@ body.brave-scene-combat-enter .inputwrap {
     12% { opacity: 1; }
     82% { opacity: 1; }
     100% { opacity: 1; }
+}
+
+@keyframes brave-victory-wash {
+    0% { opacity: 0; }
+    24% { opacity: 1; }
+    76% { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+@keyframes brave-victory-glow {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.72);
+    }
+    28% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    76% {
+        opacity: 0.72;
+        transform: translate(-50%, -50%) scale(1.06);
+    }
+    100% {
+        opacity: 0.54;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+@keyframes brave-victory-card {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.94);
+        filter: blur(8px);
+    }
+    28% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        filter: blur(0);
+    }
+    78% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        filter: blur(0);
+    }
 }
 
 @keyframes brave-combat-return-wash {
@@ -13575,6 +13727,8 @@ body.brave-combat-return-active .scene-card {
     .brave-view__arcade-utility,
     #brave-combat-transition,
     #brave-combat-transition *,
+    #brave-victory-transition,
+    #brave-victory-transition *,
     #brave-region-transition,
     #brave-region-transition *,
     .inputsend,
@@ -15562,7 +15716,8 @@ body[data-brave-motion="reduced"] .brave-combat-ghost {
     }
 
     .brave-view--combat .brave-view__section--targets .brave-view__entries {
-        grid-auto-columns: calc((100% - 15px) / 4);
+        grid-auto-columns: clamp(86px, 24vw, 104px);
+        grid-auto-rows: 142px;
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry-cluster {
@@ -15662,7 +15817,7 @@ body[data-brave-motion="reduced"] .brave-combat-ghost {
     }
 
     .brave-view--combat .brave-view__section--targets .brave-view__entry {
-        height: 136px;
+        height: 142px;
         border-color: rgba(170, 109, 96, 0.24);
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
@@ -15703,7 +15858,7 @@ body[data-brave-motion="reduced"] .brave-combat-ghost {
     }
 
     .brave-view--combat .brave-view__section--targets .brave-view__entry--size-boss {
-        grid-column: span 2;
+        grid-column: span 3;
         width: auto;
         max-width: calc(100vw - 48px);
     }
@@ -15722,8 +15877,14 @@ body[data-brave-motion="reduced"] .brave-combat-ghost {
 
     .brave-view--combat .brave-view__section--party .brave-view__entry--size-boss,
     .brave-view--combat .brave-view__section--targets .brave-view__entry--size-boss {
-        height: 228px;
+        height: 166px;
         padding: 10px 10px 8px;
+    }
+
+    .brave-view--combat .brave-view__section--targets .brave-view__entry--size-boss {
+        gap: 4px;
+        min-height: 166px;
+        max-height: 166px;
     }
 
     .brave-view--combat .brave-view__section--party .brave-view__entry--size-elite .brave-view__entry-ornament,
@@ -16626,20 +16787,12 @@ body[data-brave-scene="map"][data-brave-world-tone="drownedweir"] {
     --brave-menu-dim-color: #8fbeca;
 }
 
-body[data-brave-scene="map"][data-brave-world-tone="nexus"] {
+body[data-brave-scene="map"][data-brave-world-tone="lanternworks"] {
     --brave-menu-primary-rgb: 124, 183, 215;
     --brave-menu-secondary-rgb: 173, 219, 246;
     --brave-menu-title-color: #eef5ff;
     --brave-menu-copy-color: #d9e6f2;
     --brave-menu-dim-color: #93b8d7;
-}
-
-body[data-brave-scene="map"][data-brave-world-tone="junkyard"] {
-    --brave-menu-primary-rgb: 221, 143, 82;
-    --brave-menu-secondary-rgb: 236, 189, 132;
-    --brave-menu-title-color: #fbede2;
-    --brave-menu-copy-color: #ecd8ca;
-    --brave-menu-dim-color: #d3a06f;
 }
 
 body[data-brave-scene="map"][data-brave-world-tone="portal"] {
@@ -17841,6 +17994,9 @@ body[data-brave-view="account"] .content,
 body[data-brave-view="account"] #messagewindow,
 body[data-brave-view="chargen"] .content,
 body[data-brave-view="chargen"] #messagewindow {
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
     border-color: rgba(var(--brave-frontdoor-accent-rgb), 0.2);
     background:
         radial-gradient(circle at 0 0, rgba(var(--brave-frontdoor-accent-rgb), 0.09), transparent 42%),
@@ -18039,9 +18195,28 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
 #brave-objectives-sheet.brave-objectives-sheet--tutorial {
     --brave-obj-accent: #00f2ff;
     --brave-obj-accent-rgb: 0, 242, 255;
-    --brave-obj-bg: linear-gradient(180deg, rgba(10, 20, 30, 0.96), rgba(8, 16, 24, 0.98));
-    --brave-obj-border: rgba(0, 242, 255, 0.32);
-    --brave-obj-glow: 0 0 40px rgba(0, 242, 255, 0.08), 0 32px 64px rgba(0, 0, 0, 0.6);
+    --brave-obj-bg: linear-gradient(180deg, rgb(10, 20, 30), rgb(4, 8, 12));
+    --brave-obj-border: rgba(0, 242, 255, 0.54);
+    --brave-obj-glow: 0 0 60px rgba(0, 242, 255, 0.28), 0 32px 108px rgba(0, 0, 0, 0.95);
+}
+
+#brave-objectives-sheet.brave-objectives-sheet--tutorial[aria-hidden="false"] .brave-objectives-sheet__backdrop {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    pointer-events: none !important;
+}
+
+#brave-objectives-sheet.brave-objectives-sheet--tutorial .brave-objectives-sheet__panel {
+    border-width: 2px;
+}
+
+#brave-objectives-sheet.brave-objectives-sheet--tutorial[aria-hidden="false"] .brave-objectives-sheet__panel {
+    animation: brave-tutorial-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes brave-tutorial-pop {
+    0% { transform: scale(0.9) translateY(-10px); opacity: 0; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 #brave-objectives-sheet.brave-objectives-sheet--welcome {
@@ -18459,12 +18634,117 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
     background: #0b120f;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 2.0s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 1450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body[data-brave-view="character-loading"] #brave-objectives-sheet,
+body.brave-character-load-transition-active #brave-objectives-sheet,
+body[data-brave-view="character-loading"] #scene-rail,
+body[data-brave-view="character-loading"] #mobile-nav-dock,
+body.brave-character-load-transition-active #mobile-nav-dock,
+body[data-brave-view="character-loading"] #mobile-utility-sheet,
+body.brave-character-load-transition-active #mobile-utility-sheet,
+body[data-brave-view="character-loading"] #brave-picker-sheet,
+body.brave-character-load-transition-active #brave-picker-sheet,
+body[data-brave-view="character-loading"] #brave-notice-stack,
+body.brave-character-load-transition-active #brave-notice-stack,
+body[data-brave-view="character-loading"] #brave-room-voice-overlay-desktop,
+body.brave-character-load-transition-active #brave-room-voice-overlay-desktop,
+body[data-brave-view="character-loading"] #brave-room-voice-overlay-self,
+body.brave-character-load-transition-active #brave-room-voice-overlay-self,
+body[data-brave-view="character-loading"] #brave-room-voice-overlay-mobile,
+body.brave-character-load-transition-active #brave-room-voice-overlay-mobile,
+body[data-brave-view="character-loading"] .prompt,
+body.brave-character-load-transition-active .prompt,
+body[data-brave-view="character-loading"] .inputwrap,
+body.brave-character-load-transition-active .inputwrap,
+body.brave-character-load-transition-active #messagewindow > .out,
+body.brave-character-load-transition-active #messagewindow > .msg,
+body.brave-character-load-transition-active #messagewindow > .err,
+body.brave-character-load-transition-active .brave-pixel-particle {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
 }
 
 #brave-intro-veil.brave-intro-veil--active {
     opacity: 1;
     pointer-events: none;
+}
+
+#brave-intro-veil.brave-intro-veil--character-load::after {
+    content: "Entering the world";
+    position: absolute;
+    left: 50%;
+    top: calc(50% - 14px);
+    transform: translate(-50%, -50%);
+    font-family: var(--brave-ui-font-family);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--brave-text-dim);
+    opacity: 0;
+    transition: opacity 700ms ease 180ms;
+}
+
+#brave-intro-veil.brave-intro-veil--character-load.brave-intro-veil--active::after {
+    opacity: 1;
+}
+
+#brave-intro-veil.brave-intro-veil--character-load::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: calc(50% + 22px);
+    width: 118px;
+    height: 2px;
+    border-radius: 999px;
+    background:
+        linear-gradient(90deg, transparent, rgba(var(--brave-accent-rgb), 0.58), transparent),
+        rgba(var(--brave-accent-rgb), 0.12);
+    box-shadow:
+        0 0 12px rgba(var(--brave-accent-rgb), 0.1),
+        0 0 28px rgba(var(--brave-accent-rgb), 0.06);
+    opacity: 0;
+    transform: translateX(-50%);
+    transform-origin: center;
+    transition: opacity 700ms ease 220ms;
+}
+
+#brave-intro-veil.brave-intro-veil--character-load.brave-intro-veil--active::before {
+    opacity: 1;
+    animation: brave-world-entry-pulse 1.9s ease-in-out infinite;
+}
+
+@keyframes brave-world-entry-pulse {
+    0% {
+        opacity: 0.38;
+        box-shadow:
+            0 0 10px rgba(var(--brave-accent-rgb), 0.08),
+            0 0 22px rgba(var(--brave-accent-rgb), 0.04);
+    }
+    50% {
+        opacity: 0.92;
+        box-shadow:
+            0 0 16px rgba(var(--brave-accent-rgb), 0.24),
+            0 0 42px rgba(var(--brave-accent-rgb), 0.14);
+    }
+    100% {
+        opacity: 0.38;
+        box-shadow:
+            0 0 10px rgba(var(--brave-accent-rgb), 0.08),
+            0 0 22px rgba(var(--brave-accent-rgb), 0.04);
+    }
+}
+
+.brave-view--character-loading {
+    min-height: 100%;
+    display: grid;
+    place-content: center;
+    gap: 14px;
+    text-align: center;
+    background: #0b120f;
 }
 
 /* Quest Popups */
@@ -18706,4 +18986,35 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
 @keyframes brave-rest-meter-fill {
     0% { transform: scaleX(0); opacity: 0.35; }
     100% { transform: scaleX(1); opacity: 1; }
+}
+
+/* Pixel Firework Particles */
+.brave-pixel-particle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    pointer-events: none;
+    z-index: 10000;
+    box-shadow: 0 0 4px var(--p-color);
+    background: var(--p-color);
+    animation: brave-pixel-firework var(--p-duration) ease-out forwards;
+}
+
+@keyframes brave-pixel-firework {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    50% { opacity: 1; }
+    100% { transform: translate(var(--p-x), var(--p-y)) rotate(var(--p-rotate)) scale(0); opacity: 0; }
+}
+x;
+    pointer-events: none;
+    z-index: 10000;
+    box-shadow: 0 0 4px var(--p-color);
+    background: var(--p-color);
+    animation: brave-pixel-firework var(--p-duration) ease-out forwards;
+}
+
+@keyframes brave-pixel-firework {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    50% { opacity: 1; }
+    100% { transform: translate(var(--p-x), var(--p-y)) rotate(var(--p-rotate)) scale(0); opacity: 0; }
 }

@@ -982,7 +982,7 @@ def build_prayer_view(character, *, blessing=None, applied=False):
 
 
 def build_portals_view(character):
-    """Return a browser-first main view for current Nexus gates."""
+    """Return a browser-first main view for generic route-gate content."""
 
     sections = []
     for status_key, section_title in (("stable", "Stable"), ("dormant", "Dormant"), ("sealed", "Sealed")):
@@ -1013,11 +1013,11 @@ def build_portals_view(character):
 
     stable_count = sum(1 for portal in PORTALS.values() if portal["status"] == "stable")
     return _make_view(
-        "Nexus",
-        "Gates",
+        "Route Index",
+        "Routes",
         eyebrow_icon="travel_explore",
         title_icon="public",
-        subtitle="The ring lists what Brambleford can currently reach and what still refuses to answer.",
+        subtitle="Reusable route-gate content for future packs.",
         chips=[_chip(f"{stable_count} stable", "travel_explore", "accent" if stable_count else "muted")],
         sections=sections,
         back=True,
@@ -1349,7 +1349,7 @@ def build_combat_victory_view(
     return {
         **_make_view(
             "",
-            "VICTORY",
+            "VICTORY!",
             eyebrow_icon=None,
             title_icon="military_tech",
             sections=sections,
