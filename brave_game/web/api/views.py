@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 
 from django.http import HttpResponseNotAllowed, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
 from commands.brave_creator import (
     list_content_history,
@@ -16,7 +15,7 @@ from commands.brave_creator import (
     revert_content,
 )
 from world.content import ContentEditor, ContentPublishValidationError, get_content_registry
-from world.content.registry import reload_content_registry
+from world.content.registry import build_content_registry_from_payloads, reload_content_registry
 from world.content.validation import validate_content_registry
 
 
@@ -161,6 +160,30 @@ def _reference_entries(domain, registry):
         return [{"id": portal_id, "label": portal.get("name"), "meta": portal.get("status")} for portal_id, portal in registry.systems.portals.items()]
     if domain == "forge":
         return [{"id": source_id, "label": (registry.items.get(source_id) or {}).get("name", source_id), "meta": recipe.get("result")} for source_id, recipe in registry.systems.forge_recipes.items()]
+    if domain == "cooking-recipes":
+        return [{"id": recipe_id, "label": recipe.get("name"), "meta": recipe.get("result")} for recipe_id, recipe in registry.systems.cooking_recipes.items()]
+    if domain == "tinkering-recipes":
+        return [{"id": recipe_id, "label": recipe.get("name"), "meta": recipe.get("result")} for recipe_id, recipe in registry.systems.tinkering_recipes.items()]
+    if domain == "fishing-spots":
+        return [
+            {
+                "id": room_id,
+                "label": spot.get("name") or (registry.world.get_room(room_id) or {}).get("key"),
+                "meta": f"{len(spot.get('fish', []))} fish",
+                "room_id": room_id,
+            }
+            for room_id, spot in registry.systems.fishing_spots.items()
+        ]
+    if domain == "fishing-rods":
+        return [{"id": rod_id, "label": rod.get("name"), "meta": rod.get("power", 0)} for rod_id, rod in registry.systems.fishing_rods.items()]
+    if domain == "fishing-lures":
+        return [{"id": lure_id, "label": lure.get("name"), "meta": len(lure.get("attracts", []))} for lure_id, lure in registry.systems.fishing_lures.items()]
+    if domain == "fish-behaviors":
+        return [{"id": behavior_id, "label": behavior_id.replace("_", " ").title(), "meta": behavior.get("pattern")} for behavior_id, behavior in registry.systems.fishing_behaviors.items()]
+    if domain == "boss-gates":
+        return [{"id": gate_id, "label": gate.get("name"), "meta": gate.get("trigger_room_id")} for gate_id, gate in registry.systems.boss_gates.items()]
+    if domain == "trophies":
+        return [{"id": trophy_id, "label": trophy.get("name"), "meta": trophy.get("world")} for trophy_id, trophy in registry.systems.trophies.items()]
     raise KeyError(domain)
 
 
@@ -168,7 +191,6 @@ def _build_editor():
     return ContentEditor()
 
 
-@csrf_exempt
 def content_status(request):
     if request.method != "GET":
         return HttpResponseNotAllowed(["GET"])
@@ -186,13 +208,25 @@ def content_status(request):
             "world": {"source": registry.world.source_path, "draft": str(editor._path_for("world", stage="draft")), "rooms": len(registry.world.rooms), "entities": len(registry.world.entities), "exits": len(registry.world.exits)},
             "encounters": {"source": registry.encounters.source_path, "draft": str(editor._path_for("encounters", stage="draft")), "enemies": len(registry.encounters.enemy_templates), "rooms": len(registry.encounters.room_encounters)},
             "dialogue": {"source": registry.dialogue.source_path, "draft": str(editor._path_for("dialogue", stage="draft")), "talk_entities": len(registry.dialogue.talk_rules), "readables": len(registry.dialogue.static_read_responses)},
-            "systems": {"source": registry.systems.source_path, "draft": str(editor._path_for("systems", stage="draft")), "portals": len(registry.systems.portals), "forge_recipes": len(registry.systems.forge_recipes)},
+            "systems": {
+                "source": registry.systems.source_path,
+                "draft": str(editor._path_for("systems", stage="draft")),
+                "portals": len(registry.systems.portals),
+                "forge_recipes": len(registry.systems.forge_recipes),
+                "cooking_recipes": len(registry.systems.cooking_recipes),
+                "tinkering_recipes": len(registry.systems.tinkering_recipes),
+                "fishing_spots": len(registry.systems.fishing_spots),
+                "fishing_rods": len(registry.systems.fishing_rods),
+                "fishing_lures": len(registry.systems.fishing_lures),
+                "fish_behaviors": len(registry.systems.fishing_behaviors),
+                "boss_gates": len(registry.systems.boss_gates),
+                "trophies": len(registry.systems.trophies),
+            },
         },
     }
     return JsonResponse(payload)
 
 
-@csrf_exempt
 def content_references(request, domain):
     if request.method != "GET":
         return HttpResponseNotAllowed(["GET"])
@@ -212,7 +246,6 @@ def content_references(request, domain):
     return JsonResponse({"ok": True, "domain": domain, "count": len(filtered), "results": filtered[:limit]})
 
 
-@csrf_exempt
 def content_preview(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -232,7 +265,6 @@ def content_preview(request):
     return JsonResponse({"ok": True, "kind": kind, "preview": preview})
 
 
-@csrf_exempt
 def content_mutate(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -245,7 +277,7 @@ def content_mutate(request):
         target = payload.get("target", "")
         mutation_payload = json.dumps(payload.get("payload"))
         write = bool(payload.get("write"))
-        stage = payload.get("stage") or "live"
+        stage = payload.get("stage") or "draft"
         mutation = mutate_content(kind, target, mutation_payload, write=write, stage=stage, author=_author_from_user(getattr(request, "user", None)))
     except ValueError as exc:
         return _json_error(exc)
@@ -257,7 +289,6 @@ def content_mutate(request):
     return JsonResponse(response)
 
 
-@csrf_exempt
 def content_remove(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -269,7 +300,7 @@ def content_remove(request):
         kind = payload.get("kind")
         target = payload.get("target", "")
         write = bool(payload.get("write"))
-        stage = payload.get("stage") or "live"
+        stage = payload.get("stage") or "draft"
         mutation = remove_content(kind, target, write=write, stage=stage, author=_author_from_user(getattr(request, "user", None)))
     except ValueError as exc:
         return _json_error(exc)
@@ -281,7 +312,6 @@ def content_remove(request):
     return JsonResponse(response)
 
 
-@csrf_exempt
 def content_history(request):
     if request.method != "GET":
         return HttpResponseNotAllowed(["GET"])
@@ -298,7 +328,6 @@ def content_history(request):
     return JsonResponse({"ok": True, "entries": entries})
 
 
-@csrf_exempt
 def content_revert(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -309,7 +338,7 @@ def content_revert(request):
         payload = _load_json_body(request)
         entry_id = payload.get("entry_id")
         write = bool(payload.get("write"))
-        stage = payload.get("stage")
+        stage = payload.get("stage") or "draft"
         mutation = revert_content(entry_id, write=write, stage=stage, author=_author_from_user(getattr(request, "user", None)))
     except (ValueError, KeyError) as exc:
         return _json_error(exc)
@@ -321,7 +350,6 @@ def content_revert(request):
     return JsonResponse(response)
 
 
-@csrf_exempt
 def content_publish(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -356,19 +384,35 @@ def content_publish(request):
     })
 
 
-@csrf_exempt
 def content_validate(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
     if not _is_creator_authorized(getattr(request, "user", None)):
         return _unauthorized_response()
 
-    registry = reload_content_registry()
+    try:
+        payload = _load_json_body(request)
+    except ValueError as exc:
+        return _json_error(exc)
+    stage = str(payload.get("stage") or "live").strip().lower()
+    if stage == "draft":
+        editor = _build_editor()
+        payloads = {}
+        source_paths = {}
+        for domain in editor.pack_paths:
+            draft_path = editor._path_for(domain, stage="draft")
+            live_path = editor._path_for(domain, stage="live")
+            source_path = draft_path if draft_path.exists() else live_path
+            with source_path.open("r", encoding="utf-8") as handle:
+                payloads[domain] = json.load(handle)
+            source_paths[domain] = source_path
+        registry = build_content_registry_from_payloads(payloads, source_paths=source_paths)
+    else:
+        registry = reload_content_registry()
     errors = validate_content_registry(registry)
-    return JsonResponse({"ok": not errors, "errors": errors})
+    return JsonResponse({"ok": not errors, "stage": stage, "errors": errors})
 
 
-@csrf_exempt
 def content_reload(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])

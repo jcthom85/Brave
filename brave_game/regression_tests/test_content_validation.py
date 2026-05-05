@@ -95,16 +95,25 @@ class ContentValidationTests(unittest.TestCase):
         )
         broken_systems = replace(
             registry.systems,
-            fishing_rods={**registry.systems.fishing_rods, "bad_rod": {"unlock_completed_quests": ["missing_quest"]}},
+            fishing_rods={**registry.systems.fishing_rods, "bad_rod": {"power": 0, "unlock_completed_quests": ["missing_quest"]}},
             fishing_lures={**registry.systems.fishing_lures, "bad_lure": {"attracts": ["missing_item"], "unlock_completed_quests": ["missing_quest"]}},
             fishing_spots={**registry.systems.fishing_spots, "missing_room": {"fish": [{"item": "missing_item"}]},},
-            cooking_recipes={**registry.systems.cooking_recipes, "broken_recipe": {"result": "missing_item", "ingredients": {"missing_item": 1}}},
-            tinkering_recipes={**registry.systems.tinkering_recipes, "broken_tinker": {"base": "missing_item", "result": "missing_item", "components": {"missing_item": 1}}},
+            cooking_recipes={**registry.systems.cooking_recipes, "broken_recipe": {"result": "missing_item", "ingredients": {"missing_item": 0}}},
+            tinkering_recipes={**registry.systems.tinkering_recipes, "broken_tinker": {"base": "missing_item", "result": "missing_item", "components": {"missing_item": 0}, "silver_cost": -1, "result_quantity": 0, "station": "missing_room"}},
             outfitters_room_id="missing_room",
             forge_room_id="missing_room",
             forge_recipes={**registry.systems.forge_recipes, "missing_source": {"result": "missing_item", "materials": {"missing_item": 1}}},
             portals={**registry.systems.portals, "broken_portal": {"status": "unknown", "entry_room": "missing_room"}},
             trophies={**registry.systems.trophies, "broken_trophy": {"summary": "Missing fields."}},
+            boss_gates={
+                **registry.systems.boss_gates,
+                "broken_gate": {
+                    "trigger_room_id": "goblin_road_fencebreaker_camp",
+                    "boss_enemy_key": "thorn_rat",
+                    "encounter_key": "missing_encounter",
+                    "max_participants": 0,
+                },
+            },
         )
         broken_registry = replace(registry, items=broken_items, quests=broken_quests, world=broken_world, encounters=broken_encounters, dialogue=broken_dialogue, systems=broken_systems)
 
@@ -134,15 +143,24 @@ class ContentValidationTests(unittest.TestCase):
         self.assertTrue(any("Dialogue references unknown readable entity" in error for error in errors))
         self.assertTrue(any("Fishing spot references unknown room" in error for error in errors))
         self.assertTrue(any("references unknown fish item" in error for error in errors))
+        self.assertTrue(any("must define bite_delay" in error for error in errors))
+        self.assertTrue(any("must define positive reaction_window" in error for error in errors))
+        self.assertTrue(any("must have hook_chance between 0 and 1" in error for error in errors))
         self.assertTrue(any("Fishing rod bad_rod is missing a name" in error for error in errors))
+        self.assertTrue(any("Fishing rod bad_rod must have positive power" in error for error in errors))
         self.assertTrue(any("references unknown unlock quest" in error for error in errors))
         self.assertTrue(any("Fishing lure bad_lure is missing a name" in error for error in errors))
         self.assertTrue(any("references unknown attract item" in error for error in errors))
         self.assertTrue(any("Cooking recipe broken_recipe yields unknown item" in error for error in errors))
         self.assertTrue(any("references unknown ingredient" in error for error in errors))
+        self.assertTrue(any("ingredient missing_item must have a positive integer quantity" in error for error in errors))
         self.assertTrue(any("Tinkering recipe broken_tinker yields unknown item" in error for error in errors))
         self.assertTrue(any("references unknown base item" in error for error in errors))
         self.assertTrue(any("references unknown component" in error for error in errors))
+        self.assertTrue(any("component missing_item must have a positive integer quantity" in error for error in errors))
+        self.assertTrue(any("must have positive result_quantity" in error for error in errors))
+        self.assertTrue(any("must have nonnegative silver_cost" in error for error in errors))
+        self.assertTrue(any("references unknown station room" in error for error in errors))
         self.assertTrue(any("Commerce references unknown outfitters room" in error for error in errors))
         self.assertTrue(any("Forging references unknown forge room" in error for error in errors))
         self.assertTrue(any("Forge recipe references unknown source item" in error for error in errors))
@@ -150,6 +168,10 @@ class ContentValidationTests(unittest.TestCase):
         self.assertTrue(any("Portal broken_portal references unknown entry room" in error for error in errors))
         self.assertTrue(any("Trophy broken_trophy is missing a name" in error for error in errors))
         self.assertTrue(any("Trophy broken_trophy is missing a placeholder" in error for error in errors))
+        self.assertTrue(any("Boss gate broken_gate references unknown encounter" in error for error in errors))
+        self.assertTrue(any("Boss gate broken_gate boss enemy must have boss tag" in error for error in errors))
+        self.assertTrue(any("Boss gate broken_gate must be referenced by at least one exit" in error for error in errors))
+        self.assertTrue(any("Boss gate broken_gate must have positive max_participants" in error for error in errors))
 
     def test_validator_reports_world_shippability_errors(self):
         registry = get_content_registry()

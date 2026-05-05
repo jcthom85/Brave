@@ -83,6 +83,28 @@
     .workspace { display: grid; gap: 16px; }
     .meta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--muted); font-size: 0.94rem; }
     .toolbar, .editor-toolbar { display: flex; flex-wrap: wrap; gap: 10px; }
+    .mode-rail {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .mode-button {
+      min-height: 68px;
+      border-radius: 16px;
+      background: #fffdfa;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      box-shadow: none;
+      text-align: left;
+    }
+    .mode-button strong, .mode-button span { display: block; }
+    .mode-button span { margin-top: 4px; color: var(--muted); font-size: 0.86rem; }
+    .mode-button.active {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+    .mode-button.active span { color: rgba(255, 255, 255, 0.78); }
     .stack { display: grid; gap: 12px; }
     .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .field { display: grid; gap: 6px; }
@@ -240,6 +262,37 @@
     .graph-line.one-way { stroke: var(--accent); stroke-dasharray: 8 7; }
     .graph-line.dangling { stroke: var(--bad); stroke-dasharray: 4 6; }
     .graph-line.pending { stroke: var(--good); stroke-width: 4; opacity: 0.9; }
+    .path-tool, .related-panel, .path-summary {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fffdfa;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+    .path-tool { margin: 0 18px 16px; }
+    .path-tool h3, .related-panel h3, .path-summary h4 { margin: 0; }
+    .path-tool p, .related-panel p, .path-summary p { margin: 0; color: var(--muted); line-height: 1.4; }
+    .path-preview {
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff8f2;
+      color: var(--ink);
+      font-size: 0.94rem;
+    }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 0.88rem;
+    }
     .room-node {
       position: absolute;
       width: 142px;
@@ -375,17 +428,25 @@
 
       <div class="toolbar">
         <button id="load-room" class="secondary" type="button">Reload Room Preview</button>
-        <button id="validate-content" class="secondary" type="button">Validate Packs</button>
+        <button id="validate-content" class="secondary" type="button">Validate Drafts</button>
         <button id="reload-content" class="secondary" type="button">Reload Registry</button>
       </div>
 
       <div id="validation-notes" class="validation-notes" hidden></div>
 
+      <div class="mode-rail" aria-label="World builder modes">
+        <button id="mode-select" class="mode-button active" type="button"><strong>Select</strong><span>Inspect rooms and edit details.</span></button>
+        <button id="mode-add-room" class="mode-button" type="button"><strong>Add Room</strong><span>Place a new room from the map.</span></button>
+        <button id="mode-path" class="mode-button" type="button"><strong>Create Path</strong><span>Click source and destination rooms.</span></button>
+        <button id="mode-move" class="mode-button" type="button"><strong>Move Rooms</strong><span>Drag rooms, then write coordinates.</span></button>
+        <button id="mode-issues" class="mode-button" type="button"><strong>Inspect Issues</strong><span>Find one-way paths and overlaps.</span></button>
+      </div>
+
       <div class="builder-layout">
         <div class="panel graph-panel">
           <div class="panel-head">
             <h2>Room Map</h2>
-            <p>Drag rooms to change map coordinates. Connect mode and direction handles stage exits for review.</p>
+            <p>Use the path tool for exits. It stages two-way routes by default so room flow stays obvious.</p>
           </div>
           <div class="panel-body">
             <div class="graph-toolbar">
@@ -401,8 +462,24 @@
               <div class="graph-actions">
                 <button id="new-room" class="secondary" type="button">New Room</button>
                 <button id="fit-graph" class="secondary" type="button">Fit Graph</button>
-                <button id="connect-rooms" class="secondary" type="button">Connect Rooms</button>
+                <button id="connect-rooms" class="secondary" type="button">Create Path</button>
                 <button id="write-position" type="button" disabled>Write Position</button>
+              </div>
+            </div>
+            <div id="path-tool" class="path-tool">
+              <h3>Path Tool</h3>
+              <p>Pick two rooms to preview a forward exit and a reverse exit before saving either draft.</p>
+              <div class="field-grid">
+                <div class="field"><label for="path-source">Source Room</label><select id="path-source"></select></div>
+                <div class="field"><label for="path-destination">Destination Room</label><select id="path-destination"></select></div>
+                <div class="field"><label for="path-forward-key">Forward Exit</label><input id="path-forward-key" type="text" placeholder="north"></div>
+                <div class="field"><label for="path-reverse-key">Reverse Exit</label><input id="path-reverse-key" type="text" placeholder="south"></div>
+                <div class="field full"><label><input id="path-one-way" type="checkbox"> One-way path</label></div>
+              </div>
+              <div id="path-preview" class="path-preview">Choose a source and destination to preview a path.</div>
+              <div class="editor-toolbar">
+                <button id="preview-path" class="secondary" type="button">Stage Path Preview</button>
+                <button id="write-path" type="button">Save Path Drafts</button>
               </div>
             </div>
             <div id="graph-wrap" class="graph-wrap">
@@ -456,11 +533,27 @@
               <h3>Outgoing Exits</h3>
               <p>Create paths from this room to another room. Advanced source is available when needed.</p>
               <div id="exit-list" class="selector-list"></div>
+              <div id="exit-path-summary" class="path-summary">
+                <h4>Path Summary</h4>
+                <p>Select or draft an exit to see source, destination, and reverse-exit status.</p>
+                <div id="exit-reverse-status" class="badge-row"></div>
+                <div class="editor-toolbar">
+                  <button id="open-source-room" class="secondary" type="button">Open Source Room</button>
+                  <button id="open-destination-room" class="secondary" type="button">Open Destination Room</button>
+                  <button id="create-reverse-exit" class="secondary" type="button">Create Reverse Exit</button>
+                </div>
+              </div>
               <div class="field-grid">
                 <div class="field"><label for="exit-id">Exit Id</label><input id="exit-id" type="text"></div>
                 <div class="field"><label for="exit-key">Exit Key</label><input id="exit-key" type="text"></div>
+                <div class="field"><label for="exit-direction">Direction</label><input id="exit-direction" type="text"></div>
+                <div class="field"><label for="exit-label">Map Label</label><input id="exit-label" type="text"></div>
                 <div class="field"><label for="exit-source">Source Room</label><select id="exit-source"></select></div>
                 <div class="field"><label for="exit-destination">Destination Room</label><select id="exit-destination"></select></div>
+                <div class="field full"><label for="exit-aliases">Aliases</label><input id="exit-aliases" type="text" placeholder="comma separated, e.g. north, n, gate"></div>
+                <div class="field"><label for="exit-required-quest">Required Quest</label><input id="exit-required-quest" type="text"></div>
+                <div class="field"><label for="exit-boss-gate">Boss Gate</label><input id="exit-boss-gate" type="text"></div>
+                <div class="field full"><label for="exit-lock-message">Lock Message</label><input id="exit-lock-message" type="text"></div>
               </div>
               <div class="editor-toolbar">
                 <button id="new-exit" class="secondary" type="button">New Exit Draft</button>
@@ -471,6 +564,14 @@
                 <summary>Advanced Source</summary>
                 <textarea id="exit-json" spellcheck="false"></textarea>
               </details>
+            </section>
+
+            <section class="related-panel" id="related-content">
+              <h3>Related Content</h3>
+              <p>Shows how the selected room is used by paths, systems, quests, boss gates, fishing, and activities.</p>
+              <div id="related-exits" class="badge-row"></div>
+              <div id="related-systems" class="badge-row"></div>
+              <div id="related-quests" class="badge-row"></div>
             </section>
 
             <section id="editor-tab-entities" class="editor-tab-panel" data-editor-panel="entities" role="tabpanel">
@@ -542,8 +643,18 @@
     const writeRoomButton = document.getElementById("write-room");
     const exitIdInput = document.getElementById("exit-id");
     const exitKeyInput = document.getElementById("exit-key");
+    const exitDirectionInput = document.getElementById("exit-direction");
+    const exitLabelInput = document.getElementById("exit-label");
+    const exitAliasesInput = document.getElementById("exit-aliases");
+    const exitRequiredQuestInput = document.getElementById("exit-required-quest");
+    const exitLockMessageInput = document.getElementById("exit-lock-message");
+    const exitBossGateInput = document.getElementById("exit-boss-gate");
     const exitSourceSelect = document.getElementById("exit-source");
     const exitDestinationSelect = document.getElementById("exit-destination");
+    const exitReverseStatus = document.getElementById("exit-reverse-status");
+    const openSourceRoomButton = document.getElementById("open-source-room");
+    const openDestinationRoomButton = document.getElementById("open-destination-room");
+    const createReverseExitButton = document.getElementById("create-reverse-exit");
     const syncExitFormButton = document.getElementById("sync-exit-form");
     const newExitButton = document.getElementById("new-exit");
     const diffExitButton = document.getElementById("diff-exit");
@@ -579,6 +690,23 @@
     const fitGraphButton = document.getElementById("fit-graph");
     const connectRoomsButton = document.getElementById("connect-rooms");
     const writePositionButton = document.getElementById("write-position");
+    const modeButtons = Array.from(document.querySelectorAll(".mode-button"));
+    const modeSelectButton = document.getElementById("mode-select");
+    const modeAddRoomButton = document.getElementById("mode-add-room");
+    const modePathButton = document.getElementById("mode-path");
+    const modeMoveButton = document.getElementById("mode-move");
+    const modeIssuesButton = document.getElementById("mode-issues");
+    const pathSourceSelect = document.getElementById("path-source");
+    const pathDestinationSelect = document.getElementById("path-destination");
+    const pathForwardKeyInput = document.getElementById("path-forward-key");
+    const pathReverseKeyInput = document.getElementById("path-reverse-key");
+    const pathOneWayInput = document.getElementById("path-one-way");
+    const pathPreview = document.getElementById("path-preview");
+    const previewPathButton = document.getElementById("preview-path");
+    const writePathButton = document.getElementById("write-path");
+    const relatedExits = document.getElementById("related-exits");
+    const relatedSystems = document.getElementById("related-systems");
+    const relatedQuests = document.getElementById("related-quests");
 
     let rooms = [];
     let exits = [];
@@ -589,6 +717,8 @@
     let selectedRegion = "";
     let connectMode = false;
     let connectSourceRoomId = "";
+    let worldMode = "select";
+    let pathDraft = null;
     let pendingRoomPosition = null;
     let draggingRoom = null;
     let suppressGraphClick = false;
@@ -600,7 +730,7 @@
     const GRAPH_MARGIN = 420;
 
     function setBusy(isBusy) {
-      for (const button of [loadButton, diffRoomButton, writeRoomButton, syncExitFormButton, newExitButton, diffExitButton, writeExitButton, syncEntityFormButton, newEntityButton, diffEntityButton, writeEntityButton, validateButton, reloadButton, fitGraphButton, connectRoomsButton]) {
+      for (const button of [loadButton, diffRoomButton, writeRoomButton, syncExitFormButton, newExitButton, diffExitButton, writeExitButton, syncEntityFormButton, newEntityButton, diffEntityButton, writeEntityButton, validateButton, reloadButton, fitGraphButton, connectRoomsButton, previewPathButton, writePathButton]) {
         if (button) button.disabled = isBusy;
       }
       writePositionButton.disabled = isBusy || !pendingRoomPosition;
@@ -749,6 +879,14 @@
       return { north: "n", south: "s", east: "e", west: "w", up: "u", down: "d" }[key] || "";
     }
 
+    function normalizeDirection(key) {
+      return { n: "north", s: "south", e: "east", w: "west", u: "up", d: "down" }[key] || key || "path";
+    }
+
+    function oppositeDirection(key) {
+      return { north: "south", south: "north", east: "west", west: "east", up: "down", down: "up", in: "out", out: "in" }[normalizeDirection(key)] || "back";
+    }
+
     function buildExitAliases(key, destination) {
       const aliases = [];
       const shortAlias = shortDirectionAlias(key);
@@ -771,6 +909,78 @@
         source: sourceId,
         destination: destinationId,
       };
+    }
+
+    function buildReverseExitDraft(exitDraft) {
+      const source = roomById(exitDraft.destination);
+      const destination = roomById(exitDraft.source);
+      const key = oppositeDirection(exitDraft.key || exitDraft.direction);
+      return {
+        aliases: buildExitAliases(key, destination),
+        direction: key,
+        label: destination ? (destination.label || destination.id) : "",
+        id: `${exitDraft.destination}_to_${exitDraft.source}`,
+        key,
+        source: exitDraft.destination,
+        destination: exitDraft.source,
+      };
+    }
+
+    function buildTwoWayExitDraft(sourceId, destinationId) {
+      const forward = buildGraphExitDraft(sourceId, destinationId);
+      return { forward, reverse: buildReverseExitDraft(forward) };
+    }
+
+    function setWorldMode(mode) {
+      worldMode = mode;
+      connectMode = mode === "path";
+      if (mode !== "path") connectSourceRoomId = "";
+      for (const button of modeButtons) {
+        button.classList.toggle("active", button.id === `mode-${mode}`);
+      }
+      if (mode === "issues") {
+        graphIssues.scrollIntoView({ block: "nearest" });
+      }
+      renderGraph();
+    }
+
+    function renderPathPreview() {
+      if (!pathDraft) {
+        pathPreview.textContent = "Choose a source and destination to preview a path.";
+        return;
+      }
+      const forwardKey = normalizeDirection(pathForwardKeyInput.value.trim() || pathDraft.forward.key);
+      const reverseKey = normalizeDirection(pathReverseKeyInput.value.trim() || pathDraft.reverse.key);
+      pathDraft.forward.key = forwardKey;
+      pathDraft.forward.direction = forwardKey;
+      pathDraft.forward.aliases = buildExitAliases(forwardKey, roomById(pathDraft.forward.destination));
+      pathDraft.reverse.key = reverseKey;
+      pathDraft.reverse.direction = reverseKey;
+      pathDraft.reverse.aliases = buildExitAliases(reverseKey, roomById(pathDraft.reverse.destination));
+      const reverseText = pathOneWayInput.checked ? "No reverse exit will be saved." : `${pathDraft.reverse.source} --${reverseKey}--> ${pathDraft.reverse.destination}`;
+      pathPreview.textContent = `${pathDraft.forward.source} --${forwardKey}--> ${pathDraft.forward.destination}. ${reverseText}`;
+    }
+
+    function stagePathDraft(sourceId, destinationId, options = {}) {
+      if (!sourceId || !destinationId || sourceId === destinationId) {
+        setStatus("Choose two different rooms for a path.", "bad");
+        return null;
+      }
+      pathDraft = buildTwoWayExitDraft(sourceId, destinationId);
+      pathOneWayInput.checked = Boolean(options.oneWay);
+      fillRoomSelect(pathSourceSelect, sourceId);
+      fillRoomSelect(pathDestinationSelect, destinationId);
+      pathForwardKeyInput.value = pathDraft.forward.key;
+      pathReverseKeyInput.value = pathDraft.reverse.key;
+      renderPathPreview();
+      selectedExitId = pathDraft.forward.id;
+      populateExitForm(pathDraft.forward);
+      exitJson.value = JSON.stringify(pathDraft.forward, null, 2);
+      setEditorTab("exits");
+      renderWorldEditors();
+      renderGraph();
+      setStatus(`Path staged: ${sourceId} to ${destinationId}. Two-way is on unless you mark it one-way.`, "good");
+      return pathDraft;
     }
 
     function stageExitDraft(draft, message = "") {
@@ -940,6 +1150,11 @@
           }
         }
       } catch (e) {}
+      if (pathDraft) {
+        for (const draft of [pathDraft.forward, pathOneWayInput.checked ? null : pathDraft.reverse].filter(Boolean)) {
+          if (!visibleExits.find(e => e.id === draft.id)) visibleExits.push({ ...draft, draft: true });
+        }
+      }
       const visibleIds = new Set(visibleRooms.map((room) => room.id));
       const outgoingPairs = new Set(exits.map((exit) => `${exit.source}->${exit.destination}`));
       const layout = computeGraphLayout(visibleRooms);
@@ -1014,7 +1229,7 @@
       }
       graphRoomCount.textContent = `Rooms: ${visibleRooms.length}`;
       graphExitCount.textContent = `Exits: ${visibleExits.length}`;
-      graphMode.textContent = connectMode ? (connectSourceRoomId ? `Connect from ${connectSourceRoomId}` : "Connect mode") : "Select mode";
+      graphMode.textContent = connectMode ? (connectSourceRoomId ? `Create path from ${connectSourceRoomId}` : "Create path mode") : `${worldMode.charAt(0).toUpperCase()}${worldMode.slice(1)} mode`;
       connectRoomsButton.classList.toggle("active", connectMode);
       writePositionButton.disabled = !pendingRoomPosition;
       renderGraphIssues(issues);
@@ -1060,8 +1275,17 @@
           return;
         }
 
-        const forward = buildGraphExitDraft(sourceId, target.id);
-        stageExitDraft(forward, `Drafted ${dirKey.toUpperCase()} exit to ${target.id}. Preview or save it from Outgoing Exits.`);
+        const draft = stagePathDraft(sourceId, target.id, { oneWay: false });
+        if (draft) {
+          const forwardKey = normalizeDirection(dirKey);
+          const reverseKey = oppositeDirection(forwardKey);
+          pathForwardKeyInput.value = forwardKey;
+          pathReverseKeyInput.value = reverseKey;
+          renderPathPreview();
+          populateExitForm(pathDraft.forward);
+          exitJson.value = JSON.stringify(pathDraft.forward, null, 2);
+          setStatus(`Drafted ${forwardKey} path to ${target.id}. Save Path Drafts to write both exits.`, "good");
+        }
       } catch (error) {
         setStatus(error.message, "bad");
         output.textContent = error.stack || error.message;
@@ -1094,13 +1318,13 @@
         }
         const sourceId = connectSourceRoomId;
         const source = roomById(sourceId);
-        const draft = buildGraphExitDraft(sourceId, roomId);
         connectSourceRoomId = "";
         connectMode = false;
+        worldMode = "select";
         renderGraph();
         renderRooms(roomSearch.value);
         await selectRoom(sourceId, source && source.label, source && source.meta);
-        stageExitDraft(draft, `Drafted exit ${draft.source} -> ${draft.destination}. Preview or save it from Outgoing Exits.`);
+        stagePathDraft(sourceId, roomId, { oneWay: false });
         return;
       }
       const room = roomById(roomId);
@@ -1108,7 +1332,7 @@
     }
 
     function startRoomDrag(event, roomId, layout) {
-      if (connectMode || event.button !== 0) return;
+      if (connectMode || worldMode !== "move" || event.button !== 0) return;
       const room = roomById(roomId);
       if (!room) return;
       event.preventDefault();
@@ -1213,8 +1437,15 @@
       fillRoomSelect(exitDestinationSelect, payload.destination || "", true);
       exitIdInput.value = payload.id || "";
       exitKeyInput.value = payload.key || "";
+      exitDirectionInput.value = payload.direction || payload.key || "";
+      exitLabelInput.value = payload.label || "";
+      exitAliasesInput.value = formatCsv(payload.aliases || []);
+      exitRequiredQuestInput.value = payload.required_quest || "";
+      exitLockMessageInput.value = payload.lock_message || "";
+      exitBossGateInput.value = payload.boss_gate || payload.brave_boss_gate || "";
       if (payload.source) exitSourceSelect.value = payload.source;
       if (payload.destination) exitDestinationSelect.value = payload.destination;
+      renderExitPathSummary(payload);
     }
 
     function populateEntityForm(payload) {
@@ -1266,19 +1497,30 @@
       const existing = parseTextarea(exitJson, "Exit");
       const id = exitIdInput.value.trim();
       const key = exitKeyInput.value.trim();
+      const direction = exitDirectionInput.value.trim() || key;
       const destinationId = exitDestinationSelect.value;
       const destinationRoom = roomById(destinationId);
       const isPersisted = exits.some((entry) => entry.id === id);
-      return {
+      const payload = {
         ...existing,
-        aliases: !isPersisted ? buildExitAliases(key, destinationRoom) : (existing.aliases || buildExitAliases(key, destinationRoom)),
-        direction: !isPersisted ? key : (existing.direction || key),
-        label: !isPersisted ? ((destinationRoom && (destinationRoom.label || destinationRoom.id)) || "") : (existing.label || (destinationRoom && (destinationRoom.label || destinationRoom.id)) || ""),
+        aliases: parseCsv(exitAliasesInput.value).length ? parseCsv(exitAliasesInput.value) : (!isPersisted ? buildExitAliases(key, destinationRoom) : (existing.aliases || buildExitAliases(key, destinationRoom))),
+        direction,
+        label: exitLabelInput.value.trim() || (!isPersisted ? ((destinationRoom && (destinationRoom.label || destinationRoom.id)) || "") : (existing.label || (destinationRoom && (destinationRoom.label || destinationRoom.id)) || "")),
         id,
         key,
         source: exitSourceSelect.value,
         destination: destinationId,
       };
+      if (exitRequiredQuestInput.value.trim()) payload.required_quest = exitRequiredQuestInput.value.trim();
+      else delete payload.required_quest;
+      if (exitLockMessageInput.value.trim()) payload.lock_message = exitLockMessageInput.value.trim();
+      else delete payload.lock_message;
+      if (exitBossGateInput.value.trim()) payload.boss_gate = exitBossGateInput.value.trim();
+      else {
+        delete payload.boss_gate;
+        delete payload.brave_boss_gate;
+      }
+      return payload;
     }
 
     function getEntityFormData() {
@@ -1340,6 +1582,74 @@
       return payload;
     }
 
+    function makeBadge(text, tone = "") {
+      const badge = document.createElement("span");
+      badge.className = `badge${tone ? ` ${tone}` : ""}`;
+      badge.textContent = text;
+      return badge;
+    }
+
+    function renderExitPathSummary(entry = null) {
+      if (!exitReverseStatus) return;
+      const exitEntry = entry || (() => {
+        try { return getExitFormData(); } catch { return null; }
+      })();
+      exitReverseStatus.innerHTML = "";
+      if (!exitEntry || !exitEntry.source || !exitEntry.destination) {
+        exitReverseStatus.appendChild(makeBadge("No path selected"));
+        return;
+      }
+      const reverse = exits.find((item) => item.source === exitEntry.destination && item.destination === exitEntry.source);
+      exitReverseStatus.appendChild(makeBadge(`${exitEntry.source} -> ${exitEntry.destination}`));
+      exitReverseStatus.appendChild(makeBadge(reverse ? `Reverse Exit: ${reverse.id}` : "Reverse Exit: missing"));
+      if (exitEntry.required_quest) exitReverseStatus.appendChild(makeBadge(`Quest gate: ${exitEntry.required_quest}`));
+      if (exitEntry.boss_gate || exitEntry.brave_boss_gate) exitReverseStatus.appendChild(makeBadge(`Boss gate: ${exitEntry.boss_gate || exitEntry.brave_boss_gate}`));
+    }
+
+    function renderRelatedContent() {
+      const related = (previewPayload && previewPayload.related) || {};
+      relatedExits.innerHTML = "";
+      relatedSystems.innerHTML = "";
+      relatedQuests.innerHTML = "";
+      const outgoing = (previewPayload && previewPayload.exits) || [];
+      const incoming = (previewPayload && previewPayload.incoming_exits) || [];
+      relatedExits.appendChild(makeBadge(`Outgoing: ${outgoing.length}`));
+      relatedExits.appendChild(makeBadge(`Incoming: ${incoming.length}`));
+      const oneWayCount = outgoing.filter((exitData) => exitData.has_reverse_exit === false).length;
+      relatedExits.appendChild(makeBadge(`One-way: ${oneWayCount}`));
+      for (const activity of related.activities || []) relatedSystems.appendChild(makeBadge(`Activity: ${activity}`));
+      if (related.fishing_spot) relatedSystems.appendChild(makeBadge(`Fishing: ${related.fishing_spot.name || selectedRoomId}`));
+      for (const gate of related.boss_gates || []) relatedSystems.appendChild(makeBadge(`Boss Gate: ${gate.name || gate.gate_key}`));
+      for (const quest of related.quest_links || []) relatedQuests.appendChild(makeBadge(`Quest: ${quest.title || quest.quest_key}`));
+      if (!relatedSystems.children.length) relatedSystems.appendChild(makeBadge("No linked systems"));
+      if (!relatedQuests.children.length) relatedQuests.appendChild(makeBadge("No quest objectives"));
+    }
+
+    async function writePathDraft() {
+      if (!pathDraft) {
+        const sourceId = pathSourceSelect.value;
+        const destinationId = pathDestinationSelect.value;
+        if (!stagePathDraft(sourceId, destinationId, { oneWay: pathOneWayInput.checked })) return;
+      }
+      renderPathPreview();
+      const drafts = [pathDraft.forward];
+      if (!pathOneWayInput.checked) drafts.push(pathDraft.reverse);
+      setBusy(true);
+      try {
+        for (const draft of drafts) {
+          await mutate("exit", draft.id, draft, true);
+        }
+        setStatus(`Saved ${drafts.length} path draft(s).`, "good");
+        await loadRooms();
+        if (selectedRoomId) await loadPreview();
+      } catch (error) {
+        setStatus(error.message, "bad");
+        output.textContent = error.stack || error.message;
+      } finally {
+        setBusy(false);
+      }
+    }
+
     function renderWorldEditors() {
       const exits = [...((previewPayload && previewPayload.exits) || [])];
       const entities = [...((previewPayload && previewPayload.entities) || [])];
@@ -1357,6 +1667,8 @@
       } catch (e) {}
       renderSelector(exitList, exits, selectedExitId, selectExit, (entry) => ({ title: entry.key || entry.id, meta: `${entry.id} -> ${entry.destination || "?"}` }));
       renderSelector(entityList, entities, selectedEntityId, selectEntity, (entry) => ({ title: entry.key || entry.id, meta: `${entry.id} · ${entry.kind || "entity"}` }));
+      renderRelatedContent();
+      renderExitPathSummary();
       if (!selectedExitId && exits.length) {
         selectExit(exits[0].id, false);
       } else if (!exits.length) {
@@ -1387,6 +1699,8 @@
         fillRoomSelect(exitSourceSelect, selectedRoomId);
         fillRoomSelect(exitDestinationSelect, selectedRoomId);
         fillRoomSelect(entityLocationSelect, selectedRoomId);
+        fillRoomSelect(pathSourceSelect, selectedRoomId, true);
+        fillRoomSelect(pathDestinationSelect, "", true);
         renderRooms(roomSearch.value);
         renderGraph();
         setStatus(`Loaded ${rooms.length} rooms and ${exits.length} exits.`, "good");
@@ -1458,7 +1772,7 @@
     }
 
     async function mutate(kind, target, payload, write) {
-      const result = await apiFetch("/mutate", { method: "POST", body: JSON.stringify({ kind, target, payload, write }) });
+      const result = await apiFetch("/mutate", { method: "POST", body: JSON.stringify({ kind, target, payload, write, stage: "draft" }) });
       output.textContent = result.diff || JSON.stringify(result, null, 2);
       if (write) {
         const errors = result.validation_errors || [];
@@ -1485,7 +1799,7 @@
     }
 
     async function remove(kind, target, write) {
-      const result = await apiFetch("/remove", { method: "POST", body: JSON.stringify({ kind, target, write }) });
+      const result = await apiFetch("/remove", { method: "POST", body: JSON.stringify({ kind, target, write, stage: "draft" }) });
       output.textContent = result.diff || JSON.stringify(result, null, 2);
       if (write) {
         const errors = result.validation_errors || [];
@@ -1580,9 +1894,9 @@
 
     async function validateContent() {
       setBusy(true);
-      setStatus("Validating content packs...");
+      setStatus("Validating draft content packs...");
       try {
-        const payload = await apiFetch("/validate", { method: "POST", body: "{}", allowErrorPayload: true });
+        const payload = await apiFetch("/validate", { method: "POST", body: JSON.stringify({ stage: "draft" }), allowErrorPayload: true });
         if (payload.errors.length) {
           setStatus(`Validation found ${payload.errors.length} issue(s).`, "bad");
           output.textContent = payload.errors.join("\n");
@@ -1594,6 +1908,31 @@
         setStatus(error.message, "bad");
         output.textContent = error.stack || error.message;
       } finally { setBusy(false); }
+    }
+
+    function stageCurrentPathControls() {
+      return stagePathDraft(pathSourceSelect.value, pathDestinationSelect.value, { oneWay: pathOneWayInput.checked });
+    }
+
+    async function openPathRoom(roomId) {
+      if (!roomId) return setStatus("No room selected for this side of the path.", "bad");
+      const room = roomById(roomId);
+      if (!room) return setStatus(`Room ${roomId} is not in the loaded references.`, "bad");
+      await selectRoom(roomId, room.label, room.meta);
+    }
+
+    function stageReverseFromCurrentExit() {
+      let draft;
+      try {
+        draft = getExitFormData();
+      } catch {
+        return;
+      }
+      if (!draft || !draft.source || !draft.destination) {
+        setStatus("Select an exit with a source and destination first.", "bad");
+        return;
+      }
+      stageExitDraft(buildReverseExitDraft(draft), `Reverse Exit staged for ${draft.destination} -> ${draft.source}.`);
     }
 
     async function reloadContent() {
@@ -1638,6 +1977,11 @@
       openGraphMenu(event.clientX, event.clientY, roomId);
     };
     graphWrap.addEventListener("contextmenu", openRoomMenu);
+    graphWrap.addEventListener("click", (event) => {
+      if (worldMode !== "add-room") return;
+      if (event.target !== graphWrap && event.target !== worldGraph) return;
+      createRoomFromDraft(roomDraftFromPoint(event.clientX, event.clientY));
+    });
     worldGraph.addEventListener("contextmenu", openRoomMenu);
     graphMenuAddRoom.addEventListener("click", () => {
       if (pendingGraphDraft) createRoomFromDraft(pendingGraphDraft);
@@ -1652,11 +1996,24 @@
     window.addEventListener("scroll", hideGraphMenu, true);
     fitGraphButton.addEventListener("click", fitGraph);
     connectRoomsButton.addEventListener("click", () => {
-      connectMode = !connectMode;
-      connectSourceRoomId = "";
-      renderGraph();
-      setStatus(connectMode ? "Connect mode enabled. Choose a source room." : "Connect mode disabled.");
+      setWorldMode(worldMode === "path" ? "select" : "path");
+      setStatus(worldMode === "path" ? "Create Path mode enabled. Choose a source room." : "Create Path mode disabled.");
     });
+    modeSelectButton.addEventListener("click", () => setWorldMode("select"));
+    modeAddRoomButton.addEventListener("click", () => setWorldMode("add-room"));
+    modePathButton.addEventListener("click", () => setWorldMode("path"));
+    modeMoveButton.addEventListener("click", () => setWorldMode("move"));
+    modeIssuesButton.addEventListener("click", () => setWorldMode("issues"));
+    previewPathButton.addEventListener("click", stageCurrentPathControls);
+    writePathButton.addEventListener("click", writePathDraft);
+    pathSourceSelect.addEventListener("change", () => { pathDraft = null; renderPathPreview(); });
+    pathDestinationSelect.addEventListener("change", () => { pathDraft = null; renderPathPreview(); });
+    pathForwardKeyInput.addEventListener("input", renderPathPreview);
+    pathReverseKeyInput.addEventListener("input", renderPathPreview);
+    pathOneWayInput.addEventListener("change", renderPathPreview);
+    openSourceRoomButton.addEventListener("click", () => openPathRoom(exitSourceSelect.value));
+    openDestinationRoomButton.addEventListener("click", () => openPathRoom(exitDestinationSelect.value));
+    createReverseExitButton.addEventListener("click", stageReverseFromCurrentExit);
     writePositionButton.addEventListener("click", writePendingPosition);
     window.addEventListener("pointermove", updateRoomDrag);
     window.addEventListener("pointerup", stopRoomDrag);

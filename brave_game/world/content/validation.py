@@ -137,6 +137,14 @@ def _validate_quest_content(registry, errors):
                 errors.append(f"Quest {quest_key} rewards unknown item: {template_id}")
 
         for objective in definition.get("objectives", []):
+            if objective.get("type") == "talk_to_npc":
+                npc_id = str(objective.get("npc_id") or "").strip()
+                entity_ids = {str(entity.get("id") or "") for entity in registry.world.entities}
+                if not npc_id:
+                    errors.append(f"Quest {quest_key} has a talk_to_npc objective without an npc_id")
+                elif npc_id not in entity_ids:
+                    errors.append(f"Quest {quest_key} talks to unknown NPC/entity: {npc_id}")
+                continue
             if objective.get("type") != "collect_item":
                 if objective.get("type") == "defeat_enemy":
                     enemy_tag = str(objective.get("enemy_tag") or "").strip().lower()
@@ -342,10 +350,32 @@ def _validate_systems_content(registry, errors):
     world = registry.world
     systems = registry.systems
     room_ids = {room.get("id") for room in world.rooms}
+    room_by_id = {room.get("id"): room for room in world.rooms}
+
+    def _positive_number(value):
+        return isinstance(value, (int, float)) and value > 0
+
+    def _nonnegative_number(value):
+        return isinstance(value, (int, float)) and value >= 0
+
+    def _valid_range(value):
+        return (
+            isinstance(value, list)
+            and len(value) == 2
+            and all(isinstance(entry, (int, float)) for entry in value)
+            and value[0] <= value[1]
+        )
+
+    def _has_activity(room_id, activity):
+        return activity in ((room_by_id.get(room_id) or {}).get("activities") or [])
 
     for rod_key, rod in systems.fishing_rods.items():
         if not rod.get("name"):
             errors.append(f"Fishing rod {rod_key} is missing a name")
+        if not _positive_number(rod.get("power", 1)):
+            errors.append(f"Fishing rod {rod_key} must have positive power")
+        if not _positive_number(rod.get("stability", 1)):
+            errors.append(f"Fishing rod {rod_key} must have positive stability")
         for quest_key in rod.get("unlock_completed_quests", []) or []:
             if quest_key not in quests.quests:
                 errors.append(f"Fishing rod {rod_key} references unknown unlock quest: {quest_key}")
@@ -353,6 +383,8 @@ def _validate_systems_content(registry, errors):
     for lure_key, lure in systems.fishing_lures.items():
         if not lure.get("name"):
             errors.append(f"Fishing lure {lure_key} is missing a name")
+        if "rarity_bonus" in lure and not _nonnegative_number(lure.get("rarity_bonus")):
+            errors.append(f"Fishing lure {lure_key} must have nonnegative rarity_bonus")
         for item_id in lure.get("attracts", []):
             if item_id not in items.item_templates:
                 errors.append(f"Fishing lure {lure_key} references unknown attract item: {item_id}")
@@ -363,10 +395,20 @@ def _validate_systems_content(registry, errors):
     for behavior_key, behavior in systems.fishing_behaviors.items():
         if behavior.get("pattern") not in {"sine", "linear", "burst", "dart", "drag", "snag"}:
             errors.append(f"Fish behavior {behavior_key} has an unknown pattern: {behavior.get('pattern')}")
+        if "stamina" in behavior and not _positive_number(behavior.get("stamina")):
+            errors.append(f"Fish behavior {behavior_key} must have positive stamina")
 
     for room_id, spot in systems.fishing_spots.items():
         if room_id not in room_ids:
             errors.append(f"Fishing spot references unknown room: {room_id}")
+        elif not _has_activity(room_id, "fishing"):
+            errors.append(f"Fishing spot {room_id} requires room activity: fishing")
+        if not _valid_range(spot.get("bite_delay")):
+            errors.append(f"Fishing spot {room_id} must define bite_delay as an ordered two-number range")
+        if not _positive_number(spot.get("reaction_window")):
+            errors.append(f"Fishing spot {room_id} must define positive reaction_window")
+        if not spot.get("fish"):
+            errors.append(f"Fishing spot {room_id} must define at least one fish entry")
         for rod_key in spot.get("recommended_rods", []):
             if rod_key not in systems.fishing_rods:
                 errors.append(f"Fishing spot {room_id} references unknown rod: {rod_key}")
@@ -377,6 +419,13 @@ def _validate_systems_content(registry, errors):
             item_id = fish.get("item")
             if item_id and item_id not in items.item_templates:
                 errors.append(f"Fishing spot {room_id} references unknown fish item: {item_id}")
+            if not _positive_number(fish.get("chance")):
+                errors.append(f"Fishing spot {room_id} fish {item_id} must have positive chance")
+            hook_chance = fish.get("hook_chance")
+            if not isinstance(hook_chance, (int, float)) or hook_chance < 0 or hook_chance > 1:
+                errors.append(f"Fishing spot {room_id} fish {item_id} must have hook_chance between 0 and 1")
+            if not _valid_range(fish.get("weight")):
+                errors.append(f"Fishing spot {room_id} fish {item_id} must define weight as an ordered two-number range")
             behavior_id = fish.get("behavior_id")
             if behavior_id and behavior_id not in systems.fishing_behaviors:
                 errors.append(f"Fishing spot {room_id} references unknown fish behavior: {behavior_id}")
@@ -385,9 +434,17 @@ def _validate_systems_content(registry, errors):
         result_id = recipe.get("result")
         if result_id and result_id not in items.item_templates:
             errors.append(f"Cooking recipe {recipe_key} yields unknown item: {result_id}")
+        result_item = items.item_templates.get(result_id, {})
+        if result_item and result_item.get("kind") not in {"meal", "consumable"}:
+            errors.append(f"Cooking recipe {recipe_key} should yield a meal or consumable item: {result_id}")
+        if not any(_has_activity(room.get("id"), "cooking") for room in world.rooms):
+            errors.append(f"Cooking recipe {recipe_key} requires at least one cooking room")
         for item_id in recipe.get("ingredients", {}):
             if item_id not in items.item_templates:
                 errors.append(f"Cooking recipe {recipe_key} references unknown ingredient: {item_id}")
+        for item_id, quantity in recipe.get("ingredients", {}).items():
+            if not isinstance(quantity, int) or quantity <= 0:
+                errors.append(f"Cooking recipe {recipe_key} ingredient {item_id} must have a positive integer quantity")
 
     for recipe_key, recipe in systems.tinkering_recipes.items():
         result_id = recipe.get("result")
@@ -399,6 +456,18 @@ def _validate_systems_content(registry, errors):
         for item_id in recipe.get("components", {}):
             if item_id not in items.item_templates:
                 errors.append(f"Tinkering recipe {recipe_key} references unknown component: {item_id}")
+        for item_id, quantity in recipe.get("components", {}).items():
+            if not isinstance(quantity, int) or quantity <= 0:
+                errors.append(f"Tinkering recipe {recipe_key} component {item_id} must have a positive integer quantity")
+        if not isinstance(recipe.get("result_quantity", 1), int) or recipe.get("result_quantity", 1) <= 0:
+            errors.append(f"Tinkering recipe {recipe_key} must have positive result_quantity")
+        if not _nonnegative_number(recipe.get("silver_cost", 0)):
+            errors.append(f"Tinkering recipe {recipe_key} must have nonnegative silver_cost")
+        station = recipe.get("station")
+        if station and station not in room_ids:
+            errors.append(f"Tinkering recipe {recipe_key} references unknown station room: {station}")
+        if not any(_has_activity(room.get("id"), "tinkering") for room in world.rooms):
+            errors.append(f"Tinkering recipe {recipe_key} requires at least one tinkering room")
 
     if systems.outfitters_room_id and systems.outfitters_room_id not in room_ids:
         errors.append(f"Commerce references unknown outfitters room: {systems.outfitters_room_id}")
@@ -452,3 +521,9 @@ def _validate_systems_content(registry, errors):
         boss_enemy_key = gate.get("boss_enemy_key")
         if boss_enemy_key and boss_enemy_key not in enemy_templates:
             errors.append(f"Boss gate {gate_key} references unknown boss enemy: {boss_enemy_key}")
+        elif boss_enemy_key and "boss" not in {str(tag or "").strip().lower() for tag in enemy_templates.get(boss_enemy_key, {}).get("tags", [])}:
+            errors.append(f"Boss gate {gate_key} boss enemy must have boss tag: {boss_enemy_key}")
+        if not any(exit_data.get("boss_gate") == gate_key or exit_data.get("brave_boss_gate") == gate_key for exit_data in world.exits):
+            errors.append(f"Boss gate {gate_key} must be referenced by at least one exit")
+        if "max_participants" in gate and (not isinstance(gate.get("max_participants"), int) or gate.get("max_participants") <= 0):
+            errors.append(f"Boss gate {gate_key} must have positive max_participants")

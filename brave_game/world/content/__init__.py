@@ -4,10 +4,16 @@ from .editor import ContentEditor, ContentMutation, ContentPublishValidationErro
 from .history import ContentHistoryStore
 from .preview import (
     preview_character_config,
+    preview_boss_gate,
     preview_class,
+    preview_cooking_recipe,
     preview_dialogue,
     preview_encounter,
     preview_enemy,
+    preview_fish_behavior,
+    preview_fishing_lure,
+    preview_fishing_rod,
+    preview_fishing_spot,
     preview_forge_recipe,
     preview_item,
     preview_portal,
@@ -17,6 +23,8 @@ from .preview import (
     preview_roaming_party,
     preview_room_encounters,
     preview_room,
+    preview_tinkering_recipe,
+    preview_trophy,
 )
 from .registry import BraveContentRegistry, get_content_registry, reload_content_registry
 
@@ -29,10 +37,16 @@ __all__ = [
     "get_content_registry",
     "reload_content_registry",
     "preview_character_config",
+    "preview_boss_gate",
     "preview_class",
+    "preview_cooking_recipe",
     "preview_dialogue",
     "preview_encounter",
     "preview_enemy",
+    "preview_fish_behavior",
+    "preview_fishing_lure",
+    "preview_fishing_rod",
+    "preview_fishing_spot",
     "preview_forge_recipe",
     "preview_item",
     "preview_portal",
@@ -42,4 +56,6 @@ __all__ = [
     "preview_roaming_party",
     "preview_room_encounters",
     "preview_room",
+    "preview_tinkering_recipe",
+    "preview_trophy",
 ]

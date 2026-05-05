@@ -85,6 +85,40 @@ class CreatorContentCommandTests(unittest.TestCase):
         self.assertIn("creator_test_portal", persisted["portals"]["portals"])
         self.assertEqual("tester", persisted["_meta"]["last_modified_by"])
 
+    def test_mutate_content_system_kinds_write_to_draft(self):
+        mutate_content(
+            "cooking-recipe",
+            "creator_test_stew",
+            json.dumps({"name": "Creator Test Stew", "ingredients": {"bramble_perch": 1}, "result": "innkeepers_fishpie", "summary": "Draft recipe."}),
+            write=True,
+            stage="draft",
+            editor=self.editor,
+            author="systems-user",
+        )
+        mutate_content(
+            "boss-gate",
+            "creator_test_gate",
+            json.dumps({"name": "Creator Test Gate", "trigger_room_id": "goblin_road_fencebreaker_camp", "boss_enemy_key": "ruk_fence_cutter", "encounter_key": "ruks_stand", "max_participants": 4}),
+            write=True,
+            stage="draft",
+            editor=self.editor,
+            author="systems-user",
+        )
+
+        draft_payload = json.loads(self.draft_paths["systems"].read_text(encoding="utf-8"))
+        self.assertIn("creator_test_stew", draft_payload["activities"]["cooking_recipes"])
+        self.assertIn("creator_test_gate", draft_payload["boss_gates"]["boss_gates"])
+        self.assertEqual("systems-user", draft_payload["_meta"]["last_modified_by"])
+
+    def test_preview_content_system_kinds(self):
+        cooking = preview_content("cooking-recipe", ["crisped_perch_plate"])
+        fishing = preview_content("fishing-spot", ["blackfen_approach_reedflats"])
+        gate = preview_content("boss-gate", ["ruk_fence_cutter"])
+
+        self.assertEqual("crisped_perch_plate", cooking["recipe_key"])
+        self.assertTrue(fishing["fish"])
+        self.assertEqual("ruk_fence_cutter", gate["gate_key"])
+
     def test_remove_content_readable_dry_run_removes_entry(self):
         mutation = remove_content("read", "dawn_bell", editor=self.editor)
         self.assertNotIn("dawn_bell", mutation.payload["static_read_responses"])

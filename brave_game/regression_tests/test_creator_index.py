@@ -44,13 +44,18 @@ class CreatorIndexViewTests(unittest.TestCase):
         response = creator_index(request)
         body = response.content.decode("utf-8")
         self.assertEqual(200, response.status_code)
-        self.assertIn("Brave Creator", body)
-        self.assertIn("builder tooling", body)
+        self.assertIn("Brave Creator Studio", body)
+        self.assertIn("What are you making", body)
         self.assertIn("/creator/world/", body)
         self.assertIn("staff, superuser, or Developer-authorized account", body)
         self.assertIn("/creator/items/", body)
         self.assertIn("/creator/characters/", body)
         self.assertIn("Open Character Builder", body)
+        self.assertIn("/creator/systems/", body)
+        self.assertIn("Open Systems Builder", body)
+        self.assertIn("/creator/composers/boss/", body)
+        self.assertIn("Compose a Boss Fight", body)
+        self.assertIn("creator_common.js", body)
 
 
 if __name__ == "__main__":

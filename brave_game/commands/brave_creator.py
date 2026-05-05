@@ -5,11 +5,17 @@ import json
 from world.content import (
     ContentEditor,
     ContentPublishValidationError,
+    preview_boss_gate,
     preview_character_config,
     preview_class,
+    preview_cooking_recipe,
     preview_dialogue,
     preview_encounter,
     preview_enemy,
+    preview_fish_behavior,
+    preview_fishing_lure,
+    preview_fishing_rod,
+    preview_fishing_spot,
     preview_forge_recipe,
     preview_item,
     preview_portal,
@@ -19,6 +25,8 @@ from world.content import (
     preview_roaming_party,
     preview_room,
     preview_room_encounters,
+    preview_tinkering_recipe,
+    preview_trophy,
 )
 from world.content.registry import reload_content_registry
 from world.content.validation import validate_content_registry
@@ -100,6 +108,38 @@ def preview_content(kind, args, registry=None):
         if len(tokens) != 1:
             raise ValueError("Usage: content preview roaming-party <party_key>")
         return preview_roaming_party(tokens[0], registry=registry)
+    if normalized == "cooking-recipe":
+        if len(tokens) != 1:
+            raise ValueError("Usage: content preview cooking-recipe <recipe_key>")
+        return preview_cooking_recipe(tokens[0], registry=registry)
+    if normalized == "tinkering-recipe":
+        if len(tokens) != 1:
+            raise ValueError("Usage: content preview tinkering-recipe <recipe_key>")
+        return preview_tinkering_recipe(tokens[0], registry=registry)
+    if normalized == "fishing-spot":
+        if len(tokens) != 1:
+            raise ValueError("Usage: content preview fishing-spot <room_id>")
+        return preview_fishing_spot(tokens[0], registry=registry)
+    if normalized == "fishing-rod":
+        if len(tokens) != 1:
+            raise ValueError("Usage: content preview fishing-rod <rod_key>")
+        return preview_fishing_rod(tokens[0], registry=registry)
+    if normalized == "fishing-lure":
+        if len(tokens) != 1:
+            raise ValueError("Usage: content preview fishing-lure <lure_key>")
+        return preview_fishing_lure(tokens[0], registry=registry)
+    if normalized == "fish-behavior":
+        if len(tokens) != 1:
+            raise ValueError("Usage: content preview fish-behavior <behavior_key>")
+        return preview_fish_behavior(tokens[0], registry=registry)
+    if normalized == "boss-gate":
+        if len(tokens) != 1:
+            raise ValueError("Usage: content preview boss-gate <gate_key>")
+        return preview_boss_gate(tokens[0], registry=registry)
+    if normalized == "trophy":
+        if len(tokens) != 1:
+            raise ValueError("Usage: content preview trophy <trophy_key>")
+        return preview_trophy(tokens[0], registry=registry)
 
     raise ValueError(f"Unknown preview kind: {kind}")
 
@@ -214,6 +254,62 @@ def mutate_content(kind, target, raw_payload, *, write=False, editor=None, stage
             raise ValueError("Forge payload must be a JSON object.")
         return editor.upsert_forge_recipe(key, payload, write=write, stage=stage, author=author)
 
+    if normalized == "cooking-recipe":
+        if not key:
+            raise ValueError("Cooking recipe updates require a recipe key.")
+        if not isinstance(payload, dict):
+            raise ValueError("Cooking recipe payload must be a JSON object.")
+        return editor.upsert_cooking_recipe(key, payload, write=write, stage=stage, author=author)
+
+    if normalized == "tinkering-recipe":
+        if not key:
+            raise ValueError("Tinkering recipe updates require a recipe key.")
+        if not isinstance(payload, dict):
+            raise ValueError("Tinkering recipe payload must be a JSON object.")
+        return editor.upsert_tinkering_recipe(key, payload, write=write, stage=stage, author=author)
+
+    if normalized == "fishing-spot":
+        if not key:
+            raise ValueError("Fishing spot updates require a room id.")
+        if not isinstance(payload, dict):
+            raise ValueError("Fishing spot payload must be a JSON object.")
+        return editor.upsert_fishing_spot(key, payload, write=write, stage=stage, author=author)
+
+    if normalized == "fishing-rod":
+        if not key:
+            raise ValueError("Fishing rod updates require a rod key.")
+        if not isinstance(payload, dict):
+            raise ValueError("Fishing rod payload must be a JSON object.")
+        return editor.upsert_fishing_rod(key, payload, write=write, stage=stage, author=author)
+
+    if normalized == "fishing-lure":
+        if not key:
+            raise ValueError("Fishing lure updates require a lure key.")
+        if not isinstance(payload, dict):
+            raise ValueError("Fishing lure payload must be a JSON object.")
+        return editor.upsert_fishing_lure(key, payload, write=write, stage=stage, author=author)
+
+    if normalized == "fish-behavior":
+        if not key:
+            raise ValueError("Fish behavior updates require a behavior key.")
+        if not isinstance(payload, dict):
+            raise ValueError("Fish behavior payload must be a JSON object.")
+        return editor.upsert_fish_behavior(key, payload, write=write, stage=stage, author=author)
+
+    if normalized == "boss-gate":
+        if not key:
+            raise ValueError("Boss gate updates require a gate key.")
+        if not isinstance(payload, dict):
+            raise ValueError("Boss gate payload must be a JSON object.")
+        return editor.upsert_boss_gate(key, payload, write=write, stage=stage, author=author)
+
+    if normalized == "trophy":
+        if not key:
+            raise ValueError("Trophy updates require a trophy key.")
+        if not isinstance(payload, dict):
+            raise ValueError("Trophy payload must be a JSON object.")
+        return editor.upsert_trophy(key, payload, write=write, stage=stage, author=author)
+
     raise ValueError(f"Unknown mutation kind: {kind}")
 
 
@@ -279,6 +375,38 @@ def remove_content(kind, target, *, write=False, editor=None, stage="live", auth
         if not key:
             raise ValueError("Forge removal requires a source template id.")
         return editor.delete_forge_recipe(key, write=write, stage=stage, author=author)
+    if normalized == "cooking-recipe":
+        if not key:
+            raise ValueError("Cooking recipe removal requires a recipe key.")
+        return editor.delete_cooking_recipe(key, write=write, stage=stage, author=author)
+    if normalized == "tinkering-recipe":
+        if not key:
+            raise ValueError("Tinkering recipe removal requires a recipe key.")
+        return editor.delete_tinkering_recipe(key, write=write, stage=stage, author=author)
+    if normalized == "fishing-spot":
+        if not key:
+            raise ValueError("Fishing spot removal requires a room id.")
+        return editor.delete_fishing_spot(key, write=write, stage=stage, author=author)
+    if normalized == "fishing-rod":
+        if not key:
+            raise ValueError("Fishing rod removal requires a rod key.")
+        return editor.delete_fishing_rod(key, write=write, stage=stage, author=author)
+    if normalized == "fishing-lure":
+        if not key:
+            raise ValueError("Fishing lure removal requires a lure key.")
+        return editor.delete_fishing_lure(key, write=write, stage=stage, author=author)
+    if normalized == "fish-behavior":
+        if not key:
+            raise ValueError("Fish behavior removal requires a behavior key.")
+        return editor.delete_fish_behavior(key, write=write, stage=stage, author=author)
+    if normalized == "boss-gate":
+        if not key:
+            raise ValueError("Boss gate removal requires a gate key.")
+        return editor.delete_boss_gate(key, write=write, stage=stage, author=author)
+    if normalized == "trophy":
+        if not key:
+            raise ValueError("Trophy removal requires a trophy key.")
+        return editor.delete_trophy(key, write=write, stage=stage, author=author)
 
     raise ValueError(f"Unknown removal kind: {kind}")
 

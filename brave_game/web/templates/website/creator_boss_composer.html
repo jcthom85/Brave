@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }}</title>
+  <style>
+    :root { --ink:#1d2430; --accent:#8b4a29; --panel:#fff9f0; --line:#d9c8ac; --muted:#6b6157; --good:#2f6d4c; --bad:#8d3122; --shadow:rgba(29,36,48,.12); }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:radial-gradient(circle at 80% 10%, rgba(139,74,41,.18), transparent 28%),linear-gradient(180deg,#f3eadb,#f9f3e8 48%,#efe2cf); min-height:100vh; }
+    .shell { width:min(1500px,calc(100vw - 32px)); margin:24px auto; display:grid; gap:18px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
+    .panel-head { padding:18px 20px; border-bottom:1px solid var(--line); background:linear-gradient(135deg, rgba(139,74,41,.12), rgba(217,200,172,.22)); }
+    .panel-head h1,.panel-head h2,.panel-head h3 { margin:0; }
+    .panel-head p { margin:8px 0 0; color:var(--muted); line-height:1.45; }
+    .panel-body { padding:18px 20px 20px; }
+    .grid { display:grid; grid-template-columns:1.1fr .9fr; gap:16px; }
+    .steps { display:grid; gap:12px; }
+    .step { border:1px solid var(--line); border-radius:16px; background:#fffdfa; padding:14px; display:grid; gap:10px; }
+    .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .field { display:grid; gap:6px; }
+    .field.full { grid-column:1/-1; }
+    .field label { color:var(--muted); font-size:.88rem; text-transform:uppercase; letter-spacing:.05em; }
+    input,textarea,select,pre { width:100%; border:1px solid var(--line); border-radius:12px; background:#fff; font:inherit; }
+    input,select { padding:10px 12px; }
+    textarea,pre { min-height:170px; padding:16px; font:.94rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; white-space:pre-wrap; overflow:auto; }
+    textarea { resize:vertical; }
+    .toolbar,.link-row { display:flex; flex-wrap:wrap; gap:10px; }
+    button,.button-link { border:0; border-radius:999px; padding:10px 16px; font:inherit; cursor:pointer; background:var(--accent); color:#fff; box-shadow:0 10px 24px rgba(139,74,41,.24); text-decoration:none; }
+    button.secondary,.button-link.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none; }
+    .status { padding:12px 14px; border-radius:12px; background:#fff6e7; border:1px solid var(--line); }
+    .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
+    .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
+    .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
+    .validation-notes[hidden] { display:none; }
+    @media (max-width:980px) { .grid,.field-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="shell" data-creator-workflow-host>
+    <section class="panel">
+      <div class="panel-head"><h1>Boss Composer</h1><p>Draft a complete boss gate loop: place the fight in the world, bind an encounter, register the system gate, then validate before publishing.</p></div>
+      <div class="panel-body toolbar">
+        <a class="button-link secondary" href="/creator/world/">World Builder</a>
+        <a class="button-link secondary" href="/creator/encounters/">Encounter Builder</a>
+        <a class="button-link secondary" href="/creator/systems/">Systems Builder</a>
+        <a class="button-link secondary" href="/creator/quests/">Quest Builder</a>
+      </div>
+    </section>
+    <section class="grid">
+      <section class="panel"><div class="panel-head"><h2>Compose The Flow</h2><p>Use existing rooms/enemies for now, or jump to a builder to create missing pieces first.</p></div><div class="panel-body steps">
+        <div class="step"><h3>1. Identity</h3><div class="field-grid">
+          <div class="field"><label for="gate-key">Gate Key</label><input id="gate-key" value="new_boss_gate"></div>
+          <div class="field"><label for="gate-name">Boss Name</label><input id="gate-name" value="New Boss Gate"></div>
+          <div class="field full"><label for="gate-summary">Summary</label><textarea id="gate-summary">A decisive boss fight blocks the next stretch of adventure.</textarea></div>
+        </div></div>
+        <div class="step"><h3>2. World Route</h3><div class="field-grid">
+          <div class="field"><label for="trigger-room">Trigger Room</label><select id="trigger-room"></select></div>
+          <div class="field"><label for="entry-room">Entry Room</label><select id="entry-room"></select></div>
+          <div class="field"><label for="success-room">Success Room</label><select id="success-room"></select></div>
+          <div class="field"><label for="failure-room">Failure Room</label><select id="failure-room"></select></div>
+          <div class="field"><label for="exit-key">Gate Exit Command</label><input id="exit-key" value="forward"></div>
+          <div class="field"><label for="exit-label">Gate Exit Label</label><input id="exit-label" value="Boss Gate"></div>
+        </div></div>
+        <div class="step"><h3>3. Encounter</h3><div class="field-grid">
+          <div class="field"><label for="encounter-key">Encounter Key</label><input id="encounter-key" value="new_boss_stand"></div>
+          <div class="field"><label for="boss-enemy">Boss Enemy</label><select id="boss-enemy"></select></div>
+          <div class="field full"><label for="encounter-title">Encounter Title</label><input id="encounter-title" value="A Boss Makes Their Stand"></div>
+          <div class="field full"><label for="encounter-intro">Encounter Intro</label><textarea id="encounter-intro">The air tightens. The road behind you goes quiet. The boss steps forward.</textarea></div>
+        </div></div>
+        <div class="step"><h3>4. Gate Rules</h3><div class="field-grid">
+          <div class="field"><label for="max-participants">Max Participants</label><input id="max-participants" type="number" min="1" value="4"></div>
+          <div class="field"><label for="requires-clear">Requires Personal Clear</label><select id="requires-clear"><option value="true">true</option><option value="false">false</option></select></div>
+          <div class="field full"><label for="instance-desc">Instance Description</label><textarea id="instance-desc">The boss arena locks into focus around the party. This is the run that decides the route.</textarea></div>
+        </div></div>
+        <div class="toolbar">
+          <button id="preview-boss" class="secondary" type="button">Preview Draft Payloads</button>
+          <button id="write-boss" type="button">Write Draft Boss Flow</button>
+          <button id="validate-boss" class="secondary" type="button">Validate Drafts</button>
+        </div>
+      </div></section>
+      <section class="panel"><div class="panel-head"><h2>Composer Output</h2><p>Diffs, validation, and follow-up links appear here.</p></div><div class="panel-body steps">
+        <div id="validation-notes" class="validation-notes" hidden></div>
+        <div id="status" class="status">Load existing rooms and enemies, then compose a draft.</div>
+        <pre id="output"></pre>
+      </div></section>
+    </section>
+  </div>
+  <script src="/static/website/js/creator_common.js"></script>
+  <script>
+    const API_ROOT = "{{ api_root|escapejs }}";
+    const statusNode = document.getElementById('status');
+    const validationNode = document.getElementById('validation-notes');
+    const output = document.getElementById('output');
+    const creator = window.BraveCreator.bind(API_ROOT, statusNode, validationNode);
+    const fields = {
+      gateKey: document.getElementById('gate-key'),
+      gateName: document.getElementById('gate-name'),
+      gateSummary: document.getElementById('gate-summary'),
+      triggerRoom: document.getElementById('trigger-room'),
+      entryRoom: document.getElementById('entry-room'),
+      successRoom: document.getElementById('success-room'),
+      failureRoom: document.getElementById('failure-room'),
+      encounterKey: document.getElementById('encounter-key'),
+      bossEnemy: document.getElementById('boss-enemy'),
+      encounterTitle: document.getElementById('encounter-title'),
+      encounterIntro: document.getElementById('encounter-intro'),
+      exitKey: document.getElementById('exit-key'),
+      exitLabel: document.getElementById('exit-label'),
+      maxParticipants: document.getElementById('max-participants'),
+      requiresClear: document.getElementById('requires-clear'),
+      instanceDesc: document.getElementById('instance-desc'),
+    };
+    function selected(select) { return select.value.trim(); }
+    function buildPayloads() {
+      const gateKey = fields.gateKey.value.trim();
+      const encounterKey = fields.encounterKey.value.trim();
+      const triggerRoom = selected(fields.triggerRoom);
+      const bossEnemy = selected(fields.bossEnemy);
+      if (!gateKey || !encounterKey || !triggerRoom || !bossEnemy) throw new Error('Gate key, encounter key, trigger room, and boss enemy are required.');
+      const successRoom = selected(fields.successRoom);
+      if (!successRoom) throw new Error('Success room is required so the composer can create a boss-gate exit.');
+      return {
+        encounterEntry: { key: encounterKey, title: fields.encounterTitle.value.trim(), intro: fields.encounterIntro.value.trim(), enemies: [bossEnemy] },
+        exit: {
+          kind: 'exit',
+          target: `${triggerRoom}_to_${successRoom}_${gateKey}`,
+          payload: {
+            id: `${triggerRoom}_to_${successRoom}_${gateKey}`,
+            key: fields.exitKey.value.trim() || 'forward',
+            label: fields.exitLabel.value.trim() || fields.gateName.value.trim(),
+            source: triggerRoom,
+            destination: successRoom,
+            boss_gate: gateKey,
+          },
+        },
+        gate: {
+          kind: 'boss-gate',
+          target: gateKey,
+          payload: {
+            key: gateKey,
+            name: fields.gateName.value.trim(),
+            summary: fields.gateSummary.value.trim(),
+            trigger_room_id: triggerRoom,
+            entry_room_id: selected(fields.entryRoom) || triggerRoom,
+            success_room_id: successRoom,
+            failure_room_id: selected(fields.failureRoom) || triggerRoom,
+            encounter_key: encounterKey,
+            boss_enemy_key: bossEnemy,
+            max_participants: Number(fields.maxParticipants.value || 1),
+            requires_personal_clear: fields.requiresClear.value === 'true',
+            instance_desc: fields.instanceDesc.value.trim(),
+          },
+        },
+      };
+    }
+    async function loadRefs() {
+      const [rooms, enemies] = await Promise.all([
+        creator.fetchReferences('rooms', { limit: 1000 }),
+        creator.fetchReferences('enemies', { limit: 1000 }),
+      ]);
+      for (const select of [fields.triggerRoom, fields.entryRoom, fields.successRoom, fields.failureRoom]) {
+        creator.fillSelect(select, rooms, { placeholder: 'Choose room', includeBlank: true });
+      }
+      creator.fillSelect(fields.bossEnemy, enemies, { placeholder: 'Choose boss enemy', includeBlank: true });
+      const ruk = enemies.find((entry) => entry.id === 'ruk_fence_cutter');
+      if (ruk) fields.bossEnemy.value = ruk.id;
+      const camp = rooms.find((entry) => entry.id === 'goblin_road_fencebreaker_camp');
+      if (camp) {
+        fields.triggerRoom.value = camp.id;
+        fields.entryRoom.value = camp.id;
+        fields.failureRoom.value = camp.id;
+      }
+      creator.setStatus('Boss Composer loaded. Choose or create linked content, then write drafts.', 'good');
+    }
+    async function mutate(spec, write) {
+      return creator.apiFetch('/mutate', { method:'POST', body: JSON.stringify({ ...spec, write, stage:'draft' }) });
+    }
+    async function buildEncounterSpec(triggerRoom, encounterEntry) {
+      let encounters = [];
+      try {
+        const preview = await creator.apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind:'encounters', args:[triggerRoom] }) });
+        encounters = Array.isArray(preview.preview.encounters) ? preview.preview.encounters.map((entry) => {
+          const copy = { ...entry };
+          delete copy.enemy_details;
+          return copy;
+        }) : [];
+      } catch (error) {
+        encounters = [];
+      }
+      const index = encounters.findIndex((entry) => entry.key === encounterEntry.key);
+      if (index >= 0) encounters[index] = encounterEntry;
+      else encounters.push(encounterEntry);
+      return { kind:'encounters', target:triggerRoom, payload:encounters };
+    }
+    async function runCompose(write) {
+      const specs = buildPayloads();
+      if (!write) {
+        output.textContent = JSON.stringify(specs, null, 2);
+        creator.setStatus('Draft payloads are ready. Nothing written yet.', 'good');
+        return;
+      }
+      const encounterSpec = await buildEncounterSpec(specs.gate.payload.trigger_room_id, specs.encounterEntry);
+      const encounter = await mutate(encounterSpec, true);
+      const exit = await mutate(specs.exit, true);
+      const gate = await mutate(specs.gate, true);
+      output.textContent = JSON.stringify({ encounter_diff: encounter.diff, exit_diff: exit.diff, gate_diff: gate.diff }, null, 2);
+      creator.setStatus('Boss encounter, gate exit, and boss gate were written to draft packs. Validate before publishing.', 'good');
+    }
+    async function validateDrafts() {
+      const payload = await creator.apiFetch('/validate', { method:'POST', body: JSON.stringify({ stage:'draft' }) });
+      output.textContent = JSON.stringify(payload, null, 2);
+      creator.showValidation(payload.errors || []);
+      creator.setStatus(payload.ok ? 'Draft validation passed.' : 'Draft validation found issues.', payload.ok ? 'good' : 'bad');
+    }
+    document.getElementById('preview-boss').addEventListener('click', () => runCompose(false).catch((error) => creator.setStatus(error.message, 'bad')));
+    document.getElementById('write-boss').addEventListener('click', () => runCompose(true).catch((error) => creator.setStatus(error.message, 'bad')));
+    document.getElementById('validate-boss').addEventListener('click', () => validateDrafts().catch((error) => creator.setStatus(error.message, 'bad')));
+    loadRefs().catch((error) => creator.setStatus(error.message, 'bad'));
+  </script>
+</body>
+</html>

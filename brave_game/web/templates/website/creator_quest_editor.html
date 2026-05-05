@@ -18,6 +18,12 @@
     .stack { display:grid; gap:12px; }
     .toolbar,.editor-toolbar,.pill-row,.summary-grid,.chip-row,.row-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
     .meta { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.94rem; }
+    .guide-rail { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .guide-button { border-radius:14px; min-height:76px; background:#fffdfa; color:var(--ink); border:1px solid var(--line); box-shadow:none; text-align:left; }
+    .guide-button strong,.guide-button span { display:block; }
+    .guide-button span { margin-top:4px; color:var(--muted); font-size:.86rem; line-height:1.25; }
+    .guide-button.active { background:var(--ink); color:#fff; border-color:var(--ink); }
+    .guide-button.active span { color:rgba(255,255,255,.76); }
     .tabs { border-bottom:1px solid var(--line); padding:0 20px; background:#fff8f2; }
     .search,.field input,.field select,textarea { width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font:inherit; background:#fff; color:var(--ink); }
     .search { margin-bottom:12px; }
@@ -72,8 +78,15 @@
     details .details-body { padding:0 14px 14px; }
     .preview-block { border:1px solid var(--line); border-radius:8px; background:#fffdfa; padding:12px; display:grid; gap:8px; }
     .preview-block strong { display:block; }
-    @media (max-width:1180px) { .builder-grid { grid-template-columns:1fr; } }
-    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .field-grid,.reward-grid,.objective-target.two,.mini-row { grid-template-columns:1fr; } .quest-list { max-height:240px; } .summary-grid { grid-template-columns:1fr; } }
+    .link-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .link-card { border:1px solid var(--line); border-radius:10px; background:#fff; padding:12px; display:grid; gap:8px; }
+    .link-card strong,.link-card span { display:block; }
+    .link-card span { color:var(--muted); font-size:.9rem; line-height:1.35; }
+    .link-card code { font:.86rem/1.4 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; white-space:pre-wrap; word-break:break-word; }
+    .builder-links { display:flex; flex-wrap:wrap; gap:8px; }
+    .builder-links a { border:1px solid var(--line); border-radius:999px; padding:8px 10px; background:#fffdfa; color:var(--accent); text-decoration:none; font-size:.9rem; }
+    @media (max-width:1180px) { .builder-grid,.link-grid { grid-template-columns:1fr; } }
+    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .field-grid,.reward-grid,.objective-target.two,.mini-row,.guide-rail { grid-template-columns:1fr; } .quest-list { max-height:240px; } .summary-grid { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -106,9 +119,28 @@
       <div class="toolbar">
         <button id="load-quest" class="secondary" type="button">Refresh Selection</button>
         <button id="new-quest" class="secondary" type="button">New Quest Draft</button>
-        <button id="validate-content" class="secondary" type="button">Check Content</button>
+        <button id="validate-content" class="secondary" type="button">Check Draft Content</button>
         <button id="reload-content" class="secondary" type="button">Reload Registry</button>
       </div>
+
+      <section class="subsection">
+        <div class="subsection-head">
+          <div>
+            <h3>Quest Guide</h3>
+            <p>Pick the player experience first. Presets seed objective and reward shape without replacing Advanced Source.</p>
+          </div>
+        </div>
+        <div class="subsection-body">
+          <div class="guide-rail" aria-label="Quest type presets">
+            <button class="guide-button" type="button" data-quest-preset="route"><strong>Route Quest</strong><span>Visit a room or unlock movement through World Builder.</span></button>
+            <button class="guide-button" type="button" data-quest-preset="collection"><strong>Collection Quest</strong><span>Collect an item from drops, fishing, cooking, or rewards.</span></button>
+            <button class="guide-button" type="button" data-quest-preset="combat"><strong>Combat Quest</strong><span>Defeat enemies by tag and link to Encounter Builder.</span></button>
+            <button class="guide-button" type="button" data-quest-preset="talk"><strong>Talk/NPC Quest</strong><span>Talk to an NPC/entity and link to Dialogue Builder.</span></button>
+            <button class="guide-button" type="button" data-quest-preset="chain"><strong>Quest Chain</strong><span>Use prerequisites and follow-up hooks.</span></button>
+            <button class="guide-button" type="button" data-quest-preset="reward"><strong>Reward/Unlock Quest</strong><span>Emphasize item rewards, gated exits, or unlock items.</span></button>
+          </div>
+        </div>
+      </section>
 
       <div class="summary-grid">
         <div class="summary-card"><strong id="quest-summary-title">-</strong><span>Quest</span></div>
@@ -194,11 +226,17 @@
           <section class="subsection">
             <div class="subsection-head">
               <div>
-                <h3>Quest Snapshot</h3>
-                <p>Resolved state from the live registry and the current staged fields.</p>
+                <h3>Quest Flow</h3>
+                <p>Readable player route and linked content from World, Items, Encounters, and Dialogue.</p>
               </div>
             </div>
             <div class="subsection-body stack">
+              <div class="builder-links">
+                <a href="/creator/world/">Open World Builder</a>
+                <a href="/creator/items/">Open Item Builder</a>
+                <a href="/creator/encounters/">Open Encounter Builder</a>
+                <a href="/creator/dialogue/">Open Dialogue Builder</a>
+              </div>
               <div class="chip-row">
                 <div id="quest-region-chip" class="chip">Region: -</div>
                 <div id="quest-starting-chip" class="chip">Starting: No</div>
@@ -211,6 +249,10 @@
               <div class="preview-block">
                 <strong>Rewards</strong>
                 <div id="quest-reward-preview" class="preview-list"></div>
+              </div>
+              <div class="preview-block">
+                <strong>Linked Content</strong>
+                <div id="quest-link-grid" class="link-grid"></div>
               </div>
             </div>
           </section>
@@ -274,6 +316,7 @@
     const rewardList = $('reward-list');
     const objectivePreview = $('quest-objective-preview');
     const rewardPreview = $('quest-reward-preview');
+    const questLinkGrid = $('quest-link-grid');
     const loadQuestButton = $('load-quest');
     const newQuestButton = $('new-quest');
     const addObjectiveButton = $('add-objective');
@@ -285,12 +328,15 @@
     const writeQuestButton = $('write-quest');
     const validateButton = $('validate-content');
     const reloadButton = $('reload-content');
+    const guideButtons = Array.from(document.querySelectorAll('[data-quest-preset]'));
 
     let quests = [];
     let rooms = [];
     let items = [];
+    let entities = [];
     let enemyTags = [];
     let selectedQuestKey = '';
+    let previewPayload = null;
     let objectiveRows = [];
     let prerequisiteRows = [];
     let rewardRows = [];
@@ -310,14 +356,21 @@
     }
 
     async function apiFetch(path, options = {}) {
+      const { allowErrorPayload = false, ...requestOptions } = options;
       const response = await fetch(`${API_ROOT}${path}`, {
         credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-        ...options,
+        headers: { 'Content-Type': 'application/json', ...(requestOptions.headers || {}) },
+        ...requestOptions,
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload.ok === false) throw new Error(payload.error || `Request failed with ${response.status}`);
+      if (!response.ok || (payload.ok === false && !allowErrorPayload)) throw new Error(payload.error || `Request failed with ${response.status}`);
       return payload;
+    }
+
+    function setActivePreset(preset) {
+      for (const button of guideButtons) {
+        button.classList.toggle('active', button.dataset.questPreset === preset);
+      }
     }
 
     function fillSelect(select, entries, config = {}) {
@@ -395,6 +448,7 @@
         item_id: data.item_id || '',
         count: data.count || 1,
         enemy_tag: data.enemy_tag || '',
+        npc_id: data.npc_id || '',
       };
     }
 
@@ -464,7 +518,7 @@
       typeField.className = 'field';
       typeField.innerHTML = '<label>Objective Type</label>';
       const typeSelect = document.createElement('select');
-      for (const value of ['visit_room', 'collect_item', 'defeat_enemy']) {
+      for (const value of ['visit_room', 'collect_item', 'defeat_enemy', 'talk_to_npc']) {
         const option = document.createElement('option');
         option.value = value;
         option.textContent = value.replace(/_/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase());
@@ -479,9 +533,14 @@
         } else if (row.type === 'collect_item') {
           row.room_id = '';
           row.enemy_tag = '';
+        } else if (row.type === 'defeat_enemy') {
+          row.room_id = '';
+          row.item_id = '';
+          row.npc_id = '';
         } else {
           row.room_id = '';
           row.item_id = '';
+          row.enemy_tag = '';
         }
         renderObjectiveRows();
         updateQuestSummary();
@@ -543,7 +602,7 @@
 
         targetRow.appendChild(itemField);
         targetRow.appendChild(countField);
-      } else {
+      } else if (row.type === 'defeat_enemy') {
         const tagField = document.createElement('div');
         tagField.className = 'field';
         tagField.innerHTML = '<label>Enemy Tag</label>';
@@ -555,12 +614,26 @@
         tagInput.addEventListener('input', () => { row.enemy_tag = tagInput.value; updateQuestSummary(); });
         tagField.appendChild(tagInput);
         targetRow.appendChild(tagField);
+      } else {
+        const npcField = document.createElement('div');
+        npcField.className = 'field';
+        npcField.innerHTML = '<label>NPC / Entity Target</label>';
+        const npcSelect = document.createElement('select');
+        fillSelect(npcSelect, entities, {
+          placeholder: 'Select NPC/entity',
+          includeBlank: true,
+          selectedValue: row.npc_id,
+          labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`,
+        });
+        npcSelect.addEventListener('change', () => { row.npc_id = npcSelect.value; updateQuestSummary(); });
+        npcField.appendChild(npcSelect);
+        targetRow.appendChild(npcField);
       }
       card.appendChild(targetRow);
 
       const hint = document.createElement('div');
       hint.className = 'objective-hint';
-      hint.textContent = row.type === 'visit_room' ? 'The player must reach a specific room.' : row.type === 'collect_item' ? 'The player must collect a specific item.' : 'The player must defeat enemies with the matching tag.';
+      hint.textContent = row.type === 'visit_room' ? 'The player must reach a specific room.' : row.type === 'collect_item' ? 'The player must collect a specific item.' : row.type === 'defeat_enemy' ? 'The player must defeat enemies with the matching tag.' : 'The player must talk to a specific NPC/entity.';
       card.appendChild(hint);
       objectiveList.appendChild(card);
     }
@@ -663,9 +736,14 @@
           const item = items.find((entry) => entry.id === row.item_id);
           pill.textContent = `${row.description || 'Collect item'} · ${(item && item.label) || row.item_id || 'no item selected'} x${Math.max(1, Number(row.count || 1))}`;
         } else {
-          const tag = row.enemy_tag || 'no enemy tag selected';
-          const suggestion = enemyTags.find((entry) => entry.id === tag.toLowerCase());
-          pill.textContent = `${row.description || 'Defeat enemy'} · ${suggestion ? suggestion.label : tag}`;
+          if (row.type === 'defeat_enemy') {
+            const tag = row.enemy_tag || 'no enemy tag selected';
+            const suggestion = enemyTags.find((entry) => entry.id === tag.toLowerCase());
+            pill.textContent = `${row.description || 'Defeat enemy'} · ${suggestion ? suggestion.label : tag}`;
+          } else {
+            const entity = entities.find((entry) => entry.id === row.npc_id);
+            pill.textContent = `${row.description || 'Talk to NPC'} · ${(entity && entity.label) || row.npc_id || 'no NPC/entity selected'}`;
+          }
         }
         objectivePreview.appendChild(pill);
       }
@@ -688,6 +766,7 @@
         pill.textContent = 'No item rewards yet.';
         rewardPreview.appendChild(pill);
       }
+      renderLinkedContent(null);
     }
 
     function buildQuestFromState() {
@@ -705,8 +784,10 @@
           } else if (row.type === 'collect_item') {
             payload.item_id = row.item_id;
             payload.count = Math.max(1, Number(row.count || 1));
-          } else {
+          } else if (row.type === 'defeat_enemy') {
             payload.enemy_tag = row.enemy_tag.trim();
+          } else if (row.type === 'talk_to_npc') {
+            payload.npc_id = row.npc_id;
           }
           return payload;
         }),
@@ -766,6 +847,7 @@
           if (Number(row.count || 0) < 1) messages.push(`Objective ${index + 1} count must be at least 1.`);
         }
         if (row.type === 'defeat_enemy' && !String(row.enemy_tag || '').trim()) messages.push(`Objective ${index + 1} enemy tag is required.`);
+        if (row.type === 'talk_to_npc' && !String(row.npc_id || '').trim()) messages.push(`Objective ${index + 1} NPC/entity target is required.`);
       });
       if (!showValidation(messages)) {
         setStatus('Quest form is incomplete.', 'bad');
@@ -793,11 +875,87 @@
       }
     }
 
+    function payloadSnippet(kind, data = {}) {
+      if (kind === 'quest-gated-exit') return JSON.stringify({ required_quest: questKeyInput.value.trim() || selectedQuestKey || 'quest_key', lock_message: 'You need to finish this quest first.' }, null, 2);
+      if (kind === 'quest-reward') return JSON.stringify({ item: data.template_id || data.item || 'item_key', quantity: 1 }, null, 2);
+      if (kind === 'enemy-objective') return JSON.stringify({ type: 'defeat_enemy', enemy_tag: data.enemy_tag || 'enemy_tag', description: 'Defeat the marked enemies.' }, null, 2);
+      if (kind === 'dialogue-hook') return JSON.stringify({ type: 'talk_to_npc', npc_id: data.entity_id || data.id || 'npc_id', description: 'Talk to the NPC.' }, null, 2);
+      return JSON.stringify(data, null, 2);
+    }
+
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+      return Promise.resolve();
+    }
+
+    function addLinkCard(title, meta, href, snippet) {
+      const card = document.createElement('div');
+      card.className = 'link-card';
+      card.innerHTML = `<strong>${href ? `<a href="${href}">${title}</a>` : title}</strong><span>${meta}</span>${snippet ? `<code>${snippet}</code>` : ''}`;
+      if (snippet) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'secondary';
+        button.textContent = 'Copy Link Payload';
+        button.addEventListener('click', () => copyText(snippet).then(() => setStatus('Quest link payload copied.', 'good')));
+        card.appendChild(button);
+      }
+      questLinkGrid.appendChild(card);
+    }
+
+    function renderLinkedContent(preview = previewPayload) {
+      questLinkGrid.innerHTML = '';
+      let linked = (preview && preview.linked_content) || null;
+      if (!linked) {
+        linked = {
+          rooms: objectiveRows.filter((row) => row.type === 'visit_room' && row.room_id).map((row) => ({ room_id: row.room_id, name: (rooms.find((entry) => entry.id === row.room_id) || {}).label, role: 'objective' })),
+          items: [
+            ...objectiveRows.filter((row) => row.type === 'collect_item' && row.item_id).map((row) => ({ template_id: row.item_id, name: (items.find((entry) => entry.id === row.item_id) || {}).label, role: 'objective' })),
+            ...rewardRows.filter((row) => row.item).map((row) => ({ template_id: row.item, name: (items.find((entry) => entry.id === row.item) || {}).label, role: 'reward' })),
+          ],
+          enemies: objectiveRows.filter((row) => row.type === 'defeat_enemy' && row.enemy_tag).map((row) => ({ enemy_tag: row.enemy_tag, name: (enemyTags.find((entry) => entry.id === row.enemy_tag) || {}).label, role: 'objective' })),
+          entities: objectiveRows.filter((row) => row.type === 'talk_to_npc' && row.npc_id).map((row) => ({ entity_id: row.npc_id, name: (entities.find((entry) => entry.id === row.npc_id) || {}).label, role: 'objective' })),
+          prerequisites: prerequisiteRows.filter((row) => row.value).map((row) => ({ quest_key: row.value, title: (quests.find((entry) => entry.id === row.value) || {}).label })),
+        };
+      }
+      for (const room of linked.rooms || []) addLinkCard(room.name || room.room_id, `World room objective: ${room.room_id}`, '/creator/world/', payloadSnippet('quest-gated-exit'));
+      for (const item of linked.items || []) addLinkCard(item.name || item.template_id, `Item ${item.role}: ${item.template_id}`, '/creator/items/', payloadSnippet('quest-reward', item));
+      for (const enemy of linked.enemies || []) addLinkCard(enemy.name || enemy.enemy_tag, `Enemy objective tag: ${enemy.enemy_tag}`, '/creator/encounters/', payloadSnippet('enemy-objective', enemy));
+      for (const entity of linked.entities || []) addLinkCard(entity.name || entity.entity_id, `Dialogue/NPC objective: ${entity.entity_id}`, '/creator/dialogue/', payloadSnippet('dialogue-hook', entity));
+      for (const prereq of linked.prerequisites || []) addLinkCard(prereq.title || prereq.quest_key, `Prerequisite quest: ${prereq.quest_key}`, '/creator/quests/', '');
+      if (!questLinkGrid.children.length) {
+        addLinkCard('No linked content yet', 'Add an objective or reward to generate builder links and payload snippets.', null, payloadSnippet('quest-gated-exit'));
+      }
+    }
+
+    function applyQuestPreset(preset) {
+      setActivePreset(preset);
+      if (preset === 'route') objectiveRows = [createObjectiveRow({ type: 'visit_room', description: 'Reach the target location.', room_id: rooms[0] ? rooms[0].id : '' })];
+      if (preset === 'collection') objectiveRows = [createObjectiveRow({ type: 'collect_item', description: 'Collect the required item.', item_id: items[0] ? items[0].id : '', count: 1 })];
+      if (preset === 'combat') objectiveRows = [createObjectiveRow({ type: 'defeat_enemy', description: 'Defeat enemies with the matching tag.', enemy_tag: enemyTags[0] ? enemyTags[0].id : '' })];
+      if (preset === 'talk') objectiveRows = [createObjectiveRow({ type: 'talk_to_npc', description: 'Talk to the selected NPC.', npc_id: entities[0] ? entities[0].id : '' })];
+      if (preset === 'chain' && !prerequisiteRows.length) prerequisiteRows = [createPrerequisiteRow(quests[0] ? quests[0].id : '')];
+      if (preset === 'reward' && !rewardRows.length) rewardRows = [createRewardRow({ item: items[0] ? items[0].id : '', quantity: 1 })];
+      renderPrerequisiteRows();
+      renderObjectiveRows();
+      renderRewardRows();
+      updateQuestSummary();
+      syncQuestFormToJson();
+      setStatus(`${preset.replace(/_/g, ' ')} quest preset applied.`, 'good');
+    }
+
     async function loadReferences() {
-      [quests, rooms, items, enemyTags] = await Promise.all([
+      [quests, rooms, items, entities, enemyTags] = await Promise.all([
         creatorTools.fetchReferences('quests', { limit: 1000 }),
         creatorTools.fetchReferences('rooms', { limit: 1000 }),
         creatorTools.fetchReferences('items', { limit: 1000 }),
+        creatorTools.fetchReferences('entities', { limit: 1000 }),
         creatorTools.fetchReferences('enemy-tags', { limit: 1000 }),
       ]);
       const regionOptions = $('quest-region-options');
@@ -836,6 +994,7 @@
       setStatus(`Loading preview for ${selectedQuestKey}...`);
       try {
         const payload = await apiFetch('/preview', { method: 'POST', body: JSON.stringify({ kind: 'quest', args: [selectedQuestKey] }) });
+        previewPayload = payload.preview;
         const wrapper = {
           key: selectedQuestKey,
           quest: payload.preview.quest,
@@ -843,6 +1002,7 @@
           add_starting: !!payload.preview.is_starting,
         };
         populateQuestForm(wrapper);
+        renderLinkedContent(payload.preview);
         output.textContent = JSON.stringify(payload.preview, null, 2);
         setStatus(`Loaded quest preview for ${selectedQuestKey}.`, 'good');
       } catch (error) {
@@ -878,7 +1038,7 @@
       setBusy(true);
       setStatus(write ? `Saving quest ${target}...` : `Previewing quest changes for ${target}...`);
       try {
-        const result = await apiFetch('/mutate', { method: 'POST', body: JSON.stringify({ kind: 'quest', target, payload: wrapper, write }) });
+        const result = await apiFetch('/mutate', { method: 'POST', body: JSON.stringify({ kind: 'quest', target, payload: wrapper, write, stage: 'draft' }) });
         output.textContent = result.diff || JSON.stringify(result, null, 2);
         if (write) {
           const errors = result.validation_errors || [];
@@ -903,9 +1063,9 @@
 
     async function validateContent() {
       setBusy(true);
-      setStatus('Checking content packs...');
+      setStatus('Checking draft content packs...');
       try {
-        const payload = await apiFetch('/validate', { method: 'POST', body: '{}' });
+        const payload = await apiFetch('/validate', { method: 'POST', body: JSON.stringify({ stage: 'draft' }), allowErrorPayload: true });
         if (payload.errors.length) {
           setStatus(`Content check found ${payload.errors.length} issue(s).`, 'bad');
           output.textContent = payload.errors.join('\n');
@@ -943,6 +1103,7 @@
     newQuestButton.addEventListener('click', () => {
       const draft = buildQuestDraft();
       selectedQuestKey = '';
+      previewPayload = null;
       populateQuestForm(draft);
       renderQuestList(questSearch.value);
       editorTitle.textContent = 'New Quest Draft';
@@ -958,6 +1119,9 @@
     writeQuestButton.addEventListener('click', () => mutateQuest(true));
     validateButton.addEventListener('click', validateContent);
     reloadButton.addEventListener('click', reloadContent);
+    for (const button of guideButtons) {
+      button.addEventListener('click', () => applyQuestPreset(button.dataset.questPreset));
+    }
 
     populateQuestForm(buildQuestDraft());
     renderQuestList();

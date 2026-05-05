@@ -5,37 +5,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ page_title }}</title>
   <style>
-    :root { --ink:#1a2230; --accent:#8b4a29; --panel:#fff8ef; --line:#d8c6aa; --muted:#655d53; --shadow:rgba(26,34,48,.12); }
+    :root { --ink:#1a2230; --accent:#8b4a29; --panel:#fff8ef; --line:#d8c6aa; --muted:#655d53; --good:#2f6d4c; --shadow:rgba(26,34,48,.12); }
     * { box-sizing:border-box; }
-    body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:radial-gradient(circle at top left, rgba(139,74,41,.14), transparent 30%), linear-gradient(180deg,#f3eadb 0%,#f9f3e8 44%,#efe2cf 100%); min-height:100vh; }
-    .shell { width:min(1320px,calc(100vw - 32px)); margin:24px auto 48px; display:grid; gap:18px; }
-    .hero,.card { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 16px 48px var(--shadow); }
-    .hero { padding:24px; }
-    .hero h1,.card h2 { margin:0; }
-    .hero p,.card p { color:var(--muted); line-height:1.5; }
-    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
-    .card { padding:18px; display:grid; gap:10px; }
-    .card a { color:var(--accent); font-weight:700; text-decoration:none; }
+    body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:radial-gradient(circle at top left, rgba(139,74,41,.18), transparent 30%), linear-gradient(180deg,#f3eadb 0%,#f9f3e8 44%,#efe2cf 100%); min-height:100vh; }
+    .shell { width:min(1420px,calc(100vw - 32px)); margin:24px auto 48px; display:grid; gap:18px; }
+    .hero,.card,.rail { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 16px 48px var(--shadow); }
+    .hero { padding:28px; display:grid; gap:14px; background:linear-gradient(135deg, rgba(255,248,239,.98), rgba(232,210,175,.78)); }
+    .hero h1,.card h2,.rail h2 { margin:0; }
+    .hero p,.card p,.rail p { color:var(--muted); line-height:1.5; }
+    .hero-actions,.grid,.builder-grid,.status-row { display:grid; gap:14px; }
+    .hero-actions { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .builder-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+    .card,.rail { padding:18px; display:grid; gap:10px; }
+    .card.feature { min-height:190px; background:#fffaf2; }
+    .card a,.button-link { color:var(--accent); font-weight:700; text-decoration:none; }
+    .button-link { display:inline-flex; width:max-content; border:1px solid var(--accent); border-radius:999px; padding:9px 13px; background:#fffdfa; }
     .meta { color:var(--muted); font-size:.95rem; }
     code { background:#fff; border:1px solid var(--line); border-radius:8px; padding:2px 6px; }
-    @media (max-width:980px) { .grid { grid-template-columns:1fr; } }
+    .status { padding:12px 14px; border-radius:12px; background:#fff6e7; border:1px solid var(--line); }
+    .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
+    .validation-notes[hidden] { display:none; }
+    pre { display:none; }
+    @media (max-width:980px) { .grid,.builder-grid,.hero-actions { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
   <div class="shell">
     <section class="hero">
-      <h1>Brave Creator</h1>
-      <p>Browser-based builder tooling for authored Brave content packs. Access is limited to a staff, superuser, or Developer-authorized account. If you already have one of those roles, log into the site first and then return to <code>/creator/</code>.</p>
-      <p class="meta">API root: {{ api_root }}</p>
+      <h1>Brave Creator Studio</h1>
+      <p>Start with the player experience you want to build, then move through the builders as linked drafting tools. Browser saves go to draft packs first, so experimentation is safe.</p>
+      <p class="meta">API root: {{ api_root }} · Access: staff, superuser, or Developer-authorized account</p>
+      <div class="hero-actions">
+        <a class="button-link" href="/creator/composers/boss/">Compose a Boss Fight</a>
+        <a class="button-link" href="/creator/systems/">Edit Systems</a>
+        <a class="button-link" href="/creator/world/">Open World Map</a>
+      </div>
+    </section>
+    <section class="rail">
+      <h2>What are you making?</h2>
+      <p>Choose a player-facing experience first, then let Creator point you at the builders that make it real.</p>
     </section>
     <section class="grid">
-      <article class="card"><h2>World Builder</h2><p>Rooms, exits, and entities.</p><a href="/creator/world/">Open World Builder</a></article>
-      <article class="card"><h2>Quest Builder</h2><p>Objectives, rewards, and prerequisites.</p><a href="/creator/quests/">Open Quest Builder</a></article>
-      <article class="card"><h2>Dialogue Builder</h2><p>Talk rules and readable text.</p><a href="/creator/dialogue/">Open Dialogue Builder</a></article>
-      <article class="card"><h2>Encounter Builder</h2><p>Room encounter tables and enemy templates.</p><a href="/creator/encounters/">Open Encounter Builder</a></article>
-      <article class="card"><h2>Item Builder</h2><p>Item templates, restore effects, and use metadata.</p><a href="/creator/items/">Open Item Builder</a></article>
-      <article class="card"><h2>Character Builder</h2><p>Classes, races, progression, and defaults.</p><a href="/creator/characters/">Open Character Builder</a></article>
+      <article class="card feature"><h2>Boss Fight</h2><p>Create the gate, boss enemy, encounter, linked exits, and reward hooks as one draftable flow.</p><a href="/creator/composers/boss/">Open Boss Composer</a></article>
+      <article class="card feature"><h2>Recipe</h2><p>Use Items and Systems together to build meals, tinkering patterns, unlock notes, and ingredients.</p><a href="/creator/items/">Start with Items</a></article>
+      <article class="card feature"><h2>Fishing Spot</h2><p>Shape a room activity, fish table, rods, lures, and behaviors, then validate the links.</p><a href="/creator/systems/">Start with Systems</a></article>
+    </section>
+    <section class="rail">
+      <h2>Builders</h2>
+      <p>Use the authoring flow when making connected content: World -> Encounters -> Systems -> Items -> Quests -> Dialogue.</p>
+      <div class="builder-grid">
+        <article class="card"><h2>World</h2><p>Rooms, exits, and entities.</p><a href="/creator/world/">Open World Builder</a></article>
+        <article class="card"><h2>Encounters</h2><p>Room tables, enemies, and roaming parties.</p><a href="/creator/encounters/">Open Encounter Builder</a></article>
+        <article class="card"><h2>Systems</h2><p>Cooking, tinkering, fishing, boss gates, forge, portals, trophies.</p><a href="/creator/systems/">Open Systems Builder</a></article>
+        <article class="card"><h2>Items</h2><p>Gear, meals, materials, rewards, and use metadata.</p><a href="/creator/items/">Open Item Builder</a></article>
+        <article class="card"><h2>Quests</h2><p>Objectives, rewards, and prerequisites.</p><a href="/creator/quests/">Open Quest Builder</a></article>
+        <article class="card"><h2>Dialogue</h2><p>Talk rules and readable text.</p><a href="/creator/dialogue/">Open Dialogue Builder</a></article>
+        <article class="card"><h2>Characters</h2><p>Classes, races, progression, and defaults.</p><a href="/creator/characters/">Open Character Builder</a></article>
+      </div>
+    </section>
+    <section class="rail" data-creator-workflow-host>
+      <h2>Draft Control</h2>
+      <p>Validate or publish all draft packs from the Studio. History and revert are available after writes.</p>
+      <div id="validation-notes" class="validation-notes" hidden></div>
+      <div id="status" class="status">Draft workflow ready.</div>
+      <pre id="output"></pre>
     </section>
   </div>
+  <script src="/static/website/js/creator_common.js"></script>
+  <script>
+    const API_ROOT = "{{ api_root|escapejs }}";
+    window.BraveCreator.bind(API_ROOT, document.getElementById('status'), document.getElementById('validation-notes'));
+  </script>
 </body>
 </html>

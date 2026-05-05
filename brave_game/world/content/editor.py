@@ -67,12 +67,14 @@ class ContentEditor:
         self.draft_pack_paths = {key: Path(path) for key, path in self.draft_pack_paths.items()}
         self.history = ContentHistoryStore(history_root or self._default_history_root())
 
-    def load_pack(self, domain, *, stage="live"):
+    def load_pack(self, domain, *, stage="live", create_draft=True):
         path = self._path_for(domain, stage=stage)
-        if stage == "draft" and not path.exists():
+        if stage == "draft" and not path.exists() and create_draft:
             live_path = self._path_for(domain, stage="live")
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(live_path.read_text(encoding="utf-8"), encoding="utf-8")
+        if stage == "draft" and not path.exists():
+            path = self._path_for(domain, stage="live")
         with path.open("r", encoding="utf-8") as handle:
             return json.load(handle)
 
@@ -84,7 +86,10 @@ class ContentEditor:
 
     def diff_pack(self, domain, payload, *, stage="live"):
         path = self._path_for(domain, stage=stage)
-        before = path.read_text(encoding="utf-8") if path.exists() else ""
+        before_path = path
+        if stage == "draft" and not path.exists():
+            before_path = self._path_for(domain, stage="live")
+        before = before_path.read_text(encoding="utf-8") if before_path.exists() else ""
         after = self._serialize(payload)
         return "".join(
             unified_diff(
@@ -96,7 +101,7 @@ class ContentEditor:
         )
 
     def apply_pack_update(self, domain, updater, *, write=False, stage="live", author="system", action="update", target=""):
-        payload = self.load_pack(domain, stage=stage)
+        payload = self.load_pack(domain, stage=stage, create_draft=write)
         updated = updater(deepcopy(payload))
         persisted = self._stamp_payload(updated, author=author, action=action, target=target, stage=stage) if write else updated
         diff = self.diff_pack(domain, persisted if write else updated, stage=stage)
@@ -417,6 +422,47 @@ class ContentEditor:
 
         return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="upsert", target=source_template_id)
 
+    def upsert_cooking_recipe(self, recipe_key, recipe_data, *, write=False, stage="live", author="system"):
+        return self._upsert_activities_mapping("cooking_recipes", recipe_key, recipe_data, write=write, stage=stage, author=author)
+
+    def upsert_tinkering_recipe(self, recipe_key, recipe_data, *, write=False, stage="live", author="system"):
+        return self._upsert_activities_mapping("tinkering_recipes", recipe_key, recipe_data, write=write, stage=stage, author=author)
+
+    def upsert_fishing_spot(self, room_id, spot_data, *, write=False, stage="live", author="system"):
+        return self._upsert_activities_mapping("fishing_spots", room_id, spot_data, write=write, stage=stage, author=author)
+
+    def upsert_fishing_rod(self, rod_key, rod_data, *, write=False, stage="live", author="system"):
+        return self._upsert_activities_mapping("fishing_rods", rod_key, rod_data, write=write, stage=stage, author=author)
+
+    def upsert_fishing_lure(self, lure_key, lure_data, *, write=False, stage="live", author="system"):
+        return self._upsert_activities_mapping("fishing_lures", lure_key, lure_data, write=write, stage=stage, author=author)
+
+    def upsert_fish_behavior(self, behavior_key, behavior_data, *, write=False, stage="live", author="system"):
+        return self._upsert_activities_mapping("fish_behaviors", behavior_key, behavior_data, write=write, stage=stage, author=author)
+
+    def upsert_boss_gate(self, gate_key, gate_data, *, write=False, stage="live", author="system"):
+        def updater(payload):
+            gates_block = dict(payload.get("boss_gates", {}))
+            gates = dict(gates_block.get("boss_gates", gates_block))
+            next_gate = dict(gate_data)
+            next_gate.setdefault("key", gate_key)
+            gates[gate_key] = next_gate
+            payload["boss_gates"] = {"boss_gates": dict(sorted(gates.items()))}
+            return payload
+
+        return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="upsert", target=gate_key)
+
+    def upsert_trophy(self, trophy_key, trophy_data, *, write=False, stage="live", author="system"):
+        def updater(payload):
+            trophies_block = dict(payload.get("trophies", {}))
+            trophies = dict(trophies_block.get("trophies", {}))
+            trophies[trophy_key] = trophy_data
+            trophies_block["trophies"] = dict(sorted(trophies.items()))
+            payload["trophies"] = trophies_block
+            return payload
+
+        return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="upsert", target=trophy_key)
+
     def delete_room(self, room_id, *, write=False, stage="live", author="system"):
         def updater(payload):
             payload["rooms"] = [room for room in payload.get("rooms", []) if room.get("id") != room_id]
@@ -548,6 +594,67 @@ class ContentEditor:
             return payload
 
         return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="remove", target=source_template_id)
+
+    def delete_cooking_recipe(self, recipe_key, *, write=False, stage="live", author="system"):
+        return self._delete_activities_mapping("cooking_recipes", recipe_key, write=write, stage=stage, author=author)
+
+    def delete_tinkering_recipe(self, recipe_key, *, write=False, stage="live", author="system"):
+        return self._delete_activities_mapping("tinkering_recipes", recipe_key, write=write, stage=stage, author=author)
+
+    def delete_fishing_spot(self, room_id, *, write=False, stage="live", author="system"):
+        return self._delete_activities_mapping("fishing_spots", room_id, write=write, stage=stage, author=author)
+
+    def delete_fishing_rod(self, rod_key, *, write=False, stage="live", author="system"):
+        return self._delete_activities_mapping("fishing_rods", rod_key, write=write, stage=stage, author=author)
+
+    def delete_fishing_lure(self, lure_key, *, write=False, stage="live", author="system"):
+        return self._delete_activities_mapping("fishing_lures", lure_key, write=write, stage=stage, author=author)
+
+    def delete_fish_behavior(self, behavior_key, *, write=False, stage="live", author="system"):
+        return self._delete_activities_mapping("fish_behaviors", behavior_key, write=write, stage=stage, author=author)
+
+    def delete_boss_gate(self, gate_key, *, write=False, stage="live", author="system"):
+        def updater(payload):
+            gates_block = dict(payload.get("boss_gates", {}))
+            gates = dict(gates_block.get("boss_gates", gates_block))
+            gates.pop(gate_key, None)
+            payload["boss_gates"] = {"boss_gates": dict(sorted(gates.items()))}
+            return payload
+
+        return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="remove", target=gate_key)
+
+    def delete_trophy(self, trophy_key, *, write=False, stage="live", author="system"):
+        def updater(payload):
+            trophies_block = dict(payload.get("trophies", {}))
+            trophies = dict(trophies_block.get("trophies", {}))
+            trophies.pop(trophy_key, None)
+            trophies_block["trophies"] = dict(sorted(trophies.items()))
+            payload["trophies"] = trophies_block
+            return payload
+
+        return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="remove", target=trophy_key)
+
+    def _upsert_activities_mapping(self, mapping_key, entry_key, entry_data, *, write=False, stage="live", author="system"):
+        def updater(payload):
+            activities = dict(payload.get("activities", {}))
+            entries = dict(activities.get(mapping_key, {}))
+            entries[entry_key] = entry_data
+            activities[mapping_key] = dict(sorted(entries.items()))
+            payload["activities"] = activities
+            return payload
+
+        return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="upsert", target=entry_key)
+
+    def _delete_activities_mapping(self, mapping_key, entry_key, *, write=False, stage="live", author="system"):
+        def updater(payload):
+            activities = dict(payload.get("activities", {}))
+            entries = dict(activities.get(mapping_key, {}))
+            entries.pop(entry_key, None)
+            activities[mapping_key] = dict(sorted(entries.items()))
+            payload["activities"] = activities
+            return payload
+
+        return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="remove", target=entry_key)
 
     def _path_for(self, domain, *, stage="live"):
         try:

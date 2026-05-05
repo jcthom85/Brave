@@ -26,6 +26,15 @@
     .meta { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.94rem; }
     .editor-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
     .stack { display:grid; gap:12px; }
+    .section-card { border:1px solid var(--line); border-radius:16px; background:#fffdfa; padding:14px; display:grid; gap:12px; }
+    .section-card h4 { margin:0; font-size:1rem; letter-spacing:.02em; }
+    .section-card p { margin:0; color:var(--muted); line-height:1.4; }
+    .preset-rail { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+    .preset-button { border-radius:16px; background:#fffdfa; color:var(--ink); border:1px solid var(--line); box-shadow:none; text-align:left; min-height:74px; }
+    .preset-button strong,.preset-button span { display:block; }
+    .preset-button span { color:var(--muted); margin-top:4px; font-size:.86rem; line-height:1.25; }
+    .preset-button.active { background:var(--ink); color:#fff; border-color:var(--ink); }
+    .preset-button.active span { color:rgba(255,255,255,.76); }
     .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
     .field { display:grid; gap:6px; }
     .field.full { grid-column:1/-1; }
@@ -34,6 +43,12 @@
     button.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none; }
     button:disabled { opacity:.55; cursor:progress; }
     .chip { border:1px solid var(--line); border-radius:999px; padding:8px 12px; background:#fff; font-size:.92rem; }
+    .link-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .link-card { border:1px solid var(--line); border-radius:14px; padding:12px; background:#fff; display:grid; gap:8px; }
+    .link-card strong,.link-card span { display:block; }
+    .link-card span { color:var(--muted); font-size:.9rem; line-height:1.35; }
+    .link-card code { font:0.86rem/1.4 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; white-space:pre-wrap; word-break:break-word; }
+    .hint-list { display:grid; gap:8px; color:var(--bad); }
     textarea,pre { width:100%; margin:0; border:1px solid var(--line); border-radius:14px; background:#fffdfa; font:.95rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
     textarea { min-height:220px; padding:16px; resize:vertical; }
     pre { min-height:220px; padding:16px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
@@ -50,8 +65,8 @@
     .status { padding:12px 14px; border-radius:12px; background:#fff6e7; color:var(--ink); border:1px solid var(--line); }
     .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
     .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
-    @media (max-width:1180px) { .editor-grid { grid-template-columns:1fr; } }
-    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .item-list { max-height:280px; } .field-grid { grid-template-columns:1fr; } }
+    @media (max-width:1180px) { .editor-grid,.link-grid { grid-template-columns:1fr; } .preset-rail { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:980px) { .shell { grid-template-columns:1fr; } .item-list { max-height:280px; } .field-grid,.preset-rail { grid-template-columns:1fr; } }
   
     .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
     .validation-notes[hidden] { display:none; }
@@ -71,23 +86,41 @@
     </section>
     <section class="workspace">
       <div class="panel"><div class="panel-head"><h2 id="editor-title">Item Builder</h2><p id="editor-subtitle">Select an item to load its builder fields and current game links.</p></div><div class="panel-body"><div class="meta"><span>Builder source: <strong>items</strong></span></div></div></div>
-      <div class="toolbar"><button id="load-item" class="secondary" type="button">Reload Item</button><button id="new-item" class="secondary" type="button">New Item Draft</button><button id="validate-content" class="secondary" type="button">Check Content</button><button id="reload-content" class="secondary" type="button">Reload Content</button></div>
+      <div class="toolbar"><button id="load-item" class="secondary" type="button">Reload Item</button><button id="new-item" class="secondary" type="button">New Item Draft</button><button id="validate-content" class="secondary" type="button">Check Draft Content</button><button id="reload-content" class="secondary" type="button">Reload Content</button></div>
       <div id="validation-notes" class="validation-notes" hidden></div>
+      <section class="panel">
+        <div class="panel-head"><h3>Creator Guide</h3><p>Choose the item purpose first, then use the fields and placement cards to finish the linked content.</p></div>
+        <div class="panel-body">
+          <div class="preset-rail" aria-label="Item purpose presets">
+            <button class="preset-button" type="button" data-item-preset="equipment"><strong>Equipment</strong><span>Gear with slot, rarity, value, and stat bonuses.</span></button>
+            <button class="preset-button" type="button" data-item-preset="meal"><strong>Meal</strong><span>Food with restore effects and meal bonuses.</span></button>
+            <button class="preset-button" type="button" data-item-preset="ingredient"><strong>Ingredient</strong><span>Stackable material for recipes, fishing, drops, and tinkering.</span></button>
+            <button class="preset-button" type="button" data-item-preset="recipe_unlock"><strong>Recipe Unlock</strong><span>Readable or pattern item that unlocks cooking or tinkering.</span></button>
+            <button class="preset-button" type="button" data-item-preset="combat_consumable"><strong>Combat Consumable</strong><span>Use in combat or exploration for restore, damage, or guard.</span></button>
+            <button class="preset-button" type="button" data-item-preset="quest_reward"><strong>Quest Reward</strong><span>Item intended to be placed in Quest Builder rewards.</span></button>
+            <button class="preset-button" type="button" data-item-preset="fish_catch"><strong>Fish/Catch</strong><span>Catchable item for Fishing Spot tables and lures.</span></button>
+            <button class="preset-button" type="button" data-item-preset="loot_drop"><strong>Loot Drop</strong><span>Enemy drop or world reward that needs placement.</span></button>
+          </div>
+        </div>
+      </section>
       <div class="editor-grid">
         <section class="panel"><div class="panel-head"><h3>Item Builder</h3><p>Build the item with fields and rows. Advanced source is available for unusual fields.</p></div><div class="panel-body stack">
-          <div class="field-grid">
+          <section class="section-card"><h4>Identity & Economy</h4><p>The fields every item should make obvious to a creator.</p><div class="field-grid">
             <div class="field"><label for="item-id">Template Id</label><input id="item-id" type="text"></div>
             <div class="field"><label for="item-name">Item Name</label><input id="item-name" type="text"></div>
             <div class="field"><label for="item-kind">Kind</label><select id="item-kind"><option value="loot">loot</option><option value="equipment">equipment</option><option value="consumable">consumable</option><option value="ingredient">ingredient</option><option value="meal">meal</option></select></div>
-            <div class="field"><label for="item-slot">Equipment Slot</label><select id="item-slot"><option value="">None</option><option value="main_hand">main_hand</option><option value="off_hand">off_hand</option><option value="head">head</option><option value="chest">chest</option><option value="hands">hands</option><option value="legs">legs</option><option value="feet">feet</option><option value="ring">ring</option><option value="trinket">trinket</option><option value="snack">snack</option></select></div>
+            <div class="field"><label for="item-rarity">Rarity</label><select id="item-rarity"><option value="">Default/Common</option><option value="common">common</option><option value="uncommon">uncommon</option><option value="rare">rare</option><option value="epic">epic</option><option value="legendary">legendary</option><option value="story">story</option></select></div>
             <div class="field"><label for="item-value">Value</label><input id="item-value" type="number" min="0" value="0"></div>
             <div class="field"><label for="item-stackable">Stackable</label><select id="item-stackable"><option value="false">No</option><option value="true">Yes</option></select></div>
             <div class="field full"><label for="item-summary">Summary</label><textarea id="item-summary" spellcheck="false"></textarea></div>
-          </div>
-          <div class="field full"><label>Equipment Bonuses</label><div id="item-bonuses" class="stat-list"></div><button id="add-bonus" class="secondary" type="button">Add Bonus</button></div>
+          </div></section>
+          <section class="section-card"><h4>Equipment</h4><p>Use this when the item can be equipped. Non-equipment items should normally leave slot and bonuses empty.</p><div class="field-grid">
+            <div class="field"><label for="item-slot">Equipment Slot</label><select id="item-slot"><option value="">None</option><option value="main_hand">main_hand</option><option value="off_hand">off_hand</option><option value="head">head</option><option value="chest">chest</option><option value="hands">hands</option><option value="legs">legs</option><option value="feet">feet</option><option value="ring">ring</option><option value="trinket">trinket</option><option value="snack">snack</option></select></div>
+          </div><div class="field full"><label>Equipment Bonuses</label><div id="item-bonuses" class="stat-list"></div><button id="add-bonus" class="secondary" type="button">Add Bonus</button></div></section>
+          <section class="section-card"><h4>Consumable Effects</h4><p>Restore effects and meal bonuses define food, potions, and other useable items.</p>
           <div class="field full"><label>Restore Effects</label><div id="item-restore" class="stat-list"></div><button id="add-restore" class="secondary" type="button">Add Restore</button></div>
-          <div class="field full"><label>Meal Bonuses</label><div id="item-meal-bonuses" class="stat-list"></div><button id="add-meal-bonus" class="secondary" type="button">Add Meal Bonus</button></div>
-          <div class="field-grid">
+          <div class="field full"><label>Meal Bonuses</label><div id="item-meal-bonuses" class="stat-list"></div><button id="add-meal-bonus" class="secondary" type="button">Add Meal Bonus</button></div></section>
+          <section class="section-card"><h4>Use Profile</h4><p>Only fill this when the item can be used, studied, eaten, thrown, or activated.</p><div class="field-grid">
             <div class="field"><label for="use-verb">Use Verb</label><input id="use-verb" type="text" placeholder="drink, eat, study, throw"></div>
             <div class="field"><label for="use-effect-type">Use Effect</label><select id="use-effect-type"><option value="">None</option><option value="restore">restore</option><option value="damage">damage</option><option value="guard">guard</option><option value="meal">meal</option><option value="unlock_recipe">unlock_recipe</option><option value="teach_spell">teach_spell</option><option value="unlock_companion">unlock_companion</option><option value="unlock_oath">unlock_oath</option></select></div>
             <div class="field"><label for="use-target">Target</label><select id="use-target"><option value="">None</option><option value="self">self</option><option value="ally">ally</option><option value="enemy">enemy</option></select></div>
@@ -99,11 +132,11 @@
             <div class="field"><label for="use-damage-base">Damage Base</label><input id="use-damage-base" type="number" min="0" value="0"></div>
             <div class="field"><label for="use-damage-variance">Damage Variance</label><input id="use-damage-variance" type="number" min="0" value="0"></div>
             <div class="field full"><label for="use-extra-text">Use Text</label><textarea id="use-extra-text" spellcheck="true"></textarea></div>
-          </div>
+          </div></section>
           <div class="editor-toolbar"><button id="diff-item" type="button">Preview Item Change</button><button id="write-item" type="button">Save Item</button></div>
           <details class="raw-panel"><summary>Advanced Source</summary><textarea id="item-json" spellcheck="false"></textarea></details>
         </div></section>
-        <section class="panel"><div class="panel-head"><h3>Item Summary</h3><p>Quick checks for what this item does and where it connects.</p></div><div class="panel-body stack"><div class="chips"><div id="item-id-chip" class="chip">Item: -</div><div id="item-kind-chip" class="chip">Kind: -</div><div id="item-category-chip" class="chip">Category: -</div></div><pre id="item-summary-output"></pre></div></section>
+        <section class="panel"><div class="panel-head"><h3>Usage & Placement</h3><p>Quick checks for what this item does, where it connects, and what should be edited next.</p></div><div class="panel-body stack"><div class="chips"><div id="item-id-chip" class="chip">Item: -</div><div id="item-kind-chip" class="chip">Kind: -</div><div id="item-category-chip" class="chip">Category: -</div></div><pre id="item-summary-output"></pre><div id="placement-hints" class="hint-list"></div><div id="item-link-grid" class="link-grid"></div></div></section>
       </div>
       <div class="panel"><div class="panel-head"><h2>Activity</h2><p>Shows load results, validation issues, and change previews after you ask for them.</p></div><div class="panel-body"><div id="status" class="status">Waiting for item selection.</div><pre id="output"></pre></div></div>
     </section>
@@ -126,6 +159,7 @@
     const itemId = document.getElementById('item-id');
     const itemName = document.getElementById('item-name');
     const itemKind = document.getElementById('item-kind');
+    const itemRarity = document.getElementById('item-rarity');
     const itemSlot = document.getElementById('item-slot');
     const itemValue = document.getElementById('item-value');
     const itemStackable = document.getElementById('item-stackable');
@@ -140,6 +174,9 @@
     const itemKindChip = document.getElementById('item-kind-chip');
     const itemCategoryChip = document.getElementById('item-category-chip');
     const itemSummaryOutput = document.getElementById('item-summary-output');
+    const itemLinkGrid = document.getElementById('item-link-grid');
+    const placementHints = document.getElementById('placement-hints');
+    const presetButtons = Array.from(document.querySelectorAll('[data-item-preset]'));
     const addBonusButton = document.getElementById('add-bonus');
     const addRestoreButton = document.getElementById('add-restore');
     const addMealBonusButton = document.getElementById('add-meal-bonus');
@@ -158,7 +195,7 @@
 
     let items = [];
     let selectedItem = null;
-    const STAT_OPTIONS = ['accuracy','armor','attack_power','dodge','intellect','max_hp','max_mana','max_stamina','precision','spell_power','spirit','threat'];
+    const STAT_OPTIONS = ['accuracy','agility','armor','attack_power','crit_chance','dodge','intellect','max_hp','max_mana','max_stamina','precision','spell_power','spirit','strength','threat','vitality'];
     const RESTORE_OPTIONS = ['hp','mana','stamina'];
 
     function setBusy(isBusy) {
@@ -174,10 +211,73 @@
       return creatorTools.showValidation(messages);
     }
     async function apiFetch(path, options = {}) {
-      const response = await fetch(`${API_ROOT}${path}`, { credentials:'same-origin', headers:{'Content-Type':'application/json', ...(options.headers || {})}, ...options });
+      const { allowErrorPayload = false, ...requestOptions } = options;
+      const response = await fetch(`${API_ROOT}${path}`, { credentials:'same-origin', headers:{'Content-Type':'application/json', ...(requestOptions.headers || {})}, ...requestOptions });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload.ok === false) throw new Error(payload.error || `Request failed with ${response.status}`);
+      if (!response.ok || (payload.ok === false && !allowErrorPayload)) throw new Error(payload.error || `Request failed with ${response.status}`);
       return payload;
+    }
+    function setActivePreset(preset) {
+      for (const button of presetButtons) {
+        button.classList.toggle('active', button.dataset.itemPreset === preset);
+      }
+    }
+    function inferPreset(item) {
+      const use = item.use || {};
+      if (use.effect_type === 'unlock_recipe') return 'recipe_unlock';
+      if (item.kind === 'equipment') return 'equipment';
+      if (item.kind === 'meal') return 'meal';
+      if (item.kind === 'ingredient') return 'ingredient';
+      if (item.kind === 'consumable') return 'combat_consumable';
+      return 'loot_drop';
+    }
+    function applyPreset(preset) {
+      setActivePreset(preset);
+      if (preset === 'equipment') {
+        itemKind.value = 'equipment';
+        itemStackable.value = 'false';
+        if (!itemSlot.value) itemSlot.value = 'main_hand';
+        if (!itemRarity.value) itemRarity.value = 'common';
+      } else if (preset === 'meal') {
+        itemKind.value = 'meal';
+        itemStackable.value = 'true';
+        useVerb.value = 'eat';
+        useEffectType.value = 'meal';
+        useTarget.value = 'self';
+        useContextExplore.checked = true;
+        useContextCombat.checked = true;
+      } else if (preset === 'ingredient') {
+        itemKind.value = 'ingredient';
+        itemStackable.value = 'true';
+        useEffectType.value = '';
+      } else if (preset === 'recipe_unlock') {
+        itemKind.value = 'loot';
+        itemStackable.value = 'true';
+        useVerb.value = 'study';
+        useEffectType.value = 'unlock_recipe';
+        useTarget.value = 'self';
+        useContextExplore.checked = true;
+        useRecipeDomain.value = useRecipeDomain.value || 'cooking';
+      } else if (preset === 'combat_consumable') {
+        itemKind.value = 'consumable';
+        itemStackable.value = 'true';
+        useVerb.value = useVerb.value || 'use';
+        useEffectType.value = useEffectType.value || 'restore';
+        useTarget.value = useTarget.value || 'self';
+        useContextExplore.checked = true;
+        useContextCombat.checked = true;
+      } else if (preset === 'quest_reward') {
+        itemKind.value = itemKind.value || 'loot';
+        itemStackable.value = itemKind.value === 'equipment' ? 'false' : 'true';
+      } else if (preset === 'fish_catch') {
+        itemKind.value = 'ingredient';
+        itemStackable.value = 'true';
+      } else if (preset === 'loot_drop') {
+        itemKind.value = 'loot';
+        itemStackable.value = 'true';
+      }
+      syncItemFormToJson();
+      setStatus(`${preset.replace(/_/g, ' ')} preset applied.`, 'good');
     }
     function renderItems(filter = '') {
       const token = filter.trim().toLowerCase();
@@ -301,6 +401,7 @@
       itemId.value = templateId || '';
       itemName.value = item.name || '';
       itemKind.value = item.kind || '';
+      itemRarity.value = item.rarity || '';
       itemSlot.value = item.slot || '';
       itemValue.value = item.value || 0;
       itemStackable.value = item.stackable ? 'true' : 'false';
@@ -323,8 +424,46 @@
       useExtraText.value = use.extra_text || '';
       itemIdChip.textContent = `Item: ${templateId || '-'}`;
       itemKindChip.textContent = `Kind: ${item.kind || '-'}`;
+      setActivePreset(inferPreset(item));
     }
 
+    function payloadSnippet(kind, preview, link = {}) {
+      const templateId = preview.template_id;
+      if (kind === 'quest') return JSON.stringify({ item: templateId, quantity: 1 }, null, 2);
+      if (kind === 'enemy') return JSON.stringify({ item: templateId, chance: 0.35 }, null, 2);
+      if (kind === 'cooking') return JSON.stringify({ [templateId]: 1 }, null, 2);
+      if (kind === 'tinkering') return JSON.stringify({ components: { [templateId]: 1 } }, null, 2);
+      if (kind === 'fishing') return JSON.stringify({ item: templateId, chance: 0.3, hook_chance: 0.6, rarity: 'common' }, null, 2);
+      if (kind === 'unlock') return JSON.stringify({ effect_type: 'unlock_recipe', recipe_domain: link.domain || 'cooking', unlock_recipe: link.key || 'recipe_key' }, null, 2);
+      return JSON.stringify({ item: templateId }, null, 2);
+    }
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+      }
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+      return Promise.resolve();
+    }
+    function addLinkCard(title, meta, href, snippet) {
+      const card = document.createElement('div');
+      card.className = 'link-card';
+      const linkMarkup = href ? `<a href="${href}">${title}</a>` : title;
+      card.innerHTML = `<strong>${linkMarkup}</strong><span>${meta}</span>${snippet ? `<code>${snippet}</code>` : ''}`;
+      if (snippet) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'secondary';
+        button.textContent = 'Copy Link Payload';
+        button.addEventListener('click', () => copyText(snippet).then(() => setStatus('Link payload copied.', 'good')));
+        card.appendChild(button);
+      }
+      itemLinkGrid.appendChild(card);
+    }
     function renderItemSummary(preview) {
       const lines = [];
       if (preview.category) lines.push(`Category: ${preview.category}`);
@@ -334,7 +473,27 @@
       if (preview.forge_recipe) lines.push(`Forge result: ${preview.forge_recipe.result || '-'}`);
       const quests = preview.quest_links || [];
       if (quests.length) lines.push(`Quest links: ${quests.map((quest) => quest.title || quest.quest_key).join(', ')}`);
+      const enemyLoot = preview.enemy_loot_links || [];
+      if (enemyLoot.length) lines.push(`Enemy drops: ${enemyLoot.map((entry) => entry.name || entry.template_key).join(', ')}`);
       itemSummaryOutput.textContent = lines.length ? lines.join('\n') : 'No derived item links yet.';
+      placementHints.innerHTML = '';
+      for (const hint of preview.placement_hints || []) {
+        const row = document.createElement('div');
+        row.textContent = hint;
+        placementHints.appendChild(row);
+      }
+      itemLinkGrid.innerHTML = '';
+      for (const quest of quests) addLinkCard(quest.title || quest.quest_key, `Quest ${quest.quest_key}${quest.used_in_rewards ? ' reward' : ''}${quest.used_in_objectives ? ' objective' : ''}`, '/creator/quests/', payloadSnippet('quest', preview, quest));
+      for (const entry of enemyLoot) addLinkCard(entry.name || entry.template_key, `Enemy loot ${entry.template_key}, chance ${entry.chance ?? '-'}`, '/creator/encounters/', payloadSnippet('enemy', preview, entry));
+      for (const recipe of preview.cooking_links || []) addLinkCard(recipe.name || recipe.recipe_key, `Cooking ${recipe.role}: ${recipe.recipe_key}`, '/creator/systems/', payloadSnippet('cooking', preview, recipe));
+      for (const recipe of preview.tinkering_links || []) addLinkCard(recipe.name || recipe.recipe_key, `Tinkering ${recipe.role}: ${recipe.recipe_key}`, '/creator/systems/', payloadSnippet('tinkering', preview, recipe));
+      for (const spot of preview.fishing_links || []) addLinkCard(spot.name || spot.room_id, `Fishing spot ${spot.room_id}, chance ${spot.chance ?? '-'}`, '/creator/systems/', payloadSnippet('fishing', preview, spot));
+      for (const lure of preview.lure_links || []) addLinkCard(lure.name || lure.lure_key, `Attracted by lure ${lure.lure_key}`, '/creator/systems/', '');
+      for (const unlock of preview.unlock_links || []) addLinkCard(`Unlock ${unlock.kind}`, `${unlock.domain || ''} ${unlock.key || ''}`.trim(), '/creator/systems/', payloadSnippet('unlock', preview, unlock));
+      if (preview.forge_recipe) addLinkCard('Forge Recipe', `Source item upgrades to ${preview.forge_recipe.result || '-'}`, '/creator/systems/', '');
+      if (!itemLinkGrid.children.length) {
+        addLinkCard('No linked placement yet', 'Use the copied payload patterns after choosing a purpose preset, or place this item in the relevant builder.', null, payloadSnippet('quest', preview));
+      }
     }
     function syncItemFormToJson() {
       const templateId = itemId.value.trim();
@@ -372,8 +531,10 @@
       delete payload.use;
       delete payload.slot;
       delete payload.value;
+      delete payload.rarity;
       if (itemSlot.value) payload.slot = itemSlot.value;
       if (Number(itemValue.value || 0) > 0) payload.value = Number(itemValue.value || 0);
+      if (itemRarity.value) payload.rarity = itemRarity.value;
       if (Object.keys(bonuses).length) payload.bonuses = bonuses;
       if (Object.keys(restore).length) payload.restore = restore;
       if (Object.keys(mealBonuses).length) payload.meal_bonuses = mealBonuses;
@@ -432,7 +593,7 @@
       setBusy(true);
       setStatus(write ? `Saving item ${target}...` : `Previewing item change for ${target}...`);
       try {
-        const result = await apiFetch('/mutate', { method:'POST', body: JSON.stringify({ kind:'item', target, payload, write }) });
+        const result = await apiFetch('/mutate', { method:'POST', body: JSON.stringify({ kind:'item', target, payload, write, stage:'draft' }) });
         output.textContent = result.diff || JSON.stringify(result, null, 2);
         if (write) {
           const errors = result.validation_errors || [];
@@ -457,9 +618,9 @@
     }
     async function validateContent() {
       setBusy(true);
-      setStatus('Checking content...');
+      setStatus('Checking draft content...');
       try {
-        const payload = await apiFetch('/validate', { method:'POST', body:'{}' });
+        const payload = await apiFetch('/validate', { method:'POST', body: JSON.stringify({ stage: 'draft' }), allowErrorPayload: true });
         if (payload.errors.length) {
           setStatus(`Validation found ${payload.errors.length} issue(s).`, 'bad');
           output.textContent = payload.errors.join('\n');
@@ -500,6 +661,9 @@
     addBonusButton.addEventListener('click', () => addStatRow(itemBonuses, '', 0, STAT_OPTIONS));
     addRestoreButton.addEventListener('click', () => addStatRow(itemRestore, '', 0, RESTORE_OPTIONS));
     addMealBonusButton.addEventListener('click', () => addStatRow(itemMealBonuses, '', 0, STAT_OPTIONS));
+    for (const button of presetButtons) {
+      button.addEventListener('click', () => applyPreset(button.dataset.itemPreset));
+    }
     newItemDraft();
     loadReferences().catch((error) => { setStatus(error.message, 'bad'); output.textContent = error.stack || error.message; });
   </script>

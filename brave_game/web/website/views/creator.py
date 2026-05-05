@@ -4,6 +4,7 @@ from pathlib import Path
 
 from django.http import HttpResponse, HttpResponseForbidden
 from django.template import Context, Template
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from web.api.views import _is_creator_authorized
 
@@ -16,6 +17,7 @@ def _render_creator_template(template_name, context):
     return HttpResponse(template.render(Context(context)))
 
 
+@ensure_csrf_cookie
 def creator_index(request):
     user = getattr(request, "user", None)
     if not _is_creator_authorized(user):
@@ -30,6 +32,7 @@ def creator_index(request):
     )
 
 
+@ensure_csrf_cookie
 def creator_world_editor(request):
     user = getattr(request, "user", None)
     if not _is_creator_authorized(user):
@@ -45,6 +48,7 @@ def creator_world_editor(request):
     )
 
 
+@ensure_csrf_cookie
 def creator_quest_editor(request):
     user = getattr(request, "user", None)
     if not _is_creator_authorized(user):
@@ -60,6 +64,7 @@ def creator_quest_editor(request):
     )
 
 
+@ensure_csrf_cookie
 def creator_dialogue_editor(request):
     user = getattr(request, "user", None)
     if not _is_creator_authorized(user):
@@ -75,6 +80,7 @@ def creator_dialogue_editor(request):
     )
 
 
+@ensure_csrf_cookie
 def creator_encounter_editor(request):
     user = getattr(request, "user", None)
     if not _is_creator_authorized(user):
@@ -90,6 +96,7 @@ def creator_encounter_editor(request):
     )
 
 
+@ensure_csrf_cookie
 def creator_item_editor(request):
     user = getattr(request, "user", None)
     if not _is_creator_authorized(user):
@@ -105,6 +112,7 @@ def creator_item_editor(request):
     )
 
 
+@ensure_csrf_cookie
 def creator_character_editor(request):
     user = getattr(request, "user", None)
     if not _is_creator_authorized(user):
@@ -116,5 +124,35 @@ def creator_character_editor(request):
             "api_root": "/api/content",
             "reference_domain": "classes",
             "page_title": "Brave Creator: Character Builder",
+        },
+    )
+
+
+@ensure_csrf_cookie
+def creator_systems_editor(request):
+    user = getattr(request, "user", None)
+    if not _is_creator_authorized(user):
+        return HttpResponseForbidden("Creator access required.")
+
+    return _render_creator_template(
+        "creator_systems_editor.html",
+        {
+            "api_root": "/api/content",
+            "page_title": "Brave Creator: Systems Builder",
+        },
+    )
+
+
+@ensure_csrf_cookie
+def creator_boss_composer(request):
+    user = getattr(request, "user", None)
+    if not _is_creator_authorized(user):
+        return HttpResponseForbidden("Creator access required.")
+
+    return _render_creator_template(
+        "creator_boss_composer.html",
+        {
+            "api_root": "/api/content",
+            "page_title": "Brave Creator: Boss Composer",
         },
     )

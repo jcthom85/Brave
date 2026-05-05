@@ -81,6 +81,42 @@ class ContentEditorTests(unittest.TestCase):
         self.assertIn("creator_test_portal", persisted["portals"]["portals"])
         self.assertIn("Creator Test Portal", mutation.diff)
 
+    def test_system_activity_upserts_and_deletes_use_draft_pack(self):
+        self.editor.upsert_cooking_recipe(
+            "creator_test_stew",
+            {"name": "Creator Test Stew", "ingredients": {"bramble_perch": 1}, "result": "innkeepers_fishpie", "summary": "Draft recipe."},
+            write=True,
+            stage="draft",
+        )
+        self.editor.upsert_fishing_rod(
+            "creator_test_rod",
+            {"name": "Creator Test Rod", "power": 1, "stability": 1, "summary": "Draft rod."},
+            write=True,
+            stage="draft",
+        )
+        self.editor.delete_fishing_rod("creator_test_rod", write=True, stage="draft")
+
+        live_payload = json.loads(self.pack_paths["systems"].read_text(encoding="utf-8"))
+        draft_payload = json.loads((self.pack_paths["systems"].parent / "drafts" / "systems.json").read_text(encoding="utf-8"))
+        self.assertNotIn("creator_test_stew", live_payload["activities"]["cooking_recipes"])
+        self.assertIn("creator_test_stew", draft_payload["activities"]["cooking_recipes"])
+        self.assertNotIn("creator_test_rod", draft_payload["activities"]["fishing_rods"])
+
+    def test_system_boss_gate_and_trophy_upserts(self):
+        gate = self.editor.upsert_boss_gate(
+            "creator_test_gate",
+            {"name": "Creator Test Gate", "trigger_room_id": "brambleford_town_green", "boss_enemy_key": "training_dummy", "encounter_key": "training_dummy", "max_participants": 1},
+            write=False,
+        )
+        trophy = self.editor.upsert_trophy(
+            "creator_test_trophy",
+            {"name": "Creator Test Trophy", "placeholder": "Empty hook.", "summary": "A test trophy.", "world": "Brave"},
+            write=False,
+        )
+
+        self.assertIn("creator_test_gate", gate.payload["boss_gates"]["boss_gates"])
+        self.assertIn("creator_test_trophy", trophy.payload["trophies"]["trophies"])
+
     def test_publish_rejects_bad_world_graph_without_touching_live(self):
         before = self.pack_paths["world"].read_text(encoding="utf-8")
         self.editor.upsert_room(

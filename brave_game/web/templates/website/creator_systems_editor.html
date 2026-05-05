@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }}</title>
+  <style>
+    :root { --ink:#1d2430; --accent:#8b4a29; --panel:#fff9f0; --line:#d9c8ac; --muted:#6b6157; --good:#2f6d4c; --bad:#8d3122; --shadow:rgba(29,36,48,.12); }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:radial-gradient(circle at 15% 10%, rgba(139,74,41,.16), transparent 30%),linear-gradient(180deg,#f3eadb,#f9f3e8 48%,#efe2cf); min-height:100vh; }
+    .shell { width:min(1680px,calc(100vw - 32px)); margin:24px auto; display:grid; grid-template-columns:320px minmax(0,1fr); gap:20px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
+    .panel-head { padding:18px 20px; border-bottom:1px solid var(--line); background:linear-gradient(135deg, rgba(139,74,41,.12), rgba(217,200,172,.22)); }
+    .panel-head h1,.panel-head h2,.panel-head h3 { margin:0; }
+    .panel-head p { margin:8px 0 0; color:var(--muted); line-height:1.45; }
+    .panel-body { padding:18px 20px 20px; }
+    .stack { display:grid; gap:14px; }
+    .tabs,.toolbar,.guide-rail,.builder-links { display:flex; flex-wrap:wrap; gap:10px; }
+    .guide-rail { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
+    .guide-button { min-height:76px; border-radius:16px; background:#fffdfa; color:var(--ink); border:1px solid var(--line); box-shadow:none; text-align:left; }
+    .guide-button strong,.guide-button span { display:block; }
+    .guide-button span { color:var(--muted); margin-top:4px; font-size:.86rem; line-height:1.25; }
+    .guide-button.active { background:var(--ink); color:#fff; border-color:var(--ink); }
+    .guide-button.active span { color:rgba(255,255,255,.76); }
+    button,.button-link { border:0; border-radius:999px; padding:10px 16px; font:inherit; cursor:pointer; background:var(--accent); color:#fff; box-shadow:0 10px 24px rgba(139,74,41,.24); text-decoration:none; }
+    button.secondary,.button-link.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none; }
+    button.active { outline:3px solid rgba(139,74,41,.22); }
+    button:disabled { opacity:.55; cursor:progress; }
+    input,textarea,select,pre { width:100%; border:1px solid var(--line); border-radius:12px; background:#fffdfa; font:inherit; }
+    input,select { padding:10px 12px; }
+    textarea,pre { min-height:220px; padding:16px; font:.94rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; white-space:pre-wrap; overflow:auto; }
+    textarea { resize:vertical; }
+    .field-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .field-grid.three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .field { display:grid; gap:6px; }
+    .field.full { grid-column:1/-1; }
+    .field label { color:var(--muted); font-size:.88rem; text-transform:uppercase; letter-spacing:.05em; }
+    .item-list { display:grid; gap:8px; max-height:calc(100vh - 330px); overflow:auto; padding-right:4px; }
+    .item-row { width:100%; text-align:left; border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:12px; padding:12px; box-shadow:none; }
+    .item-row:hover,.item-row.active { border-color:var(--accent); background:#fff8f2; }
+    .item-row strong,.item-row span { display:block; }
+    .item-row span { color:var(--muted); font-size:.92rem; margin-top:4px; }
+    .builder-grid { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr); gap:16px; }
+    .section { border:1px solid var(--line); border-radius:14px; background:#fffdfa; padding:14px; display:grid; gap:12px; }
+    .section h3 { margin:0; font-size:1rem; }
+    .section p { margin:0; color:var(--muted); line-height:1.4; }
+    .type-panel[hidden] { display:none; }
+    .link-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .link-card { border:1px solid var(--line); border-radius:12px; background:#fff; padding:12px; display:grid; gap:8px; }
+    .link-card strong,.link-card span { display:block; }
+    .link-card span { color:var(--muted); font-size:.9rem; line-height:1.35; }
+    .link-card code { font:.86rem/1.4 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; white-space:pre-wrap; word-break:break-word; }
+    .status { padding:12px 14px; border-radius:12px; background:#fff6e7; border:1px solid var(--line); }
+    .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
+    .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
+    .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
+    .validation-notes[hidden] { display:none; }
+    @media (max-width:1180px) { .builder-grid,.link-grid { grid-template-columns:1fr; } .guide-rail { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:980px) { .shell,.field-grid,.field-grid.three,.guide-rail { grid-template-columns:1fr; } .item-list { max-height:260px; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel">
+      <div class="panel-head"><h1>Systems Builder</h1><p>Guided draft-first editor for Brave's gameplay loops: recipes, fishing, boss gates, portals, trophies, and upgrades.</p></div>
+      <div class="panel-body stack">
+        <div class="tabs" id="system-tabs"></div>
+        <input id="system-search" type="search" placeholder="Search current system entries">
+        <div id="system-list" class="item-list"></div>
+      </div>
+    </section>
+    <section class="stack" data-creator-workflow-host>
+      <div class="panel"><div class="panel-head"><h2 id="editor-title">Systems Builder</h2><p id="editor-subtitle">Choose a system kind, use the guided fields, and keep Advanced Source as the escape hatch. Draft Workflow controls are available for validate, publish, history, and revert.</p></div></div>
+
+      <section class="panel"><div class="panel-head"><h3>Systems Guide</h3><p>Pick the gameplay system first. Direct writes remain systems-only; linked builder changes are copied or opened.</p></div><div class="panel-body">
+        <div class="guide-rail" aria-label="Systems presets">
+          <button class="guide-button" type="button" data-system-preset="cooking"><strong>Cooking Recipe</strong><span>Ingredients, meal result, unlock item payloads.</span></button>
+          <button class="guide-button" type="button" data-system-preset="tinkering"><strong>Tinkering Pattern</strong><span>Base item, components, station, result.</span></button>
+          <button class="guide-button" type="button" data-system-preset="fishing"><strong>Fishing Spot</strong><span>Room, fish table, rods, lures, behaviors.</span></button>
+          <button class="guide-button" type="button" data-system-preset="tackle"><strong>Fishing Tackle</strong><span>Rod, lure, or fish behavior entries.</span></button>
+          <button class="guide-button" type="button" data-system-preset="boss"><strong>Boss Gate</strong><span>Rooms, boss enemy, encounter key, exit payload.</span></button>
+          <button class="guide-button" type="button" data-system-preset="forge"><strong>Forge Upgrade</strong><span>Source item, result item, materials, silver.</span></button>
+          <button class="guide-button" type="button" data-system-preset="portal"><strong>Portal</strong><span>Status, resonance, entry room, travel hint.</span></button>
+          <button class="guide-button" type="button" data-system-preset="trophy"><strong>Trophy</strong><span>World trophy summary and placeholder.</span></button>
+        </div>
+      </div></section>
+
+      <div class="toolbar">
+        <button id="new-entry" class="secondary" type="button">New Draft</button>
+        <button id="preview-entry" type="button">Preview</button>
+        <button id="diff-entry" class="secondary" type="button">Diff Draft</button>
+        <button id="write-entry" type="button">Save Draft</button>
+        <button id="remove-entry" class="secondary" type="button">Remove Draft</button>
+        <button id="validate-entry" class="secondary" type="button">Validate Drafts</button>
+      </div>
+      <div id="validation-notes" class="validation-notes" hidden></div>
+
+      <div class="builder-grid">
+        <section class="panel"><div class="panel-head"><h3>Structured System Entry</h3><p>Use guided fields first. The JSON source is kept in sync and can still be edited directly.</p></div><div class="panel-body stack">
+          <section class="section"><h3>Identity</h3><div class="field-grid">
+            <div class="field"><label for="entry-key">Entry Key</label><input id="entry-key" type="text"></div>
+            <div class="field"><label for="entry-name">Name</label><input id="entry-name" type="text"></div>
+            <div class="field full"><label for="entry-summary">Summary</label><textarea id="entry-summary" spellcheck="true"></textarea></div>
+          </div></section>
+
+          <section class="section type-panel" data-type-panel="recipe"><h3>Recipe</h3><p>Cooking uses ingredients and result. Tinkering can also use base, station, silver, and success text.</p><div class="field-grid">
+            <div class="field"><label for="recipe-result">Result Item</label><select id="recipe-result"></select></div>
+            <div class="field"><label for="recipe-base">Base Item</label><select id="recipe-base"></select></div>
+            <div class="field"><label for="recipe-station">Station / Room</label><select id="recipe-station"></select></div>
+            <div class="field"><label for="recipe-silver">Silver Cost</label><input id="recipe-silver" type="number" min="0" value="0"></div>
+            <div class="field full"><label for="recipe-materials">Ingredients / Components JSON</label><textarea id="recipe-materials" spellcheck="false">{}</textarea></div>
+            <div class="field"><label for="recipe-unlock-type">Unlock Type</label><input id="recipe-unlock-type" type="text"></div>
+            <div class="field"><label for="recipe-success-text">Success Text</label><input id="recipe-success-text" type="text"></div>
+            <div class="field full"><label for="recipe-unlock-text">Unlock Text</label><textarea id="recipe-unlock-text" spellcheck="true"></textarea></div>
+          </div></section>
+
+          <section class="section type-panel" data-type-panel="fishing"><h3>Fishing</h3><p>Fishing spots use a room key as entry key. Tackle and behavior entries use the same identity fields plus JSON source.</p><div class="field-grid">
+            <div class="field"><label for="fish-room">Fishing Room</label><select id="fish-room"></select></div>
+            <div class="field"><label for="fish-reaction">Reaction Window</label><input id="fish-reaction" type="number" min="1" value="5"></div>
+            <div class="field"><label for="fish-bite-min">Bite Delay Min</label><input id="fish-bite-min" type="number" min="0" value="4"></div>
+            <div class="field"><label for="fish-bite-max">Bite Delay Max</label><input id="fish-bite-max" type="number" min="0" value="7"></div>
+            <div class="field full"><label for="fish-table">Fish Table JSON</label><textarea id="fish-table" spellcheck="false">[]</textarea></div>
+            <div class="field full"><label for="fish-cast-text">Cast Text</label><textarea id="fish-cast-text" spellcheck="true"></textarea></div>
+          </div></section>
+
+          <section class="section type-panel" data-type-panel="boss"><h3>Boss Gate</h3><p>Bind a trigger room, encounter key, boss enemy, and route rooms.</p><div class="field-grid">
+            <div class="field"><label for="boss-trigger">Trigger Room</label><select id="boss-trigger"></select></div>
+            <div class="field"><label for="boss-encounter">Encounter Key</label><input id="boss-encounter" type="text"></div>
+            <div class="field"><label for="boss-enemy">Boss Enemy</label><select id="boss-enemy"></select></div>
+            <div class="field"><label for="boss-max">Max Participants</label><input id="boss-max" type="number" min="1" value="4"></div>
+            <div class="field"><label for="boss-entry">Entry Room</label><select id="boss-entry"></select></div>
+            <div class="field"><label for="boss-success">Success Room</label><select id="boss-success"></select></div>
+            <div class="field"><label for="boss-failure">Failure Room</label><select id="boss-failure"></select></div>
+            <div class="field"><label for="boss-clear">Requires Personal Clear</label><select id="boss-clear"><option value="true">true</option><option value="false">false</option></select></div>
+            <div class="field full"><label for="boss-instance">Instance Description</label><textarea id="boss-instance" spellcheck="true"></textarea></div>
+          </div></section>
+
+          <section class="section type-panel" data-type-panel="portal"><h3>Portal / Trophy</h3><p>Portal fields also cover trophy metadata where applicable.</p><div class="field-grid">
+            <div class="field"><label for="portal-status">Status</label><select id="portal-status"><option value="">None</option><option value="dormant">dormant</option><option value="sealed">sealed</option><option value="stable">stable</option></select></div>
+            <div class="field"><label for="portal-resonance">Resonance</label><select id="portal-resonance"><option value="">None</option><option value="fantasy">fantasy</option><option value="tech">tech</option></select></div>
+            <div class="field"><label for="portal-room">Entry Room</label><select id="portal-room"></select></div>
+            <div class="field"><label for="trophy-world">Trophy World</label><input id="trophy-world" type="text"></div>
+            <div class="field full"><label for="portal-hint">Travel Hint / Placeholder</label><textarea id="portal-hint" spellcheck="true"></textarea></div>
+          </div></section>
+
+          <details open><summary>Advanced Source</summary><div class="stack" style="padding:0 14px 14px"><textarea id="entry-json" spellcheck="false"></textarea><button id="sync-source" class="secondary" type="button">Apply Source To Fields</button></div></details>
+        </div></section>
+
+        <section class="panel"><div class="panel-head"><h3>Linked Content</h3><p>Resolved items, rooms, enemies, and copyable payloads for the other builders.</p></div><div class="panel-body stack">
+          <div class="builder-links"><a class="button-link secondary" href="/creator/world/">World Builder</a><a class="button-link secondary" href="/creator/items/">Item Builder</a><a class="button-link secondary" href="/creator/quests/">Quest Builder</a><a class="button-link secondary" href="/creator/encounters/">Encounter Builder</a><a class="button-link secondary" href="/creator/composers/boss/">Boss Composer</a></div>
+          <div id="link-grid" class="link-grid"></div>
+        </div></section>
+      </div>
+
+      <section class="panel"><div class="panel-head"><h3>Activity</h3><p>Preview, diff, validation, publish, history, and revert output.</p></div><div class="panel-body stack"><div id="status" class="status">Waiting for a system selection.</div><pre id="output"></pre></div></section>
+    </section>
+  </div>
+  <script src="/static/website/js/creator_common.js"></script>
+  <script>
+    const API_ROOT = "{{ api_root|escapejs }}";
+    const $ = (id) => document.getElementById(id);
+    const systemTabs = $('system-tabs');
+    const systemList = $('system-list');
+    const systemSearch = $('system-search');
+    const entryKey = $('entry-key');
+    const entryName = $('entry-name');
+    const entrySummary = $('entry-summary');
+    const entryJson = $('entry-json');
+    const output = $('output');
+    const statusBox = $('status');
+    const validationNotes = $('validation-notes');
+    const linkGrid = $('link-grid');
+    const creatorTools = window.BraveCreator.bind(API_ROOT, statusBox, validationNotes);
+    const guideButtons = Array.from(document.querySelectorAll('[data-system-preset]'));
+    const systems = [
+      { label:'Cooking', reference:'cooking-recipes', kind:'cooking-recipe', preset:'cooking', panels:['recipe'], sample:{ name:'New Recipe', ingredients:{}, result:'item_id', summary:'' } },
+      { label:'Tinkering', reference:'tinkering-recipes', kind:'tinkering-recipe', preset:'tinkering', panels:['recipe'], sample:{ name:'New Pattern', base:'item_id', components:{}, result:'item_id', silver_cost:0, station:'brambleford_menders_shed', summary:'' } },
+      { label:'Fishing Spots', reference:'fishing-spots', kind:'fishing-spot', preset:'fishing', panels:['fishing'], sample:{ name:'New Fishing Spot', bite_delay:[4,7], reaction_window:5, recommended_rods:[], recommended_lures:[], fish:[] } },
+      { label:'Fishing Rods', reference:'fishing-rods', kind:'fishing-rod', preset:'tackle', panels:[], sample:{ name:'New Rod', power:1, stability:1, summary:'' } },
+      { label:'Fishing Lures', reference:'fishing-lures', kind:'fishing-lure', preset:'tackle', panels:[], sample:{ name:'New Lure', attracts:[], rarity_bonus:0, summary:'' } },
+      { label:'Fish Behaviors', reference:'fish-behaviors', kind:'fish-behavior', preset:'tackle', panels:[], sample:{ pattern:'sine', stamina:10, base_pull:0.2, burst_pull:0.1 } },
+      { label:'Boss Gates', reference:'boss-gates', kind:'boss-gate', preset:'boss', panels:['boss'], sample:{ key:'new_boss_gate', name:'New Boss Gate', trigger_room_id:'room_id', encounter_key:'encounter_key', boss_enemy_key:'enemy_key', max_participants:4, requires_personal_clear:true } },
+      { label:'Forge', reference:'forge', kind:'forge', preset:'forge', panels:['recipe'], sample:{ result:'item_id', materials:{}, silver:0, text:'' } },
+      { label:'Portals', reference:'portals', kind:'portal', preset:'portal', panels:['portal'], sample:{ name:'New Portal', status:'stable', resonance:'fantasy', summary:'', travel_hint:'', entry_room:'room_id' } },
+      { label:'Trophies', reference:'trophies', kind:'trophy', preset:'trophy', panels:['portal'], sample:{ name:'New Trophy', placeholder:'', summary:'', world:'Brave' } },
+    ];
+    let activeSystem = systems[0];
+    let entries = [];
+    let selectedId = '';
+    let items = [];
+    let rooms = [];
+    let enemies = [];
+    let previewPayload = null;
+
+    function setStatus(message, tone = '') { creatorTools.setStatus(message, tone); }
+    function renderJson(value) { return JSON.stringify(value || {}, null, 2); }
+    function parseJson(text, fallback) { try { return JSON.parse(text || JSON.stringify(fallback)); } catch { return fallback; } }
+    function parsePayload() { return creatorTools.parseJsonField(entryJson, {}, { label:'Entry source', expect:'object' }); }
+    function setBusy(isBusy) { for (const button of document.querySelectorAll('button')) button.disabled = isBusy; }
+    function setActivePreset(preset) { guideButtons.forEach((button) => button.classList.toggle('active', button.dataset.systemPreset === preset)); }
+    function fillSelect(select, entries, selected = '', labelBuilder = (entry) => `${entry.label || entry.id} (${entry.id})`) {
+      select.innerHTML = '<option value="">None</option>';
+      for (const entry of entries) {
+        const option = document.createElement('option');
+        option.value = entry.id;
+        option.textContent = labelBuilder(entry);
+        if (entry.id === selected) option.selected = true;
+        select.appendChild(option);
+      }
+    }
+    function sourceFromPreview(preview) {
+      return preview.recipe || preview.spot || preview.rod || preview.lure || preview.behavior || preview.gate || preview.trophy || preview.portal || preview;
+    }
+    function showPanels() {
+      document.querySelectorAll('[data-type-panel]').forEach((panel) => panel.hidden = !activeSystem.panels.includes(panel.dataset.typePanel));
+      setActivePreset(activeSystem.preset);
+    }
+    function syncFieldsFromPayload(payload) {
+      const data = payload || activeSystem.sample;
+      entryName.value = data.name || '';
+      entrySummary.value = data.summary || '';
+      $('recipe-result').value = data.result || '';
+      $('recipe-base').value = data.base || '';
+      $('recipe-station').value = data.station || '';
+      $('recipe-silver').value = data.silver_cost || data.silver || 0;
+      $('recipe-materials').value = renderJson(data.ingredients || data.components || data.materials || {});
+      $('recipe-unlock-type').value = data.unlock_type || '';
+      $('recipe-unlock-text').value = data.unlock_text || '';
+      $('recipe-success-text').value = data.success_text || '';
+      $('fish-room').value = entryKey.value || '';
+      $('fish-reaction').value = data.reaction_window || 5;
+      $('fish-bite-min').value = (data.bite_delay || [4, 7])[0] || 4;
+      $('fish-bite-max').value = (data.bite_delay || [4, 7])[1] || 7;
+      $('fish-table').value = renderJson(data.fish || []);
+      $('fish-cast-text').value = data.cast_text || '';
+      $('boss-trigger').value = data.trigger_room_id || '';
+      $('boss-encounter').value = data.encounter_key || '';
+      $('boss-enemy').value = data.boss_enemy_key || '';
+      $('boss-max').value = data.max_participants || 4;
+      $('boss-entry').value = data.entry_room_id || '';
+      $('boss-success').value = data.success_room_id || '';
+      $('boss-failure').value = data.failure_room_id || '';
+      $('boss-clear').value = data.requires_personal_clear === false ? 'false' : 'true';
+      $('boss-instance').value = data.instance_desc || '';
+      $('portal-status').value = data.status || '';
+      $('portal-resonance').value = data.resonance || '';
+      $('portal-room').value = data.entry_room || '';
+      $('trophy-world').value = data.world || '';
+      $('portal-hint').value = data.travel_hint || data.placeholder || '';
+    }
+    function syncPayloadFromFields() {
+      const payload = parsePayload();
+      if (entryName.value.trim()) payload.name = entryName.value.trim();
+      if (entrySummary.value.trim()) payload.summary = entrySummary.value.trim();
+      if (activeSystem.kind === 'cooking-recipe') {
+        payload.result = $('recipe-result').value || payload.result;
+        payload.ingredients = parseJson($('recipe-materials').value, {});
+      } else if (activeSystem.kind === 'tinkering-recipe') {
+        payload.result = $('recipe-result').value || payload.result;
+        payload.base = $('recipe-base').value || payload.base;
+        payload.components = parseJson($('recipe-materials').value, {});
+        payload.station = $('recipe-station').value || payload.station;
+        payload.silver_cost = Number($('recipe-silver').value || 0);
+      } else if (activeSystem.kind === 'forge') {
+        payload.result = $('recipe-result').value || payload.result;
+        payload.materials = parseJson($('recipe-materials').value, {});
+        payload.silver = Number($('recipe-silver').value || 0);
+      } else if (activeSystem.kind === 'fishing-spot') {
+        if ($('fish-room').value) entryKey.value = $('fish-room').value;
+        payload.bite_delay = [Number($('fish-bite-min').value || 4), Number($('fish-bite-max').value || 7)];
+        payload.reaction_window = Number($('fish-reaction').value || 5);
+        payload.fish = parseJson($('fish-table').value, []);
+        payload.cast_text = $('fish-cast-text').value.trim();
+      } else if (activeSystem.kind === 'boss-gate') {
+        payload.key = entryKey.value.trim();
+        payload.trigger_room_id = $('boss-trigger').value;
+        payload.encounter_key = $('boss-encounter').value.trim();
+        payload.boss_enemy_key = $('boss-enemy').value;
+        payload.max_participants = Number($('boss-max').value || 4);
+        payload.entry_room_id = $('boss-entry').value;
+        payload.success_room_id = $('boss-success').value;
+        payload.failure_room_id = $('boss-failure').value;
+        payload.requires_personal_clear = $('boss-clear').value === 'true';
+        payload.instance_desc = $('boss-instance').value.trim();
+      } else if (activeSystem.kind === 'portal') {
+        payload.status = $('portal-status').value;
+        payload.resonance = $('portal-resonance').value;
+        payload.entry_room = $('portal-room').value;
+        payload.travel_hint = $('portal-hint').value.trim();
+      } else if (activeSystem.kind === 'trophy') {
+        payload.world = $('trophy-world').value.trim();
+        payload.placeholder = $('portal-hint').value.trim();
+      }
+      if ($('recipe-unlock-type').value.trim()) payload.unlock_type = $('recipe-unlock-type').value.trim();
+      if ($('recipe-unlock-text').value.trim()) payload.unlock_text = $('recipe-unlock-text').value.trim();
+      if ($('recipe-success-text').value.trim()) payload.success_text = $('recipe-success-text').value.trim();
+      entryJson.value = renderJson(payload);
+      return payload;
+    }
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+      return Promise.resolve();
+    }
+    function payloadSnippet(kind, data = {}) {
+      if (kind === 'unlock') return JSON.stringify({ use:{ verb:'study', effect_type:'unlock_recipe', target:'self', contexts:['explore'], recipe_domain:data.domain || 'cooking', unlock_recipe: entryKey.value.trim() || 'recipe_key' } }, null, 2);
+      if (kind === 'activity') return JSON.stringify({ activities:[data.activity || 'fishing'] }, null, 2);
+      if (kind === 'fish') return JSON.stringify({ item:data.item || 'item_id', chance:20, hook_chance:0.75, rarity:'common', behavior_id:'steady_pull', weight:[1,3] }, null, 2);
+      if (kind === 'boss-exit') return JSON.stringify({ boss_gate: entryKey.value.trim() || 'boss_gate_key', key:'forward', label:'Boss Gate' }, null, 2);
+      if (kind === 'quest-reward') return JSON.stringify({ item:data.item || data.template_id || 'item_id', quantity:1 }, null, 2);
+      return JSON.stringify(data, null, 2);
+    }
+    function addLinkCard(title, meta, href, snippet) {
+      const card = document.createElement('div');
+      card.className = 'link-card';
+      card.innerHTML = `<strong>${href ? `<a href="${href}">${title}</a>` : title}</strong><span>${meta}</span>${snippet ? `<code>${snippet}</code>` : ''}`;
+      if (snippet) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'secondary';
+        button.textContent = 'Copy Payload';
+        button.addEventListener('click', () => copyText(snippet).then(() => setStatus('Systems payload copied.', 'good')));
+        card.appendChild(button);
+      }
+      linkGrid.appendChild(card);
+    }
+    function renderLinks(preview = previewPayload) {
+      linkGrid.innerHTML = '';
+      if (!preview) {
+        addLinkCard('Room Activity Snippet', 'Copy activity flags for World Builder.', '/creator/world/', payloadSnippet('activity', { activity:'fishing' }));
+        return;
+      }
+      for (const item of preview.ingredients || preview.components || preview.materials || []) addLinkCard(item.name || item.template_id, `Ingredient/material ${item.template_id} x${item.quantity}`, '/creator/items/', payloadSnippet('quest-reward', item));
+      if (preview.result_template_id) addLinkCard(preview.result_name || preview.result_template_id, `Result item ${preview.result_template_id}`, '/creator/items/', payloadSnippet('quest-reward', { item:preview.result_template_id }));
+      if (preview.base_template_id) addLinkCard(preview.base_name || preview.base_template_id, `Base item ${preview.base_template_id}`, '/creator/items/', '');
+      for (const item of preview.unlock_items || []) addLinkCard(item.name || item.template_id, `Unlock item ${item.template_id}`, '/creator/items/', payloadSnippet('unlock', { domain: activeSystem.kind.startsWith('tinkering') ? 'tinkering' : 'cooking' }));
+      for (const fish of preview.fish || []) addLinkCard(fish.item_name || fish.item, `Fish table entry ${fish.item}`, '/creator/items/', payloadSnippet('fish', fish));
+      for (const rod of preview.recommended_rods || []) addLinkCard(rod.name || rod.rod_key, `Recommended rod ${rod.rod_key}`, '/creator/systems/', '');
+      for (const lure of preview.recommended_lures || []) addLinkCard(lure.name || lure.lure_key, `Recommended lure ${lure.lure_key}`, '/creator/systems/', '');
+      for (const roomKey of ['trigger_room','entry_room','success_room','failure_room','room','station_room']) {
+        const room = preview[roomKey];
+        if (room) addLinkCard(room.key || room.id, `Linked room: ${room.id}`, '/creator/world/', roomKey === 'room' ? payloadSnippet('activity', { activity:'fishing' }) : '');
+      }
+      if (preview.boss_enemy_key) addLinkCard((preview.boss_enemy || {}).name || preview.boss_enemy_key, `Boss enemy ${preview.boss_enemy_key}`, '/creator/encounters/', '');
+      if (preview.encounter) addLinkCard(preview.encounter.title || preview.encounter.key, `Encounter key ${preview.encounter.key}`, '/creator/encounters/', '');
+      for (const exit of preview.linked_exits || []) addLinkCard(exit.label || exit.id, `Boss-gate exit ${exit.id}`, '/creator/world/', payloadSnippet('boss-exit'));
+      if (preview.entry_room_name) addLinkCard(preview.entry_room_name, 'Portal entry room', '/creator/world/', '');
+      if (preview.trophy) addLinkCard(preview.trophy.name || entryKey.value, `Trophy world ${preview.trophy.world || '-'}`, null, payloadSnippet('quest-reward'));
+      if (!linkGrid.children.length) addLinkCard('No links yet', 'Preview this entry or fill guided fields to reveal linked content.', null, payloadSnippet('activity'));
+    }
+    function renderTabs() {
+      systemTabs.innerHTML = '';
+      for (const system of systems) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'secondary' + (system === activeSystem ? ' active' : '');
+        button.textContent = system.label;
+        button.addEventListener('click', () => selectSystem(system));
+        systemTabs.appendChild(button);
+      }
+    }
+    function renderList(filter = '') {
+      const token = filter.trim().toLowerCase();
+      const filtered = entries.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || '').toLowerCase().includes(token)));
+      systemList.innerHTML = '';
+      for (const entry of filtered) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'item-row' + (entry.id === selectedId ? ' active' : '');
+        button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id}${entry.meta ? ` · ${entry.meta}` : ''}</span>`;
+        button.addEventListener('click', () => selectEntry(entry.id));
+        systemList.appendChild(button);
+      }
+    }
+    async function loadReferences() {
+      [items, rooms, enemies] = await Promise.all([
+        creatorTools.fetchReferences('items', { limit: 1000 }),
+        creatorTools.fetchReferences('rooms', { limit: 1000 }),
+        creatorTools.fetchReferences('enemies', { limit: 1000 }),
+      ]);
+      for (const select of [$('recipe-result'), $('recipe-base')]) fillSelect(select, items);
+      for (const select of [$('recipe-station'), $('fish-room'), $('boss-trigger'), $('boss-entry'), $('boss-success'), $('boss-failure'), $('portal-room')]) fillSelect(select, rooms);
+      fillSelect($('boss-enemy'), enemies);
+    }
+    async function loadEntries() {
+      entries = await creatorTools.fetchReferences(activeSystem.reference, { limit: 1000 });
+      renderList(systemSearch.value);
+    }
+    async function selectSystem(system) {
+      activeSystem = system;
+      selectedId = '';
+      previewPayload = null;
+      entryKey.value = '';
+      entryJson.value = renderJson(system.sample);
+      syncFieldsFromPayload(system.sample);
+      showPanels();
+      $('editor-title').textContent = `${system.label} Editor`;
+      $('editor-subtitle').textContent = `${system.kind} writes are staged to draft systems content.`;
+      renderTabs();
+      renderLinks(null);
+      await loadEntries();
+      setStatus(`Loaded ${system.label}.`, 'good');
+    }
+    async function selectEntry(id) {
+      selectedId = id;
+      entryKey.value = id;
+      renderList(systemSearch.value);
+      await previewEntry();
+    }
+    async function previewEntry() {
+      const key = entryKey.value.trim() || selectedId;
+      if (!key) throw new Error('Entry key is required.');
+      const payload = await creatorTools.apiFetch('/preview', { method:'POST', body: JSON.stringify({ kind: activeSystem.kind, args: [key] }) });
+      previewPayload = payload.preview;
+      const source = sourceFromPreview(payload.preview);
+      entryJson.value = renderJson(source);
+      syncFieldsFromPayload(source);
+      output.textContent = renderJson(payload.preview);
+      renderLinks(payload.preview);
+      setStatus(`Preview loaded for ${key}.`, 'good');
+    }
+    async function mutateEntry(write) {
+      const key = entryKey.value.trim();
+      if (!key) throw new Error('Entry key is required.');
+      const result = await creatorTools.apiFetch('/mutate', { method:'POST', body: JSON.stringify({ kind: activeSystem.kind, target: key, payload: syncPayloadFromFields(), write, stage:'draft' }) });
+      output.textContent = result.diff || '(no diff)';
+      setStatus(write ? `Saved ${key} to draft systems content.` : `Previewed draft diff for ${key}.`, 'good');
+      if (write) await loadEntries();
+    }
+    async function removeEntry() {
+      const key = entryKey.value.trim();
+      if (!key) throw new Error('Entry key is required.');
+      const result = await creatorTools.apiFetch('/remove', { method:'POST', body: JSON.stringify({ kind: activeSystem.kind, target: key, write:true, stage:'draft' }) });
+      output.textContent = result.diff || '(no diff)';
+      setStatus(`Removed ${key} from draft systems content.`, 'good');
+      await loadEntries();
+    }
+    async function validateDrafts() {
+      const response = await fetch(`${API_ROOT}/validate`, { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ stage:'draft' }) });
+      const payload = await response.json().catch(() => ({}));
+      output.textContent = renderJson(payload);
+      creatorTools.showValidation(payload.errors || []);
+      setStatus(payload.ok ? 'Draft validation passed.' : `Draft validation found ${(payload.errors || []).length} issue(s).`, payload.ok ? 'good' : 'bad');
+    }
+    async function runAction(action) {
+      setBusy(true);
+      try { await action(); }
+      catch (error) { setStatus(error.message, 'bad'); }
+      finally { setBusy(false); }
+    }
+    function applyPreset(preset) {
+      const target = systems.find((system) => system.preset === preset) || activeSystem;
+      selectSystem(target);
+    }
+    $('new-entry').addEventListener('click', () => {
+      selectedId = '';
+      previewPayload = null;
+      entryKey.value = '';
+      entryJson.value = renderJson(activeSystem.sample);
+      syncFieldsFromPayload(activeSystem.sample);
+      output.textContent = '';
+      renderLinks(null);
+      setStatus('New draft staged in the form.', 'good');
+      renderList(systemSearch.value);
+    });
+    $('preview-entry').addEventListener('click', () => runAction(previewEntry));
+    $('diff-entry').addEventListener('click', () => runAction(() => mutateEntry(false)));
+    $('write-entry').addEventListener('click', () => runAction(() => mutateEntry(true)));
+    $('remove-entry').addEventListener('click', () => runAction(removeEntry));
+    $('validate-entry').addEventListener('click', () => runAction(validateDrafts));
+    $('sync-source').addEventListener('click', () => { syncFieldsFromPayload(parsePayload()); renderLinks(null); setStatus('Advanced source applied to guided fields.', 'good'); });
+    entryJson.addEventListener('input', () => renderLinks(null));
+    systemSearch.addEventListener('input', () => renderList(systemSearch.value));
+    guideButtons.forEach((button) => button.addEventListener('click', () => applyPreset(button.dataset.systemPreset)));
+    document.querySelectorAll('input,select,textarea').forEach((field) => {
+      if (field.id !== 'entry-json') field.addEventListener('change', () => { try { syncPayloadFromFields(); renderLinks(null); } catch (error) {} });
+    });
+    renderTabs();
+    loadReferences().then(() => selectSystem(activeSystem)).catch((error) => setStatus(error.message, 'bad'));
+  </script>
+</body>
+</html>

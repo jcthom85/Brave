@@ -71,6 +71,8 @@ class CreatorApiTests(unittest.TestCase):
         self.assertTrue(payload["ok"])
         self.assertIn("quests", payload["domains"])
         self.assertIn("draft", payload["domains"]["world"])
+        self.assertIn("cooking_recipes", payload["domains"]["systems"])
+        self.assertIn("boss_gates", payload["domains"]["systems"])
 
     def test_reference_search_returns_room_matches(self):
         request = self.factory.get("/api/content/references/rooms", {"q": "green", "limit": 5})
@@ -106,6 +108,15 @@ class CreatorApiTests(unittest.TestCase):
         self.assertIn("region", payload["results"][0])
         self.assertIn("start_room", payload["results"][0])
 
+    def test_reference_search_returns_system_matches(self):
+        request = self.factory.get("/api/content/references/cooking-recipes", {"limit": 5})
+        request.user = self.user
+        response = views.content_references(request, "cooking-recipes")
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("cooking-recipes", payload["domain"])
+        self.assertTrue(payload["results"])
+
     def test_preview_returns_room_payload(self):
         request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "room", "args": ["brambleford_town_green"]}), content_type="application/json")
         request.user = self.user
@@ -114,6 +125,8 @@ class CreatorApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual("room", payload["kind"])
         self.assertEqual("brambleford_town_green", payload["preview"]["room"]["id"])
+        self.assertIn("incoming_exits", payload["preview"])
+        self.assertIn("related", payload["preview"])
 
     def test_preview_returns_quest_payload_with_starting_state(self):
         request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "quest", "args": ["practice_makes_heroes"]}), content_type="application/json")
@@ -135,6 +148,15 @@ class CreatorApiTests(unittest.TestCase):
         self.assertEqual("blackreed_patrol", payload["preview"]["party_key"])
         self.assertIn("total_xp", payload["preview"])
 
+    def test_preview_returns_system_payload(self):
+        request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "boss-gate", "args": ["ruk_fence_cutter"]}), content_type="application/json")
+        request.user = self.user
+        response = views.content_preview(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("boss-gate", payload["kind"])
+        self.assertEqual("ruk_fence_cutter", payload["preview"]["gate_key"])
+
     def test_preview_returns_dialogue_payload(self):
         request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "dialogue", "args": ["brother_alden"]}), content_type="application/json")
         request.user = self.user
@@ -143,6 +165,8 @@ class CreatorApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual("dialogue", payload["kind"])
         self.assertIn("talk_rules", payload["preview"])
+        self.assertIn("linked_content", payload["preview"])
+        self.assertIn("quest_links", payload["preview"])
 
     def test_preview_returns_readable_payload(self):
         request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "readable", "args": ["barrow_marker_stone"]}), content_type="application/json")
@@ -152,6 +176,7 @@ class CreatorApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual("readable", payload["kind"])
         self.assertIn("text", payload["preview"])
+        self.assertIn("linked_content", payload["preview"])
 
     def test_mutate_dry_run_returns_diff(self):
         request = self.factory.post("/api/content/mutate", data=json.dumps({"kind": "room", "target": "creator_api_room", "payload": {"key": "Creator API Room", "desc": "Dry run through the web creator api.", "zone": "Testing", "world": "Brave"}, "write": False}), content_type="application/json")
@@ -161,6 +186,7 @@ class CreatorApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         self.assertTrue(payload["ok"])
         self.assertFalse(payload["write"])
+        self.assertEqual("draft", payload["stage"])
         self.assertIn("creator_api_room", payload["diff"])
 
     def test_mutate_roaming_party_dry_run_returns_diff(self):
@@ -189,6 +215,24 @@ class CreatorApiTests(unittest.TestCase):
         self.assertTrue(payload["ok"])
         self.assertFalse(payload["write"])
         self.assertIn("creator_api_patrol", payload["diff"])
+
+    def test_mutate_system_dry_run_defaults_to_draft(self):
+        request = self.factory.post(
+            "/api/content/mutate",
+            data=json.dumps({
+                "kind": "fishing-rod",
+                "target": "creator_api_rod",
+                "payload": {"name": "Creator API Rod", "power": 1, "stability": 1, "summary": "Dry-run rod."},
+                "write": False,
+            }),
+            content_type="application/json",
+        )
+        request.user = self.user
+        response = views.content_mutate(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("draft", payload["stage"])
+        self.assertIn("creator_api_rod", payload["diff"])
 
     def test_remove_dry_run_returns_diff(self):
         request = self.factory.post("/api/content/remove", data=json.dumps({"kind": "read", "target": "dawn_bell", "write": False}), content_type="application/json")
