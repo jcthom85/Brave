@@ -74,6 +74,9 @@ let defaultout_plugin = (function () {
     var currentMapText = "";
     var currentMapGrid = null;
     var currentArcadeState = null;
+    var currentMovieOverlayState = null;
+    var currentMovieCardTimer = null;
+    var currentMovieProgressTimer = null;
     var pendingArcadeRoomRestore = false;
     var pendingMainScrollRestore = null;
     var currentMobileUtilityTab = null;
@@ -6823,6 +6826,25 @@ let defaultout_plugin = (function () {
         renderConnectionView();
     };
 
+    var clearBrowserLoginSession = function (payload) {
+        var logoutPayload = payload && typeof payload === "object" ? payload : {};
+        var endpoint = logoutPayload.endpoint || "/webclient/logout";
+        var screen = logoutPayload.screen || "signin";
+        var finish = function () {
+            resetToConnectionView(screen);
+        };
+        if (!window.fetch) {
+            finish();
+            return;
+        }
+        window.fetch(endpoint, {
+            method: "POST",
+            credentials: "same-origin",
+            cache: "no-store",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+        }).then(finish).catch(finish);
+    };
+
     var openConnectionScreen = function (screen) {
         currentConnectionScreen = screen || "menu";
         renderConnectionView();
@@ -10695,6 +10717,184 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var clearMovieOverlayTimers = function () {
+        if (currentMovieCardTimer) {
+            window.clearInterval(currentMovieCardTimer);
+            currentMovieCardTimer = null;
+        }
+        if (currentMovieProgressTimer) {
+            window.clearInterval(currentMovieProgressTimer);
+            currentMovieProgressTimer = null;
+        }
+    };
+
+    var clearMovieOverlay = function () {
+        clearMovieOverlayTimers();
+        currentMovieOverlayState = null;
+        var root = document.getElementById("brave-movie-overlay");
+        if (root && root.parentNode) {
+            root.parentNode.removeChild(root);
+        }
+        if (document.body) {
+            document.body.classList.remove("brave-movie-active");
+        }
+    };
+
+    var formatMovieTime = function (seconds) {
+        seconds = Math.max(0, Math.floor(parseFloat(seconds) || 0));
+        var minutes = Math.floor(seconds / 60);
+        var remaining = seconds % 60;
+        return String(minutes) + ":" + (remaining < 10 ? "0" : "") + String(remaining);
+    };
+
+    var setMovieCard = function (root, index) {
+        if (!root || !currentMovieOverlayState) {
+            return;
+        }
+        var cards = currentMovieOverlayState.cards || [];
+        if (!cards.length) {
+            return;
+        }
+        currentMovieOverlayState.cardIndex = index % cards.length;
+        var cardNode = root.querySelector("[data-brave-movie-card]");
+        var countNode = root.querySelector("[data-brave-movie-card-count]");
+        if (cardNode) {
+            if (!prefersReducedMotion()) {
+                cardNode.classList.remove("brave-movie-overlay__card-text--enter");
+                void cardNode.offsetWidth;
+                cardNode.classList.add("brave-movie-overlay__card-text--enter");
+            }
+            cardNode.textContent = cards[currentMovieOverlayState.cardIndex];
+        }
+        if (countNode) {
+            countNode.textContent = String(currentMovieOverlayState.cardIndex + 1) + " / " + String(cards.length);
+        }
+    };
+
+    var updateMovieProgress = function () {
+        var state = currentMovieOverlayState;
+        var root = document.getElementById("brave-movie-overlay");
+        if (!state || !root) {
+            return;
+        }
+        var runtime = Math.max(0, parseFloat(state.runtimeSec) || 0);
+        var elapsed = Math.max(0, (Date.now() - state.startedAt) / 1000);
+        var ratio = runtime ? Math.min(1, elapsed / runtime) : 0;
+        var progressNode = root.querySelector("[data-brave-movie-progress]");
+        var elapsedNode = root.querySelector("[data-brave-movie-elapsed]");
+        var runtimeNode = root.querySelector("[data-brave-movie-runtime]");
+        if (progressNode) {
+            progressNode.style.width = String(Math.round(ratio * 1000) / 10) + "%";
+        }
+        if (elapsedNode) {
+            elapsedNode.textContent = formatMovieTime(elapsed);
+        }
+        if (runtimeNode) {
+            runtimeNode.textContent = runtime ? formatMovieTime(runtime) : "--:--";
+        }
+        if (runtime && elapsed >= runtime + 1) {
+            clearMovieOverlay();
+        }
+    };
+
+    var bindMovieOverlayControls = function (root) {
+        root.addEventListener("click", function (event) {
+            var closeTarget = event.target.closest("[data-brave-movie-close]");
+            if (closeTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                sendBrowserCommand("movie stop");
+                return;
+            }
+            var commandTarget = event.target.closest("[data-brave-movie-command]");
+            if (commandTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                var command = commandTarget.getAttribute("data-brave-movie-command") || "";
+                if (command === "movie") {
+                    clearMovieOverlay();
+                }
+                sendBrowserCommand(command);
+            }
+        }, true);
+    };
+
+    var renderMovieOverlay = function (payload) {
+        payload = payload || {};
+        console.log("DEBUG: renderMovieOverlay called", payload);
+        clearMovieOverlay();
+        closePickerSheet();
+        clearActivityOverlay({ suppressArcadeRestore: true });
+        var cards = compactActivityLines(payload.cards);
+        if (!cards.length) {
+            cards = ["The lantern screen brightens, and the room goes still."];
+        }
+        currentMovieOverlayState = {
+            title: String(payload.title || "Great Frontier"),
+            cards: cards,
+            cardIndex: 0,
+            runtimeSec: Math.max(0, parseFloat(payload.runtime_sec || payload.runtimeSec || 0) || 0),
+            startedAt: Date.now(),
+        };
+        var root = document.createElement("div");
+        root.id = "brave-movie-overlay";
+        root.className = "brave-movie-overlay";
+        root.setAttribute("aria-hidden", "false");
+        root.style.zIndex = "2000"; // Ensure it is above the explore view
+        root.innerHTML =
+            "<div class='brave-movie-overlay__backdrop'></div>"
+            + "<section class='brave-movie-overlay__panel' role='dialog' aria-modal='true' tabindex='0'>"
+            + "<div class='brave-movie-overlay__curtain brave-movie-overlay__curtain--left'></div>"
+            + "<div class='brave-movie-overlay__curtain brave-movie-overlay__curtain--right'></div>"
+            + "<div class='brave-movie-overlay__topbar'>"
+            + "<div class='brave-movie-overlay__now'>Now Showing</div>"
+            + "<button type='button' class='brave-movie-overlay__close brave-view__action brave-view__action--muted brave-view__back' data-brave-movie-close='1' aria-label='Stop movie'>"
+            + icon("close")
+            + "</button>"
+            + "</div>"
+            + "<div class='brave-movie-overlay__screen'>"
+            + "<div class='brave-movie-overlay__projector'></div>"
+            + "<div class='brave-movie-overlay__title'>" + escapeHtml(currentMovieOverlayState.title) + "</div>"
+            + "<div class='brave-movie-overlay__rule'></div>"
+            + "<div class='brave-movie-overlay__card-text' data-brave-movie-card>" + escapeHtml(cards[0]) + "</div>"
+            + "<div class='brave-movie-overlay__card-count' data-brave-movie-card-count'>1 / " + escapeHtml(String(cards.length)) + "</div>"
+            + "</div>"
+            + "<div class='brave-movie-overlay__controls'>"
+            + "<div class='brave-movie-overlay__time'><span data-brave-movie-elapsed>0:00</span><span data-brave-movie-runtime>" + escapeHtml(currentMovieOverlayState.runtimeSec ? formatMovieTime(currentMovieOverlayState.runtimeSec) : "--:--") + "</span></div>"
+            + "<div class='brave-movie-overlay__track'><div class='brave-movie-overlay__progress' data-brave-movie-progress></div></div>"
+            + "<div class='brave-movie-overlay__actions'>"
+            + "<button type='button' class='brave-movie-overlay__button brave-movie-overlay__button--stop' data-brave-movie-command='" + escapeHtml(payload.stop_command || "movie stop") + "'>"
+            + icon("stop_circle", "brave-movie-overlay__button-icon")
+            + "<span>Stop Movie</span>"
+            + "</button>"
+            + "<button type='button' class='brave-movie-overlay__button' data-brave-movie-command='" + escapeHtml(payload.program_command || "movie") + "'>"
+            + icon("theaters", "brave-movie-overlay__button-icon")
+            + "<span>Program</span>"
+            + "</button>"
+            + "</div>"
+            + "</div>"
+            + "</section>";
+        document.body.appendChild(root);
+        document.body.classList.add("brave-movie-active");
+        bindMovieOverlayControls(root);
+        updateMovieProgress();
+        if (cards.length > 1) {
+            currentMovieCardTimer = window.setInterval(function () {
+                var overlay = document.getElementById("brave-movie-overlay");
+                if (!overlay || !currentMovieOverlayState) {
+                    clearMovieOverlayTimers();
+                    return;
+                }
+                setMovieCard(overlay, currentMovieOverlayState.cardIndex + 1);
+            }, 9500);
+        }
+        currentMovieProgressTimer = window.setInterval(updateMovieProgress, 1000);
+        var panel = root.querySelector(".brave-movie-overlay__panel");
+        if (panel && typeof panel.focus === "function") {
+            panel.focus();
+        }
+    };
+
     var restoreArcadeRoomView = function () {
         if (isRoomLikeView(currentRoomViewData)) {
             pendingArcadeRoomRestore = false;
@@ -12650,6 +12850,11 @@ let defaultout_plugin = (function () {
             return true;
         }
 
+        if (cmdname === "brave_logout") {
+            clearBrowserLoginSession(getOobPayload(args, kwargs, "brave_logout", {}) || {});
+            return true;
+        }
+
         if (cmdname === "brave_scene") {
             var scenePayload = getOobPayload(args, kwargs, "brave_scene", {});
             currentRoomSceneData = (scenePayload && typeof scenePayload === "object") ? scenePayload : {};
@@ -12727,6 +12932,27 @@ let defaultout_plugin = (function () {
                     braveAudioCue.play(audioCueId, { force: !!audioCuePayload.force });
                 }, Math.max(0, parseInt(audioCuePayload.delay_ms || 0, 10) || 0));
             }
+            return true;
+        }
+
+        if (cmdname === "brave_movie_audio") {
+            var movieAudioPayload = getOobPayload(args, kwargs, "brave_movie_audio", {}) || {};
+            var movieAudioAction = String(movieAudioPayload.action || "").toLowerCase();
+            var movieAudioCueId = movieAudioPayload.cue_id || movieAudioPayload.cue || "";
+            var braveMovieAudio = getBraveAudio();
+            if (movieAudioAction === "stop") {
+                if (braveMovieAudio && typeof braveMovieAudio.stopMovie === "function") {
+                    braveMovieAudio.stopMovie();
+                }
+            } else if (movieAudioCueId) {
+                if (braveMovieAudio && typeof braveMovieAudio.playMovie === "function") {
+                    braveMovieAudio.playMovie(movieAudioCueId);
+                }
+            }
+            return true;
+        }
+
+        if (cmdname === "brave_movie_overlay") {
             return true;
         }
 

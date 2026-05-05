@@ -114,6 +114,26 @@ class ContentRegistryTests(unittest.TestCase):
         self.assertTrue(registry.world.get_entity("mayor_elric_thorne"))
         self.assertEqual(payload["entities"][0]["id"], registry.world.entities[0]["id"])
 
+    def test_frontier_picture_house_is_linked_from_lantern_rest(self):
+        registry = get_content_registry()
+        theater = registry.world.get_room("brambleford_frontier_picture_house")
+        self.assertIsNotNone(theater)
+        self.assertTrue(theater["safe"])
+        self.assertEqual("Brambleford", theater["zone"])
+        self.assertIn("movie_theater", theater.get("activities", []))
+
+        exits = registry.world.exits
+        self.assertTrue(any(
+            exit_data["source"] == "brambleford_lantern_rest_inn"
+            and exit_data["destination"] == "brambleford_frontier_picture_house"
+            for exit_data in exits
+        ))
+        self.assertTrue(any(
+            exit_data["source"] == "brambleford_frontier_picture_house"
+            and exit_data["destination"] == "brambleford_lantern_rest_inn"
+            for exit_data in exits
+        ))
+
     def test_encounter_registry_loads_from_pack_file(self):
         registry = get_content_registry()
         pack_path = Path(registry.encounters.source_path)

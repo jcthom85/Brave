@@ -14,6 +14,8 @@
   function activeCreatorKey() {
     const path = window.location.pathname;
     if (path.includes('/creator/composers/boss/')) return 'boss';
+    if (path.includes('/creator/composers/recipe/')) return 'recipe';
+    if (path.includes('/creator/composers/fishing/')) return 'fishing';
     const match = CREATOR_LINKS.find((entry) => entry.href !== '/creator/' && path.startsWith(entry.href));
     return match ? match.key : 'studio';
   }
@@ -32,6 +34,14 @@
       .creator-shell-nav__flow a { border-color:var(--line,#d9c8ac); background:#fffdfa; }
       .creator-related-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
       .creator-related-links a { border:1px solid var(--line,#d9c8ac); border-radius:999px; padding:7px 10px; background:#fffdfa; color:var(--accent,#8b4a29); text-decoration:none; font-size:.92rem; }
+      .creator-health-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+      .creator-health-card,.creator-incoming-card { border:1px solid var(--line,#d9c8ac); border-radius:12px; background:#fffdfa; padding:12px; display:grid; gap:6px; }
+      .creator-health-card strong,.creator-incoming-card strong { display:block; }
+      .creator-health-card span,.creator-incoming-card span { color:var(--muted,#6b6157); font-size:.9rem; line-height:1.35; }
+      .creator-health-card.good { border-color:rgba(47,109,76,.28); background:#eef8f1; }
+      .creator-health-card.bad { border-color:rgba(141,49,34,.28); background:#fff0ed; }
+      .creator-incoming-card pre { display:block; min-height:90px; max-height:220px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+      @media (max-width:980px) { .creator-health-grid { grid-template-columns:1fr; } }
     `;
     document.head.appendChild(style);
   }
@@ -48,7 +58,7 @@
     const previous = activeIndex > 0 ? CREATOR_LINKS.find((entry) => entry.key === FLOW_ORDER[activeIndex - 1]) : null;
     const next = activeIndex >= 0 && activeIndex < FLOW_ORDER.length - 1 ? CREATOR_LINKS.find((entry) => entry.key === FLOW_ORDER[activeIndex + 1]) : null;
     nav.innerHTML = [
-      `<div class="creator-shell-nav__bar"><span class="creator-shell-nav__brand">Brave Creator</span>${linkHtml}<a href="/creator/composers/boss/"${active === 'boss' ? ' aria-current="page"' : ''}>Boss Composer</a></div>`,
+      `<div class="creator-shell-nav__bar"><span class="creator-shell-nav__brand">Brave Creator</span>${linkHtml}<a href="/creator/composers/boss/"${active === 'boss' ? ' aria-current="page"' : ''}>Boss Composer</a><a href="/creator/composers/recipe/"${active === 'recipe' ? ' aria-current="page"' : ''}>Recipe Composer</a><a href="/creator/composers/fishing/"${active === 'fishing' ? ' aria-current="page"' : ''}>Fishing Composer</a></div>`,
       `<div class="creator-shell-nav__flow">${previous ? `<a href="${previous.href}">&larr; ${previous.label}</a>` : ''}<span>Authoring flow: World &rarr; Encounters &rarr; Systems &rarr; Items &rarr; Quests &rarr; Dialogue</span>${next ? `<a href="${next.href}">${next.label} &rarr;</a>` : ''}</div>`,
     ].join('');
     document.body.insertBefore(nav, document.body.firstChild);
@@ -158,6 +168,70 @@
     return panel;
   }
 
+  function fetchHealth(apiRoot, stage) {
+    return apiFetch(apiRoot, `/health?stage=${encodeURIComponent(stage || 'draft')}`);
+  }
+
+  function renderHealthPanel(host, payload) {
+    if (!host) return null;
+    let panel = host.querySelector('[data-creator-health-panel]');
+    if (!panel) {
+      panel = document.createElement('section');
+      panel.className = 'panel creator-health';
+      panel.setAttribute('data-creator-health-panel', 'true');
+      panel.innerHTML = '<div class="panel-head"><h2>Creator Health</h2><p>Draft status, validation, readiness checks, and recommended next actions.</p></div><div class="panel-body stack"><div class="creator-health-grid" data-creator-health-grid></div></div>';
+      host.appendChild(panel);
+    }
+    const grid = panel.querySelector('[data-creator-health-grid]');
+    const errors = payload.validation_errors || [];
+    const draftDomains = payload.draft_domains || [];
+    const issueCount = (payload.readiness || []).reduce((total, section) => total + (section.issues || []).length, 0);
+    const cards = [
+      { title: payload.ok ? 'Validation Clear' : 'Validation Issues', meta: errors.length ? `${errors.length} issue(s) need fixing.` : 'Draft registry validates cleanly.', tone: payload.ok ? 'good' : 'bad' },
+      { title: draftDomains.length ? 'Drafts Present' : 'No Drafts', meta: draftDomains.length ? draftDomains.join(', ') : 'No draft pack files detected.', tone: draftDomains.length ? '' : 'good' },
+      { title: issueCount ? 'Readiness Gaps' : 'Ready', meta: issueCount ? `${issueCount} cross-builder readiness issue(s).` : 'No readiness gaps found.', tone: issueCount ? 'bad' : 'good' },
+    ];
+    for (const action of payload.recommended_next_actions || []) {
+      cards.push({ title: 'Next Action', meta: action.label, href: action.href, tone: '' });
+    }
+    grid.innerHTML = cards.map((card) => `<article class="creator-health-card ${card.tone || ''}"><strong>${card.href ? `<a href="${card.href}">${card.title}</a>` : card.title}</strong><span>${card.meta}</span></article>`).join('');
+    return panel;
+  }
+
+  function sendToBuilder(path, payload, label) {
+    const entry = { payload, label: label || 'Incoming Payload', created_at: new Date().toISOString() };
+    window.sessionStorage.setItem('braveCreatorIncomingPayload', JSON.stringify(entry));
+    window.location.href = path;
+  }
+
+  function consumeIncomingPayload() {
+    const raw = window.sessionStorage.getItem('braveCreatorIncomingPayload');
+    if (!raw) return null;
+    window.sessionStorage.removeItem('braveCreatorIncomingPayload');
+    try { return JSON.parse(raw); }
+    catch (_error) { return null; }
+  }
+
+  function renderIncomingPayload(host, incoming, statusNode) {
+    if (!host || !incoming) return null;
+    const panel = document.createElement('section');
+    panel.className = 'panel creator-incoming';
+    panel.setAttribute('data-creator-incoming-payload-panel', 'true');
+    panel.innerHTML = [
+      '<div class="panel-head"><h2>Incoming Payload</h2><p>A linked builder sent this payload here. Review it, copy it, then explicitly Preview or Save in this builder.</p></div>',
+      '<div class="panel-body stack">',
+      `<article class="creator-incoming-card"><strong>${incoming.label || 'Incoming Payload'}</strong><span>Payload is staged only; nothing was written.</span><pre>${JSON.stringify(incoming.payload || {}, null, 2)}</pre><button class="secondary" type="button" data-copy-incoming-payload>Copy Payload</button></article>`,
+      '</div>',
+    ].join('');
+    panel.querySelector('[data-copy-incoming-payload]').addEventListener('click', () => {
+      const text = JSON.stringify(incoming.payload || {}, null, 2);
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
+      if (statusNode) setStatus(statusNode, 'Incoming payload copied.', 'good');
+    });
+    host.insertBefore(panel, host.firstChild);
+    return panel;
+  }
+
   function setStatus(node, message, tone) {
     if (!node) return;
     node.className = 'status' + (tone ? ` ${tone}` : '');
@@ -245,13 +319,24 @@
   function bind(apiRoot, statusNode, validationNode) {
     attachCreatorShell();
     const outputNode = document.getElementById('output');
+    const host = document.querySelector('[data-creator-workflow-host]') || document.querySelector('.workspace') || document.querySelector('.stack') || document.body;
+    const incoming = consumeIncomingPayload();
+    renderIncomingPayload(host, incoming, statusNode);
     attachWorkflow(apiRoot, statusNode, outputNode, validationNode);
+    fetchHealth(apiRoot, 'draft')
+      .then((payload) => renderHealthPanel(host, payload))
+      .catch(() => {});
     return {
       apiFetch: (path, options) => apiFetch(apiRoot, path, options),
+      fetchHealth: (stage) => fetchHealth(apiRoot, stage),
+      renderHealthPanel: (hostNode, payload) => renderHealthPanel(hostNode || host, payload),
       fetchReferences: (domain, options) => fetchReferences(apiRoot, domain, options),
       fillSelect,
       requireFields,
       parseJsonField,
+      sendToBuilder,
+      consumeIncomingPayload,
+      renderIncomingPayload: (hostNode, payload) => renderIncomingPayload(hostNode || host, payload, statusNode),
       setStatus: (message, tone) => setStatus(statusNode, message, tone),
       showValidation: (messages) => renderValidation(validationNode, messages).length === 0,
       clearValidation: () => renderValidation(validationNode, []),
@@ -260,5 +345,5 @@
     };
   }
 
-  window.BraveCreator = { apiFetch, setStatus, renderValidation, fillSelect, fetchReferences, requireFields, parseJsonField, attachWorkflow, attachCreatorShell, bind };
+  window.BraveCreator = { apiFetch, setStatus, renderValidation, fillSelect, fetchReferences, fetchHealth, renderHealthPanel, requireFields, parseJsonField, sendToBuilder, consumeIncomingPayload, renderIncomingPayload, attachWorkflow, attachCreatorShell, bind };
 }());

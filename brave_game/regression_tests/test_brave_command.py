@@ -11,7 +11,10 @@ django.setup()
 
 from commands.brave import BraveCharacterCommand
 from commands.brave_explore import CmdRest
+from commands.brave_town import CmdMovie
 from world.browser_panels import format_speech_activity
+from world.browser_room_helpers import _format_room_context_action_items
+from world.movies import GREAT_FRONTIER_MOVIES, build_movie_picker, build_movie_view, resolve_movie
 
 
 class _DummySessions:
@@ -248,3 +251,159 @@ class BraveCharacterCommandTests(unittest.TestCase):
         )
         self.assertEqual(["You take a moment to recover your strength."], sent)
         self.assertTrue(character.db.brave_tutorial["flags"]["rested_after_fight"])
+
+    def test_movie_query_resolves_numbers_and_titles(self):
+        movie, matches = resolve_movie("1")
+        self.assertEqual("music.great_frontier.unpayable_debt", movie["cue_id"])
+        self.assertEqual([], matches)
+
+        movie, matches = resolve_movie("shackles")
+        self.assertEqual("music.great_frontier.shackles", movie["cue_id"])
+        self.assertEqual([], matches)
+
+    def test_every_movie_has_title_cards_and_runtime(self):
+        for movie in GREAT_FRONTIER_MOVIES:
+            self.assertGreaterEqual(movie.get("runtime_sec", 0), 120, msg=movie["title"])
+            self.assertGreaterEqual(len(movie.get("cards", ())), 3, msg=movie["title"])
+
+    def test_movie_picker_lists_program_and_stop_action(self):
+        picker = build_movie_picker()
+        labels = [option["label"] for option in picker["options"]]
+        self.assertIn("Unpayable Debt", labels)
+        self.assertIn("Shackles", labels)
+        self.assertNotIn("10 - Great Frontier - Shackles", labels)
+        self.assertEqual("Stop Movie", labels[-1])
+
+    def test_movie_view_renders_visible_title_cards(self):
+        movie = GREAT_FRONTIER_MOVIES[-1]
+        view = build_movie_view(movie)
+
+        self.assertEqual("movie", view["variant"])
+        self.assertEqual("Shackles", view["title"])
+        self.assertTrue(any(section.get("variant") == "movie-cards" for section in view["sections"]))
+        self.assertTrue(
+            any(
+                "Iron remembers" in " ".join(entry.get("lines", []))
+                for section in view["sections"]
+                for entry in section.get("items", [])
+            )
+        )
+        self.assertIn("Stop Movie", [action["label"] for action in view["actions"]])
+
+    def test_movie_theater_room_action_opens_picker(self):
+        room = SimpleNamespace(
+            contents=[],
+            db=SimpleNamespace(brave_activities=["movie_theater"], brave_rest_allowed=False, brave_room_id="brambleford_frontier_picture_house"),
+        )
+        viewer = SimpleNamespace(location=room, db=SimpleNamespace(), ndb=SimpleNamespace())
+
+        actions = _format_room_context_action_items(room, viewer)
+        movie_action = next(action for action in actions if action["text"] == "Watch Movies")
+
+        self.assertEqual("theaters", movie_action["icon"])
+        self.assertEqual("Great Frontier", movie_action["picker"]["title"])
+
+    def test_movie_command_requires_picture_house(self):
+        command = object.__new__(CmdMovie)
+        room = SimpleNamespace(db=SimpleNamespace(brave_activities=[]))
+        character = SimpleNamespace(key="Dad", location=room, db=SimpleNamespace())
+        character.ensure_brave_character = lambda: character
+        command.caller = character
+        command.args = "1"
+        command.get_encounter = lambda *_args, **_kwargs: None
+
+        sent = []
+        command.msg = lambda message=None, **_kwargs: sent.append(str(message))
+
+        command.func()
+
+        self.assertEqual(["You need to be in Brambleford's Frontier Picture House to watch Great Frontier movies."], sent)
+
+    def test_movie_command_sends_private_browser_audio_event(self):
+        web_session = SimpleNamespace(protocol_key="websocket")
+        command = object.__new__(CmdMovie)
+        room = SimpleNamespace(db=SimpleNamespace(brave_activities=["movie_theater"]))
+        sent_to_character = []
+        character = SimpleNamespace(key="Dad", location=room, db=SimpleNamespace(), sessions=_DummySessions([web_session]))
+        character.ensure_brave_character = lambda: character
+        character.msg = lambda *args, **kwargs: sent_to_character.append({"args": args, "kwargs": kwargs})
+        command.session = web_session
+        command.caller = character
+        command.args = "shackles"
+        command.get_encounter = lambda *_args, **_kwargs: None
+
+        command_sent = []
+        command.msg = lambda message=None, **_kwargs: command_sent.append(str(message))
+
+        command.func()
+
+        self.assertEqual(
+            ["music.great_frontier.shackles"],
+            [
+                event["kwargs"]["brave_movie_audio"]["cue_id"]
+                for event in sent_to_character
+                if "brave_movie_audio" in event["kwargs"]
+            ],
+        )
+        payload = next(event["kwargs"]["brave_movie_audio"] for event in sent_to_character if "brave_movie_audio" in event["kwargs"])
+        self.assertEqual("play", payload["action"])
+        self.assertEqual("Shackles", payload["title"])
+        self.assertGreaterEqual(payload["runtime_sec"], 120)
+        self.assertGreaterEqual(len(payload["cards"]), 3)
+        self.assertEqual("movie", payload["program_command"])
+        self.assertEqual("movie stop", payload["stop_command"])
+        self.assertEqual([web_session], [event["kwargs"]["session"] for event in sent_to_character if "brave_movie_audio" in event["kwargs"]])
+        self.assertEqual(
+            [payload],
+            [event["kwargs"]["brave_movie_overlay"] for event in sent_to_character if "brave_movie_overlay" in event["kwargs"]],
+        )
+        views = [event["kwargs"]["brave_view"] for event in sent_to_character if "brave_view" in event["kwargs"]]
+        self.assertEqual(["movie"], [view["variant"] for view in views])
+        self.assertEqual(["Shackles"], [view["title"] for view in views])
+        self.assertEqual(["You start Shackles."], command_sent)
+
+    def test_movie_command_text_client_shows_title_cards(self):
+        command = object.__new__(CmdMovie)
+        room = SimpleNamespace(db=SimpleNamespace(brave_activities=["movie_theater"]))
+        character = SimpleNamespace(key="Dad", location=room, db=SimpleNamespace())
+        character.ensure_brave_character = lambda: character
+        command.session = None
+        command.caller = character
+        command.args = "shackles"
+        command.get_encounter = lambda *_args, **_kwargs: None
+
+        sent = []
+        command.msg = lambda message=None, **_kwargs: sent.append(str(message))
+
+        command.func()
+
+        self.assertIn("Now showing: Shackles", sent[0])
+        self.assertIn("Iron remembers", sent[0])
+
+    def test_movie_stop_sends_stop_event(self):
+        web_session = SimpleNamespace(protocol_key="websocket")
+        command = object.__new__(CmdMovie)
+        room = SimpleNamespace(db=SimpleNamespace(brave_activities=["movie_theater"]))
+        sent_to_character = []
+        character = SimpleNamespace(key="Dad", location=room, db=SimpleNamespace(), sessions=_DummySessions([web_session]))
+        character.ensure_brave_character = lambda: character
+        character.msg = lambda *args, **kwargs: sent_to_character.append({"args": args, "kwargs": kwargs})
+        command.session = web_session
+        command.caller = character
+        command.args = "stop"
+        command.get_encounter = lambda *_args, **_kwargs: None
+
+        command_sent = []
+        command.msg = lambda message=None, **_kwargs: command_sent.append(str(message))
+
+        command.func()
+
+        self.assertEqual(
+            [{"action": "stop"}],
+            [event["kwargs"]["brave_movie_audio"] for event in sent_to_character if "brave_movie_audio" in event["kwargs"]],
+        )
+        self.assertEqual(
+            [{"action": "stop"}],
+            [event["kwargs"]["brave_movie_overlay"] for event in sent_to_character if "brave_movie_overlay" in event["kwargs"]],
+        )
+        self.assertEqual(["You stop the picture-house speaker."], command_sent)

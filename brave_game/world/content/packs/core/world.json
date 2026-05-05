@@ -1337,6 +1337,23 @@
     },
     {
       "aliases": [
+        "s",
+        "movies",
+        "movie",
+        "picture house",
+        "theater",
+        "theatre",
+        "cinema"
+      ],
+      "destination": "brambleford_frontier_picture_house",
+      "direction": "south",
+      "id": "inn_to_frontier_picture_house",
+      "key": "south",
+      "label": "Frontier Picture House",
+      "source": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
         "e",
         "green",
         "town green"
@@ -1347,6 +1364,20 @@
       "key": "east",
       "label": "Town Green",
       "source": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
+        "n",
+        "inn",
+        "lantern rest",
+        "lantern rest inn"
+      ],
+      "destination": "brambleford_lantern_rest_inn",
+      "direction": "north",
+      "id": "frontier_picture_house_to_inn",
+      "key": "north",
+      "label": "Lantern Rest Inn",
+      "source": "brambleford_frontier_picture_house"
     },
     {
       "aliases": [
@@ -2446,6 +2477,20 @@
       "map_x": -1,
       "map_y": 0,
       "rest_allowed": true,
+      "safe": true,
+      "zone": "Brambleford"
+    },
+    {
+      "activities": [
+        "movie_theater"
+      ],
+      "desc": "A narrow side room has been turned into a frontier picture house with bench rows, patched velvet curtains, a brass speaker horn, and a blank lantern screen framed by hand-painted title cards. The reels here are mostly songs, but Brambleford has decided that counts.",
+      "id": "brambleford_frontier_picture_house",
+      "key": "Frontier Picture House",
+      "map_icon": "P",
+      "map_region": "brambleford",
+      "map_x": -1,
+      "map_y": -1,
       "safe": true,
       "zone": "Brambleford"
     },

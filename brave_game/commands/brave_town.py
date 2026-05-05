@@ -31,6 +31,17 @@ from world.commerce import (
 from world.data.items import ITEM_TEMPLATES
 from world.forging import apply_forge_upgrade, get_forge_entries, is_forge_room
 from world.interactions import get_entity_response
+from world.movies import (
+    GREAT_FRONTIER_MOVIES,
+    build_movie_audio_payload,
+    build_movie_picker,
+    build_movie_view,
+    build_now_showing_picker,
+    is_movie_theater_room,
+    movie_cards,
+    movie_label,
+    resolve_movie,
+)
 from world.rogue_ops import attempt_theft, get_available_steal_targets
 from world.screen_text import format_entry, render_screen, wrap_text
 from world.tinkering import (
@@ -730,3 +741,70 @@ class CmdRead(BraveCharacterCommand):
 
         self.scene_msg(None, picker=_build_world_interaction_picker(character, target))
         get_entity_response(character, target, "read", is_action=True)
+
+
+class CmdMovie(BraveCharacterCommand):
+    """
+    Play a Great Frontier movie in the Frontier Picture House.
+
+    Usage:
+      movie
+      movie <number or title>
+      movie stop
+    """
+
+    key = "movie"
+    aliases = ["watch"]
+    help_category = "Brave"
+
+    def _send_movie_audio(self, character, payload):
+        session = self.get_web_session()
+        print(f"DEBUG: CmdMovie._send_movie_audio - session={session} payload_action={payload.get('action')}")
+        if not session:
+            return False
+        # The brave_movie_audio OOB command in default_out handles both audio and overlay rendering.
+        send_webclient_event(character, session=session, brave_movie_audio=payload)
+        return True
+
+    def func(self):
+        character = self.get_character()
+        print(f"DEBUG: CmdMovie.func - character={character} args={self.args}")
+        if not character:
+            return
+
+        encounter = self.get_encounter(character, require=False)
+        if encounter and encounter.is_participant(character):
+            self.msg("This is not the moment to watch a movie.")
+            return
+
+        if not is_movie_theater_room(character.location):
+            self.msg("You need to be in Brambleford's Frontier Picture House to watch Great Frontier movies.")
+            return
+
+        query = str(self.args or "").strip()
+        if not query:
+            if self.get_web_session():
+                self.scene_msg(self._movie_list_text(), picker=build_movie_picker())
+            else:
+                self.msg(self._movie_list_text())
+            return
+
+        if query.lower() in {"stop", "off", "quiet", "silence"}:
+            self._send_movie_audio(character, {"action": "stop"})
+            return
+
+        movie, matches = resolve_movie(query)
+        if matches:
+            self.msg("Be more specific. That could mean: " + ", ".join(movie_label(entry) for entry in matches))
+            return
+        if not movie:
+            self.msg("No Great Frontier movie matches that. Use |wmovie|n to see the program.")
+            return
+
+        sent = self._send_movie_audio(character, build_movie_audio_payload(movie))
+        if sent:
+            self.msg(brave_picker=build_now_showing_picker(movie))
+        else:
+            lines = [f"Now showing: {movie_label(movie)}"]
+            lines.extend(f"  {card}" for card in movie_cards(movie))
+            self.msg("\n".join(lines))

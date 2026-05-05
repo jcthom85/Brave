@@ -65,6 +65,7 @@
         ambience: null,
         music: null
     };
+    var activeMoviePlayback = null;
     var desiredLayers = {
         ambience: "",
         music: ""
@@ -339,6 +340,10 @@
         return 0.18;
     }
 
+    function hasExplicitCueDuration(cue) {
+        return !!(cue && typeof cue.duration_sec === "number" && cue.duration_sec > 0);
+    }
+
     function getCueEffectiveVolume(cue, busName) {
         if (!settings.enabled || settings.muted) {
             return 0;
@@ -353,7 +358,11 @@
             return "";
         }
         try {
-            return new window.URL(assetPath, manifestBaseUrl || window.location.href).href;
+            var resolved = new window.URL(assetPath, manifestBaseUrl || window.location.href).href;
+            if (assetPath.indexOf("great_frontier") >= 0) {
+                console.log("DEBUG: resolveAssetUrl", { assetPath: assetPath, manifestBaseUrl: manifestBaseUrl, resolved: resolved });
+            }
+            return resolved;
         } catch (error) {
             return assetPath;
         }
@@ -413,7 +422,9 @@
     function loadAudioBuffer(assetPath) {
         var resolvedUrl = resolveAssetUrl(assetPath);
         var ctx = getAudioContext();
+        console.log("DEBUG: loadAudioBuffer starting", { assetPath: assetPath, resolvedUrl: resolvedUrl });
         if (!ctx || !resolvedUrl || !window.fetch) {
+            console.log("DEBUG: loadAudioBuffer abort - missing ctx, url, or fetch");
             return Promise.resolve(null);
         }
         if (audioBufferCache[resolvedUrl]) {
@@ -428,15 +439,18 @@
         }
         audioBufferLoads[resolvedUrl] = window.fetch(resolvedUrl, { credentials: "same-origin" })
             .then(function (response) {
+                console.log("DEBUG: loadAudioBuffer fetch response", { status: response.status, ok: response.ok, url: response.url });
                 if (!response.ok) {
-                    throw new Error("Audio request failed");
+                    throw new Error("Audio request failed: " + response.status);
                 }
                 return response.arrayBuffer();
             })
             .then(function (arrayBuffer) {
+                console.log("DEBUG: loadAudioBuffer decoding buffer", { byteLength: arrayBuffer.byteLength });
                 return decodeAudioBuffer(ctx, arrayBuffer);
             })
             .then(function (buffer) {
+                console.log("DEBUG: loadAudioBuffer success", { duration: buffer.duration });
                 audioBufferCache[resolvedUrl] = buffer;
                 return {
                     assetPath: assetPath,
@@ -444,16 +458,16 @@
                     buffer: buffer
                 };
             })
-            .catch(function () {
+            .catch(function (err) {
+                console.log("DEBUG: loadAudioBuffer FAILED", { assetPath: assetPath, error: err.message });
                 lastPlayback.error = "decode/fetch failed for " + assetPath;
                 return null;
             })
             .finally(function () {
                 delete audioBufferLoads[resolvedUrl];
-        });
+            });
         return audioBufferLoads[resolvedUrl];
     }
-
     function performUnlockPulse(ctx) {
         try {
             var buffer = ctx.createBuffer(1, 1, Math.max(22050, ctx.sampleRate || 44100));
@@ -490,7 +504,8 @@
             var loop = !!cue.loop;
             var fadeInSec = Math.max(0.02, typeof cue.fade_in_sec === "number" ? cue.fade_in_sec : 0.04);
             var fadeOutSec = Math.max(0.03, typeof cue.fade_out_sec === "number" ? cue.fade_out_sec : 0.08);
-            var durationSec = getCueDuration(cue);
+            var explicitDuration = hasExplicitCueDuration(cue);
+            var durationSec = explicitDuration ? getCueDuration(cue) : 0;
             var stopped = false;
             var cleanupTimer = null;
             audio.preload = "auto";
@@ -544,7 +559,7 @@
                 lastPlayback.mode = "htmlaudio";
                 lastPlayback.error = "";
                 playback.applyVolume();
-                if (!loop) {
+                if (!loop && explicitDuration) {
                     cleanupTimer = window.setTimeout(function () {
                         playback.stop(fadeOutSec * 1000);
                     }, Math.max(120, (durationSec * 1000) - (fadeOutSec * 500)));
@@ -749,7 +764,7 @@
             var loop = !!cue.loop;
             var fadeInSec = Math.max(0.02, typeof cue.fade_in_sec === "number" ? cue.fade_in_sec : 0.04);
             var fadeOutSec = Math.max(0.03, typeof cue.fade_out_sec === "number" ? cue.fade_out_sec : 0.08);
-            var durationSec = loop ? loaded.buffer.duration : Math.max(0.03, getCueDuration(cue));
+            var durationSec = loop ? loaded.buffer.duration : Math.max(0.03, hasExplicitCueDuration(cue) ? getCueDuration(cue) : loaded.buffer.duration);
             var outputGain = ctx.createGain();
             var source = ctx.createBufferSource();
             var peakGain = Math.max(0.0001, typeof cue.gain === "number" ? cue.gain : 1.0);
@@ -925,6 +940,9 @@
         if (!canAttemptImmediatePlayback()) {
             return;
         }
+        if (activeMoviePlayback) {
+            return;
+        }
         ["ambience", "music"].forEach(function (busName) {
             var desiredCueId = desiredLayers[busName] || "";
             var active = activeLayers[busName];
@@ -945,6 +963,7 @@
         var scene = String((reactive && reactive.scene) || "system").toLowerCase();
         var tone = String((reactive && reactive.world_tone) || "neutral").toLowerCase();
         var sourceId = String((reactive && reactive.source_id) || "").toLowerCase();
+        console.log("DEBUG: chooseAmbienceCue - scene=" + scene + " tone=" + tone + " sourceId=" + sourceId);
         if (
             scene !== "explore"
             && scene !== "travel"
@@ -952,6 +971,10 @@
             && scene !== "arcade"
             && scene !== "chapel"
         ) {
+            return "";
+        }
+        if (sourceId === "brambleford_frontier_picture_house" || sourceId.indexOf("picture_house") >= 0) {
+            console.log("DEBUG: chooseAmbienceCue - SILENCING FOR PICTURE HOUSE");
             return "";
         }
         if (sourceId.indexOf("rat_and_kettle_cellar") >= 0 || sourceId.indexOf("cellar") >= 0) {
@@ -1067,6 +1090,12 @@
         var tone = String((reactive && reactive.world_tone) || "neutral").toLowerCase();
         var danger = String((reactive && reactive.danger) || "").toLowerCase();
         var boss = !!(reactive && reactive.boss);
+        var sourceId = String((reactive && reactive.source_id) || "").toLowerCase();
+        console.log("DEBUG: chooseMusicCue - scene=" + scene + " tone=" + tone + " danger=" + danger + " sourceId=" + sourceId);
+        if (sourceId === "brambleford_frontier_picture_house" || sourceId.indexOf("picture_house") >= 0) {
+            console.log("DEBUG: chooseMusicCue - SILENCING FOR PICTURE HOUSE");
+            return "";
+        }
         if (scene === "victory") {
             return chooseAvailableCue(["music.victory"]);
         }
@@ -1226,6 +1255,77 @@
                 }, 1600);
             }
         });
+        return true;
+    }
+
+    function stopMovie(fadeMs, restoreLayers) {
+        if (activeMoviePlayback && typeof activeMoviePlayback.stop === "function") {
+            activeMoviePlayback.stop(typeof fadeMs === "number" ? fadeMs : 500);
+        }
+        activeMoviePlayback = null;
+        if (restoreLayers !== false) {
+            refreshLayerTargets();
+        }
+        dispatchStateChange();
+        return true;
+    }
+
+    function playMovie(cueId) {
+        cueId = String(cueId || "").trim();
+        var ctx = getAudioContext();
+        console.log("DEBUG: playMovie called", { cueId: cueId, enabled: settings.enabled, muted: settings.muted, ctxState: ctx ? ctx.state : "none" });
+        if (!settings.enabled || settings.muted || !cueId) {
+            return false;
+        }
+        var cue = getCue(cueId);
+        if (!cue) {
+            console.log("DEBUG: playMovie - cue not found", cueId);
+            return false;
+        }
+        var startPlayback = function () {
+            console.log("DEBUG: playMovie startPlayback triggered");
+            if (ctx && typeof ctx.resume === "function") {
+                ctx.resume();
+            }
+            stopMovie(260, false);
+            stopLayer("ambience", 700);
+            stopLayer("music", 700);
+            activeMoviePlayback = true;
+            playCueInternal(cueId, cue, { bus: "music", force: true }).then(function (playback) {
+                if (!playback) {
+                    console.log("DEBUG: playMovie - playback failed (playCueInternal returned null)");
+                    activeMoviePlayback = null;
+                    refreshLayerTargets();
+                    return;
+                }
+                console.log("DEBUG: playMovie - playback successful", { cueId: playback.cueId, asset: playback.assetPath });
+                activeMoviePlayback = playback;
+                var clearMoviePlayback = function () {
+                    if (activeMoviePlayback === playback) {
+                        activeMoviePlayback = null;
+                        refreshLayerTargets();
+                        dispatchStateChange();
+                    }
+                };
+                if (playback.source) {
+                    playback.source.onended = clearMoviePlayback;
+                }
+                if (playback.audio) {
+                    playback.audio.addEventListener("ended", clearMoviePlayback);
+                }
+                dispatchStateChange();
+            });
+        };
+        if (!canAttemptImmediatePlayback()) {
+            lastPlayback.error = "playback blocked pending unlock for " + cueId;
+            unlock().then(function (didUnlock) {
+                if (didUnlock && settings.enabled && !settings.muted) {
+                    startPlayback();
+                }
+            });
+            return true;
+        }
+        startPlayback();
         return true;
     }
 
@@ -1524,7 +1624,8 @@
             settings: cloneJsonSafe(settings),
             active_layers: {
                 ambience: activeLayers.ambience ? activeLayers.ambience.cueId : "",
-                music: activeLayers.music ? activeLayers.music.cueId : ""
+                music: activeLayers.music ? activeLayers.music.cueId : "",
+                movie: activeMoviePlayback ? activeMoviePlayback.cueId : ""
             },
             desired_layers: cloneJsonSafe(desiredLayers),
             reactive: cloneJsonSafe(currentReactiveState),
@@ -1570,6 +1671,8 @@
         handleRoomActivity: handleRoomActivity,
         handleUiAction: handleUiAction,
         play: playCue,
+        playMovie: playMovie,
+        stopMovie: stopMovie,
         previewCue: previewCue,
         setSetting: setSetting,
         toggleSetting: toggleSetting

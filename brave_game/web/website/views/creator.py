@@ -156,3 +156,33 @@ def creator_boss_composer(request):
             "page_title": "Brave Creator: Boss Composer",
         },
     )
+
+
+@ensure_csrf_cookie
+def creator_recipe_composer(request):
+    user = getattr(request, "user", None)
+    if not _is_creator_authorized(user):
+        return HttpResponseForbidden("Creator access required.")
+
+    return _render_creator_template(
+        "creator_recipe_composer.html",
+        {
+            "api_root": "/api/content",
+            "page_title": "Brave Creator: Recipe Composer",
+        },
+    )
+
+
+@ensure_csrf_cookie
+def creator_fishing_composer(request):
+    user = getattr(request, "user", None)
+    if not _is_creator_authorized(user):
+        return HttpResponseForbidden("Creator access required.")
+
+    return _render_creator_template(
+        "creator_fishing_composer.html",
+        {
+            "api_root": "/api/content",
+            "page_title": "Brave Creator: Fishing Composer",
+        },
+    )

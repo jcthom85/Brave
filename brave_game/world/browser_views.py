@@ -755,18 +755,6 @@ def build_connection_view(*, screen="menu", error=None, username="", registratio
                 submit_tone="accent",
             )
         )
-        sections.append(
-            _section(
-                "What Happens Next",
-                "explore",
-                "list",
-                items=[
-                    _item("Choose a character or resume a draft after login.", icon="groups"),
-                    _item("Your last played character will be ready to continue.", icon="history"),
-                    _item("If sign-in fails, you stay here with the username preserved.", icon="sync_problem"),
-                ],
-            )
-        )
         eyebrow = "Sign In"
         eyebrow_icon = "login"
         subtitle = ""

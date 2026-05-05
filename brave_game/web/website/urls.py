@@ -15,8 +15,10 @@ from .views.creator import (
     creator_dialogue_editor,
     creator_encounter_editor,
     creator_boss_composer,
+    creator_fishing_composer,
     creator_item_editor,
     creator_quest_editor,
+    creator_recipe_composer,
     creator_systems_editor,
     creator_world_editor,
 )
@@ -31,6 +33,8 @@ urlpatterns = [
     path("creator/items/", creator_item_editor, name="creator-item-editor"),
     path("creator/systems/", creator_systems_editor, name="creator-systems-editor"),
     path("creator/composers/boss/", creator_boss_composer, name="creator-boss-composer"),
+    path("creator/composers/recipe/", creator_recipe_composer, name="creator-recipe-composer"),
+    path("creator/composers/fishing/", creator_fishing_composer, name="creator-fishing-composer"),
 ]
 
 urlpatterns = urlpatterns + evennia_website_urlpatterns

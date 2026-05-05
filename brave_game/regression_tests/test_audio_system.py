@@ -7,6 +7,7 @@ REPO_ROOT = Path("/home/jcthom85/Brave")
 AUDIO_ROOT = REPO_ROOT / "brave_game/web/static/webclient/audio"
 MANIFEST_PATH = AUDIO_ROOT / "manifest.json"
 AUDIO_JS_PATH = REPO_ROOT / "brave_game/web/static/webclient/js/brave_audio.js"
+WEBCLIENT_CSS_PATH = REPO_ROOT / "brave_game/web/static/webclient/css/brave_webclient.css"
 WEBCLIENT_TEMPLATE_PATH = REPO_ROOT / "brave_game/web/templates/webclient/webclient.html"
 WEBCLIENT_BASE_TEMPLATE_PATH = REPO_ROOT / "brave_game/web/templates/webclient/base.html"
 DEFAULT_OUT_PATH = REPO_ROOT / "brave_game/web/static/webclient/js/plugins/default_out.js"
@@ -30,6 +31,8 @@ class AudioSystemFilesTests(unittest.TestCase):
             "ambience.brambleford",
             "music.explore.safe",
             "music.title",
+            "music.great_frontier.unpayable_debt",
+            "music.great_frontier.shackles",
             "music.rest",
             "music.combat.standard",
             "music.combat.boss",
@@ -109,14 +112,30 @@ class AudioSystemFilesTests(unittest.TestCase):
             "handleRest: handleRest",
             "handleRoomActivity: handleRoomActivity",
             "play: playCue",
+            "playMovie: playMovie",
+            "stopMovie: stopMovie",
             "setSetting: setSetting",
             "function loadAudioBuffer(assetPath)",
             "function playFileCue(cue, cueId, options)",
+            "function hasExplicitCueDuration(cue)",
+            "hasExplicitCueDuration(cue) ? getCueDuration(cue) : loaded.buffer.duration",
             "function chooseAvailableCue(cueIds)",
             "function playFirstCue(cueIds, options)",
             'return chooseAvailableCue(["music.title"]);',
         ):
             self.assertIn(snippet, source)
+
+    def test_movie_overlay_styles_are_present(self):
+        css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
+
+        for snippet in (
+            ".brave-movie-overlay",
+            ".brave-movie-overlay__screen",
+            ".brave-movie-overlay__card-text",
+            ".brave-movie-overlay__progress",
+            "@keyframes brave-movie-card-enter",
+        ):
+            self.assertIn(snippet, css_source)
 
     def test_webclient_template_and_menu_wire_audio_ui(self):
         template_source = WEBCLIENT_TEMPLATE_PATH.read_text(encoding="utf-8")
@@ -125,7 +144,7 @@ class AudioSystemFilesTests(unittest.TestCase):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
         default_in_source = DEFAULT_IN_PATH.read_text(encoding="utf-8")
 
-        self.assertIn('brave_static_v="20260504frontdoorlink2"', base_template_source)
+        self.assertIn('brave_static_v="20260505movieview1"', base_template_source)
         self.assertIn("BRAVE_AUDIO_MANIFEST_URL", base_template_source)
         self.assertIn("webclient/js/brave_audio.js", base_template_source)
         self.assertLess(
@@ -160,7 +179,16 @@ class AudioSystemFilesTests(unittest.TestCase):
         self.assertIn('{ label: "Video", icon: "tv", picker: buildVideoSettingsPicker() }', default_out_source)
         self.assertIn('{ label: "Audio", icon: "graphic_eq", picker: buildAudioSettingsPicker() }', default_out_source)
         self.assertIn('cmdname === "brave_audio_cue"', default_out_source)
+        self.assertIn('cmdname === "brave_movie_audio"', default_out_source)
+        self.assertIn('cmdname === "brave_movie_overlay"', default_out_source)
         self.assertIn("braveAudioCue.play(audioCueId", default_out_source)
+        self.assertIn("braveMovieAudio.playMovie(movieAudioCueId)", default_out_source)
+        self.assertIn("braveMovieAudio.stopMovie()", default_out_source)
+        self.assertIn("var renderMovieOverlay = function (payload) {", default_out_source)
+        self.assertIn("var clearMovieOverlay = function () {", default_out_source)
+        self.assertIn("data-brave-movie-command", default_out_source)
+        self.assertIn("renderMovieOverlay(movieAudioPayload)", default_out_source)
+        self.assertIn("renderMovieOverlay(movieOverlayPayload)", default_out_source)
         self.assertIn('transitionReactive.scene = "combat";', default_out_source)
         self.assertIn("isTitleExperienceScene(currentReactiveState", audio_source)
         self.assertIn("var unlockPromise = null;", audio_source)
@@ -169,6 +197,7 @@ class AudioSystemFilesTests(unittest.TestCase):
         self.assertIn('ctx.state === "suspended" && !contextUnlocked', audio_source)
         self.assertIn("refreshLayerTargets();\n        playFirstCue(cueIds);", audio_source)
         self.assertIn("refreshLayerTargets();\n                    playFirstCue(cueIds, { force: true });", audio_source)
+        self.assertIn('stopLayer("ambience", 700);', audio_source)
         self.assertIn("function startTitleMusic()", audio_source)
         self.assertIn('window.matchMedia("(hover: none), (pointer: coarse), (max-width: 820px)").matches', audio_source)
         self.assertIn('var TITLE_MUSIC_CUE_ID = "music.title";', audio_source)

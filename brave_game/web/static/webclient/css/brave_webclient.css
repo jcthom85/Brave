@@ -19174,6 +19174,327 @@ body.brave-character-load-transition-active .brave-pixel-particle {
     50% { opacity: 1; }
     100% { transform: translate(var(--p-x), var(--p-y)) rotate(var(--p-rotate)) scale(0); opacity: 0; }
 }
+
+.brave-view--movie {
+    --movie-gold: #d7b46a;
+    --movie-red: #7c2630;
+    min-height: min(720px, calc(100vh - 120px));
+}
+
+.brave-view--movie .brave-view__hero {
+    border: 1px solid color-mix(in srgb, var(--movie-gold) 36%, transparent);
+    background:
+        linear-gradient(90deg, rgba(124, 38, 48, 0.22), transparent 18%, transparent 82%, rgba(124, 38, 48, 0.22)),
+        radial-gradient(circle at 50% 0%, rgba(215, 180, 106, 0.16), transparent 42%),
+        color-mix(in srgb, var(--brave-surface) 88%, #090705);
+    box-shadow: inset 0 0 0 1px rgba(255, 244, 204, 0.04), 0 22px 70px rgba(0, 0, 0, 0.26);
+}
+
+.brave-view--movie .brave-view__title {
+    color: #fff6d8;
+    text-shadow: 0 0 24px rgba(215, 180, 106, 0.24);
+}
+
+.brave-view--movie .brave-view__title-icon,
+.brave-view--movie .brave-view__eyebrow-icon {
+    color: var(--movie-gold);
+}
+
+.brave-view--movie .brave-view__subtitle {
+    color: color-mix(in srgb, #fff2c4 74%, var(--brave-text-soft));
+}
+
+.brave-view--movie .brave-view__section--movie-cards {
+    border-color: color-mix(in srgb, var(--movie-gold) 30%, transparent);
+    background:
+        linear-gradient(180deg, rgba(255, 246, 216, 0.05), rgba(0, 0, 0, 0.08)),
+        color-mix(in srgb, var(--brave-surface-strong) 80%, #11100d);
+}
+
+.brave-view--movie .brave-view__section--movie-cards .brave-view__entries {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.brave-view--movie .brave-view__section--movie-cards .brave-view__entry {
+    min-height: 150px;
+    justify-content: center;
+    border-color: color-mix(in srgb, var(--movie-gold) 22%, transparent);
+    background:
+        linear-gradient(180deg, rgba(255, 246, 216, 0.08), rgba(255, 246, 216, 0.025)),
+        color-mix(in srgb, var(--brave-surface) 88%, #060504);
+}
+
+.brave-view--movie .brave-view__section--movie-cards .brave-view__entry-title {
+    color: var(--movie-gold);
+}
+
+.brave-view--movie .brave-view__section--movie-cards .brave-view__entry-line {
+    color: #fff7df;
+    font-family: var(--brave-dialogue-font-family);
+    font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.55;
+}
+
+.brave-view--movie .brave-view__section--movie-progress .brave-view__meter-fill {
+    background: linear-gradient(90deg, var(--movie-red), var(--movie-gold));
+}
+
+.brave-movie-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1120;
+    display: grid;
+    place-items: center;
+    padding: clamp(16px, 4vw, 42px);
+    color: #f5ecd6;
+}
+
+.brave-movie-overlay__backdrop {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 22%, rgba(227, 184, 98, 0.18), transparent 34%),
+        linear-gradient(135deg, rgba(91, 20, 25, 0.76), rgba(12, 12, 16, 0.96) 38%, rgba(5, 7, 10, 0.98));
+    backdrop-filter: blur(5px);
+}
+
+.brave-movie-overlay__panel {
+    position: relative;
+    width: min(920px, 96vw);
+    min-height: min(690px, 88vh);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden;
+    border: 1px solid rgba(232, 190, 116, 0.4);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(50, 18, 24, 0.96), rgba(13, 13, 17, 0.98)),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 16px);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.62), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.brave-movie-overlay__curtain {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 82px;
+    pointer-events: none;
+    opacity: 0.68;
+    background: repeating-linear-gradient(90deg, rgba(93, 18, 27, 0.86) 0 13px, rgba(43, 9, 15, 0.9) 13px 24px);
+}
+
+.brave-movie-overlay__curtain--left {
+    left: 0;
+}
+
+.brave-movie-overlay__curtain--right {
+    right: 0;
+}
+
+.brave-movie-overlay__topbar,
+.brave-movie-overlay__controls {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px clamp(22px, 5vw, 72px);
+}
+
+.brave-movie-overlay__now {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #eac783;
+}
+
+.brave-movie-overlay__close {
+    flex: 0 0 auto;
+}
+
+.brave-movie-overlay__screen {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: min(680px, calc(100% - 140px));
+    min-height: 390px;
+    margin: 0 auto;
+    padding: clamp(28px, 5vw, 58px);
+    border: 10px solid rgba(60, 38, 25, 0.95);
+    border-radius: 6px;
+    background:
+        radial-gradient(circle at 50% 42%, rgba(255, 248, 222, 0.98), rgba(236, 214, 171, 0.98) 62%, rgba(199, 164, 105, 0.98));
+    color: #221811;
+    box-shadow: 0 0 46px rgba(236, 186, 100, 0.26), inset 0 0 48px rgba(78, 43, 18, 0.18);
+}
+
+.brave-movie-overlay__projector {
+    position: absolute;
+    inset: 14px;
+    pointer-events: none;
+    opacity: 0.18;
+    background:
+        repeating-linear-gradient(0deg, rgba(45, 28, 19, 0.18) 0 1px, transparent 1px 7px),
+        radial-gradient(circle at 20% 18%, rgba(45, 28, 19, 0.16), transparent 12%),
+        radial-gradient(circle at 78% 72%, rgba(45, 28, 19, 0.12), transparent 14%);
+}
+
+.brave-movie-overlay__title {
+    position: relative;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.2rem, 7vw, 5.25rem);
+    line-height: 0.94;
+    font-weight: 800;
+    text-align: center;
+    color: #25170e;
+}
+
+.brave-movie-overlay__rule {
+    position: relative;
+    width: min(360px, 72%);
+    height: 2px;
+    margin: 24px auto;
+    background: linear-gradient(90deg, transparent, rgba(54, 34, 22, 0.82), transparent);
+}
+
+.brave-movie-overlay__card-text {
+    position: relative;
+    max-width: 34rem;
+    min-height: 4.8em;
+    margin: 0 auto;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.15rem, 2.4vw, 1.65rem);
+    line-height: 1.45;
+    text-align: center;
+    color: #382416;
+}
+
+.brave-movie-overlay__card-text--enter {
+    animation: brave-movie-card-enter 520ms ease-out both;
+}
+
+.brave-movie-overlay__card-count {
+    position: relative;
+    margin-top: 28px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-align: center;
+    color: rgba(56, 36, 22, 0.7);
+}
+
+.brave-movie-overlay__controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+}
+
+.brave-movie-overlay__time {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: rgba(245, 236, 214, 0.76);
+}
+
+.brave-movie-overlay__track {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.brave-movie-overlay__progress {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #c94f46, #eac783, #77b89a);
+    transition: width 360ms linear;
+}
+
+.brave-movie-overlay__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.brave-movie-overlay__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 15px;
+    border: 1px solid rgba(234, 199, 131, 0.36);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f5ecd6;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.brave-movie-overlay__button:hover,
+.brave-movie-overlay__button:focus-visible {
+    background: rgba(234, 199, 131, 0.16);
+    outline: none;
+}
+
+.brave-movie-overlay__button--stop {
+    border-color: rgba(201, 79, 70, 0.48);
+}
+
+.brave-movie-overlay__button-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+}
+
+@keyframes brave-movie-card-enter {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 720px) {
+    .brave-movie-overlay {
+        padding: 10px;
+    }
+
+    .brave-movie-overlay__panel {
+        min-height: 88vh;
+    }
+
+    .brave-movie-overlay__curtain {
+        width: 26px;
+    }
+
+    .brave-movie-overlay__topbar,
+    .brave-movie-overlay__controls {
+        padding-inline: 18px;
+    }
+
+    .brave-movie-overlay__screen {
+        width: calc(100% - 48px);
+        min-height: 420px;
+        padding: 28px 20px;
+        border-width: 7px;
+    }
+
+    .brave-movie-overlay__actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .brave-movie-overlay__card-text--enter {
+        animation: none;
+    }
+}
 x;
     pointer-events: none;
     z-index: 10000;

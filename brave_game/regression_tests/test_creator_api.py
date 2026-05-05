@@ -74,6 +74,24 @@ class CreatorApiTests(unittest.TestCase):
         self.assertIn("cooking_recipes", payload["domains"]["systems"])
         self.assertIn("boss_gates", payload["domains"]["systems"])
 
+    def test_health_requires_authorization(self):
+        request = self.factory.get("/api/content/health")
+        request.user = _DummyUser(authenticated=False)
+        response = views.content_health(request)
+        self.assertEqual(403, response.status_code)
+
+    def test_health_reports_draft_readiness_and_recommendations(self):
+        request = self.factory.get("/api/content/health", {"stage": "draft"})
+        request.user = self.user
+        response = views.content_health(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertIn("draft_domains", payload)
+        self.assertIn("validation_errors", payload)
+        self.assertIn("readiness", payload)
+        self.assertTrue(payload["readiness"])
+        self.assertIn("recommended_next_actions", payload)
+
     def test_reference_search_returns_room_matches(self):
         request = self.factory.get("/api/content/references/rooms", {"q": "green", "limit": 5})
         request.user = self.user

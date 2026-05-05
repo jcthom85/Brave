@@ -211,11 +211,17 @@ class CmdBraveLogout(COMMAND_DEFAULT_CLASS):
             session.sessionhandler.disconnect(session, "Good bye! Disconnecting.")
             return
 
+        send_webclient_event(
+            session,
+            session=session,
+            brave_logout={"endpoint": "/webclient/logout", "screen": "menu"},
+        )
         session.account = None
         session.uid = None
         session.uname = ""
         session.puid = None
         session.puppet = None
+        session.logged_in = False
         session.cmdset_storage = settings.CMDSET_UNLOGGEDIN
         session.cmdset.update(init_mode=True)
         session.sessionhandler.session_portal_partial_sync(

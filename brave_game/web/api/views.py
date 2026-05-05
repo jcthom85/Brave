@@ -15,6 +15,7 @@ from commands.brave_creator import (
     revert_content,
 )
 from world.content import ContentEditor, ContentPublishValidationError, get_content_registry
+from world.content.health import creator_health_payload
 from world.content.registry import build_content_registry_from_payloads, reload_content_registry
 from world.content.validation import validate_content_registry
 
@@ -225,6 +226,18 @@ def content_status(request):
         },
     }
     return JsonResponse(payload)
+
+
+def content_health(request):
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+    if not _is_creator_authorized(getattr(request, "user", None)):
+        return _unauthorized_response()
+
+    stage = str(request.GET.get("stage") or "draft").strip().lower()
+    if stage not in {"draft", "live"}:
+        return _json_error(f"Unknown health stage: {stage}")
+    return JsonResponse(creator_health_payload(stage=stage))
 
 
 def content_references(request, domain):

@@ -26,7 +26,7 @@ sys.modules["world.chargen"] = chargen_stub
 from world.browser_views import build_account_view, build_chargen_view, build_connection_view
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.test import RequestFactory
-from web.webclient.views import webclient_test_login
+from web.webclient.views import webclient_logout, webclient_test_login
 
 
 def _section(view, label):
@@ -113,6 +113,12 @@ class ConnectionViewTests(unittest.TestCase):
         self.assertEqual([], view.get("chips", []))
         section_labels = [section.get("label") for section in view.get("sections", [])]
         self.assertEqual(["Enter Brave"], section_labels)
+
+    def test_signin_screen_only_shows_the_form(self):
+        view = build_connection_view(screen="signin")
+
+        section_labels = [section.get("label") for section in view.get("sections", [])]
+        self.assertEqual(["Sign In"], section_labels)
 
 
 class AccountViewTests(unittest.TestCase):
@@ -216,6 +222,19 @@ class ChargenViewTests(unittest.TestCase):
 
 
 class WebclientTestLoginViewTests(unittest.TestCase):
+    def test_webclient_logout_clears_browser_auth_session(self):
+        factory = RequestFactory()
+        request = factory.post("/webclient/logout")
+        SessionMiddleware(lambda req: None).process_request(request)
+        request.user = types.SimpleNamespace(is_authenticated=True, pk=7)
+
+        with patch("web.webclient.views.logout") as logout_mock:
+            response = webclient_logout(request)
+
+        logout_mock.assert_called_once_with(request)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("no-store", response["Cache-Control"])
+
     def test_webclient_test_logs_into_jctest_and_redirects(self):
         factory = RequestFactory()
         request = factory.get("/webclient/test")

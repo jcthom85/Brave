@@ -37,6 +37,7 @@ from .brave_profile import CmdBuild, CmdClass, CmdCompanion, CmdGear, CmdMastery
 from .brave_town import (
     CmdBravePopup,
     CmdForge,
+    CmdMovie,
     CmdPray,
     CmdRead,
     CmdSell,
@@ -100,6 +101,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdRest())
         self.add(CmdArcade())
         self.add(CmdArcadeSubmit())
+        self.add(CmdMovie())
         self.add(CmdTalk())
         self.add(CmdBravePopup())
         self.add(CmdSteal())

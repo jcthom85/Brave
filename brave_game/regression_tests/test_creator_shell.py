@@ -12,8 +12,15 @@ class CreatorShellTests(unittest.TestCase):
         self.assertIn("CREATOR_LINKS", source)
         self.assertIn("attachCreatorShell", source)
         self.assertIn("Boss Composer", source)
+        self.assertIn("Recipe Composer", source)
+        self.assertIn("Fishing Composer", source)
         self.assertIn("Authoring flow: World", source)
         self.assertIn("/creator/composers/boss/", source)
+        self.assertIn("fetchHealth", source)
+        self.assertIn("renderHealthPanel", source)
+        self.assertIn("sendToBuilder", source)
+        self.assertIn("consumeIncomingPayload", source)
+        self.assertIn("Incoming Payload", source)
 
 
 if __name__ == "__main__":

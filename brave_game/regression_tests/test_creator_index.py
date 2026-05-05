@@ -44,7 +44,7 @@ class CreatorIndexViewTests(unittest.TestCase):
         response = creator_index(request)
         body = response.content.decode("utf-8")
         self.assertEqual(200, response.status_code)
-        self.assertIn("Brave Creator Studio", body)
+        self.assertIn("Brave Creator Mission Control", body)
         self.assertIn("What are you making", body)
         self.assertIn("/creator/world/", body)
         self.assertIn("staff, superuser, or Developer-authorized account", body)
@@ -55,6 +55,14 @@ class CreatorIndexViewTests(unittest.TestCase):
         self.assertIn("Open Systems Builder", body)
         self.assertIn("/creator/composers/boss/", body)
         self.assertIn("Compose a Boss Fight", body)
+        self.assertIn("/creator/composers/recipe/", body)
+        self.assertIn("Compose a Recipe", body)
+        self.assertIn("/creator/composers/fishing/", body)
+        self.assertIn("Compose Fishing", body)
+        self.assertIn("Quest Chain", body)
+        self.assertIn("Tutorial Moment", body)
+        self.assertIn("New Zone", body)
+        self.assertIn("Creator Health", body)
         self.assertIn("creator_common.js", body)
 
 

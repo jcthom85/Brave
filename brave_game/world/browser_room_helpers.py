@@ -3,6 +3,7 @@
 from world.activities import room_supports_activity
 from world.chapel import get_active_blessing, is_chapel_room
 from world.interactions import get_entity_response
+from world.movies import build_movie_picker, is_movie_theater_room
 from world.party import get_follow_target, get_party_leader, get_party_members
 from world.resting import room_allows_rest
 from world.browser_ui import (
@@ -575,6 +576,8 @@ def _format_room_context_action_items(room, viewer):
         items.append(_item("Tinker", icon="build", command="tinker"))
     if room_supports_activity(room, "mastery"):
         items.append(_item("Mastery", icon="school", command="mastery"))
+    if is_movie_theater_room(room):
+        items.append(_item("Watch Movies", icon="theaters", picker=build_movie_picker()))
 
     if is_chapel_room(room):
         blessing = get_active_blessing(viewer)

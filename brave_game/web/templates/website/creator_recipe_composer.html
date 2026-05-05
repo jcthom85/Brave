@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }}</title>
+  <style>
+    :root { --ink:#1d2430; --accent:#8b4a29; --panel:#fff9f0; --line:#d9c8ac; --muted:#6b6157; --good:#2f6d4c; --bad:#8d3122; --shadow:rgba(29,36,48,.12); }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:linear-gradient(180deg,#f3eadb,#f9f3e8 48%,#efe2cf); min-height:100vh; }
+    .shell { width:min(1320px,calc(100vw - 32px)); margin:24px auto; display:grid; gap:16px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 16px 48px var(--shadow); overflow:hidden; }
+    .panel-head { padding:18px 20px; border-bottom:1px solid var(--line); background:linear-gradient(135deg, rgba(139,74,41,.12), rgba(217,200,172,.22)); }
+    .panel-head h1,.panel-head h2 { margin:0; }
+    .panel-head p { margin:8px 0 0; color:var(--muted); line-height:1.45; }
+    .panel-body,.stack { display:grid; gap:12px; }
+    .panel-body { padding:18px 20px 20px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .field { display:grid; gap:6px; }
+    label { color:var(--muted); font-size:.88rem; text-transform:uppercase; letter-spacing:.05em; }
+    input,select,textarea,pre { width:100%; border:1px solid var(--line); border-radius:12px; background:#fffdfa; font:inherit; padding:10px 12px; }
+    textarea,pre { min-height:160px; font:.92rem/1.45 "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; white-space:pre-wrap; }
+    button,.button-link { border:0; border-radius:999px; padding:10px 16px; font:inherit; cursor:pointer; background:var(--accent); color:#fff; text-decoration:none; }
+    button.secondary,.button-link.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); }
+    .toolbar,.builder-links { display:flex; flex-wrap:wrap; gap:10px; }
+    .status { padding:12px 14px; border-radius:12px; background:#fff6e7; border:1px solid var(--line); }
+    .status.good { background:#eef8f1; color:var(--good); } .status.bad { background:#fff0ed; color:var(--bad); }
+    .validation-notes[hidden] { display:none; }
+    @media (max-width:900px) { .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="shell" data-creator-workflow-host>
+    <section class="panel"><div class="panel-head"><h1>Recipe Composer</h1><p>Create linked cooking or tinkering drafts: recipe system entry, result item shell, and unlock item payloads.</p></div></section>
+    <section class="panel"><div class="panel-head"><h2>Compose Recipe Flow</h2><p>Write drafts only. Use Advanced builders for deeper item tuning after the flow exists.</p></div><div class="panel-body stack">
+      <div class="builder-links"><a class="button-link secondary" href="/creator/items/">Open Item Builder</a><a class="button-link secondary" href="/creator/systems/">Open Systems Builder</a><a class="button-link secondary" href="/creator/quests/">Open Quest Builder</a></div>
+      <div class="grid">
+        <div class="field"><label for="recipe-kind">Recipe Kind</label><select id="recipe-kind"><option value="cooking-recipe">Cooking</option><option value="tinkering-recipe">Tinkering</option></select></div>
+        <div class="field"><label for="recipe-key">Recipe Key</label><input id="recipe-key" value="new_recipe"></div>
+        <div class="field"><label for="recipe-name">Recipe Name</label><input id="recipe-name" value="New Recipe"></div>
+        <div class="field"><label for="result-item">Result Item</label><input id="result-item" value="new_recipe_result"></div>
+        <div class="field"><label for="base-item">Base Item / Primary Ingredient</label><input id="base-item" value="base_item"></div>
+        <div class="field"><label for="materials">Ingredients / Components JSON</label><textarea id="materials">{"base_item": 1}</textarea></div>
+        <div class="field"><label for="unlock-item">Unlock Item Key</label><input id="unlock-item" value="new_recipe_note"></div>
+        <div class="field"><label for="silver-cost">Tinkering Silver Cost</label><input id="silver-cost" type="number" value="0"></div>
+      </div>
+      <div class="toolbar"><button id="preview-recipe" type="button">Preview Recipe Drafts</button><button id="write-recipe" type="button">Write Draft Recipe Flow</button><button id="send-item" class="secondary" type="button">Send Result To Item Builder</button></div>
+    </div></section>
+    <section class="panel"><div class="panel-head"><h2>Composer Output</h2><p>Diffs and payloads appear here. Validate before publishing.</p></div><div class="panel-body stack"><div id="validation-notes" class="validation-notes" hidden></div><div id="status" class="status">Recipe Composer ready.</div><pre id="output"></pre></div></section>
+  </div>
+  <script src="/static/website/js/creator_common.js"></script>
+  <script>
+    const API_ROOT = "{{ api_root|escapejs }}";
+    const creator = window.BraveCreator.bind(API_ROOT, document.getElementById('status'), document.getElementById('validation-notes'));
+    const $ = (id) => document.getElementById(id);
+    const output = $('output');
+    function parseMaterials() { try { return JSON.parse($('materials').value || '{}'); } catch (error) { throw new Error(`Materials JSON: ${error.message}`); } }
+    function recipePayload() {
+      const kind = $('recipe-kind').value;
+      const materials = parseMaterials();
+      if (kind === 'cooking-recipe') return { name:$('recipe-name').value, result:$('result-item').value, ingredients:materials, unlock:'manual' };
+      return { name:$('recipe-name').value, base:$('base-item').value, result:$('result-item').value, components:materials, silver_cost:Number($('silver-cost').value || 0), unlock:'manual' };
+    }
+    function resultItemPayload() { return { name:$('recipe-name').value, kind:$('recipe-kind').value === 'cooking-recipe' ? 'meal' : 'loot', rarity:'common', summary:'Created by Recipe Composer.' }; }
+    function unlockItemPayload() { return { name:`${$('recipe-name').value} Note`, kind:'book', rarity:'common', summary:'Unlocks a recipe.', use:{ effect_type:'unlock_recipe', recipe_domain:$('recipe-kind').value === 'cooking-recipe' ? 'cooking' : 'tinkering', unlock_recipe:$('recipe-key').value } }; }
+    async function mutate(kind, target, payload, write) { return creator.apiFetch('/mutate', { method:'POST', body:JSON.stringify({ kind, target, payload, write, stage:'draft' }) }); }
+    async function run(write) {
+      const drafts = [
+        { kind:'item', target:$('result-item').value, payload:resultItemPayload() },
+        { kind:'item', target:$('unlock-item').value, payload:unlockItemPayload() },
+        { kind:$('recipe-kind').value, target:$('recipe-key').value, payload:recipePayload() },
+      ];
+      const results = [];
+      for (const draft of drafts) results.push(await mutate(draft.kind, draft.target, draft.payload, write));
+      output.textContent = JSON.stringify(results, null, 2);
+      creator.setStatus(write ? 'Recipe item, unlock item, and system recipe were written to draft packs.' : 'Recipe draft preview complete.', 'good');
+    }
+    $('preview-recipe').addEventListener('click', () => run(false).catch((error) => creator.setStatus(error.message, 'bad')));
+    $('write-recipe').addEventListener('click', () => run(true).catch((error) => creator.setStatus(error.message, 'bad')));
+    $('send-item').addEventListener('click', () => creator.sendToBuilder('/creator/items/', resultItemPayload(), 'Recipe Result Item'));
+  </script>
+</body>
+</html>

@@ -20,7 +20,12 @@ evmenu_stub = types.ModuleType("evennia.utils.evmenu")
 evmenu_stub.get_input = lambda *args, **kwargs: None
 sys.modules.setdefault("evennia.utils.evmenu", evmenu_stub)
 
-from commands.account import CmdBravePlay, _refresh_web_session_after_play, _release_existing_puppets_for_play
+from commands.account import (
+    CmdBraveLogout,
+    CmdBravePlay,
+    _refresh_web_session_after_play,
+    _release_existing_puppets_for_play,
+)
 from evennia.commands.default import account as default_account
 
 
@@ -47,7 +52,63 @@ class _Account:
         self._puppets = []
 
 
+class _SessionHandler:
+    def __init__(self):
+        self.partial_syncs = []
+
+    def session_portal_partial_sync(self, payload):
+        self.partial_syncs.append(payload)
+
+
+class _Cmdset:
+    def __init__(self):
+        self.update_calls = []
+
+    def update(self, **kwargs):
+        self.update_calls.append(kwargs)
+
+
 class AccountPlayTests(unittest.TestCase):
+    def test_web_logout_clears_evennia_and_browser_login_state(self):
+        messages = []
+        session_handler = _SessionHandler()
+        session = SimpleNamespace(
+            protocol_key="websocket",
+            account=SimpleNamespace(key="Tester"),
+            uid=7,
+            uname="Tester",
+            puid=14,
+            puppet=SimpleNamespace(key="Hero"),
+            logged_in=True,
+            cmdset_storage="old",
+            cmdset=_Cmdset(),
+            sessid=99,
+            sessionhandler=session_handler,
+        )
+        session.msg = lambda **kwargs: messages.append(kwargs)
+        command = object.__new__(CmdBraveLogout)
+        command.session = session
+        command.account = session.account
+
+        command.func()
+
+        self.assertIsNone(session.account)
+        self.assertIsNone(session.uid)
+        self.assertEqual("", session.uname)
+        self.assertIsNone(session.puid)
+        self.assertIsNone(session.puppet)
+        self.assertFalse(session.logged_in)
+        self.assertEqual([{"init_mode": True}], session.cmdset.update_calls)
+        self.assertEqual([{99: {"logged_in": False, "uid": None}}], session_handler.partial_syncs)
+        logout_events = [message.get("brave_logout") for message in messages if message.get("brave_logout")]
+        self.assertEqual("menu", logout_events[-1].get("screen"))
+        signin_views = [
+            message.get("brave_view")
+            for message in messages
+            if message.get("brave_view", {}).get("variant") == "connection"
+        ]
+        self.assertEqual(["Enter Brave"], [section.get("label") for section in signin_views[-1].get("sections", [])])
+
     def test_release_existing_puppets_unpuppets_different_character(self):
         old_character = SimpleNamespace(key="Old")
         new_character = SimpleNamespace(key="New")

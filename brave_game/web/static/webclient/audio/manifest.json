@@ -201,6 +201,96 @@
         "music/dark_place_loop.ogg"
       ]
     },
+    "music.great_frontier.unpayable_debt": {
+      "bus": "music",
+      "gain": 0.72,
+      "fade_in_sec": 0.8,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/great_frontier/1 - Unpayable Debt.mp3"
+      ]
+    },
+    "music.great_frontier.memories_of_another_life": {
+      "bus": "music",
+      "gain": 0.72,
+      "fade_in_sec": 0.8,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/great_frontier/2 - Memories of Another Life.mp3"
+      ]
+    },
+    "music.great_frontier.showdown_in_the_rain": {
+      "bus": "music",
+      "gain": 0.72,
+      "fade_in_sec": 0.8,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/great_frontier/3 - Showdown in the Rain.mp3"
+      ]
+    },
+    "music.great_frontier.the_road_at_night": {
+      "bus": "music",
+      "gain": 0.72,
+      "fade_in_sec": 0.8,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/great_frontier/4 - The Road at Night.mp3"
+      ]
+    },
+    "music.great_frontier.the_black_city": {
+      "bus": "music",
+      "gain": 0.72,
+      "fade_in_sec": 0.8,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/great_frontier/5 - The Black City.mp3"
+      ]
+    },
+    "music.great_frontier.refuge": {
+      "bus": "music",
+      "gain": 0.72,
+      "fade_in_sec": 0.8,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/great_frontier/6 - Refuge.mp3"
+      ]
+    },
+    "music.great_frontier.reclamation": {
+      "bus": "music",
+      "gain": 0.72,
+      "fade_in_sec": 0.8,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/great_frontier/7 - Reclamation.mp3"
+      ]
+    },
+    "music.great_frontier.the_end_of_the_beginning": {
+      "bus": "music",
+      "gain": 0.72,
+      "fade_in_sec": 0.8,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/great_frontier/8 - The End of the Beginning.mp3"
+      ]
+    },
+    "music.great_frontier.reconciliation": {
+      "bus": "music",
+      "gain": 0.72,
+      "fade_in_sec": 0.8,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/great_frontier/Great Frontier - Reconciliation.mp3"
+      ]
+    },
+    "music.great_frontier.shackles": {
+      "bus": "music",
+      "gain": 0.72,
+      "fade_in_sec": 0.8,
+      "fade_out_sec": 1.0,
+      "files": [
+        "music/great_frontier/Great Frontier - Shackles.mp3"
+      ]
+    },
     "sfx.ui.click": {
       "bus": "sfx",
       "gain": 0.74,

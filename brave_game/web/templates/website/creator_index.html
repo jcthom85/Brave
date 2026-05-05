@@ -33,11 +33,13 @@
 <body>
   <div class="shell">
     <section class="hero">
-      <h1>Brave Creator Studio</h1>
-      <p>Start with the player experience you want to build, then move through the builders as linked drafting tools. Browser saves go to draft packs first, so experimentation is safe.</p>
+      <h1>Brave Creator Mission Control</h1>
+      <p>Start with the player experience you want to build, watch draft health, then move through linked builders as a coherent game-making workflow. Browser saves go to draft packs first, so experimentation is safe.</p>
       <p class="meta">API root: {{ api_root }} · Access: staff, superuser, or Developer-authorized account</p>
       <div class="hero-actions">
         <a class="button-link" href="/creator/composers/boss/">Compose a Boss Fight</a>
+        <a class="button-link" href="/creator/composers/recipe/">Compose a Recipe</a>
+        <a class="button-link" href="/creator/composers/fishing/">Compose Fishing</a>
         <a class="button-link" href="/creator/systems/">Edit Systems</a>
         <a class="button-link" href="/creator/world/">Open World Map</a>
       </div>
@@ -48,8 +50,11 @@
     </section>
     <section class="grid">
       <article class="card feature"><h2>Boss Fight</h2><p>Create the gate, boss enemy, encounter, linked exits, and reward hooks as one draftable flow.</p><a href="/creator/composers/boss/">Open Boss Composer</a></article>
-      <article class="card feature"><h2>Recipe</h2><p>Use Items and Systems together to build meals, tinkering patterns, unlock notes, and ingredients.</p><a href="/creator/items/">Start with Items</a></article>
-      <article class="card feature"><h2>Fishing Spot</h2><p>Shape a room activity, fish table, rods, lures, and behaviors, then validate the links.</p><a href="/creator/systems/">Start with Systems</a></article>
+      <article class="card feature"><h2>Recipe</h2><p>Use Items and Systems together to build meals, tinkering patterns, unlock notes, and ingredients.</p><a href="/creator/composers/recipe/">Open Recipe Composer</a></article>
+      <article class="card feature"><h2>Fishing Spot</h2><p>Shape a room activity, fish table, rods, lures, and behaviors, then validate the links.</p><a href="/creator/composers/fishing/">Open Fishing Composer</a></article>
+      <article class="card feature"><h2>Quest Chain</h2><p>Plan objectives, handoffs, reward hooks, dialogue, and route checks.</p><a href="/creator/quests/">Open Quest Builder</a></article>
+      <article class="card feature"><h2>Tutorial Moment</h2><p>Create readable guidance, NPC hints, room placement, and reward context.</p><a href="/creator/dialogue/">Open Dialogue Builder</a></article>
+      <article class="card feature"><h2>New Zone</h2><p>Start with rooms and exits, then layer encounters, systems, quests, and dialogue.</p><a href="/creator/world/">Open World Builder</a></article>
     </section>
     <section class="rail">
       <h2>Builders</h2>
@@ -66,7 +71,7 @@
     </section>
     <section class="rail" data-creator-workflow-host>
       <h2>Draft Control</h2>
-      <p>Validate or publish all draft packs from the Studio. History and revert are available after writes.</p>
+      <p>Creator Health, validation, publish, history, revert, and incoming builder payloads are available from Mission Control.</p>
       <div id="validation-notes" class="validation-notes" hidden></div>
       <div id="status" class="status">Draft workflow ready.</div>
       <pre id="output"></pre>

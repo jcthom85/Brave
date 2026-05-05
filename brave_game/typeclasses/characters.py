@@ -146,6 +146,11 @@ class Character(ObjectParent, DefaultCharacter):
 
     def at_post_move(self, source_location, move_type="move", **kwargs):
         super().at_post_move(source_location, move_type=move_type, **kwargs)
+        if source_location and source_location != self.location:
+            from world.movies import is_movie_theater_room, send_movie_stop_event
+
+            if is_movie_theater_room(source_location) and not is_movie_theater_room(self.location):
+                send_movie_stop_event(self)
         if self.location:
             self.ndb.brave_first_region_discovery = bool(discover_region(self, self.location))
             self.ndb.brave_first_room_discovery = bool(discover_room(self, self.location))
