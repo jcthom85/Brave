@@ -736,6 +736,16 @@ class RoomViewTests(unittest.TestCase):
 
         self.assertTrue(view.get("first_region_discovery"))
 
+    def test_room_view_flags_first_room_discovery(self):
+        character = DummyCharacter()
+        character.ndb.brave_first_room_discovery = True
+        room = DummyMappedRoom("current_room", key="Current Room", x=0, y=0)
+
+        with patch("world.browser_room_views.build_minimap_snapshot", return_value={}):
+            view = build_room_view(room, character)
+
+        self.assertTrue(view.get("first_room_discovery"))
+
 
 if __name__ == "__main__":
     unittest.main()

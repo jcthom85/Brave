@@ -148,7 +148,7 @@ class Character(ObjectParent, DefaultCharacter):
         super().at_post_move(source_location, move_type=move_type, **kwargs)
         if self.location:
             self.ndb.brave_first_region_discovery = bool(discover_region(self, self.location))
-            discover_room(self, self.location)
+            self.ndb.brave_first_room_discovery = bool(discover_room(self, self.location))
             if source_location and source_location != self.location and move_type not in {"defeat", "flee"}:
                 self.ndb.brave_previous_location = source_location
             if move_type != "spawn":
@@ -182,6 +182,9 @@ class Character(ObjectParent, DefaultCharacter):
         if self.account and not is_brave_room(self.location):
             place_new_brave_character(self.account, self)
 
+        if getattr(self, "ndb", None):
+            self.ndb.brave_post_puppet_room_view_sent = False
+
         # TRIGGER NARRATIVE/CINEMATIC LOGIC
         if protocol in {"websocket", "ajax/comet", "webclient"}:
             if self.location:
@@ -191,6 +194,8 @@ class Character(ObjectParent, DefaultCharacter):
                 advance_room_visit(self, self.location)
                 # Force a room look to trigger the browser_view and its welcome_pages
                 self.location.return_appearance(self)
+                if getattr(self, "ndb", None):
+                    self.ndb.brave_post_puppet_room_view_sent = True
                 # Delay the cinematic/speech to let the modal land and the UI stabilize
                 delay(2.5, self._send_opening_cinematic)
         else:

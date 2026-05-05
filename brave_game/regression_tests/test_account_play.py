@@ -11,17 +11,16 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
-chargen_stub = types.ModuleType("world.chargen")
+chargen_stub = sys.modules.setdefault("world.chargen", types.ModuleType("world.chargen"))
 chargen_stub.clear_chargen_state = lambda *args, **kwargs: None
 chargen_stub.get_chargen_state = lambda *args, **kwargs: {}
 chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 chargen_stub.start_brave_chargen = lambda *args, **kwargs: None
-sys.modules.setdefault("world.chargen", chargen_stub)
 evmenu_stub = types.ModuleType("evennia.utils.evmenu")
 evmenu_stub.get_input = lambda *args, **kwargs: None
 sys.modules.setdefault("evennia.utils.evmenu", evmenu_stub)
 
-from commands.account import CmdBravePlay, _release_existing_puppets_for_play
+from commands.account import CmdBravePlay, _refresh_web_session_after_play, _release_existing_puppets_for_play
 from evennia.commands.default import account as default_account
 
 
@@ -79,6 +78,55 @@ class AccountPlayTests(unittest.TestCase):
             command.func()
 
         self.assertEqual([("super", "New", 1)], calls)
+
+    def test_play_command_refreshes_web_room_after_puppet(self):
+        calls = []
+        location = SimpleNamespace(return_appearance=lambda character: calls.append(("look", character.key)))
+        character = SimpleNamespace(key="New", location=location, ndb=SimpleNamespace())
+        account = _Account([character])
+        session = SimpleNamespace(protocol_key="websocket", puppet=None)
+        command = object.__new__(CmdBravePlay)
+        command.account = account
+        command.session = session
+        command.args = "New"
+        command.msg = lambda *_args, **_kwargs: None
+
+        def _record_super(cmd):
+            session.puppet = character
+            calls.append(("super", cmd.args))
+
+        with patch.object(default_account.CmdIC, "func", _record_super):
+            command.func()
+
+        # We no longer expect an explicit 'look' call from CmdBravePlay.func,
+        # as it is handled by the at_post_puppet hook within the super().func() call chain.
+        self.assertEqual([("super", "New")], calls)
+
+    def test_refresh_web_session_after_play_ignores_stale_puppet(self):
+        calls = []
+        character = SimpleNamespace(
+            key="New",
+            location=SimpleNamespace(return_appearance=lambda _character: calls.append("look")),
+            ndb=SimpleNamespace(),
+        )
+        session = SimpleNamespace(protocol_key="websocket", puppet=SimpleNamespace(key="Old"))
+
+        _refresh_web_session_after_play(session, character)
+
+        self.assertEqual([], calls)
+
+    def test_refresh_web_session_after_play_skips_view_already_sent_by_puppet_hook(self):
+        calls = []
+        character = SimpleNamespace(
+            key="New",
+            location=SimpleNamespace(return_appearance=lambda _character: calls.append("look")),
+            ndb=SimpleNamespace(brave_post_puppet_room_view_sent=True),
+        )
+        session = SimpleNamespace(protocol_key="websocket", puppet=character)
+
+        _refresh_web_session_after_play(session, character)
+
+        self.assertEqual([], calls)
 
 
 if __name__ == "__main__":

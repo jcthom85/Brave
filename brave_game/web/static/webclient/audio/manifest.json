@@ -92,7 +92,7 @@
       "fade_in_sec": 1.2,
       "fade_out_sec": 1.0,
       "files": [
-        "ambience/regions/brambleford/nexus_gate_loop.mp3"
+        "ambience/portal_forest_loop.ogg"
       ]
     },
     "music.explore.safe": {
@@ -863,36 +863,6 @@
         "ambience/regions/goblin_warrens/sludge_run_loop.mp3"
       ]
     },
-    "ambience.junkyard.landing": {
-      "bus": "ambience",
-      "loop": true,
-      "gain": 0.68,
-      "fade_in_sec": 1.2,
-      "fade_out_sec": 1.0,
-      "files": [
-        "ambience/regions/junkyard/landing_loop.mp3"
-      ]
-    },
-    "ambience.junkyard.relay": {
-      "bus": "ambience",
-      "loop": true,
-      "gain": 0.68,
-      "fade_in_sec": 1.2,
-      "fade_out_sec": 1.0,
-      "files": [
-        "ambience/regions/junkyard/relay_trench_loop.mp3"
-      ]
-    },
-    "ambience.junkyard.anchor_pit": {
-      "bus": "ambience",
-      "loop": true,
-      "gain": 0.68,
-      "fade_in_sec": 1.2,
-      "fade_out_sec": 1.0,
-      "files": [
-        "ambience/regions/junkyard/anchor_pit_loop.mp3"
-      ]
-    },
     "sfx.ui.navigate": {
       "bus": "sfx",
       "gain": 0.72,
@@ -990,14 +960,14 @@
         "music/theme_sketches/theme.goblin_warrens.mp3"
       ]
     },
-    "music.region.junkyard_planet": {
-      "bus": "music",
+    "ambience.lanternworks": {
+      "bus": "ambience",
       "loop": true,
-      "gain": 0.56,
-      "fade_in_sec": 1.4,
+      "gain": 0.68,
+      "fade_in_sec": 1.2,
       "fade_out_sec": 1.0,
       "files": [
-        "music/theme_sketches/theme.junkyard_planet.mp3"
+        "ambience/regions/brambleford/lower_lanternworks_loop.mp3"
       ]
     }
   }

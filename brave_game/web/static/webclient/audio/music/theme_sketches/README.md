@@ -17,7 +17,6 @@ director; live music cues still come from `manifest.json`.
 - `theme.drowned_weir.mp3` -> `music.region.drowned_weir`
 - `theme.ruined_watchtower.mp3` -> `music.region.ruined_watchtower`
 - `theme.goblin_warrens.mp3` -> `music.region.goblin_warrens`
-- `theme.junkyard_planet.mp3` -> `music.portal`
 - `theme.combat.standard.mp3` -> `music.combat.standard`
 - `theme.combat.boss_general.mp3` -> `music.combat.boss`
 - `theme.boss.ruk.mp3` -> `music.combat.boss`

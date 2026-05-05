@@ -264,9 +264,9 @@ def resolve_ability_query(character, raw_ability):
 
 
 def format_portal_list():
-    """Return a readable summary of current Nexus gates."""
+    """Return a readable summary of generic route gates."""
 
-    lines = ["|wNexus Gates|n"]
+    lines = ["|wRoute Gates|n"]
     for portal_key, portal in PORTALS.items():
         status_label = PORTAL_STATUS_LABELS.get(portal["status"], portal["status"].title())
         resonance_label = RESONANCE_PROFILES.get(portal["resonance"], RESONANCE_PROFILES["fantasy"])[
@@ -280,7 +280,7 @@ def format_portal_list():
 
 
 def format_portal_plaque_text():
-    """Return the readable plaque text for the Nexus Gate."""
+    """Return readable plaque text for generic route-gate content."""
 
     lines = [
         "A brass plate is set into the ring dais, each gate name etched beside a narrow groove of colored glass.",

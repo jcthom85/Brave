@@ -6,7 +6,6 @@
     "boglight_lantern": "The lantern cage is cold, but something pale still clings to the green glass from the inside. One scratched note on the hook reads: IF IT LOOKS LIKE A GUIDE LIGHT, IT ISN'T.",
     "carrion_stake_circle": "Most of the stakes were hammered by anxious human hands. The newer cuts across them were not. A crow skull has been tied to the tallest one with reed cord and black bog thread.",
     "cellar_warning_slate": "Uncle Pib's chalk scrawl reads: IF YOU ARE HOLDING THIS SLATE, THE RATS HAVE NOT EATEN YOU. GOOD. CLEAR THEM OUT BEFORE THEY RUIN THE STORES. IF THE ROAD STAYS CUT, FLOUR BECOMES STRATEGIC.",
-    "crane_gantry": "A dead foreman schedule still clings to the cab wall, every shift crossed out except one line left legible in angry strokes: COILBACK CLAIMS PIT AUTHORITY.",
     "dawn_bell": "The bell's bronze lip is etched with a prayer worn soft by generations of hands: LET MORNING FIND US, LET MEMORY REST, LET THE LOST HEAR THE WAY HOME. Those who kneel beneath it before a hard road still say the chapel answers. Pray if you mean to test that.",
     "drowned_survey_marker": "The old survey cut reads: SOUTH WEIR LINE / BLACKWATER FEED / LAMP HOUSE EAST. A newer scratch over it is less official and more useful: IF THE LIGHT IS STILL BURNING, TURN IT WRONGER OR TURN IT OFF.",
     "edrics_slab": "The cracked slab still carries a knightly carving beneath the moss: SIR EDRIC VALE, WHO HELD THE LINE UNTIL THE LINE OUTLIVED HIM.",
@@ -14,14 +13,14 @@
     "fenreach_waypost": "The old road mark once pointed to a survey line no one in Brambleford still uses. A newer charcoal warning cuts across it in Mira's hand: BLACKFEN SOUTH. KEEP TO THE HARD GROUND UNTIL THE MARSH STOPS LYING.",
     "forge_order_board": "Torren's board reads: NAIL KEGS FOR SOUTH FARM. HINGE SET FOR MAYOR'S HALL. TWO SPEAR TIPS FOR THE WATCH. Below that, in heavier chalk: FIELD KIT IMPROVEMENTS DONE TO ORDER. WEAR IT IN. BRING SCRAP. PAY SILVER. ASK AT THE FORGE, NOT WITH STORIES.",
     "hunters_warning_post": "Three deep knife-cuts have been carved into the cedar, then crossed out beneath a newer line: GREYMAW TOOK THE OUTER TRAIL. STAY IN NUMBERS.",
+    "lower_lanternworks_notice": "The notice is written in Joss's exact hand: Lower Lanternworks open for inspection. Do not touch south-line glass without Joss Veller present. Someone has added: this includes tapping.",
+    "lower_lanternworks_plaque": "The plaque is a maintenance map for Brambleford's road lanterns. North, west, and town lines are cold. The south groove is stained dark and faintly warm.",
     "mayors_ledger": "The open ledger carries three fresh entries in the mayor's square hand: LANTERN OIL SHORT BY TWO CRATES. WEST WATCH REPORTS LIGHT LOSS AT DUSK. CHAPEL REQUESTS ADDITIONAL VOLUNTEERS WITH STEADY NERVES.",
     "midden_bone_totem": "The totem has been wired together from feast scraps and threats. Three scratched signs repeat around the lid-face: KING, POT, ROAD. None of them improve under repetition.",
     "miretooth_shed_skull": "The skull is too heavy through the jaw and too narrow through the eyes to belong to anything Brambleford would name kindly. Deep score marks along the bone suggest the beast that shed it grew into something even worse.",
     "outfitters_chalkboard": "Leda's chalk hand is spare and direct: WE BUY PELTS, HERBS, SALVAGE, ROAD SCRAP, AND OTHER SENSIBLE FINDS. FAIR PRICES FOR FAIR HANDS. ASK ABOUT A SHIFT IF YOU WANT TO EARN THE BETTER COLUMN.",
     "potking_lid_throne": "The throne is less built than accumulated. Pot lids, road shields, and dented signboards have all been hammered together into a seat meant to look richer than the cave deserves.",
-    "relay_route_mast": "The mast flashes a repeating route code through the trench glass: RELAY / YARD / PIT. Someone has etched a newer note beneath it in softer metal: IF IT HUMS BACK, DUCK.",
     "ruks_chopping_block": "Fresh cuts score the block in harsh, uneven lines. One gouge has been hacked deep enough to lodge a shred of wagon paint and a few pale flecks of lantern glass. A goblin hand has scratched nearby: RUK KEEPS THIS ROAD.",
-    "salvage_beacon": "A clipped scrolling line repeats across the beacon housing in a script your eyes somehow decide they understand: ANCHOR STABLE. RETURN VECTOR CLEAN. LOCAL SALVAGE FIELD ACTIVE.",
     "signal_brazier": "Fresh soot rims the iron pan, and the stacked wood beside it has been sorted into quick-burn bundles. The tower crew means to signal far and fast if the ridge turns ugly.",
     "sinkmouth_scratch_map": "The slate shows a goblin scratch map: CAMP crossed out, then arrows leading east into a crown mark over a grease-slick room. One soot-smeared note is clearer than the rest: POT-KING EATS FIRST.",
     "star_lens": "The etched brass rings mark stars, routes, and a handful of names that are definitely not villages anywhere near Brambleford. One line is picked out brighter than the rest: JUNK-YARD PLANET.",
@@ -141,38 +140,34 @@
       },
       {
         "active": "the_south_light",
-        "text": "\"Miretooth wasn't the source. He was just the teeth on the edge of a larger circuit. Follow the causeway east, confirm the old lantern weir is still somehow lit, and come back with proof before the mayor starts calling me dramatic in public.\""
+        "text": "\"The lock is broken and the south light has fewer places to lie. Follow it to the weir, confirm how it feeds the lamp house, and do not stand where the old glass is brightest.\""
       },
       {
         "active": "foreman_coilback",
-        "text": "\"Coilback sits in the Anchor Pit like a bad idea nobody managed to turn off. Hit the pit from the relay trench or the crane grave, keep moving when the clamps come down, and don't let that foreman decide the bridge belongs to him.\""
+        "text": "\"The Chain Keeper is not alive, not properly dead, and not interested in my categories. It sits in the Sunken Lock enforcing the old line. Break it and the lamp house loses its strongest hinge.\""
       },
       {
         "active": "signal_in_the_scrap",
-        "text": "\"Good. The trench route still answers. Now chart the Crane Grave and bring me one clean shard of anchor glass so I can tune the lens without guessing.\""
+        "text": "\"The causeway pulse is real. Now chart Lantern Weir and the Sluice Walk, then bring me one clean shard of blackwater lensglass so I can read the line instead of guessing at it.\""
       },
       {
         "active": "bridgework_for_joss",
-        "text": "\"The first trench east of the landing still carries a route pulse. Reach it, then bring back a live flux coil. Preferably one that isn't trying to bite through your gloves by the time you return.\""
+        "text": "\"The lower lanternworks under the observatory are old road-light machinery, not a miracle door. Reach the Drowned Causeway and bring me a live lamp coil. If it hums like a bad secret, that is the one.\""
       },
       {
         "completed": "the_hollow_lantern",
-        "text": "\"The south line is dark again. Properly dark, not waiting-to-be-clever dark. That's worth more than a tidy lens report. If you haven't looked upstairs yet, the Trophy Hall has a frame waiting for the prism.\""
+        "text": "\"The south line is dark again. Properly dark, not waiting-to-be-clever dark. That is worth more than a tidy lens report. If you have not looked upstairs yet, the Trophy Hall has a frame waiting for the prism.\""
       },
       {
         "completed": "foreman_coilback",
-        "text": "\"There. Hear that? The gate's hum is cleaner now. The Trophy Hall upstairs has a place for the Beacon Core because some wins ought to stay where the whole family can point at them.\""
+        "text": "\"There. Hear that? The lower lanternworks are quiet enough to think in. The Trophy Hall upstairs has a place for the Blackwater Beacon Core because some wins ought to stay where the whole family can point at them.\""
       },
       {
-        "room_id": "brambleford_nexus_gate",
-        "text": "\"Every gate needs an anchor or you stop calling it travel and start calling it loss. The ring below is holding one stable bridge for now. Review the lineup, then step through when you're ready to test your nerve somewhere stranger.\""
+        "room_id": "brambleford_lower_lanternworks",
+        "text": "\"Every groove down here belongs to a road-light line Brambleford forgot it owned. The south groove woke up angry, and that is enough mystery without giving it a grander name.\""
       },
       {
-        "resonance": "tech",
-        "text": "\"Different sky, same bones. The world here skins your instincts as tech. Your sheet will show the local names, and the return gate will always answer while I keep the bridge lit.\""
-      },
-      {
-        "text": "\"Most folk think I light lamps. True enough. They just forget a gate is another sort of lamp if you know what to feed it. The observatory's the town's portal center, whether the mayor likes the phrase or not.\""
+        "text": "\"Most folk think I light lamps. True enough. They just forget a town lantern can be a warning, a promise, or a warning depending on who built the brass under it.\""
       }
     ],
     "mayor_elric_thorne": [

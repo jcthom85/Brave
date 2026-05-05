@@ -97,6 +97,16 @@ from world.browser_ui import (
 
 WELCOME_PAGES = LANTERNFALL_WELCOME_PAGES
 RECAP_PAGES = LANTERNFALL_RECAP_PAGES
+JUNEWIRE_GAMES_LINK = {
+    "label": "junewiregames.com",
+    "href": "https://junewiregames.com/",
+    "aria_label": "Visit Junewire Games",
+}
+
+
+def _with_junewire_footer(view):
+    view["footer_link"] = dict(JUNEWIRE_GAMES_LINK)
+    return view
 
 
 def _pre_section(label, icon, text, *, span=None, tone=None, hide_label=False, grid=None):
@@ -473,7 +483,7 @@ def build_chargen_view(account, state, *, error=None):
             )
         )
 
-    return {
+    return _with_junewire_footer({
         **_make_view(
             step_meta["eyebrow"],
             step_meta["title"],
@@ -487,7 +497,7 @@ def build_chargen_view(account, state, *, error=None):
             reactive=_reactive_view(scene="account"),
         ),
         "variant": "chargen",
-    }
+    })
 
 
 def build_map_view(room, character, *, mode="map"):
@@ -667,7 +677,7 @@ def build_account_view(account):
 
     actions = [_action("Logout", "logout", "logout", tone="muted")]
 
-    return {
+    return _with_junewire_footer({
         **_make_view(
             account.key,
             "",
@@ -681,7 +691,7 @@ def build_account_view(account):
             reactive=_reactive_view(scene="account"),
         ),
         "variant": "account",
-    }
+    })
 
 
 def build_connection_view(*, screen="menu", error=None, username="", registration_enabled=True):
@@ -831,7 +841,7 @@ def build_connection_view(*, screen="menu", error=None, username="", registratio
         sections.append(
             _section(
                 "Enter Brave",
-                "key",
+                None,
                 "list",
                 items=[
                     _item("Sign In", icon="key"),
@@ -845,7 +855,7 @@ def build_connection_view(*, screen="menu", error=None, username="", registratio
         eyebrow_icon = None
         subtitle = ""
 
-    return {
+    return _with_junewire_footer({
         **_make_view(
             eyebrow,
             "",
@@ -859,7 +869,7 @@ def build_connection_view(*, screen="menu", error=None, username="", registratio
             reactive=_reactive_view(scene="account"),
         ),
         "variant": "connection",
-    }
+    })
 
 
 def build_theme_view(current_theme_key=None):

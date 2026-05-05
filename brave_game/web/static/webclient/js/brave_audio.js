@@ -975,8 +975,8 @@
         if (sourceId.indexOf("menders_shed") >= 0 || sourceId.indexOf("mender") >= 0) {
             return chooseAvailableCue(["ambience.brambleford.mender", "ambience.brambleford"]);
         }
-        if (sourceId.indexOf("nexus_gate") >= 0) {
-            return chooseAvailableCue(["ambience.portal", "ambience.brambleford"]);
+        if (sourceId.indexOf("lower_lanternworks") >= 0 || sourceId.indexOf("lanternworks") >= 0) {
+            return chooseAvailableCue(["ambience.lanternworks", "ambience.brambleford"]);
         }
         if (sourceId.indexOf("wayfarer") >= 0 || sourceId.indexOf("sparring") >= 0 || sourceId.indexOf("quartermaster") >= 0 || sourceId.indexOf("vermin_pens") >= 0) {
             return chooseAvailableCue(["ambience.wayfarers_yard", "ambience.brambleford"]);
@@ -1026,15 +1026,6 @@
         if (sourceId.indexOf("goblin_warrens") >= 0) {
             return chooseAvailableCue(["ambience.goblin_warrens.tunnel"]);
         }
-        if (sourceId.indexOf("relay_trench") >= 0 || sourceId.indexOf("scrapway") >= 0) {
-            return chooseAvailableCue(["ambience.junkyard.relay", "ambience.junkyard.landing"]);
-        }
-        if (sourceId.indexOf("anchor_pit") >= 0 || sourceId.indexOf("crane_grave") >= 0) {
-            return chooseAvailableCue(["ambience.junkyard.anchor_pit", "ambience.junkyard.landing"]);
-        }
-        if (sourceId.indexOf("junkyard") >= 0) {
-            return chooseAvailableCue(["ambience.junkyard.landing"]);
-        }
         if (tone === "brambleford") {
             return chooseAvailableCue(["ambience.brambleford"]);
         }
@@ -1062,11 +1053,11 @@
         if (tone === "warrens") {
             return chooseAvailableCue(["ambience.goblin_warrens.tunnel", "ambience.oldbarrow"]);
         }
-        if (tone === "nexus" || tone === "portal" || tone === "junkyard") {
-            return chooseAvailableCue([
-                tone === "junkyard" ? "ambience.junkyard.landing" : "ambience.portal",
-                "ambience.portal"
-            ]);
+        if (tone === "lanternworks") {
+            return chooseAvailableCue(["ambience.lanternworks", "ambience.brambleford"]);
+        }
+        if (tone === "portal") {
+            return chooseAvailableCue(["ambience.portal"]);
         }
         return "ambience.brambleford";
     }
@@ -1085,8 +1076,8 @@
         if (scene === "account" || scene === "chargen" || scene === "connection") {
             return chooseAvailableCue(["music.title"]);
         }
-        if (tone === "nexus" || tone === "portal" || tone === "junkyard") {
-            return chooseAvailableCue(["music.region.junkyard_planet", "music.portal"]);
+        if (tone === "portal") {
+            return chooseAvailableCue(["music.portal"]);
         }
         if (tone === "goblinroad") {
             return chooseAvailableCue(["music.region.goblin_road", "music.explore.danger"]);

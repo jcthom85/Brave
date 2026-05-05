@@ -39,7 +39,6 @@ ZONE_LEVEL_BANDS = (
     ("brambleford_", 1),
     ("goblin_road_", 2),
     ("whispering_woods_", 3),
-    ("junkyard_planet_", 4),
     ("old_barrow_field_", 5),
     ("ruined_watchtower_", 6),
     ("goblin_warrens_", 8),

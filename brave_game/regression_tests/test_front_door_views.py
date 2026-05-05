@@ -36,6 +36,13 @@ def _section(view, label):
     raise AssertionError(f"Missing section {label}")
 
 
+def _assert_junewire_footer(testcase, view):
+    footer = view.get("footer_link", {})
+    testcase.assertEqual("junewiregames.com", footer.get("label"))
+    testcase.assertEqual("https://junewiregames.com/", footer.get("href"))
+    testcase.assertEqual("Visit Junewire Games", footer.get("aria_label"))
+
+
 class _DummySessions:
     def __init__(self, connected=False):
         self._connected = connected
@@ -90,6 +97,7 @@ class ConnectionViewTests(unittest.TestCase):
         )
 
         self.assertEqual("connection", view.get("variant"))
+        _assert_junewire_footer(self, view)
         issue = _section(view, "Issue")
         self.assertIn("Password confirmation did not match.", issue.get("lines", []))
         form = _section(view, "Create Account")
@@ -101,6 +109,7 @@ class ConnectionViewTests(unittest.TestCase):
         view = build_connection_view(screen="menu")
 
         self.assertEqual("connection", view.get("variant"))
+        _assert_junewire_footer(self, view)
         self.assertEqual([], view.get("chips", []))
         section_labels = [section.get("label") for section in view.get("sections", [])]
         self.assertEqual(["Enter Brave"], section_labels)
@@ -115,6 +124,7 @@ class AccountViewTests(unittest.TestCase):
 
         action_labels = [action.get("label") for action in view.get("actions", [])]
         self.assertEqual([], view.get("chips", []))
+        _assert_junewire_footer(self, view)
         self.assertEqual(["Logout"], action_labels)
 
         roster = view.get("sections", [])[0]
@@ -128,6 +138,7 @@ class ChargenViewTests(unittest.TestCase):
     def test_welcome_step_now_points_to_race_first(self):
         view = build_chargen_view(DummyAccount(), {"step": "menunode_welcome"})
 
+        _assert_junewire_footer(self, view)
         next_step = _section(view, "Next Step")
         entry = next_step.get("items", [])[0]
         self.assertEqual("Choose Race", entry.get("title"))

@@ -133,8 +133,11 @@ def _ensure_world_object(entity_data, rooms_by_id):
     return obj
 
 
-def ensure_brave_world():
+def ensure_brave_world(force=False):
     """Create or repair the first Brave world slice."""
+
+    if not force and get_room("brambleford_town_green"):
+        return None
 
     try:
         rooms_by_id = {room_data["id"]: _ensure_room(room_data) for room_data in WORLD_CONTENT.rooms}

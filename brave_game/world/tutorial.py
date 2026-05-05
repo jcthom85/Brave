@@ -92,6 +92,25 @@ LANTERNFALL_RECAP_PAGES = [
     },
 ]
 
+TUTORIAL_COMBAT_INTRO_PAGES = [
+    {
+        "title": "First Fight",
+        "text": "Brask has put you in the vermin pens for a controlled fight. This is where Brave slows down enough for you to read the field, pick a target, and act with intent.",
+        "icon": "swords",
+    },
+    {
+        "title": "How Combat Works",
+        "text": "Enemy and hero cards show HP, readiness, and status chips. When an action is ready, choose an ability or attack, then select the target you want to pressure.",
+        "icon": "monitor_heart",
+    },
+    {
+        "title": "Prove The Lesson",
+        "text": "To satisfy Brask, use your class skill once during this fight, then finish the enemy. The Training Focus panel will keep the important reminders visible.",
+        "icon": "bolt",
+        "cta_label": "Begin Fight",
+    },
+]
+
 LANTERNFALL_TERMINAL_INTRO = (
     "|wLanternfall|n\n\n"
     "The bell hits before dawn. Somewhere south of town, a road lantern has gone black, "
@@ -118,7 +137,7 @@ TUTORIAL_STEPS = {
         "order": 2,
         "title": "Kit Before The Gate",
         "summary": "Nella is issuing field checks. Check your gear, open your pack, read the supply board, then return west to the yard.",
-        "how_to": "Click the MENU button to check your Gear and Pack",
+        "how_to": "Talk to Quartermaster Nella, then use the menu to check Gear and Pack.",
     },
     "stand_your_ground": {
         "order": 3,
@@ -130,13 +149,13 @@ TUTORIAL_STEPS = {
         "order": 4,
         "title": "Clear The Pens",
         "summary": "Start a fight in the vermin pens, read the enemy line, use your class skill, and win cleanly.",
-        "how_to": "Click the Fight button to engage. In combat, use your class skill to satisfy Brask's test.",
+        "how_to": "Click the Fight button to engage. In combat, use your class skill once, then win the fight.",
     },
     "fit_your_clasp": {
         "order": 5,
         "title": "Fit Your Clasp",
         "summary": "You recovered a Wayfarer Clasp. Equip it, notice what changed, then check your bearings before you report.",
-        "how_to": "Open Gear, click your Clasp, and choose Equip. Check your Sheet to see your improved stats.",
+        "how_to": "Open Gear, choose the Wayfarer Clasp, and equip it. Check your Sheet to see what changed.",
     },
     "catch_your_breath": {
         "order": 6,
@@ -514,6 +533,35 @@ def get_tutorial_combat_focus(character, encounter):
     return prompts[:3]
 
 
+def get_tutorial_combat_intro_pages(character, encounter):
+    """Return one-time welcome-style pages for the first tutorial combat."""
+
+    if not getattr(getattr(character, "db", None), "brave_tutorial", None):
+        return []
+    state = _get_normalized_tutorial_state(character)
+    if state.get("status") != "active" or state.get("step") != "clear_the_pens" or not encounter:
+        return []
+    room_id = getattr(getattr(getattr(encounter, "obj", None), "db", None), "brave_room_id", None)
+    if room_id != TUTORIAL_VERMIN_ROOM_ID:
+        return []
+    flags = state.get("flags") or {}
+    if flags.get("used_class_ability") and flags.get("won_vermin_fight"):
+        return []
+    sessions = getattr(character, "sessions", None)
+    try:
+        has_sessions = bool(sessions and sessions.count() > 0)
+    except Exception:
+        has_sessions = False
+    if not has_sessions:
+        return []
+    db = getattr(character, "db", None)
+    if getattr(db, "brave_tutorial_combat_intro_shown", False):
+        return []
+    if db is not None:
+        db.brave_tutorial_combat_intro_shown = True
+    return TUTORIAL_COMBAT_INTRO_PAGES
+
+
 def _is_in_tutorial_combat(character):
     """Return whether combat-specific tutorial guidance should own the overlay."""
 
@@ -552,6 +600,44 @@ def _is_active_quest(character, quest_key):
     return (getattr(character.db, "brave_quests", None) or {}).get(quest_key, {}).get("status") == "active"
 
 
+def _tutorial_guidance_text(step_key, flags):
+    """Return the next concrete browser instruction for the active tutorial step."""
+
+    flags = flags or {}
+    if step_key == "first_steps":
+        if not flags.get("talked_tamsin"):
+            return "Click Sergeant Tamsin Vale's card in the Vicinity panel to receive your orders."
+        return "Go east to the Quartermaster Shed and talk to Quartermaster Nella."
+
+    if step_key == "pack_before_walk":
+        if not flags.get("talked_nella"):
+            return "Talk to Quartermaster Nella in the shed so she can start your kit check."
+        if not flags.get("viewed_gear"):
+            return "Open Gear from the menu and check what you are wearing."
+        if not flags.get("viewed_pack"):
+            return "Open Pack from the menu and check what you are carrying."
+        if not flags.get("read_supply_board"):
+            return "Read the supply board in the Quartermaster Shed."
+        return "Return west to Wayfarer's Yard so Tamsin can send you to Brask."
+
+    if step_key == "stand_your_ground":
+        return "Go west to the Sparring Ring and talk to Ringhand Brask."
+
+    if step_key == "clear_the_pens":
+        return "Enter the Vermin Pens, start a fight, use your class skill once, and win."
+
+    if step_key == "fit_your_clasp":
+        return "Open Gear, choose the Wayfarer Clasp, and equip it before you report."
+
+    if step_key == "catch_your_breath":
+        return "Rest in Wayfarer's Yard, then head south when you are recovered."
+
+    if step_key == "through_the_gate":
+        return "Head south to the Training Yard and talk to Captain Harl Rowan."
+
+    return TUTORIAL_STEPS.get(step_key, TUTORIAL_STEPS["first_steps"])["how_to"]
+
+
 def format_tutorial_block(character):
     """Return a tutorial journal block for the active onboarding flow."""
 
@@ -572,7 +658,7 @@ def format_tutorial_block(character):
             f"  [{'x' if flags.get('talked_tamsin') else ' '}] Consult with Sergeant Tamsin Vale."
         )
         lines.append(
-            f"  [{'x' if flags.get('visited_quartermaster_shed') else ' '}] Head east to Quartermaster Nella."
+            f"  [{'x' if flags.get('visited_quartermaster_shed') else ' '}] Head east to the Quartermaster Shed."
         )
     elif step_key == "pack_before_walk":
         lines.append(
@@ -606,7 +692,7 @@ def format_tutorial_block(character):
             f"  [{'x' if flags.get('received_wayfarer_clasp') else ' '}] Recover the Wayfarer Clasp."
         )
         lines.append(
-            f"  [{'x' if flags.get('equipped_wayfarer_clasp') else ' '}] Equip the clasp with gear equip trinket clasp."
+            f"  [{'x' if flags.get('equipped_wayfarer_clasp') else ' '}] Equip the Wayfarer Clasp from Gear."
         )
         lines.append(
             f"  [{'x' if flags.get('viewed_sheet') else ' '}] Optional: Open your sheet or stats."
@@ -626,10 +712,6 @@ def format_tutorial_block(character):
             f"  [{'x' if flags.get('talked_harl') else ' '}] Report to Captain Harl Rowan in the Training Yard."
         )
 
-    optional_done = flags.get("read_family_post_sign") or flags.get("talked_peep") or flags.get("visited_family_post")
-    lines.append(
-        f"  [{'x' if optional_done else ' '}] Optional: Visit Family Post to learn party basics."
-    )
     return "\n".join(lines)
 
 
@@ -650,7 +732,7 @@ def get_tutorial_objective_entries(character):
 
     if step_key == "first_steps":
         add("Consult with Sergeant Tamsin Vale.", "talked_tamsin")
-        add("Head east to Quartermaster Nella.", "visited_quartermaster_shed")
+        add("Head east to the Quartermaster Shed.", "visited_quartermaster_shed")
     elif step_key == "pack_before_walk":
         add("Let Quartermaster Nella check your kit.", "talked_nella")
         add("Check your gear.", "viewed_gear")
@@ -664,7 +746,7 @@ def get_tutorial_objective_entries(character):
         add("Win one fight in the Vermin Pens.", "won_vermin_fight")
     elif step_key == "fit_your_clasp":
         add("Recover the Wayfarer Clasp.", "received_wayfarer_clasp")
-        add("Equip the clasp with gear equip trinket clasp.", "equipped_wayfarer_clasp")
+        add("Equip the Wayfarer Clasp from Gear.", "equipped_wayfarer_clasp")
         add("Optional: Open your sheet or stats.", "viewed_sheet")
         add("Optional: Check the map.", "viewed_map")
         add("Optional: Open your journal.", "viewed_journal")
@@ -673,8 +755,6 @@ def get_tutorial_objective_entries(character):
     elif step_key == "through_the_gate":
         add("Report to Captain Harl Rowan in the Training Yard.", "talked_harl")
 
-    optional_done = flags.get("read_family_post_sign") or flags.get("talked_peep") or flags.get("visited_family_post")
-    add("Optional: Visit Family Post for party basics.", completed=optional_done)
     return {
         "title": step["title"],
         "summary": step["summary"],
@@ -739,11 +819,11 @@ def get_tutorial_focus(character, room):
 
     if step == "fit_your_clasp":
         if room_id == TUTORIAL_VERMIN_ROOM_ID:
-            return ["Use gear equip trinket clasp", "Then head north"]
+            return ["Equip the Wayfarer Clasp", "Then head north"]
         if room_id == "tutorial_sparring_ring":
-            return ["Use gear equip trinket clasp", "Head east to rest"]
+            return ["Equip the Wayfarer Clasp", "Head east to rest"]
         if room_id == TUTORIAL_START_ROOM_ID:
-            return ["Use gear equip trinket clasp", "Optional: map, sheet, quests"]
+            return ["Equip the Wayfarer Clasp", "Optional: map, sheet, quests"]
 
     if step == "through_the_gate":
         if room_id == TUTORIAL_TRAINING_ROOM_ID:
@@ -851,6 +931,7 @@ def get_tutorial_entity_response(character, entity, action, is_action=False):
 
 
 def _talk_tamsin(character, is_action=False):
+    had_talked_tamsin = _get_normalized_tutorial_state(character)["flags"].get("talked_tamsin")
     if is_action:
         _set_flag(character, "talked_tamsin")
 
@@ -858,10 +939,10 @@ def _talk_tamsin(character, is_action=False):
     flags = state["flags"]
     step = state.get("step")
 
-    if step == "first_steps" and not flags.get("visited_quartermaster_shed"):
+    if step == "first_steps" and not flags.get("visited_quartermaster_shed") and not had_talked_tamsin:
         return (
             "\"Hear that bell? South road lantern went black before dawn, and the gate crew just dragged in a cart full of cut harness and clawed mud. "
-            "You can help, but first I need you steady and equipped. Head east to Nella in the shed. She checks every road kit before anyone gets pointed at real trouble.\""
+            "You can help, but first I need you steady and equipped. Head east to Nella in the shed. East to the shed; she checks every road kit before anyone gets pointed at real trouble.\""
         )
 
     if step == "first_steps" and not flags.get("visited_quartermaster_shed"):
@@ -988,17 +1069,7 @@ def get_tutorial_mechanical_guidance(character):
     step = TUTORIAL_STEPS[step_key]
     flags = state["flags"]
 
-    guidance = []
-
-    # 1. Primary mechanical instruction for the current step
-    guidance.append((f"GUIDE: {step['how_to']}", "help_outline"))
-
-    # 2. Contextual tips based on missing knowledge
-    if not flags.get("visited_family_post") and not flags.get("talked_peep"):
-        guidance.append(("Traveling with family? Click Family Post west of the yard to learn about Parties.", "groups"))
-
-    if step_key == "clear_the_pens":
-        guidance.append(("Need an edge? Use the Emote button to express your character's resolve.", "sentiment_satisfied"))
+    guidance = [(f"{_tutorial_guidance_text(step_key, flags)}", "help_outline")]
 
     return {
         "title": step["title"],

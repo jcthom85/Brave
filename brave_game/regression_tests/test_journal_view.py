@@ -13,8 +13,11 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
 chargen_stub = types.ModuleType("world.chargen")
+chargen_stub.clear_chargen_state = lambda *args, **kwargs: None
+chargen_stub.get_chargen_state = lambda *args, **kwargs: {}
 chargen_stub.get_next_chargen_step = lambda *args, **kwargs: None
 chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
+chargen_stub.start_brave_chargen = lambda *args, **kwargs: None
 sys.modules.setdefault("world.chargen", chargen_stub)
 
 from world.browser_views import build_quests_view
@@ -129,7 +132,7 @@ class JournalViewTests(unittest.TestCase):
         self.assertEqual([], view.get("actions", []))
         self.assertEqual(["Active", "Completed"], [item.get("label") for item in view.get("sections", [])[0].get("items", [])])
         labels = [section.get("label") for section in view.get("sections", [])]
-        self.assertEqual(["", "Brambleford", "Junk-Yard Planet"], labels)
+        self.assertEqual(["", "Brambleford", "Drowned Weir"], labels)
         self.assertEqual("entries", view.get("sections", [])[1].get("kind"))
 
     def test_journal_view_keeps_empty_states(self):

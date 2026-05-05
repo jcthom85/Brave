@@ -194,6 +194,7 @@ class CombatViewTests(unittest.TestCase):
         )
         self.assertEqual("use Smite = e1", smite_item.get("command"))
         self.assertEqual([], view.get("chips", []))
+        self.assertEqual([], view.get("welcome_pages", []))
         self.assertEqual("2 Allies • 1 Foe", view.get("subtitle", ""))
         self.assertEqual(["Abilities", "Items", "Flee"], [action.get("label") for action in view.get("actions", [])])
         self.assertIsNot(_action(view, "Flee").get("icon_only"), True)

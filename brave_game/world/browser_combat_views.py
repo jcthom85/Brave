@@ -539,12 +539,14 @@ def build_combat_view(encounter, character):
     tutorial_guidance = []
     guidance_eyebrow = None
     guidance_title = None
+    welcome_pages = []
     try:
-        from world.tutorial import get_tutorial_combat_focus
+        from world.tutorial import get_tutorial_combat_focus, get_tutorial_combat_intro_pages
     except Exception:
         tutorial_focus = []
     else:
         tutorial_focus = get_tutorial_combat_focus(character, encounter)
+        welcome_pages = get_tutorial_combat_intro_pages(character, encounter)
     if tutorial_focus:
         guidance_eyebrow = "Combat Tutorial"
         guidance_title = "Training Focus"
@@ -583,11 +585,13 @@ def build_combat_view(encounter, character):
                 _section("Enemies", "warning", "entries", items=enemy_entries or [_entry("No enemies remain.", icon="task_alt")], variant="targets"),
             ],
             reactive=_reactive_view(encounter.obj, scene="combat", danger="combat", boss=has_boss_enemy),
+            welcome_pages=welcome_pages,
         ),
         "variant": "combat",
         "guidance": tutorial_guidance,
         "guidance_eyebrow": guidance_eyebrow,
         "guidance_title": guidance_title,
+        "welcome_pages": welcome_pages,
         "combat_actions": combat_actions,
         "reaction_window": reaction_window,
         "party_count": party_count,

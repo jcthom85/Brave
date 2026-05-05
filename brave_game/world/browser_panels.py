@@ -821,7 +821,7 @@ def build_forge_panel(character):
 
 
 def build_portals_panel():
-    """Build the browser-side companion panel for the current portal list."""
+    """Build the browser-side companion panel for generic route-gate content."""
 
     chips = [_chip(f"{len(PORTALS)} gates", "travel_explore", "accent")]
     items = []
@@ -834,8 +834,8 @@ def build_portals_panel():
         )
 
     return _make_panel(
-        "Portal Network",
-        "Nexus Gates",
+        "Route Network",
+        "Route Gates",
         eyebrow_icon="travel_explore",
         title_icon="public",
         chips=chips,

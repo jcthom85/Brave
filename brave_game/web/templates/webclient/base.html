@@ -13,6 +13,34 @@
     <link rel='stylesheet' type="text/css" media="screen" href={% static "webclient/css/custom.css" %}>
     <link rel="icon" type="image/x-icon" href="/static/website/images/evennia_logo.png" />
 
+    <style>
+      /* Brave: Global Scrollbar Nuke (Allowing Scroll) */
+      * {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      *::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+      }
+      html, body {
+        overflow: hidden !important;
+        height: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        position: fixed !important;
+        inset: 0 !important;
+      }
+      #clientwrapper, #main, .split, .content, #messagewindow {
+        height: 100% !important;
+        width: 100% !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+      }
+    </style>
+
     {% block jquery_import %}
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f" crossorigin="anonymous"></script>
     {% endblock %}
@@ -64,7 +92,7 @@
     <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-dark-theme.css" />
     <link type="text/css" rel="stylesheet" href={% static "webclient/css/goldenlayout.css" %} />
 
-    {% with brave_static_v="20260501a" %}
+    {% with brave_static_v="20260504frontdoorlink2" %}
     {% block guilib_import %}
         <script>
         window.BRAVE_AUDIO_MANIFEST_URL = "{% static 'webclient/audio/manifest.json' %}?v={{ brave_static_v }}";

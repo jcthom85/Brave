@@ -136,6 +136,17 @@ def _release_existing_puppets_for_play(account, session, character):
         account.unpuppet_all()
 
 
+def _refresh_web_session_after_play(session, character):
+    """Push the selected character's room view after web puppeting completes."""
+
+    if not _is_web_session(session) or not character:
+        return
+    # This was originally calling location.return_appearance, but at_post_puppet
+    # now handles this itself. We keep the helper to ensure any session-level
+    # webclient synchronization can happen here if needed in the future.
+    pass
+
+
 class CmdBraveOOCLook(default_account.CmdOOCLook):
     """
     Show the Brave title screen.
@@ -173,6 +184,7 @@ class CmdBravePlay(default_account.CmdIC):
         _release_existing_puppets_for_play(account, self.session, character)
         self.args = character.key
         super().func()
+        _refresh_web_session_after_play(self.session, character)
 
 
 class CmdBraveLogout(COMMAND_DEFAULT_CLASS):

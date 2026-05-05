@@ -1,21 +1,4 @@
 {
-  "boss_gates": {
-    "ruk_fence_cutter": {
-      "key": "ruk_fence_cutter",
-      "name": "Ruk the Fence-Cutter",
-      "summary": "A hard encounter guards the road beyond Fencebreaker Camp.",
-      "trigger_room_id": "goblin_road_fencebreaker_camp",
-      "encounter_key": "ruks_stand",
-      "boss_enemy_key": "ruk_fence_cutter",
-      "entry_room_id": "goblin_road_fencebreaker_camp",
-      "success_room_id": "goblin_warrens_sinkmouth_cut",
-      "failure_room_id": "goblin_road_fencebreaker_camp",
-      "max_participants": 4,
-      "allow_non_party_helpers": true,
-      "requires_personal_clear": true,
-      "instance_desc": "Ruk's stand tightens into a ring of chopped rails, mud, and lantern-glass grit. The road waits on the other side of him."
-    }
-  },
   "activities": {
     "cooking_recipes": {
       "crisped_perch_plate": {
@@ -26,35 +9,6 @@
         "result": "crisped_perch_plate",
         "summary": "A simple, filling plate that makes long walks and harder swings feel easier."
       },
-      "innkeepers_fishpie": {
-        "ingredients": {
-          "lantern_carp": 1,
-          "mudsnout_catfish": 1
-        },
-        "name": "Innkeeper's Fish Pie",
-        "result": "innkeepers_fishpie",
-        "summary": "A sturdy inn pie that leaves you feeling well-patched and harder to rattle."
-      },
-      "riverlight_chowder": {
-        "ingredients": {
-          "lantern_carp": 1,
-          "silver_eel": 1
-        },
-        "name": "Riverlight Chowder",
-        "result": "riverlight_chowder",
-        "summary": "A rich chowder that steadies the nerves and wakes up the mind."
-      },
-      "moonleaf_eel_skillet": {
-        "ingredients": {
-          "silver_eel": 1,
-          "moonleaf_sprig": 1
-        },
-        "name": "Moonleaf Eel Skillet",
-        "result": "moonleaf_eel_skillet",
-        "summary": "A rich skillet supper that sharpens the head and leaves a cool herbal finish.",
-        "unlock_type": "manual",
-        "unlock_text": "You need the right kitchen note before you can turn eel and moonleaf into something worth serving."
-      },
       "dawnscale_supper": {
         "ingredients": {
           "dawnscale_trout": 1,
@@ -63,8 +17,8 @@
         "name": "Dawnscale Supper",
         "result": "dawnscale_supper",
         "summary": "A careful rare-fish supper that rewards quick hands and cleaner finishing work.",
-        "unlock_type": "manual",
-        "unlock_text": "You need a proper supper note before trying to do anything this ambitious with dawnscale trout."
+        "unlock_text": "You need a proper supper note before trying to do anything this ambitious with dawnscale trout.",
+        "unlock_type": "manual"
       },
       "hedgeroot_hash": {
         "ingredients": {
@@ -75,14 +29,36 @@
         "result": "hedgeroot_hash",
         "summary": "A hot skillet hash of chopped roots and hedge mushroom that sits well and keeps the legs honest."
       },
-      "wharfside_skewers": {
+      "innkeepers_fishpie": {
         "ingredients": {
-          "bramble_perch": 1,
+          "lantern_carp": 1,
           "mudsnout_catfish": 1
         },
-        "name": "Wharfside Skewers",
-        "result": "wharfside_skewers",
-        "summary": "Smoky skewers that reward quick hands and lighter feet."
+        "name": "Innkeeper's Fish Pie",
+        "result": "innkeepers_fishpie",
+        "summary": "A sturdy inn pie that leaves you feeling well-patched and harder to rattle."
+      },
+      "lockfin_skillet": {
+        "ingredients": {
+          "lockfin_pike": 1,
+          "marsh_root": 1
+        },
+        "name": "Lockfin Skillet",
+        "result": "lockfin_skillet",
+        "summary": "A hard-seared pike skillet with marsh root and black pepper that eats like cold water and holds like iron.",
+        "unlock_text": "You need a drowned-weir kitchen note before turning lock water pike into something worth serving.",
+        "unlock_type": "manual"
+      },
+      "moonleaf_eel_skillet": {
+        "ingredients": {
+          "moonleaf_sprig": 1,
+          "silver_eel": 1
+        },
+        "name": "Moonleaf Eel Skillet",
+        "result": "moonleaf_eel_skillet",
+        "summary": "A rich skillet supper that sharpens the head and leaves a cool herbal finish.",
+        "unlock_text": "You need the right kitchen note before you can turn eel and moonleaf into something worth serving.",
+        "unlock_type": "manual"
       },
       "moonleaf_root_broth": {
         "ingredients": {
@@ -93,16 +69,23 @@
         "result": "moonleaf_root_broth",
         "summary": "A clear herb broth brewed from marsh root and moonleaf to steady the nerves and put warmth back in the hands."
       },
-      "lockfin_skillet": {
+      "riverlight_chowder": {
         "ingredients": {
-          "lockfin_pike": 1,
-          "marsh_root": 1
+          "lantern_carp": 1,
+          "silver_eel": 1
         },
-        "name": "Lockfin Skillet",
-        "result": "lockfin_skillet",
-        "summary": "A hard-seared pike skillet with marsh root and black pepper that eats like cold water and holds like iron.",
-        "unlock_type": "manual",
-        "unlock_text": "You need a drowned-weir kitchen note before turning lock water pike into something worth serving."
+        "name": "Riverlight Chowder",
+        "result": "riverlight_chowder",
+        "summary": "A rich chowder that steadies the nerves and wakes up the mind."
+      },
+      "wharfside_skewers": {
+        "ingredients": {
+          "bramble_perch": 1,
+          "mudsnout_catfish": 1
+        },
+        "name": "Wharfside Skewers",
+        "result": "wharfside_skewers",
+        "summary": "Smoky skewers that reward quick hands and lighter feet."
       }
     },
     "cozy_bonus": {
@@ -110,13 +93,124 @@
       "max_mana": 6,
       "max_stamina": 6
     },
-    "fishing_rods": {
-      "loaner_pole": {
-        "name": "Loaner Pole",
-        "power": 1,
-        "stability": 0.6,
-        "summary": "A town-owned pole with more repairs than pride, but enough patience for the Bramble River."
+    "fish_behaviors": {
+      "bottom_heave": {
+        "base_pull": 0.42,
+        "burst_pull": 0.12,
+        "pattern": "drag",
+        "stamina": 14
       },
+      "darting_runs": {
+        "base_pull": 0.38,
+        "burst_pull": 0.34,
+        "pattern": "dart",
+        "stamina": 15
+      },
+      "dead_weight": {
+        "base_pull": 0.18,
+        "burst_pull": 0,
+        "pattern": "drag",
+        "stamina": 7
+      },
+      "erratic_slither": {
+        "base_pull": 0.42,
+        "burst_pull": 0.42,
+        "pattern": "dart",
+        "stamina": 16
+      },
+      "gentle_wobble": {
+        "base_pull": 0.24,
+        "burst_pull": 0.04,
+        "pattern": "sine",
+        "stamina": 9
+      },
+      "panic_burst": {
+        "base_pull": 0.44,
+        "burst_pull": 0.48,
+        "pattern": "burst",
+        "stamina": 17
+      },
+      "quick_slither": {
+        "base_pull": 0.36,
+        "burst_pull": 0.18,
+        "pattern": "sine",
+        "stamina": 12
+      },
+      "snag_drag": {
+        "base_pull": 0.28,
+        "burst_pull": 0.22,
+        "pattern": "snag",
+        "stamina": 10
+      },
+      "steady_drag": {
+        "base_pull": 0.32,
+        "burst_pull": 0.08,
+        "pattern": "linear",
+        "stamina": 11
+      }
+    },
+    "fishing_lures": {
+      "feather_jig": {
+        "attracts": [
+          "silver_eel",
+          "dawnscale_trout"
+        ],
+        "name": "Feather Jig",
+        "rarity_bonus": 1,
+        "summary": "A bright-feathered lure that coaxes quicker, cleaner strikes from the better fish.",
+        "unlock_completed_quests": [
+          "lights_in_the_reeds"
+        ],
+        "unlock_text": "Work far enough into Blackfen before the good feather work starts circulating your way.",
+        "zone_bonus": {
+          "brambleford_hobbyists_wharf": 2
+        }
+      },
+      "glass_spinner": {
+        "attracts": [
+          "lockfin_pike",
+          "weirglass_eel",
+          "hollow_glass_shard"
+        ],
+        "name": "Glass Spinner",
+        "rarity_bonus": 2,
+        "summary": "A pale spinning lure that flashes like bad lampglass and tempts anything in the drowned line still making poor choices around light.",
+        "unlock_completed_quests": [
+          "the_south_light"
+        ],
+        "unlock_text": "Only anglers who've worked the drowned line get trusted with lampglass tackle.",
+        "zone_bonus": {
+          "drowned_weir_drowned_causeway": 3
+        }
+      },
+      "plain_hook": {
+        "attracts": [
+          "bramble_perch",
+          "lantern_carp"
+        ],
+        "name": "Plain Hook",
+        "rarity_bonus": 0,
+        "summary": "A simple baited hook that draws the wharf's ordinary river fish."
+      },
+      "sinker_chain": {
+        "attracts": [
+          "mudsnout_catfish",
+          "lantern_carp"
+        ],
+        "name": "Sinker Chain",
+        "rarity_bonus": 1,
+        "summary": "A mean little weighted rig that keeps bait lower and drags stubborn bottom-feeders into bad decisions.",
+        "unlock_completed_quests": [
+          "miretooths_claim"
+        ],
+        "unlock_text": "Bring back a real Blackfen kill before anyone gives you the heavier chain rigs.",
+        "zone_bonus": {
+          "blackfen_approach_reedflats": 2,
+          "brambleford_hobbyists_wharf": 1
+        }
+      }
+    },
+    "fishing_rods": {
       "ashwood_rod": {
         "name": "Ashwood Rod",
         "power": 2,
@@ -126,6 +220,12 @@
           "rats_in_the_kettle"
         ],
         "unlock_text": "Earn Brambleford's trust past the inn cellar before anyone hands you a better rod."
+      },
+      "loaner_pole": {
+        "name": "Loaner Pole",
+        "power": 1,
+        "stability": 0.6,
+        "summary": "A town-owned pole with more repairs than pride, but enough patience for the Bramble River."
       },
       "riversteel_rod": {
         "name": "Riversteel Rod",
@@ -138,198 +238,7 @@
         "unlock_text": "Prove yourself against ridge trouble before anyone trusts you with riversteel."
       }
     },
-    "fishing_lures": {
-      "plain_hook": {
-        "name": "Plain Hook",
-        "rarity_bonus": 0,
-        "attracts": [
-          "bramble_perch",
-          "lantern_carp"
-        ],
-        "summary": "A simple baited hook that draws the wharf's ordinary river fish."
-      },
-      "feather_jig": {
-        "name": "Feather Jig",
-        "rarity_bonus": 1,
-        "attracts": [
-          "silver_eel",
-          "dawnscale_trout"
-        ],
-        "summary": "A bright-feathered lure that coaxes quicker, cleaner strikes from the better fish.",
-        "zone_bonus": {
-          "brambleford_hobbyists_wharf": 2
-        },
-        "unlock_completed_quests": [
-          "lights_in_the_reeds"
-        ],
-        "unlock_text": "Work far enough into Blackfen before the good feather work starts circulating your way."
-      },
-      "sinker_chain": {
-        "name": "Sinker Chain",
-        "rarity_bonus": 1,
-        "attracts": [
-          "mudsnout_catfish",
-          "lantern_carp"
-        ],
-        "summary": "A mean little weighted rig that keeps bait lower and drags stubborn bottom-feeders into bad decisions.",
-        "zone_bonus": {
-          "blackfen_approach_reedflats": 2,
-          "brambleford_hobbyists_wharf": 1
-        },
-        "unlock_completed_quests": [
-          "miretooths_claim"
-        ],
-        "unlock_text": "Bring back a real Blackfen kill before anyone gives you the heavier chain rigs."
-      },
-      "glass_spinner": {
-        "name": "Glass Spinner",
-        "rarity_bonus": 2,
-        "attracts": [
-          "lockfin_pike",
-          "weirglass_eel",
-          "hollow_glass_shard"
-        ],
-        "summary": "A pale spinning lure that flashes like bad lampglass and tempts anything in the drowned line still making poor choices around light.",
-        "zone_bonus": {
-          "drowned_weir_drowned_causeway": 3
-        },
-        "unlock_completed_quests": [
-          "the_south_light"
-        ],
-        "unlock_text": "Only anglers who've worked the drowned line get trusted with lampglass tackle."
-      }
-    },
-    "fish_behaviors": {
-      "gentle_wobble": {
-        "pattern": "sine",
-        "base_pull": 0.24,
-        "burst_pull": 0.04,
-        "stamina": 9
-      },
-      "steady_drag": {
-        "pattern": "linear",
-        "base_pull": 0.32,
-        "burst_pull": 0.08,
-        "stamina": 11
-      },
-      "bottom_heave": {
-        "pattern": "drag",
-        "base_pull": 0.42,
-        "burst_pull": 0.12,
-        "stamina": 14
-      },
-      "quick_slither": {
-        "pattern": "sine",
-        "base_pull": 0.36,
-        "burst_pull": 0.18,
-        "stamina": 12
-      },
-      "darting_runs": {
-        "pattern": "dart",
-        "base_pull": 0.38,
-        "burst_pull": 0.34,
-        "stamina": 15
-      },
-      "panic_burst": {
-        "pattern": "burst",
-        "base_pull": 0.44,
-        "burst_pull": 0.48,
-        "stamina": 17
-      },
-      "erratic_slither": {
-        "pattern": "dart",
-        "base_pull": 0.42,
-        "burst_pull": 0.42,
-        "stamina": 16
-      },
-      "snag_drag": {
-        "pattern": "snag",
-        "base_pull": 0.28,
-        "burst_pull": 0.22,
-        "stamina": 10
-      },
-      "dead_weight": {
-        "pattern": "drag",
-        "base_pull": 0.18,
-        "burst_pull": 0,
-        "stamina": 7
-      }
-    },
     "fishing_spots": {
-      "brambleford_hobbyists_wharf": {
-        "bite_delay": [
-          3,
-          6
-        ],
-        "cast_text": "You cast a line into the Bramble River and settle in to watch the surface.",
-        "fish": [
-          {
-            "chance": 38,
-            "behavior_id": "gentle_wobble",
-            "hook_chance": 0.9,
-            "item": "bramble_perch",
-            "rarity": "common",
-            "weight": [
-              1.1,
-              3.6
-            ]
-          },
-          {
-            "chance": 26,
-            "behavior_id": "steady_drag",
-            "hook_chance": 0.82,
-            "item": "lantern_carp",
-            "rarity": "common",
-            "weight": [
-              2.5,
-              6.8
-            ]
-          },
-          {
-            "chance": 18,
-            "behavior_id": "bottom_heave",
-            "hook_chance": 0.78,
-            "item": "mudsnout_catfish",
-            "rarity": "uncommon",
-            "weight": [
-              3.2,
-              8.4
-            ]
-          },
-          {
-            "chance": 12,
-            "behavior_id": "quick_slither",
-            "hook_chance": 0.7,
-            "item": "silver_eel",
-            "rarity": "rare",
-            "weight": [
-              1.8,
-              5.2
-            ]
-          },
-          {
-            "chance": 6,
-            "behavior_id": "darting_runs",
-            "hook_chance": 0.6,
-            "item": "dawnscale_trout",
-            "rarity": "rare",
-            "weight": [
-              4.4,
-              9.8
-            ]
-          }
-        ],
-        "name": "Hobbyist's Wharf",
-        "recommended_lures": [
-          "plain_hook",
-          "feather_jig"
-        ],
-        "recommended_rods": [
-          "loaner_pole",
-          "ashwood_rod"
-        ],
-        "reaction_window": 6
-      },
       "blackfen_approach_reedflats": {
         "bite_delay": [
           4,
@@ -338,8 +247,8 @@
         "cast_text": "You pitch a line into the dark reed channels and watch the water knot around the stems.",
         "fish": [
           {
-            "chance": 28,
             "behavior_id": "bottom_heave",
+            "chance": 28,
             "hook_chance": 0.86,
             "item": "mudsnout_catfish",
             "rarity": "common",
@@ -349,8 +258,8 @@
             ]
           },
           {
-            "chance": 22,
             "behavior_id": "quick_slither",
+            "chance": 22,
             "hook_chance": 0.8,
             "item": "silver_eel",
             "rarity": "uncommon",
@@ -360,8 +269,8 @@
             ]
           },
           {
-            "chance": 16,
             "behavior_id": "dead_weight",
+            "chance": 16,
             "hook_chance": 0.78,
             "item": "fen_resin_clot",
             "rarity": "uncommon",
@@ -371,8 +280,8 @@
             ]
           },
           {
-            "chance": 14,
             "behavior_id": "snag_drag",
+            "chance": 14,
             "hook_chance": 0.76,
             "item": "moonleaf_sprig",
             "rarity": "uncommon",
@@ -382,8 +291,8 @@
             ]
           },
           {
-            "chance": 10,
             "behavior_id": "dead_weight",
+            "chance": 10,
             "hook_chance": 0.64,
             "item": "grease_stained_supper_note",
             "rarity": "rare",
@@ -393,8 +302,8 @@
             ]
           },
           {
-            "chance": 6,
             "behavior_id": "dead_weight",
+            "chance": 6,
             "hook_chance": 0.58,
             "item": "veskas_pitchfire_pattern",
             "rarity": "rare",
@@ -404,8 +313,8 @@
             ]
           },
           {
-            "chance": 4,
             "behavior_id": "dead_weight",
+            "chance": 4,
             "hook_chance": 0.52,
             "item": "purity_salts_formula",
             "rarity": "rare",
@@ -416,6 +325,7 @@
           }
         ],
         "name": "Reedflats",
+        "reaction_window": 5,
         "recommended_lures": [
           "sinker_chain",
           "feather_jig"
@@ -423,8 +333,81 @@
         "recommended_rods": [
           "ashwood_rod",
           "riversteel_rod"
+        ]
+      },
+      "brambleford_hobbyists_wharf": {
+        "bite_delay": [
+          3,
+          6
         ],
-        "reaction_window": 5
+        "cast_text": "You cast a line into the Bramble River and settle in to watch the surface.",
+        "fish": [
+          {
+            "behavior_id": "gentle_wobble",
+            "chance": 38,
+            "hook_chance": 0.9,
+            "item": "bramble_perch",
+            "rarity": "common",
+            "weight": [
+              1.1,
+              3.6
+            ]
+          },
+          {
+            "behavior_id": "steady_drag",
+            "chance": 26,
+            "hook_chance": 0.82,
+            "item": "lantern_carp",
+            "rarity": "common",
+            "weight": [
+              2.5,
+              6.8
+            ]
+          },
+          {
+            "behavior_id": "bottom_heave",
+            "chance": 18,
+            "hook_chance": 0.78,
+            "item": "mudsnout_catfish",
+            "rarity": "uncommon",
+            "weight": [
+              3.2,
+              8.4
+            ]
+          },
+          {
+            "behavior_id": "quick_slither",
+            "chance": 12,
+            "hook_chance": 0.7,
+            "item": "silver_eel",
+            "rarity": "rare",
+            "weight": [
+              1.8,
+              5.2
+            ]
+          },
+          {
+            "behavior_id": "darting_runs",
+            "chance": 6,
+            "hook_chance": 0.6,
+            "item": "dawnscale_trout",
+            "rarity": "rare",
+            "weight": [
+              4.4,
+              9.8
+            ]
+          }
+        ],
+        "name": "Hobbyist's Wharf",
+        "reaction_window": 6,
+        "recommended_lures": [
+          "plain_hook",
+          "feather_jig"
+        ],
+        "recommended_rods": [
+          "loaner_pole",
+          "ashwood_rod"
+        ]
       },
       "drowned_weir_drowned_causeway": {
         "bite_delay": [
@@ -434,8 +417,8 @@
         "cast_text": "You cast into the black channel beside the drowned stones and watch dead lampglow crawl across the line.",
         "fish": [
           {
-            "chance": 30,
             "behavior_id": "panic_burst",
+            "chance": 30,
             "hook_chance": 0.82,
             "item": "lockfin_pike",
             "rarity": "common",
@@ -445,8 +428,8 @@
             ]
           },
           {
-            "chance": 20,
             "behavior_id": "erratic_slither",
+            "chance": 20,
             "hook_chance": 0.72,
             "item": "weirglass_eel",
             "rarity": "uncommon",
@@ -456,8 +439,8 @@
             ]
           },
           {
-            "chance": 18,
             "behavior_id": "snag_drag",
+            "chance": 18,
             "hook_chance": 0.76,
             "item": "silt_hook",
             "rarity": "uncommon",
@@ -467,8 +450,8 @@
             ]
           },
           {
-            "chance": 14,
             "behavior_id": "dead_weight",
+            "chance": 14,
             "hook_chance": 0.7,
             "item": "ward_iron_rivet",
             "rarity": "uncommon",
@@ -478,8 +461,8 @@
             ]
           },
           {
-            "chance": 10,
             "behavior_id": "snag_drag",
+            "chance": 10,
             "hook_chance": 0.62,
             "item": "hollow_glass_shard",
             "rarity": "rare",
@@ -489,8 +472,8 @@
             ]
           },
           {
-            "chance": 8,
             "behavior_id": "dead_weight",
+            "chance": 8,
             "hook_chance": 0.56,
             "item": "dawnscale_supper_note",
             "rarity": "rare",
@@ -501,6 +484,7 @@
           }
         ],
         "name": "Drowned Causeway",
+        "reaction_window": 4,
         "recommended_lures": [
           "glass_spinner",
           "sinker_chain"
@@ -508,11 +492,24 @@
         "recommended_rods": [
           "ashwood_rod",
           "riversteel_rod"
-        ],
-        "reaction_window": 4
+        ]
       }
     },
     "tinkering_recipes": {
+      "fenlight_talisman_setting": {
+        "base": "hollow_glass_shard",
+        "components": {
+          "ward_iron_rivet": 1
+        },
+        "name": "Fenlight Talisman Setting",
+        "result": "fenlight_talisman",
+        "silver_cost": 7,
+        "station": "brambleford_menders_shed",
+        "success_text": "You seat the drowned glass in a bright iron cage, bind it clean, and finish a |wFenlight Talisman|n.",
+        "summary": "A finer bench charm built from weir salvage and steadied into something the marsh can no longer bully.",
+        "unlock_text": "You need a proper talisman setting pattern before risking drowned glass in a piece meant to survive the road.",
+        "unlock_type": "manual"
+      },
       "field_bandage_roll": {
         "base": "silk_bundle",
         "components": {
@@ -526,17 +523,31 @@
         "success_text": "You cut the silk down, bind in the herb packet, and finish |wField Bandage|n x2.",
         "summary": "Turns silk and herbs into dependable wound wraps for the road."
       },
-      "ward_dust_packet": {
-        "base": "grave_dust",
+      "focus_tonic_vial": {
+        "base": "fen_resin_clot",
+        "components": {
+          "moonleaf_sprig": 1
+        },
+        "name": "Focus Tonic Vial",
+        "result": "focus_tonic",
+        "silver_cost": 3,
+        "station": "brambleford_menders_shed",
+        "success_text": "You thin the resin, steep the herb sharp, and cork a bitter |wFocus Tonic|n.",
+        "summary": "A hard little bench tonic that clears the head and steadies the hands."
+      },
+      "latchwire_ward_bundle": {
+        "base": "bent_fence_nails",
         "components": {
           "road_charm": 1
         },
-        "name": "Ward Dust Packet",
-        "result": "ward_dust",
+        "name": "Latchwire Ward Bundle",
+        "result": "latchwire_ward",
         "silver_cost": 3,
         "station": "brambleford_menders_shed",
-        "success_text": "You grind the dust finer, bind it in charm-thread, and finish a |wWard Dust|n packet.",
-        "summary": "A quick frontier ward packet meant to blunt the next ugly hit."
+        "success_text": "You bind the nails in ward-thread, hitch the charm knot tight, and finish a |wLatchwire Ward|n bundle.",
+        "summary": "A quick roadward kit that throws a rough guard across the next ally likely to eat the hit.",
+        "unlock_text": "You need Veska's latchwire notes before you can rig a guard bundle that won't come apart in the hand.",
+        "unlock_type": "manual"
       },
       "pitchfire_flask": {
         "base": "sludge_resin",
@@ -549,20 +560,22 @@
         "station": "brambleford_menders_shed",
         "success_text": "You bottle the resin, temper it with spiteful salts, and cork a |wFire Flask|n.",
         "summary": "Bench-brewed fire for when the problem needs flames more than discussion.",
-        "unlock_type": "manual",
-        "unlock_text": "You need Veska's pitchfire pattern before you can bottle something this irresponsible on purpose."
+        "unlock_text": "You need Veska's pitchfire pattern before you can bottle something this irresponsible on purpose.",
+        "unlock_type": "manual"
       },
-      "focus_tonic_vial": {
-        "base": "fen_resin_clot",
+      "purity_salts_satchel": {
+        "base": "grave_dust",
         "components": {
           "moonleaf_sprig": 1
         },
-        "name": "Focus Tonic Vial",
-        "result": "focus_tonic",
-        "silver_cost": 3,
+        "name": "Purity Salts Satchel",
+        "result": "purity_salts",
+        "silver_cost": 2,
         "station": "brambleford_menders_shed",
-        "success_text": "You thin the resin, steep the herb sharp, and cork a bitter |wFocus Tonic|n.",
-        "summary": "A hard little bench tonic that clears the head and steadies the hands."
+        "success_text": "You dry the mix hard, bind it in paper, and finish a biting packet of |wPurity Salts|n.",
+        "summary": "A harsh field-cleanse mix for poison, swamp filth, and other things that deserve an insult on the way out.",
+        "unlock_text": "You need a proper formula before you can mix cleansing salts that won't do more harm than good.",
+        "unlock_type": "manual"
       },
       "stitchleaf_salve_jar": {
         "base": "fen_resin_clot",
@@ -576,48 +589,35 @@
         "success_text": "You warm the resin, work the mushroom down to paste, and seal a jar of |wStitchleaf Salve|n.",
         "summary": "A resin-heavy field salve that closes the gap between a bandage and an actual night's rest."
       },
-      "purity_salts_satchel": {
+      "ward_dust_packet": {
         "base": "grave_dust",
-        "components": {
-          "moonleaf_sprig": 1
-        },
-        "name": "Purity Salts Satchel",
-        "result": "purity_salts",
-        "silver_cost": 2,
-        "station": "brambleford_menders_shed",
-        "success_text": "You dry the mix hard, bind it in paper, and finish a biting packet of |wPurity Salts|n.",
-        "summary": "A harsh field-cleanse mix for poison, swamp filth, and other things that deserve an insult on the way out.",
-        "unlock_type": "manual",
-        "unlock_text": "You need a proper formula before you can mix cleansing salts that won't do more harm than good."
-      },
-      "latchwire_ward_bundle": {
-        "base": "bent_fence_nails",
         "components": {
           "road_charm": 1
         },
-        "name": "Latchwire Ward Bundle",
-        "result": "latchwire_ward",
+        "name": "Ward Dust Packet",
+        "result": "ward_dust",
         "silver_cost": 3,
         "station": "brambleford_menders_shed",
-        "success_text": "You bind the nails in ward-thread, hitch the charm knot tight, and finish a |wLatchwire Ward|n bundle.",
-        "summary": "A quick roadward kit that throws a rough guard across the next ally likely to eat the hit.",
-        "unlock_type": "manual",
-        "unlock_text": "You need Veska's latchwire notes before you can rig a guard bundle that won't come apart in the hand."
-      },
-      "fenlight_talisman_setting": {
-        "base": "hollow_glass_shard",
-        "components": {
-          "ward_iron_rivet": 1
-        },
-        "name": "Fenlight Talisman Setting",
-        "result": "fenlight_talisman",
-        "silver_cost": 7,
-        "station": "brambleford_menders_shed",
-        "success_text": "You seat the drowned glass in a bright iron cage, bind it clean, and finish a |wFenlight Talisman|n.",
-        "summary": "A finer bench charm built from weir salvage and steadied into something the marsh can no longer bully.",
-        "unlock_type": "manual",
-        "unlock_text": "You need a proper talisman setting pattern before risking drowned glass in a piece meant to survive the road."
+        "success_text": "You grind the dust finer, bind it in charm-thread, and finish a |wWard Dust|n packet.",
+        "summary": "A quick frontier ward packet meant to blunt the next ugly hit."
       }
+    }
+  },
+  "boss_gates": {
+    "ruk_fence_cutter": {
+      "allow_non_party_helpers": true,
+      "boss_enemy_key": "ruk_fence_cutter",
+      "encounter_key": "ruks_stand",
+      "entry_room_id": "goblin_road_fencebreaker_camp",
+      "failure_room_id": "goblin_road_fencebreaker_camp",
+      "instance_desc": "Ruk's stand tightens into a ring of chopped rails, mud, and lantern-glass grit. The road waits on the other side of him.",
+      "key": "ruk_fence_cutter",
+      "max_participants": 4,
+      "name": "Ruk the Fence-Cutter",
+      "requires_personal_clear": true,
+      "success_room_id": "goblin_warrens_sinkmouth_cut",
+      "summary": "A hard encounter guards the road beyond Fencebreaker Camp.",
+      "trigger_room_id": "goblin_road_fencebreaker_camp"
     }
   },
   "commerce": {
@@ -942,32 +942,7 @@
       "sealed": "Sealed",
       "stable": "Stable"
     },
-    "portals": {
-      "drafting_table": {
-        "entry_room": null,
-        "name": "The Drafting Table",
-        "resonance": "sandbox",
-        "status": "sealed",
-        "summary": "A blank builder's dimension waiting for the family's first custom rooms.",
-        "travel_hint": null
-      },
-      "junkyard_planet": {
-        "entry_room": "junkyard_planet_landing_pad",
-        "name": "Junk-Yard Planet",
-        "resonance": "tech",
-        "status": "stable",
-        "summary": "A scrapyard world of broken rails, humming salvage, and practical tech violence.",
-        "travel_hint": "east"
-      },
-      "training_island": {
-        "entry_room": null,
-        "name": "Training Island",
-        "resonance": "martial",
-        "status": "dormant",
-        "summary": "A fast bright world meant for ki, speed, and martial experiments.",
-        "travel_hint": null
-      }
-    }
+    "portals": {}
   },
   "trophies": {
     "trophies": {
@@ -977,17 +952,17 @@
         "summary": "The rain-dark standard Captain Varn flew over the tower, hung now as proof the ridge does not belong to him anymore.",
         "world": "Ruined Watchtower"
       },
+      "blackwater_beacon_core": {
+        "name": "Blackwater Beacon Core",
+        "placeholder": "A brass label waits for the first relic from the drowned lampworks beneath the south line.",
+        "summary": "The recovered heart-core from the Sunken Lock, quiet now that the Chain Keeper no longer holds the line shut.",
+        "world": "Drowned Weir"
+      },
       "hollow_lantern_prism": {
         "name": "Hollow Lantern Prism",
         "placeholder": "A black-brass frame waits for whatever finally comes back from the drowned weir beyond Blackfen.",
         "summary": "The pale prism taken from the wrong south light at the drowned weir, hung now as proof Brambleford's first hard chapter ended with the lamp finally dark.",
         "world": "Drowned Weir"
-      },
-      "junkyard_beacon_core": {
-        "name": "Beacon Core",
-        "placeholder": "A brass label waits for the first relic from Junk-Yard Planet.",
-        "summary": "The first recovered heart-core from beyond the Nexus, still faintly warm with route light.",
-        "world": "Junk-Yard Planet"
       },
       "miretooth_fen_jaw": {
         "name": "Miretooth's Fen Jaw",

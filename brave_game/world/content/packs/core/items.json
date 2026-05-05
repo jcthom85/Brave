@@ -17,44 +17,6 @@
     "threat": "Threat",
     "vitality": "Vitality"
   },
-  "rarities": {
-    "common": {
-      "icon": "radio_button_unchecked",
-      "label": "Common",
-      "order": 10,
-      "tone": "rarity-common"
-    },
-    "uncommon": {
-      "icon": "change_history",
-      "label": "Uncommon",
-      "order": 20,
-      "tone": "rarity-uncommon"
-    },
-    "rare": {
-      "icon": "diamond",
-      "label": "Rare",
-      "order": 30,
-      "tone": "rarity-rare"
-    },
-    "epic": {
-      "icon": "auto_awesome",
-      "label": "Epic",
-      "order": 40,
-      "tone": "rarity-epic"
-    },
-    "legendary": {
-      "icon": "workspace_premium",
-      "label": "Legendary",
-      "order": 50,
-      "tone": "rarity-legendary"
-    },
-    "story": {
-      "icon": "bookmark",
-      "label": "Story",
-      "order": 60,
-      "tone": "rarity-story"
-    }
-  },
   "equipment_slots": [
     "main_hand",
     "off_hand",
@@ -258,10 +220,10 @@
   "item_templates": {
     "anchor_glass_shard": {
       "kind": "loot",
-      "name": "Anchor Glass Shard",
+      "name": "Blackwater Lens Shard",
       "rarity": "rare",
       "stackable": true,
-      "summary": "A blue-white shard of route glass that thrums faintly when held near the Nexus.",
+      "summary": "A blue-white shard of old lampglass that trembles near the sealed grooves beneath Brambleford.",
       "value": 14
     },
     "ashwood_bow": {
@@ -298,10 +260,10 @@
     },
     "beacon_core": {
       "kind": "loot",
-      "name": "Beacon Core",
+      "name": "Blackwater Beacon Core",
       "rarity": "epic",
       "stackable": true,
-      "summary": "A heavy heart-core from the Junk-Yard beacon network, fit for a trophy shelf more than a pocket.",
+      "summary": "A heavy heart-core from the drowned weir lamp line, fit for a trophy shelf more than a pocket.",
       "value": 28
     },
     "bellguard_bastion": {
@@ -343,6 +305,20 @@
       "slot": "off_hand",
       "summary": "A brass-braced devotional icon fitted to hold steadier light and steadier prayers."
     },
+    "bent_fence_nails": {
+      "kind": "loot",
+      "name": "Bent Fence Nails",
+      "stackable": true,
+      "summary": "A fistful of stolen nails and fasteners from the roadside fences.",
+      "value": 5
+    },
+    "blackreed_longcoat": {
+      "kind": "loot",
+      "name": "Blackreed Longcoat",
+      "stackable": true,
+      "summary": "Captain Varn's weather-dark longcoat, lined with hidden pockets and the smell of wet leather and command.",
+      "value": 36
+    },
     "boar_keeper_charm": {
       "kind": "consumable",
       "name": "Boar-Keeper Charm",
@@ -359,36 +335,6 @@
         "unlock_companion": "briar_boar",
         "verb": "bond"
       }
-    },
-    "cinder_vigil_tablet": {
-      "kind": "consumable",
-      "name": "Cinder Vigil Tablet",
-      "stackable": true,
-      "summary": "A scorched prayer tablet from an older chapel watch, heavy with soot, warning, and the promise to answer darkness hard.",
-      "use": {
-        "contexts": [
-          "explore"
-        ],
-        "effect_type": "unlock_oath",
-        "required_class": "paladin",
-        "target": "self",
-        "unlock_oath": "oath_of_cinders",
-        "verb": "swear"
-      }
-    },
-    "bent_fence_nails": {
-      "kind": "loot",
-      "name": "Bent Fence Nails",
-      "stackable": true,
-      "summary": "A fistful of stolen nails and fasteners from the roadside fences.",
-      "value": 5
-    },
-    "blackreed_longcoat": {
-      "kind": "loot",
-      "name": "Blackreed Longcoat",
-      "stackable": true,
-      "summary": "Captain Varn's weather-dark longcoat, lined with hidden pockets and the smell of wet leather and command.",
-      "value": 36
     },
     "bramble_perch": {
       "kind": "ingredient",
@@ -449,6 +395,22 @@
       "slot": "main_hand",
       "summary": "A straight practical sword kept for road duty, oath work, and the sort of bad nights that require both."
     },
+    "cinder_vigil_tablet": {
+      "kind": "consumable",
+      "name": "Cinder Vigil Tablet",
+      "stackable": true,
+      "summary": "A scorched prayer tablet from an older chapel watch, heavy with soot, warning, and the promise to answer darkness hard.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_oath",
+        "required_class": "paladin",
+        "target": "self",
+        "unlock_oath": "oath_of_cinders",
+        "verb": "swear"
+      }
+    },
     "cinderwire_staff": {
       "bonuses": {
         "accuracy": 3,
@@ -460,6 +422,20 @@
       "rarity": "rare",
       "slot": "main_hand",
       "summary": "A reworked emberglass staff bound in black wire that keeps heat like a grudge."
+    },
+    "crisped_perch_plate": {
+      "kind": "meal",
+      "meal_bonuses": {
+        "attack_power": 2,
+        "max_stamina": 10
+      },
+      "name": "Crisped Perch Plate",
+      "restore": {
+        "hp": 14,
+        "stamina": 18
+      },
+      "stackable": true,
+      "summary": "Two pan-crisped perch with herbs and browned butter."
     },
     "crowfeather_rite": {
       "kind": "consumable",
@@ -477,6 +453,33 @@
         "verb": "study"
       }
     },
+    "dawnbell_mace": {
+      "bonuses": {
+        "accuracy": 3,
+        "attack_power": 3,
+        "spell_power": 4
+      },
+      "kind": "equipment",
+      "name": "Dawnbell Mace",
+      "slot": "main_hand",
+      "summary": "A tempered mace whose head carries a quiet sun-mark beneath the iron."
+    },
+    "dawnscale_supper": {
+      "kind": "meal",
+      "meal_bonuses": {
+        "accuracy": 3,
+        "max_stamina": 8,
+        "precision": 2
+      },
+      "name": "Dawnscale Supper",
+      "restore": {
+        "hp": 16,
+        "mana": 10,
+        "stamina": 20
+      },
+      "stackable": true,
+      "summary": "Rare trout seared hard at the skin and finished with bright herb butter."
+    },
     "dawnscale_supper_note": {
       "kind": "consumable",
       "name": "Dawnscale Supper Note",
@@ -492,47 +495,6 @@
         "unlock_recipe": "dawnscale_supper",
         "verb": "study"
       }
-    },
-    "crisped_perch_plate": {
-      "kind": "meal",
-      "meal_bonuses": {
-        "attack_power": 2,
-        "max_stamina": 10
-      },
-      "name": "Crisped Perch Plate",
-      "restore": {
-        "hp": 14,
-        "stamina": 18
-      },
-      "stackable": true,
-      "summary": "Two pan-crisped perch with herbs and browned butter."
-    },
-    "dawnscale_supper": {
-      "kind": "meal",
-      "meal_bonuses": {
-        "accuracy": 3,
-        "precision": 2,
-        "max_stamina": 8
-      },
-      "name": "Dawnscale Supper",
-      "restore": {
-        "hp": 16,
-        "mana": 10,
-        "stamina": 20
-      },
-      "stackable": true,
-      "summary": "Rare trout seared hard at the skin and finished with bright herb butter."
-    },
-    "dawnbell_mace": {
-      "bonuses": {
-        "accuracy": 3,
-        "attack_power": 3,
-        "spell_power": 4
-      },
-      "kind": "equipment",
-      "name": "Dawnbell Mace",
-      "slot": "main_hand",
-      "summary": "A tempered mace whose head carries a quiet sun-mark beneath the iron."
     },
     "dawnscale_trout": {
       "kind": "ingredient",
@@ -559,22 +521,6 @@
       "slot": "off_hand",
       "summary": "A brass-caged focus crystal tuned to answer faster when power moves through it."
     },
-    "hawkcaller_whistle": {
-      "kind": "consumable",
-      "name": "Hawkcaller Whistle",
-      "stackable": true,
-      "summary": "A bone whistle cut and weighted for high hunting calls, meant to seal a bond with a sharp-eyed ash hawk.",
-      "use": {
-        "contexts": [
-          "explore"
-        ],
-        "effect_type": "unlock_companion",
-        "required_class": "ranger",
-        "target": "self",
-        "unlock_companion": "ash_hawk",
-        "verb": "bond"
-      }
-    },
     "emberglass_staff": {
       "bonuses": {
         "accuracy": 2,
@@ -593,6 +539,18 @@
       "summary": "A dark clot of marsh resin and root sap that hardens into something halfway between lacquer and warning.",
       "value": 12
     },
+    "fenlight_talisman": {
+      "bonuses": {
+        "max_hp": 6,
+        "max_mana": 18,
+        "spell_power": 4,
+        "spirit": 2
+      },
+      "kind": "equipment",
+      "name": "Fenlight Talisman",
+      "slot": "off_hand",
+      "summary": "A marsh-bright charm of glass, feather, and bound root that answers softly but never weakly."
+    },
     "fenlight_talisman_pattern": {
       "kind": "consumable",
       "name": "Fenlight Talisman Pattern",
@@ -608,18 +566,6 @@
         "unlock_recipe": "fenlight_talisman_setting",
         "verb": "study"
       }
-    },
-    "fenlight_talisman": {
-      "bonuses": {
-        "max_hp": 6,
-        "max_mana": 18,
-        "spell_power": 4,
-        "spirit": 2
-      },
-      "kind": "equipment",
-      "name": "Fenlight Talisman",
-      "slot": "off_hand",
-      "summary": "A marsh-bright charm of glass, feather, and bound root that answers softly but never weakly."
     },
     "field_bandage": {
       "kind": "consumable",
@@ -652,37 +598,6 @@
       "slot": "chest",
       "summary": "Light leather layers treated to turn rain, brush, and shallow cuts."
     },
-    "latchwire_ward": {
-      "kind": "consumable",
-      "name": "Latchwire Ward",
-      "stackable": true,
-      "summary": "A wrapped knot of bent nails, cord, and road-ward chalk meant to catch the first ugly hit on stubborn terms.",
-      "use": {
-        "contexts": [
-          "combat"
-        ],
-        "effect_type": "guard",
-        "guard": 18,
-        "target": "ally",
-        "verb": "cast"
-      }
-    },
-    "latchwire_ward_pattern": {
-      "kind": "consumable",
-      "name": "Latchwire Ward Pattern",
-      "stackable": true,
-      "summary": "A grubby note bundle in Veska's hand explaining how to lash scavenged nails into a ward that holds just long enough to matter.",
-      "use": {
-        "contexts": [
-          "explore"
-        ],
-        "effect_type": "unlock_recipe",
-        "recipe_domain": "tinkering",
-        "target": "self",
-        "unlock_recipe": "latchwire_ward_bundle",
-        "verb": "study"
-      }
-    },
     "fireflask": {
       "kind": "consumable",
       "name": "Fire Flask",
@@ -702,32 +617,11 @@
         "verb": "throw"
       }
     },
-    "hedge_mushroom": {
-      "kind": "ingredient",
-      "name": "Hedge Mushroom",
-      "stackable": true,
-      "summary": "A firm brown cap from shaded roots and damp hedgerows, good in a pan if you know what you're doing.",
-      "value": 5
-    },
-    "hedgeroot_hash": {
-      "kind": "meal",
-      "meal_bonuses": {
-        "max_hp": 10,
-        "max_stamina": 8
-      },
-      "name": "Hedgeroot Hash",
-      "restore": {
-        "hp": 18,
-        "stamina": 16
-      },
-      "stackable": true,
-      "summary": "A hot pan hash of chopped marsh root, hedge mushroom, and enough browned fat to count as frontier optimism."
-    },
     "flux_coil": {
       "kind": "loot",
-      "name": "Flux Coil",
+      "name": "Lamp Coil",
       "stackable": true,
-      "summary": "A humming coil that still holds a nervous charge.",
+      "summary": "A brass lantern coil that still holds a nervous pulse from the drowned south line.",
       "value": 12
     },
     "focus_tonic": {
@@ -750,98 +644,11 @@
         "verb": "drink"
       }
     },
-    "grease_stained_supper_note": {
-      "kind": "consumable",
-      "name": "Grease-Stained Supper Note",
-      "stackable": true,
-      "summary": "A cook's folded note about getting eel and moonleaf to work together instead of arguing in the pan.",
-      "use": {
-        "contexts": [
-          "explore"
-        ],
-        "effect_type": "unlock_recipe",
-        "recipe_domain": "cooking",
-        "target": "self",
-        "unlock_recipe": "moonleaf_eel_skillet",
-        "verb": "study"
-      }
-    },
-    "mirror_veil_primer": {
-      "kind": "consumable",
-      "name": "Mirror Veil Primer",
-      "stackable": true,
-      "summary": "A stitched apprentice spellbook of reflective sigils and margin notes on surviving one spell longer than the enemy expected.",
-      "use": {
-        "contexts": [
-          "explore"
-        ],
-        "effect_type": "teach_spell",
-        "learn_ability": "mirrorveil",
-        "required_class": "mage",
-        "target": "self",
-        "verb": "study"
-      }
-    },
-    "marsh_root": {
-      "kind": "ingredient",
-      "name": "Marsh Root",
-      "stackable": true,
-      "summary": "A pale knuckled root pulled from wet ground, bitter raw and far more useful once cooked down.",
-      "value": 5
-    },
-    "moonleaf_eel_skillet": {
-      "kind": "meal",
-      "meal_bonuses": {
-        "max_mana": 12,
-        "spell_power": 3,
-        "spirit": 1
-      },
-      "name": "Moonleaf Eel Skillet",
-      "restore": {
-        "hp": 18,
-        "mana": 18,
-        "stamina": 10
-      },
-      "stackable": true,
-      "summary": "Silver eel fried in a black pan with moonleaf, pepper, and enough butter to make the smell carry."
-    },
-    "moonleaf_root_broth": {
-      "kind": "meal",
-      "meal_bonuses": {
-        "max_hp": 4,
-        "max_mana": 10,
-        "spirit": 1
-      },
-      "name": "Moonleaf Root Broth",
-      "restore": {
-        "hp": 16,
-        "mana": 14,
-        "stamina": 10
-      },
-      "stackable": true,
-      "summary": "A clear root broth with moonleaf and pepper that warms the gut and quiets the hands."
-    },
-    "mercy_votive": {
-      "kind": "consumable",
-      "name": "Mercy Votive",
-      "stackable": true,
-      "summary": "A chapel votive wrapped in linen and ash-blue thread, meant to seal a gentler oath of relief and protection.",
-      "use": {
-        "contexts": [
-          "explore"
-        ],
-        "effect_type": "unlock_oath",
-        "required_class": "paladin",
-        "target": "self",
-        "unlock_oath": "oath_of_mercy",
-        "verb": "swear"
-      }
-    },
     "fractured_circuit": {
       "kind": "loot",
-      "name": "Fractured Circuit",
+      "name": "Fractured Lensplate",
       "stackable": true,
-      "summary": "A cracked control wafer pried from some long-dead machine mind.",
+      "summary": "A cracked plate of old lampglass and brass control etching, pried from drowned lanternwork.",
       "value": 8
     },
     "goblin_knife": {
@@ -857,6 +664,22 @@
       "stackable": true,
       "summary": "Cold pale dust shaken loose from old barrows and things that should have stayed in them.",
       "value": 7
+    },
+    "grease_stained_supper_note": {
+      "kind": "consumable",
+      "name": "Grease-Stained Supper Note",
+      "stackable": true,
+      "summary": "A cook's folded note about getting eel and moonleaf to work together instead of arguing in the pan.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_recipe",
+        "recipe_domain": "cooking",
+        "target": "self",
+        "unlock_recipe": "moonleaf_eel_skillet",
+        "verb": "study"
+      }
     },
     "greymaw_pelt": {
       "kind": "loot",
@@ -887,6 +710,43 @@
       "name": "Gutterfang Pair",
       "slot": "main_hand",
       "summary": "Torren refiles the hooks, lightens the draw, and sends the pair back keen enough to reward hesitation in other people."
+    },
+    "hawkcaller_whistle": {
+      "kind": "consumable",
+      "name": "Hawkcaller Whistle",
+      "stackable": true,
+      "summary": "A bone whistle cut and weighted for high hunting calls, meant to seal a bond with a sharp-eyed ash hawk.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_companion",
+        "required_class": "ranger",
+        "target": "self",
+        "unlock_companion": "ash_hawk",
+        "verb": "bond"
+      }
+    },
+    "hedge_mushroom": {
+      "kind": "ingredient",
+      "name": "Hedge Mushroom",
+      "stackable": true,
+      "summary": "A firm brown cap from shaded roots and damp hedgerows, good in a pan if you know what you're doing.",
+      "value": 5
+    },
+    "hedgeroot_hash": {
+      "kind": "meal",
+      "meal_bonuses": {
+        "max_hp": 10,
+        "max_stamina": 8
+      },
+      "name": "Hedgeroot Hash",
+      "restore": {
+        "hp": 18,
+        "stamina": 16
+      },
+      "stackable": true,
+      "summary": "A hot pan hash of chopped marsh root, hedge mushroom, and enough browned fat to count as frontier optimism."
     },
     "hedgeweave_robes": {
       "bonuses": {
@@ -956,44 +816,6 @@
       },
       "stackable": true,
       "summary": "A deep savory pie Uncle Pib approves of on principle."
-    },
-    "lockfin_pike": {
-      "kind": "ingredient",
-      "name": "Lockfin Pike",
-      "stackable": true,
-      "summary": "A hard-jawed pike from drowned lock water, all scarred scales and bad attitude.",
-      "value": 10
-    },
-    "lockfin_skillet_note": {
-      "kind": "consumable",
-      "name": "Lockfin Skillet Note",
-      "stackable": true,
-      "summary": "A damp kitchen scrap on searing lockfin hard, resting the flesh, and not letting marsh root bully the pan.",
-      "use": {
-        "contexts": [
-          "explore"
-        ],
-        "effect_type": "unlock_recipe",
-        "recipe_domain": "cooking",
-        "target": "self",
-        "unlock_recipe": "lockfin_skillet",
-        "verb": "study"
-      }
-    },
-    "lockfin_skillet": {
-      "kind": "meal",
-      "meal_bonuses": {
-        "armor": 2,
-        "attack_power": 2,
-        "max_hp": 8
-      },
-      "name": "Lockfin Skillet",
-      "restore": {
-        "hp": 20,
-        "stamina": 14
-      },
-      "stackable": true,
-      "summary": "A blackened pike skillet with marsh root and pepper, dense enough to make cold weather reconsider."
     },
     "ironroot_longblade": {
       "bonuses": {
@@ -1080,6 +902,75 @@
       "slot": "chest",
       "summary": "Apprentice robes rebuilt with better hems, hidden pockets, and enough lining to ignore sparks."
     },
+    "latchwire_ward": {
+      "kind": "consumable",
+      "name": "Latchwire Ward",
+      "stackable": true,
+      "summary": "A wrapped knot of bent nails, cord, and road-ward chalk meant to catch the first ugly hit on stubborn terms.",
+      "use": {
+        "contexts": [
+          "combat"
+        ],
+        "effect_type": "guard",
+        "guard": 18,
+        "target": "ally",
+        "verb": "cast"
+      }
+    },
+    "latchwire_ward_pattern": {
+      "kind": "consumable",
+      "name": "Latchwire Ward Pattern",
+      "stackable": true,
+      "summary": "A grubby note bundle in Veska's hand explaining how to lash scavenged nails into a ward that holds just long enough to matter.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_recipe",
+        "recipe_domain": "tinkering",
+        "target": "self",
+        "unlock_recipe": "latchwire_ward_bundle",
+        "verb": "study"
+      }
+    },
+    "lockfin_pike": {
+      "kind": "ingredient",
+      "name": "Lockfin Pike",
+      "stackable": true,
+      "summary": "A hard-jawed pike from drowned lock water, all scarred scales and bad attitude.",
+      "value": 10
+    },
+    "lockfin_skillet": {
+      "kind": "meal",
+      "meal_bonuses": {
+        "armor": 2,
+        "attack_power": 2,
+        "max_hp": 8
+      },
+      "name": "Lockfin Skillet",
+      "restore": {
+        "hp": 20,
+        "stamina": 14
+      },
+      "stackable": true,
+      "summary": "A blackened pike skillet with marsh root and pepper, dense enough to make cold weather reconsider."
+    },
+    "lockfin_skillet_note": {
+      "kind": "consumable",
+      "name": "Lockfin Skillet Note",
+      "stackable": true,
+      "summary": "A damp kitchen scrap on searing lockfin hard, resting the flesh, and not letting marsh root bully the pan.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_recipe",
+        "recipe_domain": "cooking",
+        "target": "self",
+        "unlock_recipe": "lockfin_skillet",
+        "verb": "study"
+      }
+    },
     "locklight_blade": {
       "bonuses": {
         "accuracy": 4,
@@ -1095,10 +986,17 @@
     },
     "magnetized_scrap": {
       "kind": "loot",
-      "name": "Magnetized Scrap",
+      "name": "Ward-Iron Scrap",
       "stackable": true,
-      "summary": "A plate of salvage still tugging toward anything metal with irritating enthusiasm.",
+      "summary": "A torn plate of drowned weir iron that still tugs toward old lanternwork.",
       "value": 9
+    },
+    "marsh_root": {
+      "kind": "ingredient",
+      "name": "Marsh Root",
+      "stackable": true,
+      "summary": "A pale knuckled root pulled from wet ground, bitter raw and far more useful once cooked down.",
+      "value": 5
     },
     "marshsong_staff": {
       "bonuses": {
@@ -1111,6 +1009,22 @@
       "name": "Marshsong Staff",
       "slot": "main_hand",
       "summary": "A thorn staff rebuilt with fen resin and wispglass until the grain hums like water remembering moonlight."
+    },
+    "mercy_votive": {
+      "kind": "consumable",
+      "name": "Mercy Votive",
+      "stackable": true,
+      "summary": "A chapel votive wrapped in linen and ash-blue thread, meant to seal a gentler oath of relief and protection.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "unlock_oath",
+        "required_class": "paladin",
+        "target": "self",
+        "unlock_oath": "oath_of_mercy",
+        "verb": "swear"
+      }
     },
     "militia_blade": {
       "bonuses": {
@@ -1137,6 +1051,54 @@
       "stackable": true,
       "summary": "A hooked predator fang from the beast ruling the fen edge, still carrying a sick green stain near the root.",
       "value": 42
+    },
+    "mirror_veil_primer": {
+      "kind": "consumable",
+      "name": "Mirror Veil Primer",
+      "stackable": true,
+      "summary": "A stitched apprentice spellbook of reflective sigils and margin notes on surviving one spell longer than the enemy expected.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "teach_spell",
+        "learn_ability": "mirrorveil",
+        "required_class": "mage",
+        "target": "self",
+        "verb": "study"
+      }
+    },
+    "moonleaf_eel_skillet": {
+      "kind": "meal",
+      "meal_bonuses": {
+        "max_mana": 12,
+        "spell_power": 3,
+        "spirit": 1
+      },
+      "name": "Moonleaf Eel Skillet",
+      "restore": {
+        "hp": 18,
+        "mana": 18,
+        "stamina": 10
+      },
+      "stackable": true,
+      "summary": "Silver eel fried in a black pan with moonleaf, pepper, and enough butter to make the smell carry."
+    },
+    "moonleaf_root_broth": {
+      "kind": "meal",
+      "meal_bonuses": {
+        "max_hp": 4,
+        "max_mana": 10,
+        "spirit": 1
+      },
+      "name": "Moonleaf Root Broth",
+      "restore": {
+        "hp": 16,
+        "mana": 14,
+        "stamina": 10
+      },
+      "stackable": true,
+      "summary": "A clear root broth with moonleaf and pepper that warms the gut and quiets the hands."
     },
     "moonleaf_sprig": {
       "kind": "loot",
@@ -1279,22 +1241,6 @@
       "slot": "chest",
       "summary": "A field robe strengthened with hide, resin, and reed cord, light enough for the marsh and sturdy enough for the argument after."
     },
-    "serpent_scale_manual": {
-      "kind": "consumable",
-      "name": "Serpent Scale Manual",
-      "stackable": true,
-      "summary": "A stitched field manual of shed scales and poison notes teaching how to coil low and let the battlefield do the killing for you.",
-      "use": {
-        "contexts": [
-          "explore"
-        ],
-        "effect_type": "teach_spell",
-        "learn_ability": "serpentform",
-        "required_class": "druid",
-        "target": "self",
-        "verb": "study"
-      }
-    },
     "ridgebreaker_blade": {
       "bonuses": {
         "accuracy": 5,
@@ -1323,22 +1269,6 @@
       },
       "stackable": true,
       "summary": "A creamy chowder bright with carp, eel, and a peppery finish."
-    },
-    "veskas_pitchfire_pattern": {
-      "kind": "consumable",
-      "name": "Veska's Pitchfire Pattern",
-      "stackable": true,
-      "summary": "A workbench pattern in Veska's hand explaining how to bottle resin, spite, and bad intentions into something you should only throw away from yourself.",
-      "use": {
-        "contexts": [
-          "explore"
-        ],
-        "effect_type": "unlock_recipe",
-        "recipe_domain": "tinkering",
-        "target": "self",
-        "unlock_recipe": "pitchfire_flask",
-        "verb": "study"
-      }
     },
     "rivetmail_coat": {
       "bonuses": {
@@ -1400,6 +1330,22 @@
       "stackable": true,
       "summary": "A long black marsh feather with an oily sheen and the faint smell of stagnant water.",
       "value": 10
+    },
+    "serpent_scale_manual": {
+      "kind": "consumable",
+      "name": "Serpent Scale Manual",
+      "stackable": true,
+      "summary": "A stitched field manual of shed scales and poison notes teaching how to coil low and let the battlefield do the killing for you.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "teach_spell",
+        "learn_ability": "serpentform",
+        "required_class": "druid",
+        "target": "self",
+        "verb": "study"
+      }
     },
     "shadowtrail_leathers": {
       "bonuses": {
@@ -1470,6 +1416,42 @@
       "stackable": true,
       "summary": "The broken iron head of Ruk's notorious fence-cutter.",
       "value": 18
+    },
+    "stitchleaf_salve": {
+      "kind": "consumable",
+      "name": "Stitchleaf Salve",
+      "stackable": true,
+      "summary": "A thick resin salve with hedge mushroom and bitter herbs worked in until it smells like a treatment plan rather than a meal.",
+      "use": {
+        "contexts": [
+          "explore",
+          "combat"
+        ],
+        "effect_type": "restore",
+        "restore": {
+          "hp": 24,
+          "stamina": 8
+        },
+        "target": "ally",
+        "verb": "apply"
+      }
+    },
+    "stormlance_codex": {
+      "kind": "consumable",
+      "name": "Stormlance Codex",
+      "rarity": "story",
+      "stackable": true,
+      "summary": "A weather-stained codex of line-casting diagrams, each page more interested in disciplined lightning than safe eyebrows.",
+      "use": {
+        "contexts": [
+          "explore"
+        ],
+        "effect_type": "teach_spell",
+        "learn_ability": "stormlance",
+        "required_class": "mage",
+        "target": "self",
+        "verb": "study"
+      }
     },
     "sun_prayer_icon": {
       "bonuses": {
@@ -1566,40 +1548,20 @@
       "slot": "snack",
       "summary": "A waxed trail pouch packed with nuts, berries, and enough salt to pull you back into the fight."
     },
-    "stormlance_codex": {
+    "veskas_pitchfire_pattern": {
       "kind": "consumable",
-      "name": "Stormlance Codex",
-      "rarity": "story",
+      "name": "Veska's Pitchfire Pattern",
       "stackable": true,
-      "summary": "A weather-stained codex of line-casting diagrams, each page more interested in disciplined lightning than safe eyebrows.",
+      "summary": "A workbench pattern in Veska's hand explaining how to bottle resin, spite, and bad intentions into something you should only throw away from yourself.",
       "use": {
         "contexts": [
           "explore"
         ],
-        "effect_type": "teach_spell",
-        "learn_ability": "stormlance",
-        "required_class": "mage",
+        "effect_type": "unlock_recipe",
+        "recipe_domain": "tinkering",
         "target": "self",
+        "unlock_recipe": "pitchfire_flask",
         "verb": "study"
-      }
-    },
-    "stitchleaf_salve": {
-      "kind": "consumable",
-      "name": "Stitchleaf Salve",
-      "stackable": true,
-      "summary": "A thick resin salve with hedge mushroom and bitter herbs worked in until it smells like a treatment plan rather than a meal.",
-      "use": {
-        "contexts": [
-          "explore",
-          "combat"
-        ],
-        "effect_type": "restore",
-        "restore": {
-          "hp": 24,
-          "stamina": 8
-        },
-        "target": "ally",
-        "verb": "apply"
       }
     },
     "ward_dust": {
@@ -1617,13 +1579,6 @@
         "target": "ally",
         "verb": "cast"
       }
-    },
-    "weirglass_eel": {
-      "kind": "ingredient",
-      "name": "Weirglass Eel",
-      "stackable": true,
-      "summary": "A pale eel from the drowned line whose skin catches bad light like cracked glass.",
-      "value": 12
     },
     "ward_iron_rivet": {
       "kind": "loot",
@@ -1669,6 +1624,16 @@
       "slot": "main_hand",
       "summary": "A horn-backed recurve tuned with tower arrow stock and cave sinew for faster, nastier line shots."
     },
+    "wayfarer_clasp": {
+      "bonuses": {
+        "accuracy": 1,
+        "max_hp": 4
+      },
+      "kind": "equipment",
+      "name": "Wayfarer Clasp",
+      "slot": "trinket",
+      "summary": "A plain brass yard clasp stamped with Brambleford's gate mark, small enough to ignore until it keeps a strap tight."
+    },
     "wayfarer_vestments": {
       "bonuses": {
         "armor": 2,
@@ -1681,15 +1646,12 @@
       "slot": "chest",
       "summary": "Travel-ready robes stitched for mud, weather, and long prayers."
     },
-    "wayfarer_clasp": {
-      "bonuses": {
-        "accuracy": 1,
-        "max_hp": 4
-      },
-      "kind": "equipment",
-      "name": "Wayfarer Clasp",
-      "slot": "trinket",
-      "summary": "A plain brass yard clasp stamped with Brambleford's gate mark, small enough to ignore until it keeps a strap tight."
+    "weirglass_eel": {
+      "kind": "ingredient",
+      "name": "Weirglass Eel",
+      "stackable": true,
+      "summary": "A pale eel from the drowned line whose skin catches bad light like cracked glass.",
+      "value": 12
     },
     "weirward_bulwark": {
       "bonuses": {
@@ -1750,6 +1712,44 @@
       "stackable": true,
       "summary": "A rough grey pelt, useful enough to trade or keep.",
       "value": 8
+    }
+  },
+  "rarities": {
+    "common": {
+      "icon": "radio_button_unchecked",
+      "label": "Common",
+      "order": 10,
+      "tone": "rarity-common"
+    },
+    "epic": {
+      "icon": "auto_awesome",
+      "label": "Epic",
+      "order": 40,
+      "tone": "rarity-epic"
+    },
+    "legendary": {
+      "icon": "workspace_premium",
+      "label": "Legendary",
+      "order": 50,
+      "tone": "rarity-legendary"
+    },
+    "rare": {
+      "icon": "diamond",
+      "label": "Rare",
+      "order": 30,
+      "tone": "rarity-rare"
+    },
+    "story": {
+      "icon": "bookmark",
+      "label": "Story",
+      "order": 60,
+      "tone": "rarity-story"
+    },
+    "uncommon": {
+      "icon": "change_history",
+      "label": "Uncommon",
+      "order": 20,
+      "tone": "rarity-uncommon"
     }
   },
   "starter_consumables": [

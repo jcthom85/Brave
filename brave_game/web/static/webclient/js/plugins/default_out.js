@@ -3805,6 +3805,7 @@ let defaultout_plugin = (function () {
         if (!body) {
             return;
         }
+        var scrollSnapshots = typeof captureMainScrollPositions === "function" ? captureMainScrollPositions() : null;
         var active = typeof force === "boolean" ? force : !body.classList.contains("brave-objectives-active");
         body.classList.toggle("brave-objectives-active", active);
         var sheet = document.getElementById("brave-objectives-sheet");
@@ -3849,6 +3850,9 @@ let defaultout_plugin = (function () {
             }
         } else if (typeof renderMobileNavDock === "function") {
             renderMobileNavDock();
+        }
+        if (typeof restoreMainScrollPositions === "function") {
+            restoreMainScrollPositions(scrollSnapshots);
         }
     };
 
@@ -3962,12 +3966,20 @@ let defaultout_plugin = (function () {
         if (!host) {
             return;
         }
+        var scrollSnapshots = typeof captureMainScrollPositions === "function" ? captureMainScrollPositions() : null;
+        if (isMobileViewport()) {
+            blurActiveUiControl();
+            suppressMobileNonInputFocus(900);
+        }
 
         if (viewData && Array.isArray(viewData.welcome_pages) && viewData.welcome_pages.length) {
             currentWelcomePages = viewData.welcome_pages;
             currentWelcomePageIndex = 0;
             renderWelcomePage();
             toggleObjectives(true);
+            if (typeof restoreMainScrollPositions === "function") {
+                restoreMainScrollPositions(scrollSnapshots);
+            }
             return;
         }
 
@@ -3995,6 +4007,9 @@ let defaultout_plugin = (function () {
             if (typeof renderMobileNavDock === "function") {
                 renderMobileNavDock();
             }
+            if (typeof restoreMainScrollPositions === "function") {
+                restoreMainScrollPositions(scrollSnapshots);
+            }
             return;
         }
 
@@ -4019,6 +4034,9 @@ let defaultout_plugin = (function () {
         ) {
             host.classList.toggle("brave-objectives-sheet--mobile-expanded", mobileObjectivesExpanded);
             host.classList.toggle("brave-objectives-sheet--mobile-collapsed", isMobileViewport() && !mobileObjectivesExpanded);
+            if (typeof restoreMainScrollPositions === "function") {
+                restoreMainScrollPositions(scrollSnapshots);
+            }
             return;
         }
 
@@ -4040,9 +4058,9 @@ let defaultout_plugin = (function () {
             + "<span class='brave-objectives-sheet__count'>" + escapeHtml(String(remainingCount || objectives.length)) + "</span>"
             + icon(mobileObjectivesExpanded ? "expand_more" : "expand_less", "brave-objectives-sheet__expand-icon")
             + "</button>"
-            + "<button type='button' class='brave-objectives-sheet__close' data-brave-objectives-toggle='1'>"
-            + icon("close", "brave-objectives-sheet__close-icon")
-            + "<span>Close</span>"
+            + "<button type='button' class='brave-objectives-sheet__close' data-brave-objectives-toggle='1' aria-label='Close objectives'>"
+            + "<span class='brave-objectives-sheet__close-mark' aria-hidden='true'></span>"
+            + "<span class='brave-objectives-sheet__close-label'>Close</span>"
             + "</button>"
             + "</div>"
             + "<div class='brave-objectives-sheet__body'>"
@@ -4064,6 +4082,9 @@ let defaultout_plugin = (function () {
             + "</div>";
 
         toggleObjectives(true);
+        if (typeof restoreMainScrollPositions === "function") {
+            restoreMainScrollPositions(scrollSnapshots);
+        }
         if (hasChanged) {
             window.setTimeout(triggerTutorialFireworks, 100);
         }
@@ -5457,7 +5478,7 @@ let defaultout_plugin = (function () {
             sections: [
                 {
                     label: "Enter Brave",
-                    icon: "key",
+                    icon: null,
                     kind: "list",
                     items: [
                         {
@@ -7132,11 +7153,22 @@ let defaultout_plugin = (function () {
     };
 
     var shouldSuppressMobileRoomNavScroll = function (target) {
+        var node = target && target.nodeType === 9 ? target.scrollingElement : target;
         return !!(
             isMobileViewport()
             && Date.now() < (suppressMobileRoomNavScrollUntil || 0)
-            && target
-            && target.id === "messagewindow"
+            && node
+            && (
+                node === document.scrollingElement
+                || node === document.documentElement
+                || node === document.body
+                || node.id === "messagewindow"
+                || (node.classList && (
+                    node.classList.contains("brave-gl-main-item")
+                    || node.classList.contains("lm_content")
+                    || node.classList.contains("content")
+                ))
+            )
             && currentViewData
             && isRoomLikeView(currentViewData)
         );
@@ -8298,6 +8330,11 @@ let defaultout_plugin = (function () {
         ];
         var snapshots = [];
         var seen = [];
+        snapshots.push({
+            window: true,
+            top: window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0,
+            left: window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0,
+        });
         var pushSelector = function (selector) {
             if (!selector || seen.indexOf(selector) !== -1) {
                 return;
@@ -8343,6 +8380,14 @@ let defaultout_plugin = (function () {
         var apply = function () {
             entries.forEach(function (entry) {
                 if (!entry) {
+                    return;
+                }
+                if (entry.window) {
+                    try {
+                        window.scrollTo(entry.left || 0, entry.top || 0);
+                    } catch (err) {
+                        // Ignore viewport restore failures.
+                    }
                     return;
                 }
                 var node = entry.selector ? document.querySelector(entry.selector) : entry.node;
@@ -8969,6 +9014,22 @@ let defaultout_plugin = (function () {
             shouldAnimateRegionSceneCard
             && viewData
             && viewData.first_region_discovery
+        );
+        var shouldAnimateFirstRoomDiscoverySceneCard = !!(
+            !prefersReducedMotion()
+            && !options.skipRoomCardTransition
+            && !shouldAnimateRegionSceneCard
+            && !shouldAnimateFirstRegionDiscoverySceneCard
+            && viewData
+            && viewData.first_room_discovery
+            && isRoomLikeView(viewData)
+            && nextRoomSceneMeta
+            && nextRoomSceneMeta.roomId
+            && (
+                !previousRoomSceneMeta
+                || !previousRoomSceneMeta.roomId
+                || previousRoomSceneMeta.roomId !== nextRoomSceneMeta.roomId
+            )
         );
         var shouldAnimateRoomSceneCard = !!(
             !options.skipRoomCardTransition
@@ -9742,6 +9803,21 @@ let defaultout_plugin = (function () {
             );
         };
 
+        var renderFooterLink = function () {
+            var footer = viewData && viewData.footer_link;
+            if (!(footer && footer.href)) {
+                return "";
+            }
+            var label = footer.label || "junewiregames.com";
+            return (
+                "<div class='brave-view__studio-footer'>"
+                + "<a class='brave-view__studio-link' href='" + escapeHtml(footer.href) + "' target='_blank' rel='noopener noreferrer' data-brave-external-link='1' aria-label='" + escapeHtml(footer.aria_label || label) + "'>"
+                + escapeHtml(label)
+                + "</a>"
+                + "</div>"
+            );
+        };
+
         var renderRoomMicromap = function () {
             if (!isRoomLikeView(viewData)) {
                 return "";
@@ -9792,6 +9868,7 @@ let defaultout_plugin = (function () {
                     + (shouldApplyRoomSceneEnterClass ? " brave-view__room-scene-card--enter" : "")
                     + (shouldAnimateRegionSceneCard ? " brave-view__room-scene-card--region-change" : "")
                     + (shouldAnimateFirstRegionDiscoverySceneCard ? " brave-view__room-scene-card--first-region-discovery" : "")
+                    + (shouldAnimateFirstRoomDiscoverySceneCard ? " brave-view__room-scene-card--first-room-discovery" : "")
                     + "' data-brave-room-id='" + escapeHtml((nextRoomSceneMeta && nextRoomSceneMeta.roomId) || "") + "' data-brave-region='" + escapeHtml((nextRoomSceneMeta && nextRoomSceneMeta.regionName) || "") + "'>" + heroSceneMarkup + "</div>"
                 : heroSceneMarkup)
             + renderMobileRoomUtility()
@@ -9807,6 +9884,7 @@ let defaultout_plugin = (function () {
                 ? viewData.sections.map(renderSection).join("")
                 : "")
             + "</div>"
+            + renderFooterLink()
             + "</div>";
 
         if (
@@ -11603,6 +11681,21 @@ let defaultout_plugin = (function () {
         }, true);
 
         document.addEventListener("click", function (event) {
+            var externalLinkTarget = event.target.closest("[data-brave-external-link][href]");
+            if (externalLinkTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                var href = externalLinkTarget.getAttribute("href");
+                if (href) {
+                    var opened = window.open(href, "_blank");
+                    if (!opened) {
+                        window.location.href = href;
+                    } else {
+                        opened.opener = null;
+                    }
+                }
+                return;
+            }
             if (Date.now() < suppressBrowserClickUntil) {
                 event.preventDefault();
                 event.stopPropagation();

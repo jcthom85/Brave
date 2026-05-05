@@ -121,34 +121,24 @@
     function lockRootScrolling() {
         var html = document.documentElement;
         var body = document.body;
-        var scroller = document.scrollingElement || html;
         var viewportHeight = window.innerHeight + "px";
         var viewportWidth = window.innerWidth + "px";
         if (!html || !body) {
             return;
         }
 
-        [html, body, scroller].forEach(function (el) {
+        [html, body].forEach(function (el) {
             if (!el) {
                 return;
             }
             el.style.setProperty("overflow", "hidden", "important");
-            el.style.setProperty("overflow-x", "hidden", "important");
-            el.style.setProperty("overflow-y", "hidden", "important");
-            el.style.setProperty("scrollbar-width", "none", "important");
-            el.style.setProperty("width", viewportWidth, "important");
-            el.style.setProperty("min-width", viewportWidth, "important");
-            el.style.setProperty("max-width", viewportWidth, "important");
             el.style.setProperty("height", viewportHeight, "important");
-            el.style.setProperty("min-height", viewportHeight, "important");
-            el.style.setProperty("max-height", viewportHeight, "important");
+            el.style.setProperty("width", viewportWidth, "important");
+            el.style.setProperty("position", "fixed", "important");
+            el.style.setProperty("inset", "0", "important");
         });
 
         window.scrollTo(0, 0);
-        if (scroller) {
-            scroller.scrollTop = 0;
-            scroller.scrollLeft = 0;
-        }
     }
 
     if (window.history && "scrollRestoration" in window.history) {

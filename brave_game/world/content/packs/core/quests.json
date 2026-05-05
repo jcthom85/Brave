@@ -2,11 +2,11 @@
   "quest_regions": {
     "below_the_fencebreakers": "Goblin Warrens",
     "bogwater_rumors": "Blackfen",
-    "bridgework_for_joss": "Junk-Yard Planet",
+    "bridgework_for_joss": "Drowned Weir",
     "captain_varn_blackreed": "Ruined Watchtower",
     "do_not_disturb_the_dead": "Old Barrow Field",
     "fencebreakers": "Goblin Road",
-    "foreman_coilback": "Junk-Yard Planet",
+    "foreman_coilback": "Drowned Weir",
     "greymaws_trail": "Whispering Woods",
     "gutters_and_hexes": "Goblin Warrens",
     "herbs_for_sister_maybelle": "Whispering Woods",
@@ -19,7 +19,7 @@
     "rats_in_the_kettle": "Brambleford",
     "roadside_howls": "Goblin Road",
     "ruk_the_fence_cutter": "Goblin Road",
-    "signal_in_the_scrap": "Junk-Yard Planet",
+    "signal_in_the_scrap": "Drowned Weir",
     "smoke_on_the_ridge": "Ruined Watchtower",
     "the_hollow_lantern": "Drowned Weir",
     "the_knight_without_rest": "Old Barrow Field",
@@ -78,22 +78,22 @@
     },
     "bridgework_for_joss": {
       "giver": "Joss Veller",
+      "next_step": "After Miretooth falls, meet Joss at the observatory, then cross to the Drowned Causeway and recover a live lamp coil from the old line.",
       "objectives": [
         {
-          "description": "Reach the Relay Trench beyond the first salvage drifts.",
-          "room_id": "junkyard_planet_relay_trench",
+          "description": "Reach the Drowned Causeway beyond Miretooth's Wallow.",
+          "room_id": "drowned_weir_drowned_causeway",
           "type": "visit_room"
         },
         {
           "count": 1,
-          "description": "Recover a live Flux Coil from Junk-Yard salvage machines.",
+          "description": "Recover a live Lamp Coil from the old lanternwork clamps.",
           "item_id": "flux_coil",
           "type": "collect_item"
         }
       ],
-      "next_step": "Find Joss Veller at the observatory by the Nexus Gate, then use the gate route to reach the Junk-Yard Planet relay trench.",
       "prerequisites": [
-        "ruk_the_fence_cutter"
+        "miretooths_claim"
       ],
       "rewards": {
         "items": [
@@ -105,7 +105,7 @@
         "silver": 12,
         "xp": 130
       },
-      "summary": "Help Joss steady the Junk-Yard bridge by reaching the relay trench and bringing back a live flux coil.",
+      "summary": "Help Joss prove the lower lanternworks are tied to the drowned south line by recovering a live pulse from the old road-light system.",
       "title": "Bridgework for Joss"
     },
     "captain_varn_blackreed": {
@@ -183,15 +183,16 @@
     },
     "foreman_coilback": {
       "giver": "Joss Veller",
+      "next_step": "Descend into the Sunken Lock, defeat the Chain Keeper, then follow the exposed south light toward the lamp house.",
       "objectives": [
         {
-          "description": "Find the Anchor Pit at the heart of the salvage field.",
-          "room_id": "junkyard_planet_anchor_pit",
+          "description": "Reach the Sunken Lock at the far side of the drowned works.",
+          "room_id": "drowned_weir_sunken_lock",
           "type": "visit_room"
         },
         {
-          "description": "Defeat Foreman Coilback.",
-          "enemy_tag": "coilback",
+          "description": "Defeat the Chain Keeper.",
+          "enemy_tag": "chainkeeper",
           "type": "defeat_enemy"
         }
       ],
@@ -201,12 +202,12 @@
       "rewards": {
         "silver": 24,
         "trophies": [
-          "junkyard_beacon_core"
+          "blackwater_beacon_core"
         ],
         "xp": 190
       },
-      "summary": "Descend into the Anchor Pit and destroy the salvage foreman that keeps the Junk-Yard bridge violent and unstable.",
-      "title": "Foreman Coilback"
+      "summary": "Break the old lock-keeper enforcing the drowned line so the lamp house can no longer hide behind its machinery.",
+      "title": "The Chain Keeper"
     },
     "greymaws_trail": {
       "giver": "Mira Fenleaf",
@@ -369,7 +370,7 @@
         "silver": 32,
         "xp": 390
       },
-      "summary": "Push deeper into the drowned works, reach the inner lock line, and tear through enough of the blackwater ward to expose whatever is still keeping the old lamp burning wrong.",
+      "summary": "Tear through the drowned works, break the blackwater ward, and expose whatever is still keeping the old lamp burning wrong.",
       "title": "Locks Under Blackwater"
     },
     "loose_arrows": {
@@ -553,15 +554,21 @@
     },
     "signal_in_the_scrap": {
       "giver": "Joss Veller",
+      "next_step": "Push from the Drowned Causeway into Lantern Weir and the Sluice Walk, then bring Joss a Blackwater Lens Shard.",
       "objectives": [
         {
-          "description": "Reach the Crane Grave deeper in Junk-Yard Planet.",
-          "room_id": "junkyard_planet_crane_grave",
+          "description": "Reach Lantern Weir where the wrong south light starts burning in earnest.",
+          "room_id": "drowned_weir_lantern_weir",
+          "type": "visit_room"
+        },
+        {
+          "description": "Climb the Sluice Walk above the blackwater channels.",
+          "room_id": "drowned_weir_sluice_walk",
           "type": "visit_room"
         },
         {
           "count": 1,
-          "description": "Recover an Anchor Glass Shard from the relay swarm.",
+          "description": "Recover a Blackwater Lens Shard from the drowned lanternwork.",
           "item_id": "anchor_glass_shard",
           "type": "collect_item"
         }
@@ -573,8 +580,8 @@
         "silver": 16,
         "xp": 150
       },
-      "summary": "Push deeper into the scrapfield, chart the crane grave, and recover a shard of anchor glass for the observatory lens.",
-      "title": "Signal in the Scrap"
+      "summary": "Chart where the wrong south light is traveling through the drowned works and bring Joss lensglass clean enough to read.",
+      "title": "Signal Under Blackwater"
     },
     "smoke_on_the_ridge": {
       "giver": "Captain Harl Rowan",
@@ -688,7 +695,7 @@
     },
     "the_south_light": {
       "giver": "Joss Veller",
-      "next_step": "Push through the Sluice Walk and the Sunken Lock, then break the blackwater line before it decides Brambleford belongs on its route.",
+      "next_step": "Push from the Drowned Causeway toward Lantern Weir, then keep following the wrong south light until the lamp house has nowhere left to hide.",
       "objectives": [
         {
           "description": "Cross into the Drowned Causeway beyond Miretooth's Wallow.",
@@ -702,17 +709,18 @@
         }
       ],
       "prerequisites": [
-        "miretooths_claim"
+        "foreman_coilback"
       ],
       "rewards": {
         "silver": 26,
         "xp": 360
       },
-      "summary": "Follow the wrong marsh light beyond Miretooth's Wallow and confirm whether an old drowned lamp line is still feeding whatever has started answering from the fen edge.",
+      "summary": "Follow the exposed south light beyond the broken lock line and confirm the old lamp house is still feeding the Lanternfall emergency.",
       "title": "The South Light"
     },
     "what_whispers_in_the_wood": {
       "giver": "Sister Maybelle",
+      "next_step": "Go east from Brambleford toward the old wood trail, then press into Whispering Woods until you reach the Briar Glade.",
       "objectives": [
         {
           "description": "Enter Whispering Woods by the old trail.",
@@ -725,7 +733,6 @@
           "type": "visit_room"
         }
       ],
-      "next_step": "Go east from Brambleford toward the old wood trail, then press into Whispering Woods until you reach the Briar Glade.",
       "prerequisites": [
         "ruk_the_fence_cutter"
       ],
@@ -745,9 +752,6 @@
     "what_whispers_in_the_wood",
     "herbs_for_sister_maybelle",
     "greymaws_trail",
-    "bridgework_for_joss",
-    "signal_in_the_scrap",
-    "foreman_coilback",
     "lanterns_at_dusk",
     "do_not_disturb_the_dead",
     "the_knight_without_rest",
@@ -760,6 +764,9 @@
     "bogwater_rumors",
     "lights_in_the_reeds",
     "miretooths_claim",
+    "bridgework_for_joss",
+    "signal_in_the_scrap",
+    "foreman_coilback",
     "the_south_light",
     "locks_under_blackwater",
     "the_hollow_lantern"

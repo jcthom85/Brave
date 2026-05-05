@@ -369,8 +369,7 @@ def _format_tutorial_screen_block(character, completed_only=False):
     if step_key == "first_steps":
         checks = [
             f"[{'x' if flags.get('talked_tamsin') else ' '}] Consult with Sergeant Tamsin Vale.",
-            f"[{'x' if flags.get('visited_quartermaster_shed') else ' '}] Check the Quartermaster Shed east of the yard.",
-            f"[{'x' if flags.get('returned_to_wayfarers_yard') else ' '}] Return before the yard moves on.",
+            f"[{'x' if flags.get('visited_quartermaster_shed') else ' '}] Head east to the Quartermaster Shed.",
         ]
     elif step_key == "pack_before_walk":
         checks = [
@@ -378,6 +377,7 @@ def _format_tutorial_screen_block(character, completed_only=False):
             f"[{'x' if flags.get('viewed_gear') else ' '}] Check your gear.",
             f"[{'x' if flags.get('viewed_pack') else ' '}] Open your pack.",
             f"[{'x' if flags.get('read_supply_board') else ' '}] Read the supply board.",
+            f"[{'x' if flags.get('returned_to_wayfarers_yard') else ' '}] Return west to Wayfarer's Yard.",
         ]
     elif step_key == "stand_your_ground":
         checks = [
@@ -388,6 +388,14 @@ def _format_tutorial_screen_block(character, completed_only=False):
             f"[{'x' if flags.get('used_class_ability') else ' '}] Use your class skill in combat.",
             f"[{'x' if flags.get('won_vermin_fight') else ' '}] Win one fight in the Vermin Pens.",
         ]
+    elif step_key == "fit_your_clasp":
+        checks = [
+            f"[{'x' if flags.get('received_wayfarer_clasp') else ' '}] Recover the Wayfarer Clasp.",
+            f"[{'x' if flags.get('equipped_wayfarer_clasp') else ' '}] Equip the Wayfarer Clasp from Gear.",
+            f"[{'x' if flags.get('viewed_sheet') else ' '}] Optional: Open your sheet or stats.",
+            f"[{'x' if flags.get('viewed_map') else ' '}] Optional: Check the map.",
+            f"[{'x' if flags.get('viewed_journal') else ' '}] Optional: Open your journal.",
+        ]
     elif step_key == "catch_your_breath":
         checks = [
             f"[{'x' if flags.get('rested_after_fight') else ' '}] Rest in Wayfarer's Yard.",
@@ -396,9 +404,6 @@ def _format_tutorial_screen_block(character, completed_only=False):
         checks = [
             f"[{'x' if flags.get('talked_harl') else ' '}] Report to Captain Harl Rowan in the Training Yard.",
         ]
-
-    optional_done = flags.get("read_family_post_sign") or flags.get("talked_peep") or flags.get("visited_family_post")
-    checks.append(f"[{'x' if optional_done else ' '}] Optional: Visit Family Post for party basics.")
 
     details = [step["summary"]]
     details.extend(checks)

@@ -31,10 +31,7 @@ class CommandRegistrationTests(unittest.TestCase):
         self.assertTrue({"CmdCook", "CmdEat", "CmdFish", "CmdItem", "CmdMap", "CmdReel", "CmdRest", "CmdTravel"} <= self.imports["brave_explore"])
         self.assertIn("CmdParty", self.imports["brave_party"])
         self.assertTrue({"CmdBuild", "CmdClass", "CmdGear", "CmdPack", "CmdQuests", "CmdRace", "CmdSheet"} <= self.imports["brave_profile"])
-        self.assertTrue(
-            {"CmdForge", "CmdPortals", "CmdPray", "CmdRead", "CmdSell", "CmdShift", "CmdShop", "CmdTalk"}
-            <= self.imports["brave_town"]
-        )
+        self.assertTrue({"CmdForge", "CmdPray", "CmdRead", "CmdSell", "CmdShift", "CmdShop", "CmdTalk"} <= self.imports["brave_town"])
 
     def test_character_cmdset_registers_extracted_commands(self):
         add_calls = set()
@@ -81,7 +78,6 @@ class CommandRegistrationTests(unittest.TestCase):
             "CmdSell",
             "CmdShift",
             "CmdForge",
-            "CmdPortals",
             "CmdPray",
             "CmdTalk",
             "CmdRead",

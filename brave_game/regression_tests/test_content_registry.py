@@ -139,7 +139,7 @@ class ContentRegistryTests(unittest.TestCase):
         pack_path = Path(registry.systems.source_path)
         payload = json.loads(pack_path.read_text(encoding="utf-8"))
         self.assertEqual(payload["activities"]["cozy_bonus"], registry.systems.cozy_bonus)
-        self.assertEqual(payload["portals"]["portals"]["junkyard_planet"]["name"], registry.systems.get_portal("junkyard_planet")["name"])
+        self.assertEqual({}, registry.systems.portals)
         self.assertEqual("Stable", registry.systems.get_portal_status_label("stable"))
         self.assertIn("brambleford_hobbyists_wharf", registry.systems.fishing_spots)
         self.assertIn("drowned_weir_drowned_causeway", registry.systems.fishing_spots)
@@ -148,7 +148,7 @@ class ContentRegistryTests(unittest.TestCase):
         self.assertIn("plain_hook", registry.systems.fishing_lures)
         self.assertIn("field_bandage_roll", registry.systems.tinkering_recipes)
         self.assertIn("militia_blade", registry.systems.forge_recipes)
-        self.assertIn("junkyard_beacon_core", registry.systems.trophies)
+        self.assertIn("blackwater_beacon_core", registry.systems.trophies)
 
     def test_recipe_unlock_items_are_distributed_beyond_fishing(self):
         registry = get_content_registry()

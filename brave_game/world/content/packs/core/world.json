@@ -356,7 +356,7 @@
         "veller",
         "lamplighter"
       ],
-      "desc": "Joss wears a lamplighter's coat patched with brass tabs, soot marks, and tools that definitely do not belong on an ordinary ladder. He watches the telescope and the lower chamber with the look of someone quietly keeping two kinds of town lit at once.",
+      "desc": "Joss Veller carries lens scraps, south-line notes, and the expression of a man who would rather solve a frightening truth than let the town name it badly first.",
       "gender": "male",
       "id": "joss_veller",
       "key": "Joss Veller",
@@ -380,14 +380,13 @@
         "notice",
         "sign",
         "brass notice",
-        "nexus notice",
-        "gate notice",
-        "lower gate sign",
-        "lower gate notice"
+        "lanternworks notice",
+        "lower chamber sign",
+        "lower chamber notice"
       ],
-      "desc": "Joss's brass notice plate hangs from the chained east arch. It reads: LOWER GATE CHAMBER SEALED. NO NEXUS WORK, NO JUNK-YARD JUMPS, NO EXCEPTIONS UNTIL THE BRIDGEWORK IS STABLE.",
-      "id": "observatory_nexus_notice",
-      "key": "nexus gate notice",
+      "desc": "Joss's brass notice plate hangs from the east arch. It reads: LOWER LANTERNWORKS OPEN FOR INSPECTION. DO NOT TOUCH SOUTH-LINE GLASS WITHOUT JOSS VELLER PRESENT.",
+      "id": "lower_lanternworks_notice",
+      "key": "lower lanternworks notice",
       "kind": "readable",
       "location": "brambleford_great_observatory"
     },
@@ -431,51 +430,15 @@
     {
       "aliases": [
         "plaque",
-        "gate plaque",
+        "lanternworks plaque",
         "brass plaque",
-        "gates"
+        "south line plaque"
       ],
-      "desc": "A polished brass plaque is riveted into the gate dais, each portal name engraved beside a thin glass strip that glows or stays dark depending on the gate's condition.",
-      "id": "nexus_gate_plaque",
-      "key": "nexus gate plaque",
+      "desc": "A brass plaque labels the old road-light grooves by service line. Most are cold and ordinary. The south line is tarnished dark around every screw.",
+      "id": "lower_lanternworks_plaque",
+      "key": "lower lanternworks plaque",
       "kind": "readable",
-      "location": "brambleford_nexus_gate"
-    },
-    {
-      "aliases": [
-        "beacon",
-        "signal",
-        "tower"
-      ],
-      "desc": "A waist-high beacon blinks in clipped pulses through the scrap haze, anchoring the return gate to something on this world that still remembers how to answer.",
-      "id": "salvage_beacon",
-      "key": "salvage beacon",
-      "kind": "readable",
-      "location": "junkyard_planet_landing_pad"
-    },
-    {
-      "aliases": [
-        "mast",
-        "relay mast",
-        "route mast"
-      ],
-      "desc": "A metal mast rises from the trench with route glass still threaded through its ribs. Static ticks across it like rain on wire.",
-      "id": "relay_route_mast",
-      "key": "relay route mast",
-      "kind": "readable",
-      "location": "junkyard_planet_relay_trench"
-    },
-    {
-      "aliases": [
-        "gantry",
-        "crane gantry",
-        "crane"
-      ],
-      "desc": "The gantry lies folded across the yard, cab glass burst outward and old work orders sealed under layers of rust dust and magnet grit.",
-      "id": "crane_gantry",
-      "key": "collapsed crane gantry",
-      "kind": "readable",
-      "location": "junkyard_planet_crane_grave"
+      "location": "brambleford_lower_lanternworks"
     },
     {
       "aliases": [
@@ -728,34 +691,6 @@
     }
   ],
   "exits": [
-    {
-      "aliases": [
-        "s",
-        "crane",
-        "grave",
-        "crane grave"
-      ],
-      "destination": "junkyard_planet_crane_grave",
-      "direction": "south",
-      "id": "anchor_pit_to_crane_grave",
-      "key": "south",
-      "label": "Crane Grave",
-      "source": "junkyard_planet_anchor_pit"
-    },
-    {
-      "aliases": [
-        "w",
-        "relay",
-        "trench",
-        "relay trench"
-      ],
-      "destination": "junkyard_planet_relay_trench",
-      "direction": "west",
-      "id": "anchor_pit_to_relay_trench",
-      "key": "west",
-      "label": "Relay Trench",
-      "source": "junkyard_planet_anchor_pit"
-    },
     {
       "aliases": [
         "e",
@@ -1084,33 +1019,6 @@
     },
     {
       "aliases": [
-        "n",
-        "anchor",
-        "pit",
-        "anchor pit"
-      ],
-      "destination": "junkyard_planet_anchor_pit",
-      "direction": "north",
-      "id": "crane_grave_to_anchor_pit",
-      "key": "north",
-      "label": "Anchor Pit",
-      "source": "junkyard_planet_crane_grave"
-    },
-    {
-      "aliases": [
-        "w",
-        "scrapway",
-        "verge"
-      ],
-      "destination": "junkyard_planet_scrapway",
-      "direction": "west",
-      "id": "crane_grave_to_scrapway",
-      "key": "west",
-      "label": "Scrapway Verge",
-      "source": "junkyard_planet_crane_grave"
-    },
-    {
-      "aliases": [
         "e",
         "weir",
         "lantern weir",
@@ -1245,9 +1153,9 @@
         "track",
         "fenreach track"
       ],
+      "boss_gate": "ruk_fence_cutter",
       "destination": "blackfen_approach_fenreach_track",
       "direction": "south",
-      "boss_gate": "ruk_fence_cutter",
       "id": "fencebreaker_camp_to_blackfen",
       "key": "south",
       "label": "Fenreach Track",
@@ -1261,9 +1169,9 @@
         "goblin warrens",
         "warrens"
       ],
+      "boss_gate": "ruk_fence_cutter",
       "destination": "goblin_warrens_sinkmouth_cut",
       "direction": "east",
-      "boss_gate": "ruk_fence_cutter",
       "id": "fencebreaker_camp_to_sinkmouth_cut",
       "key": "east",
       "label": "Sinkmouth Cut",
@@ -1277,9 +1185,9 @@
         "ruined watchtower",
         "approach"
       ],
+      "boss_gate": "ruk_fence_cutter",
       "destination": "ruined_watchtower_approach",
       "direction": "north",
-      "boss_gate": "ruk_fence_cutter",
       "id": "fencebreaker_camp_to_watchtower",
       "key": "north",
       "label": "Watchtower Approach",
@@ -1439,37 +1347,6 @@
       "key": "east",
       "label": "Town Green",
       "source": "brambleford_lantern_rest_inn"
-    },
-    {
-      "aliases": [
-        "w",
-        "return",
-        "anchor",
-        "gate",
-        "home",
-        "nexus",
-        "nexus gate"
-      ],
-      "destination": "brambleford_nexus_gate",
-      "direction": "west",
-      "id": "junkyard_to_nexus_gate",
-      "key": "west",
-      "label": "Nexus Gate",
-      "source": "junkyard_planet_landing_pad"
-    },
-    {
-      "aliases": [
-        "e",
-        "scrapway",
-        "verge",
-        "out"
-      ],
-      "destination": "junkyard_planet_scrapway",
-      "direction": "east",
-      "id": "landing_to_scrapway",
-      "key": "east",
-      "label": "Scrapway Verge",
-      "source": "junkyard_planet_landing_pad"
     },
     {
       "aliases": [
@@ -1650,24 +1527,6 @@
     },
     {
       "aliases": [
-        "e",
-        "junkyard",
-        "planet",
-        "junk-yard planet",
-        "junk yard planet",
-        "test gate"
-      ],
-      "destination": "junkyard_planet_landing_pad",
-      "direction": "east",
-      "id": "nexus_gate_to_junkyard",
-      "key": "east",
-      "label": "Junk-Yard Planet",
-      "lock_message": "The Junk-Yard bridge is dark. Joss needs to tune the Nexus route before anyone steps through.",
-      "required_quest": "bridgework_for_joss",
-      "source": "brambleford_nexus_gate"
-    },
-    {
-      "aliases": [
         "w",
         "observatory",
         "stairs",
@@ -1675,26 +1534,24 @@
       ],
       "destination": "brambleford_great_observatory",
       "direction": "west",
-      "id": "nexus_gate_to_observatory",
+      "id": "lower_lanternworks_to_observatory",
       "key": "west",
       "label": "Great Observatory",
-      "source": "brambleford_nexus_gate"
+      "source": "brambleford_lower_lanternworks"
     },
     {
       "aliases": [
         "e",
-        "nexus",
-        "gate",
-        "ring",
-        "nexus gate"
+        "lanternworks",
+        "lower lanternworks",
+        "lampworks",
+        "lower chamber"
       ],
-      "destination": "brambleford_nexus_gate",
+      "destination": "brambleford_lower_lanternworks",
       "direction": "east",
-      "id": "observatory_to_nexus_gate",
+      "id": "observatory_to_lower_lanternworks",
       "key": "east",
-      "label": "Nexus Gate",
-      "lock_message": "Joss has the lower gate chamber chained shut until the bridgework is stable.",
-      "required_quest": "bridgework_for_joss",
+      "label": "Lower Lanternworks",
       "source": "brambleford_great_observatory"
     },
     {
@@ -1921,77 +1778,6 @@
     },
     {
       "aliases": [
-        "e",
-        "anchor",
-        "pit",
-        "anchor pit"
-      ],
-      "destination": "junkyard_planet_anchor_pit",
-      "direction": "east",
-      "id": "relay_trench_to_anchor_pit",
-      "key": "east",
-      "label": "Anchor Pit",
-      "source": "junkyard_planet_relay_trench"
-    },
-    {
-      "aliases": [
-        "s",
-        "scrapway",
-        "verge"
-      ],
-      "destination": "junkyard_planet_scrapway",
-      "direction": "south",
-      "id": "relay_trench_to_scrapway",
-      "key": "south",
-      "label": "Scrapway Verge",
-      "source": "junkyard_planet_relay_trench"
-    },
-    {
-      "aliases": [
-        "e",
-        "crane",
-        "grave",
-        "crane grave"
-      ],
-      "destination": "junkyard_planet_crane_grave",
-      "direction": "east",
-      "id": "scrapway_to_crane_grave",
-      "key": "east",
-      "label": "Crane Grave",
-      "source": "junkyard_planet_scrapway"
-    },
-    {
-      "aliases": [
-        "w",
-        "landing",
-        "return",
-        "back",
-        "junk-yard landing",
-        "junk yard landing"
-      ],
-      "destination": "junkyard_planet_landing_pad",
-      "direction": "west",
-      "id": "scrapway_to_landing",
-      "key": "west",
-      "label": "Junk-Yard Landing",
-      "source": "junkyard_planet_scrapway"
-    },
-    {
-      "aliases": [
-        "n",
-        "relay",
-        "trench",
-        "relay trench"
-      ],
-      "destination": "junkyard_planet_relay_trench",
-      "direction": "north",
-      "id": "scrapway_to_relay_trench",
-      "key": "north",
-      "label": "Relay Trench",
-      "source": "junkyard_planet_scrapway"
-    },
-    {
-      "aliases": [
         "w",
         "camp",
         "fencebreaker camp",
@@ -2214,8 +2000,7 @@
         "e",
         "observatory",
         "hill",
-        "great observatory",
-        "nexus hill"
+        "great observatory"
       ],
       "destination": "brambleford_great_observatory",
       "direction": "east",
@@ -2614,7 +2399,7 @@
       "zone": "Brambleford"
     },
     {
-      "desc": "The observatory crowns Brambleford's highest rise, all brass braces, stone arches, and lantern glass polished brighter than the road probably deserves. A great telescope points upward through the open dome while a lower east arch drops toward stranger work below. Joss has chained that arch shut with a brass notice plate until the bridgework is stable.",
+      "desc": "The observatory crowns Brambleford's highest rise, all brass braces, stone arches, and lantern glass polished brighter than the road probably deserves. A great telescope points upward through the open dome, while an east arch drops to the lower lanternworks where Joss keeps the old south-line records under watch.",
       "id": "brambleford_great_observatory",
       "key": "Great Observatory",
       "map_icon": "O",
@@ -2704,16 +2489,16 @@
       "zone": "Brambleford"
     },
     {
-      "desc": "A circular chamber of old stone and newer fittings surrounds a standing ring of pale light. Brass plaques, humming anchor lines, and a floor inlaid with star charts make the place feel half observatory, half impossible harbor.",
-      "id": "brambleford_nexus_gate",
-      "key": "Nexus Gate",
-      "map_icon": "N",
-      "map_region": "nexus_network",
+      "desc": "A low chamber beneath the observatory holds old municipal lanternwork: brass conduits, blackwater-stained lens frames, and a circular service floor cut with grooves for channeling road-light. Everything here belongs to Brambleford, not some distant elsewhere, and the south-line fittings are the only ones warm enough to worry about.",
+      "id": "brambleford_lower_lanternworks",
+      "key": "Lower Lanternworks",
+      "map_icon": "L",
+      "map_region": "brambleford",
       "map_x": 0,
       "map_y": 0,
-      "portal_hub": true,
       "safe": true,
-      "zone": "The Nexus"
+      "world": "Brave",
+      "zone": "Brambleford"
     },
     {
       "desc": "Shelves of boots, rain cloaks, rope, patched travel bags, and sensible trail goods line the walls in neat practical ranks. Nothing in the room is fancy, but everything looks like it was chosen by someone who expects bad weather, muddy children, and the occasional goblin.",
@@ -2937,71 +2722,6 @@
       "map_y": 0,
       "safe": false,
       "zone": "Goblin Warrens"
-    },
-    {
-      "desc": "A broad salvage pit drops away beneath gantries and broken cranes arranged around a central beacon socket. The machinery here still obeys something, and whatever that something is has no interest in visitors.",
-      "id": "junkyard_planet_anchor_pit",
-      "key": "Anchor Pit",
-      "map_icon": "A",
-      "map_region": "junkyard_planet",
-      "map_x": 2,
-      "map_y": 1,
-      "resonance": "tech",
-      "safe": false,
-      "world": "Junk-Yard Planet",
-      "zone": "Junk-Yard Planet"
-    },
-    {
-      "desc": "Collapsed yard cranes lean over the salvage field like dead metal herons. Cab glass crunches underfoot, and half-severed hook-lines sway whenever the wind crosses the pit.",
-      "id": "junkyard_planet_crane_grave",
-      "key": "Crane Grave",
-      "map_icon": "C",
-      "map_region": "junkyard_planet",
-      "map_x": 2,
-      "map_y": 0,
-      "resonance": "tech",
-      "safe": false,
-      "world": "Junk-Yard Planet",
-      "zone": "Junk-Yard Planet"
-    },
-    {
-      "desc": "The return side of the gate opens onto a steel platform sunk into an ocean of salvage. Broken railcars, dish arrays, and hull plates lie under a copper sky while distant towers blink with cold practical light.",
-      "id": "junkyard_planet_landing_pad",
-      "key": "Junk-Yard Landing",
-      "map_icon": "L",
-      "map_region": "junkyard_planet",
-      "map_x": 0,
-      "map_y": 0,
-      "resonance": "tech",
-      "safe": true,
-      "world": "Junk-Yard Planet",
-      "zone": "Junk-Yard Planet"
-    },
-    {
-      "desc": "A cut trench runs between salvage berms and humming cable towers, every surface striped with old hazard paint and newer scorch marks. White pulses flicker along the route glass underfoot like the ground is still trying to remember its orders.",
-      "id": "junkyard_planet_relay_trench",
-      "key": "Relay Trench",
-      "map_icon": "R",
-      "map_region": "junkyard_planet",
-      "map_x": 1,
-      "map_y": 1,
-      "resonance": "tech",
-      "safe": false,
-      "world": "Junk-Yard Planet",
-      "zone": "Junk-Yard Planet"
-    },
-    {
-      "desc": "A narrow path winds between knee-high drifts of stripped wire, cracked panels, and humming scrap. Motion flickers under the debris whenever the wind pushes hard enough to wake whatever still powers this place.",
-      "id": "junkyard_planet_scrapway",
-      "key": "Scrapway Verge",
-      "map_icon": "S",
-      "map_region": "junkyard_planet",
-      "map_x": 1,
-      "map_y": 0,
-      "resonance": "tech",
-      "safe": false,
-      "world": "Junk-Yard Planet",
-      "zone": "Junk-Yard Planet"
     },
     {
       "desc": "Standing stones ring an old burial center packed with broken offerings, guttered lamps, and a hush that feels observed. The ground inside the circle is trampled by feet that should not still exist.",

@@ -53,7 +53,8 @@ class QuestPopupTests(unittest.TestCase):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
 
         self.assertIn("var introVeilFailsafeTimer = null;", default_out_source)
-        self.assertIn("introVeilFailsafeTimer = window.setTimeout(finishGameIntroVeil, 8000);", default_out_source)
+        self.assertIn("introVeilFailsafeTimer = window.setTimeout(function () {", default_out_source)
+        self.assertIn("finishGameIntroVeil();", default_out_source)
         self.assertIn(
             "var renderWelcomePage = function () {\n"
             "        var host = document.getElementById(\"brave-objectives-sheet\");\n"
@@ -63,6 +64,10 @@ class QuestPopupTests(unittest.TestCase):
             "        finishGameIntroVeil();",
             default_out_source,
         )
+        self.assertIn('var ctaLabel = isLast ? (page.cta_label || "Begin Adventure") : "Next";', default_out_source)
+        self.assertIn("+ escapeHtml(ctaLabel)", default_out_source)
+        self.assertIn("var shouldRenderGuidanceAfterWelcome = !active && currentWelcomePages.length > 0;", default_out_source)
+        self.assertIn("renderObjectives(currentViewData);", default_out_source)
 
     def test_room_activity_speech_does_not_spawn_mobile_voice_toast(self):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
@@ -150,12 +155,15 @@ class QuestPopupTests(unittest.TestCase):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
         css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
 
-        self.assertIn('icon("close", "brave-objectives-sheet__close-icon")\n            + "<span>Close</span>"', default_out_source)
+        self.assertIn("brave-objectives-sheet__close-mark", default_out_source)
+        self.assertIn("brave-objectives-sheet__close-label", default_out_source)
         self.assertNotIn("Close Guide", default_out_source)
         self.assertIn("background: rgba(var(--brave-obj-accent-rgb), 0.08);", css_source)
         self.assertIn("border: 1px solid rgba(var(--brave-obj-accent-rgb), 0.22);", css_source)
         self.assertIn("color: color-mix(in srgb, var(--brave-obj-accent) 74%, var(--brave-text-soft));", css_source)
-        self.assertIn(".brave-objectives-sheet__close-icon {\n    color: inherit;\n}", css_source)
+        self.assertIn(".brave-objectives-sheet__close-mark", css_source)
+        self.assertIn("width: 32px;\n        min-width: 32px;\n        height: 32px;", css_source)
+        self.assertIn("width: 14px;\n        height: 14px;", css_source)
 
 
 if __name__ == "__main__":

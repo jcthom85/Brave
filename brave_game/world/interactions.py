@@ -11,7 +11,6 @@ from world.questing import (
     unlock_quest,
 )
 from world.race_world_hooks import get_extra_read_insight
-from world.resonance import format_portal_plaque_text
 from world.trophies import format_trophy_case_text
 from world.tutorial import get_tutorial_entity_response
 
@@ -245,9 +244,9 @@ def _town_notice_board(character):
     if _is_completed(character, "the_hollow_lantern"):
         lines.append("- Fresh civic addendum: South weir light extinguished. Please stop asking whether drowned public works count as weather.")
     if _is_active(character, "bridgework_for_joss") or _is_active(character, "signal_in_the_scrap"):
-        lines.append("- Joss requests steady salvage hands at the observatory. Strange lights are now considered official.")
+        lines.append("- Joss requests steady lanternwork hands at the observatory. Strange lights are now considered official.")
     if _is_completed(character, "foreman_coilback"):
-        lines.append("- Someone has added in neat script: Beacon Core hung in the Trophy Hall. Please stop tapping the glass.")
+        lines.append("- Someone has added in neat script: Blackwater Beacon Core hung in the Trophy Hall. Please stop tapping the glass.")
 
     return "\n".join(lines)
 
@@ -264,7 +263,6 @@ DYNAMIC_READ_HANDLERS = {
     "great_catch_log": lambda _character: format_catch_log(),
     "kitchen_hearth": format_kitchen_hearth_text,
     "loaner_pole_rack": lambda _character: format_pole_rack_text(),
-    "nexus_gate_plaque": lambda _character: format_portal_plaque_text(),
     "trophy_vitrine": lambda _character: format_trophy_case_text(),
 }
 

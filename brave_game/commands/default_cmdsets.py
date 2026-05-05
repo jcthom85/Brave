@@ -37,7 +37,6 @@ from .brave_profile import CmdBuild, CmdClass, CmdCompanion, CmdGear, CmdMastery
 from .brave_town import (
     CmdBravePopup,
     CmdForge,
-    CmdPortals,
     CmdPray,
     CmdRead,
     CmdSell,
@@ -87,7 +86,6 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdEat())
         self.add(CmdEmote())
         self.add(CmdItem())
-        self.add(CmdPortals())
         self.add(CmdParty())
         self.add(CmdQuests())
         self.add(CmdPray())

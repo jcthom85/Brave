@@ -2,7 +2,7 @@
 
 ELF_READ_INSIGHTS = {
     "dawn_bell": "To elven senses the bronze carries a second note under the first, as if old vows are still ringing where no hand can touch them.",
-    "nexus_gate_plaque": "The script reads like more than language for a moment, closer to a set of routes waiting to be remembered than letters waiting to be sounded out.",
+    "lower_lanternworks_plaque": "The service lines read as civic craft rather than ornament: old routes for light, warning, and duty, all bent toward the troubled south.",
     "star_lens": "The lens etchings resolve into disciplined old sky-work, the sort of pattern an elf recognizes as intent rather than decoration.",
     "boglight_lantern": "There is structure in the wrong light, not chaos; whatever answers from the glass learned to mimic guidance on purpose.",
     "weir_keepers_plaque": "The old civic engraving still hums with the shape of ordered signal-work, even through rust, water, and whatever has gone wrong since.",

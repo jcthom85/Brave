@@ -202,7 +202,7 @@ the project owner's ElevenLabs account. Keep the matching generation JSON under
   - License: ElevenLabs account output; verify active subscription terms before release.
 - `ambience/regions/**/*.mp3`
   - Source: ElevenLabs Sound Effects API
-  - Generation IDs: regional ambience batch, including Brambleford interiors, Nexus Gate, Old Barrow, Whispering Woods, Blackfen, Drowned Weir, Ruined Watchtower, Goblin Warrens, and Junkyard loops.
+  - Generation IDs: regional ambience batch, including Brambleford interiors, Lower Lanternworks, Old Barrow, Whispering Woods, Blackfen, Drowned Weir, Ruined Watchtower, Goblin Warrens, and retired regional loops.
   - License: ElevenLabs account output; verify active subscription terms before release.
 - `music/theme_sketches/*.mp3`
   - Source: ElevenLabs Sound Effects API

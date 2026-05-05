@@ -1,4 +1,5 @@
 import re
+import json
 import unittest
 from pathlib import Path
 
@@ -38,6 +39,28 @@ class ContentSourceHygieneTests(unittest.TestCase):
 
         for path in removed_paths:
             self.assertFalse(path.exists(), msg=f"{path.relative_to(ROOT)} should not exist")
+
+    def test_core_json_packs_parse_without_trailing_data(self):
+        pack_paths = sorted((ROOT / "world/content/packs/core").glob("*.json"))
+
+        for path in pack_paths:
+            with self.subTest(path=path.name):
+                json.loads(path.read_text(encoding="utf-8"))
+
+    def test_retired_portal_worlds_are_not_authored_content(self):
+        checked_paths = [
+            ROOT / "world/content/packs/core/world.json",
+            ROOT / "world/content/packs/core/quests.json",
+            ROOT / "world/content/packs/core/dialogue.json",
+            ROOT / "world/content/packs/core/encounters.json",
+            ROOT / "world/content/packs/core/systems.json",
+        ]
+        forbidden = ("Junk-Yard", "junkyard", "training_island", "Training Island", "Nexus", "nexus")
+
+        for path in checked_paths:
+            source = path.read_text(encoding="utf-8")
+            for token in forbidden:
+                self.assertNotIn(token, source, msg=f"{path.relative_to(ROOT)} still contains {token}")
 
 
 if __name__ == "__main__":

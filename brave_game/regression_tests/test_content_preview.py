@@ -83,8 +83,5 @@ class ContentPreviewTests(unittest.TestCase):
         self.assertEqual("Ironroot Longblade", preview["result_name"])
         self.assertTrue(preview["materials"])
 
-    def test_preview_portal_resolves_status_label(self):
-        preview = preview_portal("junkyard_planet")
-
-        self.assertEqual("Stable", preview["status_label"])
-        self.assertEqual("Junk-Yard Planet", preview["portal"]["name"])
+    def test_preview_portal_reports_missing_live_portal(self):
+        self.assertIsNone(preview_portal("lower_lanternworks"))

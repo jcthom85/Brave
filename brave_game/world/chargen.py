@@ -127,6 +127,10 @@ def _finish_chargen(caller, menu, **kwargs):
     if hasattr(menu, "close_menu"):
         menu.close_menu()
 
+    # Clear the chargen view immediately to prevent flickering back during play transition
+    if _is_web_session(caller):
+        send_webclient_event(caller, session=caller, brave_clear={})
+
     auto_play = getattr(getattr(caller, "ndb", None), "brave_chargen_autoplay", None)
     if getattr(caller, "ndb", None) is not None and hasattr(caller.ndb, "brave_chargen_autoplay"):
         del caller.ndb.brave_chargen_autoplay

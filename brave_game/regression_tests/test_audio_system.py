@@ -40,7 +40,6 @@ class AudioSystemFilesTests(unittest.TestCase):
             "music.region.drowned_weir",
             "music.region.ruined_watchtower",
             "music.region.goblin_warrens",
-            "music.region.junkyard_planet",
             "sfx.ui.click",
             "sfx.ui.journal_tab",
             "sfx.inventory.equip",
@@ -126,7 +125,7 @@ class AudioSystemFilesTests(unittest.TestCase):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
         default_in_source = DEFAULT_IN_PATH.read_text(encoding="utf-8")
 
-        self.assertIn('brave_static_v="20260501a"', base_template_source)
+        self.assertIn('brave_static_v="20260504frontdoorlink2"', base_template_source)
         self.assertIn("BRAVE_AUDIO_MANIFEST_URL", base_template_source)
         self.assertIn("webclient/js/brave_audio.js", base_template_source)
         self.assertLess(
@@ -191,7 +190,9 @@ class AudioSystemFilesTests(unittest.TestCase):
         self.assertIn("startLoginSubmitAudio({ musicFirst: isMobileAudioStart() });", default_out_source)
         self.assertIn("isLoginSubmitCommand(command) && isTitleExperienceView(currentViewData)", default_out_source)
         self.assertNotIn("data-brave-title-audio-unlock", default_out_source)
-        self.assertIn('tone === "junkyard" ? "ambience.junkyard.landing" : "ambience.portal"', audio_source)
+        self.assertIn('if (tone === "lanternworks")', audio_source)
+        self.assertNotIn("nexus", audio_source.lower())
+        self.assertNotIn("junkyard", audio_source)
 
     def test_browser_reactive_state_uses_authored_room_id_for_audio(self):
         import sys

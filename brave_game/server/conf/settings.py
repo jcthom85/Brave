@@ -40,6 +40,12 @@ AUTO_CREATE_CHARACTER_WITH_ACCOUNT = False
 AUTO_PUPPET_ON_LOGIN = False
 MAX_NR_CHARACTERS = 10
 
+# Production Proxy Settings
+WEBSOCKET_CLIENT_URL = "wss://brave.junewiregames.com/ws"
+CSRF_TRUSTED_ORIGINS = ["https://brave.junewiregames.com"]
+ALLOWED_HOSTS = ["brave.junewiregames.com", "localhost", "127.0.0.1"]
+DEBUG = False
+
 # The default Evennia networking settings already listen on 0.0.0.0 and allow
 # LAN access, which matches Brave's local-family multiplayer target.
 

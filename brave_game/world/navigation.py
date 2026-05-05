@@ -55,7 +55,6 @@ MAP_MARKERS = {
     "current": {"icon": "player", "label": "You", "tone": "current"},
     "quest": {"icon": "castle-flag", "label": "Tracked Quest", "tone": "quest"},
     "boss": {"icon": "skull-trophy", "label": "Boss", "tone": "danger"},
-    "portal": {"icon": "spawn-node", "label": "Portal", "tone": "portal"},
     "forge": {"icon": "anvil", "label": "Forge", "tone": "service"},
     "shop": {"icon": "wooden-sign", "label": "Shop", "tone": "service"},
     "rest": {"icon": "campfire", "label": "Rest", "tone": "service"},
@@ -69,7 +68,6 @@ MAP_MARKER_PRIORITY = (
     "current",
     "quest",
     "boss",
-    "portal",
     "forge",
     "shop",
     "rest",
@@ -304,10 +302,6 @@ def _map_marker_keys(room, *, current=False, party=False, tracked_room_ids=None)
         keys.add("quest")
     if room_id and _room_has_boss_encounter(room_id):
         keys.add("boss")
-    if getattr(room.db, "brave_portal_hub", False) or (
-        room_id and any(portal.get("entry_room") == room_id for portal in SYSTEMS_CONTENT.portals.values())
-    ):
-        keys.add("portal")
     if room_id and room_id == SYSTEMS_CONTENT.forge_room_id:
         keys.add("forge")
     if room_id and room_id == SYSTEMS_CONTENT.outfitters_room_id:

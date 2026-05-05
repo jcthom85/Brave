@@ -33,32 +33,24 @@ class DummyCharacter:
         self.db = SimpleNamespace(brave_quests=quests or {})
 
 
-class NexusGateTests(unittest.TestCase):
-    def test_nexus_route_hidden_until_bridgework_is_active(self):
+class LanternworksRouteTests(unittest.TestCase):
+    def test_lower_lanternworks_route_is_plain_local_room(self):
         town_exit = DummyExit("west", "Town Green")
-        nexus_exit = DummyExit(
-            "east",
-            "Nexus Gate",
-            required_quest="bridgework_for_joss",
-            lock_message="Joss has the lower gate chamber chained shut until the bridgework is stable.",
-        )
-        room = DummyRoom([nexus_exit, town_exit])
+        lanternworks_exit = DummyExit("east", "Lower Lanternworks")
+        room = DummyRoom([lanternworks_exit, town_exit])
         character = DummyCharacter()
 
-        self.assertFalse(is_exit_available(nexus_exit, character))
-        self.assertEqual([town_exit], visible_exits(room, character))
-        self.assertEqual(
-            "Joss has the lower gate chamber chained shut until the bridgework is stable.",
-            get_exit_block_message(nexus_exit),
-        )
+        self.assertTrue(is_exit_available(lanternworks_exit, character))
+        self.assertEqual([lanternworks_exit, town_exit], visible_exits(room, character))
+        self.assertEqual("That route is not ready for you yet.", get_exit_block_message(lanternworks_exit))
 
-    def test_nexus_route_visible_after_bridgework_unlocks(self):
-        nexus_exit = DummyExit("east", "Nexus Gate", required_quest="bridgework_for_joss")
-        room = DummyRoom([nexus_exit])
+    def test_authored_quest_locks_still_work_for_other_routes(self):
+        locked_exit = DummyExit("east", "Old Worksite", required_quest="bridgework_for_joss")
+        room = DummyRoom([locked_exit])
         character = DummyCharacter({"bridgework_for_joss": {"status": "active"}})
 
-        self.assertTrue(is_exit_available(nexus_exit, character))
-        self.assertEqual([nexus_exit], visible_exits(room, character))
+        self.assertTrue(is_exit_available(locked_exit, character))
+        self.assertEqual([locked_exit], visible_exits(room, character))
 
 
 if __name__ == "__main__":

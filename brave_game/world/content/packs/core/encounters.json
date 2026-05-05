@@ -17,14 +17,14 @@
       "armor": 6,
       "attack_power": 18,
       "desc": "A hard-looking tower raider in pieced mail, built to break a line and hold the breach.",
+      "dodge": 6,
       "emote_reactions": {
+        "default": "The bandit raider narrows his eyes and keeps watching the line.",
         "taunt": {
           "aggro": 1,
           "text": "The bandit raider spits to the side and tightens his grip on the spear."
-        },
-        "default": "The bandit raider narrows his eyes and keeps watching the line."
+        }
       },
-      "dodge": 6,
       "loot": [
         {
           "chance": 0.85,
@@ -191,6 +191,7 @@
       "attack_power": 22,
       "desc": "A disciplined bandit captain in a rain-dark coat, moving like he expects every fight to become his line if he wants it badly enough.",
       "dodge": 9,
+      "gender": "male",
       "loot": [
         {
           "chance": 1.0,
@@ -204,7 +205,6 @@
         }
       ],
       "max_hp": 188,
-      "gender": "male",
       "name": "Captain Varn Blackreed",
       "silver": [
         18,
@@ -376,39 +376,37 @@
       "armor": 6,
       "attack_kind": "spell",
       "attack_power": 18,
-      "desc": "A salvage overseer welded into a crane-rig harness, all piston limbs and command lights gone hostile.",
+      "desc": "A drowned lock-keeper of iron ribs, bell chain, and stubborn duty, still enforcing orders nobody living remembers giving.",
       "dodge": 7,
+      "gender": "male",
       "loot": [
         {
           "chance": 1.0,
           "item": "beacon_core"
         },
         {
-          "chance": 1.0,
-          "item": "flux_coil",
-          "max": 2,
-          "min": 1
+          "chance": 0.9,
+          "item": "ward_iron_rivet"
         },
         {
-          "chance": 1.0,
+          "chance": 0.45,
           "item": "anchor_glass_shard"
         }
       ],
       "max_hp": 146,
-      "gender": "male",
-      "name": "Foreman Coilback",
+      "name": "The Chain Keeper",
       "silver": [
         14,
         18
       ],
-      "special": "coilback",
+      "special": "chainkeeper",
       "spell_power": 19,
       "tags": [
-        "construct",
-        "tech",
+        "undead",
+        "weir",
+        "chainkeeper",
         "boss",
-        "coilback",
-        "foreman"
+        "brute"
       ],
       "xp": 160
     },
@@ -639,6 +637,7 @@
       "attack_power": 26,
       "desc": "An oversized goblin tyrant wearing a battered pot lid like a crown and carrying a black iron ladle like a scepter.",
       "dodge": 6,
+      "gender": "male",
       "loot": [
         {
           "chance": 1.0,
@@ -660,7 +659,6 @@
         }
       ],
       "max_hp": 226,
-      "gender": "male",
       "name": "Grubnak the Pot-King",
       "silver": [
         22,
@@ -762,20 +760,20 @@
       "armor": 3,
       "attack_kind": "spell",
       "attack_power": 9,
-      "desc": "A hovering clamp rig that locks, drags, and tags targets with ugly machine patience.",
+      "desc": "A drowned lanternwork clamp that skitters on bent iron legs, snapping shut wherever the old line tells it to hold.",
       "dodge": 7,
       "loot": [
         {
-          "chance": 0.6,
-          "item": "flux_coil"
+          "chance": 0.75,
+          "item": "ward_iron_rivet"
         },
         {
-          "chance": 0.5,
-          "item": "magnetized_scrap"
+          "chance": 0.35,
+          "item": "flux_coil"
         }
       ],
       "max_hp": 46,
-      "name": "Mag-Clamp Drone",
+      "name": "Clamp Warden",
       "silver": [
         4,
         8
@@ -783,9 +781,9 @@
       "spell_power": 13,
       "tags": [
         "construct",
-        "tech",
-        "support",
-        "clamp"
+        "weir",
+        "warden",
+        "brute"
       ],
       "xp": 32
     },
@@ -934,20 +932,20 @@
       "armor": 2,
       "attack_kind": "spell",
       "attack_power": 8,
-      "desc": "A darting relay parasite throwing needle-bright pulses through the scrap fog.",
+      "desc": "A tiny lampglass parasite pulsing with stolen south-line light.",
       "dodge": 11,
       "loot": [
         {
-          "chance": 0.55,
+          "chance": 0.7,
           "item": "anchor_glass_shard"
         },
         {
-          "chance": 0.45,
-          "item": "fractured_circuit"
+          "chance": 0.2,
+          "item": "ward_iron_rivet"
         }
       ],
       "max_hp": 28,
-      "name": "Relay Tick",
+      "name": "Glass Tick",
       "silver": [
         3,
         6
@@ -955,8 +953,8 @@
       "spell_power": 14,
       "tags": [
         "construct",
-        "tech",
-        "signal",
+        "weir",
+        "wisp",
         "skirmisher"
       ],
       "target_strategy": "lowest_hp",
@@ -1059,6 +1057,7 @@
       "attack_power": 28,
       "desc": "A broad goblin brute in stolen harness, gripping the jagged axe that gave him his name.",
       "dodge": 8,
+      "gender": "male",
       "loot": [
         {
           "chance": 1.0,
@@ -1072,13 +1071,12 @@
         }
       ],
       "max_hp": 190,
-      "gender": "male",
       "name": "Ruk the Fence-Cutter",
-      "stationary": true,
       "silver": [
         10,
         14
       ],
+      "stationary": true,
       "tags": [
         "goblin",
         "boss",
@@ -1092,7 +1090,7 @@
       "armor": 3,
       "attack_kind": "spell",
       "attack_power": 10,
-      "desc": "A hovering work drone whose tool arms now serve nobody gentle.",
+      "desc": "A hovering lanternwork plate that tracks movement through cracked glass and answers with hard pulses of south-line light.",
       "dodge": 7,
       "loot": [
         {
@@ -1105,7 +1103,7 @@
         }
       ],
       "max_hp": 38,
-      "name": "Salvage Drone",
+      "name": "Lens Warden",
       "silver": [
         4,
         7
@@ -1113,7 +1111,7 @@
       "spell_power": 12,
       "tags": [
         "construct",
-        "tech",
+        "weir",
         "ranged"
       ],
       "xp": 28
@@ -1122,29 +1120,29 @@
       "accuracy": 70,
       "armor": 4,
       "attack_power": 13,
-      "desc": "A four-legged salvage brute stitched from plates, clamps, and bad civic planning.",
+      "desc": "A low iron hound dragged together from old lock braces and bad lanternlight.",
       "dodge": 5,
       "loot": [
         {
-          "chance": 0.75,
+          "chance": 0.65,
           "item": "magnetized_scrap"
         },
         {
-          "chance": 0.4,
-          "item": "fractured_circuit"
+          "chance": 0.3,
+          "item": "ward_iron_rivet"
         }
       ],
       "max_hp": 54,
-      "name": "Scrap Hound",
+      "name": "Lockjaw Hound",
       "silver": [
         4,
         7
       ],
       "tags": [
         "construct",
-        "tech",
-        "brute",
-        "hound"
+        "weir",
+        "beast",
+        "skirmisher"
       ],
       "xp": 34
     },
@@ -1152,24 +1150,24 @@
       "accuracy": 72,
       "armor": 1,
       "attack_power": 7,
-      "desc": "A palm-sized salvage machine skittering on too many magnetic feet.",
+      "desc": "A palm-sized knot of weir iron and lamp wire that bites anything warm enough to interrupt the line.",
       "dodge": 9,
       "loot": [
         {
-          "chance": 0.7,
-          "item": "fractured_circuit"
+          "chance": 0.45,
+          "item": "magnetized_scrap"
         }
       ],
       "max_hp": 24,
-      "name": "Scrap Mite",
+      "name": "Sluice Mite",
       "silver": [
         2,
         4
       ],
       "tags": [
         "construct",
-        "tech",
-        "scrap"
+        "weir",
+        "mite"
       ],
       "xp": 18
     },
@@ -1211,6 +1209,7 @@
       "attack_power": 19,
       "desc": "A long-dead knight risen in dim mail and torn surcoat, still carrying command like a wound that never closed.",
       "dodge": 7,
+      "gender": "male",
       "loot": [
         {
           "chance": 1.0,
@@ -1224,7 +1223,6 @@
         }
       ],
       "max_hp": 168,
-      "gender": "male",
       "name": "Sir Edric the Restless",
       "silver": [
         14,
@@ -1321,26 +1319,6 @@
       ],
       "xp": 12
     },
-    "tutorial_thorn_rat": {
-      "accuracy": 68,
-      "armor": 0,
-      "attack_power": 3,
-      "desc": "A burr-matted yard rat penned for training, still mean enough to make a lesson stick.",
-      "dodge": 5,
-      "loot": [],
-      "max_hp": 28,
-      "name": "Yard Thorn Rat",
-      "silver": [
-        0,
-        0
-      ],
-      "tags": [
-        "beast",
-        "rat",
-        "tutorial"
-      ],
-      "xp": 8
-    },
     "tower_archer": {
       "accuracy": 83,
       "armor": 3,
@@ -1370,8 +1348,200 @@
       ],
       "target_strategy": "lowest_hp",
       "xp": 46
+    },
+    "tutorial_thorn_rat": {
+      "accuracy": 68,
+      "armor": 0,
+      "attack_power": 3,
+      "desc": "A burr-matted yard rat penned for training, still mean enough to make a lesson stick.",
+      "dodge": 5,
+      "loot": [],
+      "max_hp": 28,
+      "name": "Yard Thorn Rat",
+      "silver": [
+        0,
+        0
+      ],
+      "tags": [
+        "beast",
+        "rat",
+        "tutorial"
+      ],
+      "xp": 8
     }
   },
+  "roaming_parties": [
+    {
+      "avoid_safe": true,
+      "encounter": {
+        "enemies": [
+          "bandit_raider",
+          "bandit_scout"
+        ],
+        "intro": "A Blackreed patrol works the broken road in a loose line, searching for stragglers and bad luck.",
+        "key": "blackreed_patrol",
+        "title": "Blackreed Patrol"
+      },
+      "interval": 18,
+      "key": "blackreed_patrol",
+      "region": "ruined_watchtower",
+      "respawn_delay": 180,
+      "start_room": "ruined_watchtower_approach"
+    },
+    {
+      "avoid_safe": true,
+      "encounter": {
+        "enemies": [
+          "goblin_sneak",
+          "goblin_cutter"
+        ],
+        "intro": "A goblin mob rattles through the tunnels in a hard, hungry knot of teeth and stolen metal.",
+        "key": "warren_mob",
+        "title": "Warren Mob"
+      },
+      "interval": 16,
+      "key": "warren_mob",
+      "region": "goblin_warrens",
+      "respawn_delay": 150,
+      "start_room": "goblin_warrens_sinkmouth_cut"
+    },
+    {
+      "avoid_safe": true,
+      "encounter": {
+        "enemies": [
+          "fen_wisp",
+          "bog_creeper"
+        ],
+        "intro": "A marsh hunt slips through the reeds with the patience of something that already knows the mud by name.",
+        "key": "fen_hunt",
+        "title": "Fen Hunt"
+      },
+      "interval": 20,
+      "key": "fen_hunt",
+      "region": "blackfen_approach",
+      "respawn_delay": 180,
+      "start_room": "blackfen_approach_fenreach_track"
+    },
+    {
+      "avoid_safe": true,
+      "encounter": {
+        "enemies": [
+          "drowned_warder",
+          "hollow_wisp"
+        ],
+        "intro": "Drowned warders drift between the crossings, checking every shadow for something that should not be there.",
+        "key": "weir_patrol",
+        "title": "Weir Patrol"
+      },
+      "interval": 18,
+      "key": "weir_patrol",
+      "region": "drowned_weir",
+      "respawn_delay": 180,
+      "start_room": "drowned_weir_drowned_causeway"
+    },
+    {
+      "avoid_safe": true,
+      "encounter": {
+        "enemies": [
+          "goblin_sneak",
+          "goblin_cutter"
+        ],
+        "intro": "A pair of goblin raiders keeps to the fence line and ditch cuts, looking for easy travelers and loose planks.",
+        "key": "goblin_road_raiders",
+        "title": "Road Raiders"
+      },
+      "interval": 18,
+      "key": "goblin_road_raiders",
+      "region": "goblin_road",
+      "respawn_delay": 150,
+      "start_room": "goblin_road_old_fence_line"
+    },
+    {
+      "avoid_safe": true,
+      "encounter": {
+        "enemies": [
+          "road_wolf",
+          "road_wolf"
+        ],
+        "intro": "Lean road wolves work the muddy bends in a restless pack, testing anything that looks slower than hunger.",
+        "key": "goblin_road_wolves",
+        "title": "Road Wolf Pack"
+      },
+      "interval": 16,
+      "key": "goblin_road_wolves",
+      "region": "goblin_road",
+      "respawn_delay": 150,
+      "start_room": "goblin_road_wolf_turn"
+    },
+    {
+      "avoid_safe": true,
+      "encounter": {
+        "enemies": [
+          "skeletal_soldier",
+          "barrow_wisp"
+        ],
+        "intro": "Old field guardians drift between the markers and causeway, answering every step with bone and pale fire.",
+        "key": "barrow_watch",
+        "title": "Barrow Watch"
+      },
+      "interval": 20,
+      "key": "barrow_watch",
+      "region": "old_barrow_field",
+      "respawn_delay": 180,
+      "start_room": "old_barrow_field_marker_row"
+    },
+    {
+      "avoid_safe": true,
+      "encounter": {
+        "enemies": [
+          "restless_shade",
+          "grave_crow"
+        ],
+        "intro": "Shades and grave crows wheel through the field in a knot of old grief that refuses to stay buried.",
+        "key": "barrow_mourners",
+        "title": "Barrow Mourners"
+      },
+      "interval": 18,
+      "key": "barrow_mourners",
+      "region": "old_barrow_field",
+      "respawn_delay": 180,
+      "start_room": "old_barrow_field_barrow_circle"
+    },
+    {
+      "avoid_safe": true,
+      "encounter": {
+        "enemies": [
+          "briar_imp",
+          "mossling"
+        ],
+        "intro": "A briar imp capers through the brush while a mossling drags the roots along behind it like a leash.",
+        "key": "whispering_thorns",
+        "title": "Thornbound Pair"
+      },
+      "interval": 18,
+      "key": "whispering_thorns",
+      "region": "whispering_woods",
+      "respawn_delay": 180,
+      "start_room": "whispering_woods_briar_glade"
+    },
+    {
+      "avoid_safe": true,
+      "encounter": {
+        "enemies": [
+          "forest_wolf",
+          "cave_spider"
+        ],
+        "intro": "A forest wolf and a patient spider move the old stone path like they have hunted it together for years.",
+        "key": "whispering_hunters",
+        "title": "Whispering Hunters"
+      },
+      "interval": 20,
+      "key": "whispering_hunters",
+      "region": "whispering_woods",
+      "respawn_delay": 180,
+      "start_room": "whispering_woods_old_stone_path"
+    }
+  ],
   "room_encounters": {
     "blackfen_approach_boglight_hollow": [
       {
@@ -1559,6 +1729,15 @@
         "intro": "Silt boils up at the stone edge while a pale marsh light drifts in behind it, already looking for the weakest footing in the party.",
         "key": "blackwater_pull",
         "title": "Blackwater Pull"
+      },
+      {
+        "enemies": [
+          "mag_clamp_drone",
+          "relay_tick"
+        ],
+        "intro": "The causeway stones click with hidden catches, and old lanternwork clamps crawl out of the blackwater to hold the line by force.",
+        "key": "old_line_clamps",
+        "title": "Old Line Clamps"
       }
     ],
     "drowned_weir_lantern_weir": [
@@ -1619,6 +1798,16 @@
         "intro": "The upper walk belongs to the wrong line now, and it has enough bodies left to enforce that opinion.",
         "key": "high_walk_claim",
         "title": "High Walk Claim"
+      },
+      {
+        "enemies": [
+          "scrap_hound",
+          "relay_tick",
+          "scrap_mite"
+        ],
+        "intro": "The sluice walk rings like a struck bell as lockjaw shapes and glass ticks converge under the wrong south light.",
+        "key": "chainkeeper_patrol",
+        "title": "Chainkeeper Patrol"
       }
     ],
     "drowned_weir_sunken_lock": [
@@ -1651,6 +1840,14 @@
         "intro": "Black water heaves in the chamber and the whole lock answers at once: iron, claws, and that same white drowned light that does not know how to stop.",
         "key": "lock_surge",
         "title": "Lock Surge"
+      },
+      {
+        "enemies": [
+          "foreman_coilback"
+        ],
+        "intro": "The sunken lock hauls its chains tight, and the keeper at the heart of the drowned mechanism rises to deny Brambleford its answer.",
+        "key": "chain_keepers_stand",
+        "title": "The Chain Keeper's Stand"
       }
     ],
     "goblin_road_fencebreaker_camp": [
@@ -1897,112 +2094,6 @@
         "intro": "A tunnel brute drives forward while something wet and hungry slides around the torchbend behind it.",
         "key": "slime_turn",
         "title": "Slime Turn"
-      }
-    ],
-    "junkyard_planet_anchor_pit": [
-      {
-        "enemies": [
-          "foreman_coilback"
-        ],
-        "intro": "A crane-rig giant unfolds from the pit gantry, lights flaring across its welded spine as the whole yard answers to it.",
-        "key": "foremans_redoubt",
-        "title": "Foreman Coilback"
-      }
-    ],
-    "junkyard_planet_crane_grave": [
-      {
-        "enemies": [
-          "scrap_hound",
-          "salvage_drone"
-        ],
-        "intro": "Dead crane arms creak overhead as a hound and salvage drone break from cover together.",
-        "key": "craneward_pair",
-        "title": "Craneward Pair"
-      },
-      {
-        "enemies": [
-          "mag_clamp_drone",
-          "mag_clamp_drone"
-        ],
-        "intro": "Two clamp rigs sweep through the yard, trying to pin anything that still moves like a person.",
-        "key": "clamp_line",
-        "title": "Clamp Line"
-      },
-      {
-        "enemies": [
-          "relay_tick",
-          "scrap_hound",
-          "salvage_drone"
-        ],
-        "intro": "The crane grave wakes all at once: a relay tick darts between broken cabs while heavier machines advance behind it.",
-        "key": "grave_static",
-        "title": "Grave Static"
-      }
-    ],
-    "junkyard_planet_relay_trench": [
-      {
-        "enemies": [
-          "relay_tick",
-          "relay_tick"
-        ],
-        "intro": "Signal ticks pour from a trench conduit in a burst of white static and angry light.",
-        "key": "relay_swarm",
-        "title": "Relay Swarm"
-      },
-      {
-        "enemies": [
-          "mag_clamp_drone",
-          "relay_tick"
-        ],
-        "intro": "A clamp drone rises over the trench just as a relay tick starts painting targets below.",
-        "key": "trench_hold",
-        "title": "Trench Hold"
-      },
-      {
-        "enemies": [
-          "scrap_hound",
-          "mag_clamp_drone"
-        ],
-        "intro": "A scrap hound prowls the trench lip while a drone tracks movement from above.",
-        "key": "yard_watch",
-        "title": "Yard Watch"
-      }
-    ],
-    "junkyard_planet_scrapway": [
-      {
-        "enemies": [
-          "scrap_mite",
-          "scrap_mite"
-        ],
-        "intro": "The scrap drift splits open and a cluster of skittering machine mites comes alive around you.",
-        "key": "sparking_nest",
-        "title": "Sparking Nest"
-      },
-      {
-        "enemies": [
-          "salvage_drone"
-        ],
-        "intro": "A salvage drone rises from the metal haze, tool arms rotating into something much less civic.",
-        "key": "drone_sweep",
-        "title": "Drone Sweep"
-      },
-      {
-        "enemies": [
-          "salvage_drone",
-          "scrap_mite"
-        ],
-        "intro": "A drone hums awake overhead just as scrap mites surge through the wire drifts below.",
-        "key": "broken_line",
-        "title": "Broken Line"
-      },
-      {
-        "enemies": [
-          "scrap_hound",
-          "scrap_mite"
-        ],
-        "intro": "A plate-plated hound lopes through the salvage smoke while smaller machines wake around its paws.",
-        "key": "hound_and_haze",
-        "title": "Hound and Haze"
       }
     ],
     "old_barrow_field_barrow_circle": [
@@ -2318,178 +2409,6 @@
       }
     ]
   },
-  "roaming_parties": [
-    {
-      "key": "blackreed_patrol",
-      "region": "ruined_watchtower",
-      "start_room": "ruined_watchtower_approach",
-      "interval": 18,
-      "respawn_delay": 180,
-      "avoid_safe": true,
-      "encounter": {
-        "key": "blackreed_patrol",
-        "title": "Blackreed Patrol",
-        "intro": "A Blackreed patrol works the broken road in a loose line, searching for stragglers and bad luck.",
-        "enemies": [
-          "bandit_raider",
-          "bandit_scout"
-        ]
-      }
-    },
-    {
-      "key": "warren_mob",
-      "region": "goblin_warrens",
-      "start_room": "goblin_warrens_sinkmouth_cut",
-      "interval": 16,
-      "respawn_delay": 150,
-      "avoid_safe": true,
-      "encounter": {
-        "key": "warren_mob",
-        "title": "Warren Mob",
-        "intro": "A goblin mob rattles through the tunnels in a hard, hungry knot of teeth and stolen metal.",
-        "enemies": [
-          "goblin_sneak",
-          "goblin_cutter"
-        ]
-      }
-    },
-    {
-      "key": "fen_hunt",
-      "region": "blackfen_approach",
-      "start_room": "blackfen_approach_fenreach_track",
-      "interval": 20,
-      "respawn_delay": 180,
-      "avoid_safe": true,
-      "encounter": {
-        "key": "fen_hunt",
-        "title": "Fen Hunt",
-        "intro": "A marsh hunt slips through the reeds with the patience of something that already knows the mud by name.",
-        "enemies": [
-          "fen_wisp",
-          "bog_creeper"
-        ]
-      }
-    },
-    {
-      "key": "weir_patrol",
-      "region": "drowned_weir",
-      "start_room": "drowned_weir_drowned_causeway",
-      "interval": 18,
-      "respawn_delay": 180,
-      "avoid_safe": true,
-      "encounter": {
-        "key": "weir_patrol",
-        "title": "Weir Patrol",
-        "intro": "Drowned warders drift between the crossings, checking every shadow for something that should not be there.",
-        "enemies": [
-          "drowned_warder",
-          "hollow_wisp"
-        ]
-      }
-    },
-    {
-      "key": "goblin_road_raiders",
-      "region": "goblin_road",
-      "start_room": "goblin_road_old_fence_line",
-      "interval": 18,
-      "respawn_delay": 150,
-      "avoid_safe": true,
-      "encounter": {
-        "key": "goblin_road_raiders",
-        "title": "Road Raiders",
-        "intro": "A pair of goblin raiders keeps to the fence line and ditch cuts, looking for easy travelers and loose planks.",
-        "enemies": [
-          "goblin_sneak",
-          "goblin_cutter"
-        ]
-      }
-    },
-    {
-      "key": "goblin_road_wolves",
-      "region": "goblin_road",
-      "start_room": "goblin_road_wolf_turn",
-      "interval": 16,
-      "respawn_delay": 150,
-      "avoid_safe": true,
-      "encounter": {
-        "key": "goblin_road_wolves",
-        "title": "Road Wolf Pack",
-        "intro": "Lean road wolves work the muddy bends in a restless pack, testing anything that looks slower than hunger.",
-        "enemies": [
-          "road_wolf",
-          "road_wolf"
-        ]
-      }
-    },
-    {
-      "key": "barrow_watch",
-      "region": "old_barrow_field",
-      "start_room": "old_barrow_field_marker_row",
-      "interval": 20,
-      "respawn_delay": 180,
-      "avoid_safe": true,
-      "encounter": {
-        "key": "barrow_watch",
-        "title": "Barrow Watch",
-        "intro": "Old field guardians drift between the markers and causeway, answering every step with bone and pale fire.",
-        "enemies": [
-          "skeletal_soldier",
-          "barrow_wisp"
-        ]
-      }
-    },
-    {
-      "key": "barrow_mourners",
-      "region": "old_barrow_field",
-      "start_room": "old_barrow_field_barrow_circle",
-      "interval": 18,
-      "respawn_delay": 180,
-      "avoid_safe": true,
-      "encounter": {
-        "key": "barrow_mourners",
-        "title": "Barrow Mourners",
-        "intro": "Shades and grave crows wheel through the field in a knot of old grief that refuses to stay buried.",
-        "enemies": [
-          "restless_shade",
-          "grave_crow"
-        ]
-      }
-    },
-    {
-      "key": "whispering_thorns",
-      "region": "whispering_woods",
-      "start_room": "whispering_woods_briar_glade",
-      "interval": 18,
-      "respawn_delay": 180,
-      "avoid_safe": true,
-      "encounter": {
-        "key": "whispering_thorns",
-        "title": "Thornbound Pair",
-        "intro": "A briar imp capers through the brush while a mossling drags the roots along behind it like a leash.",
-        "enemies": [
-          "briar_imp",
-          "mossling"
-        ]
-      }
-    },
-    {
-      "key": "whispering_hunters",
-      "region": "whispering_woods",
-      "start_room": "whispering_woods_old_stone_path",
-      "interval": 20,
-      "respawn_delay": 180,
-      "avoid_safe": true,
-      "encounter": {
-        "key": "whispering_hunters",
-        "title": "Whispering Hunters",
-        "intro": "A forest wolf and a patient spider move the old stone path like they have hunted it together for years.",
-        "enemies": [
-          "forest_wolf",
-          "cave_spider"
-        ]
-      }
-    }
-  ],
   "temperament_labels": {
     "aggressive": "Aggressive",
     "passive": "Passive",
