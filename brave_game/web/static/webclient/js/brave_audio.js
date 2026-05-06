@@ -55,6 +55,7 @@
     var manifestBaseUrl = "";
     var context = null;
     var masterGain = null;
+    var masterAnalyser = null;
     var busGains = {};
     var manifest = null;
     var audioBufferCache = {};
@@ -179,6 +180,11 @@
         }
         masterGain = ctx.createGain();
         masterGain.connect(ctx.destination);
+
+        masterAnalyser = ctx.createAnalyser();
+        masterAnalyser.fftSize = 256;
+        masterGain.connect(masterAnalyser);
+
         BUS_NAMES.forEach(function (name) {
             if (name === "master") {
                 return;
@@ -188,6 +194,14 @@
             busGains[name] = gainNode;
         });
         applyBusVolumes();
+    }
+
+    function getByteFrequencyData(array) {
+        if (masterAnalyser) {
+            masterAnalyser.getByteFrequencyData(array);
+            return true;
+        }
+        return false;
     }
 
     function getBusNode(busName) {
@@ -1675,6 +1689,7 @@
         stopMovie: stopMovie,
         previewCue: previewCue,
         setSetting: setSetting,
-        toggleSetting: toggleSetting
+        toggleSetting: toggleSetting,
+        getByteFrequencyData: getByteFrequencyData
     };
 })();

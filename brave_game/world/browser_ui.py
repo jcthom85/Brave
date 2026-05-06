@@ -308,6 +308,7 @@ def _picker(
     rarity_label=None,
     rarity_tone=None,
     rarity_target=None,
+    **extra,
 ):
     picker = {
         "title": title,
@@ -331,6 +332,8 @@ def _picker(
         picker["rarity_tone"] = rarity_tone
     if rarity_target:
         picker["rarity_target"] = rarity_target
+    if extra:
+        picker.update(extra)
     return picker
 
 def _section(label, icon, kind, items=None, lines=None, span=None, **extra):

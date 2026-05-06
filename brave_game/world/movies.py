@@ -13,10 +13,7 @@ GREAT_FRONTIER_MOVIES = (
         "cue_id": "music.great_frontier.unpayable_debt",
         "runtime_sec": 289,
         "cards": (
-            "The road opens on a debt no honest coin can settle.",
-            "A lantern burns low over a ledger written in favors, promises, and weathered names.",
-            "Somewhere beyond Brambleford, a rider learns that owing the frontier means being called back by it.",
-            "The last page turns before the bargain is finished.",
+            "Alex grieves on his family farm while a mysterious man in black arrives searching for a girl.",
         ),
     },
     {
@@ -25,10 +22,7 @@ GREAT_FRONTIER_MOVIES = (
         "cue_id": "music.great_frontier.memories_of_another_life",
         "runtime_sec": 338,
         "cards": (
-            "A face in a rain-streaked window remembers a life that may never have happened.",
-            "Old rooms drift past like towns seen from a moving wagon.",
-            "The frontier keeps what people bury, then hums it back when the night gets quiet.",
-            "One memory refuses to stay behind the door where it was left.",
+            "Alex drifts to sleep, weighed down by memories of his late wife.",
         ),
     },
     {
@@ -37,10 +31,7 @@ GREAT_FRONTIER_MOVIES = (
         "cue_id": "music.great_frontier.showdown_in_the_rain",
         "runtime_sec": 311,
         "cards": (
-            "Rain turns the street silver, and every bootstep sounds like a verdict.",
-            "Two silhouettes face each other beneath a lamp that should have gone out.",
-            "No one reaches for steel quickly. The frontier has waited long enough to enjoy the pause.",
-            "Thunder speaks first. The rest is answered by nerve.",
+            "The stranger destroys the farm. Alex finds Carly, and they escape into the rain.",
         ),
     },
     {
@@ -49,10 +40,7 @@ GREAT_FRONTIER_MOVIES = (
         "cue_id": "music.great_frontier.the_road_at_night",
         "runtime_sec": 252,
         "cards": (
-            "The road after dusk is not empty. It is listening.",
-            "Lantern posts lean into the dark like tired witnesses.",
-            "Wagon tracks vanish under mist, but something keeps pace beyond the ditch grass.",
-            "The safest light is the one you carry without trusting too much.",
+            "Alex and Carly drive toward town, unsure whether they are running from danger or toward it.",
         ),
     },
     {
@@ -61,10 +49,7 @@ GREAT_FRONTIER_MOVIES = (
         "cue_id": "music.great_frontier.the_black_city",
         "runtime_sec": 171,
         "cards": (
-            "At the edge of the map, a city rises where no road admits to leading.",
-            "Its towers drink moonlight and return only shadow.",
-            "Every gate stands open. That is how the warning begins.",
-            "The frontier does not end at the walls. It changes its name.",
+            "Alex and Carly step into town and cross into the Black City, an alien place hidden behind the familiar streets.",
         ),
     },
     {
@@ -73,10 +58,7 @@ GREAT_FRONTIER_MOVIES = (
         "cue_id": "music.great_frontier.refuge",
         "runtime_sec": 360,
         "cards": (
-            "A door opens before the storm can ask permission.",
-            "Inside, strangers make room on benches polished by every kind of weather.",
-            "Soup steams, boots dry, and the worst news waits outside with the rain.",
-            "For one song, survival sounds almost like home.",
+            "Carly leads Alex to her hideout and remembers her mother before Alex leaves for the Black City alone.",
         ),
     },
     {
@@ -85,10 +67,7 @@ GREAT_FRONTIER_MOVIES = (
         "cue_id": "music.great_frontier.reclamation",
         "runtime_sec": 218,
         "cards": (
-            "Morning finds the broken fence first, then the hands willing to mend it.",
-            "Fields remember footsteps. So do ruins.",
-            "A town takes back one stone, one name, one lantern at a time.",
-            "What was lost does not return unchanged, but it returns.",
+            "The stranger captures Alex. Carly returns, forcing a violent confrontation inside the Black City.",
         ),
     },
     {
@@ -97,10 +76,7 @@ GREAT_FRONTIER_MOVIES = (
         "cue_id": "music.great_frontier.the_end_of_the_beginning",
         "runtime_sec": 362,
         "cards": (
-            "The first chapter closes with dust on the boots and smoke behind the hills.",
-            "No one cheers too loudly. The frontier dislikes arrogance.",
-            "A child pins a new notice over an old warning and calls it progress.",
-            "The road ahead is wider now, which is not the same as kinder.",
+            "Alex and Carly rest after escaping the Black City and begin to trust each other.",
         ),
     },
     {
@@ -109,10 +85,7 @@ GREAT_FRONTIER_MOVIES = (
         "cue_id": "music.great_frontier.reconciliation",
         "runtime_sec": 343,
         "cards": (
-            "Two chairs face the same cold hearth until someone finally sits down.",
-            "Forgiveness arrives without ceremony, carrying mud on its hem.",
-            "The hard words are not erased. They are set where both hands can reach them.",
-            "Outside, the frontier waits for people who have remembered how to stand together.",
+            "Alex and Carly prepare to board a train and rescue a captive boy.",
         ),
     },
     {
@@ -121,10 +94,7 @@ GREAT_FRONTIER_MOVIES = (
         "cue_id": "music.great_frontier.shackles",
         "runtime_sec": 299,
         "cards": (
-            "Iron remembers every wrist it was made to close around.",
-            "A prisoner counts lantern flashes through a crack in the black door.",
-            "Chains are loudest just before someone decides they are not permanent.",
-            "When the lock gives, the whole frontier hears it.",
+            "Carly boards the train and commits to the rescue.",
         ),
     },
 )
@@ -291,12 +261,18 @@ def build_now_showing_picker(movie):
     return _picker(
         movie_label(movie),
         subtitle="Great Frontier · Now Showing",
-        title_icon="theaters",
+        title_icon="movie",
         body=movie_cards(movie),
         options=[
             _picker_option("Stop Movie", command="movie stop", icon="stop_circle", tone="danger"),
             _picker_option("Close Program", command="look", icon="close", tone="muted"),
         ],
+        picker_kind="movie-showing",
+        movie={
+            "title": movie_label(movie),
+            "cards": movie_cards(movie),
+            "runtime_sec": int(movie.get("runtime_sec") or 0),
+        },
     )
 
 
@@ -316,7 +292,7 @@ def build_movie_picker():
     return _picker(
         "Great Frontier",
         subtitle="Choose a picture-house showing.",
-        title_icon="theaters",
+        title_icon="movie",
         body=[
             "The brass speaker will play the selected Great Frontier reel for you. There are no projected images yet; Brambleford is doing its best.",
         ],

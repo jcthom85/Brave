@@ -77,6 +77,7 @@ let defaultout_plugin = (function () {
     var currentMovieOverlayState = null;
     var currentMovieCardTimer = null;
     var currentMovieProgressTimer = null;
+    var currentMovieVisualizerFrame = null;
     var pendingArcadeRoomRestore = false;
     var pendingMainScrollRestore = null;
     var currentMobileUtilityTab = null;
@@ -3243,6 +3244,7 @@ let defaultout_plugin = (function () {
 
     var clearPickerSheet = function () {
         var host = document.getElementById("brave-picker-sheet");
+        clearMovieOverlayTimers();
         currentPickerData = null;
         currentBossGateData = null;
         currentPickerAnchorRect = null;
@@ -4093,6 +4095,129 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var renderMovieVisualizer = function (canvas) {
+        if (!canvas) return;
+        var ctx = canvas.getContext("2d");
+        var braveAudio = getBraveAudio();
+        if (!braveAudio || typeof braveAudio.getByteFrequencyData !== "function") return;
+
+        var bufferLength = 64;
+        var segments = 120;
+        var dataArray = new Uint8Array(bufferLength);
+        var smoothedBass = 0;
+        var smoothedData = new Float32Array(segments + 1).fill(0);
+        var lastWidth = 0;
+        var lastHeight = 0;
+
+        var render = function () {
+            if (!currentMovieOverlayState || !document.contains(canvas)) {
+                currentMovieVisualizerFrame = null;
+                return;
+            }
+            currentMovieVisualizerFrame = window.requestAnimationFrame(render);
+            braveAudio.getByteFrequencyData(dataArray);
+
+            var width = canvas.clientWidth;
+            var height = canvas.clientHeight;
+            if (width !== lastWidth || height !== lastHeight) {
+                canvas.width = lastWidth = width;
+                canvas.height = lastHeight = height;
+            }
+            
+            ctx.clearRect(0, 0, width, height);
+
+            var centerX = width / 2;
+            var centerY = height / 2;
+            var radius = Math.min(width, height) * 0.22;
+
+            // Highly smoothed bass for a slow 'breathing' pulse
+            var currentBass = 0;
+            for (var i = 0; i < 4; i++) currentBass += dataArray[i];
+            currentBass /= 4;
+            smoothedBass += (currentBass - smoothedBass) * 0.05;
+            var bassScale = 1 + (smoothedBass / 255) * 0.2;
+
+            // Symmetrical Reactive Ring
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "rgba(234, 199, 131, 0.35)";
+            
+            for (var i = 0; i <= segments; i++) {
+                var angle = (i / segments) * Math.PI * 2;
+                
+                // Decoupled mirrored frequency map
+                var relIdx = Math.abs(segments / 2 - i) / (segments / 2);
+                var dataIdx = Math.floor(relIdx * 24);
+                var rawVal = dataArray[dataIdx] / 255;
+                
+                smoothedData[i] += (rawVal - smoothedData[i]) * 0.12;
+                
+                var r = radius + (smoothedData[i] * radius * 0.6);
+                var x = centerX + Math.cos(angle) * r;
+                var y = centerY + Math.sin(angle) * r;
+                
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Calm inner pulse
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * bassScale * 0.85, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(234, 199, 131, " + (0.02 + (smoothedBass / 255) * 0.06) + ")";
+            ctx.fill();
+        };
+
+        render();
+    };
+
+    var renderMovieShowingPickerMarkup = function (pickerData, panelClass, backdropClass, panelStyle) {
+        var movie = pickerData.movie || {};
+        var title = escapeHtml(movie.title || pickerData.title || "Great Frontier");
+        var cards = movie.cards || [];
+        var options = Array.isArray(pickerData.options) ? pickerData.options : [];
+        
+        return (
+            "<div class='" + backdropClass + "' data-brave-picker-close='1'></div>"
+            + "<div class='" + panelClass + " brave-picker-sheet__panel--movie-showing' role='dialog' aria-modal='true' aria-label='" + title + "'" + panelStyle + ">"
+            + "<div class='brave-movie-overlay__atmosphere'></div>"
+            + "<canvas class='brave-movie-visualizer' data-brave-movie-visualizer></canvas>"
+            + "<div class='brave-movie-overlay__grain'></div>"
+            + "<div class='brave-picker-sheet__head'>"
+            + "<div class='brave-picker-sheet__titlebar'>"
+            + "<span class='brave-picker-sheet__title-icon'>" + icon("theaters") + "</span>"
+            + "<div class='brave-picker-sheet__title'>" + title + "</div>"
+            + "<button type='button' class='brave-picker-sheet__close brave-view__action brave-view__action--muted brave-view__back' data-brave-picker-close='1'>"
+            + icon("close", "brave-view__action-icon")
+            + "<span>Close</span>"
+            + "</button>"
+            + "</div>"
+            + "<div class='brave-picker-sheet__subtitle'>Great Frontier · Now Showing</div>"
+            + "</div>"
+            + "<div class='brave-picker-sheet__bodycopy brave-movie-overlay__caption-wrap'>"
+            + "<div class='brave-movie-overlay__caption' data-brave-movie-card>" + escapeHtml(cards[0] || "") + "</div>"
+            + "</div>"
+            + "<div class='brave-picker-sheet__options'>"
+            + options.map(function (option) {
+                var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
+                return (
+                    "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + "'"
+                    + commandAttrs(option, false)
+                    + ">"
+                    + "<span class='brave-picker-sheet__option-icon'>"
+                    + icon(option && option.icon ? option.icon : "arrow_right_alt")
+                    + "</span>"
+                    + "<span class='brave-picker-sheet__option-body'>"
+                    + "<span class='brave-picker-sheet__option-label'>" + escapeHtml(option && option.label ? option.label : "") + "</span>"
+                    + "</span>"
+                    + "</button>"
+                );
+            }).join("")
+            + "</div>"
+            + "</div>"
+        );
+    };
+
     var renderPickerSheet = function () {
         var host = document.getElementById("brave-picker-sheet");
         var pickerData = currentPickerData;
@@ -4145,6 +4270,8 @@ let defaultout_plugin = (function () {
             host.innerHTML = renderVideoSettingsPickerMarkup(pickerData, panelClass, backdropClass, panelStyle);
         } else if (pickerData.picker_kind === "accessibility-settings") {
             host.innerHTML = renderAccessibilitySettingsPickerMarkup(pickerData, panelClass, backdropClass, panelStyle);
+        } else if (pickerData.picker_kind === "movie-showing") {
+            host.innerHTML = renderMovieShowingPickerMarkup(pickerData, panelClass, backdropClass, panelStyle);
         } else {
             var titleRarityClass = pickerData && pickerData.rarity_tone && pickerData.rarity_target !== "subtitle" ? " brave-rarity-name brave-rarity-name--" + escapeHtml(pickerData.rarity_tone) : "";
             var subtitleRarityClass = pickerData && pickerData.rarity_tone && pickerData.rarity_target === "subtitle" ? " brave-rarity-name brave-rarity-name--" + escapeHtml(pickerData.rarity_tone) : "";
@@ -4236,6 +4363,32 @@ let defaultout_plugin = (function () {
             currentPickerSourceId = String(pickerData.picker_id);
         }
         renderPickerSheet();
+        if (pickerData.picker_kind === "movie-showing") {
+            var movie = pickerData.movie || {};
+            var cards = compactActivityLines(movie.cards);
+            clearMovieOverlayTimers();
+            currentMovieOverlayState = {
+                title: String(movie.title || "Great Frontier"),
+                cards: cards,
+                cardIndex: 0,
+                runtimeSec: Math.max(0, parseFloat(movie.runtime_sec || 0) || 0),
+                startedAt: Date.now(),
+            };
+            if (cards.length > 1) {
+                currentMovieCardTimer = window.setInterval(function () {
+                    var host = document.getElementById("brave-picker-sheet");
+                    if (!host || !currentMovieOverlayState) {
+                        clearMovieOverlayTimers();
+                        return;
+                    }
+                    setMovieCard(host, currentMovieOverlayState.cardIndex + 1);
+                }, 9500);
+            }
+            var canvas = document.querySelector("[data-brave-movie-visualizer]");
+            if (canvas) {
+                renderMovieVisualizer(canvas);
+            }
+        }
         return true;
     };
 
@@ -5019,6 +5172,14 @@ let defaultout_plugin = (function () {
         "map": "scroll-unfurled",
     };
 
+    var MATERIAL_ICON_MAP = {
+        "movie": "movie",
+        "movie_creation": "movie_creation",
+        "theaters": "theaters",
+        "stop_circle": "stop_circle",
+        "play_circle": "play_circle",
+    };
+
     var icon = function (name, extraClass) {
         if (name === "check_box" || name === "check_box_outline_blank") {
             var checkboxClasses = "brave-icon brave-icon--checkbox";
@@ -5052,6 +5213,14 @@ let defaultout_plugin = (function () {
                 trashClasses += " " + extraClass;
             }
             return "<span class='" + trashClasses + "' aria-hidden='true'></span>";
+        }
+        if (MATERIAL_ICON_MAP[name]) {
+            var miName = MATERIAL_ICON_MAP[name];
+            var miClasses = "material-icons";
+            if (extraClass) {
+                miClasses += " " + extraClass;
+            }
+            return "<i class='" + miClasses + "' aria-hidden='true'>" + miName + "</i>";
         }
         var raName = ICON_MAP[name] || name.replace(/_/g, "-");
         var classes = "ra ra-" + raName;
@@ -10726,6 +10895,10 @@ let defaultout_plugin = (function () {
             window.clearInterval(currentMovieProgressTimer);
             currentMovieProgressTimer = null;
         }
+        if (currentMovieVisualizerFrame) {
+            window.cancelAnimationFrame(currentMovieVisualizerFrame);
+            currentMovieVisualizerFrame = null;
+        }
     };
 
     var clearMovieOverlay = function () {
@@ -10760,9 +10933,13 @@ let defaultout_plugin = (function () {
         var countNode = root.querySelector("[data-brave-movie-card-count]");
         if (cardNode) {
             if (!prefersReducedMotion()) {
-                cardNode.classList.remove("brave-movie-overlay__card-text--enter");
+                cardNode.style.opacity = "0";
+                cardNode.style.transform = "translateY(10px)";
+                cardNode.style.transition = "none";
                 void cardNode.offsetWidth;
-                cardNode.classList.add("brave-movie-overlay__card-text--enter");
+                cardNode.style.transition = "opacity 800ms ease-out, transform 800ms ease-out";
+                cardNode.style.opacity = "1";
+                cardNode.style.transform = "translateY(0)";
             }
             cardNode.textContent = cards[currentMovieOverlayState.cardIndex];
         }
@@ -10842,36 +11019,24 @@ let defaultout_plugin = (function () {
         root.setAttribute("aria-hidden", "false");
         root.style.zIndex = "2000"; // Ensure it is above the explore view
         root.innerHTML =
-            "<div class='brave-movie-overlay__backdrop'></div>"
+            "<div class='brave-movie-overlay__atmosphere'></div>"
             + "<section class='brave-movie-overlay__panel' role='dialog' aria-modal='true' tabindex='0'>"
-            + "<div class='brave-movie-overlay__curtain brave-movie-overlay__curtain--left'></div>"
-            + "<div class='brave-movie-overlay__curtain brave-movie-overlay__curtain--right'></div>"
             + "<div class='brave-movie-overlay__topbar'>"
             + "<div class='brave-movie-overlay__now'>Now Showing</div>"
             + "<button type='button' class='brave-movie-overlay__close brave-view__action brave-view__action--muted brave-view__back' data-brave-movie-close='1' aria-label='Stop movie'>"
             + icon("close")
             + "</button>"
             + "</div>"
-            + "<div class='brave-movie-overlay__screen'>"
-            + "<div class='brave-movie-overlay__projector'></div>"
+            + "<div class='brave-movie-overlay__stage'>"
             + "<div class='brave-movie-overlay__title'>" + escapeHtml(currentMovieOverlayState.title) + "</div>"
-            + "<div class='brave-movie-overlay__rule'></div>"
-            + "<div class='brave-movie-overlay__card-text' data-brave-movie-card>" + escapeHtml(cards[0]) + "</div>"
+            + "<div class='brave-movie-overlay__caption-wrap'>"
+            + "<div class='brave-movie-overlay__caption' data-brave-movie-card>" + escapeHtml(cards[0]) + "</div>"
+            + "</div>"
             + "<div class='brave-movie-overlay__card-count' data-brave-movie-card-count'>1 / " + escapeHtml(String(cards.length)) + "</div>"
             + "</div>"
             + "<div class='brave-movie-overlay__controls'>"
             + "<div class='brave-movie-overlay__time'><span data-brave-movie-elapsed>0:00</span><span data-brave-movie-runtime>" + escapeHtml(currentMovieOverlayState.runtimeSec ? formatMovieTime(currentMovieOverlayState.runtimeSec) : "--:--") + "</span></div>"
             + "<div class='brave-movie-overlay__track'><div class='brave-movie-overlay__progress' data-brave-movie-progress></div></div>"
-            + "<div class='brave-movie-overlay__actions'>"
-            + "<button type='button' class='brave-movie-overlay__button brave-movie-overlay__button--stop' data-brave-movie-command='" + escapeHtml(payload.stop_command || "movie stop") + "'>"
-            + icon("stop_circle", "brave-movie-overlay__button-icon")
-            + "<span>Stop Movie</span>"
-            + "</button>"
-            + "<button type='button' class='brave-movie-overlay__button' data-brave-movie-command='" + escapeHtml(payload.program_command || "movie") + "'>"
-            + icon("theaters", "brave-movie-overlay__button-icon")
-            + "<span>Program</span>"
-            + "</button>"
-            + "</div>"
             + "</div>"
             + "</section>";
         document.body.appendChild(root);
@@ -12953,6 +13118,13 @@ let defaultout_plugin = (function () {
         }
 
         if (cmdname === "brave_movie_overlay") {
+            var movieOverlayPayload = getOobPayload(args, kwargs, "brave_movie_overlay", {}) || {};
+            var movieOverlayAction = String(movieOverlayPayload.action || "").toLowerCase();
+            if (movieOverlayAction === "stop") {
+                clearMovieOverlay();
+            } else {
+                renderMovieOverlay(movieOverlayPayload);
+            }
             return true;
         }
 

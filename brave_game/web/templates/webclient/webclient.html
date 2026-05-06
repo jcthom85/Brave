@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block scripts %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rpg-awesome@0.2.0/css/rpg-awesome.min.css"><link rel="stylesheet" href="{% static 'webclient/css/brave_webclient.css' %}?v=20260505movieview1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rpg-awesome@0.2.0/css/rpg-awesome.min.css"><link rel="stylesheet" href="{% static 'webclient/css/brave_webclient.css' %}?v={{ brave_static_v }}">
 <script>
 (function () {
   var clearIntroVeil = function () {
@@ -53,5 +53,5 @@
   }, 8000);
 })();
 </script>
-<script src="{% static 'webclient/js/brave_bootstrap.js' %}?v=20260505movieview1"></script>
+<script src="{% static 'webclient/js/brave_bootstrap.js' %}?v={{ brave_static_v }}"></script>
 {% endblock %}

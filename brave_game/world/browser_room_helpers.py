@@ -577,7 +577,7 @@ def _format_room_context_action_items(room, viewer):
     if room_supports_activity(room, "mastery"):
         items.append(_item("Mastery", icon="school", command="mastery"))
     if is_movie_theater_room(room):
-        items.append(_item("Watch Movies", icon="theaters", picker=build_movie_picker()))
+        items.append(_item("Watch", icon="movie", picker=build_movie_picker()))
 
     if is_chapel_room(room):
         blessing = get_active_blessing(viewer)
