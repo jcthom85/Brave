@@ -1254,15 +1254,15 @@
     {
       "aliases": [
         "s",
-        "yard",
-        "training yard",
-        "harl"
+        "hall",
+        "mastery hall",
+        "study"
       ],
-      "destination": "brambleford_training_yard",
+      "destination": "brambleford_mastery_hall",
       "direction": "south",
-      "id": "gate_walk_to_training_yard",
+      "id": "gate_walk_to_mastery_hall",
       "key": "south",
-      "label": "Training Yard",
+      "label": "Mastery Hall",
       "source": "tutorial_gate_walk"
     },
     {
