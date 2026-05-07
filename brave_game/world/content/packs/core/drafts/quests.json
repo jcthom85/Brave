@@ -1,9 +1,9 @@
 {
   "_meta": {
     "last_action": "upsert",
-    "last_modified_at": "2026-05-07T19:10:29.114567+00:00",
+    "last_modified_at": "2026-05-07T19:50:15.637549+00:00",
     "last_modified_by": "codex-cli",
-    "last_target": "rails_for_the_return",
+    "last_target": "what_the_pot_took",
     "stage": "draft"
   },
   "quest_regions": {
@@ -12,6 +12,7 @@
     "bogwater_rumors": "Blackfen",
     "bridgework_for_joss": "Drowned Weir",
     "captain_varn_blackreed": "Ruined Watchtower",
+    "chalk_for_the_quiet_stone": "Whispering Woods",
     "do_not_disturb_the_dead": "Old Barrow Field",
     "fencebreakers": "Goblin Road",
     "foreman_coilback": "Drowned Weir",
@@ -23,6 +24,7 @@
     "locks_under_blackwater": "Drowned Weir",
     "loose_arrows": "Ruined Watchtower",
     "miretooths_claim": "Blackfen",
+    "names_under_dusk": "Old Barrow Field",
     "practice_makes_heroes": "Brambleford",
     "rails_for_the_return": "Goblin Road",
     "rats_in_the_kettle": "Brambleford",
@@ -34,7 +36,9 @@
     "the_hollow_lantern": "Drowned Weir",
     "the_knight_without_rest": "Old Barrow Field",
     "the_pot_kings_feast": "Goblin Warrens",
+    "the_ridge_tally": "Ruined Watchtower",
     "the_south_light": "Drowned Weir",
+    "what_the_pot_took": "Goblin Warrens",
     "what_whispers_in_the_wood": "Whispering Woods"
   },
   "quests": {
@@ -175,6 +179,43 @@
       },
       "summary": "Climb to the broken crown of the tower and bring down the bandit captain before he turns the ridge into a permanent noose over Brambleford's road.",
       "title": "Captain Varn Blackreed"
+    },
+    "chalk_for_the_quiet_stone": {
+      "giver": "Sister Maybelle",
+      "next_step": "Bring the ward rubbing back to Maybelle, then keep the old stone path in mind when the barrow lanterns start failing.",
+      "objectives": [
+        {
+          "description": "Find the old wardstone along the Old Stone Path.",
+          "room_id": "whispering_woods_old_stone_path",
+          "type": "visit_room"
+        },
+        {
+          "count": 1,
+          "description": "Gather 1 Moonleaf Sprig growing near the restless ward marks.",
+          "item_id": "moonleaf_sprig",
+          "type": "collect_item"
+        },
+        {
+          "description": "Confirm the same quiet pressure reaches the Briar Glade.",
+          "room_id": "whispering_woods_briar_glade",
+          "type": "visit_room"
+        }
+      ],
+      "prerequisites": [
+        "what_whispers_in_the_wood"
+      ],
+      "rewards": {
+        "items": [
+          {
+            "item": "rubbed_ward_mark",
+            "quantity": 1
+          }
+        ],
+        "silver": 8,
+        "xp": 55
+      },
+      "summary": "Help Sister Maybelle confirm whether the old woods wardstone is warning Brambleford away from the barrow path, not merely marking a strange trail.",
+      "title": "Chalk for the Quiet Stone"
     },
     "do_not_disturb_the_dead": {
       "giver": "Brother Alden",
@@ -472,6 +513,37 @@
       },
       "summary": "Find the predator ruling the Blackfen edge and bring down Miretooth before whatever follows it decides Brambleford is simply the next shoreline.",
       "title": "Miretooth's Claim"
+    },
+    "names_under_dusk": {
+      "giver": "Brother Alden",
+      "next_step": "Return the name strip to Brother Alden, then keep pushing toward the Barrow Circle if the field keeps waking.",
+      "objectives": [
+        {
+          "description": "Inspect Marker Row and find the grave whose name has come loose.",
+          "room_id": "old_barrow_field_marker_row",
+          "type": "visit_room"
+        },
+        {
+          "description": "Confirm the disturbance reaches the Barrow Circle.",
+          "room_id": "old_barrow_field_barrow_circle",
+          "type": "visit_room"
+        }
+      ],
+      "prerequisites": [
+        "lanterns_at_dusk"
+      ],
+      "rewards": {
+        "items": [
+          {
+            "item": "recovered_name_strip",
+            "quantity": 1
+          }
+        ],
+        "silver": 9,
+        "xp": 70
+      },
+      "summary": "Help Brother Alden recover one loosened name from Marker Row so the chapel can treat the walking dead as failed rest, not faceless monsters.",
+      "title": "Names Under Dusk"
     },
     "practice_makes_heroes": {
       "giver": "Captain Harl Rowan",
@@ -797,6 +869,37 @@
       "summary": "Reach the goblin feast court and bring down Grubnak before his warrens become the next thing chewing at Brambleford's road.",
       "title": "The Pot-King's Feast"
     },
+    "the_ridge_tally": {
+      "giver": "Captain Harl Rowan",
+      "next_step": "Bring the tally back to Harl, then keep climbing if Blackreed still holds the roost.",
+      "objectives": [
+        {
+          "description": "Reach Archer's Ledge where the tower crew watches the road.",
+          "room_id": "ruined_watchtower_archers_ledge",
+          "type": "visit_room"
+        },
+        {
+          "description": "Search the Breach Yard for signs of sorted wagons and marked travelers.",
+          "room_id": "ruined_watchtower_breach_yard",
+          "type": "visit_room"
+        }
+      ],
+      "prerequisites": [
+        "smoke_on_the_ridge"
+      ],
+      "rewards": {
+        "items": [
+          {
+            "item": "blackreed_road_tally",
+            "quantity": 1
+          }
+        ],
+        "silver": 12,
+        "xp": 85
+      },
+      "summary": "Recover proof that Blackreed is sorting travelers and controlling the ridge route while Brambleford watches the woods and road.",
+      "title": "The Ridge Tally"
+    },
     "the_south_light": {
       "giver": "Joss Veller",
       "next_step": "Push from the Drowned Causeway toward Lantern Weir, then keep following the wrong south light until the lamp house has nowhere left to hide.",
@@ -821,6 +924,37 @@
       },
       "summary": "Follow the exposed south light beyond the broken lock line and confirm the old lamp house is still feeding the Lanternfall emergency.",
       "title": "The South Light"
+    },
+    "what_the_pot_took": {
+      "giver": "Uncle Pib Underbough",
+      "next_step": "Bring the marked flour scrap back to Uncle Pib, then follow Mira and Harl if the warrens keep pointing deeper.",
+      "objectives": [
+        {
+          "description": "Search the Bone Midden for scraps of Brambleford stores.",
+          "room_id": "goblin_warrens_bone_midden",
+          "type": "visit_room"
+        },
+        {
+          "description": "Confirm the stolen stores are feeding the Feast Hall.",
+          "room_id": "goblin_warrens_feast_hall",
+          "type": "visit_room"
+        }
+      ],
+      "prerequisites": [
+        "below_the_fencebreakers"
+      ],
+      "rewards": {
+        "items": [
+          {
+            "item": "marked_flour_scrap",
+            "quantity": 1
+          }
+        ],
+        "silver": 10,
+        "xp": 95
+      },
+      "summary": "Recover proof that the warrens are feeding on stolen Brambleford stores, not merely hoarding road junk after Ruk falls.",
+      "title": "What the Pot Took"
     },
     "what_whispers_in_the_wood": {
       "giver": "Sister Maybelle",
@@ -876,6 +1010,10 @@
     "locks_under_blackwater",
     "the_hollow_lantern",
     "bell_before_the_road",
-    "rails_for_the_return"
+    "rails_for_the_return",
+    "chalk_for_the_quiet_stone",
+    "names_under_dusk",
+    "the_ridge_tally",
+    "what_the_pot_took"
   ]
 }

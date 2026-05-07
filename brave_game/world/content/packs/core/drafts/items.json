@@ -1,9 +1,9 @@
 {
   "_meta": {
     "last_action": "upsert",
-    "last_modified_at": "2026-05-07T19:10:29.106894+00:00",
+    "last_modified_at": "2026-05-07T19:50:15.629580+00:00",
     "last_modified_by": "codex-cli",
-    "last_target": "road_repair_tally",
+    "last_target": "marked_flour_scrap",
     "stage": "draft"
   },
   "bonus_labels": {
@@ -325,6 +325,13 @@
       "stackable": true,
       "summary": "Captain Varn's weather-dark longcoat, lined with hidden pockets and the smell of wet leather and command.",
       "value": 36
+    },
+    "blackreed_road_tally": {
+      "kind": "loot",
+      "name": "Blackreed Road Tally",
+      "stackable": true,
+      "summary": "A rain-spotted tally of wagons, names, and guessed cargo values sorted by the Blackreed crew before anyone was robbed.",
+      "value": 12
     },
     "boar_keeper_charm": {
       "kind": "consumable",
@@ -1014,6 +1021,13 @@
       "summary": "A torn plate of drowned weir iron that still tugs toward old lanternwork.",
       "value": 9
     },
+    "marked_flour_scrap": {
+      "kind": "loot",
+      "name": "Marked Flour Scrap",
+      "stackable": true,
+      "summary": "A torn Brambleford flour label, grease-stained and smoke-curled, with Uncle Pib's stock mark still readable under the mess.",
+      "value": 6
+    },
     "marsh_root": {
       "kind": "ingredient",
       "name": "Marsh Root",
@@ -1251,6 +1265,13 @@
         "verb": "study"
       }
     },
+    "recovered_name_strip": {
+      "kind": "loot",
+      "name": "Recovered Name Strip",
+      "stackable": true,
+      "summary": "A thin bronze grave strip rubbed clean enough to show one old Brambleford name and the last few letters of a vow.",
+      "value": 9
+    },
     "reedwoven_raiment": {
       "bonuses": {
         "armor": 3,
@@ -1360,6 +1381,13 @@
       "stackable": true,
       "summary": "A long black marsh feather with an oily sheen and the faint smell of stagnant water.",
       "value": 10
+    },
+    "rubbed_ward_mark": {
+      "kind": "loot",
+      "name": "Rubbed Ward Mark",
+      "stackable": true,
+      "summary": "A charcoal rubbing from the old woods wardstone, showing a boundary mark turned toward the barrow path instead of town.",
+      "value": 7
     },
     "serpent_scale_manual": {
       "kind": "consumable",
