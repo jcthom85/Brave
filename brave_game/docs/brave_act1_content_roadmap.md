@@ -6,6 +6,19 @@ This roadmap turns `docs/brave_act1_agent_bible.md` into a practical production 
 
 The default workflow is draft-first: each batch should become one Creator API Agent Run, pass validation and previews, appear in Creator Studio for review, and publish only after review.
 
+## Area Source Docs
+
+Use these area bibles as the creative brief for Creator API runs:
+
+- `brave_act1_goblin_road_area_bible.md`
+- `brave_act1_whispering_woods_area_bible.md`
+- `brave_act1_old_barrow_field_area_bible.md`
+- `brave_act1_ruined_watchtower_area_bible.md`
+- `brave_act1_goblin_warrens_area_bible.md`
+- `brave_act1_blackfen_drowned_weir_area_bible.md`
+
+When a roadmap batch touches one of these areas, the area bible wins for tone, allowed content, avoid rules, and preferred quest concept. The broader Act 1 bible still wins for act-level canon and constraints.
+
 ## Production Goals
 
 - Strengthen Act 1 without expanding beyond its current Brambleford-centered crisis.
