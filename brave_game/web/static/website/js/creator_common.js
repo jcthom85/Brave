@@ -40,7 +40,11 @@
       .creator-health-card span,.creator-incoming-card span { color:var(--muted,#6b6157); font-size:.9rem; line-height:1.35; }
       .creator-health-card.good { border-color:rgba(47,109,76,.28); background:#eef8f1; }
       .creator-health-card.bad { border-color:rgba(141,49,34,.28); background:#fff0ed; }
+      .creator-health-actions span { display:block; margin-top:4px; }
       .creator-incoming-card pre { display:block; min-height:90px; max-height:220px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+      .creator-workflow details { border:1px solid var(--line,#d9c8ac); border-radius:12px; background:#fffdfa; padding:10px 12px; }
+      .creator-workflow summary { cursor:pointer; font-weight:800; color:var(--ink,#1d2430); }
+      .creator-workflow .field { margin-top:10px; }
       .creator-agent-runs { display:grid; gap:10px; }
       .creator-agent-run-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
       .creator-agent-run-section { display:grid; gap:8px; grid-column:1/-1; }
@@ -141,16 +145,21 @@
     panel.className = 'panel creator-workflow';
     panel.setAttribute('data-creator-workflow', 'draft-first');
     panel.innerHTML = [
-      '<div class="panel-head"><h2>Draft Workflow</h2><p>Browser edits save to draft packs. Validate, publish, inspect history, and revert from here.</p></div>',
+      '<div class="panel-head"><h2>Draft Actions</h2><p>Validate first. Use Publish Drafts only when the draft domains listed below are the exact content you want live.</p></div>',
       '<div class="panel-body stack">',
       '<div class="toolbar">',
       '<button id="creator-validate-draft" class="secondary" type="button">Validate Drafts</button>',
       '<button id="creator-publish-draft" type="button">Publish Drafts</button>',
+      '</div>',
+      '<div class="field"><label for="creator-publish-domain">Publish Domain</label><select id="creator-publish-domain"><option value="all">all reviewed draft domains</option><option value="world">world</option><option value="items">items</option><option value="quests">quests</option><option value="encounters">encounters</option><option value="dialogue">dialogue</option><option value="characters">characters</option><option value="systems">systems</option></select></div>',
+      '<details>',
+      '<summary>History and Revert Tools</summary>',
+      '<div class="toolbar">',
       '<button id="creator-history" class="secondary" type="button">History</button>',
       '<button id="creator-revert" class="secondary" type="button">Revert Entry</button>',
       '</div>',
-      '<div class="field"><label for="creator-publish-domain">Publish Domain</label><select id="creator-publish-domain"><option value="all">all</option><option value="world">world</option><option value="items">items</option><option value="quests">quests</option><option value="encounters">encounters</option><option value="dialogue">dialogue</option><option value="characters">characters</option><option value="systems">systems</option></select></div>',
       '<div class="field"><label for="creator-revert-entry">History Entry Id</label><input id="creator-revert-entry" type="text" placeholder="entry id from history"></div>',
+      '</details>',
       '</div>',
     ].join('');
     const shell = document.querySelector('[data-creator-workflow-host]') || document.querySelector('.workspace') || document.querySelector('.stack') || document.body;
@@ -212,7 +221,7 @@
       panel = document.createElement('section');
       panel.className = 'panel creator-health';
       panel.setAttribute('data-creator-health-panel', 'true');
-      panel.innerHTML = '<div class="panel-head"><h2>Creator Health</h2><p>Draft status, validation, readiness checks, and recommended next actions.</p></div><div class="panel-body stack"><div class="creator-health-grid" data-creator-health-grid></div></div>';
+      panel.innerHTML = '<div class="panel-head"><h2>Draft Health</h2><p>Shows whether draft content validates and what still needs cleanup before the game is fully tidy.</p></div><div class="panel-body stack"><div class="creator-health-grid" data-creator-health-grid></div></div>';
       host.appendChild(panel);
     }
     const grid = panel.querySelector('[data-creator-health-grid]');
@@ -221,13 +230,19 @@
     const issueCount = (payload.readiness || []).reduce((total, section) => total + (section.issues || []).length, 0);
     const cards = [
       { title: payload.ok ? 'Validation Clear' : 'Validation Issues', meta: errors.length ? `${errors.length} issue(s) need fixing.` : 'Draft registry validates cleanly.', tone: payload.ok ? 'good' : 'bad' },
-      { title: draftDomains.length ? 'Drafts Present' : 'No Drafts', meta: draftDomains.length ? draftDomains.join(', ') : 'No draft pack files detected.', tone: draftDomains.length ? '' : 'good' },
+      { title: draftDomains.length ? 'Draft Domains' : 'No Drafts', meta: draftDomains.length ? draftDomains.join(', ') : 'No draft pack files detected.', tone: draftDomains.length ? '' : 'good' },
       { title: issueCount ? 'Readiness Gaps' : 'Ready', meta: issueCount ? `${issueCount} cross-builder readiness issue(s).` : 'No readiness gaps found.', tone: issueCount ? 'bad' : 'good' },
     ];
-    for (const action of payload.recommended_next_actions || []) {
-      cards.push({ title: 'Next Action', meta: action.label, href: action.href, tone: '' });
+    const actions = payload.recommended_next_actions || [];
+    if (actions.length) {
+      cards.push({
+        title: 'Recommended Cleanup',
+        meta: actions.slice(0, 4).map((action) => action.label).join('\n'),
+        href: actions[0].href,
+        tone: '',
+      });
     }
-    grid.innerHTML = cards.map((card) => `<article class="creator-health-card ${card.tone || ''}"><strong>${card.href ? `<a href="${card.href}">${card.title}</a>` : card.title}</strong><span>${card.meta}</span></article>`).join('');
+    grid.innerHTML = cards.map((card) => `<article class="creator-health-card ${card.tone || ''} ${card.title === 'Recommended Cleanup' ? 'creator-health-actions' : ''}"><strong>${card.href ? `<a href="${card.href}">${card.title}</a>` : card.title}</strong>${escapeHtml(card.meta).split('\n').map((line) => `<span>${line}</span>`).join('')}</article>`).join('');
     return panel;
   }
 

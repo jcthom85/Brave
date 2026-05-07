@@ -69,7 +69,7 @@ class CreatorIndexViewTests(unittest.TestCase):
         self.assertNotIn("Quest Chain", body)
         self.assertNotIn("Tutorial Moment", body)
         self.assertNotIn("New Zone", body)
-        self.assertIn("Creator Health", body)
+        self.assertIn("Publish Readiness", body)
         self.assertIn("data-creator-agent-runs-host", body)
         self.assertIn("creator_common.js", body)
 
