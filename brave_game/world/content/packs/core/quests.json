@@ -1,7 +1,7 @@
 {
   "_meta": {
     "last_action": "publish",
-    "last_modified_at": "2026-05-07T14:33:14.116613+00:00",
+    "last_modified_at": "2026-05-07T19:15:12.929808+00:00",
     "last_modified_by": "jctest3",
     "last_target": "quests",
     "stage": "live"
@@ -24,6 +24,7 @@
     "loose_arrows": "Ruined Watchtower",
     "miretooths_claim": "Blackfen",
     "practice_makes_heroes": "Brambleford",
+    "rails_for_the_return": "Goblin Road",
     "rats_in_the_kettle": "Brambleford",
     "roadside_howls": "Goblin Road",
     "ruk_the_fence_cutter": "Goblin Road",
@@ -489,6 +490,43 @@
       "summary": "Report to Captain Harl after the alarm and get pointed at the first town problem.",
       "title": "Practice Makes Heroes"
     },
+    "rails_for_the_return": {
+      "giver": "Mira Fenleaf",
+      "next_step": "Take Mira's repair tally back to the East Gate, then decide whether to finish Ruk or follow the road's deeper trouble.",
+      "objectives": [
+        {
+          "description": "Inspect the Old Fence Line and mark which rails can still be repaired.",
+          "room_id": "goblin_road_old_fence_line",
+          "type": "visit_room"
+        },
+        {
+          "count": 2,
+          "description": "Recover 2 Bent Fence Nails from goblin cutters or Ruk's camp.",
+          "item_id": "bent_fence_nails",
+          "type": "collect_item"
+        },
+        {
+          "description": "Confirm the stolen rails were dragged to Fencebreaker Camp.",
+          "room_id": "goblin_road_fencebreaker_camp",
+          "type": "visit_room"
+        }
+      ],
+      "prerequisites": [
+        "fencebreakers"
+      ],
+      "rewards": {
+        "items": [
+          {
+            "item": "road_repair_tally",
+            "quantity": 1
+          }
+        ],
+        "silver": 9,
+        "xp": 35
+      },
+      "summary": "Help Mira turn the fencebreaker damage into a usable repair count so Brambleford can treat Goblin Road like wounded infrastructure, not just a fight already won.",
+      "title": "Rails for the Return"
+    },
     "rats_in_the_kettle": {
       "giver": "Uncle Pib Underbough",
       "next_step": "Go east to the East Gate and speak with Mira Fenleaf about the cut road.",
@@ -837,6 +875,7 @@
     "the_south_light",
     "locks_under_blackwater",
     "the_hollow_lantern",
-    "bell_before_the_road"
+    "bell_before_the_road",
+    "rails_for_the_return"
   ]
 }

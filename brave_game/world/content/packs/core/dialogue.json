@@ -1,7 +1,7 @@
 {
   "_meta": {
     "last_action": "publish",
-    "last_modified_at": "2026-05-07T14:33:14.118629+00:00",
+    "last_modified_at": "2026-05-07T19:15:12.931665+00:00",
     "last_modified_by": "jctest3",
     "last_target": "dialogue",
     "stage": "live"
@@ -269,6 +269,14 @@
       }
     ],
     "mira_fenleaf": [
+      {
+        "active": "rails_for_the_return",
+        "text": "\"The road crews need proof they can carry in a hand, not another story shouted over the gate. Check the Old Fence Line, pull together enough bent nails to show how the rails were stripped, then look at Ruk's camp before you bring me the pattern.\""
+      },
+      {
+        "completed": "rails_for_the_return",
+        "text": "\"Good. These nails are all bent the same way, and the tally marks put the stolen rails moving toward Ruk's fire. That gives the repair crews a starting point and gives the mayor something better than worry to count.\""
+      },
       {
         "active": "the_hollow_lantern",
         "text": "\"The drowned lamp house sits beyond the lock line at the far east of the weir. If the light shields itself with lesser things, cut them down first. What followed Miretooth this far isn't an animal anymore.\""
