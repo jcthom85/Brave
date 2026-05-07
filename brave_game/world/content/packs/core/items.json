@@ -1,7 +1,7 @@
 {
   "_meta": {
     "last_action": "publish",
-    "last_modified_at": "2026-05-07T20:02:58.845053+00:00",
+    "last_modified_at": "2026-05-07T20:24:18.905448+00:00",
     "last_modified_by": "jctest3",
     "last_target": "items",
     "stage": "live"
@@ -524,6 +524,13 @@
       "stackable": true,
       "summary": "A rare trout with rose-gold scales and a clean river scent.",
       "value": 14
+    },
+    "drift_marked_reed_map": {
+      "kind": "loot",
+      "name": "Drift-Marked Reed Map",
+      "stackable": true,
+      "summary": "A damp reed-map marked twice in Mira's hand, showing survey tags pulled off course by lights moving against the wind.",
+      "value": 11
     },
     "edrics_signet": {
       "kind": "loot",
@@ -1474,6 +1481,13 @@
       "stackable": true,
       "summary": "The broken iron head of Ruk's notorious fence-cutter.",
       "value": 18
+    },
+    "stamped_ward_clamp": {
+      "kind": "loot",
+      "name": "Stamped Ward Clamp",
+      "stackable": true,
+      "summary": "A blackwater-stained brass clamp stamped with an old Brambleford road-light mark and a maintenance number worn nearly smooth.",
+      "value": 13
     },
     "stitchleaf_salve": {
       "kind": "consumable",

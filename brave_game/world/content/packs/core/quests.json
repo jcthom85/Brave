@@ -1,7 +1,7 @@
 {
   "_meta": {
     "last_action": "publish",
-    "last_modified_at": "2026-05-07T20:02:58.848601+00:00",
+    "last_modified_at": "2026-05-07T20:24:18.909254+00:00",
     "last_modified_by": "jctest3",
     "last_target": "quests",
     "stage": "live"
@@ -13,6 +13,7 @@
     "bridgework_for_joss": "Drowned Weir",
     "captain_varn_blackreed": "Ruined Watchtower",
     "chalk_for_the_quiet_stone": "Whispering Woods",
+    "clamp_marks_under_blackwater": "Drowned Weir",
     "do_not_disturb_the_dead": "Old Barrow Field",
     "fencebreakers": "Goblin Road",
     "foreman_coilback": "Drowned Weir",
@@ -23,6 +24,7 @@
     "lights_in_the_reeds": "Blackfen",
     "locks_under_blackwater": "Drowned Weir",
     "loose_arrows": "Ruined Watchtower",
+    "marks_that_drift": "Blackfen",
     "miretooths_claim": "Blackfen",
     "names_under_dusk": "Old Barrow Field",
     "practice_makes_heroes": "Brambleford",
@@ -216,6 +218,37 @@
       },
       "summary": "Help Sister Maybelle confirm whether the old woods wardstone is warning Brambleford away from the barrow path, not merely marking a strange trail.",
       "title": "Chalk for the Quiet Stone"
+    },
+    "clamp_marks_under_blackwater": {
+      "giver": "Joss Veller",
+      "next_step": "Bring the stamped clamp back to Joss, then keep pushing through the Sunken Lock before the lamp house hides behind its own rules again.",
+      "objectives": [
+        {
+          "description": "Check the old clamp sockets along the Drowned Causeway.",
+          "room_id": "drowned_weir_drowned_causeway",
+          "type": "visit_room"
+        },
+        {
+          "description": "Find the matching blackwater clamp marks on the Sluice Walk.",
+          "room_id": "drowned_weir_sluice_walk",
+          "type": "visit_room"
+        }
+      ],
+      "prerequisites": [
+        "signal_in_the_scrap"
+      ],
+      "rewards": {
+        "items": [
+          {
+            "item": "stamped_ward_clamp",
+            "quantity": 1
+          }
+        ],
+        "silver": 15,
+        "xp": 145
+      },
+      "summary": "Recover a stamped ward clamp from the drowned works so Joss can prove the wrong south light is following an old public-work rule, not merely haunting the marsh.",
+      "title": "Clamp Marks Under Blackwater"
     },
     "do_not_disturb_the_dead": {
       "giver": "Brother Alden",
@@ -479,6 +512,42 @@
       },
       "summary": "Break the tower's forward line, clear the ledge, and thin the bandits before they can lock the climb down completely.",
       "title": "Loose Arrows"
+    },
+    "marks_that_drift": {
+      "giver": "Mira Fenleaf",
+      "next_step": "Bring Mira the drift-marked reed map, then press toward Miretooth knowing the marsh is being misread by light as much as fang.",
+      "objectives": [
+        {
+          "description": "Check Mira's first survey tags in the Reedflats.",
+          "room_id": "blackfen_approach_reedflats",
+          "type": "visit_room"
+        },
+        {
+          "description": "Compare the Carrion Rise tags against the bird-scarred route.",
+          "room_id": "blackfen_approach_carrion_rise",
+          "type": "visit_room"
+        },
+        {
+          "description": "Watch whether the boglights drift against the wind near the Hollow.",
+          "room_id": "blackfen_approach_boglight_hollow",
+          "type": "visit_room"
+        }
+      ],
+      "prerequisites": [
+        "lights_in_the_reeds"
+      ],
+      "rewards": {
+        "items": [
+          {
+            "item": "drift_marked_reed_map",
+            "quantity": 1
+          }
+        ],
+        "silver": 14,
+        "xp": 115
+      },
+      "summary": "Help Mira Fenleaf test whether Blackfen's lights are only confusing travelers or actively pulling the south route off its honest marks.",
+      "title": "Marks That Drift"
     },
     "miretooths_claim": {
       "giver": "Mira Fenleaf",
@@ -1014,6 +1083,8 @@
     "chalk_for_the_quiet_stone",
     "names_under_dusk",
     "the_ridge_tally",
-    "what_the_pot_took"
+    "what_the_pot_took",
+    "marks_that_drift",
+    "clamp_marks_under_blackwater"
   ]
 }

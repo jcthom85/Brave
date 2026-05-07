@@ -1,7 +1,7 @@
 {
   "_meta": {
     "last_action": "publish",
-    "last_modified_at": "2026-05-07T20:02:58.850455+00:00",
+    "last_modified_at": "2026-05-07T20:24:18.911358+00:00",
     "last_modified_by": "jctest3",
     "last_target": "dialogue",
     "stage": "live"
@@ -166,6 +166,14 @@
     ],
     "joss_veller": [
       {
+        "active": "clamp_marks_under_blackwater",
+        "text": "\"The shard says the line is carrying orders. I need the clamp that held those orders to the stone. Check the causeway sockets, then the Sluice Walk. If the stamps match, this is a public work gone wrong, not a ghost with theatrical habits.\""
+      },
+      {
+        "completed": "clamp_marks_under_blackwater",
+        "text": "\"There it is: Brambleford road-light stamp, maintenance number, ward groove. Ugly, but civic. The wrong light is obeying a rule after the people who wrote it stopped being available for corrections. That means the lock and lamp house can be forced to answer.\""
+      },
+      {
         "active": "the_hollow_lantern",
         "text": "\"The lamp house is the crown of the drowned line. If the thing inside calls up a ward, cut down whatever answered it first. The light will weaken once the support keeping it honest stops existing.\""
       },
@@ -285,6 +293,14 @@
       }
     ],
     "mira_fenleaf": [
+      {
+        "active": "marks_that_drift",
+        "text": "\"The Reedflats tags should hold still unless water or hands move them. They are not holding still. Check them against Carrion Rise, then watch Boglight Hollow. If the lights move against the wind, the marsh is misreading the road for us.\""
+      },
+      {
+        "completed": "marks_that_drift",
+        "text": "\"That map is worse than I hoped and better than guessing. The tags did not wander because the mud wanted a joke. Something east of the wallow is teaching the light to lie. Miretooth is still teeth first, but the route beyond him is the stranger answer.\""
+      },
       {
         "active": "rails_for_the_return",
         "text": "\"The road crews need proof they can carry in a hand, not another story shouted over the gate. Check the Old Fence Line, pull together enough bent nails to show how the rails were stripped, then look at Ruk's camp before you bring me the pattern.\""
