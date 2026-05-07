@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "last_action": "publish",
-    "last_modified_at": "2026-05-07T14:33:14.112811+00:00",
-    "last_modified_by": "jctest3",
-    "last_target": "items",
-    "stage": "live"
+    "last_action": "upsert",
+    "last_modified_at": "2026-05-07T19:10:29.106894+00:00",
+    "last_modified_by": "codex-cli",
+    "last_target": "road_repair_tally",
+    "stage": "draft"
   },
   "bonus_labels": {
     "accuracy": "Accuracy",
@@ -1311,6 +1311,13 @@
       "stackable": true,
       "summary": "A crude goblin trinket plaited from string, bone, and bad ideas.",
       "value": 9
+    },
+    "road_repair_tally": {
+      "kind": "loot",
+      "name": "Road Repair Tally",
+      "stackable": true,
+      "summary": "A plain slate tally marked with fence lengths, missing rails, and the first useful count of what Goblin Road needs repaired.",
+      "value": 8
     },
     "roadchapel_vestments": {
       "bonuses": {
