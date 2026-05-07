@@ -242,7 +242,7 @@
     </section>
   </div>
 
-  <script src="/static/website/js/creator_common.js"></script>
+  <script src="/static/website/js/creator_common.js?v=agent-runs-v2"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
     const $ = (id) => document.getElementById(id);
@@ -362,11 +362,28 @@
       return JSON.stringify(data, null, 2);
     }
 
+    function handoffKindForDialogueLink(href, snippet) {
+      if (!href || !snippet) return '';
+      if (href.includes('/creator/quests/')) return 'quest-talk-objective';
+      if (href.includes('/creator/world/') && snippet.includes('"kind": "readable"')) return 'world-readable';
+      if (href.includes('/creator/world/') && snippet.includes('"kind": "npc"')) return 'world-npc';
+      return '';
+    }
     function addLinkCard(title, meta, href, snippet = '') {
       const card = document.createElement('div');
       card.className = 'link-card';
       card.innerHTML = `<strong>${href ? `<a href="${href}">${title}</a>` : title}</strong><span>${meta}</span>${snippet ? `<code>${snippet}</code>` : ''}`;
       if (snippet) {
+        const handoffKind = handoffKindForDialogueLink(href, snippet);
+        let parsedPayload = null;
+        try { parsedPayload = JSON.parse(snippet); } catch (_error) {}
+        if (href && handoffKind && parsedPayload) {
+          const sendButton = document.createElement('button');
+          sendButton.type = 'button';
+          sendButton.textContent = 'Send To Builder';
+          sendButton.addEventListener('click', () => creatorTools.sendToBuilder(href, parsedPayload, title, { kind: handoffKind }));
+          card.appendChild(sendButton);
+        }
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'secondary';

@@ -1,4 +1,11 @@
 {
+  "_meta": {
+    "last_action": "publish",
+    "last_modified_at": "2026-05-06T23:12:27.235981+00:00",
+    "last_modified_by": "jctest",
+    "last_target": "items",
+    "stage": "live"
+  },
   "bonus_labels": {
     "accuracy": "Accuracy",
     "agility": "Agility",
@@ -452,6 +459,14 @@
         "target": "self",
         "verb": "study"
       }
+    },
+    "dawn_thread_candle_stub": {
+      "kind": "loot",
+      "name": "Dawn-Thread Candle Stub",
+      "rarity": "common",
+      "stackable": true,
+      "summary": "A thumb-length chapel candle wound with pale thread, carried as a small promise to keep moving carefully.",
+      "value": 3
     },
     "dawnbell_mace": {
       "bonuses": {

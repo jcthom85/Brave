@@ -158,7 +158,10 @@ class ContentEditor:
         return ContentMutation(domain=domain, path=str(self._path_for(domain, stage=target_stage)), diff=diff, payload=persisted if write else target_payload, stage=target_stage, entry_id=new_entry_id, history_path=history_path)
 
     def publish_stage(self, domain=None, *, author="system"):
-        domains = [domain] if domain else list(self.pack_paths)
+        if isinstance(domain, (list, tuple, set)):
+            domains = [str(entry or "").strip().lower() for entry in domain if str(entry or "").strip()]
+        else:
+            domains = [domain] if domain else list(self.pack_paths)
         plans = []
         candidate_payloads = {
             current_domain: self.load_pack(current_domain, stage="live")
@@ -330,7 +333,7 @@ class ContentEditor:
 
         return self.apply_pack_update("characters", updater, write=write, stage=stage, author=author, action="upsert", target="character-config")
 
-    def upsert_quest(self, quest_key, quest_data, *, region=None, add_starting=False, write=False, stage="live", author="system"):
+    def upsert_quest(self, quest_key, quest_data, *, region=None, add_starting=True, write=False, stage="live", author="system"):
         def updater(payload):
             quests = dict(payload.get("quests", {}))
             quest_regions = dict(payload.get("quest_regions", {}))

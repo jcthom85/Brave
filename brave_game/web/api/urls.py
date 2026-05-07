@@ -16,4 +16,12 @@ urlpatterns = [
     path("content/publish", views.content_publish, name="content-publish"),
     path("content/validate", views.content_validate, name="content-validate"),
     path("content/reload", views.content_reload, name="content-reload"),
+    path("content/codex/context", views.codex_context, name="content-codex-context"),
+    path("content/codex/plan", views.codex_plan, name="content-codex-plan"),
+    path("content/codex/apply", views.codex_apply, name="content-codex-apply"),
+    path("content/codex/verify", views.codex_verify, name="content-codex-verify"),
+    path("content/codex/runs", views.codex_runs, name="content-codex-runs"),
+    path("content/codex/runs/<str:run_id>/review", views.codex_run_review, name="content-codex-run-review"),
+    path("content/codex/runs/<str:run_id>/publish", views.codex_run_publish, name="content-codex-run-publish"),
+    path("content/codex/runs/<str:run_id>", views.codex_run_detail, name="content-codex-run-detail"),
 ]

@@ -46,7 +46,7 @@
     </div></section>
     <section class="panel"><div class="panel-head"><h2>Catch Preview</h2><p>Expected catch distribution is calculated directly from the fish table chances.</p></div><div class="panel-body stack"><div id="validation-notes" class="validation-notes" hidden></div><div id="status" class="status">Fishing Composer ready.</div><pre id="output"></pre></div></section>
   </div>
-  <script src="/static/website/js/creator_common.js"></script>
+  <script src="/static/website/js/creator_common.js?v=agent-runs-v2"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
     const creator = window.BraveCreator.bind(API_ROOT, document.getElementById('status'), document.getElementById('validation-notes'));
@@ -71,7 +71,7 @@
     }
     $('preview-fishing').addEventListener('click', () => run(false).catch((error) => creator.setStatus(error.message, 'bad')));
     $('write-fishing').addEventListener('click', () => run(true).catch((error) => creator.setStatus(error.message, 'bad')));
-    $('send-world').addEventListener('click', () => creator.sendToBuilder('/creator/world/', roomActivityPayload(), 'Fishing Room Activity'));
+    $('send-world').addEventListener('click', () => creator.sendToBuilder('/creator/world/', roomActivityPayload(), 'Fishing Room Activity', { kind:'room-activity' }));
   </script>
 </body>
 </html>

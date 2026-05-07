@@ -12,10 +12,11 @@ from web.website.views.creator import creator_recipe_composer
 
 
 class _DummyUser:
-    def __init__(self, *, authenticated=True, staff=False):
+    def __init__(self, *, authenticated=True, staff=False, username="testuser"):
         self.is_authenticated = authenticated
         self.is_staff = staff
         self.is_superuser = False
+        self.username = username
 
     def check_permstring(self, permstring):
         return False
@@ -25,15 +26,20 @@ class CreatorRecipeComposerViewTests(unittest.TestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
+    def _get_request(self, path, user=None):
+        request = self.factory.get(path)
+        request.user = user or _DummyUser(authenticated=False)
+        request.session = {}
+        return request
+
     def test_creator_recipe_composer_requires_authorization(self):
-        request = self.factory.get("/creator/composers/recipe/")
-        request.user = _DummyUser(authenticated=False)
+        request = self._get_request("/creator/composers/recipe/")
         response = creator_recipe_composer(request)
-        self.assertEqual(403, response.status_code)
+        self.assertEqual(302, response.status_code)
+        self.assertIn("/creator/login/", response.url)
 
     def test_creator_recipe_composer_renders_guided_flow_for_staff(self):
-        request = self.factory.get("/creator/composers/recipe/")
-        request.user = _DummyUser(staff=True)
+        request = self._get_request("/creator/composers/recipe/", user=_DummyUser(staff=True))
         response = creator_recipe_composer(request)
         body = response.content.decode("utf-8")
         self.assertEqual(200, response.status_code)
@@ -45,6 +51,7 @@ class CreatorRecipeComposerViewTests(unittest.TestCase):
         self.assertIn("kind:'item'", body)
         self.assertIn("stage:'draft'", body)
         self.assertIn("sendToBuilder", body)
+        self.assertIn("item-shell", body)
         self.assertIn("creator_common.js", body)
 
 

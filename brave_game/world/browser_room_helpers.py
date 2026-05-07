@@ -25,21 +25,9 @@ ROOM_ENTITY_ID_ICONS = {
     "kitchen_hearth": "soup_kitchen",
 }
 
-TUTORIAL_TALK_ENTITY_IDS = {
-    "sergeant_tamsin_vale",
-    "quartermaster_nella_cobb",
-    "courier_peep_marrow",
-    "ringhand_brask",
-    "captain_harl_rowan",
-}
-
-TUTORIAL_READ_ENTITY_IDS = {
-    "tutorial_supply_board",
-    "family_post_sign",
-    "tutorial_damaged_cart",
-}
 
 def _format_dialogue_line(line):
+
     return str(line or "").strip()
 
 def _build_talk_actions(target):
@@ -211,14 +199,12 @@ def _format_room_entity_items(viewer, visible_entities, visible_chars):
         if kind == "npc":
             command = f"talk {obj.key}"
             picker = _build_world_interaction_picker(viewer, obj)
-            if entity_id in TUTORIAL_TALK_ENTITY_IDS:
-                on_open_command = f"_bravepopup talk {obj.key}"
-                dismiss_bubble_speaker = obj.key
+            on_open_command = f"_bravepopup talk {obj.key}"
+            dismiss_bubble_speaker = obj.key
         elif kind == "readable":
             command = f"read {obj.key}"
             picker = _build_world_interaction_picker(viewer, obj)
-            if entity_id in TUTORIAL_READ_ENTITY_IDS:
-                on_open_command = f"_bravepopup read {obj.key}"
+            on_open_command = f"_bravepopup read {obj.key}"
         elif kind == "arcade":
             command = f"arcade inspect {obj.key}"
             picker = _build_world_interaction_picker(viewer, obj)

@@ -213,3 +213,31 @@ class ContentEditorTests(unittest.TestCase):
         quests_payload = json.loads(self.pack_paths["quests"].read_text(encoding="utf-8"))
         self.assertIn("creator_cross_domain_item", items_payload["item_templates"])
         self.assertIn("creator_cross_domain_quest", quests_payload["quests"])
+
+    def test_publish_domain_list_validates_selected_cross_domain_drafts_together(self):
+        self.editor.upsert_item(
+            "creator_selected_domain_item",
+            {"name": "Creator Selected Domain Item", "kind": "loot", "summary": "Draft item referenced by a selected draft quest."},
+            write=True,
+            stage="draft",
+        )
+        self.editor.upsert_quest(
+            "creator_selected_domain_quest",
+            {
+                "title": "Creator Selected Domain Quest",
+                "summary": "Selected publish coverage.",
+                "objectives": [{"type": "collect_item", "item_id": "creator_selected_domain_item", "description": "Collect the draft item."}],
+                "rewards": {"items": [{"item": "creator_selected_domain_item", "quantity": 1}]},
+            },
+            region="Testing",
+            write=True,
+            stage="draft",
+        )
+
+        mutations = self.editor.publish_stage(["quests", "items"], author="publisher")
+
+        self.assertEqual(["quests", "items"], [mutation.domain for mutation in mutations])
+        items_payload = json.loads(self.pack_paths["items"].read_text(encoding="utf-8"))
+        quests_payload = json.loads(self.pack_paths["quests"].read_text(encoding="utf-8"))
+        self.assertIn("creator_selected_domain_item", items_payload["item_templates"])
+        self.assertIn("creator_selected_domain_quest", quests_payload["quests"])

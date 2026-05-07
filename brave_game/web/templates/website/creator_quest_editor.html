@@ -283,7 +283,7 @@
   <datalist id="quest-region-options"></datalist>
   <datalist id="enemy-tag-options"></datalist>
 
-  <script src="/static/website/js/creator_common.js"></script>
+  <script src="/static/website/js/creator_common.js?v=agent-runs-v2"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
     const $ = (id) => document.getElementById(id);
@@ -662,22 +662,6 @@
       rewardRows.forEach((row, index) => {
         const card = document.createElement('div');
         card.className = 'reward-card';
-        const head = document.createElement('div');
-        head.className = 'reward-head';
-        const label = document.createElement('strong');
-        label.textContent = `Reward Item ${index + 1}`;
-        const remove = document.createElement('button');
-        remove.type = 'button';
-        remove.className = 'danger';
-        remove.textContent = 'Remove';
-        remove.addEventListener('click', () => {
-          rewardRows.splice(index, 1);
-          renderRewardRows();
-          updateQuestSummary();
-        });
-        head.appendChild(label);
-        head.appendChild(remove);
-        card.appendChild(head);
 
         const grid = document.createElement('div');
         grid.className = 'reward-grid';
@@ -705,8 +689,22 @@
         quantityInput.addEventListener('input', () => { row.quantity = Math.max(1, Number(quantityInput.value || 1)); updateQuestSummary(); });
         quantityField.appendChild(quantityInput);
 
+        const removeField = document.createElement('div');
+        removeField.className = 'field';
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'danger';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', () => {
+          rewardRows.splice(index, 1);
+          renderRewardRows();
+          updateQuestSummary();
+        });
+        removeField.appendChild(remove);
+
         grid.appendChild(itemField);
         grid.appendChild(quantityField);
+        grid.appendChild(removeField);
         card.appendChild(grid);
         rewardList.appendChild(card);
       });
@@ -849,6 +847,9 @@
         if (row.type === 'defeat_enemy' && !String(row.enemy_tag || '').trim()) messages.push(`Objective ${index + 1} enemy tag is required.`);
         if (row.type === 'talk_to_npc' && !String(row.npc_id || '').trim()) messages.push(`Objective ${index + 1} NPC/entity target is required.`);
       });
+      rewardRows.forEach((row, index) => {
+        if (!row.item) messages.push(`Reward Item ${index + 1} must have an item selected.`);
+      });
       if (!showValidation(messages)) {
         setStatus('Quest form is incomplete.', 'bad');
         return null;
@@ -894,11 +895,25 @@
       return Promise.resolve();
     }
 
-    function addLinkCard(title, meta, href, snippet) {
+    function sendHandoff(href, kind, payload, label) {
+      if (!href || !kind || !payload) return;
+      creatorTools.sendToBuilder(href, payload, label, { kind, target_builder: href.includes('/creator/world/') ? 'world' : href.includes('/creator/items/') ? 'items' : href.includes('/creator/encounters/') ? 'encounters' : href.includes('/creator/dialogue/') ? 'dialogue' : 'quests' });
+    }
+
+    function addLinkCard(title, meta, href, snippet, handoffKind = '') {
       const card = document.createElement('div');
       card.className = 'link-card';
       card.innerHTML = `<strong>${href ? `<a href="${href}">${title}</a>` : title}</strong><span>${meta}</span>${snippet ? `<code>${snippet}</code>` : ''}`;
       if (snippet) {
+        let parsedPayload = null;
+        try { parsedPayload = JSON.parse(snippet); } catch (_error) {}
+        if (href && handoffKind && parsedPayload) {
+          const sendButton = document.createElement('button');
+          sendButton.type = 'button';
+          sendButton.textContent = 'Send To Builder';
+          sendButton.addEventListener('click', () => sendHandoff(href, handoffKind, parsedPayload, title));
+          card.appendChild(sendButton);
+        }
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'secondary';
@@ -925,14 +940,36 @@
         };
       }
       for (const room of linked.rooms || []) addLinkCard(room.name || room.room_id, `World room objective: ${room.room_id}`, '/creator/world/', payloadSnippet('quest-gated-exit'));
-      for (const item of linked.items || []) addLinkCard(item.name || item.template_id, `Item ${item.role}: ${item.template_id}`, '/creator/items/', payloadSnippet('quest-reward', item));
-      for (const enemy of linked.enemies || []) addLinkCard(enemy.name || enemy.enemy_tag, `Enemy objective tag: ${enemy.enemy_tag}`, '/creator/encounters/', payloadSnippet('enemy-objective', enemy));
-      for (const entity of linked.entities || []) addLinkCard(entity.name || entity.entity_id, `Dialogue/NPC objective: ${entity.entity_id}`, '/creator/dialogue/', payloadSnippet('dialogue-hook', entity));
+      for (const item of linked.items || []) addLinkCard(item.name || item.template_id, `Item ${item.role}: ${item.template_id}`, '/creator/items/', payloadSnippet('quest-reward', item), 'quest-reward');
+      for (const enemy of linked.enemies || []) addLinkCard(enemy.name || enemy.enemy_tag, `Enemy objective tag: ${enemy.enemy_tag}`, '/creator/encounters/', payloadSnippet('enemy-objective', enemy), 'quest-defeat');
+      for (const entity of linked.entities || []) addLinkCard(entity.name || entity.entity_id, `Dialogue/NPC objective: ${entity.entity_id}`, '/creator/dialogue/', payloadSnippet('dialogue-hook', entity), 'quest-talk-objective');
       for (const prereq of linked.prerequisites || []) addLinkCard(prereq.title || prereq.quest_key, `Prerequisite quest: ${prereq.quest_key}`, '/creator/quests/', '');
       if (!questLinkGrid.children.length) {
         addLinkCard('No linked content yet', 'Add an objective or reward to generate builder links and payload snippets.', null, payloadSnippet('quest-gated-exit'));
       }
     }
+
+    function applyQuestIncoming(incoming) {
+      const payload = incoming.payload || {};
+      if (incoming.kind === 'quest-reward') {
+        rewardRows.push(createRewardRow({ item: payload.item || payload.template_id || '', quantity: payload.quantity || 1 }));
+        renderRewardRows();
+      } else if (incoming.kind === 'quest-defeat') {
+        objectiveRows.push(createObjectiveRow({ type: 'defeat_enemy', description: payload.description || 'Defeat the marked enemies.', enemy_tag: payload.enemy_tag || payload.tag || '' }));
+        renderObjectiveRows();
+      } else if (incoming.kind === 'quest-talk-objective') {
+        objectiveRows.push(createObjectiveRow({ type: 'talk_to_npc', description: payload.description || 'Talk to the NPC.', npc_id: payload.npc_id || payload.entity_id || payload.id || '' }));
+        renderObjectiveRows();
+      } else {
+        return false;
+      }
+      updateQuestSummary();
+      setStatus(`Applied ${incoming.label || incoming.kind} to the quest form. Preview or Save when ready.`, 'good');
+      return true;
+    }
+    creatorTools.registerApplyHandler('quest-reward', applyQuestIncoming);
+    creatorTools.registerApplyHandler('quest-defeat', applyQuestIncoming);
+    creatorTools.registerApplyHandler('quest-talk-objective', applyQuestIncoming);
 
     function applyQuestPreset(preset) {
       setActivePreset(preset);
@@ -975,6 +1012,10 @@
         tagOptions.appendChild(option);
       }
       renderQuestList(questSearch.value);
+      renderPrerequisiteRows();
+      renderObjectiveRows();
+      renderRewardRows();
+      updateQuestSummary();
     }
 
     async function selectQuest(questKey, label, meta) {

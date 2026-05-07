@@ -141,7 +141,7 @@
       <div class="panel"><div class="panel-head"><h2>Activity</h2><p>Shows load results, validation issues, and change previews after you ask for them.</p></div><div class="panel-body"><div id="status" class="status">Waiting for item selection.</div><pre id="output"></pre></div></div>
     </section>
   </div>
-  <script src="/static/website/js/creator_common.js"></script>
+  <script src="/static/website/js/creator_common.js?v=agent-runs-v2"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
     const itemList = document.getElementById('item-list');
@@ -427,6 +427,27 @@
       setActivePreset(inferPreset(item));
     }
 
+    function applyItemIncoming(incoming) {
+      const payload = incoming.payload || {};
+      if (incoming.kind !== 'item-shell') return false;
+      const templateId = payload.id || payload.template_id || itemId.value.trim() || 'new_item';
+      populateItemForm(templateId, {
+        ...buildDraft(),
+        ...payload,
+        name: payload.name || templateId.replace(/_/g, ' '),
+        kind: payload.kind || 'loot',
+      });
+      itemJson.value = JSON.stringify({
+        ...buildDraft(),
+        ...payload,
+        name: payload.name || templateId.replace(/_/g, ' '),
+        kind: payload.kind || 'loot',
+      }, null, 2);
+      setStatus(`Applied ${incoming.label || 'item shell'} to the item form. Preview or Save when ready.`, 'good');
+      return true;
+    }
+    creatorTools.registerApplyHandler('item-shell', applyItemIncoming);
+
     function payloadSnippet(kind, preview, link = {}) {
       const templateId = preview.template_id;
       if (kind === 'quest') return JSON.stringify({ item: templateId, quantity: 1 }, null, 2);
@@ -449,12 +470,28 @@
       temp.remove();
       return Promise.resolve();
     }
+    function handoffKindForItemLink(href, snippet) {
+      if (!href || !snippet) return '';
+      if (href.includes('/creator/quests/')) return 'quest-reward';
+      if (href.includes('/creator/encounters/')) return 'enemy-loot';
+      return '';
+    }
     function addLinkCard(title, meta, href, snippet) {
       const card = document.createElement('div');
       card.className = 'link-card';
       const linkMarkup = href ? `<a href="${href}">${title}</a>` : title;
       card.innerHTML = `<strong>${linkMarkup}</strong><span>${meta}</span>${snippet ? `<code>${snippet}</code>` : ''}`;
       if (snippet) {
+        const handoffKind = handoffKindForItemLink(href, snippet);
+        let parsedPayload = null;
+        try { parsedPayload = JSON.parse(snippet); } catch (_error) {}
+        if (href && handoffKind && parsedPayload) {
+          const sendButton = document.createElement('button');
+          sendButton.type = 'button';
+          sendButton.textContent = 'Send To Builder';
+          sendButton.addEventListener('click', () => creatorTools.sendToBuilder(href, parsedPayload, title, { kind: handoffKind }));
+          card.appendChild(sendButton);
+        }
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'secondary';

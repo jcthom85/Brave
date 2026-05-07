@@ -41,7 +41,18 @@
       .creator-health-card.good { border-color:rgba(47,109,76,.28); background:#eef8f1; }
       .creator-health-card.bad { border-color:rgba(141,49,34,.28); background:#fff0ed; }
       .creator-incoming-card pre { display:block; min-height:90px; max-height:220px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+      .creator-agent-runs { display:grid; gap:10px; }
+      .creator-agent-run-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+      .creator-agent-run-card { text-align:left; border:1px solid var(--line,#d9c8ac); border-radius:12px; background:#fffdfa; padding:12px; display:grid; gap:6px; color:var(--ink,#1d2430); cursor:pointer; font:inherit; }
+      .creator-agent-run-card:hover,.creator-agent-run-card[aria-current="true"] { border-color:var(--accent,#8b4a29); background:#fff8f2; }
+      .creator-agent-run-card strong { overflow-wrap:anywhere; }
+      .creator-agent-run-card span,.creator-agent-run-meta { color:var(--muted,#6b6157); font-size:.9rem; line-height:1.35; }
+      .creator-agent-run-detail { border:1px solid var(--line,#d9c8ac); border-radius:12px; background:#fffdfa; padding:12px; display:grid; gap:10px; }
+      .creator-agent-run-detail pre { display:block; max-height:360px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+      .creator-agent-run-detail textarea { width:100%; min-height:74px; }
+      .creator-agent-run-status { display:inline-flex; width:max-content; border:1px solid var(--line,#d9c8ac); border-radius:999px; padding:4px 8px; background:#fff; font-size:.86rem; }
       @media (max-width:980px) { .creator-health-grid { grid-template-columns:1fr; } }
+      @media (max-width:980px) { .creator-agent-run-list { grid-template-columns:1fr; } }
     `;
     document.head.appendChild(style);
   }
@@ -96,10 +107,22 @@
     }).then(async (response) => {
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || payload.ok === false) {
-        throw new Error(payload.error || `Request failed with ${response.status}`);
+        const error = new Error(payload.error || `Request failed with ${response.status}`);
+        error.payload = payload;
+        throw error;
       }
       return payload;
     });
+  }
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[char]));
   }
 
   function attachWorkflow(apiRoot, statusNode, outputNode, validationNode) {
@@ -198,8 +221,158 @@
     return panel;
   }
 
-  function sendToBuilder(path, payload, label) {
-    const entry = { payload, label: label || 'Incoming Payload', created_at: new Date().toISOString() };
+  function summarizeRun(run) {
+    const domains = (run.touched_domains || []).length ? run.touched_domains.join(', ') : 'No domains yet';
+    const count = Number(run.mutation_count || 0);
+    return `${run.status || 'planned'} · ${count} mutation${count === 1 ? '' : 's'} · ${domains}`;
+  }
+
+  function runBuilderLinks(run) {
+    const domains = run.touched_domains || [];
+    const links = {
+      world: '/creator/world/',
+      encounters: '/creator/encounters/',
+      systems: '/creator/systems/',
+      items: '/creator/items/',
+      quests: '/creator/quests/',
+      dialogue: '/creator/dialogue/',
+      characters: '/creator/characters/',
+    };
+    return domains.filter((domain) => links[domain]).map((domain) => `<a href="${links[domain]}">${escapeHtml(domain)}</a>`).join('');
+  }
+
+  function renderAgentRunDetail(panel, apiRoot, run, statusNode) {
+    const detail = panel.querySelector('[data-agent-run-detail]');
+    const summary = {
+      run_id: run.run_id,
+      status: run.status,
+      instructions: run.instructions,
+      plan: run.plan,
+      validation: run.validation,
+      dry_run: run.dry_run,
+      apply: run.apply,
+      verify: run.verify,
+      publish: run.publish,
+      review_notes: run.review_notes || [],
+    };
+    const publishMessage = run.status === 'reviewed'
+      ? '<div class="creator-agent-run-meta">Reviewed means approved for draft publishing. Use Publish Run Drafts to promote this run&apos;s touched draft domains.</div>'
+      : '';
+    detail.innerHTML = [
+      `<article class="creator-agent-run-detail"><div><strong>${escapeHtml(run.instructions || run.run_id)}</strong><div class="creator-agent-run-meta">${escapeHtml(run.run_id)} · updated ${escapeHtml(run.updated_at || '-')}</div></div>`,
+      `<span class="creator-agent-run-status">${escapeHtml(run.status || 'planned')}</span>`,
+      publishMessage,
+      `<div class="creator-related-links">${runBuilderLinks(run) || '<span class="creator-agent-run-meta">No builder links yet.</span>'}</div>`,
+      `<pre>${escapeHtml(JSON.stringify(summary, null, 2))}</pre>`,
+      '<label for="creator-agent-run-review-note">Review Note</label>',
+      '<textarea id="creator-agent-run-review-note" data-agent-run-review-note placeholder="What did you verify?"></textarea>',
+      '<div class="toolbar"><button type="button" data-agent-run-review>Mark Reviewed</button><button type="button" data-agent-run-publish>Publish Run Drafts</button></div>',
+      '</article>',
+    ].join('');
+    detail.querySelector('[data-agent-run-review]').addEventListener('click', async () => {
+      try {
+        const note = detail.querySelector('[data-agent-run-review-note]').value.trim();
+        if (!note) throw new Error('Review note is required.');
+        const payload = await apiFetch(apiRoot, `/codex/runs/${encodeURIComponent(run.run_id)}/review`, { method: 'POST', body: JSON.stringify({ note }) });
+        renderAgentRunDetail(panel, apiRoot, payload.run, statusNode);
+        if (statusNode) setStatus(statusNode, 'Agent run marked reviewed.', 'good');
+      } catch (error) {
+        if (statusNode) setStatus(statusNode, error.message, 'bad');
+      }
+    });
+    detail.querySelector('[data-agent-run-publish]').addEventListener('click', async () => {
+      try {
+        const payload = await apiFetch(apiRoot, `/codex/runs/${encodeURIComponent(run.run_id)}/publish`, { method: 'POST', body: JSON.stringify({}) });
+        renderAgentRunDetail(panel, apiRoot, payload.run, statusNode);
+        await loadAgentRuns(panel, apiRoot, statusNode);
+        if (statusNode) setStatus(statusNode, `Published ${payload.published.length} draft domain(s) for this agent run.`, 'good');
+      } catch (error) {
+        if (error.payload && error.payload.run) renderAgentRunDetail(panel, apiRoot, error.payload.run, statusNode);
+        const details = error.payload && (error.payload.validation_errors || []).length ? ` ${error.payload.validation_errors.join(' ')}` : '';
+        if (statusNode) setStatus(statusNode, `${error.message}${details}`, 'bad');
+      }
+    });
+  }
+
+  async function loadAgentRuns(panel, apiRoot, statusNode) {
+    const list = panel.querySelector('[data-agent-run-list]');
+    const payload = await apiFetch(apiRoot, '/codex/runs?limit=20');
+    const runs = payload.runs || [];
+    if (!runs.length) {
+      list.innerHTML = '<div class="creator-agent-run-meta">No agent runs yet.</div>';
+      panel.querySelector('[data-agent-run-detail]').innerHTML = '';
+      return;
+    }
+    list.innerHTML = runs.map((run) => [
+      `<button type="button" class="creator-agent-run-card" data-agent-run-id="${escapeHtml(run.run_id)}">`,
+      `<strong>${escapeHtml(run.instructions || run.run_id)}</strong>`,
+      `<span>${escapeHtml(summarizeRun(run))}</span>`,
+      `<span>Updated ${escapeHtml(run.updated_at || '-')}</span>`,
+      '</button>',
+    ].join('')).join('');
+    list.querySelectorAll('[data-agent-run-id]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        try {
+          list.querySelectorAll('[aria-current="true"]').forEach((entry) => entry.removeAttribute('aria-current'));
+          button.setAttribute('aria-current', 'true');
+          const detailPayload = await apiFetch(apiRoot, `/codex/runs/${encodeURIComponent(button.getAttribute('data-agent-run-id'))}`);
+          renderAgentRunDetail(panel, apiRoot, detailPayload.run, statusNode);
+        } catch (error) {
+          if (statusNode) setStatus(statusNode, error.message, 'bad');
+        }
+      });
+    });
+  }
+
+  function attachAgentRunsPanel(apiRoot, statusNode) {
+    if (!apiRoot || document.querySelector('[data-creator-agent-runs-panel]')) return null;
+    const host = document.querySelector('[data-creator-agent-runs-host]');
+    if (!host) return null;
+    const panel = document.createElement('section');
+    panel.className = 'rail creator-agent-runs';
+    panel.setAttribute('data-creator-agent-runs-panel', 'true');
+    panel.innerHTML = [
+      '<div class="panel-head"><h2>Agent Runs</h2><p>Review Codex-authored draft runs before using the normal Creator publish workflow.</p></div>',
+      '<div class="toolbar"><button type="button" data-agent-runs-refresh>Refresh</button></div>',
+      '<div class="creator-agent-run-list" data-agent-run-list></div>',
+      '<div data-agent-run-detail></div>',
+    ].join('');
+    host.appendChild(panel);
+    panel.querySelector('[data-agent-runs-refresh]').addEventListener('click', () => {
+      loadAgentRuns(panel, apiRoot, statusNode).catch((error) => {
+        if (statusNode) setStatus(statusNode, error.message, 'bad');
+      });
+    });
+    loadAgentRuns(panel, apiRoot, statusNode).catch(() => {});
+    return panel;
+  }
+
+  function builderKeyFromPath(path) {
+    const value = String(path || '');
+    if (value.includes('/creator/world/')) return 'world';
+    if (value.includes('/creator/encounters/')) return 'encounters';
+    if (value.includes('/creator/systems/')) return 'systems';
+    if (value.includes('/creator/items/')) return 'items';
+    if (value.includes('/creator/quests/')) return 'quests';
+    if (value.includes('/creator/dialogue/')) return 'dialogue';
+    if (value.includes('/creator/characters/')) return 'characters';
+    return 'studio';
+  }
+
+  function normalizeIncomingPayload(path, payload, label, options) {
+    const config = options || {};
+    return {
+      source_builder: config.source_builder || activeCreatorKey(),
+      target_builder: config.target_builder || builderKeyFromPath(path),
+      kind: config.kind || 'generic',
+      label: label || config.label || 'Incoming Payload',
+      payload: payload || {},
+      created_at: new Date().toISOString(),
+    };
+  }
+
+  function sendToBuilder(path, payload, label, options) {
+    const entry = normalizeIncomingPayload(path, payload, label, options);
     window.sessionStorage.setItem('braveCreatorIncomingPayload', JSON.stringify(entry));
     window.location.href = path;
   }
@@ -217,12 +390,17 @@
     const panel = document.createElement('section');
     panel.className = 'panel creator-incoming';
     panel.setAttribute('data-creator-incoming-payload-panel', 'true');
+    const meta = `${incoming.source_builder || 'builder'} -> ${incoming.target_builder || 'builder'}${incoming.kind ? ` · ${incoming.kind}` : ''}`;
     panel.innerHTML = [
-      '<div class="panel-head"><h2>Incoming Payload</h2><p>A linked builder sent this payload here. Review it, copy it, then explicitly Preview or Save in this builder.</p></div>',
+      '<div class="panel-head"><h2>Incoming Payload</h2><p>A linked builder sent this here. Applying it updates this form only; Preview or Save remains explicit.</p></div>',
       '<div class="panel-body stack">',
-      `<article class="creator-incoming-card"><strong>${incoming.label || 'Incoming Payload'}</strong><span>Payload is staged only; nothing was written.</span><pre>${JSON.stringify(incoming.payload || {}, null, 2)}</pre><button class="secondary" type="button" data-copy-incoming-payload>Copy Payload</button></article>`,
+      `<article class="creator-incoming-card"><strong>${incoming.label || 'Incoming Payload'}</strong><span>${meta}. Payload is staged only; nothing was written.</span><pre>${JSON.stringify(incoming.payload || {}, null, 2)}</pre><div class="toolbar"><button type="button" data-apply-incoming-payload>Apply To Builder</button><button class="secondary" type="button" data-copy-incoming-payload>Copy Payload</button></div></article>`,
       '</div>',
     ].join('');
+    panel.querySelector('[data-apply-incoming-payload]').addEventListener('click', () => {
+      const applied = applyIncomingPayload(incoming);
+      if (!applied && statusNode) setStatus(statusNode, `No apply handler for ${incoming.kind || 'this payload'} on this builder.`, 'bad');
+    });
     panel.querySelector('[data-copy-incoming-payload]').addEventListener('click', () => {
       const text = JSON.stringify(incoming.payload || {}, null, 2);
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
@@ -230,6 +408,22 @@
     });
     host.insertBefore(panel, host.firstChild);
     return panel;
+  }
+
+  function registerApplyHandler(kind, handler) {
+    window.BraveCreatorApplyHandlers = window.BraveCreatorApplyHandlers || {};
+    window.BraveCreatorApplyHandlers[kind] = handler;
+  }
+
+  function applyIncomingPayload(incoming) {
+    if (!incoming) return false;
+    const direct = window.BraveCreatorApplyIncomingPayload;
+    if (typeof direct === 'function') return direct(incoming) !== false;
+    const handlers = window.BraveCreatorApplyHandlers || {};
+    const handler = handlers[incoming.kind];
+    if (typeof handler !== 'function') return false;
+    handler(incoming);
+    return true;
   }
 
   function setStatus(node, message, tone) {
@@ -323,6 +517,7 @@
     const incoming = consumeIncomingPayload();
     renderIncomingPayload(host, incoming, statusNode);
     attachWorkflow(apiRoot, statusNode, outputNode, validationNode);
+    attachAgentRunsPanel(apiRoot, statusNode);
     fetchHealth(apiRoot, 'draft')
       .then((payload) => renderHealthPanel(host, payload))
       .catch(() => {});
@@ -335,15 +530,18 @@
       requireFields,
       parseJsonField,
       sendToBuilder,
+      registerApplyHandler,
+      applyIncomingPayload,
       consumeIncomingPayload,
       renderIncomingPayload: (hostNode, payload) => renderIncomingPayload(hostNode || host, payload, statusNode),
       setStatus: (message, tone) => setStatus(statusNode, message, tone),
       showValidation: (messages) => renderValidation(validationNode, messages).length === 0,
       clearValidation: () => renderValidation(validationNode, []),
       attachWorkflow: () => attachWorkflow(apiRoot, statusNode, outputNode, validationNode),
+      attachAgentRunsPanel: () => attachAgentRunsPanel(apiRoot, statusNode),
       attachCreatorShell,
     };
   }
 
-  window.BraveCreator = { apiFetch, setStatus, renderValidation, fillSelect, fetchReferences, fetchHealth, renderHealthPanel, requireFields, parseJsonField, sendToBuilder, consumeIncomingPayload, renderIncomingPayload, attachWorkflow, attachCreatorShell, bind };
+  window.BraveCreator = { apiFetch, setStatus, renderValidation, fillSelect, fetchReferences, fetchHealth, renderHealthPanel, requireFields, parseJsonField, sendToBuilder, normalizeIncomingPayload, registerApplyHandler, applyIncomingPayload, consumeIncomingPayload, renderIncomingPayload, attachWorkflow, attachAgentRunsPanel, attachCreatorShell, bind };
 }());

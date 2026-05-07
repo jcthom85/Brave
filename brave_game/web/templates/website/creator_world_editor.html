@@ -614,7 +614,7 @@
     </section>
   </div>
 
-  <script src="/static/website/js/creator_common.js"></script>
+  <script src="/static/website/js/creator_common.js?v=agent-runs-v2"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
     const roomList = document.getElementById("room-list");
@@ -1001,6 +1001,70 @@
       renderWorldEditors();
       setStatus(message || `Drafted room object ${draft.id}. Preview or save it from Room Entities.`, "good");
     }
+
+    function applyWorldIncoming(incoming) {
+      const payload = incoming.payload || {};
+      if (incoming.kind === "room-activity") {
+        const current = selectedRoomId ? getRoomFormData() : {};
+        const roomId = payload.id || payload.room_id || current.id || selectedRoomId || "new_activity_room";
+        const activities = Array.from(new Set([...(current.activities || current.brave_activities || []), ...(payload.activities || [])].filter(Boolean)));
+        const draft = {
+          ...current,
+          ...payload,
+          id: roomId,
+          key: payload.key || current.key || roomId.replace(/_/g, " "),
+          desc: payload.desc || current.desc || "Room activity staged from another Creator builder.",
+          zone: payload.zone || current.zone || selectedRegion || "Unmapped",
+          world: payload.world || current.world || "Brave",
+          map_region: payload.map_region || current.map_region || current.zone || selectedRegion || "Unmapped",
+          map_x: Number(payload.map_x ?? current.map_x ?? 0),
+          map_y: Number(payload.map_y ?? current.map_y ?? 0),
+          activities,
+        };
+        selectedRoomId = roomId;
+        populateRoomForm(draft);
+        roomJson.value = JSON.stringify(draft, null, 2);
+        setEditorTab("room");
+        renderWorldEditors();
+        setStatus(`Applied ${incoming.label || "room activity"} to the room form. Preview or Save when ready.`, "good");
+        return true;
+      }
+      if (incoming.kind === "boss-exit") {
+        const source = payload.source || selectedRoomId || exitSourceSelect.value || "";
+        const destination = payload.destination || exitDestinationSelect.value || "";
+        const key = payload.key || payload.direction || "forward";
+        const draft = {
+          ...payload,
+          id: payload.id || `${source || "source"}_to_${destination || "destination"}_${payload.boss_gate || "boss_gate"}`,
+          key,
+          direction: payload.direction || key,
+          label: payload.label || "Boss Gate",
+          source,
+          destination,
+          boss_gate: payload.boss_gate || payload.gate_key || payload.key || "",
+        };
+        stageExitDraft(draft, `Applied ${incoming.label || "boss-gate exit"} to the exit form. Preview or Save when ready.`);
+        return true;
+      }
+      if (["world-readable", "world-npc"].includes(incoming.kind)) {
+        const draft = {
+          aliases: [],
+          desc: payload.desc || "",
+          gender: payload.gender || "",
+          id: payload.id || `${selectedRoomId || "room"}_${incoming.kind === "world-readable" ? "readable" : "npc"}`,
+          key: payload.key || (incoming.kind === "world-readable" ? "Readable" : "NPC"),
+          kind: payload.kind || (incoming.kind === "world-readable" ? "readable" : "npc"),
+          location: payload.location || payload.room_id || selectedRoomId || "",
+        };
+        stageEntityDraft(draft, `Applied ${incoming.label || "entity"} to the entity form. Preview or Save when ready.`);
+        return true;
+      }
+      return false;
+    }
+    creatorTools.registerApplyHandler("room-activity", applyWorldIncoming);
+    creatorTools.registerApplyHandler("boss-exit", applyWorldIncoming);
+    creatorTools.registerApplyHandler("world-readable", applyWorldIncoming);
+    creatorTools.registerApplyHandler("world-npc", applyWorldIncoming);
 
     function buildRoomDraft(mapX = 0, mapY = 0, region = "") {
       const safeRegion = region || selectedRegion || roomRegion(rooms[0] || {}) || "Unmapped";

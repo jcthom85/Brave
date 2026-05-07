@@ -201,7 +201,7 @@ def mutate_content(kind, target, raw_payload, *, write=False, editor=None, stage
         quest_data = dict(payload)
         if "quest" in quest_data:
             region = quest_data.get("region")
-            add_starting = bool(quest_data.get("add_starting"))
+            add_starting = bool(quest_data.get("add_starting", True))
             quest_data = dict(quest_data.get("quest") or {})
         return editor.upsert_quest(key, quest_data, region=region, add_starting=add_starting, write=write, stage=stage, author=author)
 
@@ -423,7 +423,10 @@ def revert_content(entry_id, *, write=False, stage=None, editor=None, author="sy
 
 def publish_content(domain=None, *, editor=None, author="system"):
     editor = editor or ContentEditor()
-    normalized_domain = None if domain in (None, "", "all") else str(domain).strip().lower()
+    if isinstance(domain, (list, tuple, set)):
+        normalized_domain = [str(entry or "").strip().lower() for entry in domain if str(entry or "").strip()]
+    else:
+        normalized_domain = None if domain in (None, "", "all") else str(domain).strip().lower()
     return editor.publish_stage(normalized_domain, author=author)
 
 

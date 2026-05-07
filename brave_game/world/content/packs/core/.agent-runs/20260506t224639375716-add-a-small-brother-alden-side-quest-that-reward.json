@@ -1,0 +1,1020 @@
+{
+  "apply": {
+    "applied": [
+      {
+        "diff": "--- /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/items.json\n+++ /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/items.json\n@@ -1,4 +1,11 @@\n {\n+  \"_meta\": {\n+    \"last_action\": \"upsert\",\n+    \"last_modified_at\": \"2026-05-06T22:46:39.386804+00:00\",\n+    \"last_modified_by\": \"codex-cli\",\n+    \"last_target\": \"dawn_thread_candle_stub\",\n+    \"stage\": \"draft\"\n+  },\n   \"bonus_labels\": {\n     \"accuracy\": \"Accuracy\",\n     \"agility\": \"Agility\",\n@@ -453,6 +460,14 @@\n         \"verb\": \"study\"\n       }\n     },\n+    \"dawn_thread_candle_stub\": {\n+      \"kind\": \"loot\",\n+      \"name\": \"Dawn-Thread Candle Stub\",\n+      \"rarity\": \"common\",\n+      \"stackable\": true,\n+      \"summary\": \"A thumb-length chapel candle wound with pale thread, carried as a small promise to keep moving carefully.\",\n+      \"value\": 3\n+    },\n     \"dawnbell_mace\": {\n       \"bonuses\": {\n         \"accuracy\": 3,\n",
+        "domain": "items",
+        "entry_id": "20260506224639391227-items-upsert-dawn_thread_candle_stub",
+        "history_path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/.history/20260506224639391227-items-upsert-dawn_thread_candle_stub.json",
+        "kind": "item",
+        "path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/items.json",
+        "stage": "draft",
+        "write": true
+      },
+      {
+        "diff": "--- /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/quests.json\n+++ /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/quests.json\n@@ -1,12 +1,13 @@\n {\n   \"_meta\": {\n     \"last_action\": \"upsert\",\n-    \"last_modified_at\": \"2026-05-06T17:29:19.188823+00:00\",\n-    \"last_modified_by\": \"jctest3\",\n-    \"last_target\": \"below_the_fencebreakers\",\n+    \"last_modified_at\": \"2026-05-06T22:46:39.394531+00:00\",\n+    \"last_modified_by\": \"codex-cli\",\n+    \"last_target\": \"bell_before_the_road\",\n     \"stage\": \"draft\"\n   },\n   \"quest_regions\": {\n+    \"bell_before_the_road\": \"Brambleford\",\n     \"below_the_fencebreakers\": \"Goblin Warrens\",\n     \"bogwater_rumors\": \"Blackfen\",\n     \"bridgework_for_joss\": \"Drowned Weir\",\n@@ -36,6 +37,32 @@\n     \"what_whispers_in_the_wood\": \"Whispering Woods\"\n   },\n   \"quests\": {\n+    \"bell_before_the_road\": {\n+      \"giver\": \"Brother Alden\",\n+      \"next_step\": \"Carry Alden's candle stub back toward Town Green, then follow Captain Rowan's lead toward the inn and the cut road.\",\n+      \"objectives\": [\n+        {\n+          \"description\": \"Speak with Brother Alden at the Chapel of the Dawn Bell.\",\n+          \"npc_id\": \"brother_alden\",\n+          \"type\": \"talk_to_npc\"\n+        }\n+      ],\n+      \"prerequisites\": [\n+        \"practice_makes_heroes\"\n+      ],\n+      \"rewards\": {\n+        \"items\": [\n+          {\n+            \"item\": \"dawn_thread_candle_stub\",\n+            \"quantity\": 1\n+          }\n+        ],\n+        \"silver\": 4,\n+        \"xp\": 12\n+      },\n+      \"summary\": \"Brother Alden asks for one last steadying check at the chapel before the road pulls the town into harder trouble.\",\n+      \"title\": \"Bell Before the Road\"\n+    },\n     \"below_the_fencebreakers\": {\n       \"giver\": \"Mira Fenleaf\",\n       \"objectives\": [\n",
+        "domain": "quests",
+        "entry_id": "20260506224639396347-quests-upsert-bell_before_the_road",
+        "history_path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/.history/20260506224639396347-quests-upsert-bell_before_the_road.json",
+        "kind": "quest",
+        "path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/quests.json",
+        "stage": "draft",
+        "write": true
+      },
+      {
+        "diff": "--- /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/dialogue.json\n+++ /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/dialogue.json\n@@ -1,4 +1,11 @@\n {\n+  \"_meta\": {\n+    \"last_action\": \"upsert\",\n+    \"last_modified_at\": \"2026-05-06T22:46:39.398217+00:00\",\n+    \"last_modified_by\": \"codex-cli\",\n+    \"last_target\": \"brother_alden\",\n+    \"stage\": \"draft\"\n+  },\n   \"static_read_responses\": {\n     \"barrow_marker_stone\": \"The lichen-sunk stone reads: HERE KEEP FAITH WITH THE OLD FIELD. DISTURB NOTHING. LIGHT YOUR LANTERN. LEAVE BEFORE THE LAST BELL.\",\n     \"blackreed_standard\": \"The standard shows a black marsh reed stitched over a split road line. It is less a heraldic symbol than a very direct threat about who gets to pass beneath this hill.\",\n@@ -32,6 +39,10 @@\n   \"talk_rules\": {\n     \"brother_alden\": [\n       {\n+        \"active\": \"bell_before_the_road\",\n+        \"text\": \"\\\"Before you take the road, carry a little order with you. The Dawn Bell is only bronze, but the town hears steadier footsteps when someone remembers to light a candle and check on the frightened.\\\"\"\n+      },\n+      {\n         \"active\": \"the_knight_without_rest\",\n         \"text\": \"\\\"Sir Edric lies at the Sunken Dais, but not quietly enough. When grave-lights answer him, cut those lesser spirits down first. The ward around him should fail once the dead he leans on are gone. Ring the Dawn Bell and pray before you cross if you want steadier hands.\\\"\"\n       },\n",
+        "domain": "dialogue",
+        "entry_id": "20260506224639399391-dialogue-upsert-brother_alden",
+        "history_path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/.history/20260506224639399391-dialogue-upsert-brother_alden.json",
+        "kind": "dialogue",
+        "path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/dialogue.json",
+        "stage": "draft",
+        "write": true
+      }
+    ],
+    "health": {
+      "counts": {
+        "boss_gates": 1,
+        "cooking_recipes": 9,
+        "dialogue_entities": 9,
+        "enemies": 42,
+        "entities": 52,
+        "exits": 119,
+        "fishing_spots": 3,
+        "items": 134,
+        "quests": 28,
+        "readables": 28,
+        "room_encounter_tables": 35,
+        "rooms": 55,
+        "tinkering_recipes": 8
+      },
+      "draft_domains": [
+        "items",
+        "quests",
+        "dialogue"
+      ],
+      "ok": false,
+      "readiness": [
+        {
+          "issues": [
+            {
+              "href": "/creator/world/",
+              "message": "Exit gate_walk_to_training_yard has no reverse path."
+            },
+            {
+              "href": "/creator/world/",
+              "message": "Exit training_yard_to_mastery_hall has no reverse path."
+            }
+          ],
+          "key": "world",
+          "label": "World"
+        },
+        {
+          "issues": [
+            {
+              "href": "/creator/encounters/",
+              "message": "Enemy salvage_drone is not used by a room encounter."
+            }
+          ],
+          "key": "encounters",
+          "label": "Encounters"
+        },
+        {
+          "issues": [],
+          "key": "systems",
+          "label": "Systems"
+        },
+        {
+          "issues": [
+            {
+              "href": "/creator/items/",
+              "message": "Item lantern_pixel_pin has no quest, loot, or system placement."
+            },
+            {
+              "href": "/creator/items/",
+              "message": "Item weirglass_eel has no quest, loot, or system placement."
+            }
+          ],
+          "key": "items",
+          "label": "Items"
+        },
+        {
+          "issues": [],
+          "key": "quests",
+          "label": "Quests"
+        },
+        {
+          "issues": [
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable town_notice_board has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable tutorial_damaged_cart has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable tutorial_supply_board has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable family_post_sign has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable great_catch_log has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable kitchen_hearth has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable loaner_pole_rack has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable trophy_vitrine has no readable text."
+            }
+          ],
+          "key": "dialogue",
+          "label": "Dialogue"
+        },
+        {
+          "issues": [],
+          "key": "characters",
+          "label": "Characters"
+        }
+      ],
+      "recommended_next_actions": [
+        {
+          "href": "/creator/",
+          "label": "Fix validation errors before publishing."
+        },
+        {
+          "href": "/creator/",
+          "label": "Review draft domains: items, quests, dialogue."
+        },
+        {
+          "href": "/creator/world/",
+          "label": "Resolve World readiness issues."
+        },
+        {
+          "href": "/creator/encounters/",
+          "label": "Resolve Encounters readiness issues."
+        },
+        {
+          "href": "/creator/items/",
+          "label": "Resolve Items readiness issues."
+        },
+        {
+          "href": "/creator/dialogue/",
+          "label": "Resolve Dialogue readiness issues."
+        }
+      ],
+      "stage": "draft",
+      "validation_errors": [
+        "Quest test_reward_quest rewards unknown item: health_potion"
+      ]
+    },
+    "ok": true,
+    "recipe_warnings": [
+      {
+        "kind": "missing_preview",
+        "message": "Verify preview item dawn_thread_candle_stub before publishing.",
+        "preview": {
+          "args": [
+            "dawn_thread_candle_stub"
+          ],
+          "kind": "item"
+        }
+      },
+      {
+        "kind": "missing_preview",
+        "message": "Verify preview quest bell_before_the_road before publishing.",
+        "preview": {
+          "args": [
+            "bell_before_the_road"
+          ],
+          "kind": "quest"
+        }
+      },
+      {
+        "kind": "missing_preview",
+        "message": "Verify preview dialogue brother_alden before publishing.",
+        "preview": {
+          "args": [
+            "brother_alden"
+          ],
+          "kind": "dialogue"
+        }
+      }
+    ],
+    "stage": "draft",
+    "suggested_previews": [
+      {
+        "args": [
+          "dawn_thread_candle_stub"
+        ],
+        "kind": "item"
+      },
+      {
+        "args": [
+          "bell_before_the_road"
+        ],
+        "kind": "quest"
+      },
+      {
+        "args": [
+          "brother_alden"
+        ],
+        "kind": "dialogue"
+      }
+    ],
+    "touched_domains": [
+      "items",
+      "quests",
+      "dialogue"
+    ],
+    "write": true
+  },
+  "author": "codex-cli",
+  "created_at": "2026-05-06T22:46:39.375716+00:00",
+  "dry_run": {
+    "applied": [
+      {
+        "diff": "--- /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/items.json\n+++ /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/items.json\n@@ -453,6 +453,14 @@\n         \"verb\": \"study\"\n       }\n     },\n+    \"dawn_thread_candle_stub\": {\n+      \"kind\": \"loot\",\n+      \"name\": \"Dawn-Thread Candle Stub\",\n+      \"rarity\": \"common\",\n+      \"stackable\": true,\n+      \"summary\": \"A thumb-length chapel candle wound with pale thread, carried as a small promise to keep moving carefully.\",\n+      \"value\": 3\n+    },\n     \"dawnbell_mace\": {\n       \"bonuses\": {\n         \"accuracy\": 3,\n",
+        "domain": "items",
+        "entry_id": "",
+        "history_path": "",
+        "kind": "item",
+        "path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/items.json",
+        "stage": "draft",
+        "write": false
+      },
+      {
+        "diff": "--- /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/quests.json\n+++ /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/quests.json\n@@ -7,6 +7,7 @@\n     \"stage\": \"draft\"\n   },\n   \"quest_regions\": {\n+    \"bell_before_the_road\": \"Brambleford\",\n     \"below_the_fencebreakers\": \"Goblin Warrens\",\n     \"bogwater_rumors\": \"Blackfen\",\n     \"bridgework_for_joss\": \"Drowned Weir\",\n@@ -36,6 +37,32 @@\n     \"what_whispers_in_the_wood\": \"Whispering Woods\"\n   },\n   \"quests\": {\n+    \"bell_before_the_road\": {\n+      \"giver\": \"Brother Alden\",\n+      \"next_step\": \"Carry Alden's candle stub back toward Town Green, then follow Captain Rowan's lead toward the inn and the cut road.\",\n+      \"objectives\": [\n+        {\n+          \"description\": \"Speak with Brother Alden at the Chapel of the Dawn Bell.\",\n+          \"npc_id\": \"brother_alden\",\n+          \"type\": \"talk_to_npc\"\n+        }\n+      ],\n+      \"prerequisites\": [\n+        \"practice_makes_heroes\"\n+      ],\n+      \"rewards\": {\n+        \"items\": [\n+          {\n+            \"item\": \"dawn_thread_candle_stub\",\n+            \"quantity\": 1\n+          }\n+        ],\n+        \"silver\": 4,\n+        \"xp\": 12\n+      },\n+      \"summary\": \"Brother Alden asks for one last steadying check at the chapel before the road pulls the town into harder trouble.\",\n+      \"title\": \"Bell Before the Road\"\n+    },\n     \"below_the_fencebreakers\": {\n       \"giver\": \"Mira Fenleaf\",\n       \"objectives\": [\n",
+        "domain": "quests",
+        "entry_id": "",
+        "history_path": "",
+        "kind": "quest",
+        "path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/quests.json",
+        "stage": "draft",
+        "write": false
+      },
+      {
+        "diff": "--- /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/dialogue.json\n+++ /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/dialogue.json\n@@ -32,6 +32,10 @@\n   \"talk_rules\": {\n     \"brother_alden\": [\n       {\n+        \"active\": \"bell_before_the_road\",\n+        \"text\": \"\\\"Before you take the road, carry a little order with you. The Dawn Bell is only bronze, but the town hears steadier footsteps when someone remembers to light a candle and check on the frightened.\\\"\"\n+      },\n+      {\n         \"active\": \"the_knight_without_rest\",\n         \"text\": \"\\\"Sir Edric lies at the Sunken Dais, but not quietly enough. When grave-lights answer him, cut those lesser spirits down first. The ward around him should fail once the dead he leans on are gone. Ring the Dawn Bell and pray before you cross if you want steadier hands.\\\"\"\n       },\n",
+        "domain": "dialogue",
+        "entry_id": "",
+        "history_path": "",
+        "kind": "dialogue",
+        "path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/dialogue.json",
+        "stage": "draft",
+        "write": false
+      }
+    ],
+    "health": null,
+    "ok": true,
+    "recipe_warnings": [
+      {
+        "kind": "missing_preview",
+        "message": "Verify preview item dawn_thread_candle_stub before publishing.",
+        "preview": {
+          "args": [
+            "dawn_thread_candle_stub"
+          ],
+          "kind": "item"
+        }
+      },
+      {
+        "kind": "missing_preview",
+        "message": "Verify preview quest bell_before_the_road before publishing.",
+        "preview": {
+          "args": [
+            "bell_before_the_road"
+          ],
+          "kind": "quest"
+        }
+      },
+      {
+        "kind": "missing_preview",
+        "message": "Verify preview dialogue brother_alden before publishing.",
+        "preview": {
+          "args": [
+            "brother_alden"
+          ],
+          "kind": "dialogue"
+        }
+      }
+    ],
+    "stage": "draft",
+    "suggested_previews": [
+      {
+        "args": [
+          "dawn_thread_candle_stub"
+        ],
+        "kind": "item"
+      },
+      {
+        "args": [
+          "bell_before_the_road"
+        ],
+        "kind": "quest"
+      },
+      {
+        "args": [
+          "brother_alden"
+        ],
+        "kind": "dialogue"
+      }
+    ],
+    "touched_domains": [
+      "items",
+      "quests",
+      "dialogue"
+    ],
+    "write": false
+  },
+  "instructions": "Add a small Brother Alden side quest that rewards a chapel keepsake and demonstrates the Creator/Codex run workflow.",
+  "mutations": [
+    {
+      "kind": "item",
+      "payload": {
+        "kind": "loot",
+        "name": "Dawn-Thread Candle Stub",
+        "rarity": "common",
+        "stackable": true,
+        "summary": "A thumb-length chapel candle wound with pale thread, carried as a small promise to keep moving carefully.",
+        "value": 3
+      },
+      "target": "dawn_thread_candle_stub"
+    },
+    {
+      "kind": "quest",
+      "payload": {
+        "quest": {
+          "giver": "Brother Alden",
+          "next_step": "Carry Alden's candle stub back toward Town Green, then follow Captain Rowan's lead toward the inn and the cut road.",
+          "objectives": [
+            {
+              "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
+              "npc_id": "brother_alden",
+              "type": "talk_to_npc"
+            }
+          ],
+          "prerequisites": [
+            "practice_makes_heroes"
+          ],
+          "rewards": {
+            "items": [
+              {
+                "item": "dawn_thread_candle_stub",
+                "quantity": 1
+              }
+            ],
+            "silver": 4,
+            "xp": 12
+          },
+          "summary": "Brother Alden asks for one last steadying check at the chapel before the road pulls the town into harder trouble.",
+          "title": "Bell Before the Road"
+        },
+        "region": "Brambleford"
+      },
+      "target": "bell_before_the_road"
+    },
+    {
+      "kind": "dialogue",
+      "payload": [
+        {
+          "active": "bell_before_the_road",
+          "text": "\"Before you take the road, carry a little order with you. The Dawn Bell is only bronze, but the town hears steadier footsteps when someone remembers to light a candle and check on the frightened.\""
+        },
+        {
+          "active": "the_knight_without_rest",
+          "text": "\"Sir Edric lies at the Sunken Dais, but not quietly enough. When grave-lights answer him, cut those lesser spirits down first. The ward around him should fail once the dead he leans on are gone. Ring the Dawn Bell and pray before you cross if you want steadier hands.\""
+        },
+        {
+          "active": "do_not_disturb_the_dead",
+          "text": "\"The causeway is fouled and the circle beyond it is waking. Go into Old Barrow Field, put down four of the restless dead, and return only if the silence starts to sound honest again. Take the bell's blessing with you first if you have any sense.\""
+        },
+        {
+          "active": "lanterns_at_dusk",
+          "text": "\"The Dawn Bell has started answering with a thin, wrong note at dusk. Cross the causeway and see whether the field itself is stirring. If the air turns cold and the crows stop making natural noises, trust that instinct. And if you mean to go, pray before you leave the chapel.\""
+        },
+        {
+          "completed": "the_knight_without_rest",
+          "text": "\"The bell rings clean again. That is not peace, exactly, but it is close enough for town sleep and chapel thanks.\""
+        },
+        {
+          "text": "\"The chapel keeps records, candles, and the sort of silence people only notice when they lose it. If you need the Dawn Bell at your back before a hard road, ring your courage true and pray here before you leave.\""
+        }
+      ],
+      "target": "brother_alden"
+    }
+  ],
+  "plan": {
+    "instructions": "Add a small Brother Alden side quest that rewards a chapel keepsake and demonstrates the Creator/Codex run workflow.",
+    "mutations": [],
+    "next_steps": [
+      "Inspect references and previews for affected content.",
+      "Create explicit mutation entries with kind, target, and payload.",
+      "Apply to draft, then verify draft validation/readiness."
+    ],
+    "notes": [
+      "This endpoint returns a review scaffold only; build explicit mutations before applying.",
+      "Use /api/content/codex/context and previews/references to ground target ids before applying.",
+      "Use /api/content/codex/apply with explicit mutations to write draft packs."
+    ],
+    "required_review": true,
+    "scope": {
+      "domains": [
+        "items",
+        "quests",
+        "dialogue"
+      ]
+    },
+    "write": false
+  },
+  "publish": {
+    "domains": [
+      "items",
+      "quests",
+      "dialogue"
+    ],
+    "ok": true,
+    "published": [
+      {
+        "diff": "--- /home/jcthom85/Brave/brave_game/world/content/packs/core/items.json\n+++ /home/jcthom85/Brave/brave_game/world/content/packs/core/items.json\n@@ -1,7 +1,7 @@\n {\n   \"_meta\": {\n     \"last_action\": \"publish\",\n-    \"last_modified_at\": \"2026-05-06T23:12:16.956496+00:00\",\n+    \"last_modified_at\": \"2026-05-06T23:12:27.235981+00:00\",\n     \"last_modified_by\": \"jctest\",\n     \"last_target\": \"items\",\n     \"stage\": \"live\"\n",
+        "domain": "items",
+        "entry_id": "20260506231227244860-items-publish-items",
+        "history_path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/.history/20260506231227244860-items-publish-items.json",
+        "path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/items.json"
+      },
+      {
+        "diff": "--- /home/jcthom85/Brave/brave_game/world/content/packs/core/quests.json\n+++ /home/jcthom85/Brave/brave_game/world/content/packs/core/quests.json\n@@ -1,7 +1,7 @@\n {\n   \"_meta\": {\n     \"last_action\": \"publish\",\n-    \"last_modified_at\": \"2026-05-06T23:12:16.959984+00:00\",\n+    \"last_modified_at\": \"2026-05-06T23:12:27.239404+00:00\",\n     \"last_modified_by\": \"jctest\",\n     \"last_target\": \"quests\",\n     \"stage\": \"live\"\n",
+        "domain": "quests",
+        "entry_id": "20260506231227247356-quests-publish-quests",
+        "history_path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/.history/20260506231227247356-quests-publish-quests.json",
+        "path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/quests.json"
+      },
+      {
+        "diff": "--- /home/jcthom85/Brave/brave_game/world/content/packs/core/dialogue.json\n+++ /home/jcthom85/Brave/brave_game/world/content/packs/core/dialogue.json\n@@ -1,7 +1,7 @@\n {\n   \"_meta\": {\n     \"last_action\": \"publish\",\n-    \"last_modified_at\": \"2026-05-06T23:12:16.961540+00:00\",\n+    \"last_modified_at\": \"2026-05-06T23:12:27.240937+00:00\",\n     \"last_modified_by\": \"jctest\",\n     \"last_target\": \"dialogue\",\n     \"stage\": \"live\"\n",
+        "domain": "dialogue",
+        "entry_id": "20260506231227248532-dialogue-publish-dialogue",
+        "history_path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/.history/20260506231227248532-dialogue-publish-dialogue.json",
+        "path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/dialogue.json"
+      }
+    ],
+    "validation_errors": []
+  },
+  "review_notes": [
+    {
+      "author": "human",
+      "note": "Reviewed smoke run in Codex. Draft previews found new item, quest, and Brother Alden dialogue; publish remains manual.",
+      "timestamp": "2026-05-06T22:46:39.411437+00:00"
+    },
+    {
+      "author": "jctest",
+      "note": "test",
+      "timestamp": "2026-05-06T23:01:07.931136+00:00"
+    },
+    {
+      "author": "jctest",
+      "note": "Test",
+      "timestamp": "2026-05-06T23:12:25.563791+00:00"
+    }
+  ],
+  "run_id": "20260506T224639375716-add-a-small-brother-alden-side-quest-that-reward",
+  "scope": {
+    "domains": [
+      "items",
+      "quests",
+      "dialogue"
+    ]
+  },
+  "status": "published",
+  "updated_at": "2026-05-06T23:12:27.252238+00:00",
+  "validation": {
+    "mutations": [
+      {
+        "kind": "item",
+        "payload": {
+          "kind": "loot",
+          "name": "Dawn-Thread Candle Stub",
+          "rarity": "common",
+          "stackable": true,
+          "summary": "A thumb-length chapel candle wound with pale thread, carried as a small promise to keep moving carefully.",
+          "value": 3
+        },
+        "target": "dawn_thread_candle_stub"
+      },
+      {
+        "kind": "quest",
+        "payload": {
+          "quest": {
+            "giver": "Brother Alden",
+            "next_step": "Carry Alden's candle stub back toward Town Green, then follow Captain Rowan's lead toward the inn and the cut road.",
+            "objectives": [
+              {
+                "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
+                "npc_id": "brother_alden",
+                "type": "talk_to_npc"
+              }
+            ],
+            "prerequisites": [
+              "practice_makes_heroes"
+            ],
+            "rewards": {
+              "items": [
+                {
+                  "item": "dawn_thread_candle_stub",
+                  "quantity": 1
+                }
+              ],
+              "silver": 4,
+              "xp": 12
+            },
+            "summary": "Brother Alden asks for one last steadying check at the chapel before the road pulls the town into harder trouble.",
+            "title": "Bell Before the Road"
+          },
+          "region": "Brambleford"
+        },
+        "target": "bell_before_the_road"
+      },
+      {
+        "kind": "dialogue",
+        "payload": [
+          {
+            "active": "bell_before_the_road",
+            "text": "\"Before you take the road, carry a little order with you. The Dawn Bell is only bronze, but the town hears steadier footsteps when someone remembers to light a candle and check on the frightened.\""
+          },
+          {
+            "active": "the_knight_without_rest",
+            "text": "\"Sir Edric lies at the Sunken Dais, but not quietly enough. When grave-lights answer him, cut those lesser spirits down first. The ward around him should fail once the dead he leans on are gone. Ring the Dawn Bell and pray before you cross if you want steadier hands.\""
+          },
+          {
+            "active": "do_not_disturb_the_dead",
+            "text": "\"The causeway is fouled and the circle beyond it is waking. Go into Old Barrow Field, put down four of the restless dead, and return only if the silence starts to sound honest again. Take the bell's blessing with you first if you have any sense.\""
+          },
+          {
+            "active": "lanterns_at_dusk",
+            "text": "\"The Dawn Bell has started answering with a thin, wrong note at dusk. Cross the causeway and see whether the field itself is stirring. If the air turns cold and the crows stop making natural noises, trust that instinct. And if you mean to go, pray before you leave the chapel.\""
+          },
+          {
+            "completed": "the_knight_without_rest",
+            "text": "\"The bell rings clean again. That is not peace, exactly, but it is close enough for town sleep and chapel thanks.\""
+          },
+          {
+            "text": "\"The chapel keeps records, candles, and the sort of silence people only notice when they lose it. If you need the Dawn Bell at your back before a hard road, ring your courage true and pray here before you leave.\""
+          }
+        ],
+        "target": "brother_alden"
+      }
+    ],
+    "ok": true,
+    "suggested_previews": [
+      {
+        "args": [
+          "dawn_thread_candle_stub"
+        ],
+        "kind": "item"
+      },
+      {
+        "args": [
+          "bell_before_the_road"
+        ],
+        "kind": "quest"
+      },
+      {
+        "args": [
+          "brother_alden"
+        ],
+        "kind": "dialogue"
+      }
+    ],
+    "touched_domains": [
+      "items",
+      "quests",
+      "dialogue"
+    ]
+  },
+  "verify": {
+    "health": {
+      "counts": {
+        "boss_gates": 1,
+        "cooking_recipes": 9,
+        "dialogue_entities": 9,
+        "enemies": 42,
+        "entities": 52,
+        "exits": 119,
+        "fishing_spots": 3,
+        "items": 134,
+        "quests": 28,
+        "readables": 28,
+        "room_encounter_tables": 35,
+        "rooms": 55,
+        "tinkering_recipes": 8
+      },
+      "draft_domains": [
+        "items",
+        "quests",
+        "dialogue"
+      ],
+      "ok": false,
+      "readiness": [
+        {
+          "issues": [
+            {
+              "href": "/creator/world/",
+              "message": "Exit gate_walk_to_training_yard has no reverse path."
+            },
+            {
+              "href": "/creator/world/",
+              "message": "Exit training_yard_to_mastery_hall has no reverse path."
+            }
+          ],
+          "key": "world",
+          "label": "World"
+        },
+        {
+          "issues": [
+            {
+              "href": "/creator/encounters/",
+              "message": "Enemy salvage_drone is not used by a room encounter."
+            }
+          ],
+          "key": "encounters",
+          "label": "Encounters"
+        },
+        {
+          "issues": [],
+          "key": "systems",
+          "label": "Systems"
+        },
+        {
+          "issues": [
+            {
+              "href": "/creator/items/",
+              "message": "Item lantern_pixel_pin has no quest, loot, or system placement."
+            },
+            {
+              "href": "/creator/items/",
+              "message": "Item weirglass_eel has no quest, loot, or system placement."
+            }
+          ],
+          "key": "items",
+          "label": "Items"
+        },
+        {
+          "issues": [],
+          "key": "quests",
+          "label": "Quests"
+        },
+        {
+          "issues": [
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable town_notice_board has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable tutorial_damaged_cart has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable tutorial_supply_board has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable family_post_sign has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable great_catch_log has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable kitchen_hearth has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable loaner_pole_rack has no readable text."
+            },
+            {
+              "href": "/creator/dialogue/",
+              "message": "Readable trophy_vitrine has no readable text."
+            }
+          ],
+          "key": "dialogue",
+          "label": "Dialogue"
+        },
+        {
+          "issues": [],
+          "key": "characters",
+          "label": "Characters"
+        }
+      ],
+      "recommended_next_actions": [
+        {
+          "href": "/creator/",
+          "label": "Fix validation errors before publishing."
+        },
+        {
+          "href": "/creator/",
+          "label": "Review draft domains: items, quests, dialogue."
+        },
+        {
+          "href": "/creator/world/",
+          "label": "Resolve World readiness issues."
+        },
+        {
+          "href": "/creator/encounters/",
+          "label": "Resolve Encounters readiness issues."
+        },
+        {
+          "href": "/creator/items/",
+          "label": "Resolve Items readiness issues."
+        },
+        {
+          "href": "/creator/dialogue/",
+          "label": "Resolve Dialogue readiness issues."
+        }
+      ],
+      "stage": "draft",
+      "validation_errors": [
+        "Quest test_reward_quest rewards unknown item: health_potion"
+      ]
+    },
+    "ok": false,
+    "previews": [
+      {
+        "args": [
+          "dawn_thread_candle_stub"
+        ],
+        "found": true,
+        "kind": "item",
+        "preview": {
+          "bonus_summary": "",
+          "category": "loot",
+          "cooking_links": [],
+          "enemy_loot_links": [],
+          "fishing_links": [],
+          "forge_recipe": null,
+          "item": {
+            "kind": "loot",
+            "name": "Dawn-Thread Candle Stub",
+            "rarity": "common",
+            "stackable": true,
+            "summary": "A thumb-length chapel candle wound with pale thread, carried as a small promise to keep moving carefully.",
+            "value": 3
+          },
+          "links": {
+            "cooking": [],
+            "enemy_loot": [],
+            "fishing": [],
+            "forge": null,
+            "lures": [],
+            "quests": [
+              {
+                "quest_key": "bell_before_the_road",
+                "title": "Bell Before the Road",
+                "used_in_objectives": false,
+                "used_in_rewards": true
+              }
+            ],
+            "tinkering": [],
+            "unlocks": []
+          },
+          "lure_links": [],
+          "placement_hints": [
+            "No enemy loot drops reference this item."
+          ],
+          "quest_links": [
+            {
+              "quest_key": "bell_before_the_road",
+              "title": "Bell Before the Road",
+              "used_in_objectives": false,
+              "used_in_rewards": true
+            }
+          ],
+          "template_id": "dawn_thread_candle_stub",
+          "tinkering_links": [],
+          "unlock_links": [],
+          "use_profile": {}
+        }
+      },
+      {
+        "args": [
+          "bell_before_the_road"
+        ],
+        "found": true,
+        "kind": "quest",
+        "preview": {
+          "is_starting": false,
+          "linked_content": {
+            "enemies": [],
+            "entities": [
+              {
+                "entity_id": "brother_alden",
+                "name": "Brother Alden",
+                "role": "objective",
+                "room_id": "brambleford_chapel_dawn_bell"
+              }
+            ],
+            "items": [
+              {
+                "name": "Dawn-Thread Candle Stub",
+                "role": "reward",
+                "template_id": "dawn_thread_candle_stub"
+              }
+            ],
+            "prerequisites": [
+              {
+                "quest_key": "practice_makes_heroes",
+                "title": "Practice Makes Heroes"
+              }
+            ],
+            "rooms": []
+          },
+          "objectives": [
+            {
+              "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
+              "npc_id": "brother_alden",
+              "npc_name": "Brother Alden",
+              "type": "talk_to_npc"
+            }
+          ],
+          "prerequisite_links": [
+            {
+              "quest_key": "practice_makes_heroes",
+              "title": "Practice Makes Heroes"
+            }
+          ],
+          "prerequisites": [
+            "practice_makes_heroes"
+          ],
+          "quest": {
+            "giver": "Brother Alden",
+            "next_step": "Carry Alden's candle stub back toward Town Green, then follow Captain Rowan's lead toward the inn and the cut road.",
+            "objectives": [
+              {
+                "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
+                "npc_id": "brother_alden",
+                "type": "talk_to_npc"
+              }
+            ],
+            "prerequisites": [
+              "practice_makes_heroes"
+            ],
+            "rewards": {
+              "items": [
+                {
+                  "item": "dawn_thread_candle_stub",
+                  "quantity": 1
+                }
+              ],
+              "silver": 4,
+              "xp": 12
+            },
+            "summary": "Brother Alden asks for one last steadying check at the chapel before the road pulls the town into harder trouble.",
+            "title": "Bell Before the Road"
+          },
+          "region": "Brambleford",
+          "reward_items": [
+            {
+              "item": "dawn_thread_candle_stub",
+              "item_name": "Dawn-Thread Candle Stub",
+              "quantity": 1
+            }
+          ],
+          "route": [
+            {
+              "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
+              "step": 1,
+              "target": "Brother Alden",
+              "type": "talk_to_npc"
+            }
+          ]
+        }
+      },
+      {
+        "args": [
+          "brother_alden"
+        ],
+        "found": true,
+        "kind": "dialogue",
+        "preview": {
+          "entity": {
+            "aliases": [
+              "alden",
+              "brother",
+              "acolyte"
+            ],
+            "desc": "Brother Alden has the look of an earnest assistant cleric who keeps doing brave things only after he has finished being nervous about them.",
+            "gender": "male",
+            "id": "brother_alden",
+            "key": "Brother Alden",
+            "kind": "npc",
+            "location": "brambleford_chapel_dawn_bell"
+          },
+          "linked_content": {
+            "has_readable": false,
+            "quests": [
+              {
+                "objective_count": 1,
+                "objectives": [
+                  {
+                    "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
+                    "npc_id": "brother_alden",
+                    "type": "talk_to_npc"
+                  }
+                ],
+                "quest_key": "bell_before_the_road",
+                "region": "Brambleford",
+                "title": "Bell Before the Road"
+              }
+            ],
+            "room": {
+              "name": "Chapel of the Dawn Bell",
+              "room_id": "brambleford_chapel_dawn_bell"
+            }
+          },
+          "quest_links": [
+            {
+              "objective_count": 1,
+              "objectives": [
+                {
+                  "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
+                  "npc_id": "brother_alden",
+                  "type": "talk_to_npc"
+                }
+              ],
+              "quest_key": "bell_before_the_road",
+              "region": "Brambleford",
+              "title": "Bell Before the Road"
+            }
+          ],
+          "readable_text": null,
+          "room": {
+            "desc": "Soft lampglass, pale stone, and a brass bell frame give the little chapel a steadier kind of warmth than the inn. Prayer ribbons stir in the draft, and someone has kept every lantern trimmed as if the town's courage depends on it.",
+            "id": "brambleford_chapel_dawn_bell",
+            "key": "Chapel of the Dawn Bell",
+            "map_icon": "C",
+            "map_region": "brambleford",
+            "map_x": -2,
+            "map_y": 1,
+            "safe": true,
+            "zone": "Brambleford"
+          },
+          "talk_rules": [
+            {
+              "active": "bell_before_the_road",
+              "text": "\"Before you take the road, carry a little order with you. The Dawn Bell is only bronze, but the town hears steadier footsteps when someone remembers to light a candle and check on the frightened.\""
+            },
+            {
+              "active": "the_knight_without_rest",
+              "text": "\"Sir Edric lies at the Sunken Dais, but not quietly enough. When grave-lights answer him, cut those lesser spirits down first. The ward around him should fail once the dead he leans on are gone. Ring the Dawn Bell and pray before you cross if you want steadier hands.\""
+            },
+            {
+              "active": "do_not_disturb_the_dead",
+              "text": "\"The causeway is fouled and the circle beyond it is waking. Go into Old Barrow Field, put down four of the restless dead, and return only if the silence starts to sound honest again. Take the bell's blessing with you first if you have any sense.\""
+            },
+            {
+              "active": "lanterns_at_dusk",
+              "text": "\"The Dawn Bell has started answering with a thin, wrong note at dusk. Cross the causeway and see whether the field itself is stirring. If the air turns cold and the crows stop making natural noises, trust that instinct. And if you mean to go, pray before you leave the chapel.\""
+            },
+            {
+              "completed": "the_knight_without_rest",
+              "text": "\"The bell rings clean again. That is not peace, exactly, but it is close enough for town sleep and chapel thanks.\""
+            },
+            {
+              "text": "\"The chapel keeps records, candles, and the sort of silence people only notice when they lose it. If you need the Dawn Bell at your back before a hard road, ring your courage true and pray here before you leave.\""
+            }
+          ]
+        }
+      }
+    ],
+    "requested_previews": [
+      {
+        "args": [
+          "dawn_thread_candle_stub"
+        ],
+        "kind": "item"
+      },
+      {
+        "args": [
+          "bell_before_the_road"
+        ],
+        "kind": "quest"
+      },
+      {
+        "args": [
+          "brother_alden"
+        ],
+        "kind": "dialogue"
+      }
+    ],
+    "stage": "draft"
+  }
+}

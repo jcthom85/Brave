@@ -45,6 +45,11 @@
     .section h3 { margin:0; font-size:1rem; }
     .section p { margin:0; color:var(--muted); line-height:1.4; }
     .type-panel[hidden] { display:none; }
+    .row-list { display:grid; gap:10px; }
+    .builder-row { display:grid; gap:8px; align-items:end; border:1px solid var(--line); border-radius:12px; background:#fff; padding:10px; }
+    .builder-row.material-row { grid-template-columns:minmax(0,1fr) 110px auto; }
+    .builder-row.fish-row { grid-template-columns:minmax(170px,1.2fr) 92px 110px 110px 130px 86px 86px auto; }
+    .source-cache { display:none; }
     .link-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
     .link-card { border:1px solid var(--line); border-radius:12px; background:#fff; padding:12px; display:grid; gap:8px; }
     .link-card strong,.link-card span { display:block; }
@@ -55,7 +60,7 @@
     .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
     .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
     .validation-notes[hidden] { display:none; }
-    @media (max-width:1180px) { .builder-grid,.link-grid { grid-template-columns:1fr; } .guide-rail { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:1180px) { .builder-grid,.link-grid,.builder-row.material-row,.builder-row.fish-row { grid-template-columns:1fr; } .guide-rail { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media (max-width:980px) { .shell,.field-grid,.field-grid.three,.guide-rail { grid-template-columns:1fr; } .item-list { max-height:260px; } }
   </style>
 </head>
@@ -108,7 +113,12 @@
             <div class="field"><label for="recipe-base">Base Item</label><select id="recipe-base"></select></div>
             <div class="field"><label for="recipe-station">Station / Room</label><select id="recipe-station"></select></div>
             <div class="field"><label for="recipe-silver">Silver Cost</label><input id="recipe-silver" type="number" min="0" value="0"></div>
-            <div class="field full"><label for="recipe-materials">Ingredients / Components JSON</label><textarea id="recipe-materials" spellcheck="false">{}</textarea></div>
+            <div class="field full">
+              <label>Ingredients / Components</label>
+              <div id="recipe-material-list" class="row-list"></div>
+              <button id="add-recipe-material" class="secondary" type="button">Add Ingredient</button>
+              <textarea id="recipe-materials" class="source-cache" spellcheck="false">{}</textarea>
+            </div>
             <div class="field"><label for="recipe-unlock-type">Unlock Type</label><input id="recipe-unlock-type" type="text"></div>
             <div class="field"><label for="recipe-success-text">Success Text</label><input id="recipe-success-text" type="text"></div>
             <div class="field full"><label for="recipe-unlock-text">Unlock Text</label><textarea id="recipe-unlock-text" spellcheck="true"></textarea></div>
@@ -119,7 +129,12 @@
             <div class="field"><label for="fish-reaction">Reaction Window</label><input id="fish-reaction" type="number" min="1" value="5"></div>
             <div class="field"><label for="fish-bite-min">Bite Delay Min</label><input id="fish-bite-min" type="number" min="0" value="4"></div>
             <div class="field"><label for="fish-bite-max">Bite Delay Max</label><input id="fish-bite-max" type="number" min="0" value="7"></div>
-            <div class="field full"><label for="fish-table">Fish Table JSON</label><textarea id="fish-table" spellcheck="false">[]</textarea></div>
+            <div class="field full">
+              <label>Fish Table</label>
+              <div id="fish-table-list" class="row-list"></div>
+              <button id="add-fish-entry" class="secondary" type="button">Add Fish Entry</button>
+              <textarea id="fish-table" class="source-cache" spellcheck="false">[]</textarea>
+            </div>
             <div class="field full"><label for="fish-cast-text">Cast Text</label><textarea id="fish-cast-text" spellcheck="true"></textarea></div>
           </div></section>
 
@@ -143,7 +158,7 @@
             <div class="field full"><label for="portal-hint">Travel Hint / Placeholder</label><textarea id="portal-hint" spellcheck="true"></textarea></div>
           </div></section>
 
-          <details open><summary>Advanced Source</summary><div class="stack" style="padding:0 14px 14px"><textarea id="entry-json" spellcheck="false"></textarea><button id="sync-source" class="secondary" type="button">Apply Source To Fields</button></div></details>
+          <details><summary>Advanced Source</summary><div class="stack" style="padding:0 14px 14px"><textarea id="entry-json" spellcheck="false"></textarea><button id="sync-source" class="secondary" type="button">Apply Source To Fields</button></div></details>
         </div></section>
 
         <section class="panel"><div class="panel-head"><h3>Linked Content</h3><p>Resolved items, rooms, enemies, and copyable payloads for the other builders.</p></div><div class="panel-body stack">
@@ -155,7 +170,7 @@
       <section class="panel"><div class="panel-head"><h3>Activity</h3><p>Preview, diff, validation, publish, history, and revert output.</p></div><div class="panel-body stack"><div id="status" class="status">Waiting for a system selection.</div><pre id="output"></pre></div></section>
     </section>
   </div>
-  <script src="/static/website/js/creator_common.js"></script>
+  <script src="/static/website/js/creator_common.js?v=agent-runs-v2"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
     const $ = (id) => document.getElementById(id);
@@ -190,6 +205,7 @@
     let items = [];
     let rooms = [];
     let enemies = [];
+    let fishBehaviors = [];
     let previewPayload = null;
 
     function setStatus(message, tone = '') { creatorTools.setStatus(message, tone); }
@@ -211,6 +227,103 @@
     function sourceFromPreview(preview) {
       return preview.recipe || preview.spot || preview.rod || preview.lure || preview.behavior || preview.gate || preview.trophy || preview.portal || preview;
     }
+    function changeSync() {
+      try {
+        syncPayloadFromFields();
+        renderLinks(null);
+      } catch (error) {}
+    }
+    function materialOptions(selected = '') {
+      return ['<option value="">Select item</option>'].concat(items.map((entry) => {
+        const label = `${entry.label || entry.id} (${entry.id})`;
+        return `<option value="${entry.id}"${entry.id === selected ? ' selected' : ''}>${label}</option>`;
+      })).join('');
+    }
+    function behaviorOptions(selected = '') {
+      return ['<option value="">Default</option>'].concat(fishBehaviors.map((entry) => {
+        const label = `${entry.label || entry.id} (${entry.id})`;
+        return `<option value="${entry.id}"${entry.id === selected ? ' selected' : ''}>${label}</option>`;
+      })).join('');
+    }
+    function addMaterialRow(item = '', quantity = 1) {
+      const row = document.createElement('div');
+      row.className = 'builder-row material-row';
+      row.innerHTML = [
+        `<div class="field"><label>Item</label><select data-material-item>${materialOptions(item)}</select></div>`,
+        `<div class="field"><label>Quantity</label><input data-material-quantity type="number" min="1" value="${Math.max(1, Number(quantity || 1))}"></div>`,
+        '<button class="secondary" type="button" data-remove-material>Remove</button>',
+      ].join('');
+      row.querySelector('[data-remove-material]').addEventListener('click', () => { row.remove(); changeSync(); });
+      row.querySelectorAll('select,input').forEach((field) => field.addEventListener('change', changeSync));
+      $('recipe-material-list').appendChild(row);
+    }
+    function renderMaterialRows(materials = {}) {
+      $('recipe-material-list').innerHTML = '';
+      const entries = Object.entries(materials || {}).filter(([item]) => item);
+      if (!entries.length) {
+        addMaterialRow('', 1);
+        return;
+      }
+      entries.forEach(([item, quantity]) => addMaterialRow(item, quantity));
+    }
+    function materialRowsToObject() {
+      const payload = {};
+      for (const row of $('recipe-material-list').querySelectorAll('.material-row')) {
+        const item = row.querySelector('[data-material-item]').value;
+        if (!item) continue;
+        payload[item] = Math.max(1, Number(row.querySelector('[data-material-quantity]').value || 1));
+      }
+      $('recipe-materials').value = renderJson(payload);
+      return payload;
+    }
+    function addFishRow(entry = {}) {
+      const row = document.createElement('div');
+      row.className = 'builder-row fish-row';
+      row.innerHTML = [
+        `<div class="field"><label>Item</label><select data-fish-item>${materialOptions(entry.item || '')}</select></div>`,
+        `<div class="field"><label>Chance</label><input data-fish-chance type="number" min="0" value="${Number(entry.chance ?? 20)}"></div>`,
+        `<div class="field"><label>Hook Chance</label><input data-fish-hook type="number" min="0" max="1" step="0.05" value="${Number(entry.hook_chance ?? 0.75)}"></div>`,
+        `<div class="field"><label>Rarity</label><select data-fish-rarity><option value="common">common</option><option value="uncommon">uncommon</option><option value="rare">rare</option><option value="epic">epic</option></select></div>`,
+        `<div class="field"><label>Behavior</label><select data-fish-behavior>${behaviorOptions(entry.behavior_id || '')}</select></div>`,
+        `<div class="field"><label>Min Wt</label><input data-fish-weight-min type="number" step="0.1" min="0" value="${Array.isArray(entry.weight) ? Number(entry.weight[0] || 1) : 1}"></div>`,
+        `<div class="field"><label>Max Wt</label><input data-fish-weight-max type="number" step="0.1" min="0" value="${Array.isArray(entry.weight) ? Number(entry.weight[1] || 3) : 3}"></div>`,
+        '<button class="secondary" type="button" data-remove-fish>Remove</button>',
+      ].join('');
+      row.querySelector('[data-fish-rarity]').value = entry.rarity || 'common';
+      row.querySelector('[data-remove-fish]').addEventListener('click', () => { row.remove(); changeSync(); });
+      row.querySelectorAll('select,input').forEach((field) => field.addEventListener('change', changeSync));
+      $('fish-table-list').appendChild(row);
+    }
+    function renderFishRows(entries = []) {
+      $('fish-table-list').innerHTML = '';
+      const fishEntries = Array.isArray(entries) ? entries : [];
+      if (!fishEntries.length) {
+        addFishRow({});
+        return;
+      }
+      fishEntries.forEach((entry) => addFishRow(entry));
+    }
+    function fishRowsToArray() {
+      const payload = [];
+      for (const row of $('fish-table-list').querySelectorAll('.fish-row')) {
+        const item = row.querySelector('[data-fish-item]').value;
+        if (!item) continue;
+        const minWeight = Number(row.querySelector('[data-fish-weight-min]').value || 1);
+        const maxWeight = Number(row.querySelector('[data-fish-weight-max]').value || minWeight);
+        const entry = {
+          item,
+          chance: Number(row.querySelector('[data-fish-chance]').value || 0),
+          hook_chance: Number(row.querySelector('[data-fish-hook]').value || 0),
+          rarity: row.querySelector('[data-fish-rarity]').value || 'common',
+          weight: [minWeight, Math.max(minWeight, maxWeight)],
+        };
+        const behaviorId = row.querySelector('[data-fish-behavior]').value;
+        if (behaviorId) entry.behavior_id = behaviorId;
+        payload.push(entry);
+      }
+      $('fish-table').value = renderJson(payload);
+      return payload;
+    }
     function showPanels() {
       document.querySelectorAll('[data-type-panel]').forEach((panel) => panel.hidden = !activeSystem.panels.includes(panel.dataset.typePanel));
       setActivePreset(activeSystem.preset);
@@ -224,6 +337,7 @@
       $('recipe-station').value = data.station || '';
       $('recipe-silver').value = data.silver_cost || data.silver || 0;
       $('recipe-materials').value = renderJson(data.ingredients || data.components || data.materials || {});
+      renderMaterialRows(data.ingredients || data.components || data.materials || {});
       $('recipe-unlock-type').value = data.unlock_type || '';
       $('recipe-unlock-text').value = data.unlock_text || '';
       $('recipe-success-text').value = data.success_text || '';
@@ -232,6 +346,7 @@
       $('fish-bite-min').value = (data.bite_delay || [4, 7])[0] || 4;
       $('fish-bite-max').value = (data.bite_delay || [4, 7])[1] || 7;
       $('fish-table').value = renderJson(data.fish || []);
+      renderFishRows(data.fish || []);
       $('fish-cast-text').value = data.cast_text || '';
       $('boss-trigger').value = data.trigger_room_id || '';
       $('boss-encounter').value = data.encounter_key || '';
@@ -254,22 +369,22 @@
       if (entrySummary.value.trim()) payload.summary = entrySummary.value.trim();
       if (activeSystem.kind === 'cooking-recipe') {
         payload.result = $('recipe-result').value || payload.result;
-        payload.ingredients = parseJson($('recipe-materials').value, {});
+        payload.ingredients = materialRowsToObject();
       } else if (activeSystem.kind === 'tinkering-recipe') {
         payload.result = $('recipe-result').value || payload.result;
         payload.base = $('recipe-base').value || payload.base;
-        payload.components = parseJson($('recipe-materials').value, {});
+        payload.components = materialRowsToObject();
         payload.station = $('recipe-station').value || payload.station;
         payload.silver_cost = Number($('recipe-silver').value || 0);
       } else if (activeSystem.kind === 'forge') {
         payload.result = $('recipe-result').value || payload.result;
-        payload.materials = parseJson($('recipe-materials').value, {});
+        payload.materials = materialRowsToObject();
         payload.silver = Number($('recipe-silver').value || 0);
       } else if (activeSystem.kind === 'fishing-spot') {
         if ($('fish-room').value) entryKey.value = $('fish-room').value;
         payload.bite_delay = [Number($('fish-bite-min').value || 4), Number($('fish-bite-max').value || 7)];
         payload.reaction_window = Number($('fish-reaction').value || 5);
-        payload.fish = parseJson($('fish-table').value, []);
+        payload.fish = fishRowsToArray();
         payload.cast_text = $('fish-cast-text').value.trim();
       } else if (activeSystem.kind === 'boss-gate') {
         payload.key = entryKey.value.trim();
@@ -315,11 +430,28 @@
       if (kind === 'quest-reward') return JSON.stringify({ item:data.item || data.template_id || 'item_id', quantity:1 }, null, 2);
       return JSON.stringify(data, null, 2);
     }
+    function handoffKindForSystemsLink(href, snippet) {
+      if (!href || !snippet) return '';
+      if (href.includes('/creator/world/') && snippet.includes('activities')) return 'room-activity';
+      if (href.includes('/creator/world/') && snippet.includes('boss_gate')) return 'boss-exit';
+      if (href.includes('/creator/quests/')) return 'quest-reward';
+      return '';
+    }
     function addLinkCard(title, meta, href, snippet) {
       const card = document.createElement('div');
       card.className = 'link-card';
       card.innerHTML = `<strong>${href ? `<a href="${href}">${title}</a>` : title}</strong><span>${meta}</span>${snippet ? `<code>${snippet}</code>` : ''}`;
       if (snippet) {
+        const handoffKind = handoffKindForSystemsLink(href, snippet);
+        let parsedPayload = null;
+        try { parsedPayload = JSON.parse(snippet); } catch (_error) {}
+        if (href && handoffKind && parsedPayload) {
+          const sendButton = document.createElement('button');
+          sendButton.type = 'button';
+          sendButton.textContent = 'Send To Builder';
+          sendButton.addEventListener('click', () => creatorTools.sendToBuilder(href, parsedPayload, title, { kind: handoffKind }));
+          card.appendChild(sendButton);
+        }
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'secondary';
@@ -378,10 +510,11 @@
       }
     }
     async function loadReferences() {
-      [items, rooms, enemies] = await Promise.all([
+      [items, rooms, enemies, fishBehaviors] = await Promise.all([
         creatorTools.fetchReferences('items', { limit: 1000 }),
         creatorTools.fetchReferences('rooms', { limit: 1000 }),
         creatorTools.fetchReferences('enemies', { limit: 1000 }),
+        creatorTools.fetchReferences('fish-behaviors', { limit: 1000 }),
       ]);
       for (const select of [$('recipe-result'), $('recipe-base')]) fillSelect(select, items);
       for (const select of [$('recipe-station'), $('fish-room'), $('boss-trigger'), $('boss-entry'), $('boss-success'), $('boss-failure'), $('portal-room')]) fillSelect(select, rooms);
@@ -474,6 +607,8 @@
     $('remove-entry').addEventListener('click', () => runAction(removeEntry));
     $('validate-entry').addEventListener('click', () => runAction(validateDrafts));
     $('sync-source').addEventListener('click', () => { syncFieldsFromPayload(parsePayload()); renderLinks(null); setStatus('Advanced source applied to guided fields.', 'good'); });
+    $('add-recipe-material').addEventListener('click', () => { addMaterialRow('', 1); changeSync(); });
+    $('add-fish-entry').addEventListener('click', () => { addFishRow({}); changeSync(); });
     entryJson.addEventListener('input', () => renderLinks(null));
     systemSearch.addEventListener('input', () => renderList(systemSearch.value));
     guideButtons.forEach((button) => button.addEventListener('click', () => applyPreset(button.dataset.systemPreset)));

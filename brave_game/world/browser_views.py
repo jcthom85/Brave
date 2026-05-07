@@ -54,8 +54,6 @@ from world.browser_party_views import build_party_view
 from world.browser_room_helpers import (
     ROOM_ENTITY_ID_ICONS,
     ROOM_ENTITY_KIND_ICONS,
-    TUTORIAL_READ_ENTITY_IDS,
-    TUTORIAL_TALK_ENTITY_IDS,
     _build_room_social_presence,
     _build_world_interaction_picker,
     _format_room_context_action_items,

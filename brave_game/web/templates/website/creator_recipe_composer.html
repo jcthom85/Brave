@@ -48,7 +48,7 @@
     </div></section>
     <section class="panel"><div class="panel-head"><h2>Composer Output</h2><p>Diffs and payloads appear here. Validate before publishing.</p></div><div class="panel-body stack"><div id="validation-notes" class="validation-notes" hidden></div><div id="status" class="status">Recipe Composer ready.</div><pre id="output"></pre></div></section>
   </div>
-  <script src="/static/website/js/creator_common.js"></script>
+  <script src="/static/website/js/creator_common.js?v=agent-runs-v2"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
     const creator = window.BraveCreator.bind(API_ROOT, document.getElementById('status'), document.getElementById('validation-notes'));
@@ -77,7 +77,7 @@
     }
     $('preview-recipe').addEventListener('click', () => run(false).catch((error) => creator.setStatus(error.message, 'bad')));
     $('write-recipe').addEventListener('click', () => run(true).catch((error) => creator.setStatus(error.message, 'bad')));
-    $('send-item').addEventListener('click', () => creator.sendToBuilder('/creator/items/', resultItemPayload(), 'Recipe Result Item'));
+    $('send-item').addEventListener('click', () => creator.sendToBuilder('/creator/items/', resultItemPayload(), 'Recipe Result Item', { kind:'item-shell' }));
   </script>
 </body>
 </html>

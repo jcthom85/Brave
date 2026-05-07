@@ -1,4 +1,11 @@
 {
+  "_meta": {
+    "last_action": "publish",
+    "last_modified_at": "2026-05-06T23:12:27.240937+00:00",
+    "last_modified_by": "jctest",
+    "last_target": "dialogue",
+    "stage": "live"
+  },
   "static_read_responses": {
     "barrow_marker_stone": "The lichen-sunk stone reads: HERE KEEP FAITH WITH THE OLD FIELD. DISTURB NOTHING. LIGHT YOUR LANTERN. LEAVE BEFORE THE LAST BELL.",
     "blackreed_standard": "The standard shows a black marsh reed stitched over a split road line. It is less a heraldic symbol than a very direct threat about who gets to pass beneath this hill.",
@@ -31,6 +38,10 @@
   },
   "talk_rules": {
     "brother_alden": [
+      {
+        "active": "bell_before_the_road",
+        "text": "\"Before you take the road, carry a little order with you. The Dawn Bell is only bronze, but the town hears steadier footsteps when someone remembers to light a candle and check on the frightened.\""
+      },
       {
         "active": "the_knight_without_rest",
         "text": "\"Sir Edric lies at the Sunken Dais, but not quietly enough. When grave-lights answer him, cut those lesser spirits down first. The ward around him should fail once the dead he leans on are gone. Ring the Dawn Bell and pray before you cross if you want steadier hands.\""

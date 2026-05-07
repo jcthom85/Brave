@@ -1,0 +1,1633 @@
+{
+  "action": "upsert",
+  "after": {
+    "_meta": {
+      "last_action": "upsert",
+      "last_modified_at": "2026-05-06T17:26:08.842000+00:00",
+      "last_modified_by": "jctest3",
+      "last_target": "below_the_fencebreakers",
+      "stage": "draft"
+    },
+    "quest_regions": {
+      "below_the_fencebreakers": "Goblin Warrens",
+      "bogwater_rumors": "Blackfen",
+      "bridgework_for_joss": "Drowned Weir",
+      "captain_varn_blackreed": "Ruined Watchtower",
+      "do_not_disturb_the_dead": "Old Barrow Field",
+      "fencebreakers": "Goblin Road",
+      "foreman_coilback": "Drowned Weir",
+      "greymaws_trail": "Whispering Woods",
+      "gutters_and_hexes": "Goblin Warrens",
+      "herbs_for_sister_maybelle": "Whispering Woods",
+      "lanterns_at_dusk": "Old Barrow Field",
+      "lights_in_the_reeds": "Blackfen",
+      "locks_under_blackwater": "Drowned Weir",
+      "loose_arrows": "Ruined Watchtower",
+      "miretooths_claim": "Blackfen",
+      "practice_makes_heroes": "Brambleford",
+      "rats_in_the_kettle": "Brambleford",
+      "roadside_howls": "Goblin Road",
+      "ruk_the_fence_cutter": "Goblin Road",
+      "signal_in_the_scrap": "Drowned Weir",
+      "smoke_on_the_ridge": "Ruined Watchtower",
+      "test_reward_quest": "Brambleford",
+      "the_hollow_lantern": "Drowned Weir",
+      "the_knight_without_rest": "Old Barrow Field",
+      "the_pot_kings_feast": "Goblin Warrens",
+      "the_south_light": "Drowned Weir",
+      "what_whispers_in_the_wood": "Whispering Woods"
+    },
+    "quests": {
+      "below_the_fencebreakers": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Find the hidden Sinkmouth Cut east of Fencebreaker Camp.",
+            "room_id": "goblin_warrens_sinkmouth_cut",
+            "type": "visit_room"
+          },
+          {
+            "description": "Push as far as the goblins' Feast Hall beneath the ridge.",
+            "room_id": "goblin_warrens_feast_hall",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "captain_varn_blackreed"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "ashwood_bow",
+              "quantity": 1
+            }
+          ],
+          "silver": 16,
+          "xp": 240
+        },
+        "summary": "Follow the goblin retreat east of Ruk's old camp and confirm where the road-cutters have really been nesting.",
+        "title": "Below the Fencebreakers"
+      },
+      "bogwater_rumors": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Take the south trail from Fencebreaker Camp into Blackfen.",
+            "room_id": "blackfen_approach_fenreach_track",
+            "type": "visit_room"
+          },
+          {
+            "description": "Reach Boglight Hollow where the fen lamps start burning wrong.",
+            "room_id": "blackfen_approach_boglight_hollow",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "the_pot_kings_feast"
+        ],
+        "rewards": {
+          "silver": 22,
+          "xp": 320
+        },
+        "summary": "Follow the bad trail south of the old goblin camp and confirm what has been moving through the Blackfen edge beyond the road country.",
+        "title": "Bogwater Rumors"
+      },
+      "bridgework_for_joss": {
+        "giver": "Joss Veller",
+        "next_step": "After Miretooth falls, meet Joss at the observatory, then cross to the Drowned Causeway and recover a live lamp coil from the old line.",
+        "objectives": [
+          {
+            "description": "Reach the Drowned Causeway beyond Miretooth's Wallow.",
+            "room_id": "drowned_weir_drowned_causeway",
+            "type": "visit_room"
+          },
+          {
+            "count": 1,
+            "description": "Recover a live Lamp Coil from the old lanternwork clamps.",
+            "item_id": "flux_coil",
+            "type": "collect_item"
+          }
+        ],
+        "prerequisites": [
+          "miretooths_claim"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "stormlance_codex",
+              "quantity": 1
+            }
+          ],
+          "silver": 12,
+          "xp": 130
+        },
+        "summary": "Help Joss prove the lower lanternworks are tied to the drowned south line by recovering a live pulse from the old road-light system.",
+        "title": "Bridgework for Joss"
+      },
+      "captain_varn_blackreed": {
+        "giver": "Captain Harl Rowan",
+        "objectives": [
+          {
+            "description": "Reach Blackreed's Roost at the top of the tower.",
+            "room_id": "ruined_watchtower_blackreed_roost",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Captain Varn Blackreed.",
+            "enemy_tag": "blackreed",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "loose_arrows"
+        ],
+        "rewards": {
+          "silver": 28,
+          "trophies": [
+            "blackreed_battle_standard"
+          ],
+          "xp": 260
+        },
+        "summary": "Climb to the broken crown of the tower and bring down the bandit captain before he turns the ridge into a permanent noose over Brambleford's road.",
+        "title": "Captain Varn Blackreed"
+      },
+      "do_not_disturb_the_dead": {
+        "giver": "Brother Alden",
+        "objectives": [
+          {
+            "description": "Reach the Barrow Circle deeper in the field.",
+            "room_id": "old_barrow_field_barrow_circle",
+            "type": "visit_room"
+          },
+          {
+            "count": 4,
+            "description": "Defeat 4 undead in Old Barrow Field.",
+            "enemy_tag": "undead",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "lanterns_at_dusk"
+        ],
+        "rewards": {
+          "silver": 12,
+          "xp": 160
+        },
+        "summary": "Push into Old Barrow Field and cut down the first dead things that have started walking there.",
+        "title": "Do Not Disturb the Dead"
+      },
+      "fencebreakers": {
+        "giver": "Mira Fenleaf",
+        "next_step": "Push through Wolf Turn to Fencebreaker Camp and find the brute ordering the road cut.",
+        "objectives": [
+          {
+            "count": 2,
+            "description": "Defeat 2 goblin cutters or raiders working the fence line.",
+            "enemy_tag": "goblin",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "roadside_howls"
+        ],
+        "rewards": {
+          "silver": 12,
+          "xp": 30
+        },
+        "summary": "Stop the goblin cutters stripping fence rails and look for the pattern behind the road damage.",
+        "title": "Fencebreakers"
+      },
+      "foreman_coilback": {
+        "giver": "Joss Veller",
+        "next_step": "Descend into the Sunken Lock, defeat the Chain Keeper, then follow the exposed south light toward the lamp house.",
+        "objectives": [
+          {
+            "description": "Reach the Sunken Lock at the far side of the drowned works.",
+            "room_id": "drowned_weir_sunken_lock",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat the Chain Keeper.",
+            "enemy_tag": "chainkeeper",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "signal_in_the_scrap"
+        ],
+        "rewards": {
+          "silver": 24,
+          "trophies": [
+            "blackwater_beacon_core"
+          ],
+          "xp": 190
+        },
+        "summary": "Break the old lock-keeper enforcing the drowned line so the lamp house can no longer hide behind its machinery.",
+        "title": "The Chain Keeper"
+      },
+      "greymaws_trail": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Find Greymaw's Hollow beneath the split oak.",
+            "room_id": "whispering_woods_greymaw_hollow",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Old Greymaw.",
+            "enemy_tag": "greymaw",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "what_whispers_in_the_wood"
+        ],
+        "rewards": {
+          "xp": 140
+        },
+        "summary": "Track the scarred wolf haunting the deep trail and break its hold on the woods.",
+        "title": "Greymaw's Trail"
+      },
+      "gutters_and_hexes": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Reach the Sludge Run deeper in the warrens.",
+            "room_id": "goblin_warrens_sludge_run",
+            "type": "visit_room"
+          },
+          {
+            "count": 6,
+            "description": "Defeat 6 warrens enemies beneath the ridge.",
+            "enemy_tag": "warren",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "below_the_fencebreakers"
+        ],
+        "rewards": {
+          "silver": 20,
+          "xp": 270
+        },
+        "summary": "Thin the warrens before the goblins can spill back onto the road with hexers, cave bats, and tunnel brutes in tow.",
+        "title": "Gutters and Hexes"
+      },
+      "herbs_for_sister_maybelle": {
+        "giver": "Sister Maybelle",
+        "objectives": [
+          {
+            "count": 3,
+            "description": "Gather 3 Moonleaf Sprigs in Whispering Woods.",
+            "item_id": "moonleaf_sprig",
+            "type": "collect_item"
+          }
+        ],
+        "prerequisites": [
+          "what_whispers_in_the_wood"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "crowfeather_rite",
+              "quantity": 1
+            }
+          ],
+          "xp": 110
+        },
+        "summary": "Gather enough moonleaf from the whispering glades to keep Brambleford supplied with poultices.",
+        "title": "Herbs for Sister Maybelle"
+      },
+      "lanterns_at_dusk": {
+        "giver": "Mayor Elric Thorne",
+        "objectives": [
+          {
+            "description": "Report to Mayor Elric Thorne in Mayor's Hall.",
+            "room_id": "brambleford_mayors_hall",
+            "type": "visit_room"
+          },
+          {
+            "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
+            "room_id": "brambleford_chapel_dawn_bell",
+            "type": "visit_room"
+          },
+          {
+            "description": "Inspect the Old Barrow causeway beyond the woods.",
+            "room_id": "old_barrow_field_causeway",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "greymaws_trail"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "mercy_votive",
+              "quantity": 1
+            }
+          ],
+          "silver": 10,
+          "xp": 140
+        },
+        "summary": "Meet with the mayor and the chapel, then inspect the barrow causeway where the town's western lanterns have started going out.",
+        "title": "Lanterns at Dusk"
+      },
+      "lights_in_the_reeds": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Reach Carrion Rise at the far side of the fen track.",
+            "room_id": "blackfen_approach_carrion_rise",
+            "type": "visit_room"
+          },
+          {
+            "count": 6,
+            "description": "Defeat 6 Blackfen threats in the marsh approaches.",
+            "enemy_tag": "blackfen",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "bogwater_rumors"
+        ],
+        "rewards": {
+          "silver": 30,
+          "xp": 350
+        },
+        "summary": "Push deeper into Blackfen, chart the crow rise, and cut down enough marsh-born threats that the trail stops feeling claimed.",
+        "title": "Lights in the Reeds"
+      },
+      "locks_under_blackwater": {
+        "giver": "Joss Veller",
+        "next_step": "Climb to the Blackwater Lamp House and put down the thing wearing the south light.",
+        "objectives": [
+          {
+            "description": "Reach the Sluice Walk above the drowned lock run.",
+            "room_id": "drowned_weir_sluice_walk",
+            "type": "visit_room"
+          },
+          {
+            "description": "Reach the Sunken Lock at the far side of the drowned works.",
+            "room_id": "drowned_weir_sunken_lock",
+            "type": "visit_room"
+          },
+          {
+            "count": 5,
+            "description": "Defeat 5 Drowned Weir threats beyond the wallow.",
+            "enemy_tag": "weir",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "the_south_light"
+        ],
+        "rewards": {
+          "silver": 32,
+          "xp": 390
+        },
+        "summary": "Tear through the drowned works, break the blackwater ward, and expose whatever is still keeping the old lamp burning wrong.",
+        "title": "Locks Under Blackwater"
+      },
+      "loose_arrows": {
+        "giver": "Captain Harl Rowan",
+        "objectives": [
+          {
+            "description": "Reach Archer's Ledge beside the tower yard.",
+            "room_id": "ruined_watchtower_archers_ledge",
+            "type": "visit_room"
+          },
+          {
+            "count": 5,
+            "description": "Defeat 5 bandits at the Ruined Watchtower.",
+            "enemy_tag": "bandit",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "smoke_on_the_ridge"
+        ],
+        "rewards": {
+          "silver": 16,
+          "xp": 210
+        },
+        "summary": "Break the tower's forward line, clear the ledge, and thin the bandits before they can lock the climb down completely.",
+        "title": "Loose Arrows"
+      },
+      "miretooths_claim": {
+        "giver": "Mira Fenleaf",
+        "next_step": "Return to Brambleford and speak with Joss Veller at the observatory about the wrong south light beyond the wallow.",
+        "objectives": [
+          {
+            "description": "Reach Miretooth's Wallow beyond the far reeds.",
+            "room_id": "blackfen_approach_miretooths_wallow",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Miretooth.",
+            "enemy_tag": "miretooth",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "lights_in_the_reeds"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "serpent_scale_manual",
+              "quantity": 1
+            }
+          ],
+          "silver": 40,
+          "trophies": [
+            "miretooth_fen_jaw"
+          ],
+          "xp": 420
+        },
+        "summary": "Find the predator ruling the Blackfen edge and bring down Miretooth before whatever follows it decides Brambleford is simply the next shoreline.",
+        "title": "Miretooth's Claim"
+      },
+      "practice_makes_heroes": {
+        "giver": "Captain Harl Rowan",
+        "next_step": "Go south to Town Green, read the fresh notice if you need direction, then head west to the inn and speak with Uncle Pib Underbough.",
+        "objectives": [
+          {
+            "description": "Report to Captain Harl Rowan after Wayfarer's Yard.",
+            "npc_id": "captain_harl_rowan",
+            "type": "talk_to_npc"
+          }
+        ],
+        "rewards": {
+          "silver": 6,
+          "xp": 20
+        },
+        "summary": "Report to Captain Harl after the alarm and get pointed at the first town problem.",
+        "title": "Practice Makes Heroes"
+      },
+      "rats_in_the_kettle": {
+        "giver": "Uncle Pib Underbough",
+        "next_step": "Go east to the East Gate and speak with Mira Fenleaf about the cut road.",
+        "objectives": [
+          {
+            "description": "Head down into the Rat and Kettle Cellar beneath the inn.",
+            "room_id": "brambleford_rat_and_kettle_cellar",
+            "type": "visit_room"
+          },
+          {
+            "count": 3,
+            "description": "Defeat 3 thorn rats before they ruin more stores.",
+            "enemy_tag": "rat",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "practice_makes_heroes"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "innkeepers_fishpie",
+              "quantity": 1
+            }
+          ],
+          "silver": 8,
+          "xp": 35
+        },
+        "summary": "Drive the alarm-spooked thorn rats out of the inn cellar before they chew through supplies the town may need.",
+        "title": "Rats in the Kettle"
+      },
+      "roadside_howls": {
+        "giver": "Mira Fenleaf",
+        "next_step": "Follow the cut fences east and thin the goblin cutters still working along Goblin Road.",
+        "objectives": [
+          {
+            "description": "Check in with Mira at the East Gate.",
+            "room_id": "brambleford_east_gate",
+            "type": "visit_room"
+          },
+          {
+            "description": "Reach the Old Fence Line and inspect the cut rails.",
+            "room_id": "goblin_road_old_fence_line",
+            "type": "visit_room"
+          },
+          {
+            "description": "Push as far as Wolf Turn and follow the damage toward its source.",
+            "room_id": "goblin_road_wolf_turn",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "rats_in_the_kettle"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "hawkcaller_whistle",
+              "quantity": 1
+            },
+            {
+              "item": "wharfside_skewers",
+              "quantity": 1
+            }
+          ],
+          "silver": 10,
+          "xp": 25
+        },
+        "summary": "Scout the eastern road, read the tracks, and learn whether the dead lantern and cut fences are connected.",
+        "title": "Roadside Howls"
+      },
+      "ruk_the_fence_cutter": {
+        "giver": "Mira Fenleaf",
+        "next_step": "After Ruk falls, check in with Mira, Sister Maybelle, or Joss. The road is safer, but the black lantern is still unanswered.",
+        "objectives": [
+          {
+            "description": "Find the Fencebreaker Camp beyond Wolf Turn.",
+            "room_id": "goblin_road_fencebreaker_camp",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Ruk the Fence-Cutter and break the first road threat.",
+            "enemy_tag": "ruk",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "fencebreakers"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "boar_keeper_charm",
+              "quantity": 1
+            }
+          ],
+          "silver": 18,
+          "xp": 40
+        },
+        "summary": "Track down the goblin brute leading the fence raids and find out how much of the morning alarm belongs to him.",
+        "title": "Ruk the Fence-Cutter"
+      },
+      "signal_in_the_scrap": {
+        "giver": "Joss Veller",
+        "next_step": "Push from the Drowned Causeway into Lantern Weir and the Sluice Walk, then bring Joss a Blackwater Lens Shard.",
+        "objectives": [
+          {
+            "description": "Reach Lantern Weir where the wrong south light starts burning in earnest.",
+            "room_id": "drowned_weir_lantern_weir",
+            "type": "visit_room"
+          },
+          {
+            "description": "Climb the Sluice Walk above the blackwater channels.",
+            "room_id": "drowned_weir_sluice_walk",
+            "type": "visit_room"
+          },
+          {
+            "count": 1,
+            "description": "Recover a Blackwater Lens Shard from the drowned lanternwork.",
+            "item_id": "anchor_glass_shard",
+            "type": "collect_item"
+          }
+        ],
+        "prerequisites": [
+          "bridgework_for_joss"
+        ],
+        "rewards": {
+          "silver": 16,
+          "xp": 150
+        },
+        "summary": "Chart where the wrong south light is traveling through the drowned works and bring Joss lensglass clean enough to read.",
+        "title": "Signal Under Blackwater"
+      },
+      "smoke_on_the_ridge": {
+        "giver": "Captain Harl Rowan",
+        "objectives": [
+          {
+            "description": "Reach the Watchtower Approach beyond Fencebreaker Camp.",
+            "room_id": "ruined_watchtower_approach",
+            "type": "visit_room"
+          },
+          {
+            "description": "Push into the ruined outer yard and confirm the tower is occupied.",
+            "room_id": "ruined_watchtower_breach_yard",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "the_knight_without_rest"
+        ],
+        "rewards": {
+          "silver": 14,
+          "xp": 180
+        },
+        "summary": "Push beyond the old goblin camp and confirm whether the ruined border tower has fallen fully into bandit hands.",
+        "title": "Smoke on the Ridge"
+      },
+      "test_reward_quest": {
+        "giver": "Test Giver",
+        "objectives": [
+          {
+            "description": "Visit the test room",
+            "room_id": "brambleford_town_square",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [],
+        "rewards": {
+          "items": [
+            {
+              "item": "health_potion",
+              "quantity": 2
+            }
+          ],
+          "silver": 50,
+          "xp": 100
+        },
+        "summary": "Test Summary",
+        "title": "Test Reward Quest"
+      },
+      "the_hollow_lantern": {
+        "chapter_complete": "Brambleford's First Hard Chapter",
+        "giver": "Joss Veller",
+        "next_step": "Return to Joss, Mayor Elric, or the Trophy Hall and take the win for what it is: the end of Brambleford's first hard chapter.",
+        "objectives": [
+          {
+            "description": "Reach the Blackwater Lamp House beyond the drowned lock line.",
+            "room_id": "drowned_weir_blackwater_lamp_house",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat the Hollow Lantern.",
+            "enemy_tag": "hollowlantern",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "locks_under_blackwater"
+        ],
+        "rewards": {
+          "silver": 48,
+          "trophies": [
+            "hollow_lantern_prism"
+          ],
+          "xp": 520
+        },
+        "summary": "Reach the drowned lamp house at the edge of Blackfen and extinguish the thing inside it before the wrong south light grows into the town's next standing problem.",
+        "title": "The Hollow Lantern"
+      },
+      "the_knight_without_rest": {
+        "giver": "Brother Alden",
+        "objectives": [
+          {
+            "description": "Find the Sunken Dais at the heart of Old Barrow Field.",
+            "room_id": "old_barrow_field_sunken_dais",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Sir Edric the Restless.",
+            "enemy_tag": "edric",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "do_not_disturb_the_dead"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "cinder_vigil_tablet",
+              "quantity": 1
+            }
+          ],
+          "silver": 20,
+          "xp": 220
+        },
+        "summary": "Find the fallen knight haunting the deepest barrow and lay Sir Edric to rest.",
+        "title": "The Knight Without Rest"
+      },
+      "the_pot_kings_feast": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Reach the Pot-King's Court at the heart of the warrens.",
+            "room_id": "goblin_warrens_pot_kings_court",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Grubnak the Pot-King.",
+            "enemy_tag": "potking",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "gutters_and_hexes"
+        ],
+        "rewards": {
+          "silver": 34,
+          "trophies": [
+            "potking_battered_lid"
+          ],
+          "xp": 320
+        },
+        "summary": "Reach the goblin feast court and bring down Grubnak before his warrens become the next thing chewing at Brambleford's road.",
+        "title": "The Pot-King's Feast"
+      },
+      "the_south_light": {
+        "giver": "Joss Veller",
+        "next_step": "Push from the Drowned Causeway toward Lantern Weir, then keep following the wrong south light until the lamp house has nowhere left to hide.",
+        "objectives": [
+          {
+            "description": "Cross into the Drowned Causeway beyond Miretooth's Wallow.",
+            "room_id": "drowned_weir_drowned_causeway",
+            "type": "visit_room"
+          },
+          {
+            "description": "Reach Lantern Weir where the wrong south light starts burning in earnest.",
+            "room_id": "drowned_weir_lantern_weir",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "foreman_coilback"
+        ],
+        "rewards": {
+          "silver": 26,
+          "xp": 360
+        },
+        "summary": "Follow the exposed south light beyond the broken lock line and confirm the old lamp house is still feeding the Lanternfall emergency.",
+        "title": "The South Light"
+      },
+      "what_whispers_in_the_wood": {
+        "giver": "Sister Maybelle",
+        "next_step": "Go east from Brambleford toward the old wood trail, then press into Whispering Woods until you reach the Briar Glade.",
+        "objectives": [
+          {
+            "description": "Enter Whispering Woods by the old trail.",
+            "room_id": "whispering_woods_trailhead",
+            "type": "visit_room"
+          },
+          {
+            "description": "Reach the Briar Glade deeper in the woods.",
+            "room_id": "whispering_woods_briar_glade",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "ruk_the_fence_cutter"
+        ],
+        "rewards": {
+          "xp": 100
+        },
+        "summary": "Scout the first reaches of Whispering Woods and find where the old unease is thickest.",
+        "title": "What Whispers in the Wood"
+      }
+    },
+    "starting_quests": [
+      "practice_makes_heroes",
+      "rats_in_the_kettle",
+      "roadside_howls",
+      "fencebreakers",
+      "ruk_the_fence_cutter",
+      "what_whispers_in_the_wood",
+      "herbs_for_sister_maybelle",
+      "greymaws_trail",
+      "lanterns_at_dusk",
+      "do_not_disturb_the_dead",
+      "the_knight_without_rest",
+      "smoke_on_the_ridge",
+      "loose_arrows",
+      "captain_varn_blackreed",
+      "below_the_fencebreakers",
+      "gutters_and_hexes",
+      "the_pot_kings_feast",
+      "bogwater_rumors",
+      "lights_in_the_reeds",
+      "miretooths_claim",
+      "bridgework_for_joss",
+      "signal_in_the_scrap",
+      "foreman_coilback",
+      "the_south_light",
+      "locks_under_blackwater",
+      "the_hollow_lantern"
+    ]
+  },
+  "author": "jctest3",
+  "before": {
+    "_meta": {
+      "last_action": "upsert",
+      "last_modified_at": "2026-05-06T16:53:11.463769+00:00",
+      "last_modified_by": "test_user",
+      "last_target": "test_reward_quest",
+      "stage": "draft"
+    },
+    "quest_regions": {
+      "below_the_fencebreakers": "Goblin Warrens",
+      "bogwater_rumors": "Blackfen",
+      "bridgework_for_joss": "Drowned Weir",
+      "captain_varn_blackreed": "Ruined Watchtower",
+      "do_not_disturb_the_dead": "Old Barrow Field",
+      "fencebreakers": "Goblin Road",
+      "foreman_coilback": "Drowned Weir",
+      "greymaws_trail": "Whispering Woods",
+      "gutters_and_hexes": "Goblin Warrens",
+      "herbs_for_sister_maybelle": "Whispering Woods",
+      "lanterns_at_dusk": "Old Barrow Field",
+      "lights_in_the_reeds": "Blackfen",
+      "locks_under_blackwater": "Drowned Weir",
+      "loose_arrows": "Ruined Watchtower",
+      "miretooths_claim": "Blackfen",
+      "practice_makes_heroes": "Brambleford",
+      "rats_in_the_kettle": "Brambleford",
+      "roadside_howls": "Goblin Road",
+      "ruk_the_fence_cutter": "Goblin Road",
+      "signal_in_the_scrap": "Drowned Weir",
+      "smoke_on_the_ridge": "Ruined Watchtower",
+      "test_reward_quest": "Brambleford",
+      "the_hollow_lantern": "Drowned Weir",
+      "the_knight_without_rest": "Old Barrow Field",
+      "the_pot_kings_feast": "Goblin Warrens",
+      "the_south_light": "Drowned Weir",
+      "what_whispers_in_the_wood": "Whispering Woods"
+    },
+    "quests": {
+      "below_the_fencebreakers": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Find the hidden Sinkmouth Cut east of Fencebreaker Camp.",
+            "room_id": "goblin_warrens_sinkmouth_cut",
+            "type": "visit_room"
+          },
+          {
+            "description": "Push as far as the goblins' Feast Hall beneath the ridge.",
+            "room_id": "goblin_warrens_feast_hall",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "captain_varn_blackreed"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "brushrunner_leathers",
+              "quantity": 1
+            }
+          ],
+          "silver": 16,
+          "xp": 240
+        },
+        "summary": "Follow the goblin retreat east of Ruk's old camp and confirm where the road-cutters have really been nesting.",
+        "title": "Below the Fencebreakers"
+      },
+      "bogwater_rumors": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Take the south trail from Fencebreaker Camp into Blackfen.",
+            "room_id": "blackfen_approach_fenreach_track",
+            "type": "visit_room"
+          },
+          {
+            "description": "Reach Boglight Hollow where the fen lamps start burning wrong.",
+            "room_id": "blackfen_approach_boglight_hollow",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "the_pot_kings_feast"
+        ],
+        "rewards": {
+          "silver": 22,
+          "xp": 320
+        },
+        "summary": "Follow the bad trail south of the old goblin camp and confirm what has been moving through the Blackfen edge beyond the road country.",
+        "title": "Bogwater Rumors"
+      },
+      "bridgework_for_joss": {
+        "giver": "Joss Veller",
+        "next_step": "After Miretooth falls, meet Joss at the observatory, then cross to the Drowned Causeway and recover a live lamp coil from the old line.",
+        "objectives": [
+          {
+            "description": "Reach the Drowned Causeway beyond Miretooth's Wallow.",
+            "room_id": "drowned_weir_drowned_causeway",
+            "type": "visit_room"
+          },
+          {
+            "count": 1,
+            "description": "Recover a live Lamp Coil from the old lanternwork clamps.",
+            "item_id": "flux_coil",
+            "type": "collect_item"
+          }
+        ],
+        "prerequisites": [
+          "miretooths_claim"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "stormlance_codex",
+              "quantity": 1
+            }
+          ],
+          "silver": 12,
+          "xp": 130
+        },
+        "summary": "Help Joss prove the lower lanternworks are tied to the drowned south line by recovering a live pulse from the old road-light system.",
+        "title": "Bridgework for Joss"
+      },
+      "captain_varn_blackreed": {
+        "giver": "Captain Harl Rowan",
+        "objectives": [
+          {
+            "description": "Reach Blackreed's Roost at the top of the tower.",
+            "room_id": "ruined_watchtower_blackreed_roost",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Captain Varn Blackreed.",
+            "enemy_tag": "blackreed",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "loose_arrows"
+        ],
+        "rewards": {
+          "silver": 28,
+          "trophies": [
+            "blackreed_battle_standard"
+          ],
+          "xp": 260
+        },
+        "summary": "Climb to the broken crown of the tower and bring down the bandit captain before he turns the ridge into a permanent noose over Brambleford's road.",
+        "title": "Captain Varn Blackreed"
+      },
+      "do_not_disturb_the_dead": {
+        "giver": "Brother Alden",
+        "objectives": [
+          {
+            "description": "Reach the Barrow Circle deeper in the field.",
+            "room_id": "old_barrow_field_barrow_circle",
+            "type": "visit_room"
+          },
+          {
+            "count": 4,
+            "description": "Defeat 4 undead in Old Barrow Field.",
+            "enemy_tag": "undead",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "lanterns_at_dusk"
+        ],
+        "rewards": {
+          "silver": 12,
+          "xp": 160
+        },
+        "summary": "Push into Old Barrow Field and cut down the first dead things that have started walking there.",
+        "title": "Do Not Disturb the Dead"
+      },
+      "fencebreakers": {
+        "giver": "Mira Fenleaf",
+        "next_step": "Push through Wolf Turn to Fencebreaker Camp and find the brute ordering the road cut.",
+        "objectives": [
+          {
+            "count": 2,
+            "description": "Defeat 2 goblin cutters or raiders working the fence line.",
+            "enemy_tag": "goblin",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "roadside_howls"
+        ],
+        "rewards": {
+          "silver": 12,
+          "xp": 30
+        },
+        "summary": "Stop the goblin cutters stripping fence rails and look for the pattern behind the road damage.",
+        "title": "Fencebreakers"
+      },
+      "foreman_coilback": {
+        "giver": "Joss Veller",
+        "next_step": "Descend into the Sunken Lock, defeat the Chain Keeper, then follow the exposed south light toward the lamp house.",
+        "objectives": [
+          {
+            "description": "Reach the Sunken Lock at the far side of the drowned works.",
+            "room_id": "drowned_weir_sunken_lock",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat the Chain Keeper.",
+            "enemy_tag": "chainkeeper",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "signal_in_the_scrap"
+        ],
+        "rewards": {
+          "silver": 24,
+          "trophies": [
+            "blackwater_beacon_core"
+          ],
+          "xp": 190
+        },
+        "summary": "Break the old lock-keeper enforcing the drowned line so the lamp house can no longer hide behind its machinery.",
+        "title": "The Chain Keeper"
+      },
+      "greymaws_trail": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Find Greymaw's Hollow beneath the split oak.",
+            "room_id": "whispering_woods_greymaw_hollow",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Old Greymaw.",
+            "enemy_tag": "greymaw",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "what_whispers_in_the_wood"
+        ],
+        "rewards": {
+          "xp": 140
+        },
+        "summary": "Track the scarred wolf haunting the deep trail and break its hold on the woods.",
+        "title": "Greymaw's Trail"
+      },
+      "gutters_and_hexes": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Reach the Sludge Run deeper in the warrens.",
+            "room_id": "goblin_warrens_sludge_run",
+            "type": "visit_room"
+          },
+          {
+            "count": 6,
+            "description": "Defeat 6 warrens enemies beneath the ridge.",
+            "enemy_tag": "warren",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "below_the_fencebreakers"
+        ],
+        "rewards": {
+          "silver": 20,
+          "xp": 270
+        },
+        "summary": "Thin the warrens before the goblins can spill back onto the road with hexers, cave bats, and tunnel brutes in tow.",
+        "title": "Gutters and Hexes"
+      },
+      "herbs_for_sister_maybelle": {
+        "giver": "Sister Maybelle",
+        "objectives": [
+          {
+            "count": 3,
+            "description": "Gather 3 Moonleaf Sprigs in Whispering Woods.",
+            "item_id": "moonleaf_sprig",
+            "type": "collect_item"
+          }
+        ],
+        "prerequisites": [
+          "what_whispers_in_the_wood"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "crowfeather_rite",
+              "quantity": 1
+            }
+          ],
+          "xp": 110
+        },
+        "summary": "Gather enough moonleaf from the whispering glades to keep Brambleford supplied with poultices.",
+        "title": "Herbs for Sister Maybelle"
+      },
+      "lanterns_at_dusk": {
+        "giver": "Mayor Elric Thorne",
+        "objectives": [
+          {
+            "description": "Report to Mayor Elric Thorne in Mayor's Hall.",
+            "room_id": "brambleford_mayors_hall",
+            "type": "visit_room"
+          },
+          {
+            "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
+            "room_id": "brambleford_chapel_dawn_bell",
+            "type": "visit_room"
+          },
+          {
+            "description": "Inspect the Old Barrow causeway beyond the woods.",
+            "room_id": "old_barrow_field_causeway",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "greymaws_trail"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "mercy_votive",
+              "quantity": 1
+            }
+          ],
+          "silver": 10,
+          "xp": 140
+        },
+        "summary": "Meet with the mayor and the chapel, then inspect the barrow causeway where the town's western lanterns have started going out.",
+        "title": "Lanterns at Dusk"
+      },
+      "lights_in_the_reeds": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Reach Carrion Rise at the far side of the fen track.",
+            "room_id": "blackfen_approach_carrion_rise",
+            "type": "visit_room"
+          },
+          {
+            "count": 6,
+            "description": "Defeat 6 Blackfen threats in the marsh approaches.",
+            "enemy_tag": "blackfen",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "bogwater_rumors"
+        ],
+        "rewards": {
+          "silver": 30,
+          "xp": 350
+        },
+        "summary": "Push deeper into Blackfen, chart the crow rise, and cut down enough marsh-born threats that the trail stops feeling claimed.",
+        "title": "Lights in the Reeds"
+      },
+      "locks_under_blackwater": {
+        "giver": "Joss Veller",
+        "next_step": "Climb to the Blackwater Lamp House and put down the thing wearing the south light.",
+        "objectives": [
+          {
+            "description": "Reach the Sluice Walk above the drowned lock run.",
+            "room_id": "drowned_weir_sluice_walk",
+            "type": "visit_room"
+          },
+          {
+            "description": "Reach the Sunken Lock at the far side of the drowned works.",
+            "room_id": "drowned_weir_sunken_lock",
+            "type": "visit_room"
+          },
+          {
+            "count": 5,
+            "description": "Defeat 5 Drowned Weir threats beyond the wallow.",
+            "enemy_tag": "weir",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "the_south_light"
+        ],
+        "rewards": {
+          "silver": 32,
+          "xp": 390
+        },
+        "summary": "Tear through the drowned works, break the blackwater ward, and expose whatever is still keeping the old lamp burning wrong.",
+        "title": "Locks Under Blackwater"
+      },
+      "loose_arrows": {
+        "giver": "Captain Harl Rowan",
+        "objectives": [
+          {
+            "description": "Reach Archer's Ledge beside the tower yard.",
+            "room_id": "ruined_watchtower_archers_ledge",
+            "type": "visit_room"
+          },
+          {
+            "count": 5,
+            "description": "Defeat 5 bandits at the Ruined Watchtower.",
+            "enemy_tag": "bandit",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "smoke_on_the_ridge"
+        ],
+        "rewards": {
+          "silver": 16,
+          "xp": 210
+        },
+        "summary": "Break the tower's forward line, clear the ledge, and thin the bandits before they can lock the climb down completely.",
+        "title": "Loose Arrows"
+      },
+      "miretooths_claim": {
+        "giver": "Mira Fenleaf",
+        "next_step": "Return to Brambleford and speak with Joss Veller at the observatory about the wrong south light beyond the wallow.",
+        "objectives": [
+          {
+            "description": "Reach Miretooth's Wallow beyond the far reeds.",
+            "room_id": "blackfen_approach_miretooths_wallow",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Miretooth.",
+            "enemy_tag": "miretooth",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "lights_in_the_reeds"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "serpent_scale_manual",
+              "quantity": 1
+            }
+          ],
+          "silver": 40,
+          "trophies": [
+            "miretooth_fen_jaw"
+          ],
+          "xp": 420
+        },
+        "summary": "Find the predator ruling the Blackfen edge and bring down Miretooth before whatever follows it decides Brambleford is simply the next shoreline.",
+        "title": "Miretooth's Claim"
+      },
+      "practice_makes_heroes": {
+        "giver": "Captain Harl Rowan",
+        "next_step": "Go south to Town Green, read the fresh notice if you need direction, then head west to the inn and speak with Uncle Pib Underbough.",
+        "objectives": [
+          {
+            "description": "Report to Captain Harl Rowan after Wayfarer's Yard.",
+            "npc_id": "captain_harl_rowan",
+            "type": "talk_to_npc"
+          }
+        ],
+        "rewards": {
+          "silver": 6,
+          "xp": 20
+        },
+        "summary": "Report to Captain Harl after the alarm and get pointed at the first town problem.",
+        "title": "Practice Makes Heroes"
+      },
+      "rats_in_the_kettle": {
+        "giver": "Uncle Pib Underbough",
+        "next_step": "Go east to the East Gate and speak with Mira Fenleaf about the cut road.",
+        "objectives": [
+          {
+            "description": "Head down into the Rat and Kettle Cellar beneath the inn.",
+            "room_id": "brambleford_rat_and_kettle_cellar",
+            "type": "visit_room"
+          },
+          {
+            "count": 3,
+            "description": "Defeat 3 thorn rats before they ruin more stores.",
+            "enemy_tag": "rat",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "practice_makes_heroes"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "innkeepers_fishpie",
+              "quantity": 1
+            }
+          ],
+          "silver": 8,
+          "xp": 35
+        },
+        "summary": "Drive the alarm-spooked thorn rats out of the inn cellar before they chew through supplies the town may need.",
+        "title": "Rats in the Kettle"
+      },
+      "roadside_howls": {
+        "giver": "Mira Fenleaf",
+        "next_step": "Follow the cut fences east and thin the goblin cutters still working along Goblin Road.",
+        "objectives": [
+          {
+            "description": "Check in with Mira at the East Gate.",
+            "room_id": "brambleford_east_gate",
+            "type": "visit_room"
+          },
+          {
+            "description": "Reach the Old Fence Line and inspect the cut rails.",
+            "room_id": "goblin_road_old_fence_line",
+            "type": "visit_room"
+          },
+          {
+            "description": "Push as far as Wolf Turn and follow the damage toward its source.",
+            "room_id": "goblin_road_wolf_turn",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "rats_in_the_kettle"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "hawkcaller_whistle",
+              "quantity": 1
+            },
+            {
+              "item": "wharfside_skewers",
+              "quantity": 1
+            }
+          ],
+          "silver": 10,
+          "xp": 25
+        },
+        "summary": "Scout the eastern road, read the tracks, and learn whether the dead lantern and cut fences are connected.",
+        "title": "Roadside Howls"
+      },
+      "ruk_the_fence_cutter": {
+        "giver": "Mira Fenleaf",
+        "next_step": "After Ruk falls, check in with Mira, Sister Maybelle, or Joss. The road is safer, but the black lantern is still unanswered.",
+        "objectives": [
+          {
+            "description": "Find the Fencebreaker Camp beyond Wolf Turn.",
+            "room_id": "goblin_road_fencebreaker_camp",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Ruk the Fence-Cutter and break the first road threat.",
+            "enemy_tag": "ruk",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "fencebreakers"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "boar_keeper_charm",
+              "quantity": 1
+            }
+          ],
+          "silver": 18,
+          "xp": 40
+        },
+        "summary": "Track down the goblin brute leading the fence raids and find out how much of the morning alarm belongs to him.",
+        "title": "Ruk the Fence-Cutter"
+      },
+      "signal_in_the_scrap": {
+        "giver": "Joss Veller",
+        "next_step": "Push from the Drowned Causeway into Lantern Weir and the Sluice Walk, then bring Joss a Blackwater Lens Shard.",
+        "objectives": [
+          {
+            "description": "Reach Lantern Weir where the wrong south light starts burning in earnest.",
+            "room_id": "drowned_weir_lantern_weir",
+            "type": "visit_room"
+          },
+          {
+            "description": "Climb the Sluice Walk above the blackwater channels.",
+            "room_id": "drowned_weir_sluice_walk",
+            "type": "visit_room"
+          },
+          {
+            "count": 1,
+            "description": "Recover a Blackwater Lens Shard from the drowned lanternwork.",
+            "item_id": "anchor_glass_shard",
+            "type": "collect_item"
+          }
+        ],
+        "prerequisites": [
+          "bridgework_for_joss"
+        ],
+        "rewards": {
+          "silver": 16,
+          "xp": 150
+        },
+        "summary": "Chart where the wrong south light is traveling through the drowned works and bring Joss lensglass clean enough to read.",
+        "title": "Signal Under Blackwater"
+      },
+      "smoke_on_the_ridge": {
+        "giver": "Captain Harl Rowan",
+        "objectives": [
+          {
+            "description": "Reach the Watchtower Approach beyond Fencebreaker Camp.",
+            "room_id": "ruined_watchtower_approach",
+            "type": "visit_room"
+          },
+          {
+            "description": "Push into the ruined outer yard and confirm the tower is occupied.",
+            "room_id": "ruined_watchtower_breach_yard",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "the_knight_without_rest"
+        ],
+        "rewards": {
+          "silver": 14,
+          "xp": 180
+        },
+        "summary": "Push beyond the old goblin camp and confirm whether the ruined border tower has fallen fully into bandit hands.",
+        "title": "Smoke on the Ridge"
+      },
+      "test_reward_quest": {
+        "giver": "Test Giver",
+        "objectives": [
+          {
+            "description": "Visit the test room",
+            "room_id": "brambleford_town_square",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [],
+        "rewards": {
+          "items": [
+            {
+              "item": "health_potion",
+              "quantity": 2
+            }
+          ],
+          "silver": 50,
+          "xp": 100
+        },
+        "summary": "Test Summary",
+        "title": "Test Reward Quest"
+      },
+      "the_hollow_lantern": {
+        "chapter_complete": "Brambleford's First Hard Chapter",
+        "giver": "Joss Veller",
+        "next_step": "Return to Joss, Mayor Elric, or the Trophy Hall and take the win for what it is: the end of Brambleford's first hard chapter.",
+        "objectives": [
+          {
+            "description": "Reach the Blackwater Lamp House beyond the drowned lock line.",
+            "room_id": "drowned_weir_blackwater_lamp_house",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat the Hollow Lantern.",
+            "enemy_tag": "hollowlantern",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "locks_under_blackwater"
+        ],
+        "rewards": {
+          "silver": 48,
+          "trophies": [
+            "hollow_lantern_prism"
+          ],
+          "xp": 520
+        },
+        "summary": "Reach the drowned lamp house at the edge of Blackfen and extinguish the thing inside it before the wrong south light grows into the town's next standing problem.",
+        "title": "The Hollow Lantern"
+      },
+      "the_knight_without_rest": {
+        "giver": "Brother Alden",
+        "objectives": [
+          {
+            "description": "Find the Sunken Dais at the heart of Old Barrow Field.",
+            "room_id": "old_barrow_field_sunken_dais",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Sir Edric the Restless.",
+            "enemy_tag": "edric",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "do_not_disturb_the_dead"
+        ],
+        "rewards": {
+          "items": [
+            {
+              "item": "cinder_vigil_tablet",
+              "quantity": 1
+            }
+          ],
+          "silver": 20,
+          "xp": 220
+        },
+        "summary": "Find the fallen knight haunting the deepest barrow and lay Sir Edric to rest.",
+        "title": "The Knight Without Rest"
+      },
+      "the_pot_kings_feast": {
+        "giver": "Mira Fenleaf",
+        "objectives": [
+          {
+            "description": "Reach the Pot-King's Court at the heart of the warrens.",
+            "room_id": "goblin_warrens_pot_kings_court",
+            "type": "visit_room"
+          },
+          {
+            "description": "Defeat Grubnak the Pot-King.",
+            "enemy_tag": "potking",
+            "type": "defeat_enemy"
+          }
+        ],
+        "prerequisites": [
+          "gutters_and_hexes"
+        ],
+        "rewards": {
+          "silver": 34,
+          "trophies": [
+            "potking_battered_lid"
+          ],
+          "xp": 320
+        },
+        "summary": "Reach the goblin feast court and bring down Grubnak before his warrens become the next thing chewing at Brambleford's road.",
+        "title": "The Pot-King's Feast"
+      },
+      "the_south_light": {
+        "giver": "Joss Veller",
+        "next_step": "Push from the Drowned Causeway toward Lantern Weir, then keep following the wrong south light until the lamp house has nowhere left to hide.",
+        "objectives": [
+          {
+            "description": "Cross into the Drowned Causeway beyond Miretooth's Wallow.",
+            "room_id": "drowned_weir_drowned_causeway",
+            "type": "visit_room"
+          },
+          {
+            "description": "Reach Lantern Weir where the wrong south light starts burning in earnest.",
+            "room_id": "drowned_weir_lantern_weir",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "foreman_coilback"
+        ],
+        "rewards": {
+          "silver": 26,
+          "xp": 360
+        },
+        "summary": "Follow the exposed south light beyond the broken lock line and confirm the old lamp house is still feeding the Lanternfall emergency.",
+        "title": "The South Light"
+      },
+      "what_whispers_in_the_wood": {
+        "giver": "Sister Maybelle",
+        "next_step": "Go east from Brambleford toward the old wood trail, then press into Whispering Woods until you reach the Briar Glade.",
+        "objectives": [
+          {
+            "description": "Enter Whispering Woods by the old trail.",
+            "room_id": "whispering_woods_trailhead",
+            "type": "visit_room"
+          },
+          {
+            "description": "Reach the Briar Glade deeper in the woods.",
+            "room_id": "whispering_woods_briar_glade",
+            "type": "visit_room"
+          }
+        ],
+        "prerequisites": [
+          "ruk_the_fence_cutter"
+        ],
+        "rewards": {
+          "xp": 100
+        },
+        "summary": "Scout the first reaches of Whispering Woods and find where the old unease is thickest.",
+        "title": "What Whispers in the Wood"
+      }
+    },
+    "starting_quests": [
+      "practice_makes_heroes",
+      "rats_in_the_kettle",
+      "roadside_howls",
+      "fencebreakers",
+      "ruk_the_fence_cutter",
+      "what_whispers_in_the_wood",
+      "herbs_for_sister_maybelle",
+      "greymaws_trail",
+      "lanterns_at_dusk",
+      "do_not_disturb_the_dead",
+      "the_knight_without_rest",
+      "smoke_on_the_ridge",
+      "loose_arrows",
+      "captain_varn_blackreed",
+      "below_the_fencebreakers",
+      "gutters_and_hexes",
+      "the_pot_kings_feast",
+      "bogwater_rumors",
+      "lights_in_the_reeds",
+      "miretooths_claim",
+      "bridgework_for_joss",
+      "signal_in_the_scrap",
+      "foreman_coilback",
+      "the_south_light",
+      "locks_under_blackwater",
+      "the_hollow_lantern"
+    ]
+  },
+  "diff": "--- /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/quests.json\n+++ /home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/quests.json\n@@ -1,9 +1,9 @@\n {\n   \"_meta\": {\n     \"last_action\": \"upsert\",\n-    \"last_modified_at\": \"2026-05-06T16:53:11.463769+00:00\",\n-    \"last_modified_by\": \"test_user\",\n-    \"last_target\": \"test_reward_quest\",\n+    \"last_modified_at\": \"2026-05-06T17:26:08.842000+00:00\",\n+    \"last_modified_by\": \"jctest3\",\n+    \"last_target\": \"below_the_fencebreakers\",\n     \"stage\": \"draft\"\n   },\n   \"quest_regions\": {\n@@ -56,7 +56,7 @@\n       \"rewards\": {\n         \"items\": [\n           {\n-            \"item\": \"brushrunner_leathers\",\n+            \"item\": \"ashwood_bow\",\n             \"quantity\": 1\n           }\n         ],\n",
+  "domain": "quests",
+  "entry_id": "20260506172608853912-quests-upsert-below_the_fencebreakers",
+  "path": "/home/jcthom85/Brave/brave_game/world/content/packs/core/drafts/quests.json",
+  "stage": "draft",
+  "target": "below_the_fencebreakers",
+  "timestamp": "2026-05-06T17:26:08.853912+00:00"
+}

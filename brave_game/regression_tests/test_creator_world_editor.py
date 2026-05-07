@@ -12,10 +12,11 @@ from web.website.views.creator import creator_world_editor
 
 
 class _DummyUser:
-    def __init__(self, *, authenticated=True, staff=False, superuser=False, developer=False):
+    def __init__(self, *, authenticated=True, staff=False, superuser=False, developer=False, username="testuser"):
         self.is_authenticated = authenticated
         self.is_staff = staff
         self.is_superuser = superuser
+        self.username = username
         self._developer = developer
 
     def check_permstring(self, permstring):
@@ -26,25 +27,29 @@ class CreatorWorldEditorViewTests(unittest.TestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
+    def _get_request(self, path, user=None):
+        request = self.factory.get(path)
+        request.user = user or _DummyUser(authenticated=False)
+        request.session = {}
+        return request
+
     def test_creator_world_editor_requires_authorization(self):
-        request = self.factory.get("/creator/world/")
-        request.user = _DummyUser(authenticated=False)
+        request = self._get_request("/creator/world/")
 
         response = creator_world_editor(request)
 
-        self.assertEqual(403, response.status_code)
+        self.assertEqual(302, response.status_code)
+        self.assertIn("/creator/login/", response.url)
 
     def test_creator_world_editor_rejects_authenticated_non_creator_user(self):
-        request = self.factory.get("/creator/world/")
-        request.user = _DummyUser(authenticated=True)
+        request = self._get_request("/creator/world/", user=_DummyUser(authenticated=True))
 
         response = creator_world_editor(request)
 
         self.assertEqual(403, response.status_code)
 
     def test_creator_world_editor_renders_for_staff(self):
-        request = self.factory.get("/creator/world/")
-        request.user = _DummyUser(staff=True)
+        request = self._get_request("/creator/world/", user=_DummyUser(staff=True))
 
         response = creator_world_editor(request)
         body = response.content.decode("utf-8")
@@ -84,6 +89,10 @@ class CreatorWorldEditorViewTests(unittest.TestCase):
         self.assertIn("data-editor-tab=\"room\"", body)
         self.assertIn("validation-notes", body)
         self.assertIn("creator_common.js", body)
+        self.assertIn("applyWorldIncoming", body)
+        self.assertIn("registerApplyHandler(\"room-activity\"", body)
+        self.assertIn("registerApplyHandler(\"boss-exit\"", body)
+        self.assertIn("registerApplyHandler(\"world-readable\"", body)
         self.assertIn("Drafted exit", body)
         self.assertIn("buildTwoWayExitDraft", body)
         self.assertIn("buildReverseExitDraft", body)

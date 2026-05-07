@@ -76,6 +76,7 @@
         <div class="toolbar">
           <button id="preview-boss" class="secondary" type="button">Preview Draft Payloads</button>
           <button id="write-boss" type="button">Write Draft Boss Flow</button>
+          <button id="send-world-exit" class="secondary" type="button">Send Exit To World Builder</button>
           <button id="validate-boss" class="secondary" type="button">Validate Drafts</button>
         </div>
       </div></section>
@@ -86,7 +87,7 @@
       </div></section>
     </section>
   </div>
-  <script src="/static/website/js/creator_common.js"></script>
+  <script src="/static/website/js/creator_common.js?v=agent-runs-v2"></script>
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
     const statusNode = document.getElementById('status');
@@ -215,6 +216,14 @@
     }
     document.getElementById('preview-boss').addEventListener('click', () => runCompose(false).catch((error) => creator.setStatus(error.message, 'bad')));
     document.getElementById('write-boss').addEventListener('click', () => runCompose(true).catch((error) => creator.setStatus(error.message, 'bad')));
+    document.getElementById('send-world-exit').addEventListener('click', () => {
+      try {
+        const specs = buildPayloads();
+        creator.sendToBuilder('/creator/world/', specs.exit.payload, 'Boss Gate Exit', { kind:'boss-exit' });
+      } catch (error) {
+        creator.setStatus(error.message, 'bad');
+      }
+    });
     document.getElementById('validate-boss').addEventListener('click', () => validateDrafts().catch((error) => creator.setStatus(error.message, 'bad')));
     loadRefs().catch((error) => creator.setStatus(error.message, 'bad'));
   </script>

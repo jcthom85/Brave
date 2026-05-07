@@ -11,6 +11,7 @@ from evennia.web.website.urls import urlpatterns as evennia_website_urlpatterns
 
 from .views.creator import (
     creator_index,
+    creator_login,
     creator_character_editor,
     creator_dialogue_editor,
     creator_encounter_editor,
@@ -25,6 +26,7 @@ from .views.creator import (
 
 urlpatterns = [
     path("creator/", creator_index, name="creator-index"),
+    path("creator/login/", creator_login, name="creator-login"),
     path("creator/world/", creator_world_editor, name="creator-world-editor"),
     path("creator/quests/", creator_quest_editor, name="creator-quest-editor"),
     path("creator/characters/", creator_character_editor, name="creator-character-editor"),

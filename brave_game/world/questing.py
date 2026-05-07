@@ -236,6 +236,10 @@ def _complete_quest(character, definition, state, messages):
     if state.get("status") == "completed":
         return False
 
+    # 1. Update status immediately to prevent recursion during reward syncs
+    state["status"] = "completed"
+    character.db.brave_quests = character.db.brave_quests # Force persistence
+
     try:
         from world.browser_panels import send_audio_cue_once, send_quest_complete_event
 
@@ -245,7 +249,6 @@ def _complete_quest(character, definition, state, messages):
     except Exception:
         pass
 
-    state["status"] = "completed"
     _refresh_tracked_quest_scene(character)
     messages.append(f"|yQuest complete:|n {definition['title']}")
     rewards = definition.get("rewards", {})
@@ -711,6 +714,47 @@ def advance_talk_to_npc(character, npc_id):
             if objective_state["completed"]:
                 continue
             if objective["type"] == "talk_to_npc" and objective["npc_id"] == npc_id:
+                objective_state["progress"] = objective_state.get("required", 1)
+                objective_state["completed"] = True
+                changed = True
+                messages.append(
+                    f"|gQuest updated:|n {definition['title']} - {objective['description']}"
+                )
+
+    changed = _sync_quest_log(character, quest_log, messages) or changed
+
+    if changed:
+        character.db.brave_quests = quest_log
+        _refresh_tracked_quest_scene(character)
+
+    if messages:
+        _record_recent_updates(character, messages)
+    _send_progress_notice(character, messages)
+
+
+def advance_read_readable(character, readable_id):
+    """Update read objectives when a character inspects a tagged readable."""
+
+    if not readable_id:
+        return
+
+    quest_log = deepcopy(character.db.brave_quests or {})
+    messages = []
+    changed = False
+
+    for quest_key, state in quest_log.items():
+        if state.get("status") != "active":
+            continue
+
+        definition = QUEST_CONTENT.quests.get(quest_key)
+        if not definition:
+            continue
+
+        for index, objective in enumerate(definition["objectives"]):
+            objective_state = state["objectives"][index]
+            if objective_state["completed"]:
+                continue
+            if objective["type"] == "read_readable" and objective.get("readable_id") == readable_id:
                 objective_state["progress"] = objective_state.get("required", 1)
                 objective_state["completed"] = True
                 changed = True

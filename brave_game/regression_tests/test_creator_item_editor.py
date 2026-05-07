@@ -12,10 +12,11 @@ from web.website.views.creator import creator_item_editor
 
 
 class _DummyUser:
-    def __init__(self, *, authenticated=True, staff=False, superuser=False, developer=False):
+    def __init__(self, *, authenticated=True, staff=False, superuser=False, developer=False, username="testuser"):
         self.is_authenticated = authenticated
         self.is_staff = staff
         self.is_superuser = superuser
+        self.username = username
         self._developer = developer
 
     def check_permstring(self, permstring):
@@ -26,15 +27,20 @@ class CreatorItemEditorViewTests(unittest.TestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
+    def _get_request(self, path, user=None):
+        request = self.factory.get(path)
+        request.user = user or _DummyUser(authenticated=False)
+        request.session = {}
+        return request
+
     def test_creator_item_editor_requires_authorization(self):
-        request = self.factory.get("/creator/items/")
-        request.user = _DummyUser(authenticated=False)
+        request = self._get_request("/creator/items/")
         response = creator_item_editor(request)
-        self.assertEqual(403, response.status_code)
+        self.assertEqual(302, response.status_code)
+        self.assertIn("/creator/login/", response.url)
 
     def test_creator_item_editor_renders_for_staff(self):
-        request = self.factory.get("/creator/items/")
-        request.user = _DummyUser(staff=True)
+        request = self._get_request("/creator/items/", user=_DummyUser(staff=True))
         response = creator_item_editor(request)
         body = response.content.decode("utf-8")
         self.assertEqual(200, response.status_code)
@@ -54,6 +60,10 @@ class CreatorItemEditorViewTests(unittest.TestCase):
         self.assertIn("placement-hints", body)
         self.assertIn("item-link-grid", body)
         self.assertIn("Copy Link Payload", body)
+        self.assertIn("Send To Builder", body)
+        self.assertIn("item-shell", body)
+        self.assertIn("applyItemIncoming", body)
+        self.assertIn("registerApplyHandler('item-shell'", body)
         self.assertIn("applyPreset", body)
         self.assertIn("payloadSnippet", body)
         self.assertIn("stage: 'draft'", body)

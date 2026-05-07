@@ -1,5 +1,13 @@
 {
+  "_meta": {
+    "last_action": "publish",
+    "last_modified_at": "2026-05-06T23:12:27.239404+00:00",
+    "last_modified_by": "jctest",
+    "last_target": "quests",
+    "stage": "live"
+  },
   "quest_regions": {
+    "bell_before_the_road": "Brambleford",
     "below_the_fencebreakers": "Goblin Warrens",
     "bogwater_rumors": "Blackfen",
     "bridgework_for_joss": "Drowned Weir",
@@ -28,6 +36,32 @@
     "what_whispers_in_the_wood": "Whispering Woods"
   },
   "quests": {
+    "bell_before_the_road": {
+      "giver": "Brother Alden",
+      "next_step": "Carry Alden's candle stub back toward Town Green, then follow Captain Rowan's lead toward the inn and the cut road.",
+      "objectives": [
+        {
+          "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
+          "npc_id": "brother_alden",
+          "type": "talk_to_npc"
+        }
+      ],
+      "prerequisites": [
+        "practice_makes_heroes"
+      ],
+      "rewards": {
+        "items": [
+          {
+            "item": "dawn_thread_candle_stub",
+            "quantity": 1
+          }
+        ],
+        "silver": 4,
+        "xp": 12
+      },
+      "summary": "Brother Alden asks for one last steadying check at the chapel before the road pulls the town into harder trouble.",
+      "title": "Bell Before the Road"
+    },
     "below_the_fencebreakers": {
       "giver": "Mira Fenleaf",
       "objectives": [
@@ -46,6 +80,12 @@
         "captain_varn_blackreed"
       ],
       "rewards": {
+        "items": [
+          {
+            "item": "ashwood_bow",
+            "quantity": 1
+          }
+        ],
         "silver": 16,
         "xp": 240
       },
@@ -745,6 +785,7 @@
   },
   "starting_quests": [
     "practice_makes_heroes",
+    "bell_before_the_road",
     "rats_in_the_kettle",
     "roadside_howls",
     "fencebreakers",

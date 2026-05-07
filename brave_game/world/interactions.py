@@ -5,6 +5,7 @@ from world.commerce import format_shop_bonus, get_sellable_entries, get_shop_bon
 from world.content import get_content_registry
 from world.forging import get_forge_entries
 from world.questing import (
+    advance_read_readable,
     advance_room_visit,
     advance_talk_to_npc,
     ensure_starter_quests,
@@ -270,6 +271,9 @@ DYNAMIC_READ_HANDLERS = {
 def get_entity_response(character, entity, action, is_action=False):
     """Return contextual interaction text for a local entity."""
 
+    # Ensure character is synced with latest starting quests
+    ensure_starter_quests(character)
+
     entity_id = getattr(entity.db, "brave_entity_id", None)
     entity_kind = getattr(entity.db, "brave_entity_kind", None)
 
@@ -289,6 +293,8 @@ def get_entity_response(character, entity, action, is_action=False):
                     response = handler(character)
             else:
                 response = _resolve_talk_response(character, entity_id)
+                if is_action and response:
+                    advance_talk_to_npc(character, entity_id)
 
         elif action == "read":
             handler = DYNAMIC_READ_HANDLERS.get(entity_id)
@@ -297,6 +303,11 @@ def get_entity_response(character, entity, action, is_action=False):
                 response = handler(character)
             else:
                 response = STATIC_READ_RESPONSES.get(entity_id)
+
+            if is_action and response:
+                advance_read_readable(character, entity_id)
+
+            return response
 
             if response and extra:
                 response += "\n\n" + extra

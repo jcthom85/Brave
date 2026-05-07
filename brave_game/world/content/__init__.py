@@ -1,6 +1,7 @@
 """Content registry and tooling entry points for Brave."""
 
 from .editor import ContentEditor, ContentMutation, ContentPublishValidationError
+from .agent_runs import AgentRunStore
 from .history import ContentHistoryStore
 from .preview import (
     preview_character_config,
@@ -31,6 +32,7 @@ from .registry import BraveContentRegistry, get_content_registry, reload_content
 __all__ = [
     "BraveContentRegistry",
     "ContentEditor",
+    "AgentRunStore",
     "ContentHistoryStore",
     "ContentMutation",
     "ContentPublishValidationError",
