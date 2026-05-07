@@ -522,12 +522,30 @@
             var durationSec = explicitDuration ? getCueDuration(cue) : 0;
             var stopped = false;
             var cleanupTimer = null;
+            var ctx = getAudioContext();
+            var busNode = ctx ? getBusNode(busName) : null;
+            var mediaSource = null;
+            var outputGain = null;
             audio.preload = "auto";
             audio.src = resolvedUrl;
             audio.loop = loop;
             audio.playsInline = true;
             audio.setAttribute("playsinline", "playsinline");
             audio.volume = 0;
+            if (ctx && busNode) {
+                try {
+                    mediaSource = ctx.createMediaElementSource(audio);
+                    outputGain = ctx.createGain();
+                    outputGain.gain.value = 0.0001;
+                    mediaSource.connect(outputGain);
+                    outputGain.connect(busNode);
+                    audio.volume = 1;
+                } catch (error) {
+                    mediaSource = null;
+                    outputGain = null;
+                    audio.volume = 0;
+                }
+            }
             var playback = {
                 cueId: cueId,
                 bus: busName,
@@ -538,7 +556,11 @@
                 startedAt: Date.now(),
                 applyVolume: function () {
                     var targetVolume = getCueEffectiveVolume(cue, busName);
-                    audio.volume = clamp01(targetVolume, 0);
+                    if (outputGain) {
+                        outputGain.gain.value = Math.max(0.0001, clamp01(targetVolume, 0));
+                    } else {
+                        audio.volume = clamp01(targetVolume, 0);
+                    }
                 },
                 stop: function (fadeMs) {
                     if (stopped) {
@@ -546,11 +568,16 @@
                     }
                     stopped = true;
                     var fadeSeconds = Math.max(0.04, (typeof fadeMs === "number" ? fadeMs : fadeOutSec * 1000) / 1000);
-                    var startVolume = audio.volume;
+                    var startVolume = outputGain ? outputGain.gain.value : audio.volume;
                     var startedAt = Date.now();
                     var fadeInterval = window.setInterval(function () {
                         var progress = Math.min(1, (Date.now() - startedAt) / (fadeSeconds * 1000));
-                        audio.volume = clamp01(startVolume * (1 - progress), 0);
+                        var nextVolume = clamp01(startVolume * (1 - progress), 0);
+                        if (outputGain) {
+                            outputGain.gain.value = Math.max(0.0001, nextVolume);
+                        } else {
+                            audio.volume = nextVolume;
+                        }
                         if (progress >= 1) {
                             window.clearInterval(fadeInterval);
                             try {
@@ -558,6 +585,16 @@
                                 audio.src = "";
                             } catch (error) {
                                 // Ignore pause/clear failures.
+                            }
+                            if (outputGain) {
+                                disconnectNodeLater(outputGain, 80);
+                            }
+                            if (mediaSource && typeof mediaSource.disconnect === "function") {
+                                try {
+                                    mediaSource.disconnect();
+                                } catch (error) {
+                                    // Ignore media source disconnect failures.
+                                }
                             }
                             unregisterMediaPlayback(playback);
                         }

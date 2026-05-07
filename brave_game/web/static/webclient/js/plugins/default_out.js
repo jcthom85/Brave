@@ -4109,17 +4109,6 @@ let defaultout_plugin = (function () {
         var lastWidth = 0;
         var lastHeight = 0;
 
-        var fillFallbackFrequencyData = function () {
-            var elapsed = currentMovieOverlayState && currentMovieOverlayState.startedAt
-                ? (Date.now() - currentMovieOverlayState.startedAt) / 1000
-                : Date.now() / 1000;
-            for (var i = 0; i < dataArray.length; i++) {
-                var slow = Math.sin(elapsed * 1.8 + i * 0.28);
-                var quick = Math.sin(elapsed * 4.4 + i * 0.11);
-                dataArray[i] = Math.max(0, Math.min(255, Math.round(64 + slow * 38 + quick * 18)));
-            }
-        };
-
         var render = function () {
             if (!currentMovieOverlayState || !document.contains(canvas)) {
                 currentMovieVisualizerFrame = null;
@@ -4127,15 +4116,8 @@ let defaultout_plugin = (function () {
             }
             currentMovieVisualizerFrame = window.requestAnimationFrame(render);
             var hasAnalyserData = braveAudio.getByteFrequencyData(dataArray);
-            var hasSignal = false;
-            for (var sampleIndex = 0; sampleIndex < dataArray.length; sampleIndex++) {
-                if (dataArray[sampleIndex] > 0) {
-                    hasSignal = true;
-                    break;
-                }
-            }
-            if (!hasAnalyserData || !hasSignal) {
-                fillFallbackFrequencyData();
+            if (!hasAnalyserData) {
+                dataArray.fill(0);
             }
 
             var width = canvas.clientWidth;

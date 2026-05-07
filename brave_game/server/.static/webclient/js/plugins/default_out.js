@@ -4115,7 +4115,10 @@ let defaultout_plugin = (function () {
                 return;
             }
             currentMovieVisualizerFrame = window.requestAnimationFrame(render);
-            braveAudio.getByteFrequencyData(dataArray);
+            var hasAnalyserData = braveAudio.getByteFrequencyData(dataArray);
+            if (!hasAnalyserData) {
+                dataArray.fill(0);
+            }
 
             var width = canvas.clientWidth;
             var height = canvas.clientHeight;
@@ -11123,6 +11126,8 @@ let defaultout_plugin = (function () {
         root.style.zIndex = "2000"; // Ensure it is above the explore view
         root.innerHTML =
             "<div class='brave-movie-overlay__atmosphere'></div>"
+            + "<canvas class='brave-movie-visualizer' data-brave-movie-visualizer></canvas>"
+            + "<div class='brave-movie-overlay__grain'></div>"
             + "<section class='brave-movie-overlay__panel' role='dialog' aria-modal='true' tabindex='0'>"
             + "<div class='brave-movie-overlay__topbar'>"
             + "<div class='brave-movie-overlay__now'>Now Showing</div>"
@@ -11157,6 +11162,10 @@ let defaultout_plugin = (function () {
             }, 9500);
         }
         currentMovieProgressTimer = window.setInterval(updateMovieProgress, 1000);
+        var visualizerCanvas = root.querySelector("[data-brave-movie-visualizer]");
+        if (visualizerCanvas) {
+            renderMovieVisualizer(visualizerCanvas);
+        }
         var panel = root.querySelector(".brave-movie-overlay__panel");
         if (panel && typeof panel.focus === "function") {
             panel.focus();
