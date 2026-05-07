@@ -4109,13 +4109,34 @@ let defaultout_plugin = (function () {
         var lastWidth = 0;
         var lastHeight = 0;
 
+        var fillFallbackFrequencyData = function () {
+            var elapsed = currentMovieOverlayState && currentMovieOverlayState.startedAt
+                ? (Date.now() - currentMovieOverlayState.startedAt) / 1000
+                : Date.now() / 1000;
+            for (var i = 0; i < dataArray.length; i++) {
+                var slow = Math.sin(elapsed * 1.8 + i * 0.28);
+                var quick = Math.sin(elapsed * 4.4 + i * 0.11);
+                dataArray[i] = Math.max(0, Math.min(255, Math.round(64 + slow * 38 + quick * 18)));
+            }
+        };
+
         var render = function () {
             if (!currentMovieOverlayState || !document.contains(canvas)) {
                 currentMovieVisualizerFrame = null;
                 return;
             }
             currentMovieVisualizerFrame = window.requestAnimationFrame(render);
-            braveAudio.getByteFrequencyData(dataArray);
+            var hasAnalyserData = braveAudio.getByteFrequencyData(dataArray);
+            var hasSignal = false;
+            for (var sampleIndex = 0; sampleIndex < dataArray.length; sampleIndex++) {
+                if (dataArray[sampleIndex] > 0) {
+                    hasSignal = true;
+                    break;
+                }
+            }
+            if (!hasAnalyserData || !hasSignal) {
+                fillFallbackFrequencyData();
+            }
 
             var width = canvas.clientWidth;
             var height = canvas.clientHeight;
@@ -11123,6 +11144,8 @@ let defaultout_plugin = (function () {
         root.style.zIndex = "2000"; // Ensure it is above the explore view
         root.innerHTML =
             "<div class='brave-movie-overlay__atmosphere'></div>"
+            + "<canvas class='brave-movie-visualizer' data-brave-movie-visualizer></canvas>"
+            + "<div class='brave-movie-overlay__grain'></div>"
             + "<section class='brave-movie-overlay__panel' role='dialog' aria-modal='true' tabindex='0'>"
             + "<div class='brave-movie-overlay__topbar'>"
             + "<div class='brave-movie-overlay__now'>Now Showing</div>"
@@ -11157,6 +11180,10 @@ let defaultout_plugin = (function () {
             }, 9500);
         }
         currentMovieProgressTimer = window.setInterval(updateMovieProgress, 1000);
+        var visualizerCanvas = root.querySelector("[data-brave-movie-visualizer]");
+        if (visualizerCanvas) {
+            renderMovieVisualizer(visualizerCanvas);
+        }
         var panel = root.querySelector(".brave-movie-overlay__panel");
         if (panel && typeof panel.focus === "function") {
             panel.focus();

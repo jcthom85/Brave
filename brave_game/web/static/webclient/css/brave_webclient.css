@@ -19330,6 +19330,26 @@ body.brave-character-load-transition-active .brave-pixel-particle {
     background: linear-gradient(90deg, var(--movie-red), var(--movie-gold));
 }
 
+.brave-movie-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: hidden;
+    background: linear-gradient(135deg, #05070a, #0c0c10, #080a0f);
+}
+
+.brave-movie-overlay__panel {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    width: 100%;
+    min-height: 100%;
+    outline: none;
+}
+
 .brave-picker-sheet__panel--movie-showing {
     overflow: hidden;
     background: linear-gradient(135deg, #05070a, #0c0c10, #080a0f) !important;
@@ -19345,7 +19365,7 @@ body.brave-character-load-transition-active .brave-pixel-particle {
     animation: brave-movie-grain 0.8s steps(10) infinite;
 }
 
-.brave-picker-sheet__panel--movie-showing .brave-movie-overlay__atmosphere {
+.brave-movie-overlay__atmosphere {
     position: absolute;
     inset: 0;
     z-index: 0;

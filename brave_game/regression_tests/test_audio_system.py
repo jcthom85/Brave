@@ -130,10 +130,10 @@ class AudioSystemFilesTests(unittest.TestCase):
 
         for snippet in (
             ".brave-movie-overlay",
-            ".brave-movie-overlay__screen",
+            ".brave-movie-visualizer",
             ".brave-movie-overlay__card-text",
             ".brave-movie-overlay__progress",
-            "@keyframes brave-movie-card-enter",
+            ".brave-movie-overlay__card-text--enter",
         ):
             self.assertIn(snippet, css_source)
 
@@ -144,7 +144,7 @@ class AudioSystemFilesTests(unittest.TestCase):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
         default_in_source = DEFAULT_IN_PATH.read_text(encoding="utf-8")
 
-        self.assertIn('brave_static_v="20260505movieview1"', base_template_source)
+        self.assertIn('brave_static_v="20260505movieview20"', base_template_source)
         self.assertIn("BRAVE_AUDIO_MANIFEST_URL", base_template_source)
         self.assertIn("webclient/js/brave_audio.js", base_template_source)
         self.assertLess(
@@ -187,8 +187,11 @@ class AudioSystemFilesTests(unittest.TestCase):
         self.assertIn("var renderMovieOverlay = function (payload) {", default_out_source)
         self.assertIn("var clearMovieOverlay = function () {", default_out_source)
         self.assertIn("data-brave-movie-command", default_out_source)
-        self.assertIn("renderMovieOverlay(movieAudioPayload)", default_out_source)
         self.assertIn("renderMovieOverlay(movieOverlayPayload)", default_out_source)
+        self.assertIn("fillFallbackFrequencyData", default_out_source)
+        self.assertIn("!hasAnalyserData || !hasSignal", default_out_source)
+        self.assertIn("<canvas class='brave-movie-visualizer' data-brave-movie-visualizer></canvas>", default_out_source)
+        self.assertIn("renderMovieVisualizer(visualizerCanvas);", default_out_source)
         self.assertIn('transitionReactive.scene = "combat";', default_out_source)
         self.assertIn("isTitleExperienceScene(currentReactiveState", audio_source)
         self.assertIn("var unlockPromise = null;", audio_source)
