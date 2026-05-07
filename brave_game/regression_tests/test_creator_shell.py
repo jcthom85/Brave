@@ -20,6 +20,8 @@ class CreatorShellTests(unittest.TestCase):
         self.assertIn("renderHealthPanel", source)
         self.assertIn("Agent Runs", source)
         self.assertIn("attachAgentRunsPanel", source)
+        self.assertIn("Ready To Publish", source)
+        self.assertIn("Published History", source)
         self.assertIn("/codex/runs?limit=20", source)
         self.assertIn("/codex/runs/${encodeURIComponent", source)
         self.assertIn("/review", source)

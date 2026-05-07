@@ -43,7 +43,17 @@
       .creator-incoming-card pre { display:block; min-height:90px; max-height:220px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
       .creator-agent-runs { display:grid; gap:10px; }
       .creator-agent-run-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+      .creator-agent-run-section { display:grid; gap:8px; grid-column:1/-1; }
+      .creator-agent-run-section details { display:grid; gap:8px; }
+      .creator-agent-run-section summary { cursor:pointer; font-weight:800; color:var(--ink,#1d2430); }
+      .creator-agent-run-section__head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; border-bottom:1px solid var(--line,#d9c8ac); padding-bottom:6px; }
+      .creator-agent-run-section__head strong { color:var(--ink,#1d2430); }
+      .creator-agent-run-section__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
       .creator-agent-run-card { text-align:left; border:1px solid var(--line,#d9c8ac); border-radius:12px; background:#fffdfa; padding:12px; display:grid; gap:6px; color:var(--ink,#1d2430); cursor:pointer; font:inherit; }
+      .creator-agent-run-card.is-ready { border-color:rgba(47,109,76,.36); background:#f2fbf4; }
+      .creator-agent-run-card.is-blocked { border-color:rgba(141,49,34,.36); background:#fff0ed; }
+      .creator-agent-run-card.is-published { opacity:.78; }
+      .creator-agent-run-card.is-noop { opacity:.68; }
       .creator-agent-run-card:hover,.creator-agent-run-card[aria-current="true"] { border-color:var(--accent,#8b4a29); background:#fff8f2; }
       .creator-agent-run-card strong { overflow-wrap:anywhere; }
       .creator-agent-run-card span,.creator-agent-run-meta { color:var(--muted,#6b6157); font-size:.9rem; line-height:1.35; }
@@ -52,7 +62,7 @@
       .creator-agent-run-detail textarea { width:100%; min-height:74px; }
       .creator-agent-run-status { display:inline-flex; width:max-content; border:1px solid var(--line,#d9c8ac); border-radius:999px; padding:4px 8px; background:#fff; font-size:.86rem; }
       @media (max-width:980px) { .creator-health-grid { grid-template-columns:1fr; } }
-      @media (max-width:980px) { .creator-agent-run-list { grid-template-columns:1fr; } }
+      @media (max-width:980px) { .creator-agent-run-list,.creator-agent-run-section__grid { grid-template-columns:1fr; } }
     `;
     document.head.appendChild(style);
   }
@@ -227,6 +237,37 @@
     return `${run.status || 'planned'} · ${count} mutation${count === 1 ? '' : 's'} · ${domains}`;
   }
 
+  function agentRunClass(run) {
+    if (Number(run.mutation_count || 0) === 0) return 'is-noop';
+    if (run.status === 'reviewed') return 'is-ready';
+    if (run.status === 'publish_blocked' || run.status === 'failed') return 'is-blocked';
+    if (run.status === 'published') return 'is-published';
+    return '';
+  }
+
+  function agentRunCard(run) {
+    const classes = ['creator-agent-run-card', agentRunClass(run)].filter(Boolean).join(' ');
+    return [
+      `<button type="button" class="${classes}" data-agent-run-id="${escapeHtml(run.run_id)}">`,
+      `<strong>${escapeHtml(run.instructions || run.run_id)}</strong>`,
+      `<span>${escapeHtml(summarizeRun(run))}</span>`,
+      `<span>Updated ${escapeHtml(run.updated_at || '-')}</span>`,
+      '</button>',
+    ].join('');
+  }
+
+  function agentRunSection(title, runs, options) {
+    const config = options || {};
+    if (!runs.length) return '';
+    const subtitle = config.subtitle ? `<span class="creator-agent-run-meta">${escapeHtml(config.subtitle)}</span>` : '';
+    const grid = `<div class="creator-agent-run-section__grid">${runs.map(agentRunCard).join('')}</div>`;
+    const heading = `<div class="creator-agent-run-section__head"><strong>${escapeHtml(title)}</strong>${subtitle}</div>`;
+    if (config.collapsed) {
+      return `<section class="creator-agent-run-section"><details><summary>${escapeHtml(title)} (${runs.length})</summary>${grid}</details></section>`;
+    }
+    return `<section class="creator-agent-run-section">${heading}${grid}</section>`;
+  }
+
   function runBuilderLinks(run) {
     const domains = run.touched_domains || [];
     const links = {
@@ -303,13 +344,18 @@
       panel.querySelector('[data-agent-run-detail]').innerHTML = '';
       return;
     }
-    list.innerHTML = runs.map((run) => [
-      `<button type="button" class="creator-agent-run-card" data-agent-run-id="${escapeHtml(run.run_id)}">`,
-      `<strong>${escapeHtml(run.instructions || run.run_id)}</strong>`,
-      `<span>${escapeHtml(summarizeRun(run))}</span>`,
-      `<span>Updated ${escapeHtml(run.updated_at || '-')}</span>`,
-      '</button>',
-    ].join('')).join('');
+    const ready = runs.filter((run) => run.status === 'reviewed' && Number(run.mutation_count || 0) > 0);
+    const blocked = runs.filter((run) => run.status === 'publish_blocked' || run.status === 'failed');
+    const active = runs.filter((run) => !['reviewed', 'publish_blocked', 'failed', 'published'].includes(run.status) && Number(run.mutation_count || 0) > 0);
+    const history = runs.filter((run) => run.status === 'published' && Number(run.mutation_count || 0) > 0);
+    const noops = runs.filter((run) => Number(run.mutation_count || 0) === 0);
+    list.innerHTML = [
+      agentRunSection('Ready To Publish', ready, { subtitle: 'Reviewed draft runs waiting for publish' }),
+      agentRunSection('Needs Attention', blocked, { subtitle: 'Failed or blocked runs' }),
+      agentRunSection('In Progress', active, { subtitle: 'Draft runs not reviewed yet' }),
+      agentRunSection('Published History', history, { collapsed: true }),
+      agentRunSection('No-Op / Scratch Runs', noops, { collapsed: true }),
+    ].join('') || '<div class="creator-agent-run-meta">No matching agent runs.</div>';
     list.querySelectorAll('[data-agent-run-id]').forEach((button) => {
       button.addEventListener('click', async () => {
         try {
