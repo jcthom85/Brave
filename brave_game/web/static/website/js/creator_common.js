@@ -41,6 +41,10 @@
       .creator-health-card.good { border-color:rgba(47,109,76,.28); background:#eef8f1; }
       .creator-health-card.bad { border-color:rgba(141,49,34,.28); background:#fff0ed; }
       .creator-health-actions span { display:block; margin-top:4px; }
+      .creator-readiness-detail { grid-column:1/-1; border:1px solid var(--line,#d9c8ac); border-radius:12px; background:#fffdfa; padding:12px; display:grid; gap:8px; }
+      .creator-readiness-detail h3 { margin:0; font-size:1rem; }
+      .creator-readiness-detail ul { margin:0; padding-left:20px; display:grid; gap:5px; color:var(--muted,#6b6157); }
+      .creator-readiness-detail a { color:var(--accent,#8b4a29); font-weight:700; }
       .creator-incoming-card pre { display:block; min-height:90px; max-height:220px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
       .creator-workflow details { border:1px solid var(--line,#d9c8ac); border-radius:12px; background:#fffdfa; padding:10px 12px; }
       .creator-workflow summary { cursor:pointer; font-weight:800; color:var(--ink,#1d2430); }
@@ -242,7 +246,21 @@
         tone: '',
       });
     }
-    grid.innerHTML = cards.map((card) => `<article class="creator-health-card ${card.tone || ''} ${card.title === 'Recommended Cleanup' ? 'creator-health-actions' : ''}"><strong>${card.href ? `<a href="${card.href}">${card.title}</a>` : card.title}</strong>${escapeHtml(card.meta).split('\n').map((line) => `<span>${line}</span>`).join('')}</article>`).join('');
+    const readinessDetails = (payload.readiness || [])
+      .map((section) => {
+        const issues = section.issues || [];
+        if (!issues.length) return '';
+        const title = section.label || section.key || 'Readiness';
+        const href = section.href || '#';
+        const items = issues.map((issue) => `<li>${escapeHtml(issue.message || issue)}</li>`).join('');
+        return `<section><h3><a href="${escapeHtml(href)}">${escapeHtml(title)}</a></h3><ul>${items}</ul></section>`;
+      })
+      .filter(Boolean)
+      .join('');
+    const detailHtml = readinessDetails
+      ? `<article class="creator-readiness-detail"><h3>Readiness Issues</h3>${readinessDetails}</article>`
+      : '';
+    grid.innerHTML = cards.map((card) => `<article class="creator-health-card ${card.tone || ''} ${card.title === 'Recommended Cleanup' ? 'creator-health-actions' : ''}"><strong>${card.href ? `<a href="${card.href}">${card.title}</a>` : card.title}</strong>${escapeHtml(card.meta).split('\n').map((line) => `<span>${line}</span>`).join('')}</article>`).join('') + detailHtml;
     return panel;
   }
 

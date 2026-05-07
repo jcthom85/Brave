@@ -21,6 +21,7 @@ class CreatorShellTests(unittest.TestCase):
         self.assertIn("Draft Actions", source)
         self.assertIn("Draft Health", source)
         self.assertIn("Recommended Cleanup", source)
+        self.assertIn("Readiness Issues", source)
         self.assertIn("Agent Runs", source)
         self.assertIn("attachAgentRunsPanel", source)
         self.assertIn("Ready To Publish", source)
