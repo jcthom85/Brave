@@ -129,6 +129,20 @@ def _readiness_sections(registry):
         referenced_items.update(reward.get("item") for reward in quest.get("rewards", {}).get("items", []) if reward.get("item"))
     for enemy in registry.encounters.enemy_templates.values():
         referenced_items.update(loot.get("item") for loot in enemy.get("loot", []) if loot.get("item"))
+    for entity in registry.world.entities:
+        for reward in (entity.get("arcade_rewards") or {}).values():
+            if isinstance(reward, dict) and reward.get("item"):
+                referenced_items.add(reward.get("item"))
+    for spot in registry.systems.fishing_spots.values():
+        for fish in spot.get("fish", []):
+            if fish.get("item"):
+                referenced_items.add(fish.get("item"))
+    for lure in registry.systems.fishing_lures.values():
+        referenced_items.update(lure.get("attracts", []) or [])
+    for shop in registry.systems.shops.values():
+        for stock in shop.get("stock", []):
+            if stock.get("item"):
+                referenced_items.add(stock.get("item"))
     for recipe in registry.systems.cooking_recipes.values():
         referenced_items.add(recipe.get("result"))
         referenced_items.update((recipe.get("ingredients") or {}).keys())
