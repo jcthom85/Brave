@@ -66,6 +66,7 @@ def _content_counts(registry):
         "tinkering_recipes": len(registry.systems.tinkering_recipes),
         "fishing_spots": len(registry.systems.fishing_spots),
         "boss_gates": len(registry.systems.boss_gates),
+        "shops": len(registry.systems.shops),
     }
 
 

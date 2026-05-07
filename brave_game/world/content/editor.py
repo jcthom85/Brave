@@ -466,6 +466,17 @@ class ContentEditor:
 
         return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="upsert", target=trophy_key)
 
+    def upsert_shop(self, shop_key, shop_data, *, write=False, stage="live", author="system"):
+        def updater(payload):
+            commerce = dict(payload.get("commerce", {}))
+            shops = dict(commerce.get("shops", {}))
+            shops[shop_key] = dict(shop_data)
+            commerce["shops"] = dict(sorted(shops.items()))
+            payload["commerce"] = commerce
+            return payload
+
+        return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="upsert", target=shop_key)
+
     def delete_room(self, room_id, *, write=False, stage="live", author="system"):
         def updater(payload):
             payload["rooms"] = [room for room in payload.get("rooms", []) if room.get("id") != room_id]
@@ -636,6 +647,17 @@ class ContentEditor:
             return payload
 
         return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="remove", target=trophy_key)
+
+    def delete_shop(self, shop_key, *, write=False, stage="live", author="system"):
+        def updater(payload):
+            commerce = dict(payload.get("commerce", {}))
+            shops = dict(commerce.get("shops", {}))
+            shops.pop(shop_key, None)
+            commerce["shops"] = dict(sorted(shops.items()))
+            payload["commerce"] = commerce
+            return payload
+
+        return self.apply_pack_update("systems", updater, write=write, stage=stage, author=author, action="remove", target=shop_key)
 
     def _upsert_activities_mapping(self, mapping_key, entry_key, entry_data, *, write=False, stage="live", author="system"):
         def updater(payload):

@@ -4218,6 +4218,99 @@ let defaultout_plugin = (function () {
         );
     };
 
+    var clampPickerQuantity = function (value, control) {
+        var min = Number(control && typeof control.min !== "undefined" ? control.min : 1);
+        var max = Number(control && typeof control.max !== "undefined" ? control.max : min);
+        var parsed = Number(value);
+        if (!Number.isFinite(min)) {
+            min = 1;
+        }
+        if (!Number.isFinite(max)) {
+            max = min;
+        }
+        if (max < min) {
+            max = min;
+        }
+        if (!Number.isFinite(parsed)) {
+            parsed = min;
+        }
+        return Math.max(min, Math.min(max, Math.round(parsed)));
+    };
+
+    var pickerQuantityCommand = function (control, quantity) {
+        var template = control && control.command_template ? String(control.command_template) : "";
+        if (!template) {
+            return "";
+        }
+        return template.replace(/\{quantity\}/g, String(quantity));
+    };
+
+    var syncPickerQuantityControl = function (root) {
+        var container = root && root.closest ? root.closest("[data-brave-picker-quantity-control]") : null;
+        if (!container) {
+            container = document.querySelector("[data-brave-picker-quantity-control]");
+        }
+        if (!container) {
+            return;
+        }
+        var control;
+        try {
+            control = JSON.parse(container.getAttribute("data-brave-picker-quantity-control") || "{}");
+        } catch (_err) {
+            control = {};
+        }
+        var valueNode = container.querySelector("[data-brave-picker-quantity-value]");
+        var totalNode = container.querySelector("[data-brave-picker-quantity-total]");
+        var confirmButton = container.querySelector("[data-brave-picker-quantity-confirm]");
+        var quantity = clampPickerQuantity(container.getAttribute("data-brave-picker-quantity-current"), control);
+        var min = clampPickerQuantity(control.min, control);
+        var max = clampPickerQuantity(control.max, control);
+        var unitPrice = Number(control.unit_price || 0);
+        var disabled = !!control.disabled || max <= 0;
+        container.setAttribute("data-brave-picker-quantity-current", String(quantity));
+        if (valueNode) {
+            valueNode.textContent = String(quantity);
+        }
+        Array.prototype.forEach.call(container.querySelectorAll("[data-brave-picker-quantity-adjust]"), function (button) {
+            var delta = Number(button.getAttribute("data-brave-picker-quantity-adjust") || 0);
+            button.disabled = disabled || (delta < 0 && quantity <= min) || (delta > 0 && quantity >= max);
+        });
+        if (totalNode) {
+            totalNode.textContent = String((unitPrice || 0) * quantity) + " silver";
+        }
+        if (confirmButton) {
+            confirmButton.disabled = disabled;
+            confirmButton.setAttribute("data-brave-picker-quantity-command", pickerQuantityCommand(control, quantity));
+        }
+    };
+
+    var renderPickerQuantityControl = function (control) {
+        if (!control) {
+            return "";
+        }
+        var initial = clampPickerQuantity(control.initial, control);
+        var disabled = !!control.disabled || Number(control.max || 0) <= 0;
+        return (
+            "<div class='brave-picker-quantity' data-brave-picker-quantity-current='" + escapeHtml(String(initial)) + "' data-brave-picker-quantity-control='" + escapeHtml(JSON.stringify(control)) + "'>"
+            + "<div class='brave-picker-quantity__label'>" + escapeHtml(control.label || "Quantity") + "</div>"
+            + "<div class='brave-picker-quantity__stepper' role='group' aria-label='" + escapeHtml(control.label || "Quantity") + "'>"
+            + "<button type='button' class='brave-picker-quantity__button brave-click' data-brave-picker-quantity-adjust='-1' aria-label='Decrease quantity'" + (disabled ? " disabled" : "") + ">"
+            + icon("remove")
+            + "</button>"
+            + "<div class='brave-picker-quantity__value' data-brave-picker-quantity-value='1'>" + escapeHtml(String(initial)) + "</div>"
+            + "<button type='button' class='brave-picker-quantity__button brave-click' data-brave-picker-quantity-adjust='1' aria-label='Increase quantity'" + (disabled ? " disabled" : "") + ">"
+            + icon("add")
+            + "</button>"
+            + "</div>"
+            + "<div class='brave-picker-quantity__total'><span>" + escapeHtml(control.total_label || "Total") + "</span><strong data-brave-picker-quantity-total='1'>" + escapeHtml(String((Number(control.unit_price || 0) || 0) * initial)) + " silver</strong></div>"
+            + "<button type='button' class='brave-picker-quantity__confirm brave-view__action brave-view__action--accent brave-click' data-brave-picker-quantity-confirm='1'" + (disabled ? " disabled" : "") + ">"
+            + icon(control.action_icon || "task_alt", "brave-view__action-icon")
+            + "<span>" + escapeHtml(control.action_label || "Confirm") + "</span>"
+            + "</button>"
+            + "</div>"
+        );
+    };
+
     var renderPickerSheet = function () {
         var host = document.getElementById("brave-picker-sheet");
         var pickerData = currentPickerData;
@@ -4240,6 +4333,7 @@ let defaultout_plugin = (function () {
             || (
                 !pickerOptions.length
                 && !pickerBody.length
+                && !pickerData.quantity_control
                 && pickerData.picker_kind !== "audio-settings"
                 && pickerData.picker_kind !== "video-settings"
                 && pickerData.picker_kind !== "accessibility-settings"
@@ -4275,6 +4369,10 @@ let defaultout_plugin = (function () {
         } else {
             var titleRarityClass = pickerData && pickerData.rarity_tone && pickerData.rarity_target !== "subtitle" ? " brave-rarity-name brave-rarity-name--" + escapeHtml(pickerData.rarity_tone) : "";
             var subtitleRarityClass = pickerData && pickerData.rarity_tone && pickerData.rarity_target === "subtitle" ? " brave-rarity-name brave-rarity-name--" + escapeHtml(pickerData.rarity_tone) : "";
+            var titleItemRarityClass = pickerData && pickerData.rarity_tone && pickerData.rarity_target === "title_item" ? " brave-rarity-name brave-rarity-name--" + escapeHtml(pickerData.rarity_tone) : "";
+            var titleMarkup = pickerData && pickerData.title_item
+                ? escapeHtml(pickerData.title_prefix || "") + (pickerData.title_prefix ? " " : "") + "<span class='" + titleItemRarityClass + "'>" + escapeHtml(pickerData.title_item) + "</span>"
+                : escapeHtml(pickerData.title || "");
             var renderPickerChip = function (entry) {
                 var tone = entry && entry.tone ? "scene-card__chip--" + escapeHtml(entry.tone) : "";
                 return chip(entry && entry.label ? entry.label : "", entry && entry.icon ? entry.icon : "label", tone);
@@ -4285,7 +4383,7 @@ let defaultout_plugin = (function () {
                 + "<div class='brave-picker-sheet__head'>"
                 + "<div class='brave-picker-sheet__titlebar'>"
                 + (pickerData.title_icon ? "<span class='brave-picker-sheet__title-icon'>" + icon(pickerData.title_icon) + "</span>" : "")
-                + "<div class='brave-picker-sheet__title" + titleRarityClass + "'>" + escapeHtml(pickerData.title || "") + "</div>"
+                + "<div class='brave-picker-sheet__title" + (pickerData.title_item ? "" : titleRarityClass) + "'>" + titleMarkup + "</div>"
                 + "<button type='button' class='brave-picker-sheet__close brave-view__action brave-view__action--muted brave-view__back' data-brave-picker-close='1'>"
                 + icon("close", "brave-view__action-icon")
                 + "<span>Close</span>"
@@ -4308,6 +4406,7 @@ let defaultout_plugin = (function () {
                         }).join("")
                         + "</div>"
                     : "")
+                + renderPickerQuantityControl(pickerData.quantity_control)
                 + (pickerOptions.length
                     ? "<div class='brave-picker-sheet__options'>"
                         + pickerOptions.map(function (option) {
@@ -4333,6 +4432,7 @@ let defaultout_plugin = (function () {
         }
         host.setAttribute("aria-hidden", "false");
         document.body.classList.add("brave-picker-active");
+        syncPickerQuantityControl(host);
     };
 
     var openPickerSheet = function (pickerData) {
@@ -4345,13 +4445,14 @@ let defaultout_plugin = (function () {
             )
         );
         if (
-            !pickerData
-            || (
-                !hasOptions
-                && !hasBody
-                && pickerData.picker_kind !== "audio-settings"
-                && pickerData.picker_kind !== "video-settings"
-                && pickerData.picker_kind !== "accessibility-settings"
+                !pickerData
+                || (
+                    !hasOptions
+                    && !hasBody
+                    && !pickerData.quantity_control
+                    && pickerData.picker_kind !== "audio-settings"
+                    && pickerData.picker_kind !== "video-settings"
+                    && pickerData.picker_kind !== "accessibility-settings"
             )
         ) {
             return false;
@@ -5173,6 +5274,8 @@ let defaultout_plugin = (function () {
     };
 
     var MATERIAL_ICON_MAP = {
+        "add": "add",
+        "remove": "remove",
         "movie": "movie",
         "movie_creation": "movie_creation",
         "theaters": "theaters",
@@ -12001,6 +12104,118 @@ let defaultout_plugin = (function () {
         return true;
     };
 
+    var closestFromEventTarget = function (event, selector) {
+        var target = event && event.target;
+        if (!target) {
+            return null;
+        }
+        if (typeof target.closest === "function") {
+            return target.closest(selector);
+        }
+        if (target.parentElement && typeof target.parentElement.closest === "function") {
+            return target.parentElement.closest(selector);
+        }
+        return null;
+    };
+
+    var claimBrowserInteractionEvent = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof event.stopImmediatePropagation === "function") {
+            event.stopImmediatePropagation();
+        }
+    };
+
+    var handleBrowserInteractionEvent = function (event) {
+        var quantityAdjustTarget = closestFromEventTarget(event, "[data-brave-picker-quantity-adjust]");
+        if (quantityAdjustTarget) {
+            var quantityContainer = quantityAdjustTarget.closest("[data-brave-picker-quantity-control]");
+            if (quantityContainer) {
+                claimBrowserInteractionEvent(event);
+                var controlData;
+                try {
+                    controlData = JSON.parse(quantityContainer.getAttribute("data-brave-picker-quantity-control") || "{}");
+                } catch (_err) {
+                    controlData = {};
+                }
+                var currentQuantity = clampPickerQuantity(quantityContainer.getAttribute("data-brave-picker-quantity-current"), controlData);
+                var nextQuantity = currentQuantity + Number(quantityAdjustTarget.getAttribute("data-brave-picker-quantity-adjust") || 0);
+                quantityContainer.setAttribute("data-brave-picker-quantity-current", String(clampPickerQuantity(nextQuantity, controlData)));
+                playUiSound("select");
+                syncPickerQuantityControl(quantityContainer);
+                return true;
+            }
+        }
+
+        var quantityConfirmTarget = closestFromEventTarget(event, "[data-brave-picker-quantity-confirm]");
+        if (quantityConfirmTarget) {
+            claimBrowserInteractionEvent(event);
+            if (quantityConfirmTarget.disabled) {
+                playUiSound("error");
+                return true;
+            }
+            sendBrowserCommand(quantityConfirmTarget.getAttribute("data-brave-picker-quantity-command"));
+            return true;
+        }
+
+        var pickerCloseTarget = closestFromEventTarget(event, "[data-brave-picker-close]");
+        if (pickerCloseTarget) {
+            claimBrowserInteractionEvent(event);
+            playUiSound("close");
+            clearPickerSheet();
+            return true;
+        }
+
+        var suppressibleTarget = closestFromEventTarget(event, "[data-brave-command], [data-brave-prefill], [data-brave-picker], [data-brave-connection-screen], [data-brave-combat-tab]");
+        if (Date.now() < suppressBrowserClickUntil && suppressibleTarget) {
+            claimBrowserInteractionEvent(event);
+            return true;
+        }
+
+        var combatTabTarget = closestFromEventTarget(event, "[data-brave-combat-tab]");
+        if (combatTabTarget) {
+            claimBrowserInteractionEvent(event);
+            if (combatTabTarget.disabled) {
+                playUiSound("error");
+                return true;
+            }
+            playUiSound("select");
+            currentCombatActionTab = combatTabTarget.getAttribute("data-brave-combat-tab") || "abilities";
+            syncCombatActionTray();
+            return true;
+        }
+
+        var target = closestFromEventTarget(event, "[data-brave-command], [data-brave-prefill], [data-brave-picker], [data-brave-connection-screen]");
+        if (!target) {
+            return false;
+        }
+        claimBrowserInteractionEvent(event);
+        if (target.hasAttribute("data-brave-connection-screen")) {
+            playTitleMenuSound();
+            openConnectionScreen(target.getAttribute("data-brave-connection-screen"));
+            return true;
+        }
+        if (target.hasAttribute("data-brave-picker")) {
+            playUiSound("menu");
+            if (isMobileViewport()) {
+                currentMobileUtilityTab = null;
+                currentMobileUtilityPresentation = "sheet";
+                clearMobileUtilitySheet();
+                renderMobileNavDock();
+            }
+            openPickerFromTarget(target);
+            return true;
+        }
+        if (target.hasAttribute("data-brave-prefill")) {
+            clearPickerSheet();
+            playUiSound("select");
+            prefillBrowserInput(target.getAttribute("data-brave-prefill"));
+            return true;
+        }
+        sendBrowserCommand(target.getAttribute("data-brave-command"), target.getAttribute("data-brave-confirm"));
+        return true;
+    };
+
     var bindBrowserInteractionHandlers = function () {
         if (browserInteractionHandlersBound) {
             return;
@@ -12008,7 +12223,13 @@ let defaultout_plugin = (function () {
         browserInteractionHandlersBound = true;
 
         document.addEventListener("click", function (event) {
-            var pickerTarget = event.target.closest("[data-brave-picker]");
+            if (handleBrowserInteractionEvent(event)) {
+                return;
+            }
+        }, true);
+
+        document.addEventListener("click", function (event) {
+            var pickerTarget = closestFromEventTarget(event, "[data-brave-picker]");
             if (!pickerTarget || pickerTarget.closest("#brave-picker-sheet")) {
                 return;
             }
@@ -12075,6 +12296,37 @@ let defaultout_plugin = (function () {
                     submitBrowserForm(submitForm);
                     return;
                 }
+            }
+            var quantityAdjustTarget = event.target.closest("[data-brave-picker-quantity-adjust]");
+            if (quantityAdjustTarget) {
+                var quantityContainer = quantityAdjustTarget.closest("[data-brave-picker-quantity-control]");
+                if (quantityContainer) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    var controlData;
+                    try {
+                        controlData = JSON.parse(quantityContainer.getAttribute("data-brave-picker-quantity-control") || "{}");
+                    } catch (_err) {
+                        controlData = {};
+                    }
+                    var currentQuantity = clampPickerQuantity(quantityContainer.getAttribute("data-brave-picker-quantity-current"), controlData);
+                    var nextQuantity = currentQuantity + Number(quantityAdjustTarget.getAttribute("data-brave-picker-quantity-adjust") || 0);
+                    quantityContainer.setAttribute("data-brave-picker-quantity-current", String(clampPickerQuantity(nextQuantity, controlData)));
+                    playUiSound("select");
+                    syncPickerQuantityControl(quantityContainer);
+                    return;
+                }
+            }
+            var quantityConfirmTarget = event.target.closest("[data-brave-picker-quantity-confirm]");
+            if (quantityConfirmTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (quantityConfirmTarget.disabled) {
+                    playUiSound("error");
+                    return;
+                }
+                sendBrowserCommand(quantityConfirmTarget.getAttribute("data-brave-picker-quantity-command"));
+                return;
             }
             var pickerCloseTarget = event.target.closest("[data-brave-picker-close]");
             if (pickerCloseTarget) {
@@ -12434,6 +12686,14 @@ let defaultout_plugin = (function () {
                 + ".brave-view__entry--button[data-brave-prefill], "
                 + ".brave-view__entry--button[data-brave-picker], "
                 + ".brave-view__entry--button[data-brave-connection-screen], "
+                + ".brave-view__entry[data-brave-command], "
+                + ".brave-view__entry[data-brave-prefill], "
+                + ".brave-view__entry[data-brave-picker], "
+                + ".brave-view__entry[data-brave-connection-screen], "
+                + ".brave-view__action[data-brave-command], "
+                + ".brave-view__action[data-brave-prefill], "
+                + ".brave-view__action[data-brave-picker], "
+                + ".brave-view__action[data-brave-connection-screen], "
                 + ".brave-view__mini-action[data-brave-command], "
                 + ".brave-view__mini-action[data-brave-prefill], "
                 + ".brave-view__mini-action[data-brave-picker], "
@@ -12580,6 +12840,10 @@ let defaultout_plugin = (function () {
                     + ".brave-view__entry--button[data-brave-prefill], "
                     + ".brave-view__entry--button[data-brave-picker], "
                     + ".brave-view__entry--button[data-brave-connection-screen], "
+                    + ".brave-view__action[data-brave-command], "
+                    + ".brave-view__action[data-brave-prefill], "
+                    + ".brave-view__action[data-brave-picker], "
+                    + ".brave-view__action[data-brave-connection-screen], "
                     + ".brave-view__mini-action[data-brave-command], "
                     + ".brave-view__mini-action[data-brave-prefill], "
                     + ".brave-view__mini-action[data-brave-picker], "

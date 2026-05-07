@@ -165,7 +165,7 @@ class Character(ObjectParent, DefaultCharacter):
                 handle_party_follow(self, source_location, move_type=move_type)
 
     def at_pre_move(self, destination, **kwargs):
-        if kwargs.get("move_type") not in {"defeat", "flee"}:
+        if kwargs.get("move_type") not in {"defeat", "flee", "bossgate"}:
             encounter = self.get_active_encounter()
             if encounter and encounter.is_participant(self):
                 self.msg("You can't leave in the middle of a fight.")

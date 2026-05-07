@@ -251,8 +251,30 @@ def _validate_encounter_content(registry, errors):
     world = registry.world
     encounters = registry.encounters
     room_ids = {room.get("id") for room in world.rooms}
+    required_enemy_numeric_fields = {
+        "accuracy": True,
+        "armor": False,
+        "attack_power": True,
+        "dodge": False,
+        "max_hp": True,
+        "xp": True,
+    }
 
     for template_key, template in encounters.enemy_templates.items():
+        if not str(template.get("name") or "").strip():
+            errors.append(f"Enemy {template_key} is missing a name")
+        tags = template.get("tags")
+        if not isinstance(tags, list) or not tags:
+            errors.append(f"Enemy {template_key} must define at least one tag")
+        for field_name, must_be_positive in required_enemy_numeric_fields.items():
+            value = template.get(field_name)
+            if not isinstance(value, (int, float)):
+                errors.append(f"Enemy {template_key} is missing numeric {field_name}")
+                continue
+            if must_be_positive and value <= 0:
+                errors.append(f"Enemy {template_key} must have positive {field_name}")
+            elif not must_be_positive and value < 0:
+                errors.append(f"Enemy {template_key} must have nonnegative {field_name}")
         if template.get("gender") and normalize_brave_gender(template.get("gender")) not in VALID_BRAVE_GENDERS:
             errors.append(f"Enemy {template_key} uses an invalid gender: {template.get('gender')}")
         for drop in template.get("loot", []):
@@ -471,6 +493,32 @@ def _validate_systems_content(registry, errors):
 
     if systems.outfitters_room_id and systems.outfitters_room_id not in room_ids:
         errors.append(f"Commerce references unknown outfitters room: {systems.outfitters_room_id}")
+
+    entity_ids = {entity.get("id") for entity in world.entities if entity.get("id")}
+    for shop_key, shop in systems.shops.items():
+        room_id = shop.get("room_id")
+        if not room_id:
+            errors.append(f"Shop {shop_key} is missing room_id")
+        elif room_id not in room_ids:
+            errors.append(f"Shop {shop_key} references unknown room: {room_id}")
+        keeper_id = shop.get("keeper_entity_id")
+        if keeper_id and keeper_id not in entity_ids:
+            errors.append(f"Shop {shop_key} references unknown keeper entity: {keeper_id}")
+        buys_kinds = shop.get("buys_kinds", [])
+        if buys_kinds is not None and not isinstance(buys_kinds, list):
+            errors.append(f"Shop {shop_key} buys_kinds must be a list")
+        if shop.get("sell_price_multiplier", 1.0) is not None and not _nonnegative_number(shop.get("sell_price_multiplier", 1.0)):
+            errors.append(f"Shop {shop_key} sell_price_multiplier must be nonnegative")
+        for index, stock in enumerate(shop.get("stock", []) or []):
+            item_id = stock.get("item")
+            if item_id not in items.item_templates:
+                errors.append(f"Shop {shop_key} stock {index + 1} references unknown item: {item_id}")
+            price = stock.get("price")
+            if not isinstance(price, int) or price <= 0:
+                errors.append(f"Shop {shop_key} stock {index + 1} must have positive integer price")
+            for quest_key in stock.get("unlock_completed_quests", []) or []:
+                if quest_key not in quests.quests:
+                    errors.append(f"Shop {shop_key} stock {index + 1} references unknown unlock quest: {quest_key}")
 
     if systems.forge_room_id and systems.forge_room_id not in room_ids:
         errors.append(f"Forging references unknown forge room: {systems.forge_room_id}")

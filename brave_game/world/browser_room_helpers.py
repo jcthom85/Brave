@@ -2,10 +2,12 @@
 
 from world.activities import room_supports_activity
 from world.chapel import get_active_blessing, is_chapel_room
+from world.content import get_content_registry
 from world.interactions import get_entity_response
 from world.movies import build_movie_picker, is_movie_theater_room
 from world.party import get_follow_target, get_party_leader, get_party_members
 from world.resting import room_allows_rest
+from world.commerce import is_shop_room
 from world.browser_ui import (
     _action,
     _display_name,
@@ -34,7 +36,12 @@ def _build_talk_actions(target):
     actions = []
     entity_id = getattr(getattr(target, "db", None), "brave_entity_id", None)
 
-    if entity_id == "leda_thornwick":
+    shop_keepers = {
+        shop.get("keeper_entity_id")
+        for shop in getattr(get_content_registry().systems, "shops", {}).values()
+        if shop.get("keeper_entity_id")
+    }
+    if entity_id == "leda_thornwick" or entity_id in shop_keepers:
         actions.append(_action("Open Shop", "shop", "storefront", tone="accent"))
     elif entity_id == "torren_ironroot":
         actions.append(_action("Open Forge", "forge", "construction", tone="accent"))
@@ -51,6 +58,9 @@ def _build_world_interaction_picker(viewer, target):
     title = _display_name(target) or getattr(target, "key", "Details")
 
     if kind == "npc":
+        viewer_db = getattr(viewer, "db", None)
+        if viewer_db is not None and not hasattr(viewer_db, "brave_quests"):
+            viewer_db.brave_quests = {}
         response = get_entity_response(viewer, target, "talk")
         body = [line.strip() for line in str(response or "").splitlines() if line.strip()]
         if not body:
@@ -547,6 +557,9 @@ def _format_room_context_action_items(room, viewer):
 
     if local_arcades:
         items.append(_item("Play", icon="sports_esports", command="arcade"))
+
+    if is_shop_room(room):
+        items.append(_item("Shop", icon="storefront", command="shop"))
 
     if room_supports_activity(room, "fishing"):
         fishing_state = getattr(getattr(viewer, "ndb", None), "brave_fishing", None) or {}

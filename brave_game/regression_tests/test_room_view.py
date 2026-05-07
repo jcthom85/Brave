@@ -220,6 +220,24 @@ class RoomViewTests(unittest.TestCase):
         )
         self.assertEqual("sports_esports", room_actions[1].get("icon"))
 
+    def test_room_view_surfaces_shop_as_room_action_in_shop_room(self):
+        room = DummyRoom()
+        room.db.brave_rest_allowed = False
+        room.db.brave_room_id = "brambleford_outfitters"
+
+        view = build_room_view(room, DummyCharacter())
+        room_actions = view.get("room_actions", [])
+
+        self.assertEqual(
+            ["Shop", "Emote"],
+            [item.get("text") for item in room_actions],
+        )
+        self.assertEqual(
+            ["shop", None],
+            [item.get("command") for item in room_actions],
+        )
+        self.assertEqual("storefront", room_actions[0].get("icon"))
+
     def test_room_view_keeps_hearth_and_trainer_as_world_interactions(self):
         room = DummyRoom()
         viewer = DummyCharacter()

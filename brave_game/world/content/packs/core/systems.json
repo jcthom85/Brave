@@ -615,33 +615,41 @@
       "max_participants": 4,
       "name": "Ruk the Fence-Cutter",
       "requires_personal_clear": true,
-      "success_room_id": "goblin_warrens_sinkmouth_cut",
+      "success_room_id": "goblin_road_fencebreaker_camp",
       "summary": "A hard encounter guards the road beyond Fencebreaker Camp.",
       "trigger_room_id": "goblin_road_fencebreaker_camp"
     }
   },
   "commerce": {
     "outfitters_room_id": "brambleford_outfitters",
-    "shift_outcomes": [
-      {
-        "bonus_pct": 10,
-        "name": "Counter Rhythm",
-        "sales_left": 3,
-        "text": "You spend a while sorting boots by size, straightening cloak pegs, and handing out rope without letting anyone call it an adventure tax. Leda nods once. That counts as praise."
-      },
-      {
-        "bonus_pct": 15,
-        "name": "Sharp Eye",
-        "sales_left": 3,
-        "text": "You help fit a farmer's boy for rain gear, catch a split seam before it becomes an argument, and steer two customers toward sturdier travel kit. Leda's pricing chalk looks friendlier after that."
-      },
-      {
-        "bonus_pct": 20,
-        "name": "Shopkeeper's Eye",
-        "sales_left": 3,
-        "text": "You talk one anxious traveler out of the wrong boots, find the exact strap a scout came in for, and keep the front counter moving without losing track of a single order. Leda decides you can be trusted with margins."
+    "shift_outcomes": [],
+    "shops": {
+      "brambleford_outfitters": {
+        "buys_kinds": [
+          "loot",
+          "ingredient",
+          "consumable",
+          "meal",
+          "equipment"
+        ],
+        "keeper_entity_id": "leda_thornwick",
+        "name": "Brambleford Outfitters",
+        "room_id": "brambleford_outfitters",
+        "sell_price_multiplier": 1.0,
+        "shift_outcomes": [],
+        "stock": [
+          {
+            "item": "field_bandage",
+            "price": 12
+          },
+          {
+            "item": "trail_knife",
+            "price": 18
+          }
+        ],
+        "summary": "Leda buys practical finds and pays in clean town silver."
       }
-    ]
+    }
   },
   "forging": {
     "forge_recipes": {

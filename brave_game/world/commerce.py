@@ -1,31 +1,81 @@
-"""Town commerce helpers for Brambleford Outfitters."""
-
-import random
+"""Town commerce helpers for configurable Brave shops."""
 
 from world.content import get_content_registry
-from world.data.items import ITEM_TEMPLATES
-from world.race_world_hooks import get_shift_sales_bonus
 
-CONTENT = get_content_registry()
-QUESTS = CONTENT.quests.quests
-SYSTEMS_CONTENT = CONTENT.systems
-OUTFITTERS_ROOM_ID = SYSTEMS_CONTENT.outfitters_room_id
-SHIFT_OUTCOMES = list(SYSTEMS_CONTENT.shift_outcomes)
+
+def _registry():
+    return get_content_registry()
+
+
+def _items():
+    return _registry().items.item_templates
+
+
+def _quests():
+    return _registry().quests.quests
+
+
+def _systems():
+    return _registry().systems
+
+
+def _fallback_outfitters_shop():
+    return {
+        "name": "Brambleford Outfitters",
+        "room_id": _systems().outfitters_room_id,
+        "keeper_entity_id": "leda_thornwick",
+        "summary": "Leda buys practical finds and pays in clean town silver.",
+        "buys_kinds": ["loot", "ingredient", "consumable", "meal", "equipment"],
+        "sell_price_multiplier": 1.0,
+        "shift_outcomes": [],
+        "stock": [],
+    }
+
+
+def _all_shops():
+    systems = _systems()
+    shops = dict(getattr(systems, "shops", {}) or {})
+    if "brambleford_outfitters" not in shops and systems.outfitters_room_id:
+        shops["brambleford_outfitters"] = _fallback_outfitters_shop()
+    return shops
+
+
+def get_shop(shop_id):
+    """Return a configured shop by id."""
+
+    return _all_shops().get(shop_id)
+
+
+def get_shop_for_room(room):
+    """Return ``(shop_id, shop_data)`` for the character's current room."""
+
+    room_id = getattr(getattr(room, "db", None), "brave_room_id", None) if room else None
+    if not room_id:
+        return None, None
+    for shop_id, shop in _all_shops().items():
+        if shop.get("room_id") == room_id:
+            return shop_id, shop
+    return None, None
+
+
+def is_shop_room(room):
+    """Return whether the given room hosts a configured shop."""
+
+    _shop_id, shop = get_shop_for_room(room)
+    return bool(shop)
 
 
 def is_outfitters_room(room):
-    """Return whether the given room is Brambleford Outfitters."""
+    """Return whether the given room is the configured Outfitters shop."""
 
-    return getattr(room.db, "brave_room_id", None) == OUTFITTERS_ROOM_ID if room else False
+    shop_id, _shop = get_shop_for_room(room)
+    return shop_id == "brambleford_outfitters" if shop_id else False
 
 
-def get_shop_bonus(character):
+def get_shop_bonus(character, shop_id=None):
     """Return the current active merchant bonus, if any."""
 
-    bonus = dict(character.db.brave_shop_bonus or {})
-    if bonus.get("bonus_pct", 0) <= 0 or bonus.get("sales_left", 0) <= 0:
-        return {}
-    return bonus
+    return {}
 
 
 def clear_shop_bonus(character):
@@ -37,22 +87,25 @@ def clear_shop_bonus(character):
 def format_shop_bonus(bonus):
     """Return a readable merchant-bonus summary."""
 
-    if not bonus:
-        return "No current merchant bonus."
-    sales_left = bonus.get("sales_left", 0)
-    label = "sale" if sales_left == 1 else "sales"
-    return f"{bonus.get('name', 'Merchant Bonus')} (+{bonus['bonus_pct']}% on next {sales_left} {label})"
+    return "No current merchant bonus."
 
 
-def get_sale_price(template_id, quantity=1, bonus_pct=0):
+def get_sale_price(template_id, quantity=1, bonus_pct=0, shop=None):
     """Return the silver payout for an item sale."""
 
-    template = ITEM_TEMPLATES.get(template_id, {})
+    template = _items().get(template_id, {})
     value = template.get("value", 0)
     if quantity <= 0 or value <= 0:
         return 0
-    multiplier = (100 + max(0, bonus_pct)) / 100.0
-    return max(1, int(round(value * quantity * multiplier)))
+    shop_multiplier = float((shop or {}).get("sell_price_multiplier", 1.0) or 1.0)
+    return max(1, int(round(value * quantity * shop_multiplier)))
+
+
+def _shop_buys_item(shop, template):
+    kinds = [str(kind or "").strip().lower() for kind in (shop or {}).get("buys_kinds", [])]
+    if not kinds:
+        return False
+    return str(template.get("kind") or "").strip().lower() in kinds
 
 
 def get_reserved_quantity(character, template_id):
@@ -64,7 +117,7 @@ def get_reserved_quantity(character, template_id):
         if state.get("status") != "active":
             continue
 
-        definition = QUESTS.get(quest_key)
+        definition = _quests().get(quest_key)
         if not definition:
             continue
 
@@ -88,17 +141,19 @@ def get_reserved_quantity(character, template_id):
     return reserved
 
 
-def get_sellable_entries(character):
+def get_sellable_entries(character, shop=None, shop_id=None):
     """Return sellable pack entries with current merchant pricing."""
 
-    bonus = get_shop_bonus(character)
-    bonus_pct = bonus.get("bonus_pct", 0)
+    if shop is None:
+        resolved_id, shop = get_shop_for_room(getattr(character, "location", None))
+        shop_id = shop_id or resolved_id
+    shop = shop or _fallback_outfitters_shop()
     entries = []
 
     for entry in character.db.brave_inventory or []:
         template_id = entry.get("template")
-        template = ITEM_TEMPLATES.get(template_id)
-        if not template or template.get("value", 0) <= 0:
+        template = _items().get(template_id)
+        if not template or template.get("value", 0) <= 0 or not _shop_buys_item(shop, template):
             continue
 
         quantity = entry.get("quantity", 0)
@@ -114,8 +169,8 @@ def get_sellable_entries(character):
                 "quantity": quantity,
                 "reserved": reserved,
                 "sellable": sellable,
-                "unit_price": get_sale_price(template_id, quantity=1, bonus_pct=bonus_pct),
-                "total_price": get_sale_price(template_id, quantity=sellable, bonus_pct=bonus_pct),
+                "unit_price": get_sale_price(template_id, quantity=1, shop=shop),
+                "total_price": get_sale_price(template_id, quantity=sellable, shop=shop),
             }
         )
 
@@ -129,7 +184,7 @@ def get_reserved_entries(character):
     entries = []
     for entry in character.db.brave_inventory or []:
         template_id = entry.get("template")
-        template = ITEM_TEMPLATES.get(template_id)
+        template = _items().get(template_id)
         if not template:
             continue
         reserved = min(entry.get("quantity", 0), get_reserved_quantity(character, template_id))
@@ -141,36 +196,63 @@ def get_reserved_entries(character):
     return entries
 
 
-def run_shop_shift(character):
-    """Grant a temporary merchant bonus from helping at the Outfitters."""
+def get_buyable_entries(character, shop=None):
+    """Return stock entries the character can buy at the current shop."""
 
-    current = get_shop_bonus(character)
-    if current:
-        return False, (
-            "Leda waves you off for now. You already have |w"
-            + format_shop_bonus(current)
-            + "|n waiting on the next few sales."
-        )
-
-    outcome = random.choice(SHIFT_OUTCOMES)
-    sales_left = outcome["sales_left"] + get_shift_sales_bonus(character)
-    character.db.brave_shop_bonus = {
-        "name": outcome["name"],
-        "bonus_pct": outcome["bonus_pct"],
-        "sales_left": sales_left,
+    if shop is None:
+        _shop_id, shop = get_shop_for_room(getattr(character, "location", None))
+    if not shop:
+        return []
+    completed = {
+        quest_key
+        for quest_key, state in (character.db.brave_quests or {}).items()
+        if state.get("status") == "completed"
     }
-    message = outcome["text"] + " " + f"You gain |w{format_shop_bonus(character.db.brave_shop_bonus)}|n."
-    if get_shift_sales_bonus(character):
-        message += " Your practical instincts buy you one extra favorable sale."
-    return True, message
+    entries = []
+    for stock in shop.get("stock", []) or []:
+        template_id = stock.get("item")
+        template = _items().get(template_id)
+        if not template:
+            continue
+        unlocks = [quest_key for quest_key in stock.get("unlock_completed_quests", []) or [] if quest_key]
+        locked = any(quest_key not in completed for quest_key in unlocks)
+        price = int(stock.get("price", 0) or 0)
+        if price <= 0:
+            continue
+        entries.append(
+            {
+                "template_id": template_id,
+                "name": stock.get("label") or template.get("name", template_id),
+                "summary": template.get("summary"),
+                "price": price,
+                "locked": locked,
+                "unlock_completed_quests": unlocks,
+                "kind": template.get("kind"),
+            }
+        )
+    entries.sort(key=lambda entry: (entry["locked"], entry["name"]))
+    return entries
+
+
+def run_shop_shift(character):
+    """Return that shop counter work is not currently a supported activity."""
+
+    shop_id, shop = get_shop_for_room(getattr(character, "location", None))
+    if not shop:
+        shop_id, shop = "brambleford_outfitters", get_shop("brambleford_outfitters") or _fallback_outfitters_shop()
+    clear_shop_bonus(character)
+    return False, f"{shop.get('name', 'This shop')} is not taking counter help right now."
 
 
 def sell_inventory_item(character, template_id, quantity):
     """Sell a quantity of one pack item for silver."""
 
-    template = ITEM_TEMPLATES.get(template_id)
-    if not template or template.get("value", 0) <= 0:
-        return False, "That item is not something the Outfitters will buy."
+    shop_id, shop = get_shop_for_room(getattr(character, "location", None))
+    if not shop:
+        return False, "You need to be at a shop to sell anything."
+    template = _items().get(template_id)
+    if not template or template.get("value", 0) <= 0 or not _shop_buys_item(shop, template):
+        return False, f"That item is not something {shop.get('name', 'this shop')} will buy."
 
     owned = character.get_inventory_quantity(template_id)
     reserved = min(owned, get_reserved_quantity(character, template_id))
@@ -182,27 +264,41 @@ def sell_inventory_item(character, template_id, quantity):
     if quantity > sellable:
         return False, f"You can only sell {sellable} right now."
 
-    bonus = get_shop_bonus(character)
-    silver = get_sale_price(template_id, quantity=quantity, bonus_pct=bonus.get("bonus_pct", 0))
+    silver = get_sale_price(template_id, quantity=quantity, shop=shop)
     if not character.remove_item_from_inventory(template_id, quantity):
         return False, "You can't seem to find that many in your pack anymore."
 
     character.db.brave_silver = (character.db.brave_silver or 0) + silver
 
-    expired = False
-    if bonus:
-        bonus["sales_left"] = max(0, bonus.get("sales_left", 0) - 1)
-        if bonus["sales_left"] <= 0:
-            expired = True
-            clear_shop_bonus(character)
-        else:
-            character.db.brave_shop_bonus = bonus
+    clear_shop_bonus(character)
 
     result = {
         "item_name": template["name"],
         "quantity": quantity,
         "silver": silver,
-        "expired_bonus": expired,
-        "remaining_bonus": get_shop_bonus(character),
+        "expired_bonus": False,
+        "remaining_bonus": {},
     }
     return True, result
+
+
+def buy_shop_item(character, template_id, quantity=1):
+    """Buy a quantity of one infinite-stock shop item."""
+
+    _shop_id, shop = get_shop_for_room(getattr(character, "location", None))
+    if not shop:
+        return False, "You need to be at a shop to buy anything."
+    if quantity <= 0:
+        return False, "Buy how many?"
+    entries = {entry["template_id"]: entry for entry in get_buyable_entries(character, shop=shop)}
+    entry = entries.get(template_id)
+    if not entry:
+        return False, f"{shop.get('name', 'This shop')} does not stock that."
+    if entry.get("locked"):
+        return False, "That stock is not available to you yet."
+    total = entry["price"] * quantity
+    if (character.db.brave_silver or 0) < total:
+        return False, f"You need {total} silver."
+    character.db.brave_silver = max(0, (character.db.brave_silver or 0) - total)
+    character.add_item_to_inventory(template_id, quantity, count_for_collection=False)
+    return True, {"item_name": entry["name"], "quantity": quantity, "silver": total}

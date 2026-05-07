@@ -369,6 +369,7 @@ class SystemsContentRegistry:
     cozy_bonus: dict
     outfitters_room_id: str
     shift_outcomes: tuple
+    shops: dict
     forge_room_id: str
     forge_recipes: dict
     portals: dict
@@ -528,6 +529,7 @@ def _build_systems_registry_from_payload(payload, source_path):
         cozy_bonus=dict(activities.get("cozy_bonus", {})),
         outfitters_room_id=str(commerce.get("outfitters_room_id", "")),
         shift_outcomes=tuple(commerce.get("shift_outcomes", [])),
+        shops=dict(commerce.get("shops", {})),
         forge_room_id=str(forging.get("forge_room_id", "")),
         forge_recipes=dict(forging.get("forge_recipes", {})),
         portals=dict(portals.get("portals", {})),

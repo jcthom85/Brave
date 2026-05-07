@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "last_action": "upsert",
-    "last_modified_at": "2026-05-06T22:46:39.398217+00:00",
-    "last_modified_by": "codex-cli",
-    "last_target": "brother_alden",
-    "stage": "draft"
+    "last_action": "publish",
+    "last_modified_at": "2026-05-07T14:33:14.118629+00:00",
+    "last_modified_by": "jctest3",
+    "last_target": "dialogue",
+    "stage": "live"
   },
   "static_read_responses": {
     "barrow_marker_stone": "The lichen-sunk stone reads: HERE KEEP FAITH WITH THE OLD FIELD. DISTURB NOTHING. LIGHT YOUR LANTERN. LEAVE BEFORE THE LAST BELL.",
@@ -16,10 +16,14 @@
     "dawn_bell": "The bell's bronze lip is etched with a prayer worn soft by generations of hands: LET MORNING FIND US, LET MEMORY REST, LET THE LOST HEAR THE WAY HOME. Those who kneel beneath it before a hard road still say the chapel answers. Pray if you mean to test that.",
     "drowned_survey_marker": "The old survey cut reads: SOUTH WEIR LINE / BLACKWATER FEED / LAMP HOUSE EAST. A newer scratch over it is less official and more useful: IF THE LIGHT IS STILL BURNING, TURN IT WRONGER OR TURN IT OFF.",
     "edrics_slab": "The cracked slab still carries a knightly carving beneath the moss: SIR EDRIC VALE, WHO HELD THE LINE UNTIL THE LINE OUTLIVED HIM.",
+    "family_post_sign": "The sign names the family post as a rally point for new hands, visiting kin, and anyone still learning which gate leads to work and which gate leads to trouble.",
     "feast_hall_cauldron": "The cauldron holds a stew thick with bone broth, scavenged roots, and the sort of meat nobody decent should identify after the first guess.",
     "fenreach_waypost": "The old road mark once pointed to a survey line no one in Brambleford still uses. A newer charcoal warning cuts across it in Mira's hand: BLACKFEN SOUTH. KEEP TO THE HARD GROUND UNTIL THE MARSH STOPS LYING.",
     "forge_order_board": "Torren's board reads: NAIL KEGS FOR SOUTH FARM. HINGE SET FOR MAYOR'S HALL. TWO SPEAR TIPS FOR THE WATCH. Below that, in heavier chalk: FIELD KIT IMPROVEMENTS DONE TO ORDER. WEAR IT IN. BRING SCRAP. PAY SILVER. ASK AT THE FORGE, NOT WITH STORIES.",
+    "great_catch_log": "Most entries are fish weights, weather complaints, and proud exaggerations. The newest note is different: pale light seen south of the reeds, no bite on the line, went home early.",
     "hunters_warning_post": "Three deep knife-cuts have been carved into the cedar, then crossed out beneath a newer line: GREYMAW TOOK THE OUTER TRAIL. STAY IN NUMBERS.",
+    "kitchen_hearth": "The hearth stones are warm, scrubbed, and ringed with little reminders: keep soup low, dry herbs high, and never waste a clean flame when the town may need it after dark.",
+    "loaner_pole_rack": "Each pole has a tag, a nicked cork grip, and a warning from Uncle Pib: borrowed tackle comes back cleaner than it left or it starts telling stories about you.",
     "lower_lanternworks_notice": "The notice is written in Joss's exact hand: Lower Lanternworks open for inspection. Do not touch south-line glass without Joss Veller present. Someone has added: this includes tapping.",
     "lower_lanternworks_plaque": "The plaque is a maintenance map for Brambleford's road lanterns. North, west, and town lines are cold. The south groove is stained dark and faintly warm.",
     "mayors_ledger": "The open ledger carries three fresh entries in the mayor's square hand: LANTERN OIL SHORT BY TWO CRATES. WEST WATCH REPORTS LIGHT LOSS AT DUSK. CHAPEL REQUESTS ADDITIONAL VOLUNTEERS WITH STEADY NERVES.",
@@ -32,6 +36,10 @@
     "sinkmouth_scratch_map": "The slate shows a goblin scratch map: CAMP crossed out, then arrows leading east into a crown mark over a grease-slick room. One soot-smeared note is clearer than the rest: POT-KING EATS FIRST.",
     "star_lens": "The etched brass rings mark stars, routes, and a handful of names that are definitely not villages anywhere near Brambleford. One line is picked out brighter than the rest: JUNK-YARD PLANET.",
     "sunken_lock_chain": "The chain hums through the black water in time with the wrong light overhead. Someone once stamped the nearest link with a warning that still survives the rust: DO NOT DRAW FULL LINE WITHOUT LAMP-HOUSE ORDER.",
+    "town_notice_board": "Town notices crowd the board in practical layers: road crews needed east of the gate, chapel candles to be saved for dusk, and a fresh line from Mayor Elric asking everyone to report bad lanterns before they become worse roads.",
+    "trophy_vitrine": "The empty mounts are labeled before the victories arrive. Brambleford believes proof should have a place ready, partly for morale and partly so nobody can pretend the hard things never happened.",
+    "tutorial_damaged_cart": "The cart axle is split clean through, but the chalk marks beside it are instructional: brace the load, check the wheel pin, then call for help before a small mistake becomes a road problem.",
+    "tutorial_supply_board": "Quartermaster notes list loaner gear, bandage counts, and the rule written twice in darker chalk: take what keeps you alive, return what keeps the next person alive too.",
     "watchtower_warning_post": "The old carving reads: BORDER WATCH POST THREE. KEEP FIRE LOW. SIGNAL SOUTH IF THE RIDGE MOVES. Someone newer has cut a reply beneath it: TOO LATE FOR THAT.",
     "weir_keepers_plaque": "The greened plaque reads: KEEP SOUTH LIGHT TRIMMED. HOLD THE LOCK LINE. MAINTAIN NIGHT SIGNAL FOR BRAMBLEFORD APPROACH. Whatever used to count as maintenance here has become something much less cooperative.",
     "woods_wardstone": "The chalk marks are fresh enough to smear under a thumb. A careful hand has written one warning into the moss-dark side of the stone: DO NOT FOLLOW THE QUIET."
@@ -182,6 +190,14 @@
       }
     ],
     "mayor_elric_thorne": [
+      {
+        "active": "stores_before_the_road",
+        "text": "\"Pib sent the cellar count? Good. People like to call this sort of thing small until the wagons stop and the ledgers start telling the truth louder than the bells. Hand it here, then keep your boots ready for the East Gate.\""
+      },
+      {
+        "completed": "stores_before_the_road",
+        "text": "\"The inn stores are accounted for. That means we can make decisions instead of guesses, which is as close to luxury as a mayor gets before breakfast. The road still needs eyes.\""
+      },
       {
         "active": "the_hollow_lantern",
         "text": "\"Then finish it. A wrong light in a drowned public works line is exactly the kind of sentence I would prefer to stop using. End the lamp house, come back alive, and I'll call that a proper frontier result.\""
@@ -393,6 +409,14 @@
       }
     ],
     "uncle_pib_underbough": [
+      {
+        "active": "stores_before_the_road",
+        "text": "\"Cellar is quiet, which is a blessing, but quiet flour sacks still need counting. Take this tally to Mayor Elric before the road gets any cleverer about being closed. Tell him the inn can feed worried people for now, but not if everyone starts eating like heroes.\""
+      },
+      {
+        "completed": "stores_before_the_road",
+        "text": "\"Good. Elric has the numbers, I have my cellar back, and the soup can stop being a strategic resource for at least one hour. That is what victory looks like when it wears an apron.\""
+      },
       {
         "active": "rats_in_the_kettle",
         "text": "\"I would love to say the bell scared the rats into good manners. It did not. They are chewing grain like the road might stay closed for a week, which is rude and strategically alarming because the stores matter now. Head down to the cellar, clear them out, then come back when the scratching stops.\""

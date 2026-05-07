@@ -1,8 +1,8 @@
 {
   "_meta": {
     "last_action": "publish",
-    "last_modified_at": "2026-05-06T23:12:27.239404+00:00",
-    "last_modified_by": "jctest",
+    "last_modified_at": "2026-05-07T14:33:14.116613+00:00",
+    "last_modified_by": "jctest3",
     "last_target": "quests",
     "stage": "live"
   },
@@ -29,6 +29,7 @@
     "ruk_the_fence_cutter": "Goblin Road",
     "signal_in_the_scrap": "Drowned Weir",
     "smoke_on_the_ridge": "Ruined Watchtower",
+    "stores_before_the_road": "Brambleford",
     "the_hollow_lantern": "Drowned Weir",
     "the_knight_without_rest": "Old Barrow Field",
     "the_pot_kings_feast": "Goblin Warrens",
@@ -38,7 +39,6 @@
   "quests": {
     "bell_before_the_road": {
       "giver": "Brother Alden",
-      "next_step": "Carry Alden's candle stub back toward Town Green, then follow Captain Rowan's lead toward the inn and the cut road.",
       "objectives": [
         {
           "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
@@ -47,7 +47,7 @@
         }
       ],
       "prerequisites": [
-        "practice_makes_heroes"
+        "stores_before_the_road"
       ],
       "rewards": {
         "items": [
@@ -647,6 +647,32 @@
       "summary": "Push beyond the old goblin camp and confirm whether the ruined border tower has fallen fully into bandit hands.",
       "title": "Smoke on the Ridge"
     },
+    "stores_before_the_road": {
+      "giver": "Uncle Pib Underbough",
+      "next_step": "With the stores accounted for, follow the town attention back toward the East Gate and the cut road.",
+      "objectives": [
+        {
+          "description": "Carry Uncle Pib's emergency store tally to Mayor Elric at the Mayor's Hall.",
+          "npc_id": "mayor_elric_thorne",
+          "type": "talk_to_npc"
+        }
+      ],
+      "prerequisites": [
+        "rats_in_the_kettle"
+      ],
+      "rewards": {
+        "items": [
+          {
+            "item": "ledger_stamped_ration_chit",
+            "quantity": 1
+          }
+        ],
+        "silver": 5,
+        "xp": 18
+      },
+      "summary": "After the inn cellar is cleared, Uncle Pib asks you to carry a plain store tally to Mayor Elric before road trouble turns missing flour into a town problem.",
+      "title": "Stores Before the Road"
+    },
     "the_hollow_lantern": {
       "chapter_complete": "Brambleford's First Hard Chapter",
       "giver": "Joss Veller",
@@ -785,8 +811,8 @@
   },
   "starting_quests": [
     "practice_makes_heroes",
-    "bell_before_the_road",
     "rats_in_the_kettle",
+    "stores_before_the_road",
     "roadside_howls",
     "fencebreakers",
     "ruk_the_fence_cutter",
@@ -810,6 +836,7 @@
     "foreman_coilback",
     "the_south_light",
     "locks_under_blackwater",
-    "the_hollow_lantern"
+    "the_hollow_lantern",
+    "bell_before_the_road"
   ]
 }

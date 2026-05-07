@@ -1,7 +1,7 @@
 """Contextual NPC and readable interactions for Brave's first slice."""
 
 from world.activities import format_catch_log, format_kitchen_hearth_text, format_pole_rack_text
-from world.commerce import format_shop_bonus, get_sellable_entries, get_shop_bonus
+from world.commerce import get_sellable_entries
 from world.content import get_content_registry
 from world.forging import get_forge_entries
 from world.questing import (
@@ -98,13 +98,7 @@ def _resolve_talk_response(character, entity_id):
 
 def _leda_thornwick(character, is_action=False):
     sellables = get_sellable_entries(character)
-    bonus = get_shop_bonus(character)
 
-    if bonus:
-        return (
-            "You've already put in enough useful work for one stretch. Bring your finds to the counter and I'll honor "
-            f"that |w{format_shop_bonus(bonus)}|n."
-        )
     if sellables:
         names = ", ".join(entry["name"] for entry in sellables[:3])
         if len(sellables) > 3:

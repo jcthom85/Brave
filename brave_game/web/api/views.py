@@ -196,6 +196,18 @@ def _reference_entries(domain, registry):
         return [{"id": gate_id, "label": gate.get("name"), "meta": gate.get("trigger_room_id")} for gate_id, gate in registry.systems.boss_gates.items()]
     if domain == "trophies":
         return [{"id": trophy_id, "label": trophy.get("name"), "meta": trophy.get("world")} for trophy_id, trophy in registry.systems.trophies.items()]
+    if domain == "shops":
+        return [
+            {
+                "id": shop_id,
+                "label": shop.get("name"),
+                "meta": shop.get("room_id"),
+                "room_id": shop.get("room_id"),
+                "keeper_entity_id": shop.get("keeper_entity_id"),
+                "stock_count": len(shop.get("stock", []) or []),
+            }
+            for shop_id, shop in registry.systems.shops.items()
+        ]
     raise KeyError(domain)
 
 
@@ -310,6 +322,7 @@ def content_status(request):
                 "fish_behaviors": len(registry.systems.fishing_behaviors),
                 "boss_gates": len(registry.systems.boss_gates),
                 "trophies": len(registry.systems.trophies),
+                "shops": len(registry.systems.shops),
             },
         },
     }

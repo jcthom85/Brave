@@ -11,31 +11,31 @@ WORLD_TONES = {
     },
     "goblinroad": {
         "label": "Goblin Road",
-        "accent": "#c67a4d",
+        "accent": "#d44a24",  # Rust and dried blood
     },
     "woods": {
         "label": "Whispering Woods",
-        "accent": "#78b49a",
+        "accent": "#4a9c82",  # Deep forest shadow
     },
     "oldbarrow": {
         "label": "Old Barrow",
-        "accent": "#b6b0a1",
+        "accent": "#d4d0c5",  # Cold bone-white
     },
     "watchtower": {
         "label": "Ruined Watchtower",
-        "accent": "#b07a57",
+        "accent": "#c46a3d",  # Dust and brick
     },
     "warrens": {
         "label": "Goblin Warrens",
-        "accent": "#c88d43",
+        "accent": "#d87f2a",  # Torchgut orange
     },
     "blackfen": {
         "label": "Blackfen",
-        "accent": "#6fa278",
+        "accent": "#a8b446",  # Sickly boglight green
     },
     "drownedweir": {
         "label": "Drowned Weir",
-        "accent": "#7ebbc5",
+        "accent": "#4fbcc4",  # Cold cyan water-glass
     },
     "lanternworks": {
         "label": "Lower Lanternworks",

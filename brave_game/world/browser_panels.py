@@ -8,7 +8,7 @@ from world.ability_icons import get_ability_icon_name, get_passive_icon_name
 from world.combat_atb import render_atb_state
 from world.character_icons import get_class_icon, get_race_icon
 from world.enemy_icons import get_enemy_icon_name
-from world.commerce import get_reserved_entries, get_sellable_entries, get_shop_bonus
+from world.commerce import get_buyable_entries, get_reserved_entries, get_sellable_entries, get_shop_for_room
 from world.content import get_content_registry
 from world.forging import get_forge_entries
 from world.item_rarity import build_item_rarity_display
@@ -745,12 +745,22 @@ def build_pack_panel(character):
 
 
 def build_shop_panel(character):
-    """Build the browser-side companion panel for Outfitters."""
+    """Build the browser-side companion panel for the current shop."""
 
-    sellables = get_sellable_entries(character)
+    shop_id, shop = get_shop_for_room(getattr(character, "location", None))
+    shop = shop or {}
+    buyables = get_buyable_entries(character, shop=shop)
+    sellables = get_sellable_entries(character, shop=shop, shop_id=shop_id)
     reserved = get_reserved_entries(character)
-    bonus = get_shop_bonus(character)
-    items = [
+    buy_items = [
+        _item(
+            f"{entry['name']} · {entry['price']} silver",
+            icon="shopping_bag",
+            badge="LOCK" if entry["locked"] else None,
+        )
+        for entry in buyables[:5]
+    ] or [_item("Nothing for sale right now", icon="inventory_2")]
+    sell_items = [
         _item(
             f"{entry['name']} · {entry['total_price']} silver",
             icon="sell",
@@ -759,7 +769,7 @@ def build_shop_panel(character):
         for entry in sellables[:5]
     ] or [_item("Nothing sellable right now", icon="inventory_2")]
 
-    sections = [_section("Sellable", "storefront", items)]
+    sections = [_section("Buy", "shopping_bag", buy_items), _section("Sellable", "storefront", sell_items)]
     if reserved:
         sections.append(
             _section(
@@ -769,21 +779,15 @@ def build_shop_panel(character):
             )
         )
 
-    if bonus:
-        favor_label = f"+{bonus.get('bonus_pct', 0)}% x{bonus.get('sales_left', 0)}"
-    else:
-        favor_label = "No favor"
-
     chips = [
         _chip(f"{character.db.brave_silver or 0} silver", "savings", "accent"),
-        _chip(favor_label, "sell", "good" if bonus else "muted"),
     ]
 
     return _make_panel(
         "Town Service",
-        "Brambleford Outfitters",
+        shop.get("name", "Shop"),
         eyebrow_icon="storefront",
-        title_icon="sell",
+        title_icon="shopping_bag",
         chips=chips,
         sections=sections,
     )

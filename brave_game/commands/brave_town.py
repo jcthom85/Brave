@@ -20,11 +20,12 @@ from world.activities import format_recipe_list
 from world.content import get_content_registry
 from world.chapel import apply_dawn_bell_blessing, get_active_blessing, is_chapel_room
 from world.commerce import (
-    format_shop_bonus,
+    buy_shop_item,
+    get_buyable_entries,
     get_reserved_entries,
     get_sellable_entries,
-    get_shop_bonus,
-    is_outfitters_room,
+    get_shop_for_room,
+    is_shop_room,
     run_shop_shift,
     sell_inventory_item,
 )
@@ -102,14 +103,40 @@ def _refresh_tinkering_scene(command, character, message=None, *, success=False)
     return True
 
 
+def _refresh_shop_scene(command, character, message=None, *, success=False, title=None):
+    """Keep browser shop actions inside the shop view with popup feedback."""
+
+    if not command.get_web_session() or not is_shop_room(character.location):
+        return False
+    plain = _strip_evennia_markup(message) if message else None
+    command.send_browser_view(
+        build_shop_view(
+            character,
+            status_message=plain,
+            status_tone="good" if success else "muted",
+        )
+    )
+    command.send_browser_panel(build_shop_panel(character))
+    if plain:
+        command.send_browser_notice(
+            title or ("Shop Updated" if success else "Shop Notice"),
+            lines=[plain],
+            tone="good" if success else "danger",
+            icon="task_alt" if success else "error",
+            duration_ms=3600 if success else 5200,
+        )
+        command.send_other_sessions(message)
+    return True
+
+
 class CmdShop(BraveCharacterCommand):
     """
-    Review current Outfitters trade options.
+    Review current shop trade options.
 
     Usage:
       shop
 
-    Shows current Brambleford Outfitters trade rates, your merchant bonus, and what in your pack can be sold there.
+    Shows current shop stock, sale rates, merchant bonus, and what in your pack can be sold there.
     """
 
     key = "shop"
@@ -120,13 +147,28 @@ class CmdShop(BraveCharacterCommand):
         character = self.get_character()
         if not character:
             return
-        if not is_outfitters_room(character.location):
-            self.msg("You need to be at Brambleford Outfitters to review the trade board.")
+        shop_id, shop = get_shop_for_room(character.location)
+        if not shop:
+            if not self.deliver_browser_notice("You need to be at a shop to review the trade board.", title="No Shop", tone="danger", icon="storefront"):
+                self.msg("You need to be at a shop to review the trade board.")
             return
 
-        bonus = get_shop_bonus(character)
-        sellables = get_sellable_entries(character)
+        buyables = get_buyable_entries(character, shop=shop)
+        sellables = get_sellable_entries(character, shop=shop, shop_id=shop_id)
         reserved = get_reserved_entries(character)
+        buyable_blocks = []
+        for entry in buyables:
+            template = ITEM_TEMPLATES.get(entry["template_id"], {})
+            details = [f"{entry['price']} silver"]
+            if entry["locked"]:
+                details.append("Locked until: " + ", ".join(entry["unlock_completed_quests"]))
+            buyable_blocks.append(
+                format_entry(
+                    entry["name"],
+                    details=details,
+                    summary=template.get("summary"),
+                )
+            )
         sellable_blocks = []
         for entry in sellables:
             template = ITEM_TEMPLATES.get(entry["template_id"], {})
@@ -147,25 +189,102 @@ class CmdShop(BraveCharacterCommand):
         for entry in reserved:
             reserved_lines.extend(wrap_text(f"{entry['name']} x{entry['reserved']}", indent="  "))
         instruction_lines = [
+            *wrap_text("Use |wbuy <item>|n to buy one stocked item.", indent="  "),
+            *wrap_text("Use |wbuy <item> = <quantity>|n to buy several.", indent="  "),
             *wrap_text("Use |wsell <item>|n to sell one item.", indent="  "),
             *wrap_text("Use |wsell <item> = all|n to clear a full stack.", indent="  "),
-            *wrap_text("Use |wshift|n to help at the counter and improve your next few sales.", indent="  "),
         ]
 
         screen = render_screen(
-            "Brambleford Outfitters",
-            subtitle="Leda buys practical finds and pays in clean town silver.",
+            shop.get("name", "Shop"),
+            subtitle=shop.get("summary", "A practical place to trade."),
             meta=[
                 f"{character.db.brave_silver or 0} silver on hand",
-                format_shop_bonus(bonus) if bonus else "No current merchant favor",
             ],
             sections=[
+                ("Stock", _stack_blocks(buyable_blocks) if buyable_blocks else ["  Nothing for sale right now."]),
                 ("Sellable Stock", _stack_blocks(sellable_blocks) if sellable_blocks else ["  Nothing sellable right now."]),
                 ("Held For Active Quests", reserved_lines if reserved_lines else ["  Nothing currently reserved."]),
                 ("Counter Tips", instruction_lines),
             ],
         )
         self.scene_msg(screen, panel=build_shop_panel(character), view=build_shop_view(character))
+
+
+class CmdBuy(BraveCharacterCommand):
+    """
+    Buy stocked items at the current shop.
+
+    Usage:
+      buy <item>
+      buy <item> = <quantity>
+    """
+
+    key = "buy"
+    aliases = ["purchase"]
+    help_category = "Brave"
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+        shop_id, shop = get_shop_for_room(character.location)
+        if not shop:
+            message = "You need to be at a shop to buy anything."
+            if not self.deliver_browser_notice(message, title="No Shop", tone="danger", icon="storefront"):
+                self.msg(message)
+            return
+        if not self.args:
+            message = "Choose an item from the shop list."
+            if not _refresh_shop_scene(self, character, message, success=False, title="Choose Stock"):
+                self.msg("Usage: buy <item> or buy <item> = <quantity>")
+            return
+
+        query = self.args.strip()
+        quantity = 1
+        if "=" in query:
+            item_query, _, quantity_text = query.partition("=")
+            query = item_query.strip()
+            quantity_text = quantity_text.strip().lower()
+            if not query or not quantity_text:
+                message = "Choose an item and quantity from the shop list."
+                if not _refresh_shop_scene(self, character, message, success=False, title="Choose Stock"):
+                    self.msg("Usage: buy <item> = <quantity>")
+                return
+            if not quantity_text.isdigit():
+                message = "Quantity must be a number."
+                if not _refresh_shop_scene(self, character, message, success=False, title="Invalid Quantity"):
+                    self.msg(message)
+                return
+            quantity = int(quantity_text)
+
+        entries = get_buyable_entries(character, shop=shop)
+        token = _normalize_token(query)
+        matches = [
+            entry
+            for entry in entries
+            if token in _normalize_token(entry["name"]) or token in _normalize_token(entry["template_id"])
+        ]
+        if len(matches) > 1:
+            message = "Be more specific. That could mean: " + ", ".join(entry["name"] for entry in matches)
+            if not _refresh_shop_scene(self, character, message, success=False, title="Multiple Matches"):
+                self.msg(message)
+            return
+        if not matches:
+            message = f"{shop.get('name', 'This shop')} does not stock that."
+            if not _refresh_shop_scene(self, character, message, success=False, title="Not Stocked"):
+                self.msg(message)
+            return
+
+        ok, result = buy_shop_item(character, matches[0]["template_id"], quantity)
+        if not ok:
+            if not _refresh_shop_scene(self, character, result, success=False, title="Can't Buy"):
+                self.msg(result)
+            return
+        quantity_suffix = f" x{result['quantity']}" if result["quantity"] > 1 else ""
+        message = f"Bought {result['item_name']}{quantity_suffix} for {result['silver']} silver."
+        if not _refresh_shop_scene(self, character, message, success=True, title="Purchase Complete"):
+            self.msg(f"You buy {result['item_name']}{quantity_suffix} for |w{result['silver']}|n silver.")
 
 
 class CmdSell(BraveCharacterCommand):
@@ -187,11 +306,16 @@ class CmdSell(BraveCharacterCommand):
         character = self.get_character()
         if not character:
             return
-        if not is_outfitters_room(character.location):
-            self.msg("You need to be at Brambleford Outfitters to sell anything.")
+        shop_id, shop = get_shop_for_room(character.location)
+        if not shop:
+            message = "You need to be at a shop to sell anything."
+            if not self.deliver_browser_notice(message, title="No Shop", tone="danger", icon="storefront"):
+                self.msg(message)
             return
         if not self.args:
-            self.msg("Usage: sell <item> or sell <item> = <quantity|all>")
+            message = "Choose an item from your sell list."
+            if not _refresh_shop_scene(self, character, message, success=False, title="Choose Item"):
+                self.msg("Usage: sell <item> or sell <item> = <quantity|all>")
             return
 
         query = self.args.strip()
@@ -201,54 +325,59 @@ class CmdSell(BraveCharacterCommand):
             query = item_query.strip()
             quantity_text = quantity_text.strip().lower()
             if not query or not quantity_text:
-                self.msg("Usage: sell <item> = <quantity|all>")
+                message = "Choose an item and quantity from your sell list."
+                if not _refresh_shop_scene(self, character, message, success=False, title="Choose Item"):
+                    self.msg("Usage: sell <item> = <quantity|all>")
                 return
             if quantity_text == "all":
                 quantity = None
             else:
                 if not quantity_text.isdigit():
-                    self.msg("Quantity must be a number or |wall|n.")
+                    message = "Quantity must be a number."
+                    if not _refresh_shop_scene(self, character, message, success=False, title="Invalid Quantity"):
+                        self.msg("Quantity must be a number or |wall|n.")
                     return
                 quantity = int(quantity_text)
 
         match, entries = self.find_inventory_item(character, query, require_value=True)
         if isinstance(match, list):
-            self.msg("Be more specific. That could mean: " + ", ".join(item["name"] for _, item in match))
+            message = "Be more specific. That could mean: " + ", ".join(item["name"] for _, item in match)
+            if not _refresh_shop_scene(self, character, message, success=False, title="Multiple Matches"):
+                self.msg(message)
             return
         if not match:
             if entries:
-                self.msg("No sellable pack item matches that name.")
+                message = "No sellable pack item matches that name."
             else:
-                self.msg("You are not carrying anything the Outfitters will buy.")
+                message = "You are not carrying anything this shop will buy."
+            if not _refresh_shop_scene(self, character, message, success=False, title="Nothing To Sell"):
+                self.msg(message)
             return
 
         template_id, item = match
         if quantity is None:
-            sellables = {entry["template_id"]: entry for entry in get_sellable_entries(character)}
+            sellables = {entry["template_id"]: entry for entry in get_sellable_entries(character, shop=shop, shop_id=shop_id)}
             quantity = sellables.get(template_id, {}).get("sellable", 0)
         ok, result = sell_inventory_item(character, template_id, quantity)
         if not ok:
-            self.msg(result)
+            if not _refresh_shop_scene(self, character, result, success=False, title="Can't Sell"):
+                self.msg(result)
             return
 
         quantity_suffix = f" x{result['quantity']}" if result["quantity"] > 1 else ""
-        self.msg(
-            f"You sell {result['item_name']}{quantity_suffix} for |w{result['silver']}|n silver."
-        )
-        if result["expired_bonus"]:
-            self.msg("Leda's better column closes for now. You'll need another |wshift|n to earn it back.")
-        elif result["remaining_bonus"]:
-            self.msg("Merchant favor remaining: " + format_shop_bonus(result["remaining_bonus"]))
+        message = f"Sold {result['item_name']}{quantity_suffix} for {result['silver']} silver."
+        if not _refresh_shop_scene(self, character, message, success=True, title="Sale Complete"):
+            self.msg(f"You sell {result['item_name']}{quantity_suffix} for |w{result['silver']}|n silver.")
 
 
 class CmdShift(BraveCharacterCommand):
     """
-    Work a short shift at Brambleford Outfitters.
+    Help at a shop counter if that shop supports it.
 
     Usage:
       shift
 
-    Helps at the counter and earns a temporary better sale rate on your next few transactions.
+    Shop counter work is not currently a supported activity.
     """
 
     key = "shift"
@@ -259,15 +388,20 @@ class CmdShift(BraveCharacterCommand):
         character = self.get_character()
         if not character:
             return
-        if not is_outfitters_room(character.location):
-            self.msg("You need to be at Brambleford Outfitters to work a shift.")
+        if not is_shop_room(character.location):
+            message = "You need to be at a shop to help at the counter."
+            if not self.deliver_browser_notice(message, title="No Shop", tone="danger", icon="storefront"):
+                self.msg(message)
             return
         if character.get_active_encounter():
-            self.msg("This is not the time to step behind the counter.")
+            message = "This is not the time to step behind the counter."
+            if not _refresh_shop_scene(self, character, message, success=False, title="Not Now"):
+                self.msg(message)
             return
 
         _ok, message = run_shop_shift(character)
-        self.msg(message)
+        if not _refresh_shop_scene(self, character, message, success=False, title="Shop Help Unavailable"):
+            self.msg(message)
 
 
 class CmdForge(BraveCharacterCommand):

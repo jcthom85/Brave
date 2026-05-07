@@ -24,6 +24,7 @@ REFERENCE_DOMAINS = (
     "fish-behaviors",
     "boss-gates",
     "trophies",
+    "shops",
 )
 
 
@@ -280,6 +281,17 @@ MUTATION_RECIPES = {
         "reference_hints": ["trophies"],
         "preview": {"kind": "trophy", "args": ["target"]},
         "example": {"kind": "trophy", "target": "new_trophy", "payload": {"name": "New Trophy", "world": "Brave"}},
+    },
+    "shop": {
+        "kind": "shop",
+        "domain": "systems",
+        "target_required": True,
+        "payload_type": "object",
+        "required_fields": ["name", "room_id"],
+        "optional_fields": ["keeper_entity_id", "summary", "buys_kinds", "sell_price_multiplier", "shift_outcomes", "stock"],
+        "reference_hints": ["shops", "rooms", "entities", "items", "quests"],
+        "preview": {"kind": "shop", "args": ["target"]},
+        "example": {"kind": "shop", "target": "new_shop", "payload": {"name": "New Shop", "room_id": "room_id", "stock": []}},
     },
 }
 

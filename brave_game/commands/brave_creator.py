@@ -25,6 +25,7 @@ from world.content import (
     preview_roaming_party,
     preview_room,
     preview_room_encounters,
+    preview_shop,
     preview_tinkering_recipe,
     preview_trophy,
 )
@@ -140,6 +141,10 @@ def preview_content(kind, args, registry=None):
         if len(tokens) != 1:
             raise ValueError("Usage: content preview trophy <trophy_key>")
         return preview_trophy(tokens[0], registry=registry)
+    if normalized == "shop":
+        if len(tokens) != 1:
+            raise ValueError("Usage: content preview shop <shop_key>")
+        return preview_shop(tokens[0], registry=registry)
 
     raise ValueError(f"Unknown preview kind: {kind}")
 
@@ -310,6 +315,13 @@ def mutate_content(kind, target, raw_payload, *, write=False, editor=None, stage
             raise ValueError("Trophy payload must be a JSON object.")
         return editor.upsert_trophy(key, payload, write=write, stage=stage, author=author)
 
+    if normalized == "shop":
+        if not key:
+            raise ValueError("Shop updates require a shop key.")
+        if not isinstance(payload, dict):
+            raise ValueError("Shop payload must be a JSON object.")
+        return editor.upsert_shop(key, payload, write=write, stage=stage, author=author)
+
     raise ValueError(f"Unknown mutation kind: {kind}")
 
 
@@ -407,6 +419,10 @@ def remove_content(kind, target, *, write=False, editor=None, stage="live", auth
         if not key:
             raise ValueError("Trophy removal requires a trophy key.")
         return editor.delete_trophy(key, write=write, stage=stage, author=author)
+    if normalized == "shop":
+        if not key:
+            raise ValueError("Shop removal requires a shop key.")
+        return editor.delete_shop(key, write=write, stage=stage, author=author)
 
     raise ValueError(f"Unknown removal kind: {kind}")
 

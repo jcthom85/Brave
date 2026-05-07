@@ -69,6 +69,7 @@ class ContentValidationTests(unittest.TestCase):
                     **registry.encounters.enemy_templates["thorn_rat"],
                     "loot": [{"item": "missing_item", "chance": 1.0}],
                 },
+                "partial_enemy": {"name": "Partial Enemy", "loot": []},
             },
             room_encounters={
                 **registry.encounters.room_encounters,
@@ -101,6 +102,17 @@ class ContentValidationTests(unittest.TestCase):
             cooking_recipes={**registry.systems.cooking_recipes, "broken_recipe": {"result": "missing_item", "ingredients": {"missing_item": 0}}},
             tinkering_recipes={**registry.systems.tinkering_recipes, "broken_tinker": {"base": "missing_item", "result": "missing_item", "components": {"missing_item": 0}, "silver_cost": -1, "result_quantity": 0, "station": "missing_room"}},
             outfitters_room_id="missing_room",
+            shops={
+                **registry.systems.shops,
+                "broken_shop": {
+                    "name": "Broken Shop",
+                    "room_id": "missing_room",
+                    "keeper_entity_id": "missing_keeper",
+                    "buys_kinds": "loot",
+                    "sell_price_multiplier": -1,
+                    "stock": [{"item": "missing_item", "price": 0, "unlock_completed_quests": ["missing_quest"]}],
+                },
+            },
             forge_room_id="missing_room",
             forge_recipes={**registry.systems.forge_recipes, "missing_source": {"result": "missing_item", "materials": {"missing_item": 1}}},
             portals={**registry.systems.portals, "broken_portal": {"status": "unknown", "entry_room": "missing_room"}},
@@ -131,6 +143,9 @@ class ContentValidationTests(unittest.TestCase):
         self.assertTrue(any("unknown source room" in error for error in errors))
         self.assertTrue(any("unknown location room" in error for error in errors))
         self.assertTrue(any("drops unknown item" in error for error in errors))
+        self.assertTrue(any("Enemy partial_enemy must define at least one tag" in error for error in errors))
+        self.assertTrue(any("Enemy partial_enemy is missing numeric max_hp" in error for error in errors))
+        self.assertTrue(any("Enemy partial_enemy is missing numeric attack_power" in error for error in errors))
         self.assertTrue(any("Encounter table references unknown room" in error for error in errors))
         self.assertTrue(any("references unknown enemy" in error for error in errors))
         self.assertTrue(any("Temperament override references unknown enemy" in error for error in errors))
@@ -162,6 +177,13 @@ class ContentValidationTests(unittest.TestCase):
         self.assertTrue(any("must have nonnegative silver_cost" in error for error in errors))
         self.assertTrue(any("references unknown station room" in error for error in errors))
         self.assertTrue(any("Commerce references unknown outfitters room" in error for error in errors))
+        self.assertTrue(any("Shop broken_shop references unknown room" in error for error in errors))
+        self.assertTrue(any("Shop broken_shop references unknown keeper entity" in error for error in errors))
+        self.assertTrue(any("Shop broken_shop buys_kinds must be a list" in error for error in errors))
+        self.assertTrue(any("Shop broken_shop sell_price_multiplier must be nonnegative" in error for error in errors))
+        self.assertTrue(any("Shop broken_shop stock 1 references unknown item" in error for error in errors))
+        self.assertTrue(any("Shop broken_shop stock 1 must have positive integer price" in error for error in errors))
+        self.assertTrue(any("Shop broken_shop stock 1 references unknown unlock quest" in error for error in errors))
         self.assertTrue(any("Forging references unknown forge room" in error for error in errors))
         self.assertTrue(any("Forge recipe references unknown source item" in error for error in errors))
         self.assertTrue(any("Portal broken_portal uses unknown status" in error for error in errors))

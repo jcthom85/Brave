@@ -676,6 +676,11 @@ class TutorialOnboardingTests(unittest.TestCase):
         for _index in range(3):
             advance_enemy_defeat(character, {"rat"})
         self.assertEqual("completed", character.db.brave_quests["rats_in_the_kettle"]["status"])
+        self.assertEqual("stores_before_the_road", character.db.brave_tracked_quest)
+
+        mayor_response = get_entity_response(character, _entity("mayor_elric_thorne"), "talk", is_action=True)
+        self.assertIn("Pib sent the cellar count", mayor_response)
+        self.assertEqual("completed", character.db.brave_quests["stores_before_the_road"]["status"])
         self.assertEqual("roadside_howls", character.db.brave_tracked_quest)
         self.assertIn("Mira", get_tracked_quest_payload(character)["objectives"][0]["text"])
 

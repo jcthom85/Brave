@@ -783,3 +783,35 @@ def preview_trophy(trophy_key, registry=None):
     if not trophy:
         return None
     return {"trophy_key": trophy_key, "trophy": trophy}
+
+
+def preview_shop(shop_key, registry=None):
+    registry = registry or get_content_registry()
+    shop = registry.systems.shops.get(shop_key)
+    if not shop:
+        return None
+    room_id = shop.get("room_id")
+    keeper_id = shop.get("keeper_entity_id")
+    room = registry.world.get_room(room_id) if room_id else None
+    keeper = registry.world.get_entity(keeper_id) if keeper_id else None
+    stock = []
+    for entry in shop.get("stock", []) or []:
+        item_id = entry.get("item")
+        item = registry.items.get(item_id) or {}
+        stock.append(
+            {
+                **entry,
+                "item_name": item.get("name", item_id),
+                "item_kind": item.get("kind"),
+            }
+        )
+    return {
+        "shop_key": shop_key,
+        "shop": shop,
+        "room": room,
+        "keeper": keeper,
+        "stock": stock,
+        "stock_count": len(stock),
+        "buys_kinds": list(shop.get("buys_kinds", []) or []),
+        "shift_outcome_count": len(shop.get("shift_outcomes", []) or []),
+    }

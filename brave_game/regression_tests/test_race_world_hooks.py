@@ -77,15 +77,15 @@ class DummyEntity:
 
 
 class RaceWorldHookTests(unittest.TestCase):
-    def test_human_shift_gets_extra_sale(self):
+    def test_human_shop_shift_bonus_is_disabled(self):
         character = DummyRaceCharacter(race_key="human")
+        character.db.brave_shop_bonus = {"name": "Old Bonus", "bonus_pct": 15, "sales_left": 3}
 
-        with patch("world.commerce.random.choice", return_value={"name": "Counter Rhythm", "bonus_pct": 10, "sales_left": 3, "text": "Shift done."}):
-            ok, message = run_shop_shift(character)
+        ok, message = run_shop_shift(character)
 
-        self.assertTrue(ok)
-        self.assertEqual(4, character.db.brave_shop_bonus.get("sales_left"))
-        self.assertIn("extra favorable sale", message)
+        self.assertFalse(ok)
+        self.assertEqual({}, character.db.brave_shop_bonus)
+        self.assertIn("not taking counter help", message)
 
     def test_dwarf_gets_forge_discount(self):
         character = DummyRaceCharacter(

@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "last_action": "upsert",
-    "last_modified_at": "2026-05-06T22:46:39.386804+00:00",
-    "last_modified_by": "codex-cli",
-    "last_target": "dawn_thread_candle_stub",
-    "stage": "draft"
+    "last_action": "publish",
+    "last_modified_at": "2026-05-07T14:33:14.112811+00:00",
+    "last_modified_by": "jctest3",
+    "last_target": "items",
+    "stage": "live"
   },
   "bonus_labels": {
     "accuracy": "Accuracy",
@@ -947,6 +947,14 @@
         "unlock_recipe": "latchwire_ward_bundle",
         "verb": "study"
       }
+    },
+    "ledger_stamped_ration_chit": {
+      "kind": "loot",
+      "name": "Ledger-Stamped Ration Chit",
+      "rarity": "common",
+      "stackable": true,
+      "summary": "A small ration chit stamped by Brambleford Hall after the inn cellar tally, worth more as proof that the town is still counting carefully than as coin.",
+      "value": 2
     },
     "lockfin_pike": {
       "kind": "ingredient",

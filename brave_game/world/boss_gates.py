@@ -33,8 +33,13 @@ def _room_id(room):
 
 
 def _boss_clears(character):
-    clears = getattr(getattr(character, "db", None), "brave_boss_clears", None) or {}
-    return dict(clears) if isinstance(clears, dict) else {}
+    clears = getattr(getattr(character, "db", None), "brave_boss_clears", None)
+    if not clears:
+        return {}
+    try:
+        return dict(clears)
+    except (TypeError, ValueError):
+        return {}
 
 
 def character_has_cleared_gate(character, gate_key):
@@ -632,10 +637,10 @@ def resolve_gate_victory(encounter, participants):
     gate_key = getattr(getattr(encounter, "db", None), "boss_gate_key", None)
     if not gate_key:
         return
-    needed_at_start = set(getattr(encounter.db, "boss_gate_needed_at_start", None) or [])
+    needed_at_start = {str(pid) for pid in (getattr(encounter.db, "boss_gate_needed_at_start", None) or [])}
     success_room = get_room(getattr(encounter.db, "boss_gate_success_room_id", None))
     for participant in participants:
-        if participant.id in needed_at_start and encounter._participant_eligible_for_enemy_credit(
+        if str(participant.id) in needed_at_start and encounter._participant_eligible_for_enemy_credit(
             participant,
             {"tags": ["boss"]},
         ):

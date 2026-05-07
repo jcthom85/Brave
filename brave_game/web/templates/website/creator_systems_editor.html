@@ -48,6 +48,7 @@
     .row-list { display:grid; gap:10px; }
     .builder-row { display:grid; gap:8px; align-items:end; border:1px solid var(--line); border-radius:12px; background:#fff; padding:10px; }
     .builder-row.material-row { grid-template-columns:minmax(0,1fr) 110px auto; }
+    .builder-row.shop-stock-row { grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr) auto; }
     .builder-row.fish-row { grid-template-columns:minmax(170px,1.2fr) 92px 110px 110px 130px 86px 86px auto; }
     .source-cache { display:none; }
     .link-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
@@ -60,7 +61,7 @@
     .status.bad { background:#fff0ed; color:var(--bad); border-color:rgba(141,49,34,.24); }
     .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
     .validation-notes[hidden] { display:none; }
-    @media (max-width:1180px) { .builder-grid,.link-grid,.builder-row.material-row,.builder-row.fish-row { grid-template-columns:1fr; } .guide-rail { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:1180px) { .builder-grid,.link-grid,.builder-row.material-row,.builder-row.fish-row,.builder-row.shop-stock-row { grid-template-columns:1fr; } .guide-rail { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media (max-width:980px) { .shell,.field-grid,.field-grid.three,.guide-rail { grid-template-columns:1fr; } .item-list { max-height:260px; } }
   </style>
 </head>
@@ -85,6 +86,7 @@
           <button class="guide-button" type="button" data-system-preset="tackle"><strong>Fishing Tackle</strong><span>Rod, lure, or fish behavior entries.</span></button>
           <button class="guide-button" type="button" data-system-preset="boss"><strong>Boss Gate</strong><span>Rooms, boss enemy, encounter key, exit payload.</span></button>
           <button class="guide-button" type="button" data-system-preset="forge"><strong>Forge Upgrade</strong><span>Source item, result item, materials, silver.</span></button>
+          <button class="guide-button" type="button" data-system-preset="shop"><strong>Shop</strong><span>Room, keeper, buy stock, sell rules.</span></button>
           <button class="guide-button" type="button" data-system-preset="portal"><strong>Portal</strong><span>Status, resonance, entry room, travel hint.</span></button>
           <button class="guide-button" type="button" data-system-preset="trophy"><strong>Trophy</strong><span>World trophy summary and placeholder.</span></button>
         </div>
@@ -158,6 +160,18 @@
             <div class="field full"><label for="portal-hint">Travel Hint / Placeholder</label><textarea id="portal-hint" spellcheck="true"></textarea></div>
           </div></section>
 
+          <section class="section type-panel" data-type-panel="shop"><h3>Shop</h3><p>Configure a room-based shop with infinite buy stock and item-kind sell rules.</p><div class="field-grid">
+            <div class="field"><label for="shop-room">Shop Room</label><select id="shop-room"></select></div>
+            <div class="field"><label for="shop-keeper">Keeper Entity</label><select id="shop-keeper"></select></div>
+            <div class="field"><label for="shop-buys">Buys Kinds</label><input id="shop-buys" type="text" placeholder="loot, ingredient, consumable"></div>
+            <div class="field"><label for="shop-sell-multiplier">Sell Multiplier</label><input id="shop-sell-multiplier" type="number" min="0" step="0.05" value="1"></div>
+            <div class="field full">
+              <label>Infinite Stock</label>
+              <div id="shop-stock-list" class="row-list"></div>
+              <button id="add-shop-stock" class="secondary" type="button">Add Stock</button>
+            </div>
+          </div></section>
+
           <details><summary>Advanced Source</summary><div class="stack" style="padding:0 14px 14px"><textarea id="entry-json" spellcheck="false"></textarea><button id="sync-source" class="secondary" type="button">Apply Source To Fields</button></div></details>
         </div></section>
 
@@ -196,6 +210,7 @@
       { label:'Fish Behaviors', reference:'fish-behaviors', kind:'fish-behavior', preset:'tackle', panels:[], sample:{ pattern:'sine', stamina:10, base_pull:0.2, burst_pull:0.1 } },
       { label:'Boss Gates', reference:'boss-gates', kind:'boss-gate', preset:'boss', panels:['boss'], sample:{ key:'new_boss_gate', name:'New Boss Gate', trigger_room_id:'room_id', encounter_key:'encounter_key', boss_enemy_key:'enemy_key', max_participants:4, requires_personal_clear:true } },
       { label:'Forge', reference:'forge', kind:'forge', preset:'forge', panels:['recipe'], sample:{ result:'item_id', materials:{}, silver:0, text:'' } },
+      { label:'Shops', reference:'shops', kind:'shop', preset:'shop', panels:['shop'], sample:{ name:'New Shop', room_id:'room_id', keeper_entity_id:'entity_id', summary:'', buys_kinds:['loot','ingredient','consumable'], sell_price_multiplier:1.0, stock:[], shift_outcomes:[] } },
       { label:'Portals', reference:'portals', kind:'portal', preset:'portal', panels:['portal'], sample:{ name:'New Portal', status:'stable', resonance:'fantasy', summary:'', travel_hint:'', entry_room:'room_id' } },
       { label:'Trophies', reference:'trophies', kind:'trophy', preset:'trophy', panels:['portal'], sample:{ name:'New Trophy', placeholder:'', summary:'', world:'Brave' } },
     ];
@@ -204,6 +219,8 @@
     let selectedId = '';
     let items = [];
     let rooms = [];
+    let entities = [];
+    let quests = [];
     let enemies = [];
     let fishBehaviors = [];
     let previewPayload = null;
@@ -294,6 +311,50 @@
       row.querySelectorAll('select,input').forEach((field) => field.addEventListener('change', changeSync));
       $('fish-table-list').appendChild(row);
     }
+    function questOptions(selectedValues = []) {
+      const selected = new Set(selectedValues || []);
+      return quests.map((entry) => {
+        const label = `${entry.label || entry.id} (${entry.id})`;
+        return `<option value="${entry.id}"${selected.has(entry.id) ? ' selected' : ''}>${label}</option>`;
+      }).join('');
+    }
+    function addShopStockRow(entry = {}) {
+      const row = document.createElement('div');
+      row.className = 'builder-row shop-stock-row';
+      row.innerHTML = [
+        `<div class="field"><label>Item</label><select data-shop-stock-item>${materialOptions(entry.item || '')}</select></div>`,
+        `<div class="field"><label>Price</label><input data-shop-stock-price type="number" min="1" value="${Math.max(1, Number(entry.price || 1))}"></div>`,
+        `<div class="field"><label>Unlock Quest</label><select data-shop-stock-unlock><option value="">None</option>${questOptions(entry.unlock_completed_quests || [])}</select></div>`,
+        '<button class="secondary" type="button" data-remove-shop-stock>Remove</button>',
+      ].join('');
+      row.querySelector('[data-remove-shop-stock]').addEventListener('click', () => { row.remove(); changeSync(); });
+      row.querySelectorAll('select,input').forEach((field) => field.addEventListener('change', changeSync));
+      $('shop-stock-list').appendChild(row);
+    }
+    function renderShopStockRows(stock = []) {
+      $('shop-stock-list').innerHTML = '';
+      const entries = Array.isArray(stock) ? stock : [];
+      if (!entries.length) {
+        addShopStockRow({});
+        return;
+      }
+      entries.forEach((entry) => addShopStockRow(entry));
+    }
+    function shopStockRowsToArray() {
+      const payload = [];
+      for (const row of $('shop-stock-list').querySelectorAll('.shop-stock-row')) {
+        const item = row.querySelector('[data-shop-stock-item]').value;
+        if (!item) continue;
+        const entry = {
+          item,
+          price: Math.max(1, Number(row.querySelector('[data-shop-stock-price]').value || 1)),
+        };
+        const unlock = row.querySelector('[data-shop-stock-unlock]').value;
+        if (unlock) entry.unlock_completed_quests = [unlock];
+        payload.push(entry);
+      }
+      return payload;
+    }
     function renderFishRows(entries = []) {
       $('fish-table-list').innerHTML = '';
       const fishEntries = Array.isArray(entries) ? entries : [];
@@ -362,6 +423,11 @@
       $('portal-room').value = data.entry_room || '';
       $('trophy-world').value = data.world || '';
       $('portal-hint').value = data.travel_hint || data.placeholder || '';
+      $('shop-room').value = data.room_id || '';
+      $('shop-keeper').value = data.keeper_entity_id || '';
+      $('shop-buys').value = (data.buys_kinds || []).join(', ');
+      $('shop-sell-multiplier').value = data.sell_price_multiplier ?? 1;
+      renderShopStockRows(data.stock || []);
     }
     function syncPayloadFromFields() {
       const payload = parsePayload();
@@ -405,6 +471,12 @@
       } else if (activeSystem.kind === 'trophy') {
         payload.world = $('trophy-world').value.trim();
         payload.placeholder = $('portal-hint').value.trim();
+      } else if (activeSystem.kind === 'shop') {
+        payload.room_id = $('shop-room').value;
+        payload.keeper_entity_id = $('shop-keeper').value;
+        payload.buys_kinds = $('shop-buys').value.split(',').map((value) => value.trim()).filter(Boolean);
+        payload.sell_price_multiplier = Number($('shop-sell-multiplier').value || 1);
+        payload.stock = shopStockRowsToArray();
       }
       if ($('recipe-unlock-type').value.trim()) payload.unlock_type = $('recipe-unlock-type').value.trim();
       if ($('recipe-unlock-text').value.trim()) payload.unlock_text = $('recipe-unlock-text').value.trim();
@@ -483,6 +555,8 @@
       for (const exit of preview.linked_exits || []) addLinkCard(exit.label || exit.id, `Boss-gate exit ${exit.id}`, '/creator/world/', payloadSnippet('boss-exit'));
       if (preview.entry_room_name) addLinkCard(preview.entry_room_name, 'Portal entry room', '/creator/world/', '');
       if (preview.trophy) addLinkCard(preview.trophy.name || entryKey.value, `Trophy world ${preview.trophy.world || '-'}`, null, payloadSnippet('quest-reward'));
+      for (const stock of preview.stock || []) addLinkCard(stock.item_name || stock.item, `Shop stock ${stock.price || '-'} silver`, '/creator/items/', payloadSnippet('quest-reward', { item:stock.item }));
+      if (preview.keeper) addLinkCard(preview.keeper.key || preview.keeper.id, `Shop keeper ${preview.keeper.id}`, '/creator/world/', '');
       if (!linkGrid.children.length) addLinkCard('No links yet', 'Preview this entry or fill guided fields to reveal linked content.', null, payloadSnippet('activity'));
     }
     function renderTabs() {
@@ -510,14 +584,17 @@
       }
     }
     async function loadReferences() {
-      [items, rooms, enemies, fishBehaviors] = await Promise.all([
+      [items, rooms, enemies, fishBehaviors, entities, quests] = await Promise.all([
         creatorTools.fetchReferences('items', { limit: 1000 }),
         creatorTools.fetchReferences('rooms', { limit: 1000 }),
         creatorTools.fetchReferences('enemies', { limit: 1000 }),
         creatorTools.fetchReferences('fish-behaviors', { limit: 1000 }),
+        creatorTools.fetchReferences('entities', { limit: 1000 }),
+        creatorTools.fetchReferences('quests', { limit: 1000 }),
       ]);
       for (const select of [$('recipe-result'), $('recipe-base')]) fillSelect(select, items);
-      for (const select of [$('recipe-station'), $('fish-room'), $('boss-trigger'), $('boss-entry'), $('boss-success'), $('boss-failure'), $('portal-room')]) fillSelect(select, rooms);
+      for (const select of [$('recipe-station'), $('fish-room'), $('boss-trigger'), $('boss-entry'), $('boss-success'), $('boss-failure'), $('portal-room'), $('shop-room')]) fillSelect(select, rooms);
+      fillSelect($('shop-keeper'), entities);
       fillSelect($('boss-enemy'), enemies);
     }
     async function loadEntries() {
@@ -609,6 +686,7 @@
     $('sync-source').addEventListener('click', () => { syncFieldsFromPayload(parsePayload()); renderLinks(null); setStatus('Advanced source applied to guided fields.', 'good'); });
     $('add-recipe-material').addEventListener('click', () => { addMaterialRow('', 1); changeSync(); });
     $('add-fish-entry').addEventListener('click', () => { addFishRow({}); changeSync(); });
+    $('add-shop-stock').addEventListener('click', () => { addShopStockRow({}); changeSync(); });
     entryJson.addEventListener('input', () => renderLinks(null));
     systemSearch.addEventListener('input', () => renderList(systemSearch.value));
     guideButtons.forEach((button) => button.addEventListener('click', () => applyPreset(button.dataset.systemPreset)));

@@ -304,7 +304,10 @@ def _map_marker_keys(room, *, current=False, party=False, tracked_room_ids=None)
         keys.add("boss")
     if room_id and room_id == SYSTEMS_CONTENT.forge_room_id:
         keys.add("forge")
-    if room_id and room_id == SYSTEMS_CONTENT.outfitters_room_id:
+    if room_id and (
+        room_id == SYSTEMS_CONTENT.outfitters_room_id
+        or any(shop.get("room_id") == room_id for shop in getattr(SYSTEMS_CONTENT, "shops", {}).values())
+    ):
         keys.add("shop")
     if room_allows_rest(room):
         keys.add("rest")

@@ -74,6 +74,7 @@ class CreatorApiTests(unittest.TestCase):
         self.assertIn("draft", payload["domains"]["world"])
         self.assertIn("cooking_recipes", payload["domains"]["systems"])
         self.assertIn("boss_gates", payload["domains"]["systems"])
+        self.assertIn("shops", payload["domains"]["systems"])
 
     def test_health_requires_authorization(self):
         request = self.factory.get("/api/content/health")
@@ -136,6 +137,15 @@ class CreatorApiTests(unittest.TestCase):
         self.assertEqual("cooking-recipes", payload["domain"])
         self.assertTrue(payload["results"])
 
+    def test_reference_search_returns_shops(self):
+        request = self.factory.get("/api/content/references/shops", {"limit": 5})
+        request.user = self.user
+        response = views.content_references(request, "shops")
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("shops", payload["domain"])
+        self.assertTrue(any(entry["id"] == "brambleford_outfitters" for entry in payload["results"]))
+
     def test_preview_returns_room_payload(self):
         request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "room", "args": ["brambleford_town_green"]}), content_type="application/json")
         request.user = self.user
@@ -175,6 +185,34 @@ class CreatorApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual("boss-gate", payload["kind"])
         self.assertEqual("ruk_fence_cutter", payload["preview"]["gate_key"])
+
+    def test_preview_returns_shop_payload(self):
+        request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "shop", "args": ["brambleford_outfitters"]}), content_type="application/json")
+        request.user = self.user
+        response = views.content_preview(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("shop", payload["kind"])
+        self.assertEqual("brambleford_outfitters", payload["preview"]["shop_key"])
+        self.assertTrue(payload["preview"]["stock"])
+
+    def test_mutate_shop_dry_run_returns_systems_diff(self):
+        request = self.factory.post(
+            "/api/content/mutate",
+            data=json.dumps({
+                "kind": "shop",
+                "target": "test_shop",
+                "stage": "draft",
+                "payload": {"name": "Test Shop", "room_id": "brambleford_outfitters", "stock": [{"item": "field_bandage", "price": 10}]},
+            }),
+            content_type="application/json",
+        )
+        request.user = self.user
+        response = views.content_mutate(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("systems", payload["domain"])
+        self.assertIn("test_shop", payload["diff"])
 
     def test_preview_returns_dialogue_payload(self):
         request = self.factory.post("/api/content/preview", data=json.dumps({"kind": "dialogue", "args": ["brother_alden"]}), content_type="application/json")

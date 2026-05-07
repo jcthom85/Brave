@@ -36,6 +36,7 @@ from .brave_party import CmdParty
 from .brave_profile import CmdBuild, CmdClass, CmdCompanion, CmdGear, CmdMastery, CmdOath, CmdPack, CmdQuests, CmdRace, CmdSheet
 from .brave_town import (
     CmdBravePopup,
+    CmdBuy,
     CmdForge,
     CmdMovie,
     CmdPray,
@@ -76,6 +77,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdCompanion())
         self.add(CmdOath())
         self.add(CmdShop())
+        self.add(CmdBuy())
         self.add(CmdSell())
         self.add(CmdShift())
         self.add(CmdForge())

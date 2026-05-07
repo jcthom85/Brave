@@ -7,89 +7,181 @@ from world.activities import (
     get_cooking_entries,
     get_fishing_spot_summary,
 )
-from world.browser_context import ITEM_TEMPLATES
+from world.content import get_content_registry
 from world.browser_formatting import _format_context_bonus_summary, _format_restore_summary
 from world.browser_ui import (
     _action,
     _chip,
     _entry,
     _make_view,
+    _picker,
     _reactive_from_character,
     _section,
 )
-from world.commerce import format_shop_bonus, get_reserved_entries, get_sellable_entries, get_shop_bonus
+from world.commerce import get_buyable_entries, get_reserved_entries, get_sellable_entries, get_shop_for_room
 from world.forging import get_forge_entries
 from world.item_rarity import build_item_rarity_display
 from world.tinkering import get_tinkering_entries
 
-def build_shop_view(character):
-    """Return a browser-first main view for the Outfitters."""
 
-    bonus = get_shop_bonus(character)
-    sellables = get_sellable_entries(character)
+def _item_templates():
+    return get_content_registry().items.item_templates
+
+def _buy_quantity_picker(character, entry, template):
+    item_name = entry["name"]
+    price = max(1, int(entry.get("price") or 0))
+    silver = int(character.db.brave_silver or 0)
+    max_affordable = silver // price
+
+    return _picker(
+        f"Buy {item_name}",
+        body=[
+            template.get("summary"),
+        ],
+        options=[],
+        chips=[_chip(f"{price} silver", "savings", "accent")],
+        title_prefix="Buy",
+        title_item=item_name,
+        rarity_target="title_item",
+        quantity_control={
+            "label": "Quantity",
+            "action_label": "Buy",
+            "command_template": f"buy {item_name} = {{quantity}}",
+            "min": 1 if max_affordable else 0,
+            "max": max_affordable,
+            "initial": 1 if max_affordable else 0,
+            "unit_price": price,
+            "total_label": "Total",
+            "disabled": max_affordable <= 0,
+        },
+        title_icon="shopping_bag",
+        **build_item_rarity_display(template),
+    )
+
+def _sell_quantity_picker(entry, template):
+    item_name = entry["name"]
+    unit_price = int(entry.get("unit_price") or 0)
+    sellable = int(entry.get("sellable") or 0)
+
+    return _picker(
+        f"Sell {item_name}",
+        body=[
+            template.get("summary"),
+            f"{sellable} available to sell.",
+        ],
+        options=[],
+        chips=[_chip(f"{unit_price} silver", "savings", "accent")],
+        title_prefix="Sell",
+        title_item=item_name,
+        rarity_target="title_item",
+        quantity_control={
+            "label": "Quantity",
+            "action_label": "Sell",
+            "command_template": f"sell {item_name} = {{quantity}}",
+            "min": 1 if sellable else 0,
+            "max": sellable,
+            "initial": 1 if sellable else 0,
+            "unit_price": unit_price,
+            "total_label": "Return",
+            "disabled": sellable <= 0,
+        },
+        title_icon="sell",
+        **build_item_rarity_display(template),
+    )
+
+def build_shop_view(character, *, status_message=None, status_tone="muted"):
+    """Return a browser-first main view for the current shop."""
+
+    shop_id, shop = get_shop_for_room(getattr(character, "location", None))
+    shop = shop or {}
+    buyables = get_buyable_entries(character, shop=shop)
+    sellables = get_sellable_entries(character, shop=shop, shop_id=shop_id)
     reserved = get_reserved_entries(character)
+
+    buyable_entries = []
+    for entry in buyables:
+        template = _item_templates().get(entry["template_id"], {})
+        lines = [f"{entry['price']} silver"]
+        if entry["locked"]:
+            lines.append("Locked until: " + ", ".join(entry["unlock_completed_quests"]))
+        picker = None if entry["locked"] else _buy_quantity_picker(character, entry, template)
+        buyable_entries.append(
+            _entry(
+                entry["name"],
+                lines=lines,
+                summary=template.get("summary"),
+                icon="shopping_bag",
+                picker=picker,
+                **build_item_rarity_display(template),
+                actions=[] if entry["locked"] else [_action("Buy", None, "shopping_bag", picker=picker, tone="accent")],
+            )
+        )
 
     sellable_entries = []
     for entry in sellables:
-        template = ITEM_TEMPLATES.get(entry["template_id"], {})
+        template = _item_templates().get(entry["template_id"], {})
         lines = [f"{entry['unit_price']} silver each · {entry['total_price']} silver total"]
         if entry["reserved"]:
             lines.append(f"Holding {entry['reserved']} for active quest progress")
+        picker = _sell_quantity_picker(entry, template)
         sellable_entries.append(
             _entry(
                 f"{entry['name']} x{entry['sellable']}",
                 lines=lines,
                 summary=template.get("summary"),
                 icon="sell",
-                command=f"sell {entry['name']}",
+                picker=picker,
                 **build_item_rarity_display(template),
-                actions=[
-                    _action("Sell 1", f"sell {entry['name']}", "sell")
-                ] + (
-                    [
-                        _action(
-                            "Sell All",
-                            f"sell {entry['name']} = all",
-                            "layers",
-                            tone="danger",
-                            confirm=f"Sell all available {entry['name']}?",
-                        )
-                    ]
-                    if entry["sellable"] > 1
-                    else []
-                ),
+                actions=[_action("Sell", None, "sell", picker=picker, tone="accent")],
             )
         )
 
     chips = [
         _chip(f"{character.db.brave_silver or 0} silver", "savings", "accent"),
     ]
-    if bonus:
-        chips.append(_chip(format_shop_bonus(bonus), "storefront", "good"))
+
+    sections = [
+        _section(
+            "Buy",
+            "shopping_bag",
+            "entries",
+            items=buyable_entries or [_entry("Nothing for sale right now.", icon="inventory_2")],
+        ),
+        _section(
+            "Sell",
+            "sell",
+            "entries",
+            items=sellable_entries or [_entry("Nothing sellable right now.", icon="inventory_2")],
+        ),
+        _section(
+            "Reserved",
+            "assignment",
+            "list",
+            items=[{"text": f"{entry['name']} x{entry['reserved']}", "icon": "lock"} for entry in reserved]
+            or [{"text": "Nothing currently reserved.", "icon": "info"}],
+        ),
+    ]
+    if status_message:
+        sections.insert(
+            0,
+            _section(
+                "Shop Notice",
+                "task_alt" if status_tone == "good" else "info",
+                "lines",
+                lines=[status_message],
+                span="wide",
+            ),
+        )
 
     return _make_view(
         "Town Service",
-        "Brambleford Outfitters",
+        shop.get("name", "Shop"),
         eyebrow_icon="storefront",
-        title_icon="sell",
-        subtitle="Leda buys practical finds and pays in clean town silver.",
+        title_icon="shopping_bag",
+        subtitle=shop.get("summary", "A practical place to trade."),
         chips=chips,
-        actions=[] if bonus else [_action("Work Shift", "shift", "front_hand", tone="accent")],
-        sections=[
-            _section(
-                "Sell",
-                "sell",
-                "entries",
-                items=sellable_entries or [_entry("Nothing sellable right now.", icon="inventory_2")],
-            ),
-            _section(
-                "Reserved",
-                "assignment",
-                "list",
-                items=[{"text": f"{entry['name']} x{entry['reserved']}", "icon": "lock"} for entry in reserved]
-                or [{"text": "Nothing currently reserved.", "icon": "info"}],
-            ),
-        ],
+        actions=[],
+        sections=sections,
         back=True,
         reactive=_reactive_from_character(character, scene="service"),
     )
@@ -193,7 +285,7 @@ def build_cook_view(character, *, status_message=None, status_tone="muted"):
     for entry in (character.db.brave_inventory or []):
         template_id = entry.get("template")
         quantity = entry.get("quantity", 0)
-        item = ITEM_TEMPLATES.get(template_id, {})
+        item = _item_templates().get(template_id, {})
         if item.get("kind") != "meal" or quantity <= 0:
             continue
 
@@ -288,7 +380,8 @@ def build_fishing_view(character, *, status_message=None, status_tone="muted"):
     for lure_data in get_available_fishing_lures(character, include_locked=True):
         lure_key = lure_data["key"]
         selected = lure_key == active_lure_key
-        favored = ", ".join(ITEM_TEMPLATES[item_id]["name"] for item_id in lure_data.get("attracts", []) if item_id in ITEM_TEMPLATES)
+        templates = _item_templates()
+        favored = ", ".join(templates[item_id]["name"] for item_id in lure_data.get("attracts", []) if item_id in templates)
         lines = []
         if favored:
             lines.append("Favored: " + favored)
