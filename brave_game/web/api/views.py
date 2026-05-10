@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from django.http import HttpResponseNotAllowed, JsonResponse
 
@@ -25,7 +26,7 @@ from world.content.codex_contract import (
     touched_domains_for_mutations,
     validate_codex_mutations,
 )
-from world.content.health import build_draft_registry, creator_health_payload
+from world.content.health import build_draft_registry, creator_drift_payload, creator_health_payload
 from world.content.registry import build_content_registry_from_payloads, reload_content_registry
 from world.content.validation import validate_content_registry
 
@@ -125,7 +126,7 @@ def _reference_entries(domain, registry):
     if domain == "entities":
         return [{"id": entity.get("id"), "label": entity.get("key"), "meta": entity.get("kind"), "room_id": entity.get("location")} for entity in registry.world.entities]
     if domain == "items":
-        return [{"id": template_id, "label": item.get("name"), "meta": item.get("kind")} for template_id, item in registry.items.item_templates.items()]
+        return [{"id": template_id, "label": item.get("name"), "meta": item.get("kind"), "rarity": item.get("rarity", "common")} for template_id, item in registry.items.item_templates.items()]
     if domain == "classes":
         return [{"id": class_id, "label": class_data.get("name"), "meta": class_data.get("role")} for class_id, class_data in registry.characters.classes.items()]
     if domain == "races":
@@ -207,6 +208,19 @@ def _reference_entries(domain, registry):
                 "stock_count": len(shop.get("stock", []) or []),
             }
             for shop_id, shop in registry.systems.shops.items()
+        ]
+    if domain == "atmosphere-profiles":
+        from world.room_atmosphere import list_atmosphere_profiles
+
+        return [
+            {
+                "id": profile["id"],
+                "label": profile["label"],
+                "meta": f"{profile['intensity']} · {', '.join(profile['layers'])}".strip(" ·"),
+                "intensity": profile["intensity"],
+                "layers": profile["layers"],
+            }
+            for profile in list_atmosphere_profiles()
         ]
     raise KeyError(domain)
 
@@ -341,6 +355,45 @@ def content_health(request):
     return JsonResponse(creator_health_payload(stage=stage))
 
 
+def content_drift(request):
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+    if not _is_creator_authorized(getattr(request, "user", None)):
+        return _unauthorized_response()
+
+    return JsonResponse(creator_drift_payload())
+
+
+def content_reports(request):
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+    if not _is_creator_authorized(getattr(request, "user", None)):
+        return _unauthorized_response()
+
+    report_root = Path(__file__).resolve().parents[3] / "tmp" / "combat-simulation"
+    reports = []
+    for key, filename, label in (
+        ("act1_spine", "act1_spine.md", "Act 1 Spine"),
+        ("prose_voice", "prose_voice.md", "Prose and Voice"),
+        ("item_rarity", "item_rarity.md", "Item Rarity"),
+        ("combat_summary", "summary.md", "Combat Summary"),
+        ("resource_economy", "resource_economy.md", "Resource Economy"),
+    ):
+        path = report_root / filename
+        exists = path.exists()
+        reports.append(
+            {
+                "key": key,
+                "label": label,
+                "path": str(path),
+                "exists": exists,
+                "modified_at": path.stat().st_mtime if exists else None,
+                "content": path.read_text(encoding="utf-8")[:12000] if exists else "",
+            }
+        )
+    return JsonResponse({"ok": True, "reports": reports})
+
+
 def content_references(request, domain):
     if request.method != "GET":
         return HttpResponseNotAllowed(["GET"])
@@ -355,7 +408,7 @@ def content_references(request, domain):
 
     query = request.GET.get("q", "")
     limit = max(1, min(1000, int(request.GET.get("limit", DEFAULT_REFERENCE_LIMIT) or DEFAULT_REFERENCE_LIMIT)))
-    filtered = [entry for entry in entries if _match_query(entry.get("id"), query) or _match_query(entry.get("label"), query) or _match_query(entry.get("meta"), query)]
+    filtered = [entry for entry in entries if _match_query(entry.get("id"), query) or _match_query(entry.get("label"), query) or _match_query(entry.get("meta"), query) or _match_query(entry.get("rarity"), query)]
     filtered.sort(key=lambda entry: (str(entry.get("label") or ""), str(entry.get("id") or "")))
     return JsonResponse({"ok": True, "domain": domain, "count": len(filtered), "results": filtered[:limit]})
 

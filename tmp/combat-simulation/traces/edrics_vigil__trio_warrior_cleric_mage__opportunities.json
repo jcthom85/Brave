@@ -1,18 +1,18 @@
 {
-  "telegraph_windows": 3,
-  "telegraph_ticks": 6,
-  "interrupt_ready_ticks": 0,
+  "telegraph_windows": 4,
+  "telegraph_ticks": 11,
+  "interrupt_ready_ticks": 4,
   "interrupt_charging_zero_ticks": 4,
-  "interrupt_recovering_ticks": 0,
-  "interrupt_late_pending_ticks": 2,
+  "interrupt_recovering_ticks": 7,
+  "interrupt_late_pending_ticks": 4,
   "by_enemy": {
     "Sir Edric the Restless": {
-      "windows": 3,
-      "ticks": 6,
-      "interrupt_ready_ticks": 0,
+      "windows": 4,
+      "ticks": 11,
+      "interrupt_ready_ticks": 4,
       "interrupt_charging_zero_ticks": 4,
-      "interrupt_recovering_ticks": 0,
-      "interrupt_late_pending_ticks": 2
+      "interrupt_recovering_ticks": 7,
+      "interrupt_late_pending_ticks": 4
     }
   }
 }

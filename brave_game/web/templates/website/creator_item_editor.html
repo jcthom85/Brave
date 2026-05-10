@@ -80,7 +80,7 @@
     <section class="panel">
       <div class="panel-head"><h1>Item Builder</h1><p>Create gear, meals, materials, rewards, and usable items for Brave.</p></div>
       <div class="panel-body">
-        <input id="item-search" class="search" type="search" placeholder="Search items by id, name, or kind">
+        <input id="item-search" class="search" type="search" placeholder="Search items by id, name, kind, or rarity">
         <div id="item-list" class="item-list"></div>
       </div>
     </section>
@@ -110,6 +110,7 @@
             <div class="field"><label for="item-name">Item Name</label><input id="item-name" type="text"></div>
             <div class="field"><label for="item-kind">Kind</label><select id="item-kind"><option value="loot">loot</option><option value="equipment">equipment</option><option value="consumable">consumable</option><option value="ingredient">ingredient</option><option value="meal">meal</option></select></div>
             <div class="field"><label for="item-rarity">Rarity</label><select id="item-rarity"><option value="">Default/Common</option><option value="common">common</option><option value="uncommon">uncommon</option><option value="rare">rare</option><option value="epic">epic</option><option value="legendary">legendary</option><option value="story">story</option></select></div>
+            <div id="item-rarity-warning" class="status full" hidden>Act 1 should stay mostly common/uncommon. Use rare only for standout boss or capstone rewards; avoid epic/legendary unless it is story-only.</div>
             <div class="field"><label for="item-value">Value</label><input id="item-value" type="number" min="0" value="0"></div>
             <div class="field"><label for="item-stackable">Stackable</label><select id="item-stackable"><option value="false">No</option><option value="true">Yes</option></select></div>
             <div class="field full"><label for="item-summary">Summary</label><textarea id="item-summary" spellcheck="false"></textarea></div>
@@ -160,6 +161,7 @@
     const itemName = document.getElementById('item-name');
     const itemKind = document.getElementById('item-kind');
     const itemRarity = document.getElementById('item-rarity');
+    const itemRarityWarning = document.getElementById('item-rarity-warning');
     const itemSlot = document.getElementById('item-slot');
     const itemValue = document.getElementById('item-value');
     const itemStackable = document.getElementById('item-stackable');
@@ -281,16 +283,21 @@
     }
     function renderItems(filter = '') {
       const token = filter.trim().toLowerCase();
-      const filtered = items.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || '').toLowerCase().includes(token)));
+      const filtered = items.filter((entry) => !token || [entry.id, entry.label, entry.meta, entry.rarity].some((value) => String(value || '').toLowerCase().includes(token)));
       itemList.innerHTML = '';
       for (const entry of filtered) {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'item-row' + (selectedItem && entry.id === selectedItem.id ? ' active' : '');
-        button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id}${entry.meta ? ` · ${entry.meta}` : ''}</span>`;
+        const meta = [entry.id, entry.meta, entry.rarity].filter(Boolean).join(' · ');
+        button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${meta}</span>`;
         button.addEventListener('click', () => selectItem(entry));
         itemList.appendChild(button);
       }
+    }
+    function updateRarityWarning() {
+      const rarity = String(itemRarity.value || '').toLowerCase();
+      itemRarityWarning.hidden = !['rare', 'epic', 'legendary'].includes(rarity);
     }
     function parseAdvancedSource() {
       try {
@@ -402,6 +409,7 @@
       itemName.value = item.name || '';
       itemKind.value = item.kind || '';
       itemRarity.value = item.rarity || '';
+      updateRarityWarning();
       itemSlot.value = item.slot || '';
       itemValue.value = item.value || 0;
       itemStackable.value = item.stackable ? 'true' : 'false';
@@ -572,6 +580,7 @@
       if (itemSlot.value) payload.slot = itemSlot.value;
       if (Number(itemValue.value || 0) > 0) payload.value = Number(itemValue.value || 0);
       if (itemRarity.value) payload.rarity = itemRarity.value;
+      updateRarityWarning();
       if (Object.keys(bonuses).length) payload.bonuses = bonuses;
       if (Object.keys(restore).length) payload.restore = restore;
       if (Object.keys(mealBonuses).length) payload.meal_bonuses = mealBonuses;
@@ -693,6 +702,7 @@
     newItemButton.addEventListener('click', newItemDraft);
     diffItemButton.addEventListener('click', () => mutateItem(false));
     writeItemButton.addEventListener('click', () => mutateItem(true));
+    itemRarity.addEventListener('change', updateRarityWarning);
     validateButton.addEventListener('click', validateContent);
     reloadButton.addEventListener('click', reloadContent);
     addBonusButton.addEventListener('click', () => addStatRow(itemBonuses, '', 0, STAT_OPTIONS));

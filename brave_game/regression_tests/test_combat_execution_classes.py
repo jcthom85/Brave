@@ -109,6 +109,57 @@ class ClassExecutionTests(unittest.TestCase):
         self.assertIn("mends Wounded Ally for 11 HP", messages[1])
         self.assertIn("spills drowned lamp-light", messages[2])
 
+    def test_greymaw_large_party_pressure_adds_packmates_only_for_groups(self):
+        messages = []
+        spawned = []
+        saved = []
+        enemy = {
+            "id": "greymaw",
+            "template_key": "old_greymaw",
+            "key": "Old Greymaw",
+            "hp": 88,
+            "max_hp": 118,
+            "reposition_used": False,
+        }
+        encounter = SimpleNamespace(
+            db=SimpleNamespace(expected_party_size=3),
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: messages.append(message)),
+            _spawn_enemy=lambda template_key, display_key=None: spawned.append((template_key, display_key)),
+            _save_enemy=lambda current: saved.append(dict(current)),
+        )
+
+        BraveEncounter._handle_enemy_specials(encounter, enemy)
+
+        self.assertTrue(enemy["large_party_pressure"])
+        self.assertEqual(
+            [("forest_wolf", "Greymaw's Packmate"), ("forest_wolf", "Greymaw's Flanker")],
+            spawned,
+        )
+        self.assertTrue(any("wolves on both sides" in message for message in messages))
+        self.assertTrue(saved)
+
+    def test_boss_large_party_pressure_does_not_apply_to_solo(self):
+        spawned = []
+        enemy = {
+            "id": "greymaw",
+            "template_key": "old_greymaw",
+            "key": "Old Greymaw",
+            "hp": 88,
+            "max_hp": 118,
+            "reposition_used": False,
+        }
+        encounter = SimpleNamespace(
+            db=SimpleNamespace(expected_party_size=1),
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: None),
+            _spawn_enemy=lambda template_key, display_key=None: spawned.append((template_key, display_key)),
+            _save_enemy=lambda current: None,
+        )
+
+        BraveEncounter._handle_enemy_specials(encounter, enemy)
+
+        self.assertFalse(enemy.get("large_party_pressure"))
+        self.assertEqual([], spawned)
+
     def test_player_ability_announces_name_before_resolution(self):
         messages = []
         cleric = DummyFighter(1, "Tamsin", "cleric")
@@ -206,6 +257,45 @@ class ClassExecutionTests(unittest.TestCase):
 
         self.assertTrue(messages[0].startswith("|cTower Archer uses Aimed Shot!|n"))
         self.assertEqual("Tower Archer misses Peep.", messages[1])
+
+    def test_telegraphed_enemy_hit_splashes_pressure_in_large_party(self):
+        messages = []
+        contributions = []
+        fx = []
+        target = DummyFighter(2, "Peep", "warrior")
+        splash = DummyFighter(3, "Tamsin", "cleric")
+        enemy = {"id": "e1", "template_key": "tower_archer", "key": "Tower Archer", "accuracy": 99, "attack_power": 20, "attack_kind": "weapon"}
+        encounter = SimpleNamespace(
+            db=SimpleNamespace(expected_party_size=3),
+            obj=SimpleNamespace(msg_contents=lambda message, **_kwargs: messages.append(message)),
+            _announce_combat_action=lambda actor, label: BraveEncounter._announce_combat_action(encounter, actor, label),
+            _enemy_reaction_state=lambda current: {"telegraphed": True, "label": "Aimed Shot"},
+            _handle_enemy_specials=lambda current: current,
+            get_active_enemies=lambda: [enemy],
+            get_active_participants=lambda: [target, splash],
+            _choose_enemy_target=lambda current=None: target,
+            _get_participant_state=lambda actor: {"reaction_redirect_to": None, "reaction_label": None, "reaction_guard": 0, "guard": 0, "sacred_aegis_turns": 0},
+            _get_participant_target=lambda target_id: None,
+            _get_effective_derived=lambda actor: dict(actor.db.brave_derived_stats),
+            _roll_hit=lambda accuracy, dodge: True,
+            _weapon_damage=lambda attack_power, armor, bonus=0: 12 + bonus,
+            _roll_critical=lambda actor: False,
+            _record_telegraph_outcome=lambda current_enemy, outcome, **kwargs: None,
+            _record_participant_contribution=lambda actor, **kwargs: contributions.append((actor.key, kwargs)),
+            _emit_combat_fx=lambda **event: fx.append(event),
+            _save_companion=lambda companion: None,
+            _defeat_companion=lambda companion: None,
+            _defeat_character=lambda character: None,
+        )
+
+        with patch("world.combat_enemy_turns.random.choice", return_value=splash):
+            execute_enemy_turn(encounter, enemy)
+
+        self.assertEqual(18, target.db.brave_resources["hp"])
+        self.assertEqual(26, splash.db.brave_resources["hp"])
+        self.assertTrue(any("splashes pressure" in message for message in messages))
+        self.assertIn(("Tamsin", {"hits_taken": 4}), contributions)
+        self.assertEqual(2, len([event for event in fx if event.get("kind") == "damage"]))
 
     def test_warrior_strike_gains_control_bonus_on_marked_target(self):
         warrior = DummyFighter(1, "Rook", "warrior")

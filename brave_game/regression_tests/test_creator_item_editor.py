@@ -57,6 +57,8 @@ class CreatorItemEditorViewTests(unittest.TestCase):
         self.assertIn("Restore Effects", body)
         self.assertIn("Use Effect", body)
         self.assertIn("item-rarity", body)
+        self.assertIn("item-rarity-warning", body)
+        self.assertIn("Act 1 should stay mostly common/uncommon", body)
         self.assertIn("placement-hints", body)
         self.assertIn("item-link-grid", body)
         self.assertIn("Copy Link Payload", body)

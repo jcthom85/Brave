@@ -626,4 +626,6 @@ class CmdContent(BraveCharacterCommand):
 
     def _handle_reload(self):
         reload_content_registry()
-        self.msg("Content registry reloaded from pack files.")
+        from world.bootstrap import ensure_brave_world
+        ensure_brave_world(force=True)
+        self.msg("Content registry reloaded and world database synced (idempotent).")

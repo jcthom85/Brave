@@ -39,7 +39,7 @@ class CombatAtbTests(unittest.TestCase):
     def test_ability_profile_marks_large_spell_as_telegraphed(self):
         profile = get_ability_atb_profile(
             "meteorsigil",
-            {"class": "mage", "resource": "mana", "cost": 18, "target": "enemy"},
+            {"class": "mage", "resource": "mana", "cost": 28, "target": "enemy"},
         )
 
         self.assertEqual(2, profile["windup_ticks"])

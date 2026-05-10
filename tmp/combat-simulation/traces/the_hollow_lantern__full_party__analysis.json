@@ -4,66 +4,20 @@
       "enemy_id": "e1",
       "enemy_key": "The Hollow Lantern",
       "round_started": 4,
-      "round_ended": 5,
+      "round_ended": 4,
       "interruptible": true,
       "ticks": [
         {
           "round": 4,
-          "telegraph_ticks_remaining": 2,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
             {
               "key": "Warrior 1",
               "class": "warrior",
-              "phase": "recovering",
+              "phase": "winding",
               "ticks_remaining": 1,
-              "pending_action": {}
-            },
-            {
-              "key": "Cleric 2",
-              "class": "cleric",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            },
-            {
-              "key": "Mage 3",
-              "class": "mage",
-              "phase": "recovering",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            },
-            {
-              "key": "Ranger 4",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 0,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [
-            "Warrior 1:recovering:1",
-            "Mage 3:recovering:1"
-          ],
-          "messages_tail": [
-            "Ranger 4 hits The Hollow Lantern for 20 damage.",
-            "Warrior 1 hits The Hollow Lantern for 19 damage.",
-            "Mage 3 hits The Hollow Lantern for 16 damage.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
-          ]
-        },
-        {
-          "round": 5,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Warrior 1",
-              "class": "warrior",
-              "phase": "charging",
-              "ticks_remaining": 0,
               "pending_action": {}
             },
             {
@@ -77,28 +31,29 @@
               "key": "Mage 3",
               "class": "mage",
               "phase": "charging",
-              "ticks_remaining": 0,
-              "pending_action": {}
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "firebolt",
+                "target": "e1"
+              }
             },
             {
               "key": "Ranger 4",
               "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 2,
+              "phase": "recovering",
+              "ticks_remaining": 1,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [
-            "Warrior 1:charging:0",
-            "Mage 3:charging:0"
+            "Warrior 1:winding:1",
+            "Mage 3:charging:1"
           ],
           "messages_tail": [
-            "Ranger 4 hits The Hollow Lantern for 20 damage.",
-            "Warrior 1 hits The Hollow Lantern for 19 damage.",
-            "Mage 3 hits The Hollow Lantern for 16 damage.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits The Hollow Lantern for 17 damage."
+            "|cRanger 4 uses Mark Prey!|n",
+            "Ranger 4 fixes The Hollow Lantern as the quarry and marsh hound immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
           ]
         }
       ]
@@ -106,13 +61,13 @@
     {
       "enemy_id": "e1",
       "enemy_key": "The Hollow Lantern",
-      "round_started": 11,
-      "round_ended": 12,
+      "round_started": 9,
+      "round_ended": 10,
       "interruptible": true,
       "ticks": [
         {
-          "round": 11,
-          "telegraph_ticks_remaining": 2,
+          "round": 9,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
@@ -120,22 +75,34 @@
               "key": "Warrior 1",
               "class": "warrior",
               "phase": "charging",
-              "ticks_remaining": 0,
-              "pending_action": {}
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "strike",
+                "target": "e1"
+              }
             },
             {
               "key": "Cleric 2",
               "class": "cleric",
               "phase": "charging",
               "ticks_remaining": 1,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "ability",
+                "ability": "smite",
+                "target": "e1"
+              }
             },
             {
               "key": "Mage 3",
               "class": "mage",
               "phase": "charging",
-              "ticks_remaining": 0,
-              "pending_action": {}
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "firebolt",
+                "target": "e1"
+              }
             },
             {
               "key": "Ranger 4",
@@ -146,36 +113,32 @@
             }
           ],
           "unavailable_reasons": [
-            "Warrior 1:charging:0",
-            "Mage 3:charging:0"
+            "Warrior 1:charging:1",
+            "Mage 3:charging:2"
           ],
           "messages_tail": [
-            "Mage 3 hits The Hollow Lantern for 25 damage. Frost locks around its limbs.",
+            "Mage 3 hits The Hollow Lantern for 31 damage. The mark flares. Frost locks around its limbs.",
             "The Hollow Lantern is bound in frost.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits The Hollow Lantern for 24 damage. The mark flares. The hound worries the marked prey without letting it settle.",
-            "|rMarsh Hound opens fresh cuts across The Hollow Lantern!|n",
-            "|rThe Hollow Lantern bleeds for 2 damage.|n",
-            "Ranger 4 hits The Hollow Lantern for 21 damage.",
+            "|gMage 3's Frost Bind breaks The Hollow Lantern's Blackwater Flare.|n",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound misses The Hollow Lantern.",
+            "|cRanger 4 uses Mark Prey!|n",
+            "Ranger 4 fixes The Hollow Lantern as the quarry and marsh hound immediately picks up the line.",
             "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
           ]
         },
         {
-          "round": 12,
-          "telegraph_ticks_remaining": 1,
+          "round": 10,
+          "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": "Mage 3",
           "players": [
             {
               "key": "Warrior 1",
               "class": "warrior",
-              "phase": "charging",
-              "ticks_remaining": 3,
-              "pending_action": {
-                "kind": "ability",
-                "ability": "shieldbash",
-                "target": "e1"
-              }
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
             },
             {
               "key": "Cleric 2",
@@ -188,7 +151,7 @@
               "key": "Mage 3",
               "class": "mage",
               "phase": "charging",
-              "ticks_remaining": 3,
+              "ticks_remaining": 1,
               "pending_action": {
                 "kind": "ability",
                 "ability": "frostbind",
@@ -204,18 +167,18 @@
             }
           ],
           "unavailable_reasons": [
-            "Warrior 1:charging:3",
-            "Mage 3:charging:3"
+            "Warrior 1:recovering:1",
+            "Mage 3:charging:1"
           ],
           "messages_tail": [
-            "The Hollow Lantern is bound in frost.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits The Hollow Lantern for 24 damage. The mark flares. The hound worries the marked prey without letting it settle.",
-            "|rMarsh Hound opens fresh cuts across The Hollow Lantern!|n",
-            "|rThe Hollow Lantern bleeds for 2 damage.|n",
-            "Ranger 4 hits The Hollow Lantern for 21 damage.",
+            "|cRanger 4 uses Mark Prey!|n",
+            "Ranger 4 fixes The Hollow Lantern as the quarry and marsh hound immediately picks up the line.",
             "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "|rThe Hollow Lantern bleeds for 2 damage.|n"
+            "|cWarrior 1 uses Shield Bash!|n",
+            "Warrior 1's Shield Bash slams wide of The Hollow Lantern.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits The Hollow Lantern for 21 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across The Hollow Lantern!|n"
           ]
         }
       ]
@@ -223,21 +186,21 @@
     {
       "enemy_id": "e1",
       "enemy_key": "The Hollow Lantern",
-      "round_started": 18,
-      "round_ended": 19,
+      "round_started": 15,
+      "round_ended": 16,
       "interruptible": true,
       "ticks": [
         {
-          "round": 18,
-          "telegraph_ticks_remaining": 2,
+          "round": 15,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
             {
               "key": "Warrior 1",
               "class": "warrior",
-              "phase": "charging",
-              "ticks_remaining": 3,
+              "phase": "winding",
+              "ticks_remaining": 1,
               "pending_action": {}
             },
             {
@@ -245,49 +208,57 @@
               "class": "cleric",
               "phase": "charging",
               "ticks_remaining": 1,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "ability",
+                "ability": "smite",
+                "target": "e1"
+              }
             },
             {
               "key": "Mage 3",
               "class": "mage",
               "phase": "charging",
-              "ticks_remaining": 3,
-              "pending_action": {}
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "firebolt",
+                "target": "e1"
+              }
             },
             {
               "key": "Ranger 4",
               "class": "ranger",
               "phase": "charging",
-              "ticks_remaining": 1,
+              "ticks_remaining": 0,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [
-            "Warrior 1:charging:3",
-            "Mage 3:charging:3"
+            "Warrior 1:winding:1",
+            "Mage 3:charging:2"
           ],
           "messages_tail": [
-            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
-            "Warrior 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow. The impact staggers the target.",
-            "The Hollow Lantern is knocked off-balance.",
-            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
-            "Mage 3 hits The Hollow Lantern for 13 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
-            "The Hollow Lantern is bound in frost.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "Lamp Wisp hits Marsh Hound for 19 damage."
+            "|gMage 3's Frost Bind breaks The Hollow Lantern's Blackwater Flare.|n",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "|cRanger 4 uses Mark Prey!|n",
+            "Ranger 4 fixes The Hollow Lantern as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits The Hollow Lantern for 21 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across The Hollow Lantern!|n",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
           ]
         },
         {
-          "round": 19,
-          "telegraph_ticks_remaining": 1,
+          "round": 16,
+          "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
+          "interrupt_pending_actor": "Mage 3",
           "players": [
             {
               "key": "Warrior 1",
               "class": "warrior",
-              "phase": "charging",
-              "ticks_remaining": 2,
+              "phase": "recovering",
+              "ticks_remaining": 1,
               "pending_action": {}
             },
             {
@@ -301,13 +272,639 @@
               "key": "Mage 3",
               "class": "mage",
               "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "frostbind",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
               "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "Ranger 4 fixes The Hollow Lantern as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits The Hollow Lantern for 21 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across The Hollow Lantern!|n",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits The Hollow Lantern for 27 damage. The mark flares. The controlled target cannot shrug the blow off."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 21,
+      "round_ended": 22,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 21,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "smite",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "firebolt",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1",
+            "Mage 3:charging:2"
+          ],
+          "messages_tail": [
+            "|gMage 3's Frost Bind breaks The Hollow Lantern's Blackwater Flare.|n",
+            "|cRanger 4 uses Mark Prey!|n",
+            "Ranger 4 fixes The Hollow Lantern as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits The Hollow Lantern for 23 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across The Hollow Lantern!|n",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 22,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": "Mage 3",
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "frostbind",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits The Hollow Lantern for 23 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across The Hollow Lantern!|n",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits The Hollow Lantern for 23 damage. The controlled target cannot shrug the blow off."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 27,
+      "round_ended": 29,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 27,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "firebolt",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1",
+            "Mage 3:charging:2"
+          ],
+          "messages_tail": [
+            "|cRanger 4 uses Mark Prey!|n",
+            "Ranger 4 fixes The Hollow Lantern as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits The Hollow Lantern for 23 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across The Hollow Lantern!|n",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 28,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": "Mage 3",
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "frostbind",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "Marsh Hound hits The Hollow Lantern for 23 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across The Hollow Lantern!|n",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits The Hollow Lantern for 24 damage. The controlled target cannot shrug the blow off.",
+            "Cleric 2 hits The Hollow Lantern for 17 damage."
+          ]
+        },
+        {
+          "round": 29,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "recovering",
+              "ticks_remaining": 1,
               "pending_action": {}
             },
             {
               "key": "Ranger 4",
               "class": "ranger",
               "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0",
+            "Mage 3:recovering:1"
+          ],
+          "messages_tail": [
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits The Hollow Lantern for 24 damage. The controlled target cannot shrug the blow off.",
+            "Cleric 2 hits The Hollow Lantern for 17 damage.",
+            "|cMage 3 uses Frost Bind!|n",
+            "Mage 3's Frost Bind breaks apart before it can hold The Hollow Lantern.",
+            "|cRanger 4 uses Mark Prey!|n",
+            "Ranger 4 fixes The Hollow Lantern as the quarry and marsh hound immediately picks up the line."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 35,
+      "round_ended": 37,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 35,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e3"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0",
+            "Mage 3:winding:2"
+          ],
+          "messages_tail": [
+            "Ranger 4 fixes Blackwater Warder as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Blackwater Warder for 25 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Blackwater Warder!|n",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cLamp Wisp uses Lamp Light!|n",
+            "Lamp Wisp mends The Hollow Lantern for 11 HP.",
+            "|yLamp Wisp spills drowned lamp-light into The Hollow Lantern.|n"
+          ]
+        },
+        {
+          "round": 36,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": "Warrior 1",
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "shieldbash",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e3"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e2"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:3",
+            "Mage 3:winding:1"
+          ],
+          "messages_tail": [
+            "Marsh Hound hits Blackwater Warder for 25 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Blackwater Warder!|n",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cLamp Wisp uses Lamp Light!|n",
+            "Lamp Wisp mends The Hollow Lantern for 11 HP.",
+            "|yLamp Wisp spills drowned lamp-light into The Hollow Lantern.|n",
+            "|rBlackwater Warder bleeds for 2 damage.|n",
+            "Blackwater Warder hits Warrior 1 for 15 damage."
+          ]
+        },
+        {
+          "round": 37,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": "Warrior 1",
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "shieldbash",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e3"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "recovering",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e2"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:2",
+            "Mage 3:recovering:2"
+          ],
+          "messages_tail": [
+            "Lamp Wisp mends The Hollow Lantern for 11 HP.",
+            "|yLamp Wisp spills drowned lamp-light into The Hollow Lantern.|n",
+            "|rBlackwater Warder bleeds for 2 damage.|n",
+            "Blackwater Warder hits Warrior 1 for 15 damage.",
+            "|rBlackwater Warder bleeds for 2 damage.|n",
+            "|cMage 3 uses Arc Spark!|n",
+            "Mage 3 hits Lamp Wisp for 30 damage.",
+            "Mage 3 hits The Hollow Lantern for 7 damage. The ward absorbs part of the blow. Arc spark leaps to a second target."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 43,
+      "round_ended": 43,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 43,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e3"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "arcspark",
+                "target": "e3"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:2",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "|yWarrior 1 is tangled in webbing!|n",
+            "Warrior 1 tears free of the webbing.",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "Cleric 2 hits Lamp Wisp for 18 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cLamp Wisp uses Lamp Light!|n",
+            "Lamp Wisp mends The Hollow Lantern for 9 HP.",
+            "|yLamp Wisp spills drowned lamp-light into The Hollow Lantern.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 48,
+      "round_ended": 49,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 48,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e3"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e3"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "winding",
               "ticks_remaining": 1,
               "pending_action": {}
             }
@@ -317,152 +914,37 @@
             "Mage 3:charging:2"
           ],
           "messages_tail": [
-            "|cMage 3 uses Frost Bind!|n [[BRAVEFX kind=action&actor=Mage+3&label=Frost+Bind]]",
-            "Mage 3 hits The Hollow Lantern for 13 damage. The ward absorbs part of the blow. Frost locks around its limbs.",
-            "The Hollow Lantern is bound in frost.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "Lamp Wisp hits Marsh Hound for 19 damage.",
-            "Ranger 4 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
-            "Blackwater Warder hits Warrior 1 for 7 damage.",
-            "|yWarrior 1 is tangled in webbing!|n"
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "The Hollow Lantern",
-      "round_started": 25,
-      "round_ended": 26,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 25,
-          "telegraph_ticks_remaining": 2,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Warrior 1",
-              "class": "warrior",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            },
-            {
-              "key": "Cleric 2",
-              "class": "cleric",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            },
-            {
-              "key": "Mage 3",
-              "class": "mage",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            },
-            {
-              "key": "Ranger 4",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 2,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [
-            "Warrior 1:charging:1",
-            "Mage 3:charging:1"
-          ],
-          "messages_tail": [
-            "Ranger 4 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
-            "Marsh Hound shakes off the curse.",
-            "Blackwater Warder hits Warrior 1 for 9 damage.",
-            "|yWarrior 1 is tangled in webbing!|n",
-            "Warrior 1 tears free of the webbing.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Lamp Wisp for 16 damage.",
+            "Blackwater Warder hits Warrior 1 for 16 damage.",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "|cLamp Wisp uses Lamp Light!|n",
+            "Lamp Wisp mends The Hollow Lantern for 11 HP.",
+            "|yLamp Wisp spills drowned lamp-light into The Hollow Lantern.|n",
+            "Cleric 2 hits Lamp Wisp for 20 damage.",
+            "Lamp Wisp falls.",
             "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
           ]
         },
         {
-          "round": 26,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Warrior 1",
-              "class": "warrior",
-              "phase": "winding",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            },
-            {
-              "key": "Cleric 2",
-              "class": "cleric",
-              "phase": "winding",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            },
-            {
-              "key": "Mage 3",
-              "class": "mage",
-              "phase": "winding",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            },
-            {
-              "key": "Ranger 4",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [
-            "Warrior 1:winding:1",
-            "Mage 3:winding:1"
-          ],
-          "messages_tail": [
-            "Marsh Hound shakes off the curse.",
-            "Blackwater Warder hits Warrior 1 for 9 damage.",
-            "|yWarrior 1 is tangled in webbing!|n",
-            "Warrior 1 tears free of the webbing.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Lamp Wisp for 16 damage.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "Lamp Wisp hits Marsh Hound for 16 damage."
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "The Hollow Lantern",
-      "round_started": 31,
-      "round_ended": 32,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 31,
+          "round": 49,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
+          "interrupt_pending_actor": "Mage 3",
           "players": [
             {
               "key": "Warrior 1",
               "class": "warrior",
               "phase": "charging",
               "ticks_remaining": 1,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "attack",
+                "target": "e3"
+              }
             },
             {
               "key": "Cleric 2",
               "class": "cleric",
               "phase": "charging",
-              "ticks_remaining": 2,
+              "ticks_remaining": 0,
               "pending_action": {}
             },
             {
@@ -470,7 +952,11 @@
               "class": "mage",
               "phase": "charging",
               "ticks_remaining": 1,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "ability",
+                "ability": "frostbind",
+                "target": "e1"
+              }
             },
             {
               "key": "Ranger 4",
@@ -485,26 +971,91 @@
             "Mage 3:charging:1"
           ],
           "messages_tail": [
-            "Blackwater Warder hits Warrior 1 for 9 damage.",
-            "|yWarrior 1 is tangled in webbing!|n",
-            "Warrior 1 tears free of the webbing.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Lamp Wisp for 15 damage.",
-            "Lamp Wisp hits Marsh Hound for 16 damage.",
-            "Ranger 4 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+            "|cLamp Wisp uses Lamp Light!|n",
+            "Lamp Wisp mends The Hollow Lantern for 11 HP.",
+            "|yLamp Wisp spills drowned lamp-light into The Hollow Lantern.|n",
+            "Cleric 2 hits Lamp Wisp for 20 damage.",
+            "Lamp Wisp falls.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cRanger 4 uses Mark Prey!|n",
+            "Ranger 4 fixes The Hollow Lantern as the quarry and marsh hound immediately picks up the line."
           ]
-        },
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 54,
+      "round_ended": 56,
+      "interruptible": true,
+      "ticks": [
         {
-          "round": 32,
-          "telegraph_ticks_remaining": 1,
+          "round": 54,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
             {
               "key": "Warrior 1",
               "class": "warrior",
-              "phase": "winding",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1",
+            "Mage 3:charging:2"
+          ],
+          "messages_tail": [
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "Blackwater Warder hits Warrior 1 for 12 damage.",
+            "|yWarrior 1 is tangled in webbing!|n",
+            "Warrior 1 tears free of the webbing.",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "Cleric 2 hits Blackwater Warder for 19 damage.",
+            "Ranger 4 hits Blackwater Warder for 23 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 55,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
               "ticks_remaining": 1,
               "pending_action": {}
             },
@@ -512,13 +1063,143 @@
               "key": "Cleric 2",
               "class": "cleric",
               "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
             },
             {
               "key": "Mage 3",
               "class": "mage",
-              "phase": "winding",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "Warrior 1 tears free of the webbing.",
+            "|rThe Hollow Lantern bleeds for 2 damage.|n",
+            "Cleric 2 hits Blackwater Warder for 19 damage.",
+            "Ranger 4 hits Blackwater Warder for 23 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Warrior 1 hits Blackwater Warder for 22 damage.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Blackwater Warder for 15 damage."
+          ]
+        },
+        {
+          "round": 56,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0",
+            "Mage 3:recovering:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 hits Blackwater Warder for 19 damage.",
+            "Ranger 4 hits Blackwater Warder for 23 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Warrior 1 hits Blackwater Warder for 22 damage.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Blackwater Warder for 15 damage.",
+            "Mage 3 hits Blackwater Warder for 17 damage.",
+            "Blackwater Warder hits Warrior 1 for 15 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 62,
+      "round_ended": 64,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 62,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "recovering",
               "ticks_remaining": 1,
               "pending_action": {}
             },
@@ -531,31 +1212,22 @@
             }
           ],
           "unavailable_reasons": [
-            "Warrior 1:winding:1",
-            "Mage 3:winding:1"
+            "Warrior 1:charging:3",
+            "Mage 3:recovering:1"
           ],
           "messages_tail": [
-            "Blackwater Warder hits Warrior 1 for 9 damage.",
-            "|yWarrior 1 is tangled in webbing!|n",
-            "Warrior 1 tears free of the webbing.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Lamp Wisp for 15 damage.",
-            "Lamp Wisp hits Marsh Hound for 16 damage.",
-            "Ranger 4 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
+            "Cleric 2 hits Blackwater Warder for 16 damage.",
+            "Warrior 1 hits Blackwater Warder for 19 damage.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Blackwater Warder for 16 damage.",
+            "Ranger 4 hits Blackwater Warder for 21 damage.",
+            "Blackwater Warder hits Warrior 1 for 13 damage.",
+            "Mage 3 misses Blackwater Warder.",
             "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
           ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "The Hollow Lantern",
-      "round_started": 37,
-      "round_ended": 38,
-      "interruptible": true,
-      "ticks": [
+        },
         {
-          "round": 37,
+          "round": 63,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -564,21 +1236,24 @@
               "key": "Warrior 1",
               "class": "warrior",
               "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
             },
             {
               "key": "Cleric 2",
               "class": "cleric",
-              "phase": "charging",
-              "ticks_remaining": 2,
+              "phase": "recovering",
+              "ticks_remaining": 1,
               "pending_action": {}
             },
             {
               "key": "Mage 3",
               "class": "mage",
               "phase": "charging",
-              "ticks_remaining": 1,
+              "ticks_remaining": 0,
               "pending_action": {}
             },
             {
@@ -586,26 +1261,29 @@
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 2,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
             }
           ],
           "unavailable_reasons": [
-            "Warrior 1:charging:1",
-            "Mage 3:charging:1"
+            "Warrior 1:charging:2",
+            "Mage 3:charging:0"
           ],
           "messages_tail": [
-            "Blackwater Warder hits Warrior 1 for 7 damage.",
-            "|yWarrior 1 is tangled in webbing!|n",
-            "Lamp Wisp hits Marsh Hound for 17 damage.",
-            "Warrior 1 tears free of the webbing.",
-            "Ranger 4 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits The Hollow Lantern for 8 damage. The ward absorbs part of the blow.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Blackwater Warder for 16 damage.",
+            "Ranger 4 hits Blackwater Warder for 21 damage.",
+            "Blackwater Warder hits Warrior 1 for 13 damage.",
+            "Mage 3 misses Blackwater Warder.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Cleric 2 hits Blackwater Warder for 18 damage.",
+            "Blackwater Warder falls."
           ]
         },
         {
-          "round": 38,
+          "round": 64,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -613,7 +1291,75 @@
             {
               "key": "Warrior 1",
               "class": "warrior",
-              "phase": "winding",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 4,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1",
+            "Mage 3:charging:4"
+          ],
+          "messages_tail": [
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Blackwater Warder for 16 damage.",
+            "Ranger 4 hits Blackwater Warder for 21 damage.",
+            "Blackwater Warder hits Warrior 1 for 13 damage.",
+            "Mage 3 misses Blackwater Warder.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Cleric 2 hits Blackwater Warder for 18 damage.",
+            "Blackwater Warder falls."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 70,
+      "round_ended": 72,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 70,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
               "ticks_remaining": 1,
               "pending_action": {}
             },
@@ -621,37 +1367,164 @@
               "key": "Cleric 2",
               "class": "cleric",
               "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
             },
             {
               "key": "Mage 3",
               "class": "mage",
-              "phase": "winding",
-              "ticks_remaining": 1,
+              "phase": "charging",
+              "ticks_remaining": 4,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
               "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1",
+            "Mage 3:charging:4"
+          ],
+          "messages_tail": [
+            "|rThe Hollow Lantern's Blackwater Flare splashes pressure across Mage 3 for 10 damage.|n",
+            "Cleric 2 hits The Hollow Lantern for 14 damage.",
+            "Mage 3 hits The Hollow Lantern for 15 damage.",
+            "Ranger 4 hits The Hollow Lantern for 19 damage.",
+            "Warrior 1 hits The Hollow Lantern for 17 damage.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits The Hollow Lantern for 13 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 71,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0",
+            "Mage 3:charging:3"
+          ],
+          "messages_tail": [
+            "|rThe Hollow Lantern's Blackwater Flare splashes pressure across Mage 3 for 10 damage.|n",
+            "Cleric 2 hits The Hollow Lantern for 14 damage.",
+            "Mage 3 hits The Hollow Lantern for 15 damage.",
+            "Ranger 4 hits The Hollow Lantern for 19 damage.",
+            "Warrior 1 hits The Hollow Lantern for 17 damage.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits The Hollow Lantern for 13 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 72,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
             },
             {
               "key": "Ranger 4",
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 1,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
             }
           ],
           "unavailable_reasons": [
-            "Warrior 1:winding:1",
-            "Mage 3:winding:1"
+            "Warrior 1:charging:3",
+            "Mage 3:charging:2"
           ],
           "messages_tail": [
-            "Lamp Wisp hits Marsh Hound for 17 damage.",
-            "Warrior 1 tears free of the webbing.",
-            "Ranger 4 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits The Hollow Lantern for 8 damage. The ward absorbs part of the blow.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "Lamp Wisp hits Marsh Hound for 18 damage.",
-            "Marsh Hound is driven out of the fight."
+            "|rThe Hollow Lantern's Blackwater Flare splashes pressure across Mage 3 for 10 damage.|n",
+            "Cleric 2 hits The Hollow Lantern for 14 damage.",
+            "Mage 3 hits The Hollow Lantern for 15 damage.",
+            "Ranger 4 hits The Hollow Lantern for 19 damage.",
+            "Warrior 1 hits The Hollow Lantern for 17 damage.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits The Hollow Lantern for 13 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
           ]
         }
       ]
@@ -659,7 +1532,43 @@
   ],
   "interrupt_windows": [
     {
-      "round": 12,
+      "round": 10,
+      "enemy_key": "The Hollow Lantern",
+      "interrupt_ready_actor": null,
+      "interrupt_pending_actor": "Mage 3"
+    },
+    {
+      "round": 16,
+      "enemy_key": "The Hollow Lantern",
+      "interrupt_ready_actor": null,
+      "interrupt_pending_actor": "Mage 3"
+    },
+    {
+      "round": 22,
+      "enemy_key": "The Hollow Lantern",
+      "interrupt_ready_actor": null,
+      "interrupt_pending_actor": "Mage 3"
+    },
+    {
+      "round": 28,
+      "enemy_key": "The Hollow Lantern",
+      "interrupt_ready_actor": null,
+      "interrupt_pending_actor": "Mage 3"
+    },
+    {
+      "round": 36,
+      "enemy_key": "The Hollow Lantern",
+      "interrupt_ready_actor": null,
+      "interrupt_pending_actor": "Warrior 1"
+    },
+    {
+      "round": 37,
+      "enemy_key": "The Hollow Lantern",
+      "interrupt_ready_actor": null,
+      "interrupt_pending_actor": "Warrior 1"
+    },
+    {
+      "round": 49,
       "enemy_key": "The Hollow Lantern",
       "interrupt_ready_actor": null,
       "interrupt_pending_actor": "Mage 3"

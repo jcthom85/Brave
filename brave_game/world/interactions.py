@@ -301,10 +301,10 @@ def get_entity_response(character, entity, action, is_action=False):
             if is_action and response:
                 advance_read_readable(character, entity_id)
 
-            return response
-
             if response and extra:
                 response += "\n\n" + extra
+
+            return response
 
     if is_action and action == "talk" and response:
         speech_line = " ".join(str(response).replace("\n", " ").split())

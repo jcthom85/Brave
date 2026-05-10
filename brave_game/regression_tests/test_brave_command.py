@@ -274,6 +274,16 @@ class BraveCharacterCommandTests(unittest.TestCase):
         self.assertNotIn("10 - Great Frontier - Shackles", labels)
         self.assertEqual("Stop Movie", labels[-1])
 
+    def test_repaired_movie_picker_defaults_to_first_reel(self):
+        character = SimpleNamespace(db=SimpleNamespace(brave_quests={"repair_the_picture_house": {"status": "completed"}}))
+
+        picker = build_movie_picker(character)
+        labels = [option["label"] for option in picker["options"]]
+
+        self.assertIn("Unpayable Debt", labels)
+        self.assertNotIn("Shackles", labels)
+        self.assertEqual([1], character.db.brave_unlocked_movies)
+
     def test_movie_view_renders_visible_title_cards(self):
         movie = GREAT_FRONTIER_MOVIES[-1]
         view = build_movie_view(movie)
@@ -295,7 +305,11 @@ class BraveCharacterCommandTests(unittest.TestCase):
             contents=[],
             db=SimpleNamespace(brave_activities=["movie_theater"], brave_rest_allowed=False, brave_room_id="brambleford_frontier_picture_house"),
         )
-        viewer = SimpleNamespace(location=room, db=SimpleNamespace(), ndb=SimpleNamespace())
+        viewer = SimpleNamespace(
+            location=room,
+            db=SimpleNamespace(brave_quests={"repair_the_picture_house": {"status": "completed"}}),
+            ndb=SimpleNamespace(),
+        )
 
         actions = _format_room_context_action_items(room, viewer)
         movie_action = next(action for action in actions if action["text"] == "Watch Movies")
@@ -319,12 +333,64 @@ class BraveCharacterCommandTests(unittest.TestCase):
 
         self.assertEqual(["You need to be in Brambleford's Frontier Picture House to watch Great Frontier movies."], sent)
 
+    def test_movie_command_requires_repaired_projector(self):
+        command = object.__new__(CmdMovie)
+        room = SimpleNamespace(db=SimpleNamespace(brave_activities=["movie_theater"]))
+        character = SimpleNamespace(key="Dad", location=room, db=SimpleNamespace())
+        character.ensure_brave_character = lambda: character
+        command.session = None
+        command.caller = character
+        command.args = "1"
+        command.get_encounter = lambda *_args, **_kwargs: None
+
+        sent = []
+        command.msg = lambda message=None, **_kwargs: sent.append(str(message))
+
+        command.func()
+
+        self.assertEqual(
+            ["The picture house projector is missing its brass focus gear. You'll need to help Joss Veller in the Mender's Shed repair it before any movies can be shown."],
+            sent,
+        )
+
+    def test_movie_command_reports_locked_reel(self):
+        command = object.__new__(CmdMovie)
+        room = SimpleNamespace(db=SimpleNamespace(brave_activities=["movie_theater"]))
+        character = SimpleNamespace(
+            key="Dad",
+            location=room,
+            db=SimpleNamespace(brave_quests={"repair_the_picture_house": {"status": "completed"}}),
+        )
+        character.ensure_brave_character = lambda: character
+        command.session = None
+        command.caller = character
+        command.args = "shackles"
+        command.get_encounter = lambda *_args, **_kwargs: None
+
+        sent = []
+        command.msg = lambda message=None, **_kwargs: sent.append(str(message))
+
+        command.func()
+
+        self.assertEqual(
+            ["That movie reel (|cShackles|n) isn't loaded into the projector yet. You'll need to find it and bring it here first."],
+            sent,
+        )
+
     def test_movie_command_sends_private_browser_audio_event(self):
         web_session = SimpleNamespace(protocol_key="websocket")
         command = object.__new__(CmdMovie)
         room = SimpleNamespace(db=SimpleNamespace(brave_activities=["movie_theater"]))
         sent_to_character = []
-        character = SimpleNamespace(key="Dad", location=room, db=SimpleNamespace(), sessions=_DummySessions([web_session]))
+        character = SimpleNamespace(
+            key="Dad",
+            location=room,
+            db=SimpleNamespace(
+                brave_quests={"repair_the_picture_house": {"status": "completed"}},
+                brave_unlocked_movies=[10],
+            ),
+            sessions=_DummySessions([web_session]),
+        )
         character.ensure_brave_character = lambda: character
         character.msg = lambda *args, **kwargs: sent_to_character.append({"args": args, "kwargs": kwargs})
         command.session = web_session
@@ -365,7 +431,14 @@ class BraveCharacterCommandTests(unittest.TestCase):
     def test_movie_command_text_client_shows_title_cards(self):
         command = object.__new__(CmdMovie)
         room = SimpleNamespace(db=SimpleNamespace(brave_activities=["movie_theater"]))
-        character = SimpleNamespace(key="Dad", location=room, db=SimpleNamespace())
+        character = SimpleNamespace(
+            key="Dad",
+            location=room,
+            db=SimpleNamespace(
+                brave_quests={"repair_the_picture_house": {"status": "completed"}},
+                brave_unlocked_movies=[10],
+            ),
+        )
         character.ensure_brave_character = lambda: character
         command.session = None
         command.caller = character

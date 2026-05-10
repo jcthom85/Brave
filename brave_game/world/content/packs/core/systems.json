@@ -1,4 +1,11 @@
 {
+  "_meta": {
+    "last_action": "publish",
+    "last_modified_at": "2026-05-07T23:46:13.912426+00:00",
+    "last_modified_by": "jctest3",
+    "last_target": "systems",
+    "stage": "live"
+  },
   "activities": {
     "cooking_recipes": {
       "crisped_perch_plate": {

@@ -25,7 +25,14 @@ put secret game- or server-specific settings in secret_settings.py.
 """
 
 # Use the defaults from Evennia unless explicitly overridden
+from pathlib import Path
+
 from evennia.settings_default import *
+
+BRAVE_GAME_DIR = Path(__file__).resolve().parents[2]
+BRAVE_TEMPLATE_DIR = BRAVE_GAME_DIR / "web" / "templates"
+if BRAVE_TEMPLATE_DIR.exists():
+    TEMPLATES[0]["DIRS"] = [str(BRAVE_TEMPLATE_DIR), *TEMPLATES[0].get("DIRS", [])]
 
 ######################################################################
 # Evennia base server config

@@ -86,7 +86,7 @@
 <body>
   <div class="shell">
     <section class="panel">
-      <div class="panel-head"><h1>Encounter Builder</h1><p>Build room fights, enemy templates, and roaming threats without editing source by default.</p></div>
+      <div class="panel-head"><h1>Encounter Builder</h1><p>Build room fights, enemy templates, and roaming threats without editing source by default. Check combat summary risk buckets after changing late Act 1 pressure.</p></div>
       <div class="panel-body stack">
         <div class="browser-section">
           <h2>Rooms</h2>
@@ -466,7 +466,7 @@
 
     function renderList(container, entries, selectedId, filter, onSelect) {
       const token = filter.trim().toLowerCase();
-      const filtered = entries.filter((entry) => !token || [entry.id, entry.label, entry.meta, entry.region, entry.start_room].some((value) => String(value || '').toLowerCase().includes(token)));
+      const filtered = entries.filter((entry) => !token || [entry.id, entry.label, entry.meta, entry.region, entry.start_room, entry.rarity].some((value) => String(value || '').toLowerCase().includes(token)));
       container.innerHTML = '';
       for (const entry of filtered) {
         const button = document.createElement('button');

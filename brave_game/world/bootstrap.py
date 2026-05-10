@@ -54,6 +54,8 @@ def _ensure_room(room_data):
     room.db.brave_rest_allowed = bool(room_data.get("rest_allowed", False))
     room.db.brave_activities = list(room_data.get("activities", []))
     room.db.brave_portal_hub = bool(room_data.get("portal_hub", False))
+    if "atmosphere" in room_data:
+        room.db.brave_atmosphere = room_data.get("atmosphere")
     room.tags.add(room_data["id"], category=ROOM_TAG_CATEGORY)
     room.save()
     return room
@@ -134,25 +136,60 @@ def _ensure_world_object(entity_data, rooms_by_id):
 
 
 def ensure_brave_world(force=False):
-    """Create or repair the first Brave world slice."""
-
-    if not force and get_room("brambleford_town_green"):
-        return None
+    """Create or repair the Brave world slice, pruning orphaned content."""
 
     try:
+        # 1. Sync all active content
         rooms_by_id = {room_data["id"]: _ensure_room(room_data) for room_data in WORLD_CONTENT.rooms}
-        start_room = rooms_by_id["brambleford_town_green"]
+        start_room = rooms_by_id.get("brambleford_town_green")
+        
         for room in rooms_by_id.values():
             if room == start_room:
                 room.home = start_room
             elif not room.home:
                 room.home = start_room
             room.save()
+            
         for exit_data in WORLD_CONTENT.exits:
             _ensure_exit(exit_data, rooms_by_id)
+            
         for entity_data in WORLD_CONTENT.entities:
             _ensure_world_object(entity_data, rooms_by_id)
+
+        # 2. Prune orphaned content (objects with brave tags not in the current packs)
+        _prune_orphaned_world_content(rooms_by_id)
+
         return rooms_by_id
     except Exception:
         logger.log_trace("Brave world bootstrap failed.")
         raise
+
+
+def _prune_orphaned_world_content(rooms_by_id):
+    """Delete world objects that are tagged as Brave content but no longer in the packs."""
+
+    # We use sets for O(1) lookups during pruning
+    active_room_ids = set(rooms_by_id.keys())
+    active_exit_ids = {exit_data["id"] for exit_data in WORLD_CONTENT.exits}
+    active_entity_ids = {ent_data["id"] for ent_data in WORLD_CONTENT.entities}
+
+    # Prune Exits first (so they don't point to rooms we are about to delete)
+    for exit_obj in search.search_tag(category=EXIT_TAG_CATEGORY):
+        exit_id = exit_obj.tags.get(category=EXIT_TAG_CATEGORY)
+        if exit_id not in active_exit_ids:
+            logger.log_info(f"Pruning orphaned Brave exit: {exit_obj.key} ({exit_id})")
+            exit_obj.delete()
+
+    # Prune Entities
+    for entity_obj in search.search_tag(category=ENTITY_TAG_CATEGORY):
+        entity_id = entity_obj.tags.get(category=ENTITY_TAG_CATEGORY)
+        if entity_id not in active_entity_ids:
+            logger.log_info(f"Pruning orphaned Brave entity: {entity_obj.key} ({entity_id})")
+            entity_obj.delete()
+
+    # Prune Rooms last
+    for room_obj in search.search_tag(category=ROOM_TAG_CATEGORY):
+        room_id = room_obj.tags.get(category=ROOM_TAG_CATEGORY)
+        if room_id not in active_room_ids:
+            logger.log_info(f"Pruning orphaned Brave room: {room_obj.key} ({room_id})")
+            room_obj.delete()

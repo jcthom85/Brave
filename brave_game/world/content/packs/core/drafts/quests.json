@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "last_action": "upsert",
-    "last_modified_at": "2026-05-07T20:22:16.645533+00:00",
-    "last_modified_by": "codex-cli",
-    "last_target": "clamp_marks_under_blackwater",
-    "stage": "draft"
+    "last_action": "publish",
+    "last_modified_at": "2026-05-07T23:46:13.896988+00:00",
+    "last_modified_by": "jctest3",
+    "last_target": "quests",
+    "stage": "live"
   },
   "quest_regions": {
     "bell_before_the_road": "Brambleford",
@@ -30,6 +30,7 @@
     "practice_makes_heroes": "Brambleford",
     "rails_for_the_return": "Goblin Road",
     "rats_in_the_kettle": "Brambleford",
+    "repair_the_picture_house": "Brambleford",
     "roadside_howls": "Goblin Road",
     "ruk_the_fence_cutter": "Goblin Road",
     "signal_in_the_scrap": "Drowned Weir",
@@ -46,6 +47,7 @@
   "quests": {
     "bell_before_the_road": {
       "giver": "Brother Alden",
+      "next_step": "After the Dawn Bell steadies the town, follow the East Gate trouble toward Mira and the cut road.",
       "objectives": [
         {
           "description": "Speak with Brother Alden at the Chapel of the Dawn Bell.",
@@ -71,6 +73,7 @@
     },
     "below_the_fencebreakers": {
       "giver": "Mira Fenleaf",
+      "next_step": "Push through Torchgut Tunnel and the Sludge Run to learn how deep the road-cutters' warrens go.",
       "objectives": [
         {
           "description": "Find the hidden Sinkmouth Cut east of Fencebreaker Camp.",
@@ -101,6 +104,7 @@
     },
     "bogwater_rumors": {
       "giver": "Mira Fenleaf",
+      "next_step": "Follow Fenreach Track into the Blackfen edge, then survey the bad lights and hunting ground beyond it.",
       "objectives": [
         {
           "description": "Take the south trail from Fencebreaker Camp into Blackfen.",
@@ -157,6 +161,7 @@
     },
     "captain_varn_blackreed": {
       "giver": "Captain Harl Rowan",
+      "next_step": "Return Blackreed's standard to Harl or the Trophy Hall, then watch where the town's attention turns next.",
       "objectives": [
         {
           "description": "Reach Blackreed's Roost at the top of the tower.",
@@ -173,6 +178,12 @@
         "loose_arrows"
       ],
       "rewards": {
+        "items": [
+          {
+            "item": "blackreed_standard_trophy",
+            "quantity": 1
+          }
+        ],
         "silver": 28,
         "trophies": [
           "blackreed_battle_standard"
@@ -252,6 +263,7 @@
     },
     "do_not_disturb_the_dead": {
       "giver": "Brother Alden",
+      "next_step": "Return to Brother Alden with the field quieted, then press toward the old knight if the barrow lights keep answering.",
       "objectives": [
         {
           "description": "Reach the Barrow Circle deeper in the field.",
@@ -326,6 +338,7 @@
     },
     "greymaws_trail": {
       "giver": "Mira Fenleaf",
+      "next_step": "Return from Greymaw's Hollow, then check the west road and chapel when the lanterns begin failing at dusk.",
       "objectives": [
         {
           "description": "Find Greymaw's Hollow beneath the split oak.",
@@ -349,6 +362,7 @@
     },
     "gutters_and_hexes": {
       "giver": "Mira Fenleaf",
+      "next_step": "Keep pushing through the warrens toward the Feast Hall and the Pot-King's court.",
       "objectives": [
         {
           "description": "Reach the Sludge Run deeper in the warrens.",
@@ -374,6 +388,7 @@
     },
     "herbs_for_sister_maybelle": {
       "giver": "Sister Maybelle",
+      "next_step": "Bring the herbs back to Sister Maybelle, then keep tracking the deeper trouble in Whispering Woods.",
       "objectives": [
         {
           "count": 3,
@@ -399,6 +414,7 @@
     },
     "lanterns_at_dusk": {
       "giver": "Mayor Elric Thorne",
+      "next_step": "Cross into Old Barrow Field, quiet the restless dead, and bring Brother Alden proof before fear becomes doctrine.",
       "objectives": [
         {
           "description": "Report to Mayor Elric Thorne in Mayor's Hall.",
@@ -434,6 +450,7 @@
     },
     "lights_in_the_reeds": {
       "giver": "Mira Fenleaf",
+      "next_step": "Bring the Blackfen survey back to Mira, then press toward the deeper wallow and whatever is moving the reed marks.",
       "objectives": [
         {
           "description": "Reach Carrion Rise at the far side of the fen track.",
@@ -490,6 +507,7 @@
     },
     "loose_arrows": {
       "giver": "Captain Harl Rowan",
+      "next_step": "Take Harl's warning north through the ridge approach and find the tower crew behind the loose arrows.",
       "objectives": [
         {
           "description": "Reach Archer's Ledge beside the tower yard.",
@@ -700,6 +718,34 @@
       "summary": "Drive the alarm-spooked thorn rats out of the inn cellar before they chew through supplies the town may need.",
       "title": "Rats in the Kettle"
     },
+    "repair_the_picture_house": {
+      "giver": "Joss Veller",
+      "next_step": "Return to the Frontier Picture House and use movie to see the repaired Great Frontier program.",
+      "objectives": [
+        {
+          "description": "Search the Lower Lanternworks for the missing projector focus gear.",
+          "room_id": "brambleford_lower_lanternworks",
+          "type": "visit_room"
+        },
+        {
+          "description": "Report the recovered focus gear to Joss Veller.",
+          "npc_id": "joss_veller",
+          "type": "talk_to_npc"
+        }
+      ],
+      "rewards": {
+        "items": [
+          {
+            "item": "brass_focus_gear",
+            "quantity": 1
+          }
+        ],
+        "silver": 10,
+        "xp": 50
+      },
+      "summary": "Help Joss Veller repair the Picture House projector by finding the missing brass focus gear.",
+      "title": "Repair the Picture House"
+    },
     "roadside_howls": {
       "giver": "Mira Fenleaf",
       "next_step": "Follow the cut fences east and thin the goblin cutters still working along Goblin Road.",
@@ -763,6 +809,10 @@
           {
             "item": "boar_keeper_charm",
             "quantity": 1
+          },
+          {
+            "item": "broken_fence_cutter_axe",
+            "quantity": 1
           }
         ],
         "silver": 18,
@@ -804,6 +854,7 @@
     },
     "smoke_on_the_ridge": {
       "giver": "Captain Harl Rowan",
+      "next_step": "Climb toward the ruined watchtower, recover a cleaner tally, and keep Blackreed from turning the ridge into a toll gate.",
       "objectives": [
         {
           "description": "Reach the Watchtower Approach beyond Fencebreaker Camp.",
@@ -855,7 +906,7 @@
     "the_hollow_lantern": {
       "chapter_complete": "Brambleford's First Hard Chapter",
       "giver": "Joss Veller",
-      "next_step": "Return to Joss, Mayor Elric, or the Trophy Hall and take the win for what it is: the end of Brambleford's first hard chapter.",
+      "next_step": "Return to Joss at the observatory, carry the prism to the Trophy Hall, and let Mayor Elric hear the south line is dark. Brambleford has not been saved forever, but its first hard chapter is closed.",
       "objectives": [
         {
           "description": "Reach the Blackwater Lamp House beyond the drowned lock line.",
@@ -883,6 +934,7 @@
     },
     "the_knight_without_rest": {
       "giver": "Brother Alden",
+      "next_step": "Return Edric's signet to Brother Alden or the Trophy Hall, then follow the eastern trouble if the road still points below the fencebreakers.",
       "objectives": [
         {
           "description": "Find the Sunken Dais at the heart of Old Barrow Field.",
@@ -913,6 +965,7 @@
     },
     "the_pot_kings_feast": {
       "giver": "Mira Fenleaf",
+      "next_step": "Take the battered lid to the Trophy Hall, then follow Blackfen rumors south where the stolen road signs stop making sense.",
       "objectives": [
         {
           "description": "Reach the Pot-King's Court at the heart of the warrens.",
@@ -929,6 +982,12 @@
         "gutters_and_hexes"
       ],
       "rewards": {
+        "items": [
+          {
+            "item": "pot_king_crown_trophy",
+            "quantity": 1
+          }
+        ],
         "silver": 34,
         "trophies": [
           "potking_battered_lid"

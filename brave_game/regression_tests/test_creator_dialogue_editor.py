@@ -45,6 +45,7 @@ class CreatorDialogueEditorViewTests(unittest.TestCase):
         body = response.content.decode("utf-8")
         self.assertEqual(200, response.status_code)
         self.assertIn("Dialogue Builder", body)
+        self.assertIn("prose/voice audit", body)
         self.assertIn("Dialogue Guide", body)
         self.assertIn("NPC Greeting", body)
         self.assertIn("Quest Giver", body)

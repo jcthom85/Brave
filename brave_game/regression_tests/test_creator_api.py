@@ -94,6 +94,30 @@ class CreatorApiTests(unittest.TestCase):
         self.assertTrue(payload["readiness"])
         self.assertIn("recommended_next_actions", payload)
 
+    def test_drift_reports_draft_live_domain_state(self):
+        request = self.factory.get("/api/content/drift")
+        request.user = self.user
+        response = views.content_drift(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertTrue(payload["ok"])
+        self.assertIn("domains", payload)
+        world = next(entry for entry in payload["domains"] if entry["domain"] == "world")
+        self.assertIn("draft_exists", world)
+        self.assertIn("changed", world)
+        self.assertIn("live_modified_at", world)
+
+    def test_reports_returns_known_audit_report_slots(self):
+        request = self.factory.get("/api/content/reports")
+        request.user = self.user
+        response = views.content_reports(request)
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertTrue(payload["ok"])
+        keys = {report["key"] for report in payload["reports"]}
+        self.assertIn("act1_spine", keys)
+        self.assertIn("combat_summary", keys)
+
     def test_reference_search_returns_room_matches(self):
         request = self.factory.get("/api/content/references/rooms", {"q": "green", "limit": 5})
         request.user = self.user
@@ -136,6 +160,15 @@ class CreatorApiTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual("cooking-recipes", payload["domain"])
         self.assertTrue(payload["results"])
+
+    def test_reference_search_returns_atmosphere_profiles(self):
+        request = self.factory.get("/api/content/references/atmosphere-profiles", {"q": "chapel", "limit": 5})
+        request.user = self.user
+        response = views.content_references(request, "atmosphere-profiles")
+        payload = json.loads(response.content)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("atmosphere-profiles", payload["domain"])
+        self.assertTrue(any(entry["id"] == "chapel_lamplight" for entry in payload["results"]))
 
     def test_reference_search_returns_shops(self):
         request = self.factory.get("/api/content/references/shops", {"limit": 5})

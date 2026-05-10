@@ -3,6 +3,7 @@
 from world.browser_context import ENEMY_TEMPLATES
 from world.data.world_tones import get_world_tone_key
 from world.enemy_icons import get_enemy_icon_name
+from world.room_atmosphere import get_room_atmosphere
 
 def _display_name(obj):
     display_name = getattr(getattr(obj, "db", None), "brave_display_name", None)
@@ -393,6 +394,9 @@ def _reactive_view(source=None, *, scene="system", danger=None, boss=False):
     source_id = getattr(source_db, "brave_room_id", None) or getattr(source, "id", None)
     if source_id is not None:
         reactive["source_id"] = str(source_id)
+    atmosphere = get_room_atmosphere(source)
+    if atmosphere:
+        reactive["atmosphere"] = atmosphere["key"]
     if danger:
         reactive["danger"] = danger
     if boss:

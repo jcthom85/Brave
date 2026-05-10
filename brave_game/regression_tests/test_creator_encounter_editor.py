@@ -45,6 +45,7 @@ class CreatorEncounterEditorViewTests(unittest.TestCase):
         body = response.content.decode("utf-8")
         self.assertEqual(200, response.status_code)
         self.assertIn("Encounter Builder", body)
+        self.assertIn("combat summary risk buckets", body)
         self.assertIn("Encounter Guide", body)
         self.assertIn("Room Fight", body)
         self.assertIn("Quest Combat", body)

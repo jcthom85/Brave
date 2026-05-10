@@ -39,12 +39,15 @@ class ContentEditorTests(unittest.TestCase):
                 "desc": "A temporary room for editor coverage.",
                 "zone": "Testing",
                 "world": "Brave",
+                "atmosphere": "chapel_lamplight",
             },
             write=False,
         )
 
         room_ids = [room["id"] for room in mutation.payload["rooms"]]
         self.assertIn("creator_test_room", room_ids)
+        room = next(room for room in mutation.payload["rooms"] if room["id"] == "creator_test_room")
+        self.assertEqual("chapel_lamplight", room["atmosphere"])
         self.assertIn("Creator Test Room", mutation.diff)
 
     def test_upsert_quest_updates_region_and_starting_state(self):

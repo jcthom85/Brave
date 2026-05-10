@@ -14,6 +14,8 @@ GREAT_FRONTIER_MOVIES = (
         "runtime_sec": 289,
         "cards": (
             "Alex grieves on his family farm while a mysterious man in black arrives searching for a girl.",
+            "A debt marker waits on the table where dinner should be, and every quiet room feels too large.",
+            "At the edge of the wheat, black cloth moves against the wind and the family dog refuses to bark.",
         ),
     },
     {
@@ -23,6 +25,8 @@ GREAT_FRONTIER_MOVIES = (
         "runtime_sec": 338,
         "cards": (
             "Alex drifts to sleep, weighed down by memories of his late wife.",
+            "Old sunlight, hospital glass, and a promise half-remembered fold together behind his eyes.",
+            "When he wakes, the house is still, but the dream has left muddy footprints in the hall.",
         ),
     },
     {
@@ -32,6 +36,8 @@ GREAT_FRONTIER_MOVIES = (
         "runtime_sec": 311,
         "cards": (
             "The stranger destroys the farm. Alex finds Carly, and they escape into the rain.",
+            "Gunfire cracks through the downpour while the barn roof burns like a signal nobody asked for.",
+            "Carly knows the back road, Alex knows only that staying would mean dying on familiar ground.",
         ),
     },
     {
@@ -41,6 +47,8 @@ GREAT_FRONTIER_MOVIES = (
         "runtime_sec": 252,
         "cards": (
             "Alex and Carly drive toward town, unsure whether they are running from danger or toward it.",
+            "The road signs keep changing in the headlights, naming towns Alex swears were never on the map.",
+            "In the rearview mirror, one black rider keeps pace without ever touching the wet road.",
         ),
     },
     {
@@ -50,6 +58,8 @@ GREAT_FRONTIER_MOVIES = (
         "runtime_sec": 171,
         "cards": (
             "Alex and Carly step into town and cross into the Black City, an alien place hidden behind the familiar streets.",
+            "Brick storefronts bend into iron towers, and every window reflects a sky with no moon.",
+            "Carly says not to look at the bells when they ring, which makes Alex look almost at once.",
         ),
     },
     {
@@ -59,6 +69,8 @@ GREAT_FRONTIER_MOVIES = (
         "runtime_sec": 360,
         "cards": (
             "Carly leads Alex to her hideout and remembers her mother before Alex leaves for the Black City alone.",
+            "The room is small, warm, and full of careful exits; Carly has survived by measuring every wall.",
+            "Alex takes her map and a silence he does not know how to repay.",
         ),
     },
     {
@@ -68,6 +80,8 @@ GREAT_FRONTIER_MOVIES = (
         "runtime_sec": 218,
         "cards": (
             "The stranger captures Alex. Carly returns, forcing a violent confrontation inside the Black City.",
+            "Chains drag over the station floor while the stranger names debts like they are family history.",
+            "Carly steps from the smoke with a stolen pistol and the look of someone done being hunted.",
         ),
     },
     {
@@ -77,6 +91,8 @@ GREAT_FRONTIER_MOVIES = (
         "runtime_sec": 362,
         "cards": (
             "Alex and Carly rest after escaping the Black City and begin to trust each other.",
+            "Morning finds them in a rail shed outside the impossible walls, sharing bread too stale to argue over.",
+            "For the first time, the road ahead looks chosen instead of merely survived.",
         ),
     },
     {
@@ -86,6 +102,8 @@ GREAT_FRONTIER_MOVIES = (
         "runtime_sec": 343,
         "cards": (
             "Alex and Carly prepare to board a train and rescue a captive boy.",
+            "The timetable is written in a dead conductor's hand, but Carly reads it like a dare.",
+            "Alex checks the old revolver twice and still cannot make it feel like enough.",
         ),
     },
     {
@@ -95,6 +113,8 @@ GREAT_FRONTIER_MOVIES = (
         "runtime_sec": 299,
         "cards": (
             "Carly boards the train and commits to the rescue.",
+            "Iron remembers every prisoner it has carried, and the rails sing those names under the wheels.",
+            "At the last car, Alex sees the boy's lantern blink once from behind a locked door.",
         ),
     },
 )
@@ -226,22 +246,26 @@ def send_movie_stop_event(character):
 
 
 
-def resolve_movie(query):
+def resolve_movie(query, pool=None):
     """Resolve a number or title query to one movie entry."""
 
     raw = str(query or "").strip()
     if not raw:
         return None, []
+        
+    if pool is None:
+        pool = GREAT_FRONTIER_MOVIES
+        
     if raw.isdigit():
         number = int(raw)
-        for movie in GREAT_FRONTIER_MOVIES:
+        for movie in pool:
             if movie["number"] == number:
                 return movie, []
         return None, []
 
     normalized = _normalize_movie_query(raw)
     matches = []
-    for movie in GREAT_FRONTIER_MOVIES:
+    for movie in pool:
         candidates = {
             _normalize_movie_query(movie["title"]),
             _normalize_movie_query(movie_label(movie)),
@@ -253,6 +277,42 @@ def resolve_movie(query):
         if any(normalized and normalized in candidate for candidate in candidates):
             matches.append(movie)
     return (matches[0], []) if len(matches) == 1 else (None, matches)
+
+
+def get_unlocked_movie_numbers(character):
+    """Return the list of movie episode numbers unlocked for a character."""
+
+    if character is None:
+        return [movie["number"] for movie in GREAT_FRONTIER_MOVIES]
+
+    unlocked = list(getattr(character.db, "brave_unlocked_movies", []) or [])
+
+    quest_log = getattr(character.db, "brave_quests", {})
+    if quest_log.get("repair_the_picture_house", {}).get("status") == "completed":
+        if 1 not in unlocked:
+            unlocked.append(1)
+            character.db.brave_unlocked_movies = unlocked
+            
+    return unlocked
+
+
+def get_available_movies(character=None):
+    """Return the subset of GREAT_FRONTIER_MOVIES available to the character."""
+
+    unlocked_numbers = set(get_unlocked_movie_numbers(character))
+    return [movie for movie in GREAT_FRONTIER_MOVIES if movie["number"] in unlocked_numbers]
+
+
+def unlock_movie(character, number):
+    """Permanently unlock a movie for a character."""
+
+    unlocked = list(get_unlocked_movie_numbers(character))
+    if number not in unlocked:
+        unlocked.append(number)
+        unlocked.sort()
+        character.db.brave_unlocked_movies = unlocked
+        return True
+    return False
 
 
 def build_now_showing_picker(movie):
@@ -276,9 +336,10 @@ def build_now_showing_picker(movie):
     )
 
 
-def build_movie_picker():
+def build_movie_picker(character=None):
     """Build the browser picker used by the movie-house room action."""
 
+    available = get_available_movies(character)
     options = [
         _picker_option(
             movie_label(movie),
@@ -286,7 +347,7 @@ def build_movie_picker():
             icon="movie",
             tone="accent",
         )
-        for movie in GREAT_FRONTIER_MOVIES
+        for movie in available
     ]
     options.append(_picker_option("Stop Movie", command="movie stop", icon="stop_circle", tone="muted"))
     return _picker(

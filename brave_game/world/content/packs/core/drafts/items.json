@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "last_action": "upsert",
-    "last_modified_at": "2026-05-07T20:22:16.637583+00:00",
-    "last_modified_by": "codex-cli",
-    "last_target": "stamped_ward_clamp",
-    "stage": "draft"
+    "last_action": "publish",
+    "last_modified_at": "2026-05-07T23:46:13.893286+00:00",
+    "last_modified_by": "jctest3",
+    "last_target": "items",
+    "stage": "live"
   },
   "bonus_labels": {
     "accuracy": "Accuracy",
@@ -228,7 +228,7 @@
     "anchor_glass_shard": {
       "kind": "loot",
       "name": "Blackwater Lens Shard",
-      "rarity": "rare",
+      "rarity": "story",
       "stackable": true,
       "summary": "A blue-white shard of old lampglass that trembles near the sealed grooves beneath Brambleford.",
       "value": 14
@@ -240,7 +240,7 @@
       },
       "kind": "equipment",
       "name": "Ashwood Bow",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "slot": "main_hand",
       "summary": "A travel bow with a quick draw and a forgiving pull."
     },
@@ -268,7 +268,7 @@
     "beacon_core": {
       "kind": "loot",
       "name": "Blackwater Beacon Core",
-      "rarity": "epic",
+      "rarity": "story",
       "stackable": true,
       "summary": "A heavy heart-core from the drowned weir lamp line, fit for a trophy shelf more than a pocket.",
       "value": 28
@@ -308,7 +308,7 @@
       },
       "kind": "equipment",
       "name": "Bellwarden Icon",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "slot": "off_hand",
       "summary": "A brass-braced devotional icon fitted to hold steadier light and steadier prayers."
     },
@@ -332,6 +332,13 @@
       "stackable": true,
       "summary": "A rain-spotted tally of wagons, names, and guessed cargo values sorted by the Blackreed crew before anyone was robbed.",
       "value": 12
+    },
+    "blackreed_standard_trophy": {
+      "category": "loot",
+      "kind": "loot",
+      "name": "Blackreed Standard",
+      "summary": "A ragged dark standard from the ruined watchtower, patched but still carrying the bandit captain's ambitious mark.",
+      "value": 45
     },
     "boar_keeper_charm": {
       "kind": "consumable",
@@ -377,6 +384,13 @@
       "slot": "chest",
       "summary": "Trail wraps reinforced with silk and thorn cord, cut to move through brush like you knew it would part."
     },
+    "broken_fence_cutter_axe": {
+      "category": "loot",
+      "kind": "loot",
+      "name": "Broken Fence-Cutter Axe",
+      "summary": "A heavy, notched axe head from Ruk the Fence-Cutter, its edge ruined by road iron and its handle snapped clean.",
+      "value": 25
+    },
     "brushrunner_leathers": {
       "bonuses": {
         "accuracy": 1,
@@ -405,7 +419,7 @@
       },
       "kind": "equipment",
       "name": "Chapel Blade",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "slot": "main_hand",
       "summary": "A straight practical sword kept for road duty, oath work, and the sort of bad nights that require both."
     },
@@ -433,7 +447,7 @@
       },
       "kind": "equipment",
       "name": "Cinderwire Staff",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "slot": "main_hand",
       "summary": "A reworked emberglass staff bound in black wire that keeps heat like a grudge."
     },
@@ -532,6 +546,13 @@
       "summary": "A damp reed-map marked twice in Mira's hand, showing survey tags pulled off course by lights moving against the wind.",
       "value": 11
     },
+    "brass_focus_gear": {
+      "category": "loot",
+      "kind": "loot",
+      "name": "Brass Focus Gear",
+      "summary": "A heavy, precisely-machined brass gear meant to align a lantern projector. Joss has already filed off the piece that kept the Picture House from working.",
+      "value": 15
+    },
     "edrics_signet": {
       "kind": "loot",
       "name": "Edric's Signet",
@@ -557,7 +578,7 @@
       },
       "kind": "equipment",
       "name": "Emberglass Staff",
-      "rarity": "epic",
+      "rarity": "uncommon",
       "slot": "main_hand",
       "summary": "A slim ash staff tipped with red glass that holds heat longer than it should."
     },
@@ -656,7 +677,7 @@
     "focus_tonic": {
       "kind": "consumable",
       "name": "Focus Tonic",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "stackable": true,
       "summary": "A bitter vial that steadies the hands, clears the head, and puts a little fire back in the limbs.",
       "use": {
@@ -666,8 +687,8 @@
         ],
         "effect_type": "restore",
         "restore": {
-          "mana": 14,
-          "stamina": 14
+          "mana": 12,
+          "stamina": 12
         },
         "target": "self",
         "verb": "drink"
@@ -807,7 +828,7 @@
     "hollow_lantern_prism": {
       "kind": "loot",
       "name": "Hollow Lantern Prism",
-      "rarity": "epic",
+      "rarity": "story",
       "stackable": true,
       "summary": "A white-black prism from the drowned south light, cold in the hand and still too eager to catch any stray gleam.",
       "value": 48
@@ -820,7 +841,7 @@
       },
       "kind": "equipment",
       "name": "Hookknife Pair",
-      "rarity": "epic",
+      "rarity": "uncommon",
       "slot": "main_hand",
       "summary": "A matched set of compact hookknives made for ugly work in close quarters and quicker exits after."
     },
@@ -908,7 +929,7 @@
       },
       "kind": "equipment",
       "name": "Lantern Focus",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "slot": "off_hand",
       "summary": "A palm-sized focus crystal wrapped in brass wire from old Brambleford lanterns."
     },
@@ -1077,7 +1098,7 @@
       },
       "kind": "equipment",
       "name": "Militia Blade",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "slot": "main_hand",
       "summary": "A sturdy frontier sword with just enough weight behind it."
     },
@@ -1091,7 +1112,7 @@
     "miretooth_fang": {
       "kind": "loot",
       "name": "Miretooth Fang",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "stackable": true,
       "summary": "A hooked predator fang from the beast ruling the fen edge, still carrying a sick green stain near the root.",
       "value": 42
@@ -1191,7 +1212,7 @@
       },
       "kind": "equipment",
       "name": "Nightpath Leathers",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "slot": "chest",
       "summary": "Dark fitted leathers cut light through the shoulder and quiet through the buckle."
     },
@@ -1203,7 +1224,7 @@
       },
       "kind": "equipment",
       "name": "Oakbound Shield",
-      "rarity": "epic",
+      "rarity": "uncommon",
       "slot": "off_hand",
       "summary": "A scarred but reliable shield reinforced by practical iron bands."
     },
@@ -1215,7 +1236,7 @@
       },
       "kind": "equipment",
       "name": "Parrying Dagger",
-      "rarity": "legendary",
+      "rarity": "uncommon",
       "slot": "off_hand",
       "summary": "A narrow off-hand blade balanced to catch steel, hands, or attention at exactly the wrong moment for the other person."
     },
@@ -1227,14 +1248,21 @@
       },
       "kind": "equipment",
       "name": "Pilgrim Mace",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "slot": "main_hand",
       "summary": "A compact mace carried as much for certainty as ceremony."
+    },
+    "pot_king_crown_trophy": {
+      "category": "loot",
+      "kind": "loot",
+      "name": "Pot-King Crown",
+      "summary": "A dented, grease-stained iron crown from the goblin warrens, crudely hammered but heavy enough to hold a court together.",
+      "value": 40
     },
     "potking_ladle": {
       "kind": "loot",
       "name": "Pot-King Ladle",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "stackable": true,
       "summary": "Grubnak's iron ladle-scepter, dented, greasy, and somehow still threatening on principle alone.",
       "value": 34
@@ -1378,7 +1406,7 @@
       },
       "kind": "equipment",
       "name": "Rootwood Staff",
-      "rarity": "rare",
+      "rarity": "uncommon",
       "slot": "main_hand",
       "summary": "A living wood staff polished by use rather than ceremony, light in the hand and stubborn in the grain."
     },
@@ -1501,8 +1529,8 @@
         ],
         "effect_type": "restore",
         "restore": {
-          "hp": 24,
-          "stamina": 8
+          "hp": 20,
+          "stamina": 6
         },
         "target": "ally",
         "verb": "apply"
@@ -1606,7 +1634,7 @@
       },
       "kind": "equipment",
       "name": "Trail Knife",
-      "rarity": "epic",
+      "rarity": "uncommon",
       "slot": "off_hand",
       "summary": "A belt knife meant for camp work, skinning, and close trouble."
     },
@@ -1639,7 +1667,7 @@
     "ward_dust": {
       "kind": "consumable",
       "name": "Ward Dust",
-      "rarity": "epic",
+      "rarity": "story",
       "stackable": true,
       "summary": "A pinch of ash-bright chapel dust that settles over skin and cloth like a quick ward against the next bad hit.",
       "use": {
@@ -1668,7 +1696,7 @@
       },
       "kind": "equipment",
       "name": "Warded Kite",
-      "rarity": "epic",
+      "rarity": "uncommon",
       "slot": "off_hand",
       "summary": "A chapel-kept kite shield marked in chalk prayer and brass nailwork."
     },

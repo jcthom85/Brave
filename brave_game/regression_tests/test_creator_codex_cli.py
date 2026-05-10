@@ -25,6 +25,14 @@ class CreatorCodexCliTests(unittest.TestCase):
         self.assertEqual(["quests"], payload["plan"]["scope"]["domains"])
         self.assertIn("quest", payload["capabilities"]["mutation_kinds"])
 
+    def test_drift_payload_returns_domain_summary(self):
+        payload = creator_codex.drift_payload()
+
+        self.assertTrue(payload["ok"])
+        self.assertIn("domains", payload)
+        self.assertIn("summary", payload)
+        self.assertTrue(any(entry["domain"] == "world" for entry in payload["domains"]))
+
     def test_recipes_payload_returns_all_and_single_recipe(self):
         payload = creator_codex.recipes_payload()
         self.assertTrue(payload["ok"])

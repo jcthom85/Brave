@@ -572,7 +572,7 @@
     }
     function renderList(filter = '') {
       const token = filter.trim().toLowerCase();
-      const filtered = entries.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || '').toLowerCase().includes(token)));
+      const filtered = entries.filter((entry) => !token || [entry.id, entry.label, entry.meta, entry.rarity].some((value) => String(value || '').toLowerCase().includes(token)));
       systemList.innerHTML = '';
       for (const entry of filtered) {
         const button = document.createElement('button');

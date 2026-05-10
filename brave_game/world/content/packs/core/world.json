@@ -1,9 +1,9 @@
 {
   "_meta": {
-    "last_action": "upsert",
-    "last_modified_at": "2026-04-24T18:35:12.970522+00:00",
-    "last_modified_by": "jctest",
-    "last_target": "blackfen_approach_miretooths_wallow_to_blackfen_approach_boglight_hollow",
+    "last_action": "publish",
+    "last_modified_at": "2026-05-07T23:46:13.900688+00:00",
+    "last_modified_by": "jctest3",
+    "last_target": "world",
     "stage": "live"
   },
   "entities": [
@@ -79,7 +79,7 @@
         "quartermaster",
         "cobb"
       ],
-      "desc": "Nella looks like a woman who could judge a traveler's preparedness from twenty paces and improve it from ten. This morning she has three crates open, a south-road slate under one elbow, and no patience for mystery pockets.",
+      "desc": "Nella can judge a traveler's preparedness from twenty paces and improve it from ten. This morning she has three crates open, a south-road slate under one elbow, and no patience for mystery pockets.",
       "gender": "female",
       "id": "quartermaster_nella_cobb",
       "key": "Quartermaster Nella Cobb",
@@ -105,7 +105,7 @@
         "courier",
         "marrow"
       ],
-      "desc": "Peep has chalk on one sleeve, route twine around one wrist, and the sort of quick expression that suggests he is always halfway through three errands at once.",
+      "desc": "Peep has chalk on one sleeve, route twine around one wrist, and a quick bright look that belongs to someone halfway through three errands at once.",
       "gender": "male",
       "id": "courier_peep_marrow",
       "key": "Courier Peep Marrow",
@@ -142,7 +142,7 @@
         "elric",
         "thorne"
       ],
-      "desc": "Mayor Elric looks like a man held together by lists, weather reports, and a refusal to waste words. He carries the town's worry with practiced economy.",
+      "desc": "Mayor Elric stands held together by lists, weather reports, and a refusal to waste words. He carries the town's worry with practiced economy.",
       "gender": "male",
       "id": "mayor_elric_thorne",
       "key": "Mayor Elric Thorne",
@@ -168,7 +168,7 @@
         "pib",
         "innkeeper"
       ],
-      "desc": "Uncle Pib moves between kettles and tables with practiced ease. He looks like the sort of man who could solve a crisis with a ladle, a joke, or both.",
+      "desc": "Uncle Pib moves between kettles and tables with practiced ease, ladle in hand and one eye on the room. Crisis, hunger, and bad weather all get the same treatment here: heat, timing, and a joke if the kettle allows it.",
       "emote_response": "Uncle Pib gives a small, knowing nod and goes back to the kettle.",
       "gender": "male",
       "id": "uncle_pib_underbough",
@@ -330,7 +330,7 @@
         "mender",
         "fixer"
       ],
-      "desc": "Veska keeps one sleeve rolled, one glove half-on, and a workbench laid out like a threat against carelessness. She looks like the sort of woman who could repair a lantern, trap, or argument if the parts were honest enough.",
+      "desc": "Veska keeps one sleeve rolled, one glove half-on, and a workbench laid out like a threat against carelessness. Lanterns, traps, arguments: she studies the broken pieces first and only speaks when the repair has become obvious.",
       "gender": "female",
       "id": "mender_veska_flint",
       "key": "Mender Veska Flint",
@@ -459,7 +459,7 @@
         "edric",
         "sir edric"
       ],
-      "desc": "The carved slab shows a knight at prayer beneath a rising sun, though the stone around the hands is worn smooth as if someone has gripped it many times after burial.",
+      "desc": "The carved slab shows a knight at prayer beneath a rising sun. Around the folded hands, the stone has been gripped smooth by generations of frightened fingers.",
       "id": "edrics_slab",
       "key": "Edric's slab",
       "kind": "readable",
@@ -572,7 +572,7 @@
         "bog lantern",
         "fen lantern"
       ],
-      "desc": "A drowned lantern cage hangs from a bent willow root above the hollow, green glass panes clouded from the inside as if the light went bad before it went out.",
+      "desc": "A drowned lantern cage hangs from a bent willow root above the hollow. Its green glass panes are clouded from within, the last light spoiled before it died.",
       "id": "boglight_lantern",
       "key": "boglight lantern",
       "kind": "readable",
@@ -646,7 +646,7 @@
         "lamp lens",
         "frame"
       ],
-      "desc": "A broken lamp lens frame stands around the cold white heart of the room, its brass ribs warped as if the light inside learned to lean back.",
+      "desc": "A broken lamp lens frame stands around the cold white heart of the room. Its brass ribs bend outward, pressed by a light that learned to push back.",
       "id": "blackwater_lens_frame",
       "key": "blackwater lens frame",
       "kind": "readable",
@@ -2350,7 +2350,7 @@
   ],
   "rooms": [
     {
-      "desc": "A low basin of dark water and half-sunk root arches catches the wind and holds the light badly. Pale fen-lamps gather over the hollow as if the marsh is trying to invent stars somewhere nobody asked for them.",
+      "desc": "A low basin of dark water and half-sunk root arches catches the wind and holds the light badly. Pale fen-lamps gather over the hollow, false stars trembling where no sky should be.",
       "id": "blackfen_approach_boglight_hollow",
       "key": "Boglight Hollow",
       "map_icon": "B",
@@ -2408,7 +2408,7 @@
       "zone": "Blackfen Approach"
     },
     {
-      "desc": "Soft lampglass, pale stone, and a brass bell frame give the little chapel a steadier kind of warmth than the inn. Prayer ribbons stir in the draft, and someone has kept every lantern trimmed as if the town's courage depends on it.",
+      "desc": "Soft lampglass, pale stone, and a brass bell frame give the little chapel a steadier kind of warmth than the inn. Prayer ribbons stir in the draft, dust turns slowly through the light, and every trimmed lantern becomes a small decision to keep courage alive.",
       "id": "brambleford_chapel_dawn_bell",
       "key": "Chapel of the Dawn Bell",
       "map_icon": "C",
@@ -2469,7 +2469,7 @@
       "activities": [
         "cooking"
       ],
-      "desc": "The inn smells of stew, woodsmoke, and fresh bread. Lanternlight warms the beams, and every table seems to carry either a rumor or a complaint about wolves.",
+      "desc": "The inn smells of stew, woodsmoke, and fresh bread. Lanternlight warms the beams, and every table carries either a rumor, a complaint about wolves, or both.",
       "id": "brambleford_lantern_rest_inn",
       "key": "The Lantern Rest Inn",
       "map_icon": "I",
@@ -2498,7 +2498,7 @@
       "activities": [
         "mastery"
       ],
-      "desc": "A narrow stone hall sits just off the main yard, lined with chalk boards, stance diagrams, blunted practice steel, and old field sketches marked over until only the useful lessons remain. Nothing here feels ornamental. It feels like a room built for turning raw technique into disciplined habit.",
+      "desc": "A narrow stone hall sits just off the main yard, lined with chalk boards, stance diagrams, blunted practice steel, and old field sketches worn down to the useful marks. No trophy hangs here. The room is for repetition, correction, and the hard little silence before a lesson finally takes.",
       "id": "brambleford_mastery_hall",
       "key": "Mastery Hall",
       "map_icon": "D",
@@ -2509,7 +2509,7 @@
       "zone": "Brambleford"
     },
     {
-      "desc": "A practical stone hall with weather notices, petition ledgers, and a long table scarred by years of local argument. Nothing here is elegant, but everything feels used by people trying to keep the town upright.",
+      "desc": "Weather notices, petition ledgers, and a long table scarred by years of local argument fill the stone hall. Nothing is elegant. Every chair, shelf, and ink-stained corner has been pressed into the work of keeping Brambleford upright.",
       "id": "brambleford_mayors_hall",
       "key": "Mayor's Hall",
       "map_icon": "M",
@@ -2534,7 +2534,7 @@
       "zone": "Brambleford"
     },
     {
-      "desc": "A low chamber beneath the observatory holds old municipal lanternwork: brass conduits, blackwater-stained lens frames, and a circular service floor cut with grooves for channeling road-light. Everything here belongs to Brambleford, not some distant elsewhere, and the south-line fittings are the only ones warm enough to worry about.",
+      "desc": "A low chamber beneath the observatory holds old municipal lanternwork: brass conduits, blackwater-stained lens frames, and a circular service floor grooved for road-light. North, west, and town lines sit cold in their brass. The south-line fittings keep a faint heat, like a warning left under the floor.",
       "id": "brambleford_lower_lanternworks",
       "key": "Lower Lanternworks",
       "map_icon": "L",
@@ -2546,7 +2546,7 @@
       "zone": "Brambleford"
     },
     {
-      "desc": "Shelves of boots, rain cloaks, rope, patched travel bags, and sensible trail goods line the walls in neat practical ranks. Nothing in the room is fancy, but everything looks like it was chosen by someone who expects bad weather, muddy children, and the occasional goblin.",
+      "desc": "Shelves of boots, rain cloaks, rope, patched travel bags, and sensible trail goods line the walls in neat practical ranks. Nothing in the room is fancy. Everything has been chosen for bad weather, muddy children, and the occasional goblin.",
       "id": "brambleford_outfitters",
       "key": "Brambleford Outfitters",
       "map_icon": "U",
@@ -2557,7 +2557,7 @@
       "zone": "Brambleford"
     },
     {
-      "desc": "The inn cellar is all stone, old barrel racks, and corners that seem designed specifically for unpleasant scratching noises. Flour dust, spilled grain, and chewed crate corners make it clear the rats hit the stores hard after the bell started ringing upstairs.",
+      "desc": "Stone walls, old barrel racks, and narrow corners crowd the inn cellar. Flour dust lies across the floor in pale drifts. Spilled grain trails under the shelves, and the chewed crate corners show exactly where the rats found Brambleford's soft underbelly.",
       "id": "brambleford_rat_and_kettle_cellar",
       "key": "Rat and Kettle Cellar",
       "map_icon": "C",
@@ -2590,7 +2590,7 @@
       "zone": "Brambleford"
     },
     {
-      "desc": "Wooden cases, brass plaques, and open wall-hooks fill the hall above the observatory steps. Some shelves still wait empty, but the room has been built with the confidence of people who fully intend to bring strange things home.",
+      "desc": "Wooden cases, brass plaques, and open wall-hooks fill the hall above the observatory steps. The newest labels still look too clean against the old wood, but they give the room its purpose: proof that Brambleford remembers what it survived, and leaves space for what has not happened yet.",
       "id": "brambleford_trophy_hall",
       "key": "Trophy Hall",
       "map_icon": "H",
@@ -2626,7 +2626,7 @@
       "zone": "Drowned Weir"
     },
     {
-      "desc": "Stone spillways and drowned lamp braces divide the marsh water into dark channels that no longer answer the river cleanly. Green-white light crawls along the ironwork in slow pulses, as if the old weir is still trying to perform a duty everyone else forgot to dismiss.",
+      "desc": "Stone spillways and drowned lamp braces divide the marsh water into dark channels that no longer answer the river cleanly. Green-white light crawls along the ironwork in slow pulses, the old weir still performing a duty everyone else forgot to dismiss.",
       "id": "drowned_weir_lantern_weir",
       "key": "Lantern Weir",
       "map_icon": "W",
@@ -2637,7 +2637,7 @@
       "zone": "Drowned Weir"
     },
     {
-      "desc": "A raised walk of iron grating and split planks runs above the drowned control channels, each step echoing through black water and old machinery below. The lamp line overhead burns too steadily for a ruin, and the sound under it is not quite current and not quite breathing.",
+      "desc": "A raised walk of iron grating and split planks runs above the drowned control channels. Each step rings through black water and old machinery below. The lamp line overhead burns too steadily for a ruin, while something under the grates keeps time in slow, wet knocks.",
       "id": "drowned_weir_sluice_walk",
       "key": "Sluice Walk",
       "map_icon": "S",
@@ -2692,7 +2692,7 @@
       "zone": "Goblin Road"
     },
     {
-      "desc": "The road bends sharply around a thorny rise, and the wind seems to carry every sound twice. Prints crisscross the mud here: boot heels, claws, narrow goblin feet, and drag marks from rails hauled toward the camp beyond.",
+      "desc": "The road bends sharply around a thorny rise, and the wind carries every sound twice. Prints crisscross the mud here: boot heels, claws, narrow goblin feet, and drag marks from rails hauled toward the camp beyond.",
       "id": "goblin_road_wolf_turn",
       "key": "Wolf Turn",
       "map_icon": "W",
@@ -2714,7 +2714,7 @@
       "zone": "Goblin Warrens"
     },
     {
-      "desc": "A broad cave hall has been claimed with stolen tables, hacked banners, splintered casks, and enough greasy torchlight to make everything shine in all the wrong places. Noise carries badly here, like the room remembers too many ugly celebrations and is always ready for one more.",
+      "desc": "Stolen tables, hacked banners, and splintered casks sprawl across the broad cave hall. Greasy torchlight slicks every surface. Noise hits the stone, breaks apart, and comes back uglier, ready for another feast nobody decent would name.",
       "id": "goblin_warrens_feast_hall",
       "key": "Feast Hall",
       "map_icon": "F",
@@ -2725,7 +2725,7 @@
       "zone": "Goblin Warrens"
     },
     {
-      "desc": "The deepest court is half throne room, half cookfire pit, built around an iron slab table and a raised stone seat crusted with soot. Pot lids, split shields, and bent utensils hang like trophies, and the whole chamber feels arranged by someone who thinks hunger is a kind of law.",
+      "desc": "The deepest court is half throne room, half cookfire pit, built around an iron slab table and a raised stone seat crusted with soot. Pot lids, split shields, and bent utensils hang like trophies. Grubnak's law is written everywhere: eat first, rule second, waste nothing but mercy.",
       "id": "goblin_warrens_pot_kings_court",
       "key": "Pot-King's Court",
       "map_icon": "P",
@@ -2747,7 +2747,7 @@
       "zone": "Goblin Warrens"
     },
     {
-      "desc": "A runoff trench cuts through the lower warrens, carrying black kitchen grease, cave seep, and things that should have stayed politely dead in barrels. Boards bridge the worst of it, but most of them look chosen by goblins for confidence rather than quality.",
+      "desc": "A runoff trench cuts through the lower warrens, carrying black kitchen grease, cave seep, and things that should have stayed politely dead in barrels. Boards bridge the worst of it. Their nails sit crooked, their planks bow low, and their confidence is plainly goblin.",
       "id": "goblin_warrens_sludge_run",
       "key": "Sludge Run",
       "map_icon": "L",
@@ -2758,7 +2758,7 @@
       "zone": "Goblin Warrens"
     },
     {
-      "desc": "A low-bellied tunnel twists through greasy stone under smoky torch cages. The walls sweat, the floor grits underfoot, and every sound seems to travel ahead of you as if the warrens are passing word along faster than feet ought to.",
+      "desc": "A low-bellied tunnel twists through greasy stone under smoky torch cages. The walls sweat, the floor grits underfoot, and every sound runs ahead through pipe cracks and side holes. The warrens pass news faster than feet should manage.",
       "id": "goblin_warrens_torchgut_tunnel",
       "key": "Torchgut Tunnel",
       "map_icon": "T",
@@ -2769,7 +2769,7 @@
       "zone": "Goblin Warrens"
     },
     {
-      "desc": "Standing stones ring an old burial center packed with broken offerings, guttered lamps, and a hush that feels observed. The ground inside the circle is trampled by feet that should not still exist.",
+      "desc": "Standing stones ring an old burial center packed with broken offerings and guttered lamps. The hush has weight. Inside the circle, grave grass lies trampled flat by feet that should have finished walking generations ago.",
       "id": "old_barrow_field_barrow_circle",
       "key": "Barrow Circle",
       "map_icon": "B",
@@ -2780,7 +2780,7 @@
       "zone": "Old Barrow Field"
     },
     {
-      "desc": "A stone causeway runs between low burial mounds and leaning lantern posts gone half dark. The air feels colder here than the rest of the woods, and every step sounds like it might be waking something.",
+      "desc": "A stone causeway runs between low burial mounds and leaning lantern posts gone half dark. Cold gathers in the joints of the path. Each step clicks against the old stone with the small, guilty sound of a hand on a sleeping door.",
       "id": "old_barrow_field_causeway",
       "key": "Old Barrow Causeway",
       "map_icon": "C",
@@ -2824,7 +2824,7 @@
       "zone": "Ruined Watchtower"
     },
     {
-      "desc": "A narrow ledge of old firing stone overlooks the climb below. Arrow gouges, loose shafts, and kicked rock chips mark it as the sort of place where people stay alive by making sure someone else doesn't.",
+      "desc": "A narrow ledge of old firing stone overlooks the climb below. Arrow gouges, loose shafts, and kicked rock chips mark a place built for staying alive by making sure someone else doesn't.",
       "id": "ruined_watchtower_archers_ledge",
       "key": "Archer's Ledge",
       "map_icon": "L",
@@ -2912,7 +2912,7 @@
       "zone": "Wayfarer's Yard"
     },
     {
-      "desc": "Low timber pens and rough feed bins crowd the edge of the annex, the sort of place Brambleford uses to keep troublesome yard vermin from turning into a bigger nuisance. Today the straw keeps jumping at nothing, the feed bins rattle, and even small trouble sounds like it heard the bell.",
+      "desc": "Low timber pens and rough feed bins crowd the edge of the annex, where Brambleford keeps troublesome yard vermin from turning into a bigger nuisance. Today the straw keeps jumping at nothing, the feed bins rattle, and even small trouble sounds like it heard the bell.",
       "id": "tutorial_vermin_pens",
       "key": "Vermin Pens",
       "map_icon": "V",
@@ -2957,7 +2957,7 @@
       "zone": "Whispering Woods"
     },
     {
-      "desc": "Broken standing stones lean beside the path like tired sentries. Moss has swallowed the carvings on most of them, but the woods still feel arranged rather than wild.",
+      "desc": "Broken standing stones lean beside the path, their moss-swallowed carvings turned at careful angles. The woods are not tidy, not tame, not kind. But the trunks and stones keep lining up in ways a wild place should not know.",
       "id": "whispering_woods_old_stone_path",
       "key": "Old Stone Path",
       "map_icon": "S",
@@ -2968,7 +2968,7 @@
       "zone": "Whispering Woods"
     },
     {
-      "desc": "The path into the woods narrows beneath old branches and older silence. The air is cooler here, and every leaf-rustle seems to carry one word too many to be only wind.",
+      "desc": "The path into the woods narrows beneath old branches and older silence. The air is cooler here, and every leaf-rustle carries one word too many to be only wind.",
       "id": "whispering_woods_trailhead",
       "key": "Whispering Woods Trail",
       "map_icon": "T",

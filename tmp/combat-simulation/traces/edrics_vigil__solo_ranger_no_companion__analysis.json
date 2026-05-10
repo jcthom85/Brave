@@ -4,12 +4,12 @@
       "enemy_id": "e1",
       "enemy_key": "Sir Edric the Restless",
       "round_started": 5,
-      "round_ended": 6,
+      "round_ended": 7,
       "interruptible": true,
       "ticks": [
         {
           "round": 5,
-          "telegraph_ticks_remaining": 2,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
@@ -17,47 +17,19 @@
               "key": "Ranger 1",
               "class": "ranger",
               "phase": "charging",
-              "ticks_remaining": 2,
+              "ticks_remaining": 0,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         },
         {
           "round": 6,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "Sir Edric the Restless",
-      "round_started": 13,
-      "round_ended": 14,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 13,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -67,23 +39,112 @@
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 2,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
-            "Ranger 1 hits Sir Edric the Restless for 20 damage.",
-            "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
-            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
-            "Sir Edric the Restless hits Ranger 1 for 9 damage.",
-            "Ranger 1 hits Sir Edric the Restless for 21 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         },
+        {
+          "round": 7,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 14,
+      "round_ended": 16,
+      "interruptible": true,
+      "ticks": [
         {
           "round": 14,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "Sir Edric the Restless misses Ranger 1.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 15,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "Sir Edric the Restless misses Ranger 1.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 16,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -93,32 +154,823 @@
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "Sir Edric the Restless misses Ranger 1.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 23,
+      "round_ended": 25,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 23,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
-            "Ranger 1 hits Sir Edric the Restless for 20 damage.",
-            "|cSir Edric the Restless uses Funeral Charge!|n [[BRAVEFX kind=action&actor=Sir+Edric+the+Restless&label=Funeral+Charge]]",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
             "|rSir Edric the Restless's Funeral Charge lands clean.|n",
             "Sir Edric the Restless hits Ranger 1 for 9 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 24,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 9 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 25,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 9 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 32,
+      "round_ended": 34,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 32,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 7 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 33,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 7 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 34,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 7 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 41,
+      "round_ended": 43,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 41,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 42,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 43,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 50,
+      "round_ended": 52,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 50,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 8 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 51,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 8 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 52,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 8 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 59,
+      "round_ended": 61,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 59,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 11 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 60,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 11 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 61,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 11 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 68,
+      "round_ended": 70,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 68,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 69,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 70,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 77,
+      "round_ended": 79,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 77,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 7 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 78,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 7 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 79,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 7 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 86,
+      "round_ended": 88,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 86,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 87,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 88,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 95,
+      "round_ended": 97,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 95,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
             "Ranger 1 hits Sir Edric the Restless for 21 damage.",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 7 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "Sir Edric the Restless",
-      "round_started": 21,
-      "round_ended": 22,
-      "interruptible": true,
-      "ticks": [
+        },
         {
-          "round": 21,
+          "round": 96,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -127,85 +979,117 @@
               "key": "Ranger 1",
               "class": "ranger",
               "phase": "charging",
-              "ticks_remaining": 2,
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and your companion immediately picks up the line.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 hits Sir Edric the Restless for 21 damage.",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 7 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 97,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Edric's Grave-Light hits Ranger 1 for 6 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 hits Sir Edric the Restless for 21 damage.",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 7 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 hits Sir Edric the Restless for 21 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 104,
+      "round_ended": 106,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 104,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e3"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
             "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 12 damage. The ward absorbs part of the blow.",
+            "Ranger 1 hits Edric's Grave-Light for 25 damage.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
             "Edric's Grave Shade hits Ranger 1 for 9 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Ranger 1 for 6 damage."
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n"
           ]
         },
         {
-          "round": 22,
-          "telegraph_ticks_remaining": 1,
+          "round": 105,
+          "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
             {
               "key": "Ranger 1",
               "class": "ranger",
-              "phase": "charging",
+              "phase": "recovering",
               "ticks_remaining": 1,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Edric's Grave-Light hits Ranger 1 for 6 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n",
-            "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 12 damage. The ward absorbs part of the blow.",
+            "Ranger 1 hits Edric's Grave-Light for 25 damage.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
             "Edric's Grave Shade hits Ranger 1 for 9 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Ranger 1 for 6 damage."
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "Sir Edric the Restless",
-      "round_started": 29,
-      "round_ended": 30,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 29,
-          "telegraph_ticks_remaining": 2,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 2,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
-            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
-            "Edric's Grave Shade hits Ranger 1 for 8 damage.",
-            "Edric's Grave-Light hits Ranger 1 for 7 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n",
-            "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
-            "Ranger 1 shakes off the curse.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "Ranger 1 hits Edric's Grave-Light for 23 damage.",
+            "Edric's Grave-Light falls."
           ]
         },
         {
-          "round": 30,
+          "round": 106,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -214,81 +1098,20 @@
               "key": "Ranger 1",
               "class": "ranger",
               "phase": "charging",
-              "ticks_remaining": 1,
+              "ticks_remaining": 0,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
-            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
-            "Edric's Grave Shade hits Ranger 1 for 8 damage.",
-            "Edric's Grave-Light hits Ranger 1 for 7 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n",
-            "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
-            "Ranger 1 shakes off the curse.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "Sir Edric the Restless",
-      "round_started": 37,
-      "round_ended": 38,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 37,
-          "telegraph_ticks_remaining": 2,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 2,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "Edric's Grave-Light hits Ranger 1 for 7 damage.",
-            "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
-            "Edric's Grave Shade hits Ranger 1 for 10 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Ranger 1 for 8 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
-          ]
-        },
-        {
-          "round": 38,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
-            "Edric's Grave Shade hits Ranger 1 for 10 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Ranger 1 for 8 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 hits Edric's Grave-Light for 25 damage.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
-            "Ranger 1 shakes off the curse."
+            "Edric's Grave Shade hits Ranger 1 for 9 damage.",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "Ranger 1 hits Edric's Grave-Light for 23 damage.",
+            "Edric's Grave-Light falls."
           ]
         }
       ]
@@ -296,38 +1119,157 @@
     {
       "enemy_id": "e1",
       "enemy_key": "Sir Edric the Restless",
-      "round_started": 45,
-      "round_ended": 46,
+      "round_started": 113,
+      "round_ended": 115,
       "interruptible": true,
       "ticks": [
         {
-          "round": 45,
-          "telegraph_ticks_remaining": 2,
+          "round": 113,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
             {
               "key": "Ranger 1",
               "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 2,
+              "phase": "recovering",
+              "ticks_remaining": 1,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "|mRanger 1 shudders under a grave-cold curse!|n",
-            "Ranger 1 shakes off the curse.",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "Ranger 1 hits Edric's Grave Shade for 21 damage.",
             "Edric's Grave Shade hits Ranger 1 for 7 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Ranger 1 for 9 damage.",
-            "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
+            "Ranger 1 hits Edric's Grave Shade for 24 damage.",
+            "Edric's Grave Shade falls.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         },
         {
-          "round": 46,
+          "round": 114,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "Ranger 1 hits Edric's Grave Shade for 21 damage.",
+            "Edric's Grave Shade hits Ranger 1 for 7 damage.",
+            "Ranger 1 hits Edric's Grave Shade for 24 damage.",
+            "Edric's Grave Shade falls.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 115,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "Ranger 1 hits Edric's Grave Shade for 21 damage.",
+            "Edric's Grave Shade hits Ranger 1 for 7 damage.",
+            "Ranger 1 hits Edric's Grave Shade for 24 damage.",
+            "Edric's Grave Shade falls.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 122,
+      "round_ended": 124,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 122,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 8 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 24 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 23 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 123,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 8 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 24 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 23 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 124,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -337,19 +1279,89 @@
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 1,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "|mRanger 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Ranger 1 for 9 damage.",
-            "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
-            "Edric's Grave Shade hits Ranger 1 for 9 damage.",
-            "Edric's Grave-Light hits Ranger 1 for 7 damage.",
-            "|mRanger 1 shudders under a grave-cold curse!|n"
+            "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 8 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 24 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 23 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 131,
+      "round_ended": 132,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 131,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits Sir Edric the Restless for 23 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 132,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 10 damage.",
+            "|mRanger 1 shudders under a grave-cold curse!|n",
+            "Ranger 1 shakes off the curse.",
+            "Ranger 1 hits Sir Edric the Restless for 23 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         }
       ]

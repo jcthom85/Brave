@@ -5596,6 +5596,7 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
 }
 
 .brave-view--room .brave-view__room-scene-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -5610,6 +5611,274 @@ body[data-brave-theme] .brave-view--pack .brave-view__section--money,
         0 12px 24px rgba(0, 0, 0, 0.12);
     transform-origin: 50% 38%;
     will-change: transform, opacity, filter;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.brave-room-atmosphere,
+.brave-room-atmosphere__layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.brave-room-atmosphere {
+    z-index: 0;
+    overflow: hidden;
+    opacity: 0.86;
+    mix-blend-mode: screen;
+}
+
+.brave-view--room .brave-view__room-scene-card > :not(.brave-room-atmosphere) {
+    position: relative;
+    z-index: 1;
+}
+
+.brave-room-atmosphere__layer {
+    opacity: 0;
+}
+
+.brave-room-atmosphere__layer--rain {
+    inset: -28% -18%;
+    opacity: 1;
+    overflow: hidden;
+}
+
+.brave-room-rain-drop {
+    position: absolute;
+    left: var(--brave-rain-left);
+    top: var(--brave-rain-top);
+    width: 1px;
+    height: var(--brave-rain-length);
+    border-radius: 999px;
+    opacity: var(--brave-rain-opacity);
+    background: linear-gradient(180deg, rgba(221, 248, 240, 0), rgba(221, 248, 240, 0.8));
+    box-shadow: 0 0 5px rgba(145, 207, 190, 0.18);
+    transform: rotate(14deg);
+    animation: brave-room-rain-drop var(--brave-rain-duration) linear infinite;
+    animation-delay: var(--brave-rain-delay);
+    will-change: transform;
+}
+
+.brave-room-atmosphere__layer--fog,
+.brave-room-atmosphere__layer--grave_mist {
+    inset: auto -12% -18%;
+    height: 64%;
+    opacity: 0.46;
+    background:
+        radial-gradient(ellipse at 18% 74%, rgba(197, 215, 190, 0.18), transparent 48%),
+        radial-gradient(ellipse at 78% 68%, rgba(156, 193, 174, 0.16), transparent 44%),
+        linear-gradient(90deg, transparent, rgba(210, 231, 210, 0.12), transparent);
+    filter: blur(10px);
+    animation: brave-room-mist-drift 7.5s ease-in-out infinite alternate;
+}
+
+.brave-room-atmosphere__layer--boglight {
+    opacity: 0.42;
+    background:
+        radial-gradient(circle at 18% 72%, rgba(158, 236, 112, 0.18), transparent 12%),
+        radial-gradient(circle at 78% 28%, rgba(194, 255, 154, 0.12), transparent 10%),
+        radial-gradient(circle at 58% 88%, rgba(135, 220, 108, 0.12), transparent 14%);
+    animation: brave-room-slow-pulse 4.8s ease-in-out infinite;
+}
+
+.brave-room-atmosphere__layer--wrong_light,
+.brave-room-atmosphere__layer--flicker {
+    opacity: 0.52;
+    background:
+        radial-gradient(circle at 72% 18%, rgba(111, 253, 255, 0.2), transparent 30%),
+        linear-gradient(100deg, transparent 0 22%, rgba(108, 250, 255, 0.08) 28%, transparent 38% 100%);
+    animation: brave-room-wrong-light 2.6s steps(2, end) infinite;
+}
+
+.brave-room-atmosphere__layer--waterline {
+    top: auto;
+    height: 38%;
+    opacity: 0.32;
+    background:
+        repeating-linear-gradient(0deg, rgba(105, 226, 232, 0.0) 0 10px, rgba(105, 226, 232, 0.14) 11px 12px),
+        linear-gradient(180deg, transparent, rgba(29, 81, 88, 0.26));
+    transform: translateY(4px);
+    animation: brave-room-waterline 5.8s ease-in-out infinite alternate;
+}
+
+.brave-room-atmosphere__layer--vignette {
+    opacity: 0.72;
+    mix-blend-mode: multiply;
+    background:
+        radial-gradient(ellipse at 50% 46%, transparent 32%, rgba(1, 2, 4, 0.34) 100%),
+        linear-gradient(180deg, rgba(5, 7, 9, 0.22), transparent 28%, rgba(0, 0, 0, 0.34));
+}
+
+.brave-room-atmosphere__layer--cold_dust {
+    opacity: 0.24;
+    background:
+        radial-gradient(circle at 16% 28%, rgba(230, 229, 214, 0.18) 0 1px, transparent 2px),
+        radial-gradient(circle at 42% 62%, rgba(230, 229, 214, 0.16) 0 1px, transparent 2px),
+        radial-gradient(circle at 80% 34%, rgba(230, 229, 214, 0.14) 0 1px, transparent 2px);
+    animation: brave-room-dust-rise 8.4s ease-in-out infinite alternate;
+}
+
+.brave-room-atmosphere__layer--lamplight,
+.brave-room-atmosphere__layer--lens_glow,
+.brave-room-atmosphere__layer--floor_glow {
+    opacity: 0.5;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(255, 219, 142, 0.18), transparent 34%),
+        radial-gradient(circle at 80% 22%, rgba(255, 241, 188, 0.1), transparent 28%),
+        radial-gradient(ellipse at 50% 100%, rgba(255, 185, 82, 0.12), transparent 40%);
+    animation: brave-room-slow-pulse 5.8s ease-in-out infinite;
+}
+
+.brave-room-atmosphere--chapel_lamplight .brave-room-atmosphere__layer--lamplight {
+    opacity: 0.54;
+    background:
+        radial-gradient(circle at 22% 18%, rgba(255, 224, 150, 0.22), transparent 34%),
+        radial-gradient(circle at 72% 20%, rgba(255, 241, 190, 0.11), transparent 30%),
+        radial-gradient(ellipse at 50% 100%, rgba(255, 179, 88, 0.1), transparent 42%);
+    animation: none;
+}
+
+.brave-room-atmosphere__layer--dust_motes {
+    opacity: 1;
+    mix-blend-mode: screen;
+}
+
+.brave-room-dust-mote {
+    position: absolute;
+    left: var(--brave-dust-left);
+    top: var(--brave-dust-top);
+    width: var(--brave-dust-size);
+    height: var(--brave-dust-size);
+    border-radius: 999px;
+    opacity: var(--brave-dust-opacity);
+    background: rgba(255, 239, 190, 0.84);
+    box-shadow: 0 0 7px rgba(255, 225, 160, 0.34);
+    animation: brave-room-dust-mote var(--brave-dust-duration) ease-in-out infinite;
+    animation-delay: var(--brave-dust-delay);
+    will-change: transform, opacity;
+}
+
+.brave-room-atmosphere__layer--ribbon_shadow,
+.brave-room-atmosphere__layer--brass_sweep,
+.brave-room-atmosphere__layer--southline_pulse {
+    opacity: 0.24;
+    background:
+        linear-gradient(110deg, transparent 0 32%, rgba(255, 236, 176, 0.16) 42%, transparent 52% 100%);
+    transform: translateX(-18%);
+    animation: brave-room-light-sweep 7.2s ease-in-out infinite;
+}
+
+.brave-room-atmosphere__layer--southline_pulse {
+    opacity: 0.34;
+    background:
+        linear-gradient(90deg, transparent, rgba(96, 228, 242, 0.18), rgba(255, 210, 122, 0.1), transparent);
+    animation-duration: 3.8s;
+}
+
+body[data-brave-motion="reduced"] .brave-room-atmosphere__layer {
+    animation: none !important;
+}
+
+body[data-brave-motion="reduced"] .brave-room-rain-drop,
+body[data-brave-motion="reduced"] .brave-room-dust-mote {
+    animation: none !important;
+}
+
+@keyframes brave-room-rain-drop {
+    from {
+        transform: translate3d(-16px, -8px, 0) rotate(14deg);
+    }
+    to {
+        transform: translate3d(42px, 210px, 0) rotate(14deg);
+    }
+}
+
+@keyframes brave-room-dust-mote {
+    0% {
+        transform: translate3d(-8px, 8px, 0) scale(0.72);
+        opacity: 0.08;
+    }
+    45% {
+        transform: translate3d(8px, -8px, 0) scale(1);
+        opacity: var(--brave-dust-opacity);
+    }
+    100% {
+        transform: translate3d(16px, -18px, 0) scale(0.78);
+        opacity: 0.07;
+    }
+}
+
+@keyframes brave-room-mist-drift {
+    from {
+        transform: translate3d(-18px, 4px, 0) scale(1.02);
+    }
+    to {
+        transform: translate3d(22px, -2px, 0) scale(1.08);
+    }
+}
+
+@keyframes brave-room-slow-pulse {
+    0%,
+    100% {
+        opacity: 0.32;
+        filter: saturate(0.86);
+    }
+    50% {
+        opacity: 0.56;
+        filter: saturate(1.18);
+    }
+}
+
+@keyframes brave-room-wrong-light {
+    0%,
+    100% {
+        opacity: 0.34;
+        filter: hue-rotate(0deg) brightness(0.94);
+    }
+    42% {
+        opacity: 0.62;
+        filter: hue-rotate(-10deg) brightness(1.28);
+    }
+    48% {
+        opacity: 0.24;
+        filter: hue-rotate(14deg) brightness(0.84);
+    }
+    72% {
+        opacity: 0.58;
+        filter: hue-rotate(-6deg) brightness(1.18);
+    }
+}
+
+@keyframes brave-room-waterline {
+    from {
+        transform: translate3d(-8px, 4px, 0);
+    }
+    to {
+        transform: translate3d(10px, -2px, 0);
+    }
+}
+
+@keyframes brave-room-dust-rise {
+    from {
+        transform: translate3d(0, 10px, 0);
+    }
+    to {
+        transform: translate3d(8px, -12px, 0);
+    }
+}
+
+@keyframes brave-room-light-sweep {
+    0%,
+    100% {
+        transform: translateX(-34%);
+        opacity: 0.12;
+    }
+    48%,
+    58% {
+        transform: translateX(38%);
+        opacity: 0.34;
+    }
 }
 
 .brave-view--room .brave-view__room-scene-card--transition {

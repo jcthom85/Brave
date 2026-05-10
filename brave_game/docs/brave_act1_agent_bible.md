@@ -31,6 +31,43 @@ The tone is grounded frontier fantasy with civic strangeness. Brave should feel 
 - Prefer recoverable proof over exposition. Rewards, trophies, readable objects, and enemy drops should carry evidence back to town.
 - Keep generated content playable and connected. Every new item needs placement or use; every enemy needs an encounter or loot role; every NPC needs a room and purpose; every quest needs clear prerequisites and previewable objectives.
 
+## Writing Standard
+
+Brave should read as handcrafted frontier fantasy with a civic pulse. The prose can be lyrical, but it should stay physical: mud, lampglass, ledger ink, tool marks, chapel wax, rainwater, old stone, bad food, and practical hands doing work under pressure.
+
+Room and readable prose should:
+
+- use concrete objects before abstract mood.
+- vary sentence length so the line has a spoken rhythm: a long image can land harder when followed by a short sentence with weight.
+- give each region one dominant pressure: Brambleford is organized fear, Goblin Road is sabotage, Whispering Woods is arranged silence, Old Barrow Field is disturbed memory, Ruined Watchtower is human control, Goblin Warrens is hungry logistics, Blackfen is misleading water, and Drowned Weir is civic machinery still obeying a dead rule.
+- avoid leaning too often on the same abstract construction, especially "feels like," "looks like," "as if," and places that "think," "remember," or "intend." Those moves are allowed, but they should feel earned.
+- let the poetic quality come from cadence, image, and compression rather than rhyme, ornate diction, or vague mysticism.
+
+Dialogue should:
+
+- reveal what the speaker notices first.
+- carry the speaker's job, worry, and private bias.
+- stay playable and concise; the player should know what changed and what to do.
+- make different people disagree through emphasis, not through random contradiction. Harl sees tactics, Alden sees mercy, Joss sees mechanisms, Elric sees public consequence, Maybelle sees harm and recovery, Mira sees route truth.
+
+Major Act 1 voice anchors:
+
+- Harl: clipped, tactical, dry, protective through discipline.
+- Alden: earnest, moral, brave after fear, attentive to names and mercy.
+- Joss: precise, technical, anxious to name truth correctly.
+- Elric: restrained civic consequence, ledgers, public risk, controlled worry.
+- Maybelle: care, recovery, grief, preventable harm, practical tenderness.
+- Mira: routes, weather, tracks, field signs, danger without drama.
+- Pib: food, stores, hospitality, jokes that reveal worry instead of hiding it.
+- Leda: gear, weather, fair trade, practical judgment.
+- Torren: repair, metal, earned usefulness, blunt assessment.
+- Veska: mechanisms, clamps, traps, argument-by-evidence.
+- Elira: discipline, pattern recognition, patience with standards.
+- Tamsin: triage, training, command voice under alarm.
+- Nella: supplies, preparedness, sharp inventory sense.
+- Peep: errands, routes, quick observation, nervous competence.
+- Brask: fight lessons, timing, rough patience.
+
 ## Act 1 Progression
 
 ### 1. Brambleford and Wayfarer's Yard

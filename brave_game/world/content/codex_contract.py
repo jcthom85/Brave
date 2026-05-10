@@ -25,6 +25,7 @@ REFERENCE_DOMAINS = (
     "boss-gates",
     "trophies",
     "shops",
+    "atmosphere-profiles",
 )
 
 
@@ -35,8 +36,8 @@ MUTATION_RECIPES = {
         "target_required": True,
         "payload_type": "object",
         "required_fields": ["key", "desc"],
-        "optional_fields": ["zone", "world", "map_region", "map_x", "map_y", "activities"],
-        "reference_hints": ["rooms", "exits"],
+        "optional_fields": ["zone", "world", "map_region", "map_x", "map_y", "activities", "atmosphere"],
+        "reference_hints": ["rooms", "exits", "atmosphere-profiles"],
         "preview": {"kind": "room", "args": ["target"]},
         "example": {"kind": "room", "target": "new_room_id", "payload": {"key": "New Room", "desc": "A useful playable room.", "zone": "Brambleford", "world": "Brave"}},
     },

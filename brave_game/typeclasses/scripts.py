@@ -366,15 +366,59 @@ DEFAULT_ENEMY_ATTACK_ATB_PROFILE = normalize_atb_profile({"windup_ticks": 0, "re
 
 PARTY_SCALING = {
     1: {"label": "Solo", "hp": 0.88, "power": 0.88, "accuracy": -3, "xp": 1.0},
-    2: {"label": "Duo", "hp": 0.94, "power": 0.95, "accuracy": -1, "xp": 1.0},
-    3: {"label": "Trio", "hp": 1.08, "power": 1.02, "accuracy": 1, "xp": 1.03},
-    4: {"label": "Full Party", "hp": 1.22, "power": 1.1, "accuracy": 3, "xp": 1.08},
+    2: {"label": "Duo", "hp": 1.0, "power": 1.03, "accuracy": 0, "xp": 1.0},
+    3: {"label": "Trio", "hp": 1.28, "power": 1.18, "accuracy": 3, "xp": 1.03},
+    4: {"label": "Full Party", "hp": 2.15, "power": 1.62, "accuracy": 9, "xp": 1.08},
 }
 
 DROWNED_WEIR_SOLO_SCALING = {"hp": 0.9, "power": 0.82, "accuracy": -4}
-SOLO_ENCOUNTER_SCALING_OVERRIDES = {
-    "high_walk_claim": {"hp": 0.92, "power": 0.86, "accuracy": -2},
-    "the_hollow_lantern": {"hp": 0.62, "power": 0.55, "accuracy": -10},
+ENCOUNTER_PARTY_SCALING_OVERRIDES = {
+    1: {
+        "bad_tide": {"hp": 0.68, "power": 0.62, "accuracy": -14},
+        "grease_line": {"hp": 0.88, "power": 0.84, "accuracy": -5},
+        "hall_carvers": {"hp": 0.92, "power": 0.9, "accuracy": -2},
+        "high_walk_claim": {"hp": 0.92, "power": 0.86, "accuracy": -2},
+        "hollow_carrion": {"hp": 0.82, "power": 0.76, "accuracy": -8},
+        "lock_surge": {"hp": 0.9, "power": 0.88, "accuracy": -3},
+        "potkings_feast": {"hp": 0.86, "power": 0.82, "accuracy": -6},
+        "sour_heap": {"hp": 0.92, "power": 0.9, "accuracy": -2},
+        "spillway_lights": {"hp": 0.68, "power": 0.62, "accuracy": -14},
+        "the_hollow_lantern": {"hp": 0.62, "power": 0.55, "accuracy": -10},
+    },
+    2: {
+        "the_hollow_lantern": {"hp": 0.94, "power": 0.9, "accuracy": -4},
+    },
+}
+SOLO_ENCOUNTER_SCALING_OVERRIDES = ENCOUNTER_PARTY_SCALING_OVERRIDES[1]
+LARGE_PARTY_OPENING_PRESSURE = {
+    "ruks_stand": {
+        "boss": "ruk_fence_cutter",
+        "adds": (
+            ("goblin_cutter", "Fencebreaker Runner"),
+            ("goblin_slinger", "Fencebreaker Slinger"),
+        ),
+    },
+    "greymaws_stand": {
+        "boss": "old_greymaw",
+        "adds": (
+            ("forest_wolf", "Greymaw's Packmate"),
+            ("forest_wolf", "Greymaw's Flanker"),
+        ),
+    },
+    "chain_keepers_stand": {
+        "boss": "foreman_coilback",
+        "adds": (
+            ("drowned_warder", "Lockline Warder"),
+            ("relay_tick", "Relay Tick Overwatch"),
+        ),
+    },
+    "blackreeds_line": {
+        "boss": "captain_varn_blackreed",
+        "adds": (
+            ("carrion_hound", "Blackreed Flank Hound"),
+            ("tower_archer", "Blackreed Tower Archer"),
+        ),
+    },
 }
 
 
@@ -1078,6 +1122,30 @@ class BraveEncounter(Script):
             if template_totals[template_key] > 1:
                 display_key = f"{ENEMY_TEMPLATES[template_key]['name']} {template_seen[template_key]}"
             self._spawn_enemy(template_key, display_key=display_key, announce=False)
+        self._apply_large_party_opening_pressure()
+
+    def _apply_large_party_opening_pressure(self):
+        """Add encounter-specific opening pressure for supported larger parties."""
+
+        if int(self.db.expected_party_size or 1) < 3:
+            return
+        pressure = LARGE_PARTY_OPENING_PRESSURE.get(str(self.db.encounter_key or ""))
+        if not pressure:
+            return
+        boss_template = pressure.get("boss")
+        enemies = []
+        boss_found = False
+        for enemy in self.db.enemies or []:
+            enemy = dict(enemy)
+            if enemy.get("template_key") == boss_template:
+                enemy["large_party_pressure"] = True
+                boss_found = True
+            enemies.append(enemy)
+        self.db.enemies = enemies
+        if not boss_found:
+            return
+        for template_key, display_key in pressure.get("adds") or ():
+            self._spawn_enemy(template_key, display_key=display_key, announce=False)
 
     def at_start(self):
         if self.obj:
@@ -1775,8 +1843,8 @@ class BraveEncounter(Script):
             scaling["power"] = round(scaling["power"] * DROWNED_WEIR_SOLO_SCALING["power"], 4)
             scaling["accuracy"] += DROWNED_WEIR_SOLO_SCALING["accuracy"]
             scaling["label"] = "Solo Drowned Weir"
-        encounter_override = SOLO_ENCOUNTER_SCALING_OVERRIDES.get(str(self.db.encounter_key or ""))
-        if size == 1 and encounter_override:
+        encounter_override = ENCOUNTER_PARTY_SCALING_OVERRIDES.get(size, {}).get(str(self.db.encounter_key or ""))
+        if encounter_override:
             scaling["hp"] = round(scaling["hp"] * encounter_override.get("hp", 1.0), 4)
             scaling["power"] = round(scaling["power"] * encounter_override.get("power", 1.0), 4)
             scaling["accuracy"] += int(encounter_override.get("accuracy", 0) or 0)
@@ -1870,9 +1938,9 @@ class BraveEncounter(Script):
     def _enemy_action_timing(self, enemy):
         template_key = (enemy or {}).get("template_key")
         if template_key in {"old_greymaw", "miretooth", "ruk_fence_cutter", "tower_archer", "mag_clamp_drone"}:
-            return normalize_atb_profile({"windup_ticks": 1, "recovery_ticks": 1, "telegraph": True})
-        if template_key in {"sir_edric_restless", "foreman_coilback", "captain_varn_blackreed", "grubnak_the_pot_king", "hollow_lantern"}:
             return normalize_atb_profile({"windup_ticks": 2, "recovery_ticks": 1, "telegraph": True})
+        if template_key in {"sir_edric_restless", "foreman_coilback", "captain_varn_blackreed", "grubnak_the_pot_king", "hollow_lantern"}:
+            return normalize_atb_profile({"windup_ticks": 3, "recovery_ticks": 1, "telegraph": True})
         return dict(DEFAULT_ENEMY_ATTACK_ATB_PROFILE)
 
     def _enemy_action_label(self, enemy):
@@ -2889,7 +2957,14 @@ class BraveEncounter(Script):
         """Apply special boss or elite behaviors before an enemy acts."""
 
         changed = False
+        expected_party_size = int(getattr(getattr(self, "db", None), "expected_party_size", 1) or 1)
         if enemy["template_key"] == "ruk_fence_cutter":
+            if expected_party_size >= 3 and enemy["hp"] <= (enemy["max_hp"] * 3) // 4 and not enemy.get("large_party_pressure"):
+                self._spawn_enemy("goblin_cutter", display_key="Fencebreaker Runner")
+                enemy["large_party_pressure"] = True
+                self.obj.msg_contents("|rRuk chops the air toward the fence line and another cutter rushes in to keep the party pinned.|n")
+                changed = True
+
             if enemy["hp"] <= enemy["max_hp"] // 2 and not enemy.get("enraged"):
                 enemy["enraged"] = True
                 enemy["attack_power"] += 4
@@ -2904,6 +2979,13 @@ class BraveEncounter(Script):
                 changed = True
 
         if enemy["template_key"] == "old_greymaw":
+            if expected_party_size >= 3 and enemy["hp"] <= (enemy["max_hp"] * 3) // 4 and not enemy.get("large_party_pressure"):
+                self._spawn_enemy("forest_wolf", display_key="Greymaw's Packmate")
+                self._spawn_enemy("forest_wolf", display_key="Greymaw's Flanker")
+                enemy["large_party_pressure"] = True
+                self.obj.msg_contents("|rGreymaw gives one low bark and the brush answers with wolves on both sides of the line.|n")
+                changed = True
+
             if enemy["hp"] <= (enemy["max_hp"] * 2) // 3 and not enemy.get("reposition_used"):
                 enemy["reposition_used"] = True
                 enemy["hidden_turns"] = 1
@@ -2913,6 +2995,12 @@ class BraveEncounter(Script):
                 changed = True
 
         if enemy["template_key"] == "foreman_coilback":
+            if expected_party_size >= 3 and enemy["hp"] <= (enemy["max_hp"] * 3) // 4 and not enemy.get("large_party_pressure"):
+                self._spawn_enemy("drowned_warder", display_key="Lockline Warder")
+                enemy["large_party_pressure"] = True
+                self.obj.msg_contents("|rForeman Coilback yanks the chain line hard, and a drowned warder hauls itself up to hold the flank.|n")
+                changed = True
+
             if enemy["hp"] <= (enemy["max_hp"] * 2) // 3 and not enemy.get("called_help"):
                 self._spawn_enemy("relay_tick", display_key="Relay Tick Overwatch")
                 enemy["called_help"] = True
@@ -2961,6 +3049,12 @@ class BraveEncounter(Script):
                 changed = True
 
         if enemy["template_key"] == "captain_varn_blackreed":
+            if expected_party_size >= 3 and enemy["hp"] <= (enemy["max_hp"] * 3) // 4 and not enemy.get("large_party_pressure"):
+                self._spawn_enemy("carrion_hound", display_key="Blackreed Flank Hound")
+                enemy["large_party_pressure"] = True
+                self.obj.msg_contents("|rBlackreed whistles once, sharp and low, and a hound cuts across the line to punish loose spacing.|n")
+                changed = True
+
             if enemy["hp"] <= (enemy["max_hp"] * 2) // 3 and not enemy.get("called_help"):
                 self._spawn_enemy("tower_archer", display_key="Blackreed Tower Archer")
                 self._spawn_enemy("bandit_raider", display_key="Blackreed Shieldman")

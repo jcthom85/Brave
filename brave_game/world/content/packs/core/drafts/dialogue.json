@@ -1,14 +1,14 @@
 {
   "_meta": {
-    "last_action": "upsert",
-    "last_modified_at": "2026-05-07T20:22:16.650066+00:00",
-    "last_modified_by": "codex-cli",
-    "last_target": "joss_veller",
-    "stage": "draft"
+    "last_action": "publish",
+    "last_modified_at": "2026-05-07T23:46:13.910818+00:00",
+    "last_modified_by": "jctest3",
+    "last_target": "dialogue",
+    "stage": "live"
   },
   "static_read_responses": {
     "barrow_marker_stone": "The lichen-sunk stone reads: HERE KEEP FAITH WITH THE OLD FIELD. DISTURB NOTHING. LIGHT YOUR LANTERN. LEAVE BEFORE THE LAST BELL. One lower name strip has worked loose, and the dirt beneath it is cleaner than the grave around it should allow.",
-    "blackreed_standard": "The standard shows a black marsh reed stitched over a split road line. It is less a heraldic symbol than a very direct threat about who gets to pass beneath this hill.",
+    "blackreed_standard": "A black marsh reed is stitched over a split road line. Not heraldry. A toll notice in cloth, declaring who gets to pass beneath this hill and who gets left in the rain.",
     "blackwater_lens_frame": "The lens frame is bent around a cold white core like the brass tried to hold the light in place and learned too late that it was the part being reshaped instead.",
     "boglight_lantern": "The lantern cage is cold, but something pale still clings to the green glass from the inside. One scratched note on the hook reads: IF IT LOOKS LIKE A GUIDE LIGHT, IT ISN'T.",
     "carrion_stake_circle": "Most of the stakes were hammered by anxious human hands. The newer cuts across them were not. A crow skull has been tied to the tallest one with reed cord and black bog thread.",
@@ -27,28 +27,28 @@
     "lower_lanternworks_notice": "The notice is written in Joss's exact hand: Lower Lanternworks open for inspection. Do not touch south-line glass without Joss Veller present. Someone has added: this includes tapping.",
     "lower_lanternworks_plaque": "The plaque is a maintenance map for Brambleford's road lanterns. North, west, and town lines are cold. The south groove is stained dark and faintly warm.",
     "mayors_ledger": "The open ledger carries three fresh entries in the mayor's square hand: LANTERN OIL SHORT BY TWO CRATES. WEST WATCH REPORTS LIGHT LOSS AT DUSK. CHAPEL REQUESTS ADDITIONAL VOLUNTEERS WITH STEADY NERVES.",
-    "midden_bone_totem": "The totem has been wired together from feast scraps and threats. Three scratched signs repeat around the lid-face: KING, POT, ROAD. None of them improve under repetition.",
+    "midden_bone_totem": "The totem is wired together from feast scraps, old threats, and small bones polished by handling. Three scratched signs circle the lid-face: KING, POT, ROAD. Repetition does not make them wiser.",
     "miretooth_shed_skull": "The skull is too heavy through the jaw and too narrow through the eyes to belong to anything Brambleford would name kindly. Deep score marks along the bone suggest the beast that shed it grew into something even worse.",
     "outfitters_chalkboard": "Leda's chalk hand is spare and direct: WE BUY PELTS, HERBS, SALVAGE, ROAD SCRAP, AND OTHER SENSIBLE FINDS. FAIR PRICES FOR FAIR HANDS. ASK ABOUT A SHIFT IF YOU WANT TO EARN THE BETTER COLUMN.",
-    "potking_lid_throne": "The throne is less built than accumulated. Pot lids, road shields, and dented signboards have all been hammered together into a seat meant to look richer than the cave deserves.",
+    "potking_lid_throne": "The throne has accumulated more than it was built. Pot lids, road shields, and dented signboards have been hammered into a seat that mistakes noise for wealth and grease for polish.",
     "ruks_chopping_block": "Fresh cuts score the block in harsh, uneven lines. One gouge has been hacked deep enough to lodge a shred of wagon paint and a few pale flecks of lantern glass. A goblin hand has scratched nearby: RUK KEEPS THIS ROAD.",
     "signal_brazier": "Fresh soot rims the iron pan, and the stacked wood beside it has been sorted into quick-burn bundles. The tower crew means to signal far and fast if the ridge turns ugly.",
     "sinkmouth_scratch_map": "The slate shows a goblin scratch map: CAMP crossed out, then arrows leading east into a crown mark over a grease-slick room. One soot-smeared note is clearer than the rest: POT-KING EATS FIRST.",
     "star_lens": "The etched brass rings mark stars, routes, and a handful of names that are definitely not villages anywhere near Brambleford. One line is picked out brighter than the rest: JUNK-YARD PLANET.",
     "sunken_lock_chain": "The chain hums through the black water in time with the wrong light overhead. Someone once stamped the nearest link with a warning that still survives the rust: DO NOT DRAW FULL LINE WITHOUT LAMP-HOUSE ORDER.",
     "town_notice_board": "Town notices crowd the board in practical layers: road crews needed east of the gate, chapel candles to be saved for dusk, and a fresh line from Mayor Elric asking everyone to report bad lanterns before they become worse roads.",
-    "trophy_vitrine": "The empty mounts are labeled before the victories arrive. Brambleford believes proof should have a place ready, partly for morale and partly so nobody can pretend the hard things never happened.",
+    "trophy_vitrine": "Glass cases hold the proof of Act 1 wins: Miretooth's Fen Jaw, the Blackreed Battle Standard, the Pot-King's Battered Lid, the Blackwater Beacon Core, and the white-black Hollow Lantern Prism. The newest label is still clean enough to catch the lanternlight: SOUTH LINE DARK, FIRST CHAPTER CLOSED.",
     "tutorial_damaged_cart": "The cart axle is split clean through, but the chalk marks beside it are instructional: brace the load, check the wheel pin, then call for help before a small mistake becomes a road problem.",
     "tutorial_supply_board": "Quartermaster notes list loaner gear, bandage counts, and the rule written twice in darker chalk: take what keeps you alive, return what keeps the next person alive too.",
     "watchtower_warning_post": "The old carving reads: BORDER WATCH POST THREE. KEEP FIRE LOW. SIGNAL SOUTH IF THE RIDGE MOVES. Someone newer has cut a reply beneath it: TOO LATE FOR THAT.",
-    "weir_keepers_plaque": "The greened plaque reads: KEEP SOUTH LIGHT TRIMMED. HOLD THE LOCK LINE. MAINTAIN NIGHT SIGNAL FOR BRAMBLEFORD APPROACH. Whatever used to count as maintenance here has become something much less cooperative.",
+    "weir_keepers_plaque": "The greened plaque reads: KEEP SOUTH LIGHT TRIMMED. HOLD THE LOCK LINE. MAINTAIN NIGHT SIGNAL FOR BRAMBLEFORD APPROACH. The words are ordinary civic orders. The wet brass around them is not.",
     "woods_wardstone": "The chalk marks are fresh enough to smear under a thumb. Beneath the warning DO NOT FOLLOW THE QUIET, an older cut mark faces west toward the barrow route: a boundary sign, not a prayer. Someone has recently rubbed charcoal over it and stopped before the line could flake away."
   },
   "talk_rules": {
     "brother_alden": [
       {
         "active": "names_under_dusk",
-        "text": "\"The old field is not waking as an army. That would be simpler and worse in a more honest way. Start at Marker Row, find the loose name, and see whether the circle beyond it has begun answering. Bring me proof before I start guessing from fear.\""
+        "text": "\"The old field is not waking as an army. That would be simpler and worse in a more honest way. Start at Marker Row, find the loose name, and see whether the circle beyond it has begun answering. Bring me proof before I turn fear into prayer and call it wisdom.\""
       },
       {
         "completed": "names_under_dusk",
@@ -75,13 +75,17 @@
         "text": "\"The bell rings clean again. That is not peace, exactly, but it is close enough for town sleep and chapel thanks.\""
       },
       {
+        "completed": "the_hollow_lantern",
+        "text": "\"The Dawn Bell sounded once at dusk without shaking. I know that sounds small after a drowned lamp house and a thing made of wrong light, but small mercies are still the way a town learns it survived.\""
+      },
+      {
         "text": "\"The chapel keeps records, candles, and the sort of silence people only notice when they lose it. If you need the Dawn Bell at your back before a hard road, ring your courage true and pray here before you leave.\""
       }
     ],
     "captain_harl_rowan": [
       {
         "active": "the_ridge_tally",
-        "text": "\"Blackreed is not just robbing wagons if he has the old tower organized. Get to the ledge, check the breach yard, and bring me anything that looks like a count. A thief takes. A commander sorts first.\""
+        "text": "\"Blackreed is not just robbing wagons if he has the old tower organized. Get to the ledge, check the breach yard, and bring me anything that reads like a count. A thief takes. A commander sorts first.\""
       },
       {
         "completed": "the_ridge_tally",
@@ -89,11 +93,11 @@
       },
       {
         "active": "the_hollow_lantern",
-        "text": "\"Then this one is about finishing the line, not scouting it. Joss has the drowned works in his head better than I do, but if that lamp thing starts leaning on lesser bodies, clear those first and break its footing before you try to end the room.\""
+        "text": "\"Then this one is about finishing the line, not scouting it. Joss has the drowned works in his head better than I do, but the tactical answer is simple: if that lamp thing leans on lesser bodies, clear those first and break its footing before you try to end the room.\""
       },
       {
         "active": "locks_under_blackwater",
-        "text": "\"Good. Short route, bad footing, wrong light. That's a capstone if I've ever heard one. Clear the drowned lock crews, keep the party inside shouting distance, and don't let the place split you for the sake of one clever angle.\""
+        "text": "\"Good. Short route, bad footing, wrong light. That is a capstone. Clear the drowned lock crews, keep the party inside shouting distance, and keep watch on anyone tempted to trade formation for one clever angle.\""
       },
       {
         "active": "the_south_light",
@@ -158,10 +162,35 @@
       },
       {
         "completed": "the_hollow_lantern",
-        "text": "\"That's a chapter's worth of trouble dealt with. Goblins, graves, ridge crews, warrens, fen, and now the wrong south light itself. Good. Let the town breathe a little before we decide what deserves the next hard answer.\""
+        "text": "\"That is a chapter worth of trouble dealt with: road, woods, barrows, ridge, warrens, fen, and now the south light itself. Good. Go put that prism in the hall upstairs and let the town breathe for one evening.\""
+      },
+      {
+        "completed": "foreman_coilback",
+        "text": "\"The Beacon Core is a heavy piece of work, but it belongs in the vitrine. One less hinge for the weir to turn on.\""
+      },
+      {
+        "completed": "captain_varn_blackreed",
+        "text": "\"Blackreed learned that the ridge doesn't belong to whoever talks loudest. His standard is in the hall now, and the road's open.\""
+      },
+      {
+        "completed": "the_pot_kings_feast",
+        "text": "\"Grubnak was a king of junk, but he was still a king. Ending that court in the warrens was a clean piece of work. Put the crown upstairs.\""
+      },
+      {
+        "completed": "miretooths_claim",
+        "text": "\"Miretooth won't be picking anyone else off the fen path. That fang belongs in a case, not a throat.\""
+      },
+      {
+        "completed": "the_knight_without_rest",
+        "text": "\"Sir Edric can sleep now. The dead are back where they belong, and his signet is safe in the hall. Good job keeping your nerve when the air turned cold.\""
       },
       {
         "text": "\"You look steadier now. Let the toughest one take the first hit, let the sharpest one pick the target, and come back alive enough for supper.\""
+      }
+    ],
+    "courier_peep_marrow": [
+      {
+        "text": "\"Message for the post, chalk mark for the route, errand for the person who forgot they had legs. That's me. If I look quick, it is because slow couriers learn where every puddle lives.\""
       }
     ],
     "joss_veller": [
@@ -191,7 +220,7 @@
       },
       {
         "active": "signal_in_the_scrap",
-        "text": "\"The causeway pulse is real. Now chart Lantern Weir and the Sluice Walk, then bring me one clean shard of blackwater lensglass so I can read the line instead of guessing at it.\""
+        "text": "\"The causeway pulse is real. Now chart Lantern Weir and the Sluice Walk, then bring me one clean shard of blackwater lensglass so I can measure the signal instead of guessing at it.\""
       },
       {
         "active": "bridgework_for_joss",
@@ -199,7 +228,7 @@
       },
       {
         "completed": "the_hollow_lantern",
-        "text": "\"The south line is dark again. Properly dark, not waiting-to-be-clever dark. That is worth more than a tidy lens report. If you have not looked upstairs yet, the Trophy Hall has a frame waiting for the prism.\""
+        "text": "\"The south line is dark again. Properly dark, not hiding-current dark or waiting-for-a-better-word dark. I am going to write three reports, distrust two of them, and still admit the important part: the prism belongs upstairs where everyone can see what stopped humming.\""
       },
       {
         "completed": "foreman_coilback",
@@ -210,7 +239,12 @@
         "text": "\"Every groove down here belongs to a road-light line Brambleford forgot it owned. The south groove woke up angry, and that is enough mystery without giving it a grander name.\""
       },
       {
-        "text": "\"Most folk think I light lamps. True enough. They just forget a town lantern can be a warning, a promise, or a warning depending on who built the brass under it.\""
+        "text": "\"Most folk think I light lamps. True enough. They forget a town lantern is also a promise, a boundary, and sometimes a signal with civic handwriting. The brass remembers more than the flame does, and I prefer to measure what it remembers.\""
+      }
+    ],
+    "leda_thornwick": [
+      {
+        "text": "\"Boots, cloaks, trail gear, fair trade. If it keeps weather off you or keeps your pack from betraying you, I have an opinion and a price. Usually in that order.\""
       }
     ],
     "mayor_elric_thorne": [
@@ -269,12 +303,28 @@
         "text": "\"Our western lanterns are failing one by one, and the watch swears something moves around the old stones after dusk. Speak with Brother Alden at the chapel, then follow the old stone path to the barrow causeway and tell me whether this is fear or fact.\""
       },
       {
-        "completed": "the_knight_without_rest",
-        "text": "\"The town sleeps easier when old promises stay buried. Now the eastern ridge needs the same sort of firm answer. Rowan's been muttering about smoke from the ruined watchtower.\""
+        "completed": "the_hollow_lantern",
+        "text": "\"The south line is dark. I can stop writing impossible phrases like active drowned civic threat in the margin of the town ledger. Put the prism in the hall, then rest before someone discovers a new category of expense.\""
       },
       {
-        "completed": "the_hollow_lantern",
-        "text": "\"Good. Then phase one of this town's current bad luck is closed: road, woods, barrows, ridge, warrens, fen, and now the drowned light beyond it. Brambleford will find a way to make more trouble eventually, but for one evening the board may stay quieter.\""
+        "completed": "foreman_coilback",
+        "text": "\"There. Hear that? The lower lanternworks are quiet enough to think in. The Trophy Hall upstairs has a place for the Blackwater Beacon Core because some wins ought to stay where the whole family can point at them.\""
+      },
+      {
+        "completed": "captain_varn_blackreed",
+        "text": "\"Blackreed is finished. The ridge standard is in the hall, and the road doesn't have a toll-taker with ambitions anymore. That is a civic victory, not just a tactical one.\""
+      },
+      {
+        "completed": "the_pot_kings_feast",
+        "text": "\"The warrens have stopped growing. Grubnak is done, and the road stores are where they belong. The Trophy Hall upstairs is looking better for it too.\""
+      },
+      {
+        "completed": "miretooths_claim",
+        "text": "\"Miretooth is gone, and the fen edge is just mud and water again. Mira says the marsh remembers fear now. Good. Bring the proof to the hall upstairs so the town can see it.\""
+      },
+      {
+        "completed": "the_knight_without_rest",
+        "text": "\"The old graves have settled. Edric is properly buried this time, and his signet is in the vitrine upstairs. That is a chapter closed that I never wanted to read twice.\""
       },
       {
         "completed": "greymaws_trail",
@@ -286,10 +336,10 @@
     ],
     "mender_veska_flint": [
       {
-        "text": "\"Torren makes things meant to last. I make things meant to solve the next ugly problem before it solves you. If you want trapwork, field fixes, or something useful built out of what the road coughed up, use the workbench here.\""
+        "text": "\"Torren makes things meant to last. I make repairs meant to solve the next ugly problem before it solves you. If you want trapwork, clamp fixes, wire lashings, or something useful built out of what the road coughed up, use the workbench here.\""
       },
       {
-        "text": "\"If you're hunting better patterns, keep your eyes open. Goblin hexers steal anything not nailed down, fence-cutters and ridge scouts lift ward notes off dead caravans, barrow lights cough old formula sheets back into the dark, and half the marsh seems determined to return my work only after someone else bleeds for it. Study them when you find one worth keeping.\""
+        "text": "\"If you're hunting better mechanisms, keep your eyes open. Goblin hexers steal anything not nailed down, fence-cutters and ridge scouts lift ward notes off dead caravans, barrow lights cough old formula sheets back into the dark, and half the marsh returns my parts only after someone else bleeds for them. Study any pattern worth keeping.\""
       }
     ],
     "mira_fenleaf": [
@@ -300,10 +350,6 @@
       {
         "completed": "marks_that_drift",
         "text": "\"That map is worse than I hoped and better than guessing. The tags did not wander because the mud wanted a joke. Something east of the wallow is teaching the light to lie. Miretooth is still teeth first, but the route beyond him is the stranger answer.\""
-      },
-      {
-        "active": "rails_for_the_return",
-        "text": "\"The road crews need proof they can carry in a hand, not another story shouted over the gate. Check the Old Fence Line, pull together enough bent nails to show how the rails were stripped, then look at Ruk's camp before you bring me the pattern.\""
       },
       {
         "completed": "rails_for_the_return",
@@ -331,7 +377,7 @@
       },
       {
         "active": "bogwater_rumors",
-        "text": "\"South of Fencebreaker Camp the ground turns mean and wet fast. Take the Fenreach Track, then work east until you hit the hollow with the bad lights. That's where the marsh starts admitting what lives in it.\""
+        "text": "\"South of Fencebreaker Camp the ground turns mean and wet fast. Take the Fenreach Track, then work east until you hit the hollow with the bad lights. That's the first sign the marsh is done pretending it is only mud.\""
       },
       {
         "active": "the_pot_kings_feast",
@@ -384,12 +430,20 @@
         "text": "\"Goblin Road can breathe again, but the woods have gone strange. The trail starts just south of the gate. Watch for briar imps and the bigger wolf tracks, and check your enemies before you commit.\""
       },
       {
+        "active": "rails_for_the_return",
+        "text": "\"The road crews need proof they can carry in a hand, not another story shouted over the gate. Check the Old Fence Line, pull together enough bent nails to show how the rails were stripped, then look at Ruk's camp before you bring me the pattern.\""
+      },
+      {
         "completed": "the_hollow_lantern",
-        "text": "\"The south edge is quieter now. Still wet, still mean, still full of marsh ideas I'd rather not adopt, but quieter. That's enough of a win for one frontier town.\""
+        "text": "\"The south edge is quieter now. The reed marks hold where I set them, the bad lights have stopped walking against the wind, and the marsh has gone back to being dangerous in honest ways. That is enough of a win for one frontier town.\""
+      },
+      {
+        "completed": "miretooths_claim",
+        "text": "\"The marsh is mud and water again, not a sentence waiting to be finished. Miretooth is gone. Put the fang in the hall, then get some rest. You earned the silence.\""
       },
       {
         "completed": "ruk_the_fence_cutter",
-        "text": "\"Goblin Road can breathe again, and Ruk's little kingdom is finished. That said, the black lantern wasn't all him. The woods have gone strange, Sister Maybelle needs moonleaf, and I've seen wolf sign deeper than I like.\""
+        "text": "\"Goblin Road can breathe again, and Ruk's little kingdom is finished. Put the broken axe head upstairs. It is a better trophy than it was a tool.\""
       },
       {
         "active": "roadside_howls",
@@ -405,7 +459,22 @@
     ],
     "mistress_elira_thorne": [
       {
-        "text": "\"Technique is what survives after panic burns off. If you want to refine what you already know, speak to me to pick a combat technique to sharpen. If you want your whole focus back, I can break the pattern cleanly, but I do not do it for free.\""
+        "text": "\"Technique is what survives after panic burns off. Practice gives it shape, discipline keeps it standard, and I correct the part you keep flattering. If you want to refine what you know, speak to me. If you want your whole focus back, I can break the pattern cleanly, but I do not do it for free.\""
+      }
+    ],
+    "quartermaster_nella_cobb": [
+      {
+        "text": "\"Crate open, slate marked, inventory counted twice. Take the supply that keeps you prepared, bring back gear that can serve the next hand, and do not make me discover mystery pockets by sound.\""
+      }
+    ],
+    "ringhand_brask": [
+      {
+        "text": "\"Rail marks the ring, timing teaches the fight, and a good lesson lands before my bark has to. Step in, keep your feet under you, and let the first mistake be useful instead of decorative.\""
+      }
+    ],
+    "sergeant_tamsin_vale": [
+      {
+        "text": "\"Alarm means triage. Yard first, checklist second, command voice last because people hear panic before words. Stand where I put you, check what I name, and move when the road asks.\""
       }
     ],
     "sister_maybelle": [
@@ -434,11 +503,11 @@
       },
       {
         "active": "herbs_for_sister_maybelle",
-        "text": "\"Moonleaf likes cold shade and bad company. Check your pack as you go. Once you have three sprigs, that will keep me in poultices for a little while.\""
+        "text": "\"Moonleaf likes cold shade and bad company. Check your pack as you go. Three sprigs keeps me in poultices for a little while, which means less harm turning into grief because someone waited too long.\""
       },
       {
         "active": "greymaws_trail",
-        "text": "\"Whatever is wrong in the woods seems to gather around Greymaw. If he falls, the herbs may settle and the smaller things may remember fear.\""
+        "text": "\"Whatever is wrong in the woods gathers around Greymaw. If he falls, the herbs may recover, the smaller things may remember fear, and I may stop running out of clean bandages before supper.\""
       },
       {
         "active": "what_whispers_in_the_wood",
@@ -449,11 +518,20 @@
         "text": "\"The moonleaf has stopped curling in on itself. That is the kind of good sign I trust more than speeches.\""
       },
       {
+        "completed": "the_hollow_lantern",
+        "text": "\"The chapel lamps burned steady all morning. No cough in the flame, no chill under the door, no patient waiting in the glass. That is care too: trouble ended before it learns another name.\""
+      },
+      {
         "completed": "ruk_the_fence_cutter",
         "text": "\"Ruk is done, thank the lanterns. Now the woods need looking after. Speak to Mira, or head south if you've already decided trouble deserves a personal visit.\""
       },
       {
-        "text": "\"If you insist on being heroic, at least try not to bleed on the floorboards. The town still needs hands steady enough to gather herbs and carry the wounded.\""
+        "text": "\"If you insist on being heroic, at least try not to bleed on the floorboards. The town still needs hands steady enough to gather herbs, carry the wounded, and choose care before injury becomes a sermon.\""
+      }
+    ],
+    "torren_ironroot": [
+      {
+        "text": "\"Forge is hot, anvil is clean, scrap goes in that bin unless it is lying about being useful. Bring metal, ask for repair, and do not tell me iron has a personality until it pays rent.\""
       }
     ],
     "uncle_pib_underbough": [
@@ -463,7 +541,7 @@
       },
       {
         "completed": "what_the_pot_took",
-        "text": "\"That is my flour mark, and that is definitely not my gravy. Ruk was cutting the road, but something below him was planning dinner. Thank you. I hate being right with documentation, but it is useful.\""
+        "text": "\"That is my flour mark, and that is definitely not my gravy. Ruk was cutting the road, but something below him was planning dinner. Thank you. I hate being right with documentation, but it is useful. Food tells the truth when braggarts don't.\""
       },
       {
         "active": "stores_before_the_road",
@@ -494,7 +572,7 @@
         "text": "\"If the road has had enough of you for one evening, cook something honest and eat before you head back out. The Great Catch Log's right here too, if you feel like proving the river wrong.\""
       },
       {
-        "text": "\"The inn's still safe ground. Patch up here, empty your pack if it rattles too much, then go bother something meaner than you. Or don't. Some evenings are for the wharf and supper.\""
+        "text": "\"The inn's still safe ground. Patch up here, empty your pack if it rattles too much, then go bother something meaner than you. Or don't. Some evenings are for the wharf, the kettle, and supper.\""
       }
     ]
   }

@@ -37,8 +37,8 @@ class RacePerkTests(unittest.TestCase):
         _primary, derived = Character.recalculate_stats(character, restore=True)
 
         self.assertEqual(141, derived["max_hp"])
-        self.assertEqual(49, derived["max_mana"])
-        self.assertEqual(85, derived["max_stamina"])
+        self.assertEqual(41, derived["max_mana"])
+        self.assertEqual(62, derived["max_stamina"])
         self.assertEqual(74, derived["accuracy"])
 
     def test_elf_keen_senses_adds_accuracy_and_precision(self):

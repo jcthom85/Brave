@@ -4,11 +4,34 @@
       "enemy_id": "e1",
       "enemy_key": "Sir Edric the Restless",
       "round_started": 5,
-      "round_ended": 6,
+      "round_ended": 7,
       "interruptible": true,
       "ticks": [
         {
           "round": 5,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1"
+          ],
+          "messages_tail": [
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1's Strike glances off Sir Edric the Restless.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 6,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -25,12 +48,13 @@
             "Warrior 1:charging:0"
           ],
           "messages_tail": [
-            "Warrior 1 hits Sir Edric the Restless for 21 damage.",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1's Strike glances off Sir Edric the Restless.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         },
         {
-          "round": 6,
+          "round": 7,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": "Warrior 1",
@@ -51,7 +75,8 @@
             "Warrior 1:charging:3"
           ],
           "messages_tail": [
-            "Warrior 1 hits Sir Edric the Restless for 21 damage.",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1's Strike glances off Sir Edric the Restless.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         }
@@ -60,13 +85,13 @@
     {
       "enemy_id": "e1",
       "enemy_key": "Sir Edric the Restless",
-      "round_started": 13,
-      "round_ended": 14,
+      "round_started": 14,
+      "round_ended": 15,
       "interruptible": true,
       "ticks": [
         {
-          "round": 13,
-          "telegraph_ticks_remaining": 2,
+          "round": 14,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
@@ -75,48 +100,56 @@
               "class": "warrior",
               "phase": "charging",
               "ticks_remaining": 2,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "ability",
+                "ability": "strike",
+                "target": "e1"
+              }
             }
           ],
           "unavailable_reasons": [
             "Warrior 1:charging:2"
           ],
           "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
             "|rSir Edric the Restless's Funeral Charge lands clean.|n",
-            "Sir Edric the Restless hits Warrior 1 for 5 damage.",
+            "Sir Edric the Restless hits Warrior 1 for 7 damage.",
             "|mWarrior 1 shudders under a grave-cold curse!|n",
             "Warrior 1 shakes off the curse.",
-            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
-            "Warrior 1 hits Sir Edric the Restless for 24 damage. The impact staggers the target.",
-            "Sir Edric the Restless is knocked off-balance.",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits Sir Edric the Restless for 24 damage. A heavy blow lands.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         },
         {
-          "round": 14,
-          "telegraph_ticks_remaining": 1,
+          "round": 15,
+          "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
+          "interrupt_pending_actor": "Warrior 1",
           "players": [
             {
               "key": "Warrior 1",
               "class": "warrior",
               "phase": "charging",
               "ticks_remaining": 1,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "ability",
+                "ability": "shieldbash",
+                "target": "e1"
+              }
             }
           ],
           "unavailable_reasons": [
             "Warrior 1:charging:1"
           ],
           "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
             "|rSir Edric the Restless's Funeral Charge lands clean.|n",
-            "Sir Edric the Restless hits Warrior 1 for 5 damage.",
+            "Sir Edric the Restless hits Warrior 1 for 7 damage.",
             "|mWarrior 1 shudders under a grave-cold curse!|n",
             "Warrior 1 shakes off the curse.",
-            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
-            "Warrior 1 hits Sir Edric the Restless for 24 damage. The impact staggers the target.",
-            "Sir Edric the Restless is knocked off-balance.",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits Sir Edric the Restless for 24 damage. A heavy blow lands.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         }
@@ -126,12 +159,68 @@
       "enemy_id": "e1",
       "enemy_key": "Sir Edric the Restless",
       "round_started": 21,
-      "round_ended": 22,
+      "round_ended": 23,
       "interruptible": true,
       "ticks": [
         {
           "round": 21,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1"
+          ],
+          "messages_tail": [
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits Sir Edric the Restless for 24 damage. A heavy blow lands.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cWarrior 1 uses Shield Bash!|n",
+            "Warrior 1 hits Sir Edric the Restless for 24 damage. The impact staggers the target.",
+            "Sir Edric the Restless is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks Sir Edric the Restless's Funeral Charge.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 22,
           "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1"
+          ],
+          "messages_tail": [
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cWarrior 1 uses Shield Bash!|n",
+            "Warrior 1 hits Sir Edric the Restless for 24 damage. The impact staggers the target.",
+            "Sir Edric the Restless is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks Sir Edric the Restless's Funeral Charge.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits Sir Edric the Restless for 25 damage. The controlled target cannot shrug the blow off."
+          ]
+        },
+        {
+          "round": 23,
+          "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
@@ -147,21 +236,30 @@
             "Warrior 1:charging:0"
           ],
           "messages_tail": [
-            "Edric's Grave-Light hits Warrior 1 for 5 damage.",
-            "|mWarrior 1 shudders under a grave-cold curse!|n",
-            "Warrior 1 shakes off the curse.",
-            "Warrior 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
-            "Edric's Grave Shade hits Warrior 1 for 4 damage.",
-            "Edric's Grave-Light hits Warrior 1 for 5 damage.",
-            "|mWarrior 1 shudders under a grave-cold curse!|n"
+            "|cWarrior 1 uses Shield Bash!|n",
+            "Warrior 1 hits Sir Edric the Restless for 24 damage. The impact staggers the target.",
+            "Sir Edric the Restless is knocked off-balance.",
+            "|gWarrior 1's Shield Bash breaks Sir Edric the Restless's Funeral Charge.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits Sir Edric the Restless for 25 damage. The controlled target cannot shrug the blow off."
           ]
-        },
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 30,
+      "round_ended": 32,
+      "interruptible": true,
+      "ticks": [
         {
-          "round": 22,
-          "telegraph_ticks_remaining": 1,
+          "round": 30,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
-          "interrupt_pending_actor": "Warrior 1",
+          "interrupt_pending_actor": null,
           "players": [
             {
               "key": "Warrior 1",
@@ -170,8 +268,8 @@
               "ticks_remaining": 3,
               "pending_action": {
                 "kind": "ability",
-                "ability": "shieldbash",
-                "target": "e1"
+                "ability": "strike",
+                "target": "e3"
               }
             }
           ],
@@ -179,129 +277,27 @@
             "Warrior 1:charging:3"
           ],
           "messages_tail": [
-            "Edric's Grave-Light hits Warrior 1 for 5 damage.",
-            "|mWarrior 1 shudders under a grave-cold curse!|n",
-            "Warrior 1 shakes off the curse.",
-            "Warrior 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits Edric's Grave-Light for 26 damage. A heavy blow lands.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
             "Edric's Grave Shade hits Warrior 1 for 4 damage.",
-            "Edric's Grave-Light hits Warrior 1 for 5 damage.",
-            "|mWarrior 1 shudders under a grave-cold curse!|n"
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 9 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n"
           ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "Sir Edric the Restless",
-      "round_started": 29,
-      "round_ended": 30,
-      "interruptible": true,
-      "ticks": [
+        },
         {
-          "round": 29,
+          "round": 31,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
+          "interrupt_pending_actor": "Warrior 1",
           "players": [
             {
               "key": "Warrior 1",
               "class": "warrior",
               "phase": "charging",
               "ticks_remaining": 2,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [
-            "Warrior 1:charging:2"
-          ],
-          "messages_tail": [
-            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
-            "Warrior 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
-            "Sir Edric the Restless is knocked off-balance.",
-            "Edric's Grave Shade hits Warrior 1 for 4 damage.",
-            "|mWarrior 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Warrior 1 for 7 damage.",
-            "Warrior 1 shakes off the curse.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
-          ]
-        },
-        {
-          "round": 30,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Warrior 1",
-              "class": "warrior",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [
-            "Warrior 1:charging:1"
-          ],
-          "messages_tail": [
-            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
-            "Warrior 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
-            "Sir Edric the Restless is knocked off-balance.",
-            "Edric's Grave Shade hits Warrior 1 for 4 damage.",
-            "|mWarrior 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Warrior 1 for 7 damage.",
-            "Warrior 1 shakes off the curse.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "Sir Edric the Restless",
-      "round_started": 37,
-      "round_ended": 38,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 37,
-          "telegraph_ticks_remaining": 2,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Warrior 1",
-              "class": "warrior",
-              "phase": "charging",
-              "ticks_remaining": 0,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [
-            "Warrior 1:charging:0"
-          ],
-          "messages_tail": [
-            "|mWarrior 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Warrior 1 for 5 damage.",
-            "Warrior 1 shakes off the curse.",
-            "Warrior 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
-            "Edric's Grave Shade hits Warrior 1 for 6 damage.",
-            "|mWarrior 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Warrior 1 for 4 damage.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
-          ]
-        },
-        {
-          "round": 38,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": "Warrior 1",
-          "players": [
-            {
-              "key": "Warrior 1",
-              "class": "warrior",
-              "phase": "charging",
-              "ticks_remaining": 3,
               "pending_action": {
                 "kind": "ability",
                 "ability": "shieldbash",
@@ -310,16 +306,48 @@
             }
           ],
           "unavailable_reasons": [
-            "Warrior 1:charging:3"
+            "Warrior 1:charging:2"
           ],
           "messages_tail": [
-            "Edric's Grave-Light hits Warrior 1 for 5 damage.",
-            "Warrior 1 shakes off the curse.",
-            "Warrior 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
-            "Edric's Grave Shade hits Warrior 1 for 6 damage.",
-            "|mWarrior 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Warrior 1 for 4 damage.",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits Edric's Grave-Light for 26 damage. A heavy blow lands.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Edric's Grave Shade hits Warrior 1 for 4 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 9 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n"
+          ]
+        },
+        {
+          "round": 32,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": "Warrior 1",
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "shieldbash",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits Edric's Grave-Light for 26 damage. A heavy blow lands.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Edric's Grave Shade hits Warrior 1 for 4 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 9 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
             "Warrior 1 shakes off the curse."
           ]
         }
@@ -328,77 +356,40 @@
     {
       "enemy_id": "e1",
       "enemy_key": "Sir Edric the Restless",
-      "round_started": 45,
-      "round_ended": 46,
+      "round_started": 39,
+      "round_ended": 41,
       "interruptible": true,
       "ticks": [
         {
-          "round": 45,
-          "telegraph_ticks_remaining": 2,
+          "round": 39,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
             {
               "key": "Warrior 1",
               "class": "warrior",
-              "phase": "charging",
-              "ticks_remaining": 2,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [
-            "Warrior 1:charging:2"
-          ],
-          "messages_tail": [
-            "|mWarrior 1 shudders under a grave-cold curse!|n",
-            "Warrior 1 shakes off the curse.",
-            "Edric's Grave Shade hits Warrior 1 for 3 damage.",
-            "Edric's Grave-Light hits Warrior 1 for 3 damage.",
-            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
-            "Warrior 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
-            "Sir Edric the Restless is knocked off-balance.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
-          ]
-        },
-        {
-          "round": 46,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Warrior 1",
-              "class": "warrior",
-              "phase": "charging",
+              "phase": "recovering",
               "ticks_remaining": 1,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [
-            "Warrior 1:charging:1"
+            "Warrior 1:recovering:1"
           ],
           "messages_tail": [
-            "Edric's Grave-Light hits Warrior 1 for 3 damage.",
-            "|cWarrior 1 uses Shield Bash!|n [[BRAVEFX kind=action&actor=Warrior+1&label=Shield+Bash]]",
-            "Warrior 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow. The impact staggers the target.",
-            "Sir Edric the Restless is knocked off-balance.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
-            "Edric's Grave Shade hits Warrior 1 for 3 damage.",
             "|mWarrior 1 shudders under a grave-cold curse!|n",
-            "Edric's Grave-Light hits Warrior 1 for 4 damage."
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 8 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "Warrior 1 shakes off the curse.",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1's Strike glances off Edric's Grave-Light.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "Sir Edric the Restless",
-      "round_started": 53,
-      "round_ended": 54,
-      "interruptible": true,
-      "ticks": [
+        },
         {
-          "round": 53,
+          "round": 40,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -415,21 +406,21 @@
             "Warrior 1:charging:0"
           ],
           "messages_tail": [
-            "Sir Edric the Restless struggles against the frost and loses the moment.",
             "Warrior 1 shakes off the curse.",
-            "Edric's Grave Shade hits Warrior 1 for 3 damage.",
-            "Edric's Grave-Light hits Warrior 1 for 6 damage.",
-            "|mWarrior 1 shudders under a grave-cold curse!|n",
-            "Warrior 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
-            "Warrior 1 shakes off the curse.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1's Strike glances off Edric's Grave-Light.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Edric's Grave Shade hits Warrior 1 for 4 damage.",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n"
           ]
         },
         {
-          "round": 54,
+          "round": 41,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
-          "interrupt_pending_actor": "Warrior 1",
+          "interrupt_pending_actor": null,
           "players": [
             {
               "key": "Warrior 1",
@@ -437,8 +428,242 @@
               "phase": "charging",
               "ticks_remaining": 3,
               "pending_action": {
-                "kind": "ability",
-                "ability": "shieldbash",
+                "kind": "attack",
+                "target": "e3"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:3"
+          ],
+          "messages_tail": [
+            "Warrior 1 shakes off the curse.",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1's Strike glances off Edric's Grave-Light.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Edric's Grave Shade hits Warrior 1 for 4 damage.",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 48,
+      "round_ended": 50,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 48,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 8 damage.",
+            "Warrior 1 hits Edric's Grave-Light for 22 damage.",
+            "Edric's Grave-Light falls.",
+            "Edric's Grave Shade hits Warrior 1 for 6 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "Warrior 1 shakes off the curse.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 49,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1"
+          ],
+          "messages_tail": [
+            "Sir Edric the Restless hits Warrior 1 for 8 damage.",
+            "Warrior 1 hits Edric's Grave-Light for 22 damage.",
+            "Edric's Grave-Light falls.",
+            "Edric's Grave Shade hits Warrior 1 for 6 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "Warrior 1 shakes off the curse.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Warrior 1 hits Edric's Grave Shade for 20 damage."
+          ]
+        },
+        {
+          "round": 50,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits Edric's Grave-Light for 22 damage.",
+            "Edric's Grave-Light falls.",
+            "Edric's Grave Shade hits Warrior 1 for 6 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "Warrior 1 shakes off the curse.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Warrior 1 hits Edric's Grave Shade for 20 damage.",
+            "Edric's Grave Shade hits Warrior 1 for 5 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 57,
+      "round_ended": 59,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 57,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:2"
+          ],
+          "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 6 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "Warrior 1 shakes off the curse.",
+            "Warrior 1 hits Edric's Grave Shade for 21 damage.",
+            "Edric's Grave Shade falls.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 58,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 6 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "Warrior 1 shakes off the curse.",
+            "Warrior 1 hits Edric's Grave Shade for 21 damage.",
+            "Edric's Grave Shade falls.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 59,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1"
+          ],
+          "messages_tail": [
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 6 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "Warrior 1 shakes off the curse.",
+            "Warrior 1 hits Edric's Grave Shade for 21 damage.",
+            "Edric's Grave Shade falls.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Warrior 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 66,
+      "round_ended": 68,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 66,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "attack",
                 "target": "e1"
               }
             }
@@ -447,13 +672,310 @@
             "Warrior 1:charging:3"
           ],
           "messages_tail": [
-            "Sir Edric the Restless struggles against the frost and loses the moment.",
-            "Warrior 1 shakes off the curse.",
-            "Edric's Grave Shade hits Warrior 1 for 3 damage.",
-            "Edric's Grave-Light hits Warrior 1 for 6 damage.",
+            "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 5 damage.",
             "|mWarrior 1 shudders under a grave-cold curse!|n",
-            "Warrior 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
             "Warrior 1 shakes off the curse.",
+            "Warrior 1 hits Sir Edric the Restless for 21 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 67,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:2"
+          ],
+          "messages_tail": [
+            "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 5 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "Warrior 1 shakes off the curse.",
+            "Warrior 1 hits Sir Edric the Restless for 21 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 68,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 5 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "Warrior 1 shakes off the curse.",
+            "Warrior 1 hits Sir Edric the Restless for 21 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 75,
+      "round_ended": 77,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 75,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0"
+          ],
+          "messages_tail": [
+            "Warrior 1 misses Sir Edric the Restless.",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 4 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "Warrior 1 shakes off the curse.",
+            "Warrior 1 hits Sir Edric the Restless for 18 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 76,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:3"
+          ],
+          "messages_tail": [
+            "Warrior 1 misses Sir Edric the Restless.",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 4 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "Warrior 1 shakes off the curse.",
+            "Warrior 1 hits Sir Edric the Restless for 18 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 77,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:2"
+          ],
+          "messages_tail": [
+            "Warrior 1 misses Sir Edric the Restless.",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 4 damage.",
+            "|mWarrior 1 shudders under a grave-cold curse!|n",
+            "Warrior 1 shakes off the curse.",
+            "Warrior 1 hits Sir Edric the Restless for 18 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 84,
+      "round_ended": 86,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 84,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits Sir Edric the Restless for 18 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 7 damage.",
+            "Warrior 1 hits Sir Edric the Restless for 21 damage.",
+            "Warrior 1 hits Sir Edric the Restless for 19 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 85,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits Sir Edric the Restless for 18 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 7 damage.",
+            "Warrior 1 hits Sir Edric the Restless for 21 damage.",
+            "Warrior 1 hits Sir Edric the Restless for 19 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 86,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:3"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits Sir Edric the Restless for 18 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 7 damage.",
+            "Warrior 1 hits Sir Edric the Restless for 21 damage.",
+            "Warrior 1 hits Sir Edric the Restless for 19 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 93,
+      "round_ended": 93,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 93,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits Sir Edric the Restless for 19 damage.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|rSir Edric lowers the last of his restraint and advances with funeral wrath.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Warrior 1 for 6 damage.",
+            "Warrior 1 hits Sir Edric the Restless for 19 damage.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         }
@@ -462,25 +984,25 @@
   ],
   "interrupt_windows": [
     {
-      "round": 6,
+      "round": 7,
       "enemy_key": "Sir Edric the Restless",
       "interrupt_ready_actor": null,
       "interrupt_pending_actor": "Warrior 1"
     },
     {
-      "round": 22,
+      "round": 15,
       "enemy_key": "Sir Edric the Restless",
       "interrupt_ready_actor": null,
       "interrupt_pending_actor": "Warrior 1"
     },
     {
-      "round": 38,
+      "round": 31,
       "enemy_key": "Sir Edric the Restless",
       "interrupt_ready_actor": null,
       "interrupt_pending_actor": "Warrior 1"
     },
     {
-      "round": 54,
+      "round": 32,
       "enemy_key": "Sir Edric the Restless",
       "interrupt_ready_actor": null,
       "interrupt_pending_actor": "Warrior 1"

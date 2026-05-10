@@ -4,12 +4,12 @@
       "enemy_id": "e1",
       "enemy_key": "Sir Edric the Restless",
       "round_started": 5,
-      "round_ended": 6,
+      "round_ended": 7,
       "interruptible": true,
       "ticks": [
         {
           "round": 5,
-          "telegraph_ticks_remaining": 2,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
@@ -17,51 +17,23 @@
               "key": "Ranger 1",
               "class": "ranger",
               "phase": "charging",
-              "ticks_remaining": 2,
+              "ticks_remaining": 0,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Sir Edric the Restless for 17 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 24 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         },
         {
           "round": 6,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "Ranger 1 hits Sir Edric the Restless for 22 damage.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Sir Edric the Restless for 17 damage.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "Sir Edric the Restless",
-      "round_started": 13,
-      "round_ended": 14,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 13,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -71,23 +43,118 @@
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 2,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Ranger 1 shakes off the curse.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Edric's Grave-Light for 15 damage.",
-            "Marsh Hound shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 24 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
-            "Edric's Grave Shade hits Marsh Hound for 10 damage.",
-            "Edric's Grave-Light hits Marsh Hound for 10 damage."
+            "|rSir Edric the Restless bleeds for 2 damage.|n"
           ]
         },
+        {
+          "round": 7,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 24 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 14,
+      "round_ended": 16,
+      "interruptible": true,
+      "ticks": [
         {
           "round": 14,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 25 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 15,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 25 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n"
+          ]
+        },
+        {
+          "round": 16,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -96,20 +163,202 @@
               "key": "Ranger 1",
               "class": "ranger",
               "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 25 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 23,
+      "round_ended": 25,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 23,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "winding",
               "ticks_remaining": 1,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Marsh Hound hits Edric's Grave-Light for 15 damage.",
-            "Marsh Hound shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Edric's Grave Shade hits Marsh Hound for 7 damage.",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n"
+          ]
+        },
+        {
+          "round": 24,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 10 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n"
+          ]
+        },
+        {
+          "round": 25,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 10 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 32,
+      "round_ended": 34,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 32,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 11 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 33,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
             "Edric's Grave Shade hits Marsh Hound for 10 damage.",
-            "Edric's Grave-Light hits Marsh Hound for 10 damage.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Edric's Grave-Light for 17 damage."
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n"
+          ]
+        },
+        {
+          "round": 34,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 12 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n"
           ]
         }
       ]
@@ -117,13 +366,13 @@
     {
       "enemy_id": "e1",
       "enemy_key": "Sir Edric the Restless",
-      "round_started": 21,
-      "round_ended": 22,
+      "round_started": 41,
+      "round_ended": 43,
       "interruptible": true,
       "ticks": [
         {
-          "round": 21,
-          "telegraph_ticks_remaining": 2,
+          "round": 41,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
@@ -132,58 +381,27 @@
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 2,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Edric's Grave-Light hits Marsh Hound for 7 damage.",
-            "|mMarsh Hound shudders under a grave-cold curse!|n",
-            "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Edric's Grave-Light for 16 damage.",
-            "Edric's Grave-Light falls.",
-            "Marsh Hound shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 12 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         },
         {
-          "round": 22,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "Edric's Grave-Light hits Marsh Hound for 7 damage.",
-            "|mMarsh Hound shudders under a grave-cold curse!|n",
-            "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Edric's Grave-Light for 16 damage.",
-            "Edric's Grave-Light falls.",
-            "Marsh Hound shakes off the curse.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "Sir Edric the Restless",
-      "round_started": 29,
-      "round_ended": 30,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 29,
+          "round": 42,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -192,24 +410,28 @@
               "key": "Ranger 1",
               "class": "ranger",
               "phase": "charging",
-              "ticks_remaining": 2,
-              "pending_action": {}
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Marsh Hound hits Edric's Grave Shade for 18 damage.",
-            "Marsh Hound shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
-            "Edric's Grave Shade hits Marsh Hound for 11 damage.",
-            "|mMarsh Hound shudders under a grave-cold curse!|n",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Edric's Grave Shade for 15 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 12 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         },
         {
-          "round": 30,
+          "round": 43,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -217,21 +439,21 @@
             {
               "key": "Ranger 1",
               "class": "ranger",
-              "phase": "charging",
+              "phase": "winding",
               "ticks_remaining": 1,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Marsh Hound shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 11 damage. The ward absorbs part of the blow.",
-            "Edric's Grave Shade hits Marsh Hound for 11 damage.",
-            "|mMarsh Hound shudders under a grave-cold curse!|n",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Edric's Grave Shade for 15 damage.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
-            "Marsh Hound shakes off the curse."
+            "Edric's Grave Shade hits Marsh Hound for 10 damage.",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n"
           ]
         }
       ]
@@ -239,12 +461,38 @@
     {
       "enemy_id": "e1",
       "enemy_key": "Sir Edric the Restless",
-      "round_started": 37,
-      "round_ended": 38,
+      "round_started": 50,
+      "round_ended": 52,
       "interruptible": true,
       "ticks": [
         {
-          "round": 37,
+          "round": 50,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Edric's Grave Shade as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Edric's Grave Shade for 24 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Edric's Grave Shade!|n",
+            "|rEdric's Grave Shade bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 51,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -254,23 +502,26 @@
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 2,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Edric's Grave Shade hits Marsh Hound for 10 damage.",
-            "|mMarsh Hound shudders under a grave-cold curse!|n",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Edric's Grave Shade for 15 damage.",
-            "Edric's Grave Shade falls.",
-            "Marsh Hound shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Edric's Grave Shade as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Edric's Grave Shade for 24 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Edric's Grave Shade!|n",
+            "|rEdric's Grave Shade bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|rEdric's Grave Shade bleeds for 2 damage.|n"
           ]
         },
         {
-          "round": 38,
+          "round": 52,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -280,18 +531,294 @@
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes Edric's Grave Shade as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Edric's Grave Shade for 24 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Edric's Grave Shade!|n",
+            "|rEdric's Grave Shade bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|rEdric's Grave Shade bleeds for 2 damage.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 59,
+      "round_ended": 61,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 59,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e3"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "Ranger 1 hits Edric's Grave-Light for 25 damage.",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 9 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 60,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e3"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 11 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "Ranger 1 hits Edric's Grave-Light for 25 damage.",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 9 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 61,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Edric's Grave Shade hits Marsh Hound for 10 damage.",
-            "|mMarsh Hound shudders under a grave-cold curse!|n",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Edric's Grave Shade for 15 damage.",
-            "Edric's Grave Shade falls.",
-            "Marsh Hound shakes off the curse.",
-            "Ranger 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "Ranger 1 hits Edric's Grave-Light for 25 damage.",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 9 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 hits Edric's Grave-Light for 23 damage.",
+            "Edric's Grave-Light falls."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 68,
+      "round_ended": 70,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 68,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits Edric's Grave-Light for 23 damage.",
+            "Edric's Grave-Light falls.",
+            "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 13 damage.",
+            "Ranger 1 misses Sir Edric the Restless.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 69,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Edric's Grave-Light falls.",
+            "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 13 damage.",
+            "Ranger 1 misses Sir Edric the Restless.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 hits Sir Edric the Restless for 24 damage."
+          ]
+        },
+        {
+          "round": 70,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Edric's Grave-Light falls.",
+            "|ySir Edric's grave ward gutters out as his summoned dead collapse.|n",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 13 damage.",
+            "Ranger 1 misses Sir Edric the Restless.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 hits Sir Edric the Restless for 24 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 77,
+      "round_ended": 79,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 77,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 hits Sir Edric the Restless for 24 damage.",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 9 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 23 damage.",
+            "Ranger 1 misses Sir Edric the Restless.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 78,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 hits Sir Edric the Restless for 24 damage.",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 9 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 23 damage.",
+            "Ranger 1 misses Sir Edric the Restless.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 79,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Ranger 1 hits Sir Edric the Restless for 24 damage.",
+            "|cSir Edric the Restless uses Funeral Charge!|n",
+            "|rSir Edric the Restless's Funeral Charge lands clean.|n",
+            "Sir Edric the Restless hits Ranger 1 for 9 damage.",
+            "Ranger 1 hits Sir Edric the Restless for 23 damage.",
+            "Ranger 1 misses Sir Edric the Restless.",
             "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         }

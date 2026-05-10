@@ -268,19 +268,19 @@ def _default_ability_atb_profile(ability):
 
     profile = dict(DEFAULT_ATB_PROFILE)
     profile["gauge_cost"] = 400 + max(0, cost - 8) * 16
-    profile["recovery_ticks"] = 1 if cost < 12 else 2
+    profile["recovery_ticks"] = 1 if cost < 16 else 2
 
     if target == "self":
         profile["windup_ticks"] = 0
         profile["target_locked"] = False
     elif target == "ally":
-        profile["windup_ticks"] = 0 if cost <= 10 else 1
+        profile["windup_ticks"] = 0 if cost <= 15 else 1
         profile["target_locked"] = False
     elif target == "none":
-        profile["windup_ticks"] = 1 if cost < 14 else 2
+        profile["windup_ticks"] = 1 if cost < 18 else 2
         profile["telegraph"] = True
     else:
-        profile["windup_ticks"] = 1 if cost < 16 else 2
+        profile["windup_ticks"] = 1 if cost < 20 else 2
 
     if resource == "mana" and target != "self":
         profile["windup_ticks"] = max(profile["windup_ticks"], 1)
@@ -294,7 +294,7 @@ def _default_ability_atb_profile(ability):
         profile["windup_ticks"] = 0
         profile["interruptible"] = False
 
-    if cost >= 16:
+    if cost >= 22:
         profile["cooldown_ticks"] = 1
 
     if profile["windup_ticks"] <= 0:

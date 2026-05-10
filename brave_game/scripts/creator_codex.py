@@ -54,6 +54,12 @@ def context_payload():
     }
 
 
+def drift_payload():
+    from world.content.health import creator_drift_payload
+
+    return creator_drift_payload()
+
+
 def preview_payload(kind, args):
     from commands.brave_creator import preview_content
 
@@ -221,6 +227,7 @@ def build_parser():
     parser = argparse.ArgumentParser(description="Use Brave Creator draft tools from Codex CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("context")
+    subparsers.add_parser("drift")
 
     recipes = subparsers.add_parser("recipes")
     recipes.add_argument("kind", nargs="?", help="Optional mutation kind to print.")
@@ -274,6 +281,8 @@ def main(argv=None):
     args = build_parser().parse_args(argv)
     if args.command == "context":
         _print(context_payload())
+    elif args.command == "drift":
+        _print(drift_payload())
     elif args.command == "recipes":
         _print(recipes_payload(args.kind))
     elif args.command == "preview":

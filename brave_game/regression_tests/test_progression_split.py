@@ -234,7 +234,7 @@ class ProgressionSplitTests(unittest.TestCase):
         self.assertEqual(203, derived["max_hp"])
         self.assertEqual(87, derived["accuracy"])
         self.assertEqual(14, derived["dodge"])
-        self.assertEqual(137, derived["max_mana"])
+        self.assertEqual(112, derived["max_mana"])
         self.assertEqual(41, derived["spell_power"])
         self.assertEqual(2, derived["healing_power"])
 

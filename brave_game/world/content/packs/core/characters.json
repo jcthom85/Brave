@@ -2,7 +2,7 @@
   "ability_library": {
     "aimedshot": {
       "class": "ranger",
-      "cost": 11,
+      "cost": 17,
       "icon_role": "shot",
       "name": "Aimed Shot",
       "resource": "stamina",
@@ -11,7 +11,7 @@
     },
     "arcspark": {
       "class": "mage",
-      "cost": 11,
+      "cost": 20,
       "icon_role": "lightning",
       "name": "Arc Spark",
       "resource": "mana",
@@ -20,7 +20,7 @@
     },
     "avenginglight": {
       "class": "paladin",
-      "cost": 18,
+      "cost": 28,
       "icon_role": "holy",
       "name": "Avenging Light",
       "resource": "stamina",
@@ -29,7 +29,7 @@
     },
     "bearform": {
       "class": "druid",
-      "cost": 12,
+      "cost": 18,
       "icon_role": "guard",
       "name": "Bear Form",
       "resource": "mana",
@@ -38,7 +38,7 @@
     },
     "backstab": {
       "class": "rogue",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "attack",
       "name": "Backstab",
       "resource": "stamina",
@@ -47,7 +47,7 @@
     },
     "barbedarrow": {
       "class": "ranger",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "shot",
       "name": "Barbed Arrow",
       "resource": "stamina",
@@ -56,7 +56,7 @@
     },
     "barkskin": {
       "class": "druid",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "guard",
       "name": "Barkskin",
       "resource": "mana",
@@ -65,7 +65,7 @@
     },
     "crowform": {
       "class": "druid",
-      "cost": 11,
+      "cost": 16,
       "icon_role": "mobility",
       "name": "Crow Form",
       "resource": "mana",
@@ -74,7 +74,7 @@
     },
     "battlecry": {
       "class": "warrior",
-      "cost": 12,
+      "cost": 18,
       "icon_role": "rally",
       "name": "Battle Cry",
       "resource": "stamina",
@@ -83,7 +83,7 @@
     },
     "blessing": {
       "class": "cleric",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "blessing",
       "name": "Blessing",
       "resource": "mana",
@@ -91,7 +91,7 @@
     },
     "brace": {
       "class": "warrior",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "guard",
       "name": "Brace",
       "resource": "stamina",
@@ -99,7 +99,7 @@
     },
     "cheapshot": {
       "class": "rogue",
-      "cost": 11,
+      "cost": 16,
       "icon_role": "attack",
       "name": "Cheap Shot",
       "resource": "stamina",
@@ -107,7 +107,7 @@
     },
     "cleanse": {
       "class": "cleric",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "cleanse",
       "name": "Cleanse",
       "resource": "mana",
@@ -115,7 +115,7 @@
     },
     "consecrate": {
       "class": "paladin",
-      "cost": 13,
+      "cost": 20,
       "icon_role": "holy",
       "name": "Consecrate",
       "resource": "stamina",
@@ -124,7 +124,7 @@
     },
     "defend": {
       "class": "warrior",
-      "cost": 6,
+      "cost": 9,
       "icon_role": "guard",
       "name": "Defend",
       "resource": "stamina",
@@ -132,7 +132,7 @@
     },
     "entanglingroots": {
       "class": "druid",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "root",
       "name": "Entangling Roots",
       "resource": "mana",
@@ -141,7 +141,7 @@
     },
     "evasiveroll": {
       "class": "ranger",
-      "cost": 8,
+      "cost": 12,
       "icon_role": "mobility",
       "name": "Evasive Roll",
       "resource": "stamina",
@@ -150,7 +150,7 @@
     },
     "eviscerate": {
       "class": "rogue",
-      "cost": 16,
+      "cost": 25,
       "icon_role": "attack",
       "name": "Eviscerate",
       "resource": "stamina",
@@ -159,7 +159,7 @@
     },
     "feint": {
       "class": "rogue",
-      "cost": 6,
+      "cost": 9,
       "icon_role": "mobility",
       "name": "Feint",
       "resource": "stamina",
@@ -167,7 +167,7 @@
     },
     "firebolt": {
       "class": "mage",
-      "cost": 9,
+      "cost": 15,
       "icon_role": "fire",
       "name": "Firebolt",
       "resource": "mana",
@@ -176,7 +176,7 @@
     },
     "flamewave": {
       "class": "mage",
-      "cost": 14,
+      "cost": 22,
       "icon_role": "fire",
       "name": "Flame Wave",
       "resource": "mana",
@@ -184,7 +184,7 @@
     },
     "frostbind": {
       "class": "mage",
-      "cost": 10,
+      "cost": 14,
       "icon_role": "frost",
       "name": "Frost Bind",
       "resource": "mana",
@@ -192,7 +192,7 @@
     },
     "guardianlight": {
       "class": "cleric",
-      "cost": 18,
+      "cost": 28,
       "icon_role": "guard",
       "name": "Guardian Light",
       "resource": "mana",
@@ -201,7 +201,7 @@
     },
     "guardingaura": {
       "class": "paladin",
-      "cost": 8,
+      "cost": 12,
       "icon_role": "guard",
       "name": "Guarding Aura",
       "resource": "stamina",
@@ -210,7 +210,7 @@
     },
     "handofmercy": {
       "class": "paladin",
-      "cost": 11,
+      "cost": 17,
       "icon_role": "heal",
       "name": "Hand of Mercy",
       "resource": "stamina",
@@ -218,7 +218,7 @@
     },
     "heal": {
       "class": "cleric",
-      "cost": 10,
+      "cost": 17,
       "icon_role": "heal",
       "name": "Heal",
       "resource": "mana",
@@ -227,7 +227,7 @@
     },
     "holystrike": {
       "class": "paladin",
-      "cost": 8,
+      "cost": 12,
       "icon_role": "holy",
       "name": "Holy Strike",
       "resource": "stamina",
@@ -236,7 +236,7 @@
     },
     "icelance": {
       "class": "mage",
-      "cost": 12,
+      "cost": 18,
       "icon_role": "frost",
       "name": "Ice Lance",
       "resource": "mana",
@@ -244,7 +244,7 @@
     },
     "intercept": {
       "class": "warrior",
-      "cost": 11,
+      "cost": 17,
       "icon_role": "guard",
       "name": "Intercept",
       "resource": "stamina",
@@ -252,7 +252,7 @@
     },
     "judgement": {
       "class": "paladin",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "holy",
       "name": "Judgement",
       "resource": "stamina",
@@ -261,7 +261,7 @@
     },
     "laststand": {
       "class": "warrior",
-      "cost": 16,
+      "cost": 25,
       "icon_role": "guard",
       "name": "Last Stand",
       "resource": "stamina",
@@ -270,7 +270,7 @@
     },
     "livingcurrent": {
       "class": "druid",
-      "cost": 12,
+      "cost": 18,
       "icon_role": "cleanse",
       "name": "Living Current",
       "resource": "mana",
@@ -279,7 +279,7 @@
     },
     "manashield": {
       "class": "mage",
-      "cost": 12,
+      "cost": 18,
       "icon_role": "guard",
       "name": "Mana Shield",
       "resource": "mana",
@@ -287,7 +287,7 @@
     },
     "markprey": {
       "class": "ranger",
-      "cost": 6,
+      "cost": 9,
       "icon_role": "mark",
       "name": "Mark Prey",
       "resource": "stamina",
@@ -296,7 +296,7 @@
     },
     "meteorsigil": {
       "class": "mage",
-      "cost": 18,
+      "cost": 28,
       "icon_role": "fire",
       "name": "Meteor Sigil",
       "resource": "mana",
@@ -305,7 +305,7 @@
     },
     "mirrorveil": {
       "class": "mage",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "guard",
       "name": "Mirror Veil",
       "resource": "mana",
@@ -314,7 +314,7 @@
     },
     "minormend": {
       "class": "druid",
-      "cost": 8,
+      "cost": 12,
       "icon_role": "heal",
       "name": "Minor Mend",
       "resource": "mana",
@@ -323,7 +323,7 @@
     },
     "moonfire": {
       "class": "druid",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "holy",
       "name": "Moonfire",
       "resource": "mana",
@@ -332,7 +332,7 @@
     },
     "poisonblade": {
       "class": "rogue",
-      "cost": 9,
+      "cost": 14,
       "icon_role": "poison",
       "name": "Poison Blade",
       "resource": "stamina",
@@ -341,7 +341,7 @@
     },
     "quickshot": {
       "class": "ranger",
-      "cost": 8,
+      "cost": 12,
       "icon_role": "shot",
       "name": "Quick Shot",
       "resource": "stamina",
@@ -350,7 +350,7 @@
     },
     "radiantburst": {
       "class": "cleric",
-      "cost": 15,
+      "cost": 23,
       "icon_role": "holy",
       "name": "Radiant Burst",
       "resource": "mana",
@@ -358,7 +358,7 @@
     },
     "rainofarrows": {
       "class": "ranger",
-      "cost": 16,
+      "cost": 25,
       "icon_role": "barrage",
       "name": "Rain of Arrows",
       "resource": "stamina",
@@ -367,7 +367,7 @@
     },
     "rebukeevil": {
       "class": "paladin",
-      "cost": 12,
+      "cost": 18,
       "icon_role": "holy",
       "name": "Rebuke Evil",
       "resource": "stamina",
@@ -376,7 +376,7 @@
     },
     "rejuvenationgrove": {
       "class": "druid",
-      "cost": 16,
+      "cost": 25,
       "icon_role": "field",
       "name": "Rejuvenation Grove",
       "resource": "mana",
@@ -385,7 +385,7 @@
     },
     "renewinglight": {
       "class": "cleric",
-      "cost": 14,
+      "cost": 23,
       "icon_role": "heal",
       "name": "Renewing Light",
       "resource": "mana",
@@ -393,7 +393,7 @@
     },
     "sanctuary": {
       "class": "cleric",
-      "cost": 14,
+      "cost": 22,
       "icon_role": "guard",
       "name": "Sanctuary",
       "resource": "mana",
@@ -402,7 +402,7 @@
     },
     "shadowstep": {
       "class": "rogue",
-      "cost": 12,
+      "cost": 18,
       "icon_role": "mobility",
       "name": "Shadowstep",
       "resource": "stamina",
@@ -410,7 +410,7 @@
     },
     "shieldbash": {
       "class": "warrior",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "attack",
       "name": "Shield Bash",
       "resource": "stamina",
@@ -418,7 +418,7 @@
     },
     "shieldofdawn": {
       "class": "paladin",
-      "cost": 12,
+      "cost": 18,
       "icon_role": "guard",
       "name": "Shield of Dawn",
       "resource": "stamina",
@@ -427,7 +427,7 @@
     },
     "smite": {
       "class": "cleric",
-      "cost": 8,
+      "cost": 14,
       "icon_role": "holy",
       "name": "Smite",
       "resource": "mana",
@@ -435,7 +435,7 @@
     },
     "snaretrap": {
       "class": "ranger",
-      "cost": 9,
+      "cost": 14,
       "icon_role": "trap",
       "name": "Snare Trap",
       "resource": "stamina",
@@ -444,7 +444,7 @@
     },
     "stab": {
       "class": "rogue",
-      "cost": 7,
+      "cost": 11,
       "icon_role": "attack",
       "name": "Stab",
       "resource": "stamina",
@@ -452,7 +452,7 @@
     },
     "staticfield": {
       "class": "mage",
-      "cost": 13,
+      "cost": 20,
       "icon_role": "lightning",
       "name": "Static Field",
       "resource": "mana",
@@ -461,7 +461,7 @@
     },
     "stormlance": {
       "class": "mage",
-      "cost": 13,
+      "cost": 20,
       "icon_role": "lightning",
       "name": "Stormlance",
       "resource": "mana",
@@ -470,7 +470,7 @@
     },
     "strike": {
       "class": "warrior",
-      "cost": 8,
+      "cost": 13,
       "icon_role": "attack",
       "name": "Strike",
       "resource": "stamina",
@@ -479,7 +479,7 @@
     },
     "swarm": {
       "class": "druid",
-      "cost": 14,
+      "cost": 22,
       "icon_role": "field",
       "name": "Swarm",
       "resource": "mana",
@@ -488,7 +488,7 @@
     },
     "serpentform": {
       "class": "druid",
-      "cost": 11,
+      "cost": 16,
       "icon_role": "poison",
       "name": "Serpent Form",
       "resource": "mana",
@@ -497,7 +497,7 @@
     },
     "tauntingblow": {
       "class": "warrior",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "taunt",
       "name": "Taunting Blow",
       "resource": "stamina",
@@ -505,7 +505,7 @@
     },
     "thornlash": {
       "class": "druid",
-      "cost": 8,
+      "cost": 12,
       "icon_role": "nature",
       "name": "Thorn Lash",
       "resource": "mana",
@@ -514,7 +514,7 @@
     },
     "vanish": {
       "class": "rogue",
-      "cost": 10,
+      "cost": 15,
       "icon_role": "stealth",
       "name": "Vanish",
       "resource": "stamina",
@@ -522,7 +522,7 @@
     },
     "volley": {
       "class": "ranger",
-      "cost": 13,
+      "cost": 20,
       "icon_role": "barrage",
       "name": "Volley",
       "resource": "stamina",
@@ -531,7 +531,7 @@
     },
     "wolfform": {
       "class": "druid",
-      "cost": 8,
+      "cost": 12,
       "icon_role": "mobility",
       "name": "Wolf Form",
       "resource": "mana",
@@ -540,7 +540,7 @@
     },
     "wrathofthegrove": {
       "class": "druid",
-      "cost": 18,
+      "cost": 28,
       "icon_role": "nature",
       "name": "Wrath of the Grove",
       "resource": "mana",

@@ -58,6 +58,7 @@ INTERRUPT_RESPONSE_ABILITIES = {
     "warrior": "shieldbash",
     "mage": "frostbind",
 }
+STRESS_TEST_SCENARIOS = {"solo_ranger_no_companion"}
 
 PARTY_SCENARIOS = (
     {
@@ -110,6 +111,48 @@ FIRST_HOUR_ROUTE_STEPS = (
     {"kind": "encounter", "key": "wolf_turn_pack", "label": "Wolf Turn"},
     {"kind": "encounter", "key": "ruks_stand", "label": "Ruk's camp"},
     {"kind": "quest", "key": "ruk_the_fence_cutter", "requires_victory": "ruks_stand"},
+)
+ACT1_CLOSURE_NPCS = (
+    "captain_harl_rowan",
+    "joss_veller",
+    "mayor_elric_thorne",
+    "mira_fenleaf",
+)
+ACT1_REGION_PREFIXES = (
+    "tutorial_",
+    "brambleford_",
+    "goblin_road_",
+    "whispering_woods_",
+    "old_barrow_field_",
+    "ruined_watchtower_",
+    "goblin_warrens_",
+    "blackfen_approach_",
+    "drowned_weir_",
+)
+NPC_VOICE_ANCHORS = {
+    "brother_alden": ("name", "mercy", "chapel", "bell", "prayer", "fear"),
+    "captain_harl_rowan": ("route", "clear", "party", "hit", "watch", "tactical"),
+    "joss_veller": ("line", "lamp", "lens", "signal", "measure", "rule"),
+    "mayor_elric_thorne": ("ledger", "town", "public", "report", "people", "civic"),
+    "mira_fenleaf": ("road", "track", "route", "marsh", "wind", "sign"),
+    "sister_maybelle": ("harm", "care", "herb", "recover", "injury", "grief"),
+    "uncle_pib_underbough": ("stores", "food", "kettle", "flour", "supper", "cellar"),
+    "leda_thornwick": ("boots", "gear", "weather", "trade", "trail", "fair"),
+    "torren_ironroot": ("forge", "metal", "repair", "iron", "anvil", "scrap"),
+    "mender_veska_flint": ("clamp", "trap", "repair", "parts", "wire", "mechanism"),
+    "mistress_elira_thorne": ("practice", "shape", "discipline", "pattern", "technique", "standard"),
+    "sergeant_tamsin_vale": ("triage", "yard", "alarm", "checklist", "stand", "command"),
+    "quartermaster_nella_cobb": ("crate", "supply", "prepared", "inventory", "gear", "slate"),
+    "courier_peep_marrow": ("route", "errand", "chalk", "message", "post", "quick"),
+    "ringhand_brask": ("fight", "lesson", "timing", "rail", "ring", "bark"),
+}
+PROSE_DRIFT_PATTERNS = (
+    "feels like",
+    "looks like",
+    "as if",
+    "seems to",
+    "the sort of",
+    "not quite",
 )
 
 
@@ -279,8 +322,8 @@ class SimulatedCharacter:
 
         derived = {
             "max_hp": 55 + (primary["vitality"] * 10) + (level * 8),
-            "max_mana": 12 + (primary["intellect"] + primary["spirit"]) * 5 + (level * 4),
-            "max_stamina": 24 + (primary["strength"] + primary["agility"] + primary["vitality"]) * 3 + (level * 5),
+            "max_mana": 10 + (primary["intellect"] + primary["spirit"]) * 4 + (level * 3),
+            "max_stamina": 18 + (primary["strength"] + primary["agility"] + primary["vitality"]) * 2 + (level * 4),
             "attack_power": primary["strength"] * 2 + primary["agility"] + (level * 2),
             "spell_power": primary["intellect"] * 2 + primary["spirit"] + (level * 2),
             "armor": primary["vitality"] * 2 + primary["strength"] + level,
@@ -321,6 +364,7 @@ class SimulatedCharacter:
 
 METHOD_NAMES = (
     "configure",
+    "_apply_large_party_opening_pressure",
     "_companion_state_template",
     "_get_scaling_profile",
     "_atb_tick_ms",
@@ -421,6 +465,15 @@ class SimulationEncounter:
             "telegraphed_response_actions": 0,
             "held_actions": 0,
             "combat_fx_events": 0,
+            "ability_actions": 0,
+            "basic_attacks": 0,
+            "resource_spent_mana": 0,
+            "resource_spent_stamina": 0,
+            "resource_spent_by_class": {},
+            "ability_actions_by_class": {},
+            "basic_attacks_by_class": {},
+            "ability_uses": {},
+            "restore_item_uses": 0,
         }
         self.configure(room.key, encounter_data, expected_party_size=expected_party_size)
 
@@ -494,6 +547,19 @@ class SimulationEncounter:
         character.db.brave_resources = resources
         self._mark_defeated_participant(character)
         self.remove_participant(character, refresh=False)
+
+    def _spend_resource(self, character, resource, amount):
+        BraveEncounter._spend_resource(self, character, resource, amount)
+        if resource in {"mana", "stamina"}:
+            self.telemetry[f"resource_spent_{resource}"] += max(0, int(amount or 0))
+
+    def _execute_basic_attack(self, character, target=None):
+        self.telemetry["basic_attacks"] += 1
+        return BraveEncounter._execute_basic_attack(self, character, target=target)
+
+    def _execute_ability(self, character, action):
+        self.telemetry["ability_actions"] += 1
+        return BraveEncounter._execute_ability(self, character, action)
 
     def _enemy_telegraph_message(self, enemy):
         self.telemetry["telegraphed_actions"] += 1
@@ -597,6 +663,42 @@ for method_name in METHOD_NAMES:
     setattr(SimulationEncounter, method_name, getattr(BraveEncounter, method_name))
 
 
+def _simulation_spend_resource(self, character, resource, amount):
+    BraveEncounter._spend_resource(self, character, resource, amount)
+    if resource in {"mana", "stamina"}:
+        spent = max(0, int(amount or 0))
+        self.telemetry[f"resource_spent_{resource}"] += spent
+        class_key = str(getattr(getattr(character, "db", None), "brave_class", "") or "unknown")
+        by_class = self.telemetry.setdefault("resource_spent_by_class", {})
+        class_bucket = by_class.setdefault(class_key, {"mana": 0, "stamina": 0})
+        class_bucket[resource] = int(class_bucket.get(resource, 0) or 0) + spent
+
+
+def _simulation_execute_basic_attack(self, character, target=None):
+    self.telemetry["basic_attacks"] += 1
+    class_key = str(getattr(getattr(character, "db", None), "brave_class", "") or "unknown")
+    by_class = self.telemetry.setdefault("basic_attacks_by_class", {})
+    by_class[class_key] = int(by_class.get(class_key, 0) or 0) + 1
+    return BraveEncounter._execute_basic_attack(self, character, target=target)
+
+
+def _simulation_execute_ability(self, character, action):
+    self.telemetry["ability_actions"] += 1
+    class_key = str(getattr(getattr(character, "db", None), "brave_class", "") or "unknown")
+    by_class = self.telemetry.setdefault("ability_actions_by_class", {})
+    by_class[class_key] = int(by_class.get(class_key, 0) or 0) + 1
+    ability_key = _ability_key((action or {}).get("ability") or "")
+    if ability_key:
+        uses = self.telemetry.setdefault("ability_uses", {})
+        uses[ability_key] = int(uses.get(ability_key, 0) or 0) + 1
+    return BraveEncounter._execute_ability(self, character, action)
+
+
+SimulationEncounter._spend_resource = _simulation_spend_resource
+SimulationEncounter._execute_basic_attack = _simulation_execute_basic_attack
+SimulationEncounter._execute_ability = _simulation_execute_ability
+
+
 def _current_actor_phase(encounter, character):
     state = encounter._get_actor_atb_state(character=character)
     return str((state or {}).get("phase") or "")
@@ -625,6 +727,32 @@ def _actor_hp_ratio(actor):
     return ((actor.db.brave_resources or {}).get("hp", 0) / max(1, actor.db.brave_derived_stats.get("max_hp", 1)))
 
 
+def _party_resource_total(party, resource):
+    return sum(int((character.db.brave_resources or {}).get(resource, 0) or 0) for character in party)
+
+
+def _party_resource_max_total(party, resource):
+    stat_key = f"max_{resource}"
+    return sum(int((character.db.brave_derived_stats or {}).get(stat_key, 0) or 0) for character in party)
+
+
+def _primary_resource_key_for_character(character):
+    if character.db.brave_class in {"cleric", "mage", "druid"}:
+        return "mana"
+    return "stamina"
+
+
+def _lowest_primary_resource_ratio(encounter, party):
+    ratios = []
+    for character in party:
+        resource = _primary_resource_key_for_character(character)
+        current = int((character.db.brave_resources or {}).get(resource, 0) or 0)
+        maximum = int((character.db.brave_derived_stats or {}).get(f"max_{resource}", 0) or 0)
+        if maximum > 0:
+            ratios.append(current / float(maximum))
+    return min(ratios) if ratios else 1.0
+
+
 def _actor_id(actor):
     if isinstance(actor, dict):
         return str(actor.get("id"))
@@ -641,6 +769,11 @@ def _snapshot_actor_state(encounter, actor, *, actor_type):
             "class": actor.db.brave_class,
             "hp": int(resources.get("hp", 0) or 0),
             "max_hp": int(actor.db.brave_derived_stats.get("max_hp", 1) or 1),
+            "mana": int(resources.get("mana", 0) or 0),
+            "max_mana": int(actor.db.brave_derived_stats.get("max_mana", 0) or 0),
+            "stamina": int(resources.get("stamina", 0) or 0),
+            "max_stamina": int(actor.db.brave_derived_stats.get("max_stamina", 0) or 0),
+            "primary_resource": _primary_resource_key_for_character(actor),
             "phase": str((atb or {}).get("phase") or ""),
             "ticks_remaining": int((atb or {}).get("ticks_remaining", 0) or 0),
             "current_action": dict((atb or {}).get("current_action") or {}),
@@ -735,7 +868,8 @@ def analyze_trace(trace):
                 pending = dict(player.get("pending_action") or {})
                 phase = str(player.get("phase") or "")
                 if pending.get("ability") in {"shieldbash", "frostbind"}:
-                    if phase == "ready":
+                    ticks_remaining = int(player.get("ticks_remaining", 0) or 0)
+                    if phase == "ready" or (phase == "charging" and ticks_remaining <= 0):
                         interrupt_actor = player["key"]
                     else:
                         late_interrupt_actor = player["key"]
@@ -820,10 +954,10 @@ def analyze_interrupt_opportunities(trace):
                     continue
                 phase = str(player.get("phase") or "")
                 ticks_remaining = int(player.get("ticks_remaining", 0) or 0)
-                if phase == "ready":
+                if phase == "ready" or (phase == "charging" and ticks_remaining == 0):
                     summary["interrupt_ready_ticks"] += 1
                     bucket["interrupt_ready_ticks"] += 1
-                elif phase == "charging" and ticks_remaining == 0:
+                if phase == "charging" and ticks_remaining == 0:
                     summary["interrupt_charging_zero_ticks"] += 1
                     bucket["interrupt_charging_zero_ticks"] += 1
                 elif phase == "recovering":
@@ -1123,7 +1257,11 @@ def _queue_pending_actions(encounter):
         pending[actor_id] = action
     for character in encounter.get_active_player_participants():
         phase = _current_actor_phase(encounter, character)
-        if phase in {"winding", "resolving", "recovering", "cooldown", "charging"}:
+        atb_state = encounter._get_actor_atb_state(character=character)
+        ticks_remaining = int((atb_state or {}).get("ticks_remaining", 0) or 0)
+        if phase in {"winding", "resolving", "recovering", "cooldown"}:
+            continue
+        if phase == "charging" and ticks_remaining > 1:
             continue
         if str(character.id) in telegraph_plans:
             continue
@@ -1133,7 +1271,7 @@ def _queue_pending_actions(encounter):
                 encounter.telemetry["held_actions"] += 1
             pending[str(character.id)] = hold_action
             continue
-        if phase == "ready" or str(character.id) not in pending:
+        if phase == "ready" or phase == "charging" or str(character.id) not in pending:
             action = choose_player_action(encounter, character)
             if telegraphed_enemy and action.get("kind") == "ability" and action.get("ability") in TELEGRAPH_RESPONSE_ABILITIES:
                 encounter.telemetry["telegraphed_response_actions"] += 1
@@ -1183,6 +1321,8 @@ def simulate_encounter(authored, scenario, *, base_seed=1, max_rounds=160, trace
     party = _build_party(scenario, level=scenario_level)
     for character in party:
         encounter.add_simulated_participant(character)
+    initial_mana_total = _party_resource_total(party, "mana")
+    initial_stamina_total = _party_resource_total(party, "stamina")
     trace_log = [_trace_snapshot(encounter)] if trace else None
 
     while not encounter.ended and int(encounter.db.round or 0) < int(max_rounds):
@@ -1198,6 +1338,10 @@ def simulate_encounter(authored, scenario, *, base_seed=1, max_rounds=160, trace
     rank_bucket, max_rank = classify_encounter_rank(encounter_data)
     player_hp_total = sum(int(character.db.brave_resources.get("hp", 0) or 0) for character in party)
     player_hp_max = sum(int(character.db.brave_derived_stats.get("max_hp", 1) or 1) for character in party)
+    player_mana_total = _party_resource_total(party, "mana")
+    player_mana_max = _party_resource_max_total(party, "mana")
+    player_stamina_total = _party_resource_total(party, "stamina")
+    player_stamina_max = _party_resource_max_total(party, "stamina")
     enemy_hp_total = sum(int(enemy.get("hp", 0) or 0) for enemy in (encounter.db.enemies or []))
     enemy_hp_max = sum(int(enemy.get("max_hp", 1) or 1) for enemy in (encounter.db.enemies or []))
     contributions = dict(encounter.db.participant_contributions or {})
@@ -1211,6 +1355,11 @@ def simulate_encounter(authored, scenario, *, base_seed=1, max_rounds=160, trace
         for actor_id, entry in contributions.items()
         if str(actor_id).isdigit()
     )
+    healing_done_by_class = {}
+    for character in party:
+        contribution = dict(contributions.get(str(character.id), {}) or {})
+        class_key = str(character.db.brave_class or "unknown")
+        healing_done_by_class[class_key] = healing_done_by_class.get(class_key, 0) + int(contribution.get("healing_done", 0) or 0)
 
     return {
         "source": authored["source"],
@@ -1233,6 +1382,13 @@ def simulate_encounter(authored, scenario, *, base_seed=1, max_rounds=160, trace
         "rounds": int(encounter.db.round or 0),
         "player_remaining_hp": player_hp_total,
         "player_remaining_hp_ratio": round(player_hp_total / float(max(1, player_hp_max)), 4),
+        "party_remaining_mana": player_mana_total,
+        "party_remaining_mana_ratio": round(player_mana_total / float(max(1, player_mana_max)), 4),
+        "party_remaining_stamina": player_stamina_total,
+        "party_remaining_stamina_ratio": round(player_stamina_total / float(max(1, player_stamina_max)), 4),
+        "party_mana_spent": max(0, initial_mana_total - player_mana_total),
+        "party_stamina_spent": max(0, initial_stamina_total - player_stamina_total),
+        "lowest_primary_resource_ratio": round(_lowest_primary_resource_ratio(encounter, party), 4),
         "enemy_remaining_hp": enemy_hp_total,
         "enemy_remaining_hp_ratio": round(enemy_hp_total / float(max(1, enemy_hp_max)), 4),
         "surviving_players": sum(1 for character in party if int(character.db.brave_resources.get("hp", 0) or 0) > 0),
@@ -1252,6 +1408,21 @@ def simulate_encounter(authored, scenario, *, base_seed=1, max_rounds=160, trace
         "telegraphed_response_actions": int(encounter.telemetry["telegraphed_response_actions"]),
         "held_actions": int(encounter.telemetry["held_actions"]),
         "combat_fx_events": int(encounter.telemetry["combat_fx_events"]),
+        "ability_actions": int(encounter.telemetry["ability_actions"]),
+        "basic_attacks": int(encounter.telemetry["basic_attacks"]),
+        "ability_action_ratio": round(
+            int(encounter.telemetry["ability_actions"])
+            / float(max(1, int(encounter.telemetry["ability_actions"]) + int(encounter.telemetry["basic_attacks"]))),
+            4,
+        ),
+        "resource_spent_mana": int(encounter.telemetry["resource_spent_mana"]),
+        "resource_spent_stamina": int(encounter.telemetry["resource_spent_stamina"]),
+        "resource_spent_by_class": dict(encounter.telemetry.get("resource_spent_by_class") or {}),
+        "ability_actions_by_class": dict(encounter.telemetry.get("ability_actions_by_class") or {}),
+        "basic_attacks_by_class": dict(encounter.telemetry.get("basic_attacks_by_class") or {}),
+        "ability_uses": dict(encounter.telemetry.get("ability_uses") or {}),
+        "healing_done_by_class": healing_done_by_class,
+        "restore_item_uses": int(encounter.telemetry.get("restore_item_uses", 0) or 0),
         "near_wipe": bool(player_hp_total > 0 and (player_hp_total / float(max(1, player_hp_max))) <= 0.2),
         "trace": trace_log,
     }
@@ -1261,13 +1432,16 @@ def build_summary(runs):
     by_scenario = {}
     by_rank = {}
     by_encounter = {}
+    primary_runs = [run for run in runs if run.get("scenario_key") not in STRESS_TEST_SCENARIOS]
+    stress_runs = [run for run in runs if run.get("scenario_key") in STRESS_TEST_SCENARIOS]
     for run in runs:
         scenario_bucket = by_scenario.setdefault(run["scenario_key"], [])
         scenario_bucket.append(run)
-        rank_bucket = by_rank.setdefault(run["rank_bucket"], [])
-        rank_bucket.append(run)
-        encounter_bucket = by_encounter.setdefault(run["encounter_key"], [])
-        encounter_bucket.append(run)
+        if run in primary_runs:
+            rank_bucket = by_rank.setdefault(run["rank_bucket"], [])
+            rank_bucket.append(run)
+            encounter_bucket = by_encounter.setdefault(run["encounter_key"], [])
+            encounter_bucket.append(run)
 
     def _aggregate(entries):
         telegraphed_actions = sum(int(entry.get("telegraphed_actions", 0) or 0) for entry in entries)
@@ -1286,6 +1460,12 @@ def build_summary(runs):
             "win_rate": round(sum(1 for entry in entries if entry["outcome"] == "victory") / float(max(1, len(entries))), 4),
             "avg_rounds": round(mean(entry["rounds"] for entry in entries), 2),
             "avg_remaining_hp_ratio": round(mean(entry["player_remaining_hp_ratio"] for entry in entries), 4),
+            "avg_remaining_mana_ratio": round(mean(entry.get("party_remaining_mana_ratio", 1.0) for entry in entries), 4),
+            "avg_remaining_stamina_ratio": round(mean(entry.get("party_remaining_stamina_ratio", 1.0) for entry in entries), 4),
+            "avg_lowest_primary_resource_ratio": round(mean(entry.get("lowest_primary_resource_ratio", 1.0) for entry in entries), 4),
+            "avg_ability_action_ratio": round(mean(entry.get("ability_action_ratio", 0.0) for entry in entries), 4),
+            "avg_mana_spent": round(mean(entry.get("party_mana_spent", 0) for entry in entries), 2),
+            "avg_stamina_spent": round(mean(entry.get("party_stamina_spent", 0) for entry in entries), 2),
             "avg_damage_taken": round(mean(entry["damage_taken"] for entry in entries), 2),
             "avg_healing_done": round(mean(entry["healing_done"] for entry in entries), 2),
             "avg_mitigation_done": round(mean(entry["mitigation_done"] for entry in entries), 2),
@@ -1296,7 +1476,10 @@ def build_summary(runs):
         }
 
     scenario_summary = {
-        key: _aggregate(entries)
+        key: {
+            **_aggregate(entries),
+            "balance_bucket": "stress_test" if key in STRESS_TEST_SCENARIOS else "primary",
+        }
         for key, entries in sorted(by_scenario.items())
     }
     rank_summary = {
@@ -1396,6 +1579,14 @@ def build_summary(runs):
             item[0],
         ),
     )[:15]
+    primary_failures = sorted(
+        [run for run in primary_runs if run.get("outcome") != "victory"],
+        key=lambda entry: (
+            entry.get("outcome") != "timeout",
+            entry.get("scenario_key", ""),
+            entry.get("encounter_key", ""),
+        ),
+    )
 
     return {
         "totals": {
@@ -1405,7 +1596,19 @@ def build_summary(runs):
             "defeats": sum(1 for run in runs if run["outcome"] == "defeat"),
             "timeouts": sum(1 for run in runs if run["outcome"] == "timeout"),
             "near_wipes": sum(1 for run in runs if run.get("near_wipe")),
+            "primary_runs": len(primary_runs),
+            "primary_victories": sum(1 for run in primary_runs if run["outcome"] == "victory"),
+            "primary_defeats": sum(1 for run in primary_runs if run["outcome"] == "defeat"),
+            "primary_timeouts": sum(1 for run in primary_runs if run["outcome"] == "timeout"),
+            "primary_near_wipes": sum(1 for run in primary_runs if run.get("near_wipe")),
+            "stress_runs": len(stress_runs),
+            "stress_victories": sum(1 for run in stress_runs if run["outcome"] == "victory"),
+            "stress_defeats": sum(1 for run in stress_runs if run["outcome"] == "defeat"),
+            "stress_timeouts": sum(1 for run in stress_runs if run["outcome"] == "timeout"),
+            "stress_near_wipes": sum(1 for run in stress_runs if run.get("near_wipe")),
         },
+        "primary_summary": _aggregate(primary_runs) if primary_runs else {},
+        "stress_summary": _aggregate(stress_runs) if stress_runs else {},
         "scenario_summary": scenario_summary,
         "rank_summary": rank_summary,
         "encounter_summary": encounter_summary,
@@ -1414,9 +1617,165 @@ def build_summary(runs):
         "near_wipes": near_wipes,
         "longest_victories": longest_victories,
         "telegraph_risks": telegraph_risks,
+        "primary_failures": primary_failures,
         "encounter_risks": [
             {"encounter_key": key, **data}
             for key, data in encounter_risks
+        ],
+    }
+
+
+def _average(entries, key, default=0):
+    if not entries:
+        return default
+    return round(mean(float(entry.get(key, default) or 0) for entry in entries), 4)
+
+
+def build_resource_economy_report(runs):
+    primary_runs = [run for run in runs if run.get("scenario_key") not in STRESS_TEST_SCENARIOS]
+    scenario_rows = []
+    class_buckets = {}
+    ability_uses = {}
+
+    for run in runs:
+        for ability_key, count in (run.get("ability_uses") or {}).items():
+            ability_uses[ability_key] = ability_uses.get(ability_key, 0) + int(count or 0)
+        for class_key in run.get("party_classes") or []:
+            class_buckets.setdefault(
+                class_key,
+                {
+                    "runs": 0,
+                    "mana_spent": 0,
+                    "stamina_spent": 0,
+                    "ability_actions": 0,
+                    "basic_attacks": 0,
+                    "healing_done": 0,
+                },
+            )["runs"] += 1
+        for class_key, spent in (run.get("resource_spent_by_class") or {}).items():
+            bucket = class_buckets.setdefault(
+                class_key,
+                {
+                    "runs": 0,
+                    "mana_spent": 0,
+                    "stamina_spent": 0,
+                    "ability_actions": 0,
+                    "basic_attacks": 0,
+                    "healing_done": 0,
+                },
+            )
+            bucket["mana_spent"] += int((spent or {}).get("mana", 0) or 0)
+            bucket["stamina_spent"] += int((spent or {}).get("stamina", 0) or 0)
+        for class_key, count in (run.get("ability_actions_by_class") or {}).items():
+            class_buckets.setdefault(
+                class_key,
+                {
+                    "runs": 0,
+                    "mana_spent": 0,
+                    "stamina_spent": 0,
+                    "ability_actions": 0,
+                    "basic_attacks": 0,
+                    "healing_done": 0,
+                },
+            )["ability_actions"] += int(count or 0)
+        for class_key, count in (run.get("basic_attacks_by_class") or {}).items():
+            class_buckets.setdefault(
+                class_key,
+                {
+                    "runs": 0,
+                    "mana_spent": 0,
+                    "stamina_spent": 0,
+                    "ability_actions": 0,
+                    "basic_attacks": 0,
+                    "healing_done": 0,
+                },
+            )["basic_attacks"] += int(count or 0)
+        for class_key, amount in (run.get("healing_done_by_class") or {}).items():
+            class_buckets.setdefault(
+                class_key,
+                {
+                    "runs": 0,
+                    "mana_spent": 0,
+                    "stamina_spent": 0,
+                    "ability_actions": 0,
+                    "basic_attacks": 0,
+                    "healing_done": 0,
+                },
+            )["healing_done"] += int(amount or 0)
+
+    by_scenario = {}
+    for run in runs:
+        by_scenario.setdefault(run["scenario_key"], []).append(run)
+    for scenario_key, entries in sorted(by_scenario.items()):
+        restore_uses = sum(int(entry.get("restore_item_uses", 0) or 0) for entry in entries)
+        scenario_rows.append(
+            {
+                "scenario_key": scenario_key,
+                "balance_bucket": "stress_test" if scenario_key in STRESS_TEST_SCENARIOS else "primary",
+                "runs": len(entries),
+                "wins": sum(1 for entry in entries if entry.get("outcome") == "victory"),
+                "avg_remaining_hp_ratio": _average(entries, "player_remaining_hp_ratio"),
+                "avg_remaining_mana_ratio": _average(entries, "party_remaining_mana_ratio", 1),
+                "avg_remaining_stamina_ratio": _average(entries, "party_remaining_stamina_ratio", 1),
+                "avg_lowest_primary_resource_ratio": _average(entries, "lowest_primary_resource_ratio", 1),
+                "avg_mana_spent": round(mean(float(entry.get("party_mana_spent", 0) or 0) for entry in entries), 2),
+                "avg_stamina_spent": round(mean(float(entry.get("party_stamina_spent", 0) or 0) for entry in entries), 2),
+                "avg_healing_done": round(mean(float(entry.get("healing_done", 0) or 0) for entry in entries), 2),
+                "restore_item_uses": restore_uses,
+            }
+        )
+
+    class_rows = []
+    for class_key, data in sorted(class_buckets.items()):
+        runs_count = max(1, int(data.get("runs", 0) or 0))
+        total_actions = int(data.get("ability_actions", 0) or 0) + int(data.get("basic_attacks", 0) or 0)
+        class_rows.append(
+            {
+                "class": class_key,
+                "runs": int(data.get("runs", 0) or 0),
+                "avg_mana_spent": round(float(data.get("mana_spent", 0) or 0) / runs_count, 2),
+                "avg_stamina_spent": round(float(data.get("stamina_spent", 0) or 0) / runs_count, 2),
+                "ability_actions": int(data.get("ability_actions", 0) or 0),
+                "basic_attacks": int(data.get("basic_attacks", 0) or 0),
+                "ability_action_ratio": round(int(data.get("ability_actions", 0) or 0) / float(max(1, total_actions)), 4),
+                "avg_healing_done": round(float(data.get("healing_done", 0) or 0) / runs_count, 2),
+            }
+        )
+
+    low_relevance = sorted(
+        [
+            run
+            for run in primary_runs
+            if run.get("outcome") == "victory"
+            and float(run.get("player_remaining_hp_ratio", 0) or 0) >= 0.9
+            and float(run.get("lowest_primary_resource_ratio", 0) or 0) >= 0.65
+            and int(run.get("healing_done", 0) or 0) <= 0
+        ],
+        key=lambda entry: (
+            -float(entry.get("player_remaining_hp_ratio", 0) or 0),
+            -float(entry.get("lowest_primary_resource_ratio", 0) or 0),
+            entry.get("scenario_key", ""),
+            entry.get("encounter_key", ""),
+        ),
+    )[:20]
+    top_abilities = [
+        {"ability_key": key, "uses": count}
+        for key, count in sorted(ability_uses.items(), key=lambda item: (-item[1], item[0]))[:20]
+    ]
+    return {
+        "totals": {
+            "runs": len(runs),
+            "primary_runs": len(primary_runs),
+            "restore_item_uses": sum(int(run.get("restore_item_uses", 0) or 0) for run in runs),
+            "low_relevance_primary_runs": len(low_relevance),
+        },
+        "scenario_rows": scenario_rows,
+        "class_rows": class_rows,
+        "top_abilities": top_abilities,
+        "low_relevance_runs": low_relevance,
+        "notes": [
+            "restore_item_uses is currently zero because the deterministic combat simulator does not consume inventory items.",
+            "solo_ranger_no_companion remains marked as a stress-test scenario, not the primary tuning target.",
         ],
     }
 
@@ -1524,6 +1883,21 @@ def _quests_unlocked_by(quest_key):
 
 def _quest_next_step(quest_key):
     return str((CONTENT.quests.get(quest_key) or {}).get("next_step") or "").strip()
+
+
+def _quests_with_prerequisite(quest_key):
+    return [
+        candidate_key
+        for candidate_key, definition in sorted(CONTENT.quests.quests.items())
+        if quest_key in (definition or {}).get("prerequisites", [])
+    ]
+
+
+def _dialogue_has_completed_rule(npc_key, quest_key):
+    for rule in CONTENT.dialogue.get_talk_rules(npc_key):
+        if rule.get("completed") == quest_key or quest_key in (rule.get("completed_any") or []):
+            return True
+    return False
 
 
 def _first_hour_pacing_flags(steps, post_ruk_unlock_order):
@@ -1750,6 +2124,312 @@ def build_first_hour_route_report(*, scenario_key="solo_warrior", base_seed=1, m
     }
 
 
+def build_act1_spine_report():
+    """Audit Act 1 quest handoffs, terminal closure, and trophy proof."""
+
+    quest_keys = list(CONTENT.quests.starting_quests)
+    quest_rows = []
+    missing_next_steps = []
+    terminal_quests = []
+    trophy_rewards = []
+    for index, quest_key in enumerate(quest_keys, start=1):
+        quest = CONTENT.quests.get(quest_key) or {}
+        next_step = _quest_next_step(quest_key)
+        unlocks = _quests_with_prerequisite(quest_key)
+        trophies = list((quest.get("rewards") or {}).get("trophies") or [])
+        row = {
+            "index": index,
+            "key": quest_key,
+            "title": quest.get("title", quest_key),
+            "region": CONTENT.quests.get_quest_region(quest_key),
+            "prerequisites": list(quest.get("prerequisites") or []),
+            "unlocks": unlocks,
+            "next_step": next_step,
+            "trophies": trophies,
+            "chapter_complete": quest.get("chapter_complete") or "",
+        }
+        quest_rows.append(row)
+        if not next_step:
+            missing_next_steps.append(quest_key)
+        if not unlocks:
+            terminal_quests.append(quest_key)
+        for trophy_key in trophies:
+            trophy = CONTENT.systems.trophies.get(trophy_key) or {}
+            trophy_rewards.append(
+                {
+                    "quest": quest_key,
+                    "trophy": trophy_key,
+                    "name": trophy.get("name", trophy_key),
+                    "known": bool(trophy),
+                }
+            )
+
+    hollow = CONTENT.quests.get("the_hollow_lantern") or {}
+    trophy_text = CONTENT.dialogue.get_static_read_response("trophy_vitrine") or ""
+    closure = {
+        "final_quest": "the_hollow_lantern",
+        "chapter_complete": hollow.get("chapter_complete") or "",
+        "next_step": _quest_next_step("the_hollow_lantern"),
+        "completed_dialogue": {
+            npc_key: _dialogue_has_completed_rule(npc_key, "the_hollow_lantern")
+            for npc_key in ACT1_CLOSURE_NPCS
+        },
+        "trophy_vitrine_mentions": {
+            entry["trophy"]: entry["name"] in trophy_text
+            for entry in trophy_rewards
+            if entry.get("known")
+        },
+    }
+
+    flags = []
+    for quest_key in missing_next_steps:
+        flags.append(
+            {
+                "kind": "missing_next_step",
+                "quest": quest_key,
+                "message": f"Quest {quest_key} has no journal next_step handoff.",
+            }
+        )
+    for entry in trophy_rewards:
+        if not entry["known"]:
+            flags.append(
+                {
+                    "kind": "unknown_trophy",
+                    "quest": entry["quest"],
+                    "message": f"Quest {entry['quest']} rewards unknown trophy {entry['trophy']}.",
+                }
+            )
+    for npc_key, present in closure["completed_dialogue"].items():
+        if not present:
+            flags.append(
+                {
+                    "kind": "missing_hollow_lantern_closure_dialogue",
+                    "quest": "the_hollow_lantern",
+                    "message": f"{npc_key} has no completed dialogue for the Hollow Lantern.",
+                }
+            )
+    for trophy_key, present in closure["trophy_vitrine_mentions"].items():
+        if not present:
+            flags.append(
+                {
+                    "kind": "missing_trophy_vitrine_mention",
+                    "quest": "the_hollow_lantern",
+                    "message": f"Trophy vitrine text does not mention {trophy_key}.",
+                }
+            )
+    if not closure["chapter_complete"]:
+        flags.append(
+            {
+                "kind": "missing_chapter_complete",
+                "quest": "the_hollow_lantern",
+                "message": "The Hollow Lantern does not mark Act 1 chapter completion.",
+            }
+        )
+
+    return {
+        "quest_count": len(quest_rows),
+        "quests": quest_rows,
+        "terminal_quests": terminal_quests,
+        "trophy_rewards": trophy_rewards,
+        "closure": closure,
+        "flags": flags,
+    }
+
+
+def render_act1_spine_markdown(report):
+    lines = [
+        "# Act 1 Spine Audit",
+        "",
+        f"- Quest count: {report['quest_count']}",
+        f"- Terminal quest(s): {', '.join(f'`{key}`' for key in report.get('terminal_quests') or [])}",
+        "",
+        "## Quest Handoffs",
+        "",
+    ]
+    for row in report["quests"]:
+        lines.append(
+            f"- {row['index']}. `{row['key']}` ({row['region']}): "
+            f"unlocks {row.get('unlocks') or []}; next `{row.get('next_step') or 'MISSING'}`"
+        )
+    lines.extend(["", "## Act 1 Closure", ""])
+    closure = report["closure"]
+    lines.append(f"- Final quest: `{closure['final_quest']}`")
+    lines.append(f"- Chapter complete: {closure.get('chapter_complete') or 'MISSING'}")
+    lines.append(f"- Final next step: {closure.get('next_step') or 'MISSING'}")
+    for npc_key, present in closure.get("completed_dialogue", {}).items():
+        lines.append(f"- `{npc_key}` Hollow Lantern completion dialogue: {'yes' if present else 'MISSING'}")
+    for trophy_key, present in closure.get("trophy_vitrine_mentions", {}).items():
+        lines.append(f"- Trophy vitrine mentions `{trophy_key}`: {'yes' if present else 'MISSING'}")
+    lines.extend(["", "## Flags", ""])
+    if not report.get("flags"):
+        lines.append("- No Act 1 spine flags.")
+    else:
+        for flag in report["flags"]:
+            lines.append(f"- `{flag['kind']}` on `{flag['quest']}`: {flag['message']}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _split_sentences(text):
+    normalized = str(text or "").replace("!", ".").replace("?", ".")
+    return [part.strip() for part in normalized.split(".") if part.strip()]
+
+
+def _word_count(text):
+    return len([word for word in str(text or "").replace("\n", " ").split(" ") if word.strip()])
+
+
+def _pattern_counts(text):
+    lowered = str(text or "").lower()
+    return {
+        pattern: lowered.count(pattern)
+        for pattern in PROSE_DRIFT_PATTERNS
+        if lowered.count(pattern)
+    }
+
+
+def _voice_anchor_hits(text, anchors):
+    lowered = str(text or "").lower()
+    return sorted(anchor for anchor in anchors if anchor in lowered)
+
+
+def _room_region(room):
+    room_id = str(room.get("id") or "")
+    for prefix in ACT1_REGION_PREFIXES:
+        if room_id.startswith(prefix):
+            return prefix.rstrip("_")
+    return str(room.get("map_region") or room.get("zone") or "other").lower().replace(" ", "_")
+
+
+def build_prose_voice_report():
+    """Audit Act 1 prose cadence and NPC voice anchors."""
+
+    rooms = []
+    region_buckets = {}
+    for room in CONTENT.world.rooms:
+        room_id = str(room.get("id") or "")
+        if not any(room_id.startswith(prefix) for prefix in ACT1_REGION_PREFIXES):
+            continue
+        desc = str(room.get("desc") or "")
+        sentences = _split_sentences(desc)
+        pattern_counts = _pattern_counts(desc)
+        region = _room_region(room)
+        row = {
+            "id": room_id,
+            "key": room.get("key") or room_id,
+            "region": region,
+            "word_count": _word_count(desc),
+            "sentence_count": len(sentences),
+            "avg_sentence_words": round(_word_count(desc) / float(max(1, len(sentences))), 2),
+            "pattern_counts": pattern_counts,
+        }
+        rooms.append(row)
+        bucket = region_buckets.setdefault(region, {"rooms": 0, "words": 0, "patterns": {}})
+        bucket["rooms"] += 1
+        bucket["words"] += row["word_count"]
+        for pattern, count in pattern_counts.items():
+            bucket["patterns"][pattern] = bucket["patterns"].get(pattern, 0) + count
+
+    readables = []
+    for entity_id, text in sorted(CONTENT.dialogue.static_read_responses.items()):
+        pattern_counts = _pattern_counts(text)
+        readables.append(
+            {
+                "id": entity_id,
+                "word_count": _word_count(text),
+                "sentence_count": len(_split_sentences(text)),
+                "pattern_counts": pattern_counts,
+            }
+        )
+
+    npc_rows = []
+    for npc_key, anchors in sorted(NPC_VOICE_ANCHORS.items()):
+        rules = CONTENT.dialogue.get_talk_rules(npc_key)
+        combined = " ".join(str(rule.get("text") or "") for rule in rules)
+        hits = _voice_anchor_hits(combined, anchors)
+        npc_rows.append(
+            {
+                "npc": npc_key,
+                "rules": len(rules),
+                "anchor_hits": hits,
+                "missing_anchors": [anchor for anchor in anchors if anchor not in hits],
+                "word_count": _word_count(combined),
+                "pattern_counts": _pattern_counts(combined),
+            }
+        )
+
+    flags = []
+    for room in rooms:
+        if room["avg_sentence_words"] > 34:
+            flags.append(
+                {
+                    "kind": "long_room_sentence_average",
+                    "target": room["id"],
+                    "message": f"{room['key']} averages {room['avg_sentence_words']} words per sentence.",
+                }
+            )
+        if sum(room["pattern_counts"].values()) >= 2:
+            flags.append(
+                {
+                    "kind": "repeated_room_abstraction",
+                    "target": room["id"],
+                    "message": f"{room['key']} uses repeated abstraction patterns: {room['pattern_counts']}.",
+                }
+            )
+    for npc in npc_rows:
+        if npc["rules"] and len(npc["anchor_hits"]) < 2:
+            flags.append(
+                {
+                    "kind": "thin_voice_anchor",
+                    "target": npc["npc"],
+                    "message": f"{npc['npc']} has fewer than two voice anchor hits.",
+                }
+            )
+
+    return {
+        "rooms": rooms,
+        "regions": region_buckets,
+        "readables": readables,
+        "npcs": npc_rows,
+        "flags": flags,
+    }
+
+
+def render_prose_voice_markdown(report):
+    lines = [
+        "# Act 1 Prose and Voice Audit",
+        "",
+        "## Region Cadence",
+        "",
+    ]
+    for region, data in sorted(report["regions"].items()):
+        avg_words = round(data["words"] / float(max(1, data["rooms"])), 2)
+        lines.append(
+            f"- `{region}`: {data['rooms']} room(s), avg {avg_words} words, patterns {data.get('patterns') or {}}"
+        )
+    lines.extend(["", "## NPC Voice Anchors", ""])
+    for npc in report["npcs"]:
+        lines.append(
+            f"- `{npc['npc']}`: {npc['rules']} rule(s), anchors {npc['anchor_hits']}, "
+            f"missing {npc['missing_anchors']}"
+        )
+    lines.extend(["", "## Room Pattern Watch", ""])
+    watched_rooms = [room for room in report["rooms"] if room.get("pattern_counts")]
+    if not watched_rooms:
+        lines.append("- No repeated abstraction patterns in Act 1 room descriptions.")
+    else:
+        for room in watched_rooms[:40]:
+            lines.append(f"- `{room['id']}`: {room['pattern_counts']}")
+    lines.extend(["", "## Flags", ""])
+    if not report["flags"]:
+        lines.append("- No prose/voice audit flags.")
+    else:
+        for flag in report["flags"]:
+            lines.append(f"- `{flag['kind']}` on `{flag['target']}`: {flag['message']}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def render_first_hour_route_markdown(report):
     silver_total = (
         str(report["final_silver_min"])
@@ -1819,6 +2499,165 @@ def render_first_hour_route_markdown(report):
     return "\n".join(lines)
 
 
+def _ability_role(ability):
+    target = str((ability or {}).get("target") or "")
+    icon = str((ability or {}).get("icon_role") or "")
+    if target == "ally" or icon in {"heal", "cleanse", "blessing"}:
+        return "support"
+    if target == "self" or icon in {"guard", "mobility", "stealth"}:
+        return "defense"
+    if target == "none" or icon in {"field", "barrage", "rally"}:
+        return "field"
+    if icon in {"frost", "root", "taunt", "mark", "poison"}:
+        return "control"
+    return "damage"
+
+
+def build_ability_audit_report():
+    """Return a compact class ability audit from authored character content."""
+
+    rows = []
+    by_class = {}
+    for class_key, class_data in sorted(CHARACTER_CONTENT.classes.items()):
+        entries = []
+        for unlock_level, ability_name in class_data.get("progression", []):
+            ability_key = str(ability_name or "").replace(" ", "").lower()
+            ability = dict(ABILITY_LIBRARY.get(ability_key) or {})
+            if not ability:
+                continue
+            timing = get_ability_atb_profile(ability_key, ability)
+            row = {
+                "class": class_key,
+                "level": int(unlock_level or 1),
+                "ability_key": ability_key,
+                "name": ability.get("name", ability_name),
+                "role": _ability_role(ability),
+                "resource": ability.get("resource"),
+                "cost": int(ability.get("cost", 0) or 0),
+                "target": ability.get("target"),
+                "gauge_cost": int(timing.get("gauge_cost", 0) or 0),
+                "windup_ticks": int(timing.get("windup_ticks", 0) or 0),
+                "recovery_ticks": int(timing.get("recovery_ticks", 0) or 0),
+                "cooldown_ticks": int(timing.get("cooldown_ticks", 0) or 0),
+                "telegraph": bool(timing.get("telegraph")),
+            }
+            rows.append(row)
+            entries.append(row)
+        by_class[class_key] = entries
+    return {"rows": rows, "by_class": by_class}
+
+
+def render_ability_audit_markdown(report):
+    lines = [
+        "# Ability Audit",
+        "",
+        "This audit is generated from character content and ATB timing profiles.",
+        "",
+    ]
+    for class_key, entries in report.get("by_class", {}).items():
+        lines.extend([f"## {class_key.title()}", "", "| Level | Ability | Role | Resource | Cost | Target | ATB |", "| --- | --- | --- | --- | ---: | --- | --- |"])
+        for entry in entries:
+            atb = f"{entry['gauge_cost']}g / W{entry['windup_ticks']} R{entry['recovery_ticks']} C{entry['cooldown_ticks']}"
+            if entry["telegraph"]:
+                atb += " / telegraph"
+            lines.append(
+                f"| {entry['level']} | `{entry['ability_key']}` | {entry['role']} | {entry['resource']} | {entry['cost']} | {entry['target']} | {atb} |"
+            )
+        lines.append("")
+    return "\n".join(lines)
+
+
+def build_item_rarity_report():
+    counts = {}
+    rare_plus = []
+    for template_id, item in sorted(CONTENT.items.item_templates.items()):
+        rarity = str(item.get("rarity") or "common").lower()
+        counts[rarity] = counts.get(rarity, 0) + 1
+        if rarity in {"rare", "epic", "legendary"}:
+            rare_plus.append(
+                {
+                    "template_id": template_id,
+                    "name": item.get("name", template_id),
+                    "rarity": rarity,
+                    "kind": item.get("kind"),
+                    "slot": item.get("slot"),
+                }
+            )
+    return {
+        "counts": dict(sorted(counts.items())),
+        "rare_plus": rare_plus,
+    }
+
+
+def render_item_rarity_markdown(report):
+    lines = [
+        "# Item Rarity Audit",
+        "",
+        "Act 1 policy: common by default, uncommon for useful named/crafted gear, rare for standout boss or capstone gear, story for proof/key items.",
+        "",
+        "## Distribution",
+        "",
+    ]
+    for rarity, count in report.get("counts", {}).items():
+        lines.append(f"- `{rarity}`: {count}")
+    lines.extend(["", "## Rare Or Higher", ""])
+    rare_plus = report.get("rare_plus") or []
+    if not rare_plus:
+        lines.append("- No rare+ gameplay items.")
+    else:
+        for item in rare_plus:
+            slot = f", {item['slot']}" if item.get("slot") else ""
+            lines.append(f"- `{item['template_id']}`: {item['name']} ({item['rarity']}{slot})")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def render_resource_economy_markdown(report):
+    lines = [
+        "# Resource Economy Audit",
+        "",
+        f"- Runs covered: {report['totals']['runs']}",
+        f"- Primary runs: {report['totals']['primary_runs']}",
+        f"- Restore item uses: {report['totals']['restore_item_uses']}",
+        f"- Low-relevance primary runs sampled: {report['totals']['low_relevance_primary_runs']}",
+        "",
+        "## Scenario Economy",
+        "",
+    ]
+    for row in report.get("scenario_rows", []):
+        lines.append(
+            f"- `{row['scenario_key']}` ({row['balance_bucket']}): {row['wins']}/{row['runs']} wins, "
+            f"HP {row['avg_remaining_hp_ratio']}, mana {row['avg_remaining_mana_ratio']}, "
+            f"stamina {row['avg_remaining_stamina_ratio']}, resource floor {row['avg_lowest_primary_resource_ratio']}, "
+            f"spent mana {row['avg_mana_spent']}, spent stamina {row['avg_stamina_spent']}, "
+            f"healing {row['avg_healing_done']}, restores {row['restore_item_uses']}"
+        )
+    lines.extend(["", "## Class Spend", ""])
+    for row in report.get("class_rows", []):
+        lines.append(
+            f"- `{row['class']}`: runs {row['runs']}, avg mana spent {row['avg_mana_spent']}, "
+            f"avg stamina spent {row['avg_stamina_spent']}, ability/basic {row['ability_actions']}/{row['basic_attacks']}, "
+            f"ability ratio {row['ability_action_ratio']}, healing {row['avg_healing_done']}"
+        )
+    lines.extend(["", "## Top Ability Uses", ""])
+    for row in report.get("top_abilities", []):
+        lines.append(f"- `{row['ability_key']}`: {row['uses']} uses")
+    lines.extend(["", "## Low-Relevance Encounters", ""])
+    if not report.get("low_relevance_runs"):
+        lines.append("- No primary victory runs met the low-relevance threshold.")
+    else:
+        for run in report.get("low_relevance_runs", []):
+            lines.append(
+                f"- `{run['scenario_key']}` vs `{run['encounter_key']}`: HP {run['player_remaining_hp_ratio']}, "
+                f"resource floor {run.get('lowest_primary_resource_ratio', 1.0)}, rounds {run['rounds']}"
+            )
+    lines.extend(["", "## Notes", ""])
+    for note in report.get("notes", []):
+        lines.append(f"- {note}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def render_markdown(summary):
     lines = [
         "# Combat Simulation Summary",
@@ -1827,23 +2666,34 @@ def render_markdown(summary):
         f"- Scenario runs: {summary['totals']['runs']}",
         f"- Victories/defeats/timeouts: {summary['totals']['victories']}/{summary['totals']['defeats']}/{summary['totals']['timeouts']}",
         f"- Near wipes: {summary['totals']['near_wipes']}",
+        f"- Primary balance runs: {summary['totals'].get('primary_runs', summary['totals']['runs'])}",
+        f"- Primary victories/defeats/timeouts: {summary['totals'].get('primary_victories', summary['totals']['victories'])}/{summary['totals'].get('primary_defeats', summary['totals']['defeats'])}/{summary['totals'].get('primary_timeouts', summary['totals']['timeouts'])}",
+        f"- Stress-test runs: {summary['totals'].get('stress_runs', 0)}",
+        f"- Stress-test victories/defeats/timeouts: {summary['totals'].get('stress_victories', 0)}/{summary['totals'].get('stress_defeats', 0)}/{summary['totals'].get('stress_timeouts', 0)}",
         "",
         "## Scenario Summary",
         "",
     ]
     for key, data in summary["scenario_summary"].items():
+        bucket = data.get("balance_bucket", "primary")
         lines.append(
-            f"- `{key}`: {data['victories']}/{data['runs']} wins, "
+            f"- `{key}` ({bucket}): {data['victories']}/{data['runs']} wins, "
             f"{data['defeats']} defeats, {data['timeouts']} timeouts, "
             f"near wipes {data['near_wipes']}, avg rounds {data['avg_rounds']}, "
-            f"avg remaining HP {data['avg_remaining_hp_ratio']}, telegraph answer rate {data['telegraph_answer_rate']}"
+            f"avg remaining HP {data['avg_remaining_hp_ratio']}, "
+            f"resource floor {data['avg_lowest_primary_resource_ratio']}, "
+            f"ability ratio {data['avg_ability_action_ratio']}, "
+            f"telegraph answer rate {data['telegraph_answer_rate']}"
         )
     lines.extend(["", "## Rank Summary", ""])
     for key, data in summary["rank_summary"].items():
         lines.append(
             f"- `{key}`: {data['victories']}/{data['runs']} wins, "
             f"near wipes {data['near_wipes']}, avg rounds {data['avg_rounds']}, "
-            f"avg remaining HP {data['avg_remaining_hp_ratio']}, telegraph answer rate {data['telegraph_answer_rate']}"
+            f"avg remaining HP {data['avg_remaining_hp_ratio']}, "
+            f"resource floor {data['avg_lowest_primary_resource_ratio']}, "
+            f"ability ratio {data['avg_ability_action_ratio']}, "
+            f"telegraph answer rate {data['telegraph_answer_rate']}"
         )
     lines.extend(["", "## Encounter Risk List", ""])
     if not summary["encounter_risks"]:
@@ -1853,7 +2703,19 @@ def render_markdown(summary):
             lines.append(
                 f"- `{risk['encounter_key']}` ({risk['rank_bucket']}): win rate {risk['win_rate']}, "
                 f"near wipes {risk['near_wipes']}, avg rounds {risk['avg_rounds']}, "
-                f"avg remaining HP {risk['avg_remaining_hp_ratio']}"
+                f"avg remaining HP {risk['avg_remaining_hp_ratio']}, "
+                f"resource floor {risk['avg_lowest_primary_resource_ratio']}"
+            )
+    lines.extend(["", "## Primary Failure Set", ""])
+    if not summary.get("primary_failures"):
+        lines.append("- No primary scenario failures.")
+    else:
+        for run in summary.get("primary_failures", []):
+            lines.append(
+                f"- `{run['scenario_key']}` vs `{run['encounter_key']}`: {run['outcome']}, "
+                f"rounds {run['rounds']}, HP {run['player_remaining_hp_ratio']}, "
+                f"resource floor {run.get('lowest_primary_resource_ratio', 1.0)}, "
+                f"enemies {', '.join(run.get('enemy_templates') or [])}"
             )
     lines.extend(["", "## Ranger Companion Delta", ""])
     if not summary["ranger_companion_delta"]:
@@ -1871,6 +2733,8 @@ def render_markdown(summary):
         lines.append(
             f"- `{run['scenario_key']}` vs `{run['encounter_key']}`: {run['outcome']}, "
             f"rounds {run['rounds']}, remaining HP {run['player_remaining_hp_ratio']}, "
+            f"resource floor {run.get('lowest_primary_resource_ratio', 1.0)}, "
+            f"ability ratio {run.get('ability_action_ratio', 0.0)}, "
             f"telegraphs {run['telegraphed_actions']}/{run['telegraphed_response_actions']}/{run['telegraphed_interrupts']}"
         )
     lines.extend(["", "## Near Wipes", ""])
@@ -1926,6 +2790,16 @@ def run_harness(*, output_dir=DEFAULT_OUTPUT_DIR, base_seed=1, max_rounds=160, l
     interrupt_opportunity_md = output_path / "interrupt_opportunities.md"
     first_hour_route_json = output_path / "first_hour_route.json"
     first_hour_route_md = output_path / "first_hour_route.md"
+    act1_spine_json = output_path / "act1_spine.json"
+    act1_spine_md = output_path / "act1_spine.md"
+    prose_voice_json = output_path / "prose_voice.json"
+    prose_voice_md = output_path / "prose_voice.md"
+    ability_audit_json = output_path / "ability_audit.json"
+    ability_audit_md = output_path / "ability_audit.md"
+    item_rarity_json = output_path / "item_rarity.json"
+    item_rarity_md = output_path / "item_rarity.md"
+    resource_economy_json = output_path / "resource_economy.json"
+    resource_economy_md = output_path / "resource_economy.md"
     trace_dir = output_path / "traces"
     trace_dir.mkdir(parents=True, exist_ok=True)
     report_json.write_text(json.dumps(runs, indent=2), encoding="utf-8")
@@ -1970,6 +2844,21 @@ def run_harness(*, output_dir=DEFAULT_OUTPUT_DIR, base_seed=1, max_rounds=160, l
         "\n".join(render_first_hour_route_markdown(report) for report in first_hour_route.values()),
         encoding="utf-8",
     )
+    act1_spine = build_act1_spine_report()
+    act1_spine_json.write_text(json.dumps(act1_spine, indent=2), encoding="utf-8")
+    act1_spine_md.write_text(render_act1_spine_markdown(act1_spine), encoding="utf-8")
+    prose_voice = build_prose_voice_report()
+    prose_voice_json.write_text(json.dumps(prose_voice, indent=2), encoding="utf-8")
+    prose_voice_md.write_text(render_prose_voice_markdown(prose_voice), encoding="utf-8")
+    ability_audit = build_ability_audit_report()
+    ability_audit_json.write_text(json.dumps(ability_audit, indent=2), encoding="utf-8")
+    ability_audit_md.write_text(render_ability_audit_markdown(ability_audit), encoding="utf-8")
+    item_rarity_report = build_item_rarity_report()
+    item_rarity_json.write_text(json.dumps(item_rarity_report, indent=2), encoding="utf-8")
+    item_rarity_md.write_text(render_item_rarity_markdown(item_rarity_report), encoding="utf-8")
+    resource_economy_report = build_resource_economy_report(runs)
+    resource_economy_json.write_text(json.dumps(resource_economy_report, indent=2), encoding="utf-8")
+    resource_economy_md.write_text(render_resource_economy_markdown(resource_economy_report), encoding="utf-8")
     return {
         "output_dir": str(output_path),
         "report_json": str(report_json),
@@ -1979,12 +2868,27 @@ def run_harness(*, output_dir=DEFAULT_OUTPUT_DIR, base_seed=1, max_rounds=160, l
         "interrupt_opportunity_md": str(interrupt_opportunity_md),
         "first_hour_route_json": str(first_hour_route_json),
         "first_hour_route_md": str(first_hour_route_md),
+        "act1_spine_json": str(act1_spine_json),
+        "act1_spine_md": str(act1_spine_md),
+        "prose_voice_json": str(prose_voice_json),
+        "prose_voice_md": str(prose_voice_md),
+        "ability_audit_json": str(ability_audit_json),
+        "ability_audit_md": str(ability_audit_md),
+        "item_rarity_json": str(item_rarity_json),
+        "item_rarity_md": str(item_rarity_md),
+        "resource_economy_json": str(resource_economy_json),
+        "resource_economy_md": str(resource_economy_md),
         "trace_dir": str(trace_dir),
         "trace_files": trace_files,
         "runs": runs,
         "summary": summary,
         "interrupt_opportunity_report": interrupt_opportunity_report,
         "first_hour_route": first_hour_route,
+        "act1_spine": act1_spine,
+        "prose_voice": prose_voice,
+        "ability_audit": ability_audit,
+        "item_rarity_report": item_rarity_report,
+        "resource_economy_report": resource_economy_report,
     }
 
 

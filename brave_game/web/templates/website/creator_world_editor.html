@@ -508,7 +508,7 @@
           <div class="panel-body stack">
             <section id="editor-tab-room" class="editor-tab-panel active" data-editor-panel="room" role="tabpanel">
               <h3>Room Details</h3>
-              <p>Build the selected room with fields first. Advanced source stays available when the form is not enough.</p>
+              <p>Build the selected room with fields first. Keep high-traffic rooms physical and specific; the prose audit watches for abstract repeated phrasing.</p>
               <div class="field-grid">
                 <div class="field"><label for="room-id">Room Id</label><input id="room-id" type="text"></div>
                 <div class="field"><label for="room-key">Room Name</label><input id="room-key" type="text"></div>
@@ -517,6 +517,7 @@
                 <div class="field"><label for="room-region">Map Region</label><input id="room-region" type="text"></div>
                 <div class="field"><label for="room-map-x">Map X</label><input id="room-map-x" type="number" step="1"></div>
                 <div class="field"><label for="room-map-y">Map Y</label><input id="room-map-y" type="number" step="1"></div>
+                <div class="field"><label for="room-atmosphere">Atmosphere</label><select id="room-atmosphere"><option value="">Auto / none</option></select></div>
                 <div class="field full"><label for="room-desc">Room Description</label><textarea id="room-desc" spellcheck="true"></textarea></div>
               </div>
               <div class="builder-actions">
@@ -626,6 +627,7 @@
     const roomRegionInput = document.getElementById("room-region");
     const roomMapXInput = document.getElementById("room-map-x");
     const roomMapYInput = document.getElementById("room-map-y");
+    const roomAtmosphereSelect = document.getElementById("room-atmosphere");
     const roomDescInput = document.getElementById("room-desc");
     const roomJson = document.getElementById("room-json");
     const exitList = document.getElementById("exit-list");
@@ -710,6 +712,7 @@
 
     let rooms = [];
     let exits = [];
+    let atmosphereProfiles = [];
     let selectedRoomId = "";
     let selectedExitId = "";
     let selectedEntityId = "";
@@ -791,6 +794,21 @@
         if (room.id === previous) option.selected = true;
         select.appendChild(option);
       }
+    }
+
+    function fillAtmosphereSelect(selectedValue = "") {
+      roomAtmosphereSelect.innerHTML = "";
+      const auto = document.createElement("option");
+      auto.value = "";
+      auto.textContent = "Auto / none";
+      roomAtmosphereSelect.appendChild(auto);
+      for (const profile of atmosphereProfiles) {
+        const option = document.createElement("option");
+        option.value = profile.id;
+        option.textContent = `${profile.label || profile.id}${profile.meta ? ` (${profile.meta})` : ""}`;
+        roomAtmosphereSelect.appendChild(option);
+      }
+      roomAtmosphereSelect.value = selectedValue || "";
     }
 
     function renderRooms(filter = "") {
@@ -1493,6 +1511,7 @@
       roomRegionInput.value = payload.map_region || payload.zone || "";
       roomMapXInput.value = Number(payload.map_x || 0);
       roomMapYInput.value = Number(payload.map_y || 0);
+      fillAtmosphereSelect(payload.atmosphere || "");
       roomDescInput.value = payload.desc || "";
     }
 
@@ -1526,7 +1545,7 @@
 
     function getRoomFormData() {
       const existing = parseTextarea(roomJson, "Room");
-      return {
+      const payload = {
         ...existing,
         id: roomIdInput.value.trim(),
         key: roomKeyInput.value.trim(),
@@ -1537,6 +1556,9 @@
         map_x: Number(roomMapXInput.value || 0),
         map_y: Number(roomMapYInput.value || 0),
       };
+      if (roomAtmosphereSelect.value) payload.atmosphere = roomAtmosphereSelect.value;
+      else delete payload.atmosphere;
+      return payload;
     }
 
     function syncRoomFormToJson() {
@@ -1753,12 +1775,15 @@
       setBusy(true);
       setStatus("Loading room references...");
       try {
-        const [roomPayload, exitPayload] = await Promise.all([
+        const [roomPayload, exitPayload, atmospherePayload] = await Promise.all([
           apiFetch("/references/rooms?limit=1000"),
           apiFetch("/references/exits?limit=1000"),
+          apiFetch("/references/atmosphere-profiles?limit=1000"),
         ]);
         rooms = roomPayload.results || [];
         exits = exitPayload.results || [];
+        atmosphereProfiles = atmospherePayload.results || [];
+        fillAtmosphereSelect(roomAtmosphereSelect.value);
         populateRegionFilter();
         fillRoomSelect(exitSourceSelect, selectedRoomId);
         fillRoomSelect(exitDestinationSelect, selectedRoomId);

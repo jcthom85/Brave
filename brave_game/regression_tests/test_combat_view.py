@@ -174,8 +174,8 @@ class CombatViewTests(unittest.TestCase):
 
         view = build_combat_view(encounter, healer)
         abilities_action = _action(view, "Abilities")
-        heal_item = _picker_option(abilities_action.get("picker", {}), "Heal", meta="Heal · 10 MP")
-        smite_item = _picker_option(abilities_action.get("picker", {}), "Smite", meta="Smite · 8 MP")
+        heal_item = _picker_option(abilities_action.get("picker", {}), "Heal", meta="Heal · 17 MP")
+        smite_item = _picker_option(abilities_action.get("picker", {}), "Smite", meta="Smite · 14 MP")
 
         self.assertEqual("Heal Target", heal_item.get("picker", {}).get("title"))
         self.assertEqual(

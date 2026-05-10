@@ -1,4 +1,11 @@
 {
+  "_meta": {
+    "last_action": "publish",
+    "last_modified_at": "2026-05-07T23:46:13.906718+00:00",
+    "last_modified_by": "jctest3",
+    "last_target": "encounters",
+    "stage": "live"
+  },
   "enemy_temperament_overrides": {
     "captain_varn_blackreed": "relentless",
     "forest_wolf": "wary",
@@ -1800,12 +1807,12 @@
         "title": "High Walk Claim"
       },
       {
-      "enemies": [
-        "scrap_hound",
-        "salvage_drone",
-        "relay_tick",
-        "scrap_mite"
-      ],
+        "enemies": [
+          "scrap_hound",
+          "salvage_drone",
+          "relay_tick",
+          "scrap_mite"
+        ],
         "intro": "The sluice walk rings like a struck bell as lockjaw shapes and glass ticks converge under the wrong south light.",
         "key": "chainkeeper_patrol",
         "title": "Chainkeeper Patrol"

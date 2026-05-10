@@ -893,16 +893,35 @@ class CmdMovie(BraveCharacterCommand):
 
     def _send_movie_audio(self, character, payload):
         session = self.get_web_session()
-        print(f"DEBUG: CmdMovie._send_movie_audio - session={session} payload_action={payload.get('action')}")
         if not session:
             return False
         # The brave_movie_audio OOB command in default_out handles both audio and overlay rendering.
         send_webclient_event(character, session=session, brave_movie_audio=payload)
+        if payload.get("action") == "stop":
+            send_webclient_event(character, session=session, brave_movie_overlay={"action": "stop"})
+        else:
+            movie, _matches = resolve_movie(payload.get("title"))
+            send_webclient_event(
+                character,
+                session=session,
+                brave_movie_overlay=payload,
+                brave_view=build_movie_view(movie) if movie else None,
+            )
         return True
+
+    def _movie_list_text(self, movies):
+        if not movies:
+            return "The projector is empty. You'll need to find movie reels and bring them here first."
+        
+        lines = ["|wGreat Frontier Program|n", ""]
+        for movie in movies:
+            lines.append(f"  |c{movie['number']}.|n {movie_label(movie)}")
+        lines.append("")
+        lines.append("Use |wmovie <number>|n to start a showing.")
+        return "\n".join(lines)
 
     def func(self):
         character = self.get_character()
-        print(f"DEBUG: CmdMovie.func - character={character} args={self.args}")
         if not character:
             return
 
@@ -916,28 +935,49 @@ class CmdMovie(BraveCharacterCommand):
             return
 
         query = str(self.args or "").strip()
-        if not query:
-            if self.get_web_session():
-                self.scene_msg(self._movie_list_text(), picker=build_movie_picker())
-            else:
-                self.msg(self._movie_list_text())
-            return
-
         if query.lower() in {"stop", "off", "quiet", "silence"}:
             self._send_movie_audio(character, {"action": "stop"})
+            self.msg("You stop the picture-house speaker.")
             return
 
-        movie, matches = resolve_movie(query)
+        quest_log = getattr(character.db, "brave_quests", {})
+        if quest_log.get("repair_the_picture_house", {}).get("status") != "completed":
+            from world.questing import unlock_quest
+
+            if not hasattr(character.db, "brave_quests"):
+                character.db.brave_quests = {}
+            if not hasattr(character, "ndb"):
+                character.ndb = type("Ndb", (), {})()
+            unlock_quest(character, "repair_the_picture_house")
+            self.msg("The picture house projector is missing its brass focus gear. You'll need to help Joss Veller in the Mender's Shed repair it before any movies can be shown.")
+            return
+
+        from world.movies import get_available_movies
+        available_movies = get_available_movies(character)
+
+        if not query:
+            if self.get_web_session():
+                self.scene_msg(self._movie_list_text(available_movies), picker=build_movie_picker(character))
+            else:
+                self.msg(self._movie_list_text(available_movies))
+            return
+
+        movie, matches = resolve_movie(query, pool=available_movies)
         if matches:
             self.msg("Be more specific. That could mean: " + ", ".join(movie_label(entry) for entry in matches))
             return
         if not movie:
-            self.msg("No Great Frontier movie matches that. Use |wmovie|n to see the program.")
+            # Check if it exists at all but just isn't unlocked
+            all_movie, _ = resolve_movie(query)
+            if all_movie:
+                self.msg(f"That movie reel (|c{movie_label(all_movie)}|n) isn't loaded into the projector yet. You'll need to find it and bring it here first.")
+            else:
+                self.msg("No Great Frontier movie matches that. Use |wmovie|n to see the program.")
             return
 
         sent = self._send_movie_audio(character, build_movie_audio_payload(movie))
         if sent:
-            self.msg(brave_picker=build_now_showing_picker(movie))
+            self.msg(f"You start {movie_label(movie)}.", brave_picker=build_now_showing_picker(movie))
         else:
             lines = [f"Now showing: {movie_label(movie)}"]
             lines.extend(f"  {card}" for card in movie_cards(movie))

@@ -187,6 +187,42 @@ class RoomViewTests(unittest.TestCase):
             [option.get("label") for option in picker.get("options", [])],
         )
 
+    def test_room_view_includes_act1_atmosphere_payload(self):
+        room = DummyRoom()
+        room.key = "Boglight Hollow"
+        room.db.brave_room_id = "blackfen_approach_boglight_hollow"
+        room.db.brave_zone = "Blackfen Approach"
+        room.db.brave_safe = False
+
+        view = build_room_view(room, DummyCharacter())
+
+        self.assertEqual("blackfen_rain_fog", view["atmosphere"]["key"])
+        self.assertIn("rain", view["atmosphere"]["layers"])
+        self.assertEqual("blackfen_rain_fog", view["reactive"]["atmosphere"])
+
+    def test_room_view_atmosphere_can_be_suppressed(self):
+        room = DummyRoom()
+        room.key = "Lantern Weir"
+        room.db.brave_room_id = "drowned_weir_lantern_weir"
+        room.db.brave_zone = "Drowned Weir"
+        room.db.brave_atmosphere = False
+
+        view = build_room_view(room, DummyCharacter())
+
+        self.assertEqual({}, view["atmosphere"])
+        self.assertNotIn("atmosphere", view["reactive"])
+
+    def test_chapel_atmosphere_uses_static_light_and_dust_motes(self):
+        room = DummyRoom()
+        room.key = "Chapel of the Dawn Bell"
+        room.db.brave_room_id = "brambleford_chapel_dawn_bell"
+        room.db.brave_zone = "Brambleford"
+
+        view = build_room_view(room, DummyCharacter())
+
+        self.assertEqual("chapel_lamplight", view["atmosphere"]["key"])
+        self.assertEqual(["lamplight", "dust_motes"], view["atmosphere"]["layers"])
+
     def test_room_view_surfaces_cook_and_mastery_as_room_actions(self):
         room = DummyRoom()
         room.db.brave_activities = ["cooking", "mastery"]

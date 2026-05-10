@@ -7948,6 +7948,7 @@ let defaultout_plugin = (function () {
         var nextTone = state && state.world_tone ? state.world_tone : "neutral";
         var nextDanger = state && state.danger ? state.danger : "";
         var nextBoss = !!(state && state.boss);
+        var nextAtmosphere = state && state.atmosphere ? state.atmosphere : "";
 
         var previousScene = body.getAttribute("data-brave-scene") || "";
         var previousTone = body.getAttribute("data-brave-world-tone") || "";
@@ -7956,6 +7957,7 @@ let defaultout_plugin = (function () {
         setBodyState("world-tone", nextTone);
         setBodyState("danger", nextDanger);
         setBodyState("boss", nextBoss ? "true" : "");
+        setBodyState("atmosphere", nextAtmosphere);
 
         if (previousTone && previousTone !== nextTone) {
             pulseBodyClass("brave-tone-shift", 260);
@@ -7975,6 +7977,7 @@ let defaultout_plugin = (function () {
         setBodyState("world-tone", "neutral");
         setBodyState("danger", "");
         setBodyState("boss", "");
+        setBodyState("atmosphere", "");
         setBodyState("view", "");
         document.body.classList.remove("brave-tone-shift", "brave-scene-shift", "brave-scene-combat-enter", "brave-combat-transition-active");
         document.body.classList.remove("brave-combat-return-active");
@@ -10127,6 +10130,68 @@ let defaultout_plugin = (function () {
             );
         };
 
+        var renderRoomAtmosphere = function (atmosphere) {
+            if (!atmosphere || !atmosphere.key) {
+                return "";
+            }
+            var layers = Array.isArray(atmosphere.layers) ? atmosphere.layers : [];
+            var layerMarkup = layers.map(function (layer) {
+                var layerKey = String(layer || "");
+                if (layerKey === "rain") {
+                    var drops = [];
+                    for (var i = 0; i < 42; i += 1) {
+                        var left = ((i * 37) % 113) - 8;
+                        var top = -34 - ((i * 19) % 42);
+                        var length = 13 + ((i * 11) % 16);
+                        var opacity = 0.16 + (((i * 7) % 18) / 100);
+                        var duration = 820 + ((i * 53) % 520);
+                        var delay = -1 * ((i * 97) % 1320);
+                        drops.push(
+                            "<span class='brave-room-rain-drop' style='"
+                            + "--brave-rain-left:" + left + "%;"
+                            + "--brave-rain-top:" + top + "%;"
+                            + "--brave-rain-length:" + length + "px;"
+                            + "--brave-rain-opacity:" + opacity + ";"
+                            + "--brave-rain-duration:" + duration + "ms;"
+                            + "--brave-rain-delay:" + delay + "ms;"
+                            + "'></span>"
+                        );
+                    }
+                    return "<span class='brave-room-atmosphere__layer brave-room-atmosphere__layer--rain'>" + drops.join("") + "</span>";
+                }
+                if (layerKey === "dust_motes") {
+                    var motes = [];
+                    for (var j = 0; j < 28; j += 1) {
+                        var moteLeft = 6 + ((j * 29) % 89);
+                        var moteTop = 10 + ((j * 43) % 78);
+                        var moteSize = 2 + ((j * 5) % 4);
+                        var moteOpacity = 0.15 + (((j * 11) % 18) / 100);
+                        var moteDuration = 5400 + ((j * 173) % 4200);
+                        var moteDelay = -1 * ((j * 307) % 7200);
+                        motes.push(
+                            "<span class='brave-room-dust-mote' style='"
+                            + "--brave-dust-left:" + moteLeft + "%;"
+                            + "--brave-dust-top:" + moteTop + "%;"
+                            + "--brave-dust-size:" + moteSize + "px;"
+                            + "--brave-dust-opacity:" + moteOpacity + ";"
+                            + "--brave-dust-duration:" + moteDuration + "ms;"
+                            + "--brave-dust-delay:" + moteDelay + "ms;"
+                            + "'></span>"
+                        );
+                    }
+                    return "<span class='brave-room-atmosphere__layer brave-room-atmosphere__layer--dust_motes'>" + motes.join("") + "</span>";
+                }
+                return "<span class='brave-room-atmosphere__layer brave-room-atmosphere__layer--" + escapeHtml(layerKey) + "'></span>";
+            }).join("");
+            return (
+                "<div class='brave-room-atmosphere brave-room-atmosphere--" + escapeHtml(String(atmosphere.key || "")) + "'"
+                + " data-brave-atmosphere='" + escapeHtml(String(atmosphere.key || "")) + "'"
+                + " aria-hidden='true'>"
+                + layerMarkup
+                + "</div>"
+            );
+        };
+
         var heroSceneMarkup =
             (((viewData.eyebrow_icon || viewData.eyebrow) || (!isMobileViewport() && isRoomLikeView(viewData)))
                 ? "<div class='brave-view__hero-topbar'>"
@@ -10166,7 +10231,7 @@ let defaultout_plugin = (function () {
                     + (shouldAnimateRegionSceneCard ? " brave-view__room-scene-card--region-change" : "")
                     + (shouldAnimateFirstRegionDiscoverySceneCard ? " brave-view__room-scene-card--first-region-discovery" : "")
                     + (shouldAnimateFirstRoomDiscoverySceneCard ? " brave-view__room-scene-card--first-room-discovery" : "")
-                    + "' data-brave-room-id='" + escapeHtml((nextRoomSceneMeta && nextRoomSceneMeta.roomId) || "") + "' data-brave-region='" + escapeHtml((nextRoomSceneMeta && nextRoomSceneMeta.regionName) || "") + "'>" + heroSceneMarkup + "</div>"
+                    + "' data-brave-room-id='" + escapeHtml((nextRoomSceneMeta && nextRoomSceneMeta.roomId) || "") + "' data-brave-region='" + escapeHtml((nextRoomSceneMeta && nextRoomSceneMeta.regionName) || "") + "'>" + renderRoomAtmosphere(viewData.atmosphere) + heroSceneMarkup + "</div>"
                 : heroSceneMarkup)
             + renderMobileRoomUtility()
             + (Array.isArray(viewData.chips) && viewData.chips.length

@@ -19,6 +19,7 @@ from world.browser_ui import (
     _section,
 )
 from world.navigation import build_minimap_snapshot, get_exit_direction, get_exit_label, visible_exits
+from world.room_atmosphere import get_room_atmosphere
 from world.tutorial import (
     LANTERNFALL_RECAP_PAGES,
     LANTERNFALL_WELCOME_PAGES,
@@ -68,6 +69,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
 
     welcome_shown = getattr(looker.db, "brave_welcome_shown", False)
     room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+    atmosphere = get_room_atmosphere(room)
 
     if not welcome_shown:
         if is_tutorial_active(looker):
@@ -152,6 +154,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         "first_region_discovery": bool(getattr(getattr(looker, "ndb", None), "brave_first_region_discovery", False)),
         "first_room_discovery": bool(getattr(getattr(looker, "ndb", None), "brave_first_room_discovery", False)),
         "micromap": build_minimap_snapshot(room, radius=2, character=looker),
+        "atmosphere": atmosphere or {},
         "mobile_pack": _build_mobile_pack_payload(looker),
         "mobile_panels": _build_mobile_room_payload(
             room,

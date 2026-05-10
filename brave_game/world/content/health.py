@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from world.content.editor import ContentEditor
 from world.content.registry import build_content_registry_from_payloads, get_content_registry
@@ -49,6 +50,65 @@ def creator_health_payload(*, stage="draft", registry=None, editor=None):
         "readiness": readiness,
         "recommended_next_actions": recommendations,
     }
+
+
+def creator_drift_payload(*, editor=None):
+    """Return per-domain draft/live drift metadata for Creator review."""
+
+    editor = editor or ContentEditor()
+    domains = []
+    for domain in editor.pack_paths:
+        live_path = editor._path_for(domain, stage="live")
+        draft_path = editor._path_for(domain, stage="draft")
+        live_payload = _read_json_file(live_path)
+        draft_exists = draft_path.exists()
+        draft_payload = _read_json_file(draft_path) if draft_exists else None
+        changed = draft_exists and draft_payload != live_payload
+        domains.append(
+            {
+                "domain": domain,
+                "live_path": str(live_path),
+                "draft_path": str(draft_path),
+                "draft_exists": draft_exists,
+                "changed": bool(changed),
+                "live_modified_at": _meta_modified_at(live_payload),
+                "draft_modified_at": _meta_modified_at(draft_payload) if draft_exists else None,
+                "live_mtime": _file_mtime(live_path),
+                "draft_mtime": _file_mtime(draft_path) if draft_exists else None,
+            }
+        )
+    changed_domains = [entry["domain"] for entry in domains if entry["changed"]]
+    draft_domains = [entry["domain"] for entry in domains if entry["draft_exists"]]
+    return {
+        "ok": True,
+        "draft_domains": draft_domains,
+        "changed_domains": changed_domains,
+        "domains": domains,
+        "summary": {
+            "draft_count": len(draft_domains),
+            "changed_count": len(changed_domains),
+        },
+    }
+
+
+def _read_json_file(path):
+    path = Path(path)
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def _meta_modified_at(payload):
+    if not isinstance(payload, dict):
+        return None
+    meta = payload.get("_meta") or {}
+    return meta.get("last_modified_at")
+
+
+def _file_mtime(path):
+    path = Path(path)
+    if not path.exists():
+        return None
+    return path.stat().st_mtime
 
 
 def _content_counts(registry):

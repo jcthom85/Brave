@@ -4,11 +4,61 @@
       "enemy_id": "e1",
       "enemy_key": "Sir Edric the Restless",
       "round_started": 5,
-      "round_ended": 6,
+      "round_ended": 7,
       "interruptible": true,
       "ticks": [
         {
           "round": 5,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1",
+            "Mage 3:winding:1"
+          ],
+          "messages_tail": [
+            "Marsh Hound hits Sir Edric the Restless for 24 damage. The mark flares. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits Sir Edric the Restless for 31 damage. The mark flares. The controlled target cannot shrug the blow off.",
+            "|cCleric 2 uses Smite!|n",
+            "Cleric 2 hits Sir Edric the Restless for 34 damage. The mark flares.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 6,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -23,15 +73,15 @@
             {
               "key": "Cleric 2",
               "class": "cleric",
-              "phase": "recovering",
-              "ticks_remaining": 1,
+              "phase": "charging",
+              "ticks_remaining": 0,
               "pending_action": {}
             },
             {
               "key": "Mage 3",
               "class": "mage",
-              "phase": "charging",
-              "ticks_remaining": 0,
+              "phase": "recovering",
+              "ticks_remaining": 1,
               "pending_action": {}
             },
             {
@@ -39,28 +89,33 @@
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 2,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
             }
           ],
           "unavailable_reasons": [
             "Warrior 1:charging:0",
-            "Mage 3:charging:0"
+            "Mage 3:recovering:1"
           ],
           "messages_tail": [
-            "Ranger 4 hits Sir Edric the Restless for 22 damage.",
-            "Warrior 1 hits Sir Edric the Restless for 21 damage.",
-            "Mage 3 hits Sir Edric the Restless for 15 damage.",
-            "Cleric 2 hits Sir Edric the Restless for 16 damage.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Sir Edric the Restless for 16 damage.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits Sir Edric the Restless for 31 damage. The mark flares. The controlled target cannot shrug the blow off.",
+            "|cCleric 2 uses Smite!|n",
+            "Cleric 2 hits Sir Edric the Restless for 34 damage. The mark flares.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|cMage 3 uses Firebolt!|n",
+            "Mage 3 hits Sir Edric the Restless for 37 damage. The mark flares. The prepared opening gives the fire somewhere vicious to go."
           ]
         },
         {
-          "round": 6,
+          "round": 7,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
-          "interrupt_pending_actor": "Mage 3",
+          "interrupt_pending_actor": "Warrior 1",
           "players": [
             {
               "key": "Warrior 1",
@@ -77,119 +132,7 @@
               "key": "Cleric 2",
               "class": "cleric",
               "phase": "charging",
-              "ticks_remaining": 0,
-              "pending_action": {}
-            },
-            {
-              "key": "Mage 3",
-              "class": "mage",
-              "phase": "charging",
               "ticks_remaining": 3,
-              "pending_action": {
-                "kind": "ability",
-                "ability": "frostbind",
-                "target": "e1"
-              }
-            },
-            {
-              "key": "Ranger 4",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [
-            "Warrior 1:charging:3",
-            "Mage 3:charging:3"
-          ],
-          "messages_tail": [
-            "Ranger 4 hits Sir Edric the Restless for 22 damage.",
-            "Warrior 1 hits Sir Edric the Restless for 21 damage.",
-            "Mage 3 hits Sir Edric the Restless for 15 damage.",
-            "Cleric 2 hits Sir Edric the Restless for 16 damage.",
-            "|cMarsh Hound uses Hamstring Bite!|n [[BRAVEFX kind=action&actor=Marsh+Hound&label=Hamstring+Bite]]",
-            "Marsh Hound hits Sir Edric the Restless for 16 damage.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "Sir Edric the Restless",
-      "round_started": 13,
-      "round_ended": 14,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 13,
-          "telegraph_ticks_remaining": 2,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Warrior 1",
-              "class": "warrior",
-              "phase": "charging",
-              "ticks_remaining": 2,
-              "pending_action": {}
-            },
-            {
-              "key": "Cleric 2",
-              "class": "cleric",
-              "phase": "charging",
-              "ticks_remaining": 0,
-              "pending_action": {}
-            },
-            {
-              "key": "Mage 3",
-              "class": "mage",
-              "phase": "charging",
-              "ticks_remaining": 2,
-              "pending_action": {}
-            },
-            {
-              "key": "Ranger 4",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 2,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [
-            "Warrior 1:charging:2",
-            "Mage 3:charging:2"
-          ],
-          "messages_tail": [
-            "|rSir Edric the Restless bleeds for 2 damage.|n",
-            "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
-            "Cleric 2 restores 0 HP to Warrior 1.",
-            "Cleric 2 leaves a guardian light hanging over Warrior 1.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
-            "Edric's Grave Shade hits Marsh Hound for 12 damage.",
-            "Edric's Grave-Light hits Marsh Hound for 10 damage.",
-            "|mMarsh Hound shudders under a grave-cold curse!|n"
-          ]
-        },
-        {
-          "round": 14,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Warrior 1",
-              "class": "warrior",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            },
-            {
-              "key": "Cleric 2",
-              "class": "cleric",
-              "phase": "charging",
-              "ticks_remaining": 4,
               "pending_action": {
                 "kind": "ability",
                 "ability": "guardianlight",
@@ -200,6 +143,252 @@
               "key": "Mage 3",
               "class": "mage",
               "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:3",
+            "Mage 3:charging:0"
+          ],
+          "messages_tail": [
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits Sir Edric the Restless for 31 damage. The mark flares. The controlled target cannot shrug the blow off.",
+            "|cCleric 2 uses Smite!|n",
+            "Cleric 2 hits Sir Edric the Restless for 34 damage. The mark flares.",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|cMage 3 uses Firebolt!|n",
+            "Mage 3 hits Sir Edric the Restless for 37 damage. The mark flares. The prepared opening gives the fire somewhere vicious to go."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 14,
+      "round_ended": 15,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 14,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "strike",
+                "target": "e3"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "smite",
+                "target": "e3"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "recovering",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:2",
+            "Mage 3:recovering:2"
+          ],
+          "messages_tail": [
+            "Marsh Hound hits Sir Edric the Restless for 11 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Edric's Grave Shade hits Marsh Hound for 15 damage.",
+            "|mMarsh Hound shudders under a grave-cold curse!|n",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 9 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n"
+          ]
+        },
+        {
+          "round": 15,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": "Warrior 1",
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "shieldbash",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "guardianlight",
+                "target": 1
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:1",
+            "Mage 3:recovering:1"
+          ],
+          "messages_tail": [
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Edric's Grave Shade hits Marsh Hound for 15 damage.",
+            "|mMarsh Hound shudders under a grave-cold curse!|n",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 9 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 21,
+      "round_ended": 23,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 21,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "smite",
+                "target": "e3"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1",
+            "Mage 3:winding:2"
+          ],
+          "messages_tail": [
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "Edric's Grave Shade hits Marsh Hound for 17 damage.",
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 8 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 22,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
               "ticks_remaining": 1,
               "pending_action": {}
             },
@@ -208,22 +397,453 @@
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1",
+            "Mage 3:winding:1"
+          ],
+          "messages_tail": [
+            "|cEdric's Grave-Light uses Grave Light!|n",
+            "Edric's Grave-Light mends Sir Edric the Restless for 8 HP.",
+            "|mEdric's Grave-Light feeds cold grave-light into Sir Edric the Restless.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "|cWarrior 1 uses Strike!|n",
+            "Warrior 1 hits Edric's Grave-Light for 23 damage. A heavy blow lands."
+          ]
+        },
+        {
+          "round": 23,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "cooldown",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "recovering",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "winding",
+              "ticks_remaining": 1,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [
+            "Warrior 1:charging:0",
+            "Mage 3:recovering:2"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits Edric's Grave-Light for 23 damage. A heavy blow lands.",
+            "|cCleric 2 uses Guardian Light!|n",
+            "Cleric 2 restores 0 HP to Warrior 1.",
+            "Cleric 2 leaves a guardian light hanging over Warrior 1.",
+            "|cMage 3 uses Arc Spark!|n",
+            "Mage 3 hits Edric's Grave-Light for 31 damage.",
+            "Edric's Grave-Light falls.",
+            "Mage 3 hits Sir Edric the Restless for 7 damage. The ward absorbs part of the blow. Arc spark leaps to a second target."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 30,
+      "round_ended": 32,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 30,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "strike",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:3",
+            "Mage 3:winding:2"
+          ],
+          "messages_tail": [
+            "Ranger 4 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 10 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "Edric's Grave Shade hits Marsh Hound for 16 damage.",
+            "|mMarsh Hound shudders under a grave-cold curse!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        },
+        {
+          "round": 31,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": "Warrior 1",
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "shieldbash",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 3,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:2",
+            "Mage 3:winding:1"
+          ],
+          "messages_tail": [
+            "Marsh Hound hits Sir Edric the Restless for 10 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "Edric's Grave Shade hits Marsh Hound for 16 damage.",
+            "|mMarsh Hound shudders under a grave-cold curse!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Marsh Hound shakes off the curse.",
+            "|rSir Edric the Restless bleeds for 2 damage.|n"
+          ]
+        },
+        {
+          "round": 32,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": "Warrior 1",
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "shieldbash",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "recovering",
+              "ticks_remaining": 2,
+              "pending_action": {}
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [
             "Warrior 1:charging:1",
+            "Mage 3:recovering:2"
+          ],
+          "messages_tail": [
+            "|mMarsh Hound shudders under a grave-cold curse!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
+            "Marsh Hound shakes off the curse.",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|cMage 3 uses Arc Spark!|n",
+            "Mage 3 hits Edric's Grave Shade for 29 damage.",
+            "Mage 3 hits Sir Edric the Restless for 7 damage. The ward absorbs part of the blow. Arc spark leaps to a second target."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 38,
+      "round_ended": 38,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 38,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "arcspark",
+                "target": "e2"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "winding",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:winding:1",
             "Mage 3:charging:1"
           ],
           "messages_tail": [
+            "Ranger 4 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 11 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "Edric's Grave Shade hits Marsh Hound for 16 damage.",
             "|rSir Edric the Restless bleeds for 2 damage.|n",
-            "|cCleric 2 uses Guardian Light!|n [[BRAVEFX kind=action&actor=Cleric+2&label=Guardian+Light]]",
-            "Cleric 2 restores 0 HP to Warrior 1.",
-            "Cleric 2 leaves a guardian light hanging over Warrior 1.",
-            "|ySir Edric the Restless raises his blade for Funeral Charge.|n",
-            "Edric's Grave Shade hits Marsh Hound for 12 damage.",
-            "Edric's Grave-Light hits Marsh Hound for 10 damage.",
-            "|mMarsh Hound shudders under a grave-cold curse!|n"
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 44,
+      "round_ended": 44,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 44,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "firebolt",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:recovering:1",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "Warrior 1 hits Sir Edric the Restless for 10 damage. The ward absorbs part of the blow.",
+            "Cleric 2 hits Sir Edric the Restless for 9 damage. The ward absorbs part of the blow.",
+            "|cRanger 4 uses Mark Prey!|n",
+            "Ranger 4 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 10 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "Sir Edric the Restless",
+      "round_started": 50,
+      "round_ended": 50,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 50,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Warrior 1",
+              "class": "warrior",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Cleric 2",
+              "class": "cleric",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            },
+            {
+              "key": "Mage 3",
+              "class": "mage",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "firebolt",
+                "target": "e1"
+              }
+            },
+            {
+              "key": "Ranger 4",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [
+            "Warrior 1:charging:0",
+            "Mage 3:charging:1"
+          ],
+          "messages_tail": [
+            "Cleric 2 hits Sir Edric the Restless for 7 damage. The ward absorbs part of the blow.",
+            "|cRanger 4 uses Mark Prey!|n",
+            "Ranger 4 fixes Sir Edric the Restless as the quarry and marsh hound immediately picks up the line.",
+            "|cMarsh Hound uses Hamstring Bite!|n",
+            "Marsh Hound hits Sir Edric the Restless for 10 damage. The mark flares. The ward absorbs part of the blow. The hound worries the marked prey without letting it settle.",
+            "|rMarsh Hound opens fresh cuts across Sir Edric the Restless!|n",
+            "|rSir Edric the Restless bleeds for 2 damage.|n",
+            "|ySir Edric the Restless raises his blade for Funeral Charge.|n"
           ]
         }
       ]
@@ -231,10 +851,28 @@
   ],
   "interrupt_windows": [
     {
-      "round": 6,
+      "round": 7,
       "enemy_key": "Sir Edric the Restless",
       "interrupt_ready_actor": null,
-      "interrupt_pending_actor": "Mage 3"
+      "interrupt_pending_actor": "Warrior 1"
+    },
+    {
+      "round": 15,
+      "enemy_key": "Sir Edric the Restless",
+      "interrupt_ready_actor": null,
+      "interrupt_pending_actor": "Warrior 1"
+    },
+    {
+      "round": 31,
+      "enemy_key": "Sir Edric the Restless",
+      "interrupt_ready_actor": null,
+      "interrupt_pending_actor": "Warrior 1"
+    },
+    {
+      "round": 32,
+      "enemy_key": "Sir Edric the Restless",
+      "interrupt_ready_actor": null,
+      "interrupt_pending_actor": "Warrior 1"
     }
   ]
 }

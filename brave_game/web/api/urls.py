@@ -7,6 +7,8 @@ from . import views
 urlpatterns = [
     path("content/status", views.content_status, name="content-status"),
     path("content/health", views.content_health, name="content-health"),
+    path("content/drift", views.content_drift, name="content-drift"),
+    path("content/reports", views.content_reports, name="content-reports"),
     path("content/references/<str:domain>", views.content_references, name="content-references"),
     path("content/preview", views.content_preview, name="content-preview"),
     path("content/mutate", views.content_mutate, name="content-mutate"),

@@ -24,9 +24,16 @@
     code { background:#fff; border:1px solid var(--line); border-radius:8px; padding:2px 6px; }
     .status { padding:12px 14px; border-radius:12px; background:#fff6e7; border:1px solid var(--line); }
     .status.good { background:#eef8f1; color:var(--good); border-color:rgba(47,109,76,.24); }
+    .review-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .review-list { display:grid; gap:8px; }
+    .review-row { border:1px solid var(--line); border-radius:10px; background:#fffdfa; padding:10px; display:grid; gap:4px; }
+    .review-row.changed { border-color:#b36b36; background:#fff4e6; }
+    .review-row strong { overflow-wrap:anywhere; }
+    .review-row span { color:var(--muted); font-size:.92rem; }
+    .report-output { display:block; max-height:360px; overflow:auto; white-space:pre-wrap; word-break:break-word; background:#fffdfa; border:1px solid var(--line); border-radius:10px; padding:12px; }
     .validation-notes[hidden] { display:none; }
     pre { display:none; }
-    @media (max-width:980px) { .grid,.builder-grid { grid-template-columns:1fr; } }
+    @media (max-width:980px) { .grid,.builder-grid,.review-grid { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -58,6 +65,23 @@
         <article class="card"><h2>Characters</h2><p>Classes, races, progression, and defaults.</p><a href="/creator/characters/">Open Character Builder</a></article>
       </div>
     </section>
+    <section class="rail">
+      <h2>Review Signals</h2>
+      <p>Check draft/live drift and generated audit reports before publishing or starting the next content batch.</p>
+      <div class="review-grid">
+        <article class="card">
+          <h2>Draft vs Live</h2>
+          <p>Draft packs shadow live content during Creator review.</p>
+          <div id="drift-list" class="review-list"><div class="status">Loading drift status...</div></div>
+        </article>
+        <article class="card">
+          <h2>Audit Reports</h2>
+          <p>Read-only outputs from the current Act 1 hardening scripts.</p>
+          <select id="report-select"></select>
+          <pre id="report-output" class="report-output">Loading reports...</pre>
+        </article>
+      </div>
+    </section>
     <section class="rail" data-creator-workflow-host>
       <h2>Publish Readiness</h2>
       <p>Use this when you are ready to move reviewed draft content live. Start with validation, then publish from Agent Runs or publish selected draft domains here.</p>
@@ -71,6 +95,55 @@
   <script>
     const API_ROOT = "{{ api_root|escapejs }}";
     window.BraveCreator.bind(API_ROOT, document.getElementById('status'), document.getElementById('validation-notes'));
+    const driftList = document.getElementById('drift-list');
+    const reportSelect = document.getElementById('report-select');
+    const reportOutput = document.getElementById('report-output');
+    async function apiGet(path) {
+      const response = await fetch(`${API_ROOT}${path}`, { credentials: 'same-origin' });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload.ok === false) throw new Error(payload.error || `Request failed with ${response.status}`);
+      return payload;
+    }
+    function formatStamp(value) {
+      return value ? String(value).replace('T', ' ').replace('+00:00', ' UTC') : 'unknown';
+    }
+    async function loadDrift() {
+      try {
+        const payload = await apiGet('/drift');
+        driftList.innerHTML = '';
+        for (const entry of payload.domains || []) {
+          const row = document.createElement('div');
+          row.className = `review-row${entry.changed ? ' changed' : ''}`;
+          row.innerHTML = `<strong>${entry.domain}${entry.changed ? ' · changed draft' : entry.draft_exists ? ' · draft matches live' : ' · no draft'}</strong><span>live ${formatStamp(entry.live_modified_at)} · draft ${formatStamp(entry.draft_modified_at)}</span>`;
+          driftList.appendChild(row);
+        }
+      } catch (error) {
+        driftList.innerHTML = `<div class="status">${error.message}</div>`;
+      }
+    }
+    async function loadReports() {
+      try {
+        const payload = await apiGet('/reports');
+        const reports = payload.reports || [];
+        reportSelect.innerHTML = '';
+        for (const report of reports) {
+          const option = document.createElement('option');
+          option.value = report.key;
+          option.textContent = `${report.label}${report.exists ? '' : ' (missing)'}`;
+          reportSelect.appendChild(option);
+        }
+        function renderReport() {
+          const selected = reports.find((report) => report.key === reportSelect.value) || reports[0];
+          reportOutput.textContent = selected ? (selected.content || `Report not found: ${selected.path}`) : 'No reports available.';
+        }
+        reportSelect.addEventListener('change', renderReport);
+        renderReport();
+      } catch (error) {
+        reportOutput.textContent = error.message;
+      }
+    }
+    loadDrift();
+    loadReports();
   </script>
 </body>
 </html>

@@ -66,7 +66,7 @@ class DummyCharacter:
 class JournalViewTests(unittest.TestCase):
     def test_journal_view_shows_tracked_then_active_regions(self):
         active_key = STARTING_QUESTS[0]
-        second_active_key = STARTING_QUESTS[2]
+        second_active_key = "roadside_howls"
         completed_key = "bridgework_for_joss"
         character = DummyCharacter(
             quests={

@@ -1,18 +1,18 @@
 {
-  "telegraph_windows": 6,
-  "telegraph_ticks": 12,
-  "interrupt_ready_ticks": 0,
-  "interrupt_charging_zero_ticks": 4,
-  "interrupt_recovering_ticks": 2,
-  "interrupt_late_pending_ticks": 1,
+  "telegraph_windows": 11,
+  "telegraph_ticks": 25,
+  "interrupt_ready_ticks": 5,
+  "interrupt_charging_zero_ticks": 5,
+  "interrupt_recovering_ticks": 10,
+  "interrupt_late_pending_ticks": 7,
   "by_enemy": {
     "The Hollow Lantern": {
-      "windows": 6,
-      "ticks": 12,
-      "interrupt_ready_ticks": 0,
-      "interrupt_charging_zero_ticks": 4,
-      "interrupt_recovering_ticks": 2,
-      "interrupt_late_pending_ticks": 1
+      "windows": 11,
+      "ticks": 25,
+      "interrupt_ready_ticks": 5,
+      "interrupt_charging_zero_ticks": 5,
+      "interrupt_recovering_ticks": 10,
+      "interrupt_late_pending_ticks": 7
     }
   }
 }

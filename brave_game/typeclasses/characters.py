@@ -324,8 +324,8 @@ class Character(ObjectParent, DefaultCharacter):
         class_key = self.db.brave_class
         derived = {
             "max_hp": 55 + (primary["vitality"] * 10) + (level * 8),
-            "max_mana": 12 + (primary["intellect"] + primary["spirit"]) * 5 + (level * 4),
-            "max_stamina": 24 + (primary["strength"] + primary["agility"] + primary["vitality"]) * 3 + (level * 5),
+            "max_mana": 10 + (primary["intellect"] + primary["spirit"]) * 4 + (level * 3),
+            "max_stamina": 18 + (primary["strength"] + primary["agility"] + primary["vitality"]) * 2 + (level * 4),
             "attack_power": primary["strength"] * 2 + primary["agility"] + (level * 2),
             "spell_power": primary["intellect"] * 2 + primary["spirit"] + (level * 2),
             "armor": primary["vitality"] * 2 + primary["strength"] + level,

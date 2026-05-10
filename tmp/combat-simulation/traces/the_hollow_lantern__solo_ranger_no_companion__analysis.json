@@ -4,31 +4,53 @@
       "enemy_id": "e1",
       "enemy_key": "The Hollow Lantern",
       "round_started": 4,
-      "round_ended": 5,
+      "round_ended": 6,
       "interruptible": true,
       "ticks": [
         {
           "round": 4,
-          "telegraph_ticks_remaining": 2,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
             {
               "key": "Ranger 1",
               "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 0,
+              "phase": "recovering",
+              "ticks_remaining": 1,
               "pending_action": {}
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Ranger 1 hits The Hollow Lantern for 21 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
             "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
           ]
         },
         {
           "round": 5,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 6,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -38,12 +60,17 @@
               "class": "ranger",
               "phase": "charging",
               "ticks_remaining": 2,
-              "pending_action": {}
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "Ranger 1 hits The Hollow Lantern for 21 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
             "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
           ]
         }
@@ -52,39 +79,13 @@
     {
       "enemy_id": "e1",
       "enemy_key": "The Hollow Lantern",
-      "round_started": 11,
-      "round_ended": 12,
+      "round_started": 12,
+      "round_ended": 14,
       "interruptible": true,
       "ticks": [
-        {
-          "round": 11,
-          "telegraph_ticks_remaining": 2,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "recovering",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
-            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
-            "The Hollow Lantern hits Ranger 1 for 14 damage.",
-            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
-            "Ranger 1 hits The Hollow Lantern for 20 damage.",
-            "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits The Hollow Lantern for 23 damage.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
-          ]
-        },
         {
           "round": 12,
-          "telegraph_ticks_remaining": 1,
+          "telegraph_ticks_remaining": 3,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
           "players": [
@@ -92,216 +93,28 @@
               "key": "Ranger 1",
               "class": "ranger",
               "phase": "charging",
-              "ticks_remaining": 0,
-              "pending_action": {}
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
             }
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
             "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
-            "The Hollow Lantern hits Ranger 1 for 14 damage.",
+            "The Hollow Lantern hits Ranger 1 for 8 damage.",
             "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
-            "Ranger 1 hits The Hollow Lantern for 20 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
             "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits The Hollow Lantern for 23 damage.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "The Hollow Lantern",
-      "round_started": 18,
-      "round_ended": 19,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 18,
-          "telegraph_ticks_remaining": 2,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits The Hollow Lantern for 23 damage.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
-            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
-            "The Hollow Lantern hits Ranger 1 for 16 damage.",
-            "Ranger 1 hits The Hollow Lantern for 23 damage.",
             "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
           ]
         },
         {
-          "round": 19,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "recovering",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "Ranger 1 hits The Hollow Lantern for 23 damage.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "|cThe Hollow Lantern uses Blackwater Flare!|n [[BRAVEFX kind=action&actor=The+Hollow+Lantern&label=Blackwater+Flare]]",
-            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
-            "The Hollow Lantern hits Ranger 1 for 16 damage.",
-            "Ranger 1 hits The Hollow Lantern for 23 damage.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "Ranger 1 hits The Hollow Lantern for 19 damage."
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "The Hollow Lantern",
-      "round_started": 25,
-      "round_ended": 26,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 25,
-          "telegraph_ticks_remaining": 2,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 2,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "Lamp Wisp hits Ranger 1 for 16 damage.",
-            "|mRanger 1 shudders under a hollow-light curse!|n",
-            "Ranger 1 tears free of the webbing.",
-            "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "Lamp Wisp hits Ranger 1 for 11 damage.",
-            "|mRanger 1 shudders under a hollow-light curse!|n"
-          ]
-        },
-        {
-          "round": 26,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 1,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "|mRanger 1 shudders under a hollow-light curse!|n",
-            "Ranger 1 tears free of the webbing.",
-            "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "Lamp Wisp hits Ranger 1 for 11 damage.",
-            "|mRanger 1 shudders under a hollow-light curse!|n",
-            "Blackwater Warder hits Ranger 1 for 10 damage."
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "The Hollow Lantern",
-      "round_started": 32,
-      "round_ended": 33,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 32,
-          "telegraph_ticks_remaining": 2,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 0,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
-            "Lamp Wisp hits Ranger 1 for 15 damage.",
-            "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
-            "Blackwater Warder hits Ranger 1 for 10 damage.",
-            "|yRanger 1 is tangled in webbing!|n",
-            "Ranger 1 tears free of the webbing.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
-          ]
-        },
-        {
-          "round": 33,
-          "telegraph_ticks_remaining": 1,
-          "interrupt_ready_actor": null,
-          "interrupt_pending_actor": null,
-          "players": [
-            {
-              "key": "Ranger 1",
-              "class": "ranger",
-              "phase": "charging",
-              "ticks_remaining": 2,
-              "pending_action": {}
-            }
-          ],
-          "unavailable_reasons": [],
-          "messages_tail": [
-            "Lamp Wisp hits Ranger 1 for 15 damage.",
-            "Ranger 1 shakes off the curse.",
-            "Ranger 1 hits The Hollow Lantern for 10 damage. The ward absorbs part of the blow.",
-            "Blackwater Warder hits Ranger 1 for 10 damage.",
-            "|yRanger 1 is tangled in webbing!|n",
-            "Ranger 1 tears free of the webbing.",
-            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
-            "Lamp Wisp hits Ranger 1 for 14 damage."
-          ]
-        }
-      ]
-    },
-    {
-      "enemy_id": "e1",
-      "enemy_key": "The Hollow Lantern",
-      "round_started": 39,
-      "round_ended": 40,
-      "interruptible": true,
-      "ticks": [
-        {
-          "round": 39,
+          "round": 13,
           "telegraph_ticks_remaining": 2,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -316,18 +129,18 @@
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "|rThe Hollow Lantern floods the chamber with white-black fire and sears Ranger 1 for 22 damage!|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 8 damage.",
             "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
-            "Ranger 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow.",
-            "Blackwater Warder hits Ranger 1 for 11 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
             "Ranger 1 shakes off the curse.",
-            "Lamp Wisp hits Ranger 1 for 12 damage.",
-            "Ranger 1 misses The Hollow Lantern.",
             "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
           ]
         },
         {
-          "round": 40,
+          "round": 14,
           "telegraph_ticks_remaining": 1,
           "interrupt_ready_actor": null,
           "interrupt_pending_actor": null,
@@ -342,13 +155,1334 @@
           ],
           "unavailable_reasons": [],
           "messages_tail": [
-            "|rThe Hollow Lantern floods the chamber with white-black fire and sears Ranger 1 for 22 damage!|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 8 damage.",
             "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
-            "Ranger 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow.",
-            "Blackwater Warder hits Ranger 1 for 11 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
             "Ranger 1 shakes off the curse.",
-            "Lamp Wisp hits Ranger 1 for 12 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 20,
+      "round_ended": 22,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 20,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 6 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 21,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 6 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 22,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 6 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 28,
+      "round_ended": 30,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 28,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 8 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 29,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 8 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 30,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 8 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 36,
+      "round_ended": 38,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 36,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 5 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 37,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 5 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 38,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 5 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 44,
+      "round_ended": 46,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 44,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 9 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 45,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 9 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 46,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 9 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 52,
+      "round_ended": 54,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 52,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 6 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 53,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "aimedshot",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 6 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 54,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 6 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 60,
+      "round_ended": 62,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 60,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 5 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 61,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 5 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 62,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 5 damage.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 68,
+      "round_ended": 70,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 68,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 9 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 69,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 9 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 70,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 2,
+              "pending_action": {
+                "kind": "ability",
+                "ability": "evasiveroll",
+                "target": 1
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 9 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 shakes off the curse.",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 76,
+      "round_ended": 78,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 76,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 5 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 77,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 5 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 23 damage."
+          ]
+        },
+        {
+          "round": 78,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 5 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "|cRanger 1 uses Mark Prey!|n",
+            "Ranger 1 fixes The Hollow Lantern as the quarry and your companion immediately picks up the line.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 23 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 84,
+      "round_ended": 86,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 84,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 23 damage.",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 9 damage.",
             "Ranger 1 misses The Hollow Lantern.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 85,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 23 damage.",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 9 damage.",
+            "Ranger 1 misses The Hollow Lantern.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 22 damage."
+          ]
+        },
+        {
+          "round": 86,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 23 damage.",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 9 damage.",
+            "Ranger 1 misses The Hollow Lantern.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 22 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 92,
+      "round_ended": 94,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 92,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits The Hollow Lantern for 22 damage.",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 7 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits The Hollow Lantern for 21 damage.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 93,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 7 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits The Hollow Lantern for 21 damage.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 21 damage."
+          ]
+        },
+        {
+          "round": 94,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "The Hollow Lantern hits Ranger 1 for 7 damage.",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits The Hollow Lantern for 21 damage.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 21 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 100,
+      "round_ended": 102,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 100,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e3"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Lamp Wisp mends The Hollow Lantern for 12 HP.",
+            "|yLamp Wisp spills drowned lamp-light into The Hollow Lantern.|n",
+            "Ranger 1 tears free of the webbing.",
+            "Ranger 1 hits Lamp Wisp for 25 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cLamp Wisp uses Lamp Light!|n",
+            "Lamp Wisp mends The Hollow Lantern for 13 HP.",
+            "|yLamp Wisp spills drowned lamp-light into The Hollow Lantern.|n"
+          ]
+        },
+        {
+          "round": 101,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits Lamp Wisp for 25 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cLamp Wisp uses Lamp Light!|n",
+            "Lamp Wisp mends The Hollow Lantern for 13 HP.",
+            "|yLamp Wisp spills drowned lamp-light into The Hollow Lantern.|n",
+            "Ranger 1 hits Lamp Wisp for 22 damage.",
+            "Lamp Wisp falls.",
+            "Blackwater Warder hits Ranger 1 for 4 damage."
+          ]
+        },
+        {
+          "round": 102,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits Lamp Wisp for 25 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "|cLamp Wisp uses Lamp Light!|n",
+            "Lamp Wisp mends The Hollow Lantern for 13 HP.",
+            "|yLamp Wisp spills drowned lamp-light into The Hollow Lantern.|n",
+            "Ranger 1 hits Lamp Wisp for 22 damage.",
+            "Lamp Wisp falls.",
+            "Blackwater Warder hits Ranger 1 for 4 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 108,
+      "round_ended": 110,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 108,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e2"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "|rThe Hollow Lantern floods the chamber with white-black fire and sears Ranger 1 for 11 damage!|n",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits Blackwater Warder for 24 damage.",
+            "Ranger 1 shakes off the curse.",
+            "Blackwater Warder hits Ranger 1 for 5 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 109,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "|rThe Hollow Lantern floods the chamber with white-black fire and sears Ranger 1 for 11 damage!|n",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits Blackwater Warder for 24 damage.",
+            "Ranger 1 shakes off the curse.",
+            "Blackwater Warder hits Ranger 1 for 5 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits Blackwater Warder for 24 damage."
+          ]
+        },
+        {
+          "round": 110,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "|rThe Hollow Lantern floods the chamber with white-black fire and sears Ranger 1 for 11 damage!|n",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits Blackwater Warder for 24 damage.",
+            "Ranger 1 shakes off the curse.",
+            "Blackwater Warder hits Ranger 1 for 5 damage.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits Blackwater Warder for 24 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 116,
+      "round_ended": 118,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 116,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Blackwater Warder hits Ranger 1 for 5 damage.",
+            "|yRanger 1 is tangled in webbing!|n",
+            "Ranger 1 tears free of the webbing.",
+            "Ranger 1 hits Blackwater Warder for 23 damage.",
+            "Blackwater Warder falls.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 117,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Blackwater Warder hits Ranger 1 for 5 damage.",
+            "|yRanger 1 is tangled in webbing!|n",
+            "Ranger 1 tears free of the webbing.",
+            "Ranger 1 hits Blackwater Warder for 23 damage.",
+            "Blackwater Warder falls.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow."
+          ]
+        },
+        {
+          "round": 118,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Blackwater Warder hits Ranger 1 for 5 damage.",
+            "|yRanger 1 is tangled in webbing!|n",
+            "Ranger 1 tears free of the webbing.",
+            "Ranger 1 hits Blackwater Warder for 23 damage.",
+            "Blackwater Warder falls.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 11 damage. The ward absorbs part of the blow."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 124,
+      "round_ended": 126,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 124,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|yThe Hollow Lantern's ward gutters out as the drowned support holding it together collapses.|n",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "|rThe Hollow Lantern floods the chamber with white-black fire and sears Ranger 1 for 13 damage!|n",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits The Hollow Lantern for 23 damage.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
+          ]
+        },
+        {
+          "round": 125,
+          "telegraph_ticks_remaining": 2,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "recovering",
+              "ticks_remaining": 1,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "|rThe Hollow Lantern floods the chamber with white-black fire and sears Ranger 1 for 13 damage!|n",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits The Hollow Lantern for 23 damage.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 22 damage."
+          ]
+        },
+        {
+          "round": 126,
+          "telegraph_ticks_remaining": 1,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 0,
+              "pending_action": {}
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "|rThe Hollow Lantern floods the chamber with white-black fire and sears Ranger 1 for 13 damage!|n",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits The Hollow Lantern for 23 damage.",
+            "Ranger 1 shakes off the curse.",
+            "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n",
+            "Ranger 1 hits The Hollow Lantern for 22 damage."
+          ]
+        }
+      ]
+    },
+    {
+      "enemy_id": "e1",
+      "enemy_key": "The Hollow Lantern",
+      "round_started": 132,
+      "round_ended": 132,
+      "interruptible": true,
+      "ticks": [
+        {
+          "round": 132,
+          "telegraph_ticks_remaining": 3,
+          "interrupt_ready_actor": null,
+          "interrupt_pending_actor": null,
+          "players": [
+            {
+              "key": "Ranger 1",
+              "class": "ranger",
+              "phase": "charging",
+              "ticks_remaining": 1,
+              "pending_action": {
+                "kind": "attack",
+                "target": "e1"
+              }
+            }
+          ],
+          "unavailable_reasons": [],
+          "messages_tail": [
+            "Ranger 1 hits The Hollow Lantern for 22 damage.",
+            "|cThe Hollow Lantern uses Blackwater Flare!|n",
+            "|rThe Hollow Lantern's Blackwater Flare lands clean.|n",
+            "|rThe Hollow Lantern floods the chamber with white-black fire and sears Ranger 1 for 12 damage!|n",
+            "|mThe Hollow Lantern brands Ranger 1 in wrong light!|n",
+            "Ranger 1 hits The Hollow Lantern for 21 damage.",
+            "Ranger 1 shakes off the curse.",
             "|yThe Hollow Lantern swells with drowned light and prepares Blackwater Flare.|n"
           ]
         }

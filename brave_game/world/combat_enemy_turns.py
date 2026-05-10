@@ -188,6 +188,45 @@ def execute_enemy_turn(encounter, enemy):
         shake="subtle" if critical else None,
         lunge=True,
     )
+    expected_party_size = int(getattr(getattr(self, "db", None), "expected_party_size", 1) or 1)
+    if telegraphed and expected_party_size >= 3 and damage > 1:
+        splash_candidates = [
+            participant
+            for participant in self.get_active_participants()
+            if participant is not target
+        ]
+        if splash_candidates:
+            splash_target = random.choice(splash_candidates)
+            splash_name = _combat_target_name(splash_target, "Companion")
+            splash_damage = max(1, damage // 3)
+            splash_damage = max(1, splash_damage - get_incoming_damage_reduction(splash_target))
+            if _is_companion_actor(splash_target):
+                splash_resources = {"hp": max(0, int(splash_target.get("hp", 0) or 0) - splash_damage)}
+                splash_target["hp"] = splash_resources["hp"]
+                self._save_companion(splash_target)
+            else:
+                splash_resources = dict(splash_target.db.brave_resources or {})
+                splash_resources["hp"] = max(0, splash_resources["hp"] - splash_damage)
+                splash_target.db.brave_resources = splash_resources
+            self._record_participant_contribution(splash_target, hits_taken=splash_damage)
+            self.obj.msg_contents(f"|r{enemy['key']}'s {action_label} splashes pressure across {splash_name} for {splash_damage} damage.|n")
+            self._emit_combat_fx(
+                kind="damage",
+                source=enemy["key"],
+                source_ref=_combat_entry_ref(enemy),
+                target=splash_name,
+                target_ref=_combat_entry_ref(splash_target),
+                amount=splash_damage,
+                text=str(splash_damage),
+                tone="damage",
+                impact="damage",
+                element=_enemy_damage_type(enemy),
+            )
+            if splash_resources["hp"] <= 0:
+                if _is_companion_actor(splash_target):
+                    self._defeat_companion(splash_target)
+                else:
+                    self._defeat_character(splash_target)
     sacred_turns = int(state.get("sacred_aegis_turns", 0) or 0)
     sacred_source = self._get_participant_target(state.get("sacred_aegis_source")) if state.get("sacred_aegis_source") else None
     if (

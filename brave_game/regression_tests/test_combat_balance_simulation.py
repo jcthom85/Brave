@@ -14,8 +14,13 @@ from regression_tests.combat_balance_simulation import (
     _queue_pending_actions,
     analyze_interrupt_opportunities,
     analyze_trace,
+    build_act1_spine_report,
+    build_prose_voice_report,
     build_first_hour_route_report,
+    build_ability_audit_report,
+    build_item_rarity_report,
     build_progression_runs,
+    build_resource_economy_report,
     build_interrupt_opportunity_report,
     build_summary,
     classify_encounter_rank,
@@ -23,7 +28,12 @@ from regression_tests.combat_balance_simulation import (
     choose_player_action,
     infer_expected_level,
     render_interrupt_opportunity_markdown,
+    render_act1_spine_markdown,
+    render_prose_voice_markdown,
     render_first_hour_route_markdown,
+    render_ability_audit_markdown,
+    render_item_rarity_markdown,
+    render_resource_economy_markdown,
     render_markdown,
     simulate_encounter,
     DummyRoom,
@@ -107,6 +117,34 @@ class CombatBalanceSimulationTests(unittest.TestCase):
         self.assertIn("Pacing Flags", markdown)
         self.assertIn("what_whispers_in_the_wood", markdown)
 
+    def test_act1_spine_report_has_handoffs_and_closure(self):
+        report = build_act1_spine_report()
+
+        self.assertGreaterEqual(report["quest_count"], 30)
+        self.assertFalse(any(flag["kind"] == "missing_next_step" for flag in report["flags"]))
+        self.assertEqual([], [entry for entry in report["trophy_rewards"] if not entry["known"]])
+        self.assertEqual("Brambleford's First Hard Chapter", report["closure"]["chapter_complete"])
+        self.assertTrue(all(report["closure"]["completed_dialogue"].values()))
+        self.assertTrue(report["closure"]["trophy_vitrine_mentions"]["hollow_lantern_prism"])
+        markdown = render_act1_spine_markdown(report)
+        self.assertIn("Act 1 Spine Audit", markdown)
+        self.assertIn("No Act 1 spine flags", markdown)
+
+    def test_prose_voice_report_tracks_region_cadence_and_npc_anchors(self):
+        report = build_prose_voice_report()
+
+        self.assertGreaterEqual(len(report["rooms"]), 40)
+        self.assertIn("brambleford", report["regions"])
+        self.assertIn("drowned_weir", report["regions"])
+        npc_rows = {entry["npc"]: entry for entry in report["npcs"]}
+        self.assertIn("captain_harl_rowan", npc_rows)
+        self.assertIn("joss_veller", npc_rows)
+        self.assertGreaterEqual(len(npc_rows["captain_harl_rowan"]["anchor_hits"]), 2)
+        self.assertGreaterEqual(len(npc_rows["joss_veller"]["anchor_hits"]), 2)
+        markdown = render_prose_voice_markdown(report)
+        self.assertIn("Act 1 Prose and Voice Audit", markdown)
+        self.assertIn("NPC Voice Anchors", markdown)
+
     def test_ranger_companion_scenario_spawns_companion_actor(self):
         authored = collect_authored_encounters()[0]
         scenario = next(entry for entry in PARTY_SCENARIOS if entry["key"] == "solo_ranger_with_companion")
@@ -153,12 +191,48 @@ class CombatBalanceSimulationTests(unittest.TestCase):
             expected_party_size=1,
             seed=1,
         )
+        outlier_duo = SimulationEncounter(
+            DummyRoom("drowned_weir_blackwater_lamp_house"),
+            outlier_data,
+            expected_party_size=2,
+            seed=1,
+        )
 
         self.assertEqual("Solo Drowned Weir", solo._get_scaling_profile()["label"])
         self.assertLess(solo._get_scaling_profile()["power"], early_solo._get_scaling_profile()["power"])
         self.assertLess(outlier_solo._get_scaling_profile()["power"], solo._get_scaling_profile()["power"])
+        self.assertLess(outlier_duo._get_scaling_profile()["power"], duo._get_scaling_profile()["power"])
         self.assertEqual("Duo", duo._get_scaling_profile()["label"])
         self.assertEqual("Solo", early_solo._get_scaling_profile()["label"])
+
+    def test_large_party_opening_pressure_is_encounter_specific(self):
+        encounter_data = {
+            "key": "greymaws_stand",
+            "title": "Greymaw Pressure Check",
+            "intro": "Testing large party pressure.",
+            "enemies": ["old_greymaw"],
+        }
+
+        solo = SimulationEncounter(
+            DummyRoom("whispering_woods_greymaw_hollow"),
+            encounter_data,
+            expected_party_size=1,
+            seed=1,
+        )
+        full = SimulationEncounter(
+            DummyRoom("whispering_woods_greymaw_hollow"),
+            encounter_data,
+            expected_party_size=4,
+            seed=1,
+        )
+
+        self.assertEqual(["old_greymaw"], [enemy["template_key"] for enemy in solo.db.enemies])
+        self.assertEqual(
+            ["old_greymaw", "forest_wolf", "forest_wolf"],
+            [enemy["template_key"] for enemy in full.db.enemies],
+        )
+        boss = next(enemy for enemy in full.db.enemies if enemy["template_key"] == "old_greymaw")
+        self.assertTrue(boss["large_party_pressure"])
 
     def test_simulation_trace_emits_tick_snapshots_when_enabled(self):
         authored = collect_authored_encounters()[0]
@@ -171,6 +245,51 @@ class CombatBalanceSimulationTests(unittest.TestCase):
         self.assertIn("players", run["trace"][0])
         self.assertIn("enemies", run["trace"][0])
         self.assertIn("telegraph", run["trace"][0])
+        self.assertIn("stamina", run["trace"][0]["players"][0])
+        self.assertIn("primary_resource", run["trace"][0]["players"][0])
+
+    def test_simulation_reports_resource_pressure_metrics(self):
+        authored = collect_authored_encounters()[0]
+        scenario = next(entry for entry in PARTY_SCENARIOS if entry["key"] == "solo_warrior")
+
+        run = simulate_encounter(authored, scenario, base_seed=11, max_rounds=60)
+
+        self.assertIn("party_remaining_stamina_ratio", run)
+        self.assertIn("lowest_primary_resource_ratio", run)
+        self.assertIn("ability_action_ratio", run)
+        self.assertGreaterEqual(run["party_stamina_spent"], run["resource_spent_stamina"])
+        self.assertGreater(run["ability_actions"], 0)
+        self.assertGreater(run["resource_spent_stamina"], 0)
+        self.assertGreaterEqual(run["ability_actions"] + run["basic_attacks"], 1)
+        self.assertGreaterEqual(run["lowest_primary_resource_ratio"], 0)
+        self.assertLessEqual(run["lowest_primary_resource_ratio"], 1)
+
+    def test_summary_and_markdown_include_resource_pressure(self):
+        runs = build_progression_runs(base_seed=3, max_rounds=20, limit=1)
+
+        summary = build_summary(runs)
+        scenario_data = next(iter(summary["scenario_summary"].values()))
+        markdown = render_markdown(summary)
+
+        self.assertIn("avg_lowest_primary_resource_ratio", scenario_data)
+        self.assertIn("avg_ability_action_ratio", scenario_data)
+        self.assertIn("resource floor", markdown)
+        self.assertIn("ability ratio", markdown)
+
+    def test_resource_economy_report_surfaces_class_spend_and_low_relevance_runs(self):
+        runs = build_progression_runs(base_seed=3, max_rounds=40, limit=1)
+
+        report = build_resource_economy_report(runs)
+        markdown = render_resource_economy_markdown(report)
+
+        self.assertEqual(len(PARTY_SCENARIOS), report["totals"]["runs"])
+        self.assertTrue(report["scenario_rows"])
+        self.assertTrue(report["class_rows"])
+        self.assertIn("restore_item_uses", report["totals"])
+        self.assertIn("Resource Economy Audit", markdown)
+        self.assertIn("Class Spend", markdown)
+        self.assertTrue(any(row["class"] == "warrior" for row in report["class_rows"]))
+        self.assertTrue(any(row["uses"] > 0 for row in report["top_abilities"]))
 
     def test_simulation_counts_telegraph_outcomes(self):
         authored = next(
@@ -223,6 +342,39 @@ class CombatBalanceSimulationTests(unittest.TestCase):
         self.assertIsNone(tick["interrupt_ready_actor"])
         self.assertEqual("Warrior 1", tick["interrupt_pending_actor"])
 
+    def test_trace_analysis_treats_final_charge_interrupt_as_ready(self):
+        trace = [
+            {
+                "round": 12,
+                "telegraph": {
+                    "enemy_id": "e1",
+                    "enemy_key": "Boss",
+                    "phase": "winding",
+                    "interruptible": True,
+                    "ticks_remaining": 1,
+                },
+                "players": [
+                    {
+                        "key": "Warrior 1",
+                        "class": "warrior",
+                        "phase": "charging",
+                        "ticks_remaining": 0,
+                        "pending_action": {"kind": "ability", "ability": "shieldbash", "target": "e1"},
+                    }
+                ],
+                "messages_tail": [],
+            }
+        ]
+
+        analysis = analyze_trace(trace)
+        opportunity = analyze_interrupt_opportunities(trace)
+
+        tick = analysis["telegraph_windows"][0]["ticks"][0]
+        self.assertEqual("Warrior 1", tick["interrupt_ready_actor"])
+        self.assertIsNone(tick["interrupt_pending_actor"])
+        self.assertEqual(1, opportunity["interrupt_ready_ticks"])
+        self.assertEqual(1, opportunity["interrupt_charging_zero_ticks"])
+
     def test_interrupt_opportunity_summary_counts_ready_and_recovering_ticks(self):
         trace = [
             {
@@ -260,10 +412,10 @@ class CombatBalanceSimulationTests(unittest.TestCase):
 
         self.assertEqual(1, summary["telegraph_windows"])
         self.assertEqual(2, summary["telegraph_ticks"])
-        self.assertEqual(1, summary["interrupt_ready_ticks"])
+        self.assertEqual(2, summary["interrupt_ready_ticks"])
         self.assertEqual(1, summary["interrupt_charging_zero_ticks"])
         self.assertEqual(1, summary["interrupt_recovering_ticks"])
-        self.assertEqual(1, summary["interrupt_late_pending_ticks"])
+        self.assertEqual(0, summary["interrupt_late_pending_ticks"])
 
     def test_interrupt_opportunity_report_aggregates_traces(self):
         report = build_interrupt_opportunity_report(
@@ -322,7 +474,7 @@ class CombatBalanceSimulationTests(unittest.TestCase):
             "party_classes": ["warrior"],
             "companion_enabled": False,
             "seed": 1,
-            "outcome": "victory",
+            "outcome": "defeat",
             "rounds": 42,
             "player_remaining_hp": 10,
             "player_remaining_hp_ratio": 0.1,
@@ -354,6 +506,7 @@ class CombatBalanceSimulationTests(unittest.TestCase):
             "scenario_label": "Solo Ranger + Companion",
             "party_classes": ["ranger"],
             "companion_enabled": True,
+            "outcome": "victory",
             "damage_done_by_companions": 25,
             "near_wipe": False,
             "player_remaining_hp_ratio": 0.75,
@@ -380,12 +533,44 @@ class CombatBalanceSimulationTests(unittest.TestCase):
 
         self.assertEqual(3, summary["totals"]["runs"])
         self.assertEqual(1, summary["totals"]["near_wipes"])
+        self.assertEqual(2, summary["totals"]["primary_runs"])
+        self.assertEqual(1, summary["totals"]["stress_runs"])
+        self.assertEqual("stress_test", summary["scenario_summary"]["solo_ranger_no_companion"]["balance_bucket"])
+        self.assertEqual("primary", summary["scenario_summary"]["solo_ranger_with_companion"]["balance_bucket"])
         self.assertIn("encounter_summary", summary)
+        self.assertIn("primary_failures", summary)
         self.assertEqual(1, len(summary["telegraph_risks"]))
+        self.assertEqual(["test_boss"], [run["encounter_key"] for run in summary["primary_failures"]])
         self.assertEqual("test_boss", summary["encounter_risks"][0]["encounter_key"])
         self.assertIn("## Encounter Risk List", markdown)
+        self.assertIn("## Primary Failure Set", markdown)
         self.assertIn("## Telegraph Risks", markdown)
+        self.assertIn("Stress-test runs", markdown)
         self.assertIn("telegraph answer rate", markdown)
+
+    def test_ability_audit_report_surfaces_cost_and_timing(self):
+        report = build_ability_audit_report()
+        markdown = render_ability_audit_markdown(report)
+
+        strike = next(row for row in report["rows"] if row["ability_key"] == "strike")
+        self.assertEqual("warrior", strike["class"])
+        self.assertEqual("stamina", strike["resource"])
+        self.assertGreater(strike["cost"], 0)
+        self.assertIn("gauge_cost", strike)
+        self.assertIn("## Warrior", markdown)
+        self.assertIn("`strike`", markdown)
+
+    def test_item_rarity_report_matches_act_one_policy(self):
+        report = build_item_rarity_report()
+        markdown = render_item_rarity_markdown(report)
+        counts = report["counts"]
+        rare_plus_ids = {entry["template_id"] for entry in report["rare_plus"]}
+
+        self.assertGreater(counts.get("common", 0), counts.get("uncommon", 0))
+        self.assertEqual(0, counts.get("epic", 0))
+        self.assertEqual(0, counts.get("legendary", 0))
+        self.assertEqual({"bellguard_bastion", "ridgebreaker_blade", "sunforged_blade"}, rare_plus_ids)
+        self.assertIn("Item Rarity Audit", markdown)
 
     def test_warrior_prefers_interrupt_on_telegraphed_enemy(self):
         warrior = SimulatedCharacter(1, "warrior")

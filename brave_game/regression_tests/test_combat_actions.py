@@ -187,7 +187,7 @@ class CombatActionPayloadTests(unittest.TestCase):
         self.assertEqual("enemy", smite.get("target_mode"))
         self.assertEqual("use Smite = e1", smite.get("command"))
         self.assertIn("timing", heal)
-        self.assertEqual(432, heal.get("timing", {}).get("gauge_cost"))
+        self.assertEqual(544, heal.get("timing", {}).get("gauge_cost"))
         self.assertFalse(heal.get("timing", {}).get("target_locked"))
         self.assertEqual(1, smite.get("timing", {}).get("windup_ticks"))
         self.assertIsNone(heal.get("reaction_role"))
@@ -319,7 +319,7 @@ class CombatActionPayloadTests(unittest.TestCase):
         items = _view_action(view, "Items")
         heal_action = _action(payload.get("abilities", []), "heal")
         bandage_action = _action(payload.get("items", []), "field_bandage")
-        heal_item = _picker_option(abilities.get("picker", {}), "Heal", meta="Heal · 10 MP")
+        heal_item = _picker_option(abilities.get("picker", {}), "Heal", meta="Heal · 17 MP")
         bandage_item = _picker_option(items.get("picker", {}), "Field Bandage", meta="Field Bandage · HP+18")
 
         self.assertEqual(heal_action.get("text"), heal_item.get("meta"))
@@ -334,8 +334,8 @@ class CombatActionPayloadTests(unittest.TestCase):
             "Dad",
             room,
             "rogue",
-            {"hp": 16, "mana": 0, "stamina": 12},
-            {"max_hp": 20, "max_mana": 0, "max_stamina": 12},
+            {"hp": 16, "mana": 0, "stamina": 16},
+            {"max_hp": 20, "max_mana": 0, "max_stamina": 16},
             ["Cheap Shot"],
         )
         encounter = DummyEncounter(
