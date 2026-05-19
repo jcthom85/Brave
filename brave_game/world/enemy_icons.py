@@ -41,7 +41,7 @@ EXPLICIT_ENEMY_ICONS = {
     "road_wolf": "wolf-head",
     "rot_crow": "bird-claw",
     "ruk_fence_cutter": "crossed-axes",
-    "salvage_drone": "robot-arm",
+    "lens_warden": "robot-arm",
     "scrap_hound": "robot-arm",
     "scrap_mite": "beetle",
     "silt_stalker": "bird-claw",

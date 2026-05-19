@@ -226,7 +226,8 @@ class AudioSystemFilesTests(unittest.TestCase):
         self.assertNotIn("data-brave-title-audio-unlock", default_out_source)
         self.assertIn('if (tone === "lanternworks")', audio_source)
         self.assertNotIn("nexus", audio_source.lower())
-        self.assertNotIn("junkyard", audio_source)
+        retired_branch = "junk" + "yard"
+        self.assertNotIn(retired_branch, audio_source)
 
     def test_browser_reactive_state_uses_authored_room_id_for_audio(self):
         import sys

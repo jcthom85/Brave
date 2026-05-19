@@ -32,7 +32,7 @@ class EnemyIconTests(unittest.TestCase):
             "goblin_hexer": "crystal-wand",
             "captain_varn_blackreed": "knight-helmet",
             "hollow_lantern": "lantern-flame",
-            "salvage_drone": "robot-arm",
+            "lens_warden": "robot-arm",
             "skeletal_soldier": "crossed-bones",
             "thorn_rat": "tooth",
         }

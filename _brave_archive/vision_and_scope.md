@@ -2,7 +2,7 @@
 
 ## Pitch
 
-`Brave` is a family-focused fantasy MUD for 1 to 4 local players, built around a warm town, dangerous roads, tactical party combat, cozy side activities, and portal worlds that let the game grow beyond one genre.
+`Brave` is a family-focused fantasy MUD for 1 to 4 local players, built around a warm town, dangerous roads, tactical party combat, cozy side activities, and a larger world that can grow after the local story is strong.
 
 ## Player Promise
 
@@ -12,7 +12,7 @@ Players should quickly feel that they are:
 - building a distinct hero with readable class identity
 - playing together without needing MMO-scale population
 - alternating between danger, recovery, town flavor, and discovery
-- stepping through portals without losing their character's core identity
+- finding that Brambleford's local crisis opens onto a larger world without losing their character's core identity
 
 ## Current Product Shape
 
@@ -25,7 +25,6 @@ The current build supports:
 - Brambleford as the central family hub
 - a first-hour road chapter ending with Ruk the Fence-Cutter
 - a full fantasy ladder through Drowned Weir and The Hollow Lantern
-- Junk-Yard Planet as the first portal branch
 - ATB combat, quests, loot, gear, forging, mastery, chapel blessings, tinkering, fishing, cooking, shopkeeping, trophies, and local co-op party support
 - browser panels, mobile-oriented UI work, and audio hooks
 
@@ -47,9 +46,9 @@ Brambleford is the emotional home. Quests, bosses, trophies, NPC reactions, and 
 
 Combat can have timing, class roles, reactions, and boss pressure, but the player must always understand what changed and what to do next.
 
-### Portals Without Losing The Core
+### Growth Without Losing The Core
 
-Portal worlds can change genre, tone, enemies, and ability skins, but the player should still recognize their hero, party, progression, and core verbs.
+Later growth can change region, tone, enemies, and ability skins, but the player should still recognize their hero, party, progression, and core verbs. Current canon does not route progression through a portal branch.
 
 ### Story Through Play
 

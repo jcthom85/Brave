@@ -70,7 +70,7 @@ Bad triggers:
 
 ### Rule 3: The World Owns Color
 
-`Brambleford`, `Old Barrow`, `Junk-Yard Planet`, and `Drowned Weir` should each feel different even if the player keeps the same chosen theme.
+`Brambleford`, `Old Barrow`, `Blackfen`, and `Drowned Weir` should each feel different even if the player keeps the same chosen theme.
 
 Themes change the lens.
 The world changes the mood.
@@ -255,11 +255,7 @@ Each profile should define:
 - astral blue
 - brass energy
 - faint resonance shimmer
-
-#### `Junk-Yard Planet`
-- sodium orange
-- industrial cyan
-- scrapyard grit and glitch
+- inactive sealed infrastructure only
 
 ## State Tone System
 
@@ -318,7 +314,7 @@ Event FX should be transient browser events, not permanent CSS states.
 - `chapter complete`: strongest non-combat reward treatment
 
 #### World Reactions
-- `portal jump`: distortion / wash / settle
+- inactive portal scaffolding: distortion / wash / settle
 - `boss phase shift`: surge and recover
 - `new region entered`: tone settle-in
 
@@ -423,7 +419,7 @@ Add a transient event/effect channel for:
 - heals
 - status procs
 - phase changes
-- portal jumps
+- inactive portal transitions
 - victory/level/chapter rewards
 
 #### 5. Accessibility Controls

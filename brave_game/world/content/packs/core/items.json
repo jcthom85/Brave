@@ -933,7 +933,7 @@
       "slot": "off_hand",
       "summary": "A palm-sized focus crystal wrapped in brass wire from old Brambleford lanterns."
     },
-    "lantern_pixel_pin": {
+    "maze_lantern_pin": {
       "kind": "loot",
       "name": "Lantern Pixel Pin",
       "stackable": true,

@@ -1,30 +1,35 @@
 # Multiverse And Portals
 
-The Nexus is Brave's expansion framework. It lets the game change genre while keeping the player's hero, party, progression, and core command vocabulary intact.
+Historical note: this document records retired portal design scaffolding. It is not current progression, routing, Act 1-4 planning, or world-atlas pacing.
 
-## Current Live Portal
+The Nexus Gate may remain only as sealed, blocked, inactive Brambleford infrastructure or code scaffolding. It is not a current quest destination, travel route, or portal hub.
 
-The live portal branch is **Junk-Yard Planet**.
+## Removed Branch
 
-It begins from Brambleford's observatory and Nexus Gate, then moves through:
+The former off-world branch described by older drafts has been removed from canon and live content. Do not preserve it as optional, future, expansion-facing, archived-live, dormant, prototype, alternate, or portal-branch content.
 
-- `junkyard_planet_landing_pad`
-- `junkyard_planet_scrapway`
-- `junkyard_planet_relay_trench`
-- `junkyard_planet_crane_grave`
-- `junkyard_planet_anchor_pit`
+The former branch's room list, quest chain, and boss framing are intentionally not retained here.
 
-Current quest chain:
+## Current Canon Replacement
 
-1. `bridgework_for_joss`
-2. `signal_in_the_scrap`
-3. `foreman_coilback`
+Current Act 1 progression stays in local frontier fantasy:
 
-Current boss: Foreman Coilback.
+- Wayfarer's Yard
+- Brambleford
+- Goblin Road
+- Whispering Woods
+- Old Barrow Field
+- Ruined Watchtower
+- Goblin Warrens
+- Blackfen
+- Drowned Weir
+- Hollow Lantern
+
+`bridgework_for_joss`, `signal_in_the_scrap`, and `foreman_coilback` are Drowned Weir / Lower Lanternworks content. Foreman Coilback is not an off-world boss.
 
 ## Design Rule
 
-Portals should change presentation and encounter flavor before they change the player's mental model.
+Inactive portal scaffolding, if reactivated someday by a separate canon decision, should change presentation and encounter flavor before it changes the player's mental model.
 
 The player should still understand:
 
@@ -49,19 +54,21 @@ Example mapping:
 | Spirit | will and magic | signal attunement |
 | Vitality | toughness | field durability |
 
-Use resonance lightly. A portal should feel different, but the player should not feel like they created a second character.
+Use resonance lightly in inactive scaffolding. The current mainline does not use a portal route.
 
-## Portal Writing Rules
+## Inactive Portal Writing Rules
 
-- Anchor every portal branch through Joss, the Observatory, or the Nexus Gate.
-- Give each portal one strong visual and one strong mechanical identity.
+- Do not add portal branches to current progression.
+- Do not route Act 1, Drowned Weir, or Lower Lanternworks through the Nexus.
+- Keep the Nexus sealed, blocked, and inactive unless a future source-of-truth canon note explicitly changes that.
+- Give any non-canon test portal one strong visual and one strong mechanical identity.
 - Keep the first room safe enough to orient.
 - Always preserve a clear route home.
-- Let portal trophies live in the Trophy Hall so the strange world still feeds the family story.
+- Keep test or scaffolding trophies out of current story routing.
 
-## Future Portal Criteria
+## Inactive Future Criteria
 
-Do not add another portal branch until it can answer all of these:
+Do not add a portal branch to current canon. Historical criteria were:
 
 - What fantasy-system idea does it reskin?
 - What new encounter behavior does it teach?

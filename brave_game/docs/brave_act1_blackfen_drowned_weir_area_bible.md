@@ -6,6 +6,8 @@ Blackfen and Drowned Weir are the Act 1 turn from wilderness pressure into civic
 
 Use this with `brave_act1_agent_bible.md`, `brave_act1_content_roadmap.md`, `brave_global_story_bible.md`, and `creator_agent_contract.md`.
 
+Canon guardrail: no removed off-world branch, no portal route, no Nexus progression, and no off-world explanation for Drowned Weir. `bridgework_for_joss`, `signal_in_the_scrap`, and `foreman_coilback` are Drowned Weir / Lower Lanternworks content.
+
 ## Current Live Anchors
 
 Blackfen rooms:
@@ -56,6 +58,7 @@ The player should learn:
 - Miretooth is the apex predator warning sign, not the final answer.
 - Drowned Weir is civic infrastructure first and mythic evidence second.
 - the Hollow Lantern ends Brambleford's first hard chapter without revealing the full Broken Vow.
+- Coilback evidence should read as maintenance, work-order, lock, chain, and south-line proof from Drowned Weir / Lower Lanternworks.
 
 ## Content Rules
 
@@ -79,6 +82,7 @@ Avoid:
 - revealing the full Iron Hegemony or Primal Sovereign truth in Act 1.
 - making the Hollow Lantern a talking villain.
 - adding a bigger capstone beyond the Hollow Lantern.
+- routing any Drowned Weir answer through the Nexus or an off-world branch.
 
 ## Creator API Batch Briefs
 
@@ -115,4 +119,3 @@ Acceptance:
 - Drowned Weir reads as broken civic infrastructure.
 - The Hollow Lantern remains the Act 1 capstone.
 - The full cosmology remains withheld for later acts.
-

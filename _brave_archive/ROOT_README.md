@@ -13,7 +13,7 @@ Project docs live in [`../docs`](../docs). The best entry points are:
 
 - Evennia project scaffold is in place.
 - Core content is data-driven through JSON packs in `world/content/packs/core/`.
-- Current live build includes character creation, seven classes, Wayfarer's Yard onboarding, Brambleford, Goblin Road through Drowned Weir, Junk-Yard Planet, ATB combat, creator tooling, party play, town activities, audio hooks, and browser UI panels.
+- Current live build includes character creation, seven classes, Wayfarer's Yard onboarding, Brambleford, Goblin Road through Drowned Weir, ATB combat, creator tooling, party play, town activities, audio hooks, and browser UI panels. Nexus infrastructure is sealed, blocked, and inactive; it is not current progression.
 
 ## Local Run
 

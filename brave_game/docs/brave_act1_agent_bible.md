@@ -6,6 +6,8 @@ This document is the creative source of truth for generating Brave Act 1 content
 
 Use this alongside `docs/creator_agent_contract.md`. The contract explains how to mutate content safely. This bible explains what content should feel like, where it should fit, and how it should advance Act 1.
 
+Current canon override: see `brave_current_canon.md`. If this bible or an archive note conflicts with that file, `brave_current_canon.md` wins.
+
 ## Act 1 Vision
 
 Act 1 is the story of Brambleford discovering that its morning alarm is not a single problem. It is a pressure pattern around the town: roads cut, lantern lines failing, old graves waking, goblin crews organizing, bandits claiming the ridge, Blackfen pushing north, and a drowned civic system still enforcing a duty no living person understands.
@@ -30,6 +32,15 @@ The tone is grounded frontier fantasy with civic strangeness. Brave should feel 
 - Make each region teach the player something about the crisis. New content should clarify a threat vector, deepen a faction, introduce a tool, or pay off a prior clue.
 - Prefer recoverable proof over exposition. Rewards, trophies, readable objects, and enemy drops should carry evidence back to town.
 - Keep generated content playable and connected. Every new item needs placement or use; every enemy needs an encounter or loot role; every NPC needs a room and purpose; every quest needs clear prerequisites and previewable objectives.
+
+## Canon Guardrails
+
+- Do not add removed off-world branch content, references, rooms, enemies, items, readables, portal records, or roadmap hooks.
+- Do not create a portal route or Nexus progression path in Act 1.
+- The Nexus may appear only as sealed, blocked, inactive Brambleford infrastructure.
+- Do not use off-world travel to explain Drowned Weir or Lower Lanternworks content.
+- `bridgework_for_joss`, `signal_in_the_scrap`, and `foreman_coilback` belong to Drowned Weir / Lower Lanternworks.
+- Foreman Coilback is Drowned Weir maintenance and chain-keeper evidence, not an off-world boss.
 
 ## Writing Standard
 
@@ -301,7 +312,7 @@ Allowed new content:
 Avoid:
 
 - Revealing the entire cosmology behind the lanternworks in Act 1.
-- Making the Hollow Lantern a portal to a new full campaign unless it is a restrained hint for future acts.
+- Making the Hollow Lantern a portal, Nexus route, or handoff to a new campaign.
 
 ## NPC and Faction Guide
 

@@ -29,12 +29,17 @@
     "mayors_ledger": "The open ledger carries three fresh entries in the mayor's square hand: LANTERN OIL SHORT BY TWO CRATES. WEST WATCH REPORTS LIGHT LOSS AT DUSK. CHAPEL REQUESTS ADDITIONAL VOLUNTEERS WITH STEADY NERVES.",
     "midden_bone_totem": "The totem is wired together from feast scraps, old threats, and small bones polished by handling. Three scratched signs circle the lid-face: KING, POT, ROAD. Repetition does not make them wiser.",
     "miretooth_shed_skull": "The skull is too heavy through the jaw and too narrow through the eyes to belong to anything Brambleford would name kindly. Deep score marks along the bone suggest the beast that shed it grew into something even worse.",
+    "moonleaf_warning_ribbon": "Maybelle's ribbon marks the moonleaf cleanly, but the plants lean hard away from the old barrow route. Someone has added one nervous chalk word on the back of the tag: LISTEN.",
+    "numbered_signal_arrows": "The signal arrows are marked with route numbers and short notches for distance. Blackreed's archers were not only hunting travelers; they were measuring which roads could still answer each other.",
+    "old_fence_cut_tally": "The tally counts twelve missing rails, five clean axe cuts, and two wagon plank marks. Mira's last line is short: RUK DID NOT CUT RANDOMLY.",
     "outfitters_chalkboard": "Leda's chalk hand is spare and direct: WE BUY PELTS, HERBS, SALVAGE, ROAD SCRAP, AND OTHER SENSIBLE FINDS. FAIR PRICES FOR FAIR HANDS. ASK ABOUT A SHIFT IF YOU WANT TO EARN THE BETTER COLUMN.",
     "potking_lid_throne": "The throne has accumulated more than it was built. Pot lids, road shields, and dented signboards have been hammered into a seat that mistakes noise for wealth and grease for polish.",
     "ruks_chopping_block": "Fresh cuts score the block in harsh, uneven lines. One gouge has been hacked deep enough to lodge a shred of wagon paint and a few pale flecks of lantern glass. A goblin hand has scratched nearby: RUK KEEPS THIS ROAD.",
     "signal_brazier": "Fresh soot rims the iron pan, and the stacked wood beside it has been sorted into quick-burn bundles. The tower crew means to signal far and fast if the ridge turns ugly.",
     "sinkmouth_scratch_map": "The slate shows a goblin scratch map: CAMP crossed out, then arrows leading east into a crown mark over a grease-slick room. One soot-smeared note is clearer than the rest: POT-KING EATS FIRST.",
-    "star_lens": "The etched brass rings mark stars, routes, and a handful of names that are definitely not villages anywhere near Brambleford. One line is picked out brighter than the rest: JUNK-YARD PLANET.",
+    "sludge_run_flour_sack": "The sack still bears Uncle Pib's flour mark under the sludge. A goblin has scratched a pot symbol beside it, as if stolen food becomes official once it is ugly enough.",
+    "sluice_work_order_plate": "The stamped plate reads: SOUTH LINE / SLUICE WALK / ORDER COILBACK-7. The last digit has been cut deeper than the others, renewed again and again after rust tried to close it.",
+    "star_lens": "The etched brass rings mark stars, road lines, and old service routes around Brambleford. The Nexus marks are dark, locked behind a brass seal that has not answered Joss in years.",
     "sunken_lock_chain": "The chain hums through the black water in time with the wrong light overhead. Someone once stamped the nearest link with a warning that still survives the rust: DO NOT DRAW FULL LINE WITHOUT LAMP-HOUSE ORDER.",
     "town_notice_board": "Town notices crowd the board in practical layers: road crews needed east of the gate, chapel candles to be saved for dusk, and a fresh line from Mayor Elric asking everyone to report bad lanterns before they become worse roads.",
     "trophy_vitrine": "Glass cases hold the proof of Act 1 wins: Miretooth's Fen Jaw, the Blackreed Battle Standard, the Pot-King's Battered Lid, the Blackwater Beacon Core, and the white-black Hollow Lantern Prism. The newest label is still clean enough to catch the lanternlight: SOUTH LINE DARK, FIRST CHAPTER CLOSED.",
@@ -42,7 +47,9 @@
     "tutorial_supply_board": "Quartermaster notes list loaner gear, bandage counts, and the rule written twice in darker chalk: take what keeps you alive, return what keeps the next person alive too.",
     "watchtower_warning_post": "The old carving reads: BORDER WATCH POST THREE. KEEP FIRE LOW. SIGNAL SOUTH IF THE RIDGE MOVES. Someone newer has cut a reply beneath it: TOO LATE FOR THAT.",
     "weir_keepers_plaque": "The greened plaque reads: KEEP SOUTH LIGHT TRIMMED. HOLD THE LOCK LINE. MAINTAIN NIGHT SIGNAL FOR BRAMBLEFORD APPROACH. The words are ordinary civic orders. The wet brass around them is not.",
-    "woods_wardstone": "The chalk marks are fresh enough to smear under a thumb. Beneath the warning DO NOT FOLLOW THE QUIET, an older cut mark faces west toward the barrow route: a boundary sign, not a prayer. Someone has recently rubbed charcoal over it and stopped before the line could flake away."
+    "woods_wardstone": "The chalk marks are fresh enough to smear under a thumb. Beneath the warning DO NOT FOLLOW THE QUIET, an older cut mark faces west toward the barrow route: a boundary sign, not a prayer. Someone has recently rubbed charcoal over it and stopped before the line could flake away.",
+    "barrow_votive_ring": "Most of the chapel candles died normally. The ones nearest the dais have wax trails climbing the stone against gravity, each thread pointing toward Edric's slab like a finger that lost patience.",
+    "drifted_reed_tags": "Mira's survey knots are clean and identical, but the tags sit at three different heights. The reeds did not grow that way overnight. Something moved the marks without using the mud."
   },
   "talk_rules": {
     "brother_alden": [

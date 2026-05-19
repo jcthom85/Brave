@@ -89,7 +89,7 @@ After Ruk falls, give a clear handoff:
 
 - Mira points toward the woods and deeper tracks.
 - Joss hints that the south light is stranger than road sabotage.
-- The Observatory and Junk-Yard Planet become available as a tempting branch.
+- The Observatory points toward Lower Lanternworks records, while the Nexus remains sealed and inactive.
 - Brambleford acknowledges the win through dialogue or trophy display.
 
 Required feeling: "We finished chapter one, and the map got bigger."

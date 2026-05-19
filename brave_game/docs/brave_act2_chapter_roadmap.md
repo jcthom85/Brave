@@ -24,7 +24,7 @@ Act 2 takes the player from the isolated frontier of Brambleford into the decayi
 **Goal:** Find the missing maintenance records for Brambleford’s South Light.
 **Story:** To prove the lights are being sabotaged, the player must infiltrate the Hegemony’s central library. They discover that all records of the "Primal Sovereigns" have been scrubbed or altered.
 **Key Locations:** The Hall of Records, The Redacted Wing, The Curator’s Secret Study.
-**Mystery:** Who is "Foreman Coilback" actually reporting to? (A name found in Act 1).
+**Mystery:** Why do the Drowned Weir maintenance orders and Lower Lanternworks work records name Foreman Coilback as if the south-line duty was still being enforced? (Evidence found in Act 1).
 
 ## Chapter 4: The Siphon’s Shadow
 **Focus:** Dungeon Crawl and Technical Revelation.

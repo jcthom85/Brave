@@ -16,7 +16,7 @@ Brambleford is the family's home base. It is not just a quest dispenser. It must
 - onboarding and recovery
 - social hanging out
 - low-stakes town activities
-- launch points into danger and the Nexus
+- launch points into danger and sealed Nexus infrastructure
 
 The town should feel compact, readable, and worth returning to between runs.
 
@@ -29,7 +29,7 @@ These rules are now fixed unless the docs are updated first.
 - Every new town room needs a clear gameplay reason, not just flavor.
 - If a feature works as an object in an existing room, prefer that over adding another room.
 - The east side of town is the adventure launch side.
-- The observatory hill is the portal side.
+- The observatory hill is the star-lens and Lower Lanternworks side.
 - The inn remains the social and recovery side.
 - The town green remains the respawn and meetup anchor.
 
@@ -221,10 +221,10 @@ Attached rooms not shown on the town surface map:
 
 - Status: live
 - Coordinates: `(1, 1)`
-- Purpose: portal-center foyer and strange-town-energy room
+- Purpose: observatory foyer, star-lens room, and Lower Lanternworks handoff
 - Connected to: Training Yard west, Trophy Hall north, Nexus Gate east
-- Systems here: Joss Veller, star lens, portal introduction
-- Design note: this is the in-universe portal center and should stay that way
+- Systems here: Joss Veller, star lens, Lower Lanternworks introduction
+- Design note: the Nexus connection is sealed and inactive in current canon
 
 #### Trophy Hall
 
@@ -241,7 +241,7 @@ Attached rooms not shown on the town surface map:
 - Coordinates: separate `nexus_network` region, attached east of the observatory
 - Purpose: multiverse gateway room
 - Connected to: Great Observatory west, guest worlds east
-- Systems here: gate plaque, portal list, resonance transition
+- Systems here: sealed gate plaque only; no current portal list or resonance transition
 - Design note: physically town-accessible, but not counted as part of the surface Brambleford map
 
 ### Planned Next
@@ -284,7 +284,7 @@ Not every feature needs a new room. These should remain objects or sub-features 
 - Cooking stays in the inn hearth, not a separate kitchen room.
 - Fishing stays at the wharf, not a separate boathouse room.
 - Town notices stay on the Town Green board, not in a separate council chamber.
-- Portal administration stays in the observatory and Nexus, not in a second portal office elsewhere in town.
+- Sealed Nexus administration stays in the observatory complex, not in a second office elsewhere in town.
 
 ## Current NPC Ownership
 
@@ -322,7 +322,7 @@ The intended phase-1 flow through Brambleford is:
 4. Inn and Cellar: finish the first low-risk combat and recovery loop
 5. East Gate: launch into Goblin Road and Whispering Woods
 6. Mayor's Hall and Chapel: escalate into town-scale and undead threats
-7. Observatory and Nexus: open the first guest world branch
+7. Observatory and sealed Nexus: point toward Lower Lanternworks records, with no guest-world branch
 8. Trophy Hall: celebrate shared progress and make the town feel persistent
 
 ## Town Design Decisions Already Settled
@@ -330,7 +330,7 @@ The intended phase-1 flow through Brambleford is:
 These are not open questions anymore.
 
 - Brambleford is compact, not sprawling.
-- The portal center is the observatory and Nexus complex.
+- The sealed Nexus infrastructure is part of the observatory complex and has no current progression route.
 - The town uses mostly cardinal movement and map coordinates.
 - The inn is deliberately overloaded with social functions because that makes family play easier.
 - The East Gate is the main outdoor branching point for both Goblin Road and Whispering Woods.

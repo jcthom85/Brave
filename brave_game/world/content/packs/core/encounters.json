@@ -1092,7 +1092,7 @@
       ],
       "xp": 55
     },
-    "salvage_drone": {
+    "lens_warden": {
       "accuracy": 75,
       "armor": 3,
       "attack_kind": "spell",
@@ -1809,7 +1809,7 @@
       {
         "enemies": [
           "scrap_hound",
-          "salvage_drone",
+          "lens_warden",
           "relay_tick",
           "scrap_mite"
         ],

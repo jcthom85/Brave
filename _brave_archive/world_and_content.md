@@ -4,14 +4,13 @@ This document reflects the current core content pack in `brave_game/world/conten
 
 ## Live Shape
 
-`Brave` is currently a cozy fantasy MUD with a complete first fantasy ladder, one portal branch, and a town hub built for local family co-op.
+`Brave` is currently a cozy fantasy MUD with a complete first fantasy ladder and a town hub built for local family co-op.
 
 The present live structure is:
 
 - Onboarding: Wayfarer's Yard.
 - Hub: Brambleford.
 - First road chapter: Goblin Road through Ruk the Fence-Cutter.
-- Optional early branch after Ruk: Junk-Yard Planet.
 - Fantasy continuation: Whispering Woods, Old Barrow Field, Ruined Watchtower, Goblin Warrens, Blackfen Approach.
 - Fantasy capstone: Drowned Weir and The Hollow Lantern.
 
@@ -33,9 +32,9 @@ Current town rooms:
 - `brambleford_hobbyists_wharf`: fishing.
 - `brambleford_ironroot_forge`: forging and Torren Ironroot.
 - `brambleford_menders_shed`: tinkering and Mender Veska Flint.
-- `brambleford_great_observatory`: Joss Veller and portal framing.
+- `brambleford_great_observatory`: Joss Veller, star-lens records, and Lower Lanternworks access.
 - `brambleford_trophy_hall`: family trophy display.
-- `brambleford_nexus_gate`: portal departure chamber.
+- `brambleford_nexus_gate`: sealed, blocked, inactive infrastructure; no current progression route.
 
 ## Tutorial Area
 
@@ -62,21 +61,21 @@ The current starting quest chain is:
 6. `what_whispers_in_the_wood`
 7. `herbs_for_sister_maybelle`
 8. `greymaws_trail`
-9. `bridgework_for_joss`
-10. `signal_in_the_scrap`
-11. `foreman_coilback`
-12. `lanterns_at_dusk`
-13. `do_not_disturb_the_dead`
-14. `the_knight_without_rest`
-15. `smoke_on_the_ridge`
-16. `loose_arrows`
-17. `captain_varn_blackreed`
-18. `below_the_fencebreakers`
-19. `gutters_and_hexes`
-20. `the_pot_kings_feast`
-21. `bogwater_rumors`
-22. `lights_in_the_reeds`
-23. `miretooths_claim`
+9. `lanterns_at_dusk`
+10. `do_not_disturb_the_dead`
+11. `the_knight_without_rest`
+12. `smoke_on_the_ridge`
+13. `loose_arrows`
+14. `captain_varn_blackreed`
+15. `below_the_fencebreakers`
+16. `gutters_and_hexes`
+17. `the_pot_kings_feast`
+18. `bogwater_rumors`
+19. `lights_in_the_reeds`
+20. `miretooths_claim`
+21. `bridgework_for_joss`
+22. `signal_in_the_scrap`
+23. `foreman_coilback`
 24. `the_south_light`
 25. `locks_under_blackwater`
 26. `the_hollow_lantern`
@@ -102,14 +101,6 @@ Rooms: Whispering Woods Trail, Old Stone Path, Briar Glade, Greymaw's Hollow.
 Purpose: moves the game from practical road danger into unease, roots, old warnings, and creature-haunted wilderness.
 
 Boss: Old Greymaw.
-
-### Junk-Yard Planet
-
-Rooms: Junk-Yard Landing, Scrapway Verge, Relay Trench, Crane Grave, Anchor Pit.
-
-Purpose: first portal branch and genre shift. It proves that Brave can keep the same character core while changing world tone and enemy texture.
-
-Boss: Foreman Coilback.
 
 ### Old Barrow Field
 
@@ -147,9 +138,9 @@ Elite: Miretooth.
 
 Rooms: Drowned Causeway, Sluice Walk, Sunken Lock, Lantern Weir, Blackwater Lamp House.
 
-Purpose: phase-1 fantasy capstone. The wrong light becomes physical, answerable, and dangerous.
+Purpose: Act 1 fantasy capstone and Lower Lanternworks payoff. `bridgework_for_joss`, `signal_in_the_scrap`, and `foreman_coilback` are local Drowned Weir maintenance and south-line evidence before the wrong light becomes physical, answerable, and dangerous.
 
-Boss: The Hollow Lantern.
+Bosses: Foreman Coilback as the Drowned Weir chain-keeper, then The Hollow Lantern as the Act 1 capstone.
 
 ## Story Arc
 

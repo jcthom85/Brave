@@ -233,7 +233,7 @@
       "arcade_price": 1,
       "arcade_rewards": {
         "maze_runner": {
-          "item": "lantern_pixel_pin",
+          "item": "maze_lantern_pin",
           "threshold": 2000
         }
       },
@@ -688,6 +688,98 @@
       "key": "hunter's warning post",
       "kind": "readable",
       "location": "whispering_woods_old_stone_path"
+    },
+    {
+      "aliases": [
+        "tally",
+        "fence tally",
+        "cut tally",
+        "rail marks",
+        "chalk marks"
+      ],
+      "desc": "Chalk marks count the missing rails along the old fence line, with each clean goblin cut circled in a different hand from the weathered road crew notes.",
+      "id": "old_fence_cut_tally",
+      "key": "old fence cut tally",
+      "kind": "readable",
+      "location": "goblin_road_old_fence_line"
+    },
+    {
+      "aliases": [
+        "ribbon",
+        "herb ribbon",
+        "moonleaf tag",
+        "tag"
+      ],
+      "desc": "A careful cloth ribbon marks a moonleaf patch at the glade edge. The knot is Maybelle's tidy work, but the stems beside it are bent away from the barrow path.",
+      "id": "moonleaf_warning_ribbon",
+      "key": "moonleaf warning ribbon",
+      "kind": "readable",
+      "location": "whispering_woods_briar_glade"
+    },
+    {
+      "aliases": [
+        "votives",
+        "candle stubs",
+        "votive ring",
+        "candles"
+      ],
+      "desc": "A ring of chapel candle stubs circles the barrow stones, each wick pinched out neatly except for the ones nearest the dais, where the wax has run uphill in pale threads.",
+      "id": "barrow_votive_ring",
+      "key": "barrow votive ring",
+      "kind": "readable",
+      "location": "old_barrow_field_barrow_circle"
+    },
+    {
+      "aliases": [
+        "arrows",
+        "signal arrows",
+        "spent arrows",
+        "fletching"
+      ],
+      "desc": "A bundle of spent signal arrows lies under the ledge lip. Their black-dyed fletching is numbered by route, not by target.",
+      "id": "numbered_signal_arrows",
+      "key": "numbered signal arrows",
+      "kind": "readable",
+      "location": "ruined_watchtower_archers_ledge"
+    },
+    {
+      "aliases": [
+        "sack",
+        "flour sack",
+        "marked sack",
+        "store sack"
+      ],
+      "desc": "A flour sack from Brambleford's inn has been dragged through the sludge and retied with greasy cord, its stock mark still visible beneath goblin bite holes.",
+      "id": "sludge_run_flour_sack",
+      "key": "sludge-run flour sack",
+      "kind": "readable",
+      "location": "goblin_warrens_sludge_run"
+    },
+    {
+      "aliases": [
+        "tags",
+        "survey tags",
+        "reed tags",
+        "marker tags"
+      ],
+      "desc": "Three survey tags hang from reed stems at different heights, though the knots are identical and the mud below them shows no footprints coming or going.",
+      "id": "drifted_reed_tags",
+      "key": "drifted reed tags",
+      "kind": "readable",
+      "location": "blackfen_approach_reedflats"
+    },
+    {
+      "aliases": [
+        "work order",
+        "order plate",
+        "maintenance plate",
+        "plate"
+      ],
+      "desc": "A stamped maintenance plate is bolted beside the sluice controls. The old order number has been scratched over and rewritten by a hand that pressed too hard.",
+      "id": "sluice_work_order_plate",
+      "key": "sluice work-order plate",
+      "kind": "readable",
+      "location": "drowned_weir_sluice_walk"
     }
   ],
   "exits": [

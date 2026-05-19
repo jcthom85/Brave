@@ -36,7 +36,7 @@ class _StubCabinet:
         self.db = types.SimpleNamespace(
             brave_entity_id="lantern_rest_arcade_cabinet",
             brave_arcade_scores={},
-            brave_arcade_rewards={"maze_runner": {"threshold": 2000, "item": "lantern_pixel_pin"}},
+            brave_arcade_rewards={"maze_runner": {"threshold": 2000, "item": "maze_lantern_pin"}},
         )
 
 
@@ -89,7 +89,7 @@ class ArcadeSystemTests(unittest.TestCase):
         first = submit_arcade_score(character, cabinet, "maze_runner", 2150)
         second = submit_arcade_score(character, cabinet, "maze_runner", 2300)
 
-        self.assertEqual([("lantern_pixel_pin", 1)], character.received)
+        self.assertEqual([("maze_lantern_pin", 1)], character.received)
         self.assertIsNotNone(first["reward"])
         self.assertIsNone(second["reward"])
         self.assertEqual(2300, second["best_score"])

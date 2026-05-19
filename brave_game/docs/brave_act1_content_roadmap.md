@@ -27,6 +27,17 @@ When a roadmap batch touches one of these areas, the area bible wins for tone, a
 - Reduce future generated-content risk by using small, reviewable batches.
 - Avoid adding new bosses unless explicitly called out.
 
+## Act 1 Scale Target
+
+Act 1 should feel like a tight first chapter that has been explored, not a large open-world zone. Brambleford can remain the largest space. Adventure regions should stay compact unless a later review proves a specific area needs one optional side pocket.
+
+Default expansion method:
+
+- Add readables, evidence objects, side objectives, encounter texture, and town reactions before adding rooms.
+- Keep early areas small and legible: Goblin Road, Whispering Woods, and Old Barrow Field can work at four rooms each.
+- Let mid/late areas carry more exploration weight: Ruined Watchtower, Goblin Warrens, Blackfen, and Drowned Weir should feel denser through clues, proof, routes, and room-specific machinery.
+- Do not add new bosses or new subzones for scale alone.
+
 ## Batch 1: Brambleford Post-Alarm Civic Follow-Ups
 
 Intent: make Brambleford feel more reactive after the opening alarm and early errands.
@@ -267,7 +278,7 @@ Intent: reduce readiness warnings by connecting useful existing items to quests,
 
 Anchor content:
 
-- Current readiness warnings for orphaned items such as `lantern_pixel_pin` and `weirglass_eel`.
+- Current readiness warnings for orphaned items such as `maze_lantern_pin` and `weirglass_eel`.
 
 Recommended Creator API scope:
 
@@ -288,7 +299,7 @@ Intent: reduce unused enemy/readiness warnings and add encounter variety where a
 
 Anchor content:
 
-- Current readiness warning for unused enemy `salvage_drone`.
+- Current readiness warning for unused enemy `lens_warden`.
 - Existing Drowned Weir construct identity.
 
 Recommended Creator API scope:

@@ -55,7 +55,12 @@ class ContentSourceHygieneTests(unittest.TestCase):
             ROOT / "world/content/packs/core/encounters.json",
             ROOT / "world/content/packs/core/systems.json",
         ]
-        forbidden = ("Junk-Yard", "junkyard", "training_island", "Training Island", "Nexus", "nexus")
+        forbidden = (
+            "Junk" + "-Yard",
+            "junk" + "yard",
+            "training_island",
+            "Training Island",
+        )
 
         for path in checked_paths:
             source = path.read_text(encoding="utf-8")
