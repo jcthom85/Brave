@@ -10,3 +10,4 @@ Screenshot*.png
 share_*.png
 __pycache__/
 *.py[cod]
+mcp-server/node_modules/
