@@ -98,6 +98,9 @@ let defaultout_plugin = (function () {
     var currentBossGateData = null;
     var currentPickerAnchorRect = null;
     var currentPickerSourceId = "";
+    var pendingQuestOverlayQueue = [];
+    var currentQuestOverlay = null;
+    var questOverlayQueueTimer = null;
     var currentNoticeTimer = null;
     var currentFishingGame = null;
     var currentFishingAnimationFrame = null;
@@ -3256,6 +3259,7 @@ let defaultout_plugin = (function () {
         if (document.body) {
             document.body.classList.remove("brave-picker-active");
         }
+        scheduleQuestOverlayQueueCheck();
     };
 
     var clearBrowserNotice = function () {
@@ -3400,10 +3404,53 @@ let defaultout_plugin = (function () {
         return true;
     };
 
-    var renderQuestOverlay = function (payload, options) {
+    var isQuestOverlayQueueReady = function () {
+        var body = document.body;
+        return !!(
+            body
+            && currentViewData
+            && isRoomLikeView(currentViewData)
+            && body.getAttribute("data-brave-scene") === "explore"
+            && !isCombatUiActive()
+            && !pendingCombatResultViewData
+            && !pendingCombatResultReturnTransition
+            && !victoryTransitionActive
+            && !body.classList.contains("brave-victory-transition-active")
+            && !body.classList.contains("brave-combat-transition-active")
+            && !body.classList.contains("brave-combat-return-active")
+            && !body.classList.contains("brave-picker-active")
+            && !body.classList.contains("brave-activity-active")
+            && !body.classList.contains("brave-fishing-active")
+            && !body.classList.contains("brave-movie-active")
+            && !body.classList.contains("brave-arcade-overlay-active")
+            && !body.classList.contains("brave-character-load-transition-active")
+            && !body.classList.contains("brave-objectives-welcome-active")
+            && !currentPickerData
+            && !currentBossGateData
+            && !currentQuestOverlay
+            && !document.querySelector(".brave-quest-complete-overlay")
+        );
+    };
+
+    var scheduleQuestOverlayQueueCheck = function (delay) {
+        if (questOverlayQueueTimer || !pendingQuestOverlayQueue.length) {
+            return;
+        }
+        questOverlayQueueTimer = window.setTimeout(function () {
+            questOverlayQueueTimer = null;
+            processQuestOverlayQueue();
+        }, Math.max(0, parseInt(delay || 120, 10) || 0));
+    };
+
+    var enqueueQuestOverlay = function (payload, options) {
         if (!payload || !payload.title) {
             return;
         }
+        pendingQuestOverlayQueue.push({ payload: payload, options: options || {} });
+        processQuestOverlayQueue();
+    };
+
+    var displayQuestOverlay = function (payload, options) {
         options = options || {};
         var eyebrow = options.eyebrow || "Quest Complete";
         var sound = options.sound || "success";
@@ -3438,6 +3485,7 @@ let defaultout_plugin = (function () {
                 : "")
             + "</div>";
 
+        currentQuestOverlay = overlay;
         document.body.appendChild(overlay);
 
         var dismissed = false;
@@ -3455,6 +3503,10 @@ let defaultout_plugin = (function () {
                 if (overlay.parentNode) {
                     overlay.parentNode.removeChild(overlay);
                 }
+                if (currentQuestOverlay === overlay) {
+                    currentQuestOverlay = null;
+                }
+                scheduleQuestOverlayQueueCheck(80);
             }, 600);
         };
         overlay.addEventListener("click", dismissOverlay);
@@ -3471,6 +3523,25 @@ let defaultout_plugin = (function () {
         dismissTimer = window.setTimeout(function () {
             dismissOverlay();
         }, 5000);
+    };
+
+    var processQuestOverlayQueue = function () {
+        if (!pendingQuestOverlayQueue.length) {
+            return;
+        }
+        if (!isQuestOverlayQueueReady()) {
+            scheduleQuestOverlayQueueCheck(250);
+            return;
+        }
+        var next = pendingQuestOverlayQueue.shift();
+        displayQuestOverlay(next.payload, next.options);
+        if (pendingQuestOverlayQueue.length) {
+            scheduleQuestOverlayQueueCheck(250);
+        }
+    };
+
+    var renderQuestOverlay = function (payload, options) {
+        enqueueQuestOverlay(payload, options || {});
     };
 
     var renderQuestCompleteOverlay = function (payload) {
@@ -4327,6 +4398,7 @@ let defaultout_plugin = (function () {
             && pickerData.anchor === "toolbar"
             && !isMobileViewport()
             && currentPickerAnchorRect
+            && !pickerBody.length
         );
         if (!host) {
             return;
@@ -7780,6 +7852,7 @@ let defaultout_plugin = (function () {
                 pendingTutorialFireworks = false;
                 window.setTimeout(triggerTutorialFireworks, 80);
             }
+            scheduleQuestOverlayQueueCheck(80);
         }, 900);
     };
 
@@ -7828,6 +7901,7 @@ let defaultout_plugin = (function () {
             document.body.classList.remove("brave-combat-return-active");
         }
         clearCombatTransitionOverlay();
+        scheduleQuestOverlayQueueCheck(80);
     };
 
     var finishCombatTransitionOverlay = function () {
@@ -7846,6 +7920,7 @@ let defaultout_plugin = (function () {
                 document.body.classList.remove("brave-combat-return-active");
             }
             clearCombatTransitionOverlay();
+            scheduleQuestOverlayQueueCheck(80);
         }, cleanupDelay);
     };
 
@@ -10383,6 +10458,7 @@ let defaultout_plugin = (function () {
                 applyStickyMarkup();
             }
             focusViewAutofocusField();
+            scheduleQuestOverlayQueueCheck(80);
             return;
         }
 
@@ -10470,6 +10546,7 @@ let defaultout_plugin = (function () {
         };
 
         applyStandardMarkup();
+        scheduleQuestOverlayQueueCheck(80);
     };
 
     var clearMobileNavDock = function (options) {

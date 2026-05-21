@@ -8,11 +8,13 @@
     --brave-ui-font-family: "Brave Plex Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: var(--brave-ui-font-family);
     --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
     --brave-body-letter-spacing: var(--brave-letter-spacing);
     --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1;
     --brave-font-size-scale: 1;
     --brave-pack-rail-width: var(--brave-map-size);
@@ -618,11 +620,13 @@ body[data-brave-font="plex"] {
     --brave-ui-font-family: "Brave Plex Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: var(--brave-ui-font-family);
     --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
     --brave-body-letter-spacing: var(--brave-letter-spacing);
     --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
@@ -630,11 +634,13 @@ body[data-brave-font="dejavu"] {
     --brave-ui-font-family: "Brave DejaVu Sans Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: var(--brave-ui-font-family);
     --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
     --brave-body-letter-spacing: var(--brave-letter-spacing);
     --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
@@ -642,11 +648,13 @@ body[data-brave-font="ubuntu"] {
     --brave-ui-font-family: "Brave Ubuntu Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: var(--brave-ui-font-family);
     --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
     --brave-body-letter-spacing: var(--brave-letter-spacing);
     --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
@@ -654,11 +662,13 @@ body[data-brave-font="redhat"] {
     --brave-ui-font-family: "Brave Red Hat Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.01em;
     --brave-body-letter-spacing: 0;
     --brave-dialogue-letter-spacing: 0;
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
@@ -666,11 +676,13 @@ body[data-brave-font="anonymous"] {
     --brave-ui-font-family: "Brave Anonymous Pro", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
     --brave-body-letter-spacing: 0;
     --brave-dialogue-letter-spacing: 0;
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
@@ -678,11 +690,13 @@ body[data-brave-font="fira"] {
     --brave-ui-font-family: "Brave Fira Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: var(--brave-ui-font-family);
     --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
     --brave-body-letter-spacing: var(--brave-letter-spacing);
     --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
@@ -690,11 +704,13 @@ body[data-brave-font="sharetech"] {
     --brave-ui-font-family: "Brave Share Tech Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: var(--brave-ui-font-family);
     --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.015em;
     --brave-body-letter-spacing: var(--brave-letter-spacing);
     --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
@@ -702,11 +718,13 @@ body[data-brave-font="space"] {
     --brave-ui-font-family: "Brave Space Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.012em;
     --brave-body-letter-spacing: 0;
     --brave-dialogue-letter-spacing: 0;
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
@@ -714,11 +732,13 @@ body[data-brave-font="vt323"] {
     --brave-ui-font-family: "Brave VT323", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-dialogue-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.03em;
     --brave-body-letter-spacing: 0;
     --brave-dialogue-letter-spacing: 0;
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1.16;
 }
 
@@ -726,11 +746,13 @@ body[data-brave-font="silkscreen"] {
     --brave-ui-font-family: "Brave Silkscreen", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: var(--brave-ui-font-family);
     --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.02em;
     --brave-body-letter-spacing: var(--brave-letter-spacing);
     --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1;
 }
 
@@ -738,11 +760,13 @@ body[data-brave-font="tiny5"] {
     --brave-ui-font-family: "Brave Tiny5", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: var(--brave-ui-font-family);
     --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.025em;
     --brave-body-letter-spacing: var(--brave-letter-spacing);
     --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 1.22;
 }
 
@@ -750,12 +774,19 @@ body[data-brave-font="pressstart"] {
     --brave-ui-font-family: "Brave Press Start 2P", ui-monospace, "SFMono-Regular", "Menlo", monospace;
     --brave-body-font-family: var(--brave-ui-font-family);
     --brave-dialogue-font-family: var(--brave-body-font-family);
+    --brave-narrative-font-family: "Brave Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
     --brave-mono-font-family: var(--brave-ui-font-family);
     --brave-font-family: var(--brave-ui-font-family);
     --brave-letter-spacing: 0.02em;
     --brave-body-letter-spacing: var(--brave-letter-spacing);
     --brave-dialogue-letter-spacing: var(--brave-body-letter-spacing);
+    --brave-narrative-letter-spacing: 0;
     --brave-text-scale: 0.92;
+}
+
+body[data-brave-theme="journal"] {
+    --brave-narrative-font-family: Georgia, "Times New Roman", serif;
+    --brave-narrative-letter-spacing: 0;
 }
 
 html,
@@ -1553,11 +1584,11 @@ body.brave-objectives-welcome-active #brave-picker-sheet {
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    font-family: var(--brave-body-font-family);
-    letter-spacing: var(--brave-body-letter-spacing);
+    font-family: var(--brave-narrative-font-family);
+    letter-spacing: var(--brave-narrative-letter-spacing);
     color: var(--brave-text-soft);
-    font-size: calc(0.8rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-    line-height: 1.45;
+    font-size: calc(1.14rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.58;
 }
 
 .brave-picker-sheet__bodyline-icon {
@@ -6169,10 +6200,10 @@ body[data-brave-motion="reduced"] .brave-room-dust-mote {
 }
 
 .brave-view__subtitle {
-    font-family: var(--brave-body-font-family);
-    letter-spacing: var(--brave-body-letter-spacing);
+    font-family: var(--brave-narrative-font-family);
+    letter-spacing: var(--brave-narrative-letter-spacing);
     color: var(--brave-text-soft);
-    font-size: calc(0.88rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     line-height: 1.55;
     max-width: 64ch;
 }
@@ -6180,8 +6211,8 @@ body[data-brave-motion="reduced"] .brave-room-dust-mote {
 .brave-view--room .brave-view__subtitle {
     max-width: 100%;
     color: color-mix(in srgb, var(--brave-text-soft) 82%, var(--brave-text-bright));
-    font-size: calc(0.92rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-    line-height: 1.58;
+    font-size: calc(1.16rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.62;
 }
 
 .brave-view--room .brave-view__title {
@@ -15569,9 +15600,11 @@ body[data-brave-motion="reduced"] .brave-combat-ghost {
     }
 
     .brave-mobile-sheet__empty--intro {
+        font-family: var(--brave-narrative-font-family);
+        font-size: calc(0.98rem * var(--brave-text-scale) * var(--brave-font-size-scale));
         text-transform: none;
-        letter-spacing: normal;
-        line-height: 1.45;
+        letter-spacing: var(--brave-narrative-letter-spacing);
+        line-height: 1.55;
     }
 
     .brave-mobile-sheet__action {
