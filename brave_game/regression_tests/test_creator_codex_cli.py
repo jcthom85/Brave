@@ -99,6 +99,15 @@ class CreatorCodexCliTests(unittest.TestCase):
         self.assertTrue(mutate_mock.call_args.kwargs["write"])
         health_mock.assert_called_once_with(stage="draft")
 
+    def test_apply_payload_direct_includes_agent_run_warning(self):
+        fake_mutation = type("Mutation", (), {"domain": "items", "path": "/tmp/items.json", "stage": "draft", "diff": "diff", "entry_id": "entry-2", "history_path": "/tmp/history.json"})()
+        source = json.dumps({"mutations": [{"kind": "item", "target": "codex_cli_item", "payload": {"name": "Codex CLI Item"}}]})
+
+        with patch("commands.brave_creator.mutate_content", return_value=fake_mutation), patch("world.content.health.creator_health_payload", return_value={"ok": True}):
+            payload = creator_codex.apply_payload(source, direct=True)
+
+        self.assertIn("does not create an Agent Run card", payload["warning"])
+
     def test_verify_payload_returns_health_and_previews(self):
         source = json.dumps({"previews": [{"kind": "quest", "args": ["practice_makes_heroes"]}]})
 
@@ -159,6 +168,75 @@ class CreatorCodexCliTests(unittest.TestCase):
             self.assertEqual("reviewed", reviewed["run"]["status"])
             self.assertEqual("Looks ready for Creator review.", reviewed["run"]["review_notes"][0]["note"])
             self.assertEqual(2, mutate_mock.call_count)
+
+    def test_run_batch_payload_completes_visible_agent_run(self):
+        fake_mutation = type("Mutation", (), {"domain": "items", "path": "/tmp/items.json", "stage": "draft", "diff": "diff", "entry_id": "entry-4", "history_path": "/tmp/history.json"})()
+        source = json.dumps({
+            "instructions": "Create a visible CLI item run.",
+            "scope": {"domains": ["items"]},
+            "mutations": [{"kind": "item", "target": "visible_cli_item", "payload": {"name": "Visible CLI Item"}}],
+            "previews": [{"kind": "item", "args": ["visible_cli_item"]}],
+        })
+
+        with tempfile.TemporaryDirectory() as tmp:
+            store = AgentRunStore(root=Path(tmp))
+            with (
+                patch("scripts.creator_codex._run_store", return_value=store),
+                patch("commands.brave_creator.mutate_content", return_value=fake_mutation),
+                patch("world.content.health.creator_health_payload", return_value={"ok": True, "validation_errors": []}),
+                patch("commands.brave_creator.preview_content", return_value={"item": {"name": "Visible CLI Item"}}),
+            ):
+                payload = creator_codex.run_batch_payload(source, review_note="Reviewed via wrapper.")
+                listed = creator_codex.run_list_payload()
+
+        self.assertTrue(payload["ok"])
+        self.assertEqual("reviewed", payload["run"]["status"])
+        self.assertEqual(payload["run_id"], listed["runs"][0]["run_id"])
+        self.assertEqual("entry-4", payload["run"]["apply"]["applied"][0]["entry_id"])
+        self.assertTrue(payload["run"]["verify"]["previews"][0]["found"])
+        self.assertEqual("Reviewed via wrapper.", payload["run"]["review_notes"][0]["note"])
+
+    def test_validate_payload_supports_removal_action(self):
+        source = json.dumps({
+            "mutations": [
+                {
+                    "action": "remove",
+                    "kind": "item",
+                    "target": "codex_cli_delete_item",
+                    "note": "Clean up item"
+                }
+            ]
+        })
+        payload = creator_codex.validate_payload(source)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(["items"], payload["touched_domains"])
+
+    def test_apply_payload_deletion_routes_to_remove_content(self):
+        fake_mutation = type("Mutation", (), {"domain": "items", "path": "/tmp/items.json", "stage": "draft", "diff": "diff", "entry_id": "entry-3", "history_path": "/tmp/history.json"})()
+        source = json.dumps({
+            "mutations": [
+                {
+                    "action": "remove",
+                    "kind": "item",
+                    "target": "codex_cli_delete_item"
+                }
+            ]
+        })
+
+        with patch("commands.brave_creator.remove_content", return_value=fake_mutation) as remove_mock, patch("world.content.health.creator_health_payload") as health_mock:
+            payload = creator_codex.apply_payload(source, dry_run=True)
+
+        self.assertTrue(payload["ok"])
+        self.assertEqual("remove", payload["applied"][0]["action"])
+        self.assertEqual("items", payload["applied"][0]["domain"])
+        self.assertFalse(remove_mock.call_args.kwargs["write"])
+        remove_mock.assert_called_once_with(
+            "item",
+            "codex_cli_delete_item",
+            write=False,
+            stage="draft",
+            author="codex-cli"
+        )
 
 
 if __name__ == "__main__":

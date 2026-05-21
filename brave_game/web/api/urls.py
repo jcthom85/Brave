@@ -26,4 +26,6 @@ urlpatterns = [
     path("content/codex/runs/<str:run_id>/review", views.codex_run_review, name="content-codex-run-review"),
     path("content/codex/runs/<str:run_id>/publish", views.codex_run_publish, name="content-codex-run-publish"),
     path("content/codex/runs/<str:run_id>", views.codex_run_detail, name="content-codex-run-detail"),
+    path("content/codex/inspire", views.codex_inspire, name="content-codex-inspire"),
+    path("content/codex/ghost", views.codex_ghost, name="content-codex-ghost"),
 ]

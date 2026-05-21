@@ -27,6 +27,7 @@ from world.content.codex_contract import (
     validate_codex_mutations,
 )
 from world.content.health import build_draft_registry, creator_drift_payload, creator_health_payload
+from world.content.inspiration import get_inspiration
 from world.content.registry import build_content_registry_from_payloads, reload_content_registry
 from world.content.validation import validate_content_registry
 
@@ -108,6 +109,11 @@ def _reference_entries(domain, registry):
                 "map_region": room.get("map_region") or room.get("zone"),
                 "map_x": room.get("map_x", 0),
                 "map_y": room.get("map_y", 0),
+                "has_desc": bool(room.get("desc")),
+                "has_atmosphere": bool(room.get("atmosphere")),
+                "activities": room.get("activities", []),
+                "encounter_count": len(registry.encounters.get_room_encounters(room.get("id")) or []),
+                "involved_quests": registry.quests.get_quests_for_room(room.get("id")),
             }
             for room in registry.world.rooms
         ]
@@ -766,3 +772,58 @@ def codex_run_publish(request, run_id):
     except ValueError as exc:
         return _json_error(exc)
     return JsonResponse({**publish_result, "run": run})
+
+
+def codex_inspire(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    if not _is_creator_authorized(getattr(request, "user", None)):
+        return _unauthorized_response()
+
+    try:
+        payload = _load_json_body(request)
+        kind = payload.get("kind")
+        context = payload.get("context") or {}
+        registry = get_content_registry()
+        inspiration = get_inspiration(kind, context, registry)
+    except ValueError as exc:
+        return _json_error(exc)
+    return JsonResponse({"ok": True, "inspiration": inspiration})
+
+
+def codex_ghost(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    if not _is_creator_authorized(getattr(request, "user", None)):
+        return _unauthorized_response()
+
+    try:
+        payload = _load_json_body(request)
+        room_id = payload.get("room_id")
+        if not room_id:
+            raise ValueError("Room ID is required for ghosting.")
+
+        # Evennia specific: find the character and execute command
+        user = request.user
+        character = None
+        # This assumes the user is an Evennia Account/User and has a puppet
+        if hasattr(user, "dbobj"): # AccountDB
+            character = user.puppet
+        elif hasattr(user, "get_puppet"):
+            character = user.get_puppet(request.session.session_key)
+
+        if not character:
+            # Fallback: find any character puppeted by this user
+            from evennia.objects.models import ObjectDB
+            puppets = ObjectDB.objects.filter(db_account=user, db_typeclass_path__icontains="character")
+            if puppets:
+                character = puppets[0]
+
+        if character:
+            character.execute_cmd(f"ghost {room_id}")
+            return JsonResponse({"ok": True, "message": f"Ghosted into {room_id} in-game."})
+        else:
+            return _json_error("No active character found to ghost with. Please log into the game first.", status=400)
+
+    except ValueError as exc:
+        return _json_error(exc)

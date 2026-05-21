@@ -90,7 +90,21 @@ The mutation shape is:
 }
 ```
 
-### 2. Create the durable run
+### 2. Run the durable batch
+
+For normal Codex content work, use the batch wrapper. It creates the Agent Run, validates it, dry-runs it, applies it to draft, and verifies previews so Creator Studio gets a visible audit card.
+
+```bash
+python scripts/creator_run_batch.py /path/to/run.json
+```
+
+Use `--review-note "..."` only when the run has actually been reviewed.
+
+### Manual Step-By-Step Alternative
+
+Use the manual commands when debugging a specific stage.
+
+#### 1. Create the durable run
 
 ```bash
 python scripts/creator_codex.py run-create /path/to/run.json
@@ -98,7 +112,7 @@ python scripts/creator_codex.py run-create /path/to/run.json
 
 Save the returned `run_id`.
 
-### 3. Validate
+#### 2. Validate
 
 ```bash
 python scripts/creator_codex.py run-validate RUN_ID
@@ -106,7 +120,7 @@ python scripts/creator_codex.py run-validate RUN_ID
 
 Fix all contract errors before continuing. Contract validation catches missing targets, wrong top-level payload types, unsupported mutation kinds, and missing recipe-required fields. It is not a full content validator.
 
-### 4. Dry-run
+#### 3. Dry-run
 
 ```bash
 python scripts/creator_codex.py run-dry-run RUN_ID
@@ -122,7 +136,7 @@ Inspect:
 
 Do not apply if the dry-run changes unrelated content.
 
-### 5. Apply to draft
+#### 4. Apply to draft
 
 ```bash
 python scripts/creator_codex.py run-apply RUN_ID
@@ -130,7 +144,7 @@ python scripts/creator_codex.py run-apply RUN_ID
 
 This writes draft packs only. It should not publish live content.
 
-### 6. Verify
+#### 5. Verify
 
 ```bash
 python scripts/creator_codex.py run-verify RUN_ID

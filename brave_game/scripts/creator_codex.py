@@ -18,6 +18,11 @@ if str(ROOT) not in sys.path:
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
+DIRECT_APPLY_WARNING = (
+    "Direct apply writes draft files but does not create an Agent Run card. "
+    "Use run-batch or run-create/run-apply for Creator Studio-visible content work."
+)
+
 
 def _load_json(path_or_text):
     text = str(path_or_text)
@@ -93,8 +98,8 @@ def validate_payload(source):
     }
 
 
-def apply_payload(source, *, dry_run=False):
-    from commands.brave_creator import mutate_content
+def apply_payload(source, *, dry_run=False, direct=False):
+    from commands.brave_creator import mutate_content, remove_content
     from world.content.codex_contract import codex_recipe_warnings, suggested_previews_for_mutations, touched_domains_for_mutations, validate_codex_mutations
     from world.content.health import creator_health_payload
 
@@ -105,17 +110,28 @@ def apply_payload(source, *, dry_run=False):
         raise SystemExit(str(exc)) from exc
     results = []
     for entry in mutations:
+        action = entry.get("action")
         kind = entry.get("kind")
         target = entry.get("target", "")
-        mutation = mutate_content(
-            kind,
-            target,
-            json.dumps(entry.get("payload")),
-            write=not dry_run,
-            stage="draft",
-            author="codex-cli",
-        )
+        if action == "remove":
+            mutation = remove_content(
+                kind,
+                target,
+                write=not dry_run,
+                stage="draft",
+                author="codex-cli",
+            )
+        else:
+            mutation = mutate_content(
+                kind,
+                target,
+                json.dumps(entry.get("payload")),
+                write=not dry_run,
+                stage="draft",
+                author="codex-cli",
+            )
         results.append({
+            "action": action,
             "kind": kind,
             "domain": mutation.domain,
             "path": mutation.path,
@@ -125,7 +141,7 @@ def apply_payload(source, *, dry_run=False):
             "entry_id": mutation.entry_id,
             "history_path": mutation.history_path,
         })
-    return {
+    payload = {
         "ok": True,
         "stage": "draft",
         "write": not dry_run,
@@ -135,6 +151,9 @@ def apply_payload(source, *, dry_run=False):
         "recipe_warnings": codex_recipe_warnings(mutations, payload.get("previews") or []),
         "health": None if dry_run else creator_health_payload(stage="draft"),
     }
+    if direct:
+        payload["warning"] = DIRECT_APPLY_WARNING
+    return payload
 
 
 def verify_payload(source=None):
@@ -223,6 +242,28 @@ def run_review_payload(run_id, note):
     return {"ok": True, "run": run}
 
 
+def run_batch_payload(source, *, review_note=None):
+    """Create and complete an Agent Run so Creator Studio has an audit card."""
+    created = run_create_payload(source)
+    run_id = created["run"]["run_id"]
+    validated = run_validate_payload(run_id)
+    dry_run = run_dry_run_payload(run_id)
+    applied = run_apply_payload(run_id)
+    verified = run_verify_payload(run_id)
+    reviewed = run_review_payload(run_id, review_note) if review_note else None
+    return {
+        "ok": True,
+        "run_id": run_id,
+        "created": created,
+        "validated": validated,
+        "dry_run": dry_run,
+        "applied": applied,
+        "verified": verified,
+        "reviewed": reviewed,
+        "run": (reviewed or verified)["run"],
+    }
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="Use Brave Creator draft tools from Codex CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -245,6 +286,10 @@ def build_parser():
     apply = subparsers.add_parser("apply")
     apply.add_argument("source", help="JSON string or path containing explicit mutations.")
     apply.add_argument("--dry-run", action="store_true")
+
+    run_batch = subparsers.add_parser("run-batch")
+    run_batch.add_argument("source", help="JSON string or path containing instructions/scope/mutations/previews.")
+    run_batch.add_argument("--review-note", help="Optional note to mark the run reviewed after verification.")
 
     verify = subparsers.add_parser("verify")
     verify.add_argument("source", nargs="?", help="Optional JSON string or path with previews.")
@@ -292,7 +337,7 @@ def main(argv=None):
     elif args.command == "validate":
         _print(validate_payload(args.source))
     elif args.command == "apply":
-        _print(apply_payload(args.source, dry_run=args.dry_run))
+        _print(apply_payload(args.source, dry_run=args.dry_run, direct=True))
     elif args.command == "verify":
         _print(verify_payload(args.source))
     elif args.command == "run-create":
@@ -311,6 +356,8 @@ def main(argv=None):
         _print(run_verify_payload(args.run_id, args.source))
     elif args.command == "run-review":
         _print(run_review_payload(args.run_id, args.note))
+    elif args.command == "run-batch":
+        _print(run_batch_payload(args.source, review_note=args.review_note))
     return 0
 
 

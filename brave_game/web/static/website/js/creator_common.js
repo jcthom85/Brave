@@ -25,13 +25,295 @@
     const style = document.createElement('style');
     style.id = 'brave-creator-shell-styles';
     style.textContent = `
-      .creator-shell-nav { width:min(1680px,calc(100vw - 32px)); margin:16px auto 0; display:grid; gap:10px; }
-      .creator-shell-nav__bar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:10px; border:1px solid var(--line,#d9c8ac); border-radius:18px; background:rgba(255,249,240,.92); box-shadow:0 14px 38px rgba(29,36,48,.10); }
-      .creator-shell-nav__brand { font-weight:800; letter-spacing:.04em; margin-right:8px; color:var(--ink,#1d2430); }
-      .creator-shell-nav a { color:var(--ink,#1d2430); text-decoration:none; border:1px solid transparent; border-radius:999px; padding:8px 12px; }
-      .creator-shell-nav a:hover,.creator-shell-nav a[aria-current="page"] { border-color:var(--accent,#8b4a29); background:#fff8f2; color:var(--accent,#8b4a29); }
-      .creator-shell-nav__flow { display:flex; flex-wrap:wrap; gap:8px; align-items:center; color:var(--muted,#6b6157); font-size:.94rem; padding:0 4px; }
-      .creator-shell-nav__flow a { border-color:var(--line,#d9c8ac); background:#fffdfa; }
+      :root {
+        --creator-shell-height: 64px;
+        --creator-shell-ink: #1e293b;
+        --creator-shell-muted: #64748b;
+        --creator-shell-line: #e2e8f0;
+        --creator-shell-accent: #f97316;
+        --creator-shell-accent-soft: #fff7ed;
+      }
+      body.creator-shell-has-nav {
+        --ink: #1e293b;
+        --accent: #f97316;
+        --panel: #ffffff;
+        --line: #e2e8f0;
+        --muted: #64748b;
+        --good: #10b981;
+        --bad: #ef4444;
+        --shadow: rgba(15, 23, 42, 0.08);
+        font-family: "Outfit", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--ink, #1e293b);
+        background:
+          radial-gradient(circle at 8% 0%, rgba(249, 115, 22, 0.12), transparent 26%),
+          linear-gradient(180deg, #f8fafc 0%, #fff7ed 46%, #f1f5f9 100%);
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) {
+        padding-top: var(--creator-shell-height);
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .shell {
+        margin-top: 24px;
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .panel,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .hero,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .card,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .rail,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .section,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .section-card,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .subsection,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) details {
+        border-color: var(--line, #e2e8f0);
+        border-radius: 8px;
+        background: var(--panel, #ffffff);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, 0.08);
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .panel-head,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .section-head,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .subsection-head {
+        border-color: var(--line, #e2e8f0);
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 237, 0.92));
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) h1,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) h2,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) h3,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) h4 {
+        letter-spacing: 0;
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) p,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .meta,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .field label {
+        color: var(--muted, #64748b);
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) input,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) select,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) textarea,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) pre {
+        border-color: var(--line, #e2e8f0);
+        border-radius: 8px;
+        background: #fff;
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) button,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .button-link {
+        border-radius: 999px;
+        background: var(--accent, #f97316);
+        box-shadow: 0 10px 24px rgba(249, 115, 22, 0.22);
+        transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease, border-color 140ms ease;
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) button:hover:not(:disabled),
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .button-link:hover {
+        transform: translateY(-1px);
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) button.secondary,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .button-link.secondary,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .guide-button,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .preset-button,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .creator-agent-run-card,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .item-row,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .quest-row,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .entity-row,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .selector-row,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .room-row,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .row {
+        border-color: var(--line, #e2e8f0);
+        background: #fff;
+        color: var(--ink, #1e293b);
+        box-shadow: none;
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .guide-button.active,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .preset-button.active,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .tab.active,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .inspector-tab.active {
+        background: var(--ink, #1e293b);
+        border-color: var(--ink, #1e293b);
+        color: #fff;
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .item-row:hover,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .item-row.active,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .quest-row:hover,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .quest-row.active,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .entity-row:hover,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .entity-row.active,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .selector-row:hover,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .selector-row.active,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .room-row:hover,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .room-row.active,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .row:hover,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .row.active,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .guide-button:hover,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .preset-button:hover,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .creator-agent-run-card:hover,
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .creator-agent-run-card[aria-current="true"] {
+        border-color: rgba(249, 115, 22, 0.38);
+        background: #fff7ed;
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .status {
+        border-color: var(--line, #e2e8f0);
+        border-radius: 8px;
+        background: #fff7ed;
+      }
+      body.creator-shell-has-nav:not(.creator-shell-fixed-workspace) .validation-notes {
+        border-radius: 8px;
+      }
+      body.creator-shell-fixed-workspace .shell {
+        top: var(--creator-shell-height) !important;
+        height: calc(100vh - var(--creator-shell-height)) !important;
+        grid-template-rows: calc(100vh - var(--creator-shell-height)) !important;
+      }
+      body.creator-shell-fixed-workspace .sidebar,
+      body.creator-shell-fixed-workspace .inspector,
+      body.creator-shell-fixed-workspace .main-viewport {
+        height: calc(100vh - var(--creator-shell-height)) !important;
+      }
+      .creator-shell-nav {
+        position: fixed;
+        inset: 0 0 auto 0;
+        z-index: 10000;
+        min-height: var(--creator-shell-height);
+        display: grid;
+        align-items: center;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.92);
+        background: rgba(255, 255, 255, 0.88);
+        color: var(--creator-shell-ink);
+        box-shadow: 0 14px 42px rgba(15, 23, 42, 0.08);
+        backdrop-filter: blur(18px) saturate(160%);
+      }
+      .creator-shell-nav__bar {
+        width: min(1760px, calc(100vw - 28px));
+        min-width: 0;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(170px, auto) minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        padding: 8px 0;
+      }
+      .creator-shell-nav__brand {
+        display: inline-grid;
+        gap: 2px;
+        line-height: 1.05;
+        color: var(--creator-shell-ink);
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .creator-shell-nav__brand strong {
+        font-size: 0.96rem;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+      .creator-shell-nav__brand span,
+      .creator-shell-nav__group-label {
+        color: var(--creator-shell-muted);
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .creator-shell-nav__links {
+        min-width: 0;
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        overflow-x: auto;
+        scrollbar-width: thin;
+      }
+      .creator-shell-nav a {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        min-height: 34px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        padding: 7px 10px;
+        color: var(--creator-shell-ink);
+        text-decoration: none;
+        font-size: 0.88rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+      }
+      .creator-shell-nav a:hover {
+        transform: translateY(-1px);
+        border-color: rgba(249, 115, 22, 0.28);
+        background: var(--creator-shell-accent-soft);
+        color: #c2410c;
+      }
+      .creator-shell-nav a[aria-current="page"] {
+        border-color: rgba(249, 115, 22, 0.42);
+        background: var(--creator-shell-accent);
+        color: #fff;
+        box-shadow: 0 10px 22px rgba(249, 115, 22, 0.22);
+      }
+      .creator-shell-nav__menu {
+        position: relative;
+        justify-self: end;
+      }
+      .creator-shell-nav__menu summary {
+        list-style: none;
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(226, 232, 240, 0.96);
+        border-radius: 999px;
+        padding: 7px 12px;
+        background: #fff;
+        color: var(--creator-shell-ink);
+        cursor: pointer;
+        font-size: 0.88rem;
+        font-weight: 800;
+        white-space: nowrap;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+      }
+      .creator-shell-nav__menu summary::-webkit-details-marker {
+        display: none;
+      }
+      .creator-shell-nav__menu summary::after {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-right: 2px solid currentColor;
+        border-bottom: 2px solid currentColor;
+        transform: translateY(-2px) rotate(45deg);
+      }
+      .creator-shell-nav__menu[open] summary {
+        border-color: rgba(249, 115, 22, 0.34);
+        background: var(--creator-shell-accent-soft);
+        color: #c2410c;
+      }
+      .creator-shell-nav__menu-panel {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 220px;
+        display: grid;
+        gap: 6px;
+        padding: 8px;
+        border: 1px solid rgba(226, 232, 240, 0.96);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
+      }
+      .creator-shell-nav__menu-panel a {
+        width: 100%;
+        justify-content: flex-start;
+        border-radius: 8px;
+        padding: 9px 10px;
+      }
+      @media (max-width: 1100px) {
+        :root { --creator-shell-height: 104px; }
+        .creator-shell-nav__bar {
+          grid-template-columns: minmax(160px, auto) auto;
+          gap: 6px;
+        }
+        .creator-shell-nav__links {
+          grid-column: 1 / -1;
+          order: 3;
+        }
+        .creator-shell-nav__menu {
+          justify-self: end;
+        }
+      }
       .creator-related-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
       .creator-related-links a { border:1px solid var(--line,#d9c8ac); border-radius:999px; padding:7px 10px; background:#fffdfa; color:var(--accent,#8b4a29); text-decoration:none; font-size:.92rem; }
       .creator-health-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
@@ -57,12 +339,13 @@
       .creator-agent-run-section__head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; border-bottom:1px solid var(--line,#d9c8ac); padding-bottom:6px; }
       .creator-agent-run-section__head strong { color:var(--ink,#1d2430); }
       .creator-agent-run-section__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
-      .creator-agent-run-card { text-align:left; border:1px solid var(--line,#d9c8ac); border-radius:12px; background:#fffdfa; padding:12px; display:grid; gap:6px; color:var(--ink,#1d2430); cursor:pointer; font:inherit; }
-      .creator-agent-run-card.is-ready { border-color:rgba(47,109,76,.36); background:#f2fbf4; }
-      .creator-agent-run-card.is-blocked { border-color:rgba(141,49,34,.36); background:#fff0ed; }
+      .creator-agent-run-card { text-align:left; border:1px solid var(--line,#d9c8ac); border-radius:12px; background:#fff; padding:12px; display:grid; gap:6px; color:var(--ink,#1d2430); cursor:pointer; font:inherit; }
+      .creator-agent-run-card.is-ready { border-color:rgba(47,109,76,.36); box-shadow:inset 3px 0 0 rgba(47,109,76,.9); }
+      .creator-agent-run-card.is-blocked { border-color:rgba(141,49,34,.36); box-shadow:inset 3px 0 0 rgba(141,49,34,.9); }
+      .creator-agent-run-card.is-scratch { border-color:rgba(100,116,139,.24); box-shadow:inset 3px 0 0 rgba(100,116,139,.8); }
       .creator-agent-run-card.is-published { opacity:.78; }
       .creator-agent-run-card.is-noop { opacity:.68; }
-      .creator-agent-run-card:hover,.creator-agent-run-card[aria-current="true"] { border-color:var(--accent,#8b4a29); background:#fff8f2; }
+      .creator-agent-run-card:hover,.creator-agent-run-card[aria-current="true"] { border-color:rgba(249,115,22,.38); background:#fffaf3; }
       .creator-agent-run-card strong { overflow-wrap:anywhere; }
       .creator-agent-run-card span,.creator-agent-run-meta { color:var(--muted,#6b6157); font-size:.9rem; line-height:1.35; }
       .creator-agent-run-detail { border:1px solid var(--line,#d9c8ac); border-radius:12px; background:#fffdfa; padding:12px; display:grid; gap:10px; }
@@ -82,15 +365,36 @@
     const nav = document.createElement('nav');
     nav.className = 'creator-shell-nav';
     nav.setAttribute('data-creator-shell-nav', active);
+    nav.setAttribute('aria-label', 'Creator tools');
     const linkHtml = CREATOR_LINKS.map((entry) => `<a href="${entry.href}"${entry.key === active ? ' aria-current="page"' : ''}>${entry.label}</a>`).join('');
-    const activeIndex = FLOW_ORDER.indexOf(active);
-    const previous = activeIndex > 0 ? CREATOR_LINKS.find((entry) => entry.key === FLOW_ORDER[activeIndex - 1]) : null;
-    const next = activeIndex >= 0 && activeIndex < FLOW_ORDER.length - 1 ? CREATOR_LINKS.find((entry) => entry.key === FLOW_ORDER[activeIndex + 1]) : null;
-    nav.innerHTML = [
-      `<div class="creator-shell-nav__bar"><span class="creator-shell-nav__brand">Brave Creator</span>${linkHtml}<a href="/creator/composers/boss/"${active === 'boss' ? ' aria-current="page"' : ''}>Boss Composer</a><a href="/creator/composers/recipe/"${active === 'recipe' ? ' aria-current="page"' : ''}>Recipe Composer</a><a href="/creator/composers/fishing/"${active === 'fishing' ? ' aria-current="page"' : ''}>Fishing Composer</a></div>`,
-      `<div class="creator-shell-nav__flow">${previous ? `<a href="${previous.href}">&larr; ${previous.label}</a>` : ''}<span>Authoring flow: World &rarr; Encounters &rarr; Systems &rarr; Items &rarr; Quests &rarr; Dialogue</span>${next ? `<a href="${next.href}">${next.label} &rarr;</a>` : ''}</div>`,
-    ].join('');
+    const composerLinks = [
+      { key: 'boss', label: 'Boss Composer', href: '/creator/composers/boss/' },
+      { key: 'recipe', label: 'Recipe Composer', href: '/creator/composers/recipe/' },
+      { key: 'fishing', label: 'Fishing Composer', href: '/creator/composers/fishing/' },
+    ].map((entry) => `<a href="${entry.href}"${entry.key === active ? ' aria-current="page"' : ''}>${entry.label}</a>`).join('');
+    nav.innerHTML = `
+      <div class="creator-shell-nav__bar">
+        <a class="creator-shell-nav__brand" href="/creator/">
+          <strong>Brave Creator Studio</strong>
+        </a>
+        <div class="creator-shell-nav__links">${linkHtml}</div>
+        <details class="creator-shell-nav__menu">
+          <summary>Composers</summary>
+          <div class="creator-shell-nav__menu-panel">${composerLinks}</div>
+        </details>
+      </div>
+    `;
     document.body.insertBefore(nav, document.body.firstChild);
+    document.body.classList.add('creator-shell-has-nav');
+    const shell = document.querySelector('.shell');
+    if (shell && window.getComputedStyle(shell).position === 'fixed') {
+      document.body.classList.add('creator-shell-fixed-workspace');
+    }
+    const syncShellHeight = () => {
+      document.documentElement.style.setProperty('--creator-shell-height', `${Math.ceil(nav.getBoundingClientRect().height)}px`);
+    };
+    window.requestAnimationFrame(syncShellHeight);
+    window.addEventListener('resize', syncShellHeight);
     return nav;
   }
 
@@ -143,8 +447,10 @@
     }[char]));
   }
 
-  function attachWorkflow(apiRoot, statusNode, outputNode, validationNode) {
+  function attachWorkflow(apiRoot, statusNode, outputNode, validationNode, hostNode) {
     if (!apiRoot || document.querySelector('[data-creator-workflow]')) return null;
+    const shell = hostNode || document.querySelector('[data-creator-actions-host]');
+    if (!shell) return null;
     const panel = document.createElement('section');
     panel.className = 'panel creator-workflow';
     panel.setAttribute('data-creator-workflow', 'draft-first');
@@ -166,7 +472,6 @@
       '</details>',
       '</div>',
     ].join('');
-    const shell = document.querySelector('[data-creator-workflow-host]') || document.querySelector('.workspace') || document.querySelector('.stack') || document.body;
     shell.appendChild(panel);
 
     function renderResult(payload, message, tone) {
@@ -270,8 +575,14 @@
     return `${run.status || 'planned'} · ${count} mutation${count === 1 ? '' : 's'} · ${domains}`;
   }
 
+  function isScratchRun(run) {
+    const text = `${run.run_id || ''} ${run.instructions || ''}`.toLowerCase();
+    return text.includes('test') || text.includes('do not publish') || text.includes('disposable') || text.includes('smoke test');
+  }
+
   function agentRunClass(run) {
     if (Number(run.mutation_count || 0) === 0) return 'is-noop';
+    if (isScratchRun(run)) return 'is-scratch';
     if (run.status === 'reviewed') return 'is-ready';
     if (run.status === 'publish_blocked' || run.status === 'failed') return 'is-blocked';
     if (run.status === 'published') return 'is-published';
@@ -377,15 +688,17 @@
       panel.querySelector('[data-agent-run-detail]').innerHTML = '';
       return;
     }
-    const ready = runs.filter((run) => run.status === 'reviewed' && Number(run.mutation_count || 0) > 0);
+    const scratch = runs.filter((run) => isScratchRun(run) && run.status !== 'published' && Number(run.mutation_count || 0) > 0);
+    const ready = runs.filter((run) => !isScratchRun(run) && run.status === 'reviewed' && Number(run.mutation_count || 0) > 0);
     const blocked = runs.filter((run) => run.status === 'publish_blocked' || run.status === 'failed');
-    const active = runs.filter((run) => !['reviewed', 'publish_blocked', 'failed', 'published'].includes(run.status) && Number(run.mutation_count || 0) > 0);
+    const active = runs.filter((run) => !isScratchRun(run) && !['reviewed', 'publish_blocked', 'failed', 'published'].includes(run.status) && Number(run.mutation_count || 0) > 0);
     const history = runs.filter((run) => run.status === 'published' && Number(run.mutation_count || 0) > 0);
     const noops = runs.filter((run) => Number(run.mutation_count || 0) === 0);
     list.innerHTML = [
       agentRunSection('Ready To Publish', ready, { subtitle: 'Reviewed draft runs waiting for publish' }),
       agentRunSection('Needs Attention', blocked, { subtitle: 'Failed or blocked runs' }),
       agentRunSection('In Progress', active, { subtitle: 'Draft runs not reviewed yet' }),
+      agentRunSection('Scratch / Test Runs', scratch, { subtitle: 'Smoke-test or disposable runs; usually leave these unpublished', collapsed: true }),
       agentRunSection('Published History', history, { collapsed: true }),
       agentRunSection('No-Op / Scratch Runs', noops, { collapsed: true }),
     ].join('') || '<div class="creator-agent-run-meta">No matching agent runs.</div>';
@@ -411,7 +724,7 @@
     panel.className = 'rail creator-agent-runs';
     panel.setAttribute('data-creator-agent-runs-panel', 'true');
     panel.innerHTML = [
-      '<div class="panel-head"><h2>Agent Runs</h2><p>Review Codex-authored draft runs before using the normal Creator publish workflow.</p></div>',
+      '<div class="panel-head"><h2>Agent Runs</h2><p>This is an audit queue for Codex-authored draft batches. Open a run, check what it changed, add a review note if it is intentional, then publish only reviewed runs. Scratch and TEST runs stay collapsed.</p></div>',
       '<div class="toolbar"><button type="button" data-agent-runs-refresh>Refresh</button></div>',
       '<div class="creator-agent-run-list" data-agent-run-list></div>',
       '<div data-agent-run-detail></div>',
@@ -564,6 +877,10 @@
     return apiFetch(apiRoot, `/references/${domain}?limit=${limit}${query}`).then((payload) => payload.results || []);
   }
 
+  function fetchInspiration(apiRoot, kind, context) {
+    return apiFetch(apiRoot, '/codex/inspire', { method: 'POST', body: JSON.stringify({ kind, context }) }).then((payload) => payload.inspiration);
+  }
+
   function requireFields(specs) {
     return (specs || []).filter((spec) => !String(spec.value || '').trim()).map((spec) => `${spec.label} is required.`);
   }
@@ -595,7 +912,8 @@
     const host = document.querySelector('[data-creator-workflow-host]') || document.querySelector('.workspace') || document.querySelector('.stack') || document.body;
     const incoming = consumeIncomingPayload();
     renderIncomingPayload(host, incoming, statusNode);
-    attachWorkflow(apiRoot, statusNode, outputNode, validationNode);
+    const actionsHost = document.querySelector('[data-creator-actions-host]');
+    if (actionsHost) attachWorkflow(apiRoot, statusNode, outputNode, validationNode, actionsHost);
     attachAgentRunsPanel(apiRoot, statusNode);
     fetchHealth(apiRoot, 'draft')
       .then((payload) => renderHealthPanel(host, payload))
@@ -605,6 +923,7 @@
       fetchHealth: (stage) => fetchHealth(apiRoot, stage),
       renderHealthPanel: (hostNode, payload) => renderHealthPanel(hostNode || host, payload),
       fetchReferences: (domain, options) => fetchReferences(apiRoot, domain, options),
+      fetchInspiration: (kind, context) => fetchInspiration(apiRoot, kind, context),
       fillSelect,
       requireFields,
       parseJsonField,
@@ -616,11 +935,11 @@
       setStatus: (message, tone) => setStatus(statusNode, message, tone),
       showValidation: (messages) => renderValidation(validationNode, messages).length === 0,
       clearValidation: () => renderValidation(validationNode, []),
-      attachWorkflow: () => attachWorkflow(apiRoot, statusNode, outputNode, validationNode),
+      attachWorkflow: (hostNode) => attachWorkflow(apiRoot, statusNode, outputNode, validationNode, hostNode),
       attachAgentRunsPanel: () => attachAgentRunsPanel(apiRoot, statusNode),
       attachCreatorShell,
     };
   }
 
-  window.BraveCreator = { apiFetch, setStatus, renderValidation, fillSelect, fetchReferences, fetchHealth, renderHealthPanel, requireFields, parseJsonField, sendToBuilder, normalizeIncomingPayload, registerApplyHandler, applyIncomingPayload, consumeIncomingPayload, renderIncomingPayload, attachWorkflow, attachAgentRunsPanel, attachCreatorShell, bind };
+  window.BraveCreator = { apiFetch, setStatus, renderValidation, fillSelect, fetchReferences, fetchHealth, renderHealthPanel, fetchInspiration, requireFields, parseJsonField, sendToBuilder, normalizeIncomingPayload, registerApplyHandler, applyIncomingPayload, consumeIncomingPayload, renderIncomingPayload, attachWorkflow, attachAgentRunsPanel, attachCreatorShell, bind };
 }());

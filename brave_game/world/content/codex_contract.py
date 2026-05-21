@@ -58,10 +58,10 @@ MUTATION_RECIPES = {
         "target_required": True,
         "payload_type": "object",
         "required_fields": ["key", "kind", "location"],
-        "optional_fields": ["desc", "aliases"],
-        "reference_hints": ["rooms", "entities"],
+        "optional_fields": ["desc", "aliases", "gender"],
+        "reference_hints": ["rooms", "entities", "genders: male, female, nonbinary"],
         "preview": {"kind": "room", "args": ["location"]},
-        "example": {"kind": "entity", "target": "new_npc", "payload": {"key": "New NPC", "kind": "npc", "location": "brambleford_town_green", "desc": "A grounded character."}},
+        "example": {"kind": "entity", "target": "new_npc", "payload": {"key": "New NPC", "kind": "npc", "gender": "nonbinary", "location": "brambleford_town_green", "desc": "A grounded character."}},
     },
     "item": {
         "kind": "item",
@@ -342,6 +342,9 @@ def validate_codex_mutations(mutations):
     for index, entry in enumerate(mutations, start=1):
         if not isinstance(entry, dict):
             raise ValueError(f"Mutation {index} must be an object.")
+        action = str(entry.get("action") or "upsert").strip().lower()
+        if action not in ("upsert", "remove", "delete"):
+            raise ValueError(f"Mutation {index} uses unknown action: {entry.get('action')}")
         kind = normalize_kind(entry.get("kind"))
         recipe = MUTATION_RECIPES.get(kind)
         if not recipe:
@@ -349,6 +352,15 @@ def validate_codex_mutations(mutations):
         target = str(entry.get("target") or "").strip()
         if recipe["target_required"] and not target:
             raise ValueError(f"Mutation {index} ({kind}) requires target.")
+        
+        if action in ("remove", "delete"):
+            normalized = dict(entry)
+            normalized["action"] = "remove"
+            normalized["kind"] = kind
+            normalized["target"] = target
+            normalized_entries.append(normalized)
+            continue
+
         if "payload" not in entry:
             raise ValueError(f"Mutation {index} ({kind}) requires payload.")
         payload = entry.get("payload")
@@ -360,6 +372,7 @@ def validate_codex_mutations(mutations):
             if missing:
                 raise ValueError(f"Mutation {index} ({kind}) payload missing required fields: {', '.join(missing)}.")
         normalized = dict(entry)
+        normalized["action"] = "upsert"
         normalized["kind"] = kind
         normalized["target"] = target
         normalized_entries.append(normalized)

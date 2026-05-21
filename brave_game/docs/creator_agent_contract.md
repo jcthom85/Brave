@@ -27,8 +27,7 @@ python scripts/creator_codex.py recipes
 python scripts/creator_codex.py recipes quest
 python scripts/creator_codex.py plan '{"instructions":"Create a starter quest in Brambleford.","scope":{"domains":["quests","items"]}}'
 python scripts/creator_codex.py validate '{"mutations":[{"kind":"quest","target":"new_quest_key","payload":{"title":"New Quest"}}]}'
-python scripts/creator_codex.py apply '{"mutations":[{"kind":"quest","target":"new_quest_key","payload":{"title":"New Quest"}}]}' --dry-run
-python scripts/creator_codex.py apply /path/to/mutations.json
+python scripts/creator_run_batch.py /path/to/run.json
 python scripts/creator_codex.py verify '{"previews":[{"kind":"quest","args":["new_quest_key"]}]}'
 python scripts/creator_codex.py run-create /path/to/run.json
 python scripts/creator_codex.py run-list --limit 5
@@ -82,6 +81,8 @@ Input:
 ```
 
 Returns applied mutation metadata, diffs, and draft health. `stage` must be `draft`.
+
+For normal Codex-authored content, prefer Agent Runs or `scripts/creator_run_batch.py`. Direct apply writes draft files but does not create an Agent Run audit card unless a `run_id` is supplied.
 
 Responses also include:
 
@@ -188,11 +189,9 @@ The typed recipe layer rejects unknown kinds, missing required targets, missing 
 3. Use references and previews to ground target ids.
 4. Generate a plan with clear scope and review notes.
 5. Build explicit mutations.
-6. Run `validate` and fix contract errors.
-7. Run dry-run apply and inspect diffs, touched domains, warnings, and suggested previews.
-8. Apply to draft.
-9. Run verify with previews for touched content.
-10. Use the Creator UI to review and publish when ready.
+6. Run `python scripts/creator_run_batch.py /path/to/run.json`.
+7. Confirm the resulting Agent Run appears in Creator Studio.
+8. Use the Creator UI to review and publish when ready.
 
 For larger work, use the durable run workflow instead:
 

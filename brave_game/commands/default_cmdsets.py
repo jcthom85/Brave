@@ -31,6 +31,7 @@ from .brave import CmdFinishPlaySilent
 from .brave_arcade import CmdArcade, CmdArcadeSubmit
 from .brave_combat import CmdBossGate, CmdCombatPreview, CmdEnemies, CmdFight, CmdFlee, CmdTarget, CmdUse
 from .brave_creator import CmdContent
+from .ghost import CmdGhost, CmdGhostReturn
 from .brave_explore import CmdCook, CmdEat, CmdEmote, CmdFish, CmdItem, CmdMap, CmdReel, CmdRest, CmdTravel
 from .brave_party import CmdParty
 from .brave_profile import CmdBuild, CmdClass, CmdCompanion, CmdGear, CmdMastery, CmdOath, CmdPack, CmdQuests, CmdRace, CmdSheet
@@ -109,6 +110,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSteal())
         self.add(CmdRead())
         self.add(CmdContent())
+        self.add(CmdGhost())
+        self.add(CmdGhostReturn())
         self.add(CmdFinishPlaySilent())
 
 

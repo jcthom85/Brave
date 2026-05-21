@@ -6,31 +6,37 @@
   <title>{{ page_title }}</title>
   <style>
     :root {
-      --ink: #182028;
-      --accent: #a44f2f;
-      --panel: #fffaf0;
-      --line: #d4c3ab;
-      --muted: #6b6257;
-      --good: #2f6d4c;
-      --bad: #8d3122;
-      --shadow: rgba(24, 32, 40, 0.12);
-    }
+       --ink: #1e293b;
+       --accent: #f97316;
+       --panel: #ffffff;
+       --line: #e2e8f0;
+       --muted: #64748b;
+       --good: #10b981;
+       --bad: #ef4444;
+       --shadow: rgba(0, 0, 0, 0.08);
+       --theater-bg: #f8fafc;
+     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
+      padding: 0;
       color: var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(164, 79, 47, 0.14), transparent 32%),
-        linear-gradient(180deg, #efe6d4 0%, #f7f2e8 40%, #eee4d2 100%);
-      min-height: 100vh;
+      font-family: "Outfit", "Inter", -apple-system, sans-serif;
+      background: #fcfaf8;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
     }
     .shell {
-      width: min(1560px, calc(100vw - 32px));
-      margin: 24px auto;
       display: grid;
-      grid-template-columns: 320px minmax(0, 1fr);
-      gap: 20px;
+      grid-template-columns: 320px 1fr 400px;
+      grid-template-rows: 100vh;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: fixed;
+      top: 0;
+      left: 0;
     }
     .panel {
       background: var(--panel);
@@ -57,11 +63,13 @@
     }
     .search { margin-bottom: 12px; }
     .room-list, .selector-list {
+      flex: 1;
       display: grid;
       gap: 8px;
-      max-height: 600px;
-      overflow: auto;
+      min-height: 0;
+      overflow-y: auto;
       padding-right: 4px;
+      margin-bottom: 12px;
     }
     .room-row, .selector-row {
       width: 100%;
@@ -141,91 +149,168 @@
     }
     .status.good { background: #eef8f1; color: var(--good); border-color: rgba(47, 109, 76, 0.24); }
     .status.bad { background: #fff0ed; color: var(--bad); border-color: rgba(141, 49, 34, 0.24); }
-    .builder-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
-      gap: 16px;
-      align-items: start;
+    button.muse {
+      background: linear-gradient(135deg, #6b4a29, #a44f2f);
+      font-size: 0.82rem;
+      padding: 6px 12px;
+      margin-left: auto;
+      box-shadow: 0 4px 12px rgba(107, 74, 41, 0.2);
     }
-    .inspector-panel {
-      position: sticky;
-      top: 16px;
-      max-height: calc(100vh - 32px);
+    .status.bad { background: #fff0ed; color: var(--bad); border-color: rgba(141, 49, 34, 0.24); }
+    .field-label-row { display: flex; align-items: center; width: 100%; }
+    .overlay-toggles { display: flex; gap: 12px; margin-right: 16px; font-size: 0.85rem; color: var(--ink-light); }
+    .overlay-toggles label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .room-node.heat-low { border-color: #8fbc8f; box-shadow: 0 0 10px rgba(143, 188, 143, 0.3); }
+    .room-node.heat-med { border-color: #f4a460; box-shadow: 0 0 10px rgba(244, 164, 96, 0.3); }
+    .room-node.heat-high { border-color: #cd5c5c; box-shadow: 0 0 10px rgba(205, 92, 92, 0.3); }
+    .node-icons { display: flex; gap: 4px; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); }
+    .node-icon { width: 16px; height: 16px; border-radius: 4px; background: #fff; border: 1px solid var(--line); font-size: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .node-icon.issue { background: var(--bad); color: #fff; border-color: var(--bad); font-weight: bold; }
+    .quest-thread { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 8 4; opacity: 0.4; }
+    .quest-thread:hover { opacity: 1; stroke-width: 5; }
+    button.ghost {
+      background: linear-gradient(135deg, #708090, #94a3b8);
+      box-shadow: 0 10px 24px rgba(112, 128, 144, 0.24);
+    }
+    .sidebar, .inspector {
+      height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
+      background: var(--panel);
+      z-index: 10;
     }
-    .inspector-panel .panel-body {
+    .sidebar { border-right: 1px solid var(--line); }
+    .inspector { border-left: 1px solid var(--line); }
+    .sidebar .panel-body, .inspector .panel-body { 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+      min-height: 0; 
+      padding: 20px; 
+      overflow-y: auto; 
+    }
+    
+    .main-viewport {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: relative;
+      background: #f8f3eb;
+      overflow: hidden;
+    }
+    
+    .viewport-header {
+      padding: 16px 24px;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--line);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 4px 6px -1px var(--shadow);
+    }
+    
+    .mode-rail {
+      display: flex;
+      gap: 12px;
+    }
+    .mode-button {
+      flex: 1;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mode-button:hover:not(.active) {
+      border-color: var(--accent);
+      background: #fff7ed;
+      transform: translateY(-1px);
+    }
+    .mode-button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
+    }
+    
+    .viewport-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .graph-wrap {
+      flex: 1;
+      position: relative;
       overflow: auto;
+      background:
+        linear-gradient(rgba(226, 232, 240, 0.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(226, 232, 240, 0.5) 1px, transparent 1px),
+        var(--theater-bg);
+      background-size: 40px 40px;
     }
+    
+    .room-node {
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+    }
+    .room-node:hover {
+      transform: scale(1.05);
+      z-index: 50;
+    }
+    
+    .inspector-tab {
+      transition: all 0.2s ease;
+    }
+    .inspector-tab:hover:not(.active) {
+      background: #f1f5f9;
+    }
+    
+    .inspector {
+      background: var(--panel);
+      border-left: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .inspector .panel-body { flex: 1; overflow: auto; padding: 20px; }
+    
+    .floating-status {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .floating-status > * { pointer-events: auto; }
+    
+    .graph-chip {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    
     .inspector-tabs {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
-      padding: 12px 14px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      padding: 12px;
+      background: rgba(255,255,255,0.5);
       border-bottom: 1px solid var(--line);
-      background: rgba(255, 253, 250, 0.72);
     }
     .inspector-tab {
-      border-radius: 12px;
-      padding: 9px 10px;
-      background: #fff;
-      color: var(--ink);
-      border: 1px solid var(--line);
-      box-shadow: none;
+      padding: 8px;
+      font-size: 0.85rem;
+      border-radius: 8px;
     }
-    .inspector-tab.active {
-      background: var(--ink);
-      color: #fff;
-      border-color: var(--ink);
-    }
-    .editor-tab-panel { display: none; }
-    .editor-tab-panel.active { display: grid; gap: 12px; }
-    .editor-tab-panel h3 { margin: 0; }
-    .editor-tab-panel > p { margin: 0; color: var(--muted); line-height: 1.4; }
-    .entity-kind-fields { display: none; }
-    .entity-kind-fields.active { display: grid; }
-    @media (max-width: 1280px) { .builder-layout { grid-template-columns: 1fr; } .inspector-panel { position: static; max-height: none; } }
-    @media (max-width: 980px) { .shell { grid-template-columns: 1fr; } .room-list { max-height: 280px; } .field-grid { grid-template-columns: 1fr; } }
-  
-    .validation-notes { padding:12px 14px; border-radius:12px; border:1px solid rgba(141,49,34,.18); background:#fff4f1; color:var(--bad); }
-    .validation-notes[hidden] { display:none; }
-    .validation-notes strong { display:block; margin-bottom:8px; }
-    .validation-notes ul { margin:0; padding-left:20px; display:grid; gap:6px; }
-    .graph-panel .panel-body { display: grid; gap: 12px; padding: 0; }
-    .graph-toolbar {
-      display: grid;
-      grid-template-columns: minmax(180px, 280px) minmax(0, 1fr) auto;
-      gap: 10px;
-      align-items: end;
-      padding: 16px 18px 0;
-    }
-    .graph-toolbar .field { gap: 5px; }
-    .graph-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
-    .graph-actions button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
-    .graph-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 0 18px;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-    .graph-chip {
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: #fffdfa;
-      padding: 6px 10px;
-    }
-    .graph-wrap {
-      position: relative;
-      min-height: 560px;
-      border-top: 1px solid var(--line);
-      background:
-        linear-gradient(rgba(212, 195, 171, 0.34) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(212, 195, 171, 0.34) 1px, transparent 1px),
-        #f7f0e3;
-      background-size: 56px 56px;
-      overflow: auto;
+    
+    @media (max-width: 1400px) {
+      .shell { grid-template-columns: 280px 1fr 360px; }
     }
     .graph-menu {
       position: absolute;
@@ -247,8 +332,8 @@
     }
     .world-graph {
       position: relative;
-      width: 1800px;
-      height: 1120px;
+      min-width: 100%;
+      min-height: 100%;
       transform-origin: top left;
     }
     .graph-lines {
@@ -376,8 +461,8 @@
     }
     .graph-issues:empty { display: none; }
     @media (max-width: 980px) {
-      .graph-toolbar { grid-template-columns: 1fr; }
-      .graph-actions { justify-content: flex-start; }
+      .viewport-toolbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .graph-actions { width: 100%; justify-content: flex-start; }
       .graph-wrap { min-height: 440px; }
     }
     .raw-panel {
@@ -401,216 +486,209 @@
 </head>
 <body>
   <div class="shell">
-    <section class="panel">
+    <aside class="sidebar">
       <div class="panel-head">
-        <h1>Rooms</h1>
-        <p>Search authored rooms, select one, then edit it from the map inspector.</p>
+        <h1>Brave Codex</h1>
+        <p>World Builder Tool</p>
       </div>
       <div class="panel-body">
-        <input id="room-search" class="search" type="search" placeholder="Search rooms by id, title, or zone">
+        <input id="room-search" class="search" type="text" placeholder="Search rooms...">
         <div id="room-list" class="room-list"></div>
-      </div>
-    </section>
-
-    <section class="workspace">
-      <div class="panel">
-        <div class="panel-head">
-          <h2 id="editor-title">World Builder</h2>
-          <p id="editor-subtitle">Select a room from the left to load its room, exit, and entity payloads.</p>
-        </div>
-        <div class="panel-body">
-          <div class="meta">
-            <span>API root: <strong>{{ api_root }}</strong></span>
-            <span>Reference domain: <strong>{{ reference_domain }}</strong></span>
-          </div>
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--line);">
+        <div class="stack">
+          <button id="load-room" class="secondary" type="button">Reload Room Preview</button>
+          <button id="validate-content" class="secondary" type="button">Validate Drafts</button>
+          <button id="reload-content" class="secondary" type="button">Reload Registry</button>
         </div>
       </div>
+    </aside>
 
-      <div class="toolbar">
-        <button id="load-room" class="secondary" type="button">Reload Room Preview</button>
-        <button id="validate-content" class="secondary" type="button">Validate Drafts</button>
-        <button id="reload-content" class="secondary" type="button">Reload Registry</button>
-      </div>
-
-      <div id="validation-notes" class="validation-notes" hidden></div>
-
-      <div class="mode-rail" aria-label="World builder modes">
-        <button id="mode-select" class="mode-button active" type="button"><strong>Select</strong><span>Inspect rooms and edit details.</span></button>
-        <button id="mode-add-room" class="mode-button" type="button"><strong>Add Room</strong><span>Place a new room from the map.</span></button>
-        <button id="mode-path" class="mode-button" type="button"><strong>Create Path</strong><span>Click source and destination rooms.</span></button>
-        <button id="mode-move" class="mode-button" type="button"><strong>Move Rooms</strong><span>Drag rooms, then write coordinates.</span></button>
-        <button id="mode-issues" class="mode-button" type="button"><strong>Inspect Issues</strong><span>Find one-way paths and overlaps.</span></button>
-      </div>
-
-      <div class="builder-layout">
-        <div class="panel graph-panel">
-          <div class="panel-head">
-            <h2>Room Map</h2>
-            <p>Use the path tool for exits. It stages two-way routes by default so room flow stays obvious.</p>
+    <main class="main-viewport">
+      <header class="viewport-header">
+        <div class="mode-rail">
+          <button id="mode-select" class="mode-button active" type="button"><strong>Select</strong></button>
+          <button id="mode-add-room" class="mode-button" type="button"><strong>Add Room</strong></button>
+          <button id="mode-path" class="mode-button" type="button"><strong>Path</strong></button>
+          <button id="mode-move" class="mode-button" type="button"><strong>Move</strong></button>
+          <button id="mode-issues" class="mode-button" type="button"><strong>Issues</strong></button>
+        </div>
+        <div class="viewport-toolbar">
+          <div class="field" style="width: 200px; margin: 0;">
+            <select id="region-filter"></select>
           </div>
-          <div class="panel-body">
-            <div class="graph-toolbar">
-              <div class="field">
-                <label for="region-filter">Map Region</label>
-                <select id="region-filter"></select>
-              </div>
-              <div class="graph-meta">
-                <span id="graph-room-count" class="graph-chip">Rooms: 0</span>
-                <span id="graph-exit-count" class="graph-chip">Exits: 0</span>
-                <span id="graph-mode" class="graph-chip">Select mode</span>
-              </div>
-              <div class="graph-actions">
-                <button id="new-room" class="secondary" type="button">New Room</button>
-                <button id="fit-graph" class="secondary" type="button">Fit Graph</button>
-                <button id="connect-rooms" class="secondary" type="button">Create Path</button>
-                <button id="write-position" type="button" disabled>Write Position</button>
-              </div>
-            </div>
-            <div id="path-tool" class="path-tool">
-              <h3>Path Tool</h3>
-              <p>Pick two rooms to preview a forward exit and a reverse exit before saving either draft.</p>
-              <div class="field-grid">
-                <div class="field"><label for="path-source">Source Room</label><select id="path-source"></select></div>
-                <div class="field"><label for="path-destination">Destination Room</label><select id="path-destination"></select></div>
-                <div class="field"><label for="path-forward-key">Forward Exit</label><input id="path-forward-key" type="text" placeholder="north"></div>
-                <div class="field"><label for="path-reverse-key">Reverse Exit</label><input id="path-reverse-key" type="text" placeholder="south"></div>
-                <div class="field full"><label><input id="path-one-way" type="checkbox"> One-way path</label></div>
-              </div>
-              <div id="path-preview" class="path-preview">Choose a source and destination to preview a path.</div>
-              <div class="editor-toolbar">
-                <button id="preview-path" class="secondary" type="button">Stage Path Preview</button>
-                <button id="write-path" type="button">Save Path Drafts</button>
-              </div>
-            </div>
-            <div id="graph-wrap" class="graph-wrap">
-              <div id="world-graph" class="world-graph">
-                <svg id="graph-lines" class="graph-lines" aria-hidden="true"></svg>
-              </div>
-              <div id="graph-menu" class="graph-menu" aria-hidden="true">
-                <button id="graph-menu-add-room" class="secondary" type="button">Add Room Here</button>
-                <button id="graph-menu-delete-room" class="secondary bad" type="button">Delete Room</button>
-              </div>
-            </div>
-            <div id="graph-issues" class="graph-issues"></div>
+          <div class="graph-meta">
+            <span id="graph-room-count" class="graph-chip">Rooms: 0</span>
+            <span id="graph-exit-count" class="graph-chip">Exits: 0</span>
+            <span id="graph-mode" class="graph-chip">Select Mode</span>
+          </div>
+          <div class="overlay-toggles">
+            <label><input type="checkbox" id="toggle-heat" checked> Heat</label>
+            <label><input type="checkbox" id="toggle-icons" checked> Icons</label>
+            <label><input type="checkbox" id="toggle-issues" checked> Issues</label>
+            <label><input type="checkbox" id="toggle-quests"> Quests</label>
+          </div>
+          <div class="toolbar-spacer"></div>
+          <div class="graph-actions">
+            <button id="reload-rooms" class="secondary" type="button" title="Reload references from server" style="padding: 6px 12px; font-size: 0.85rem;">↻ Reload</button>
+            <button id="fit-graph" class="secondary" type="button" title="Fit visible rooms to viewport" style="padding: 6px 12px; font-size: 0.85rem;">Center</button>
+            <button id="new-room" class="secondary" type="button">+ Room</button>
+            <button id="connect-rooms" class="secondary" type="button">+ Path</button>
+            <button id="write-position" type="button" disabled>Write Pos</button>
           </div>
         </div>
+      </header>
 
-        <section class="panel inspector-panel">
-          <div class="panel-head">
-            <h2>Inspector</h2>
-            <p>Edit the selected room, its exits, and placed entities without leaving the map.</p>
+      <div id="graph-wrap" class="graph-wrap">
+        <div id="world-graph" class="world-graph">
+          <svg id="graph-lines" class="graph-lines" aria-hidden="true"></svg>
+        </div>
+        <div id="graph-menu" class="graph-menu" aria-hidden="true">
+          <button id="graph-menu-add-room" class="secondary" type="button">Add Room Here</button>
+          <button id="graph-menu-delete-room" class="secondary bad" type="button">Delete Room</button>
+        </div>
+      </div>
+
+      <div class="floating-status">
+        <div id="validation-notes" class="validation-notes" hidden></div>
+        <div id="status" class="status">Ready.</div>
+        <div id="graph-issues" class="graph-issues"></div>
+      </div>
+    </main>
+
+    <section class="inspector">
+      <div class="panel-head">
+        <h2 id="editor-title">Inspector</h2>
+        <p id="editor-subtitle">Select a room to begin.</p>
+      </div>
+      <div class="inspector-tabs" role="tablist">
+        <button class="inspector-tab active" type="button" data-editor-tab="room">Room</button>
+        <button class="inspector-tab" type="button" data-editor-tab="exits">Exits</button>
+        <button class="inspector-tab" type="button" data-editor-tab="entities">Entities</button>
+        <button class="inspector-tab" type="button" data-editor-tab="path">Path</button>
+      </div>
+      <div class="panel-body stack">
+        <section id="editor-tab-room" class="editor-tab-panel active" data-editor-panel="room">
+          <div class="field-grid">
+            <div class="field"><label for="room-id">Id</label><input id="room-id" type="text"></div>
+            <div class="field"><label for="room-key">Name</label><input id="room-key" type="text"></div>
+            <div class="field"><label for="room-zone">Zone</label><input id="room-zone" type="text"></div>
+            <div class="field"><label for="room-world">World</label><input id="room-world" type="text"></div>
+            <div class="field"><label for="room-region">Region</label><input id="room-region" type="text"></div>
+            <div class="field"><label for="room-map-x">X</label><input id="room-map-x" type="number"></div>
+            <div class="field"><label for="room-map-y">Y</label><input id="room-map-y" type="number"></div>
+            <div class="field"><label for="room-atmosphere">Atmosphere</label><select id="room-atmosphere"></select></div>
+            <div class="field full">
+              <div class="field-label-row">
+                <label for="room-desc">Description</label>
+                <button id="muse-room-desc" class="muse" type="button">Suggest</button>
+              </div>
+              <textarea id="room-desc" style="min-height: 140px;"></textarea>
+            </div>
           </div>
-          <div class="inspector-tabs" role="tablist" aria-label="World builder inspector sections">
-            <button class="inspector-tab active" type="button" data-editor-tab="room" role="tab" aria-selected="true">Room</button>
-            <button class="inspector-tab" type="button" data-editor-tab="exits" role="tab" aria-selected="false">Exits</button>
-            <button class="inspector-tab" type="button" data-editor-tab="entities" role="tab" aria-selected="false">Entities</button>
+          <div class="stack">
+            <button id="write-room" type="button">Save to Draft</button>
+            <button id="ghost-room" class="ghost" type="button">Ghost Into Room</button>
+            <button id="diff-room" class="secondary" type="button">Preview Change</button>
           </div>
-          <div class="panel-body stack">
-            <section id="editor-tab-room" class="editor-tab-panel active" data-editor-panel="room" role="tabpanel">
-              <h3>Room Details</h3>
-              <p>Build the selected room with fields first. Keep high-traffic rooms physical and specific; the prose audit watches for abstract repeated phrasing.</p>
-              <div class="field-grid">
-                <div class="field"><label for="room-id">Room Id</label><input id="room-id" type="text"></div>
-                <div class="field"><label for="room-key">Room Name</label><input id="room-key" type="text"></div>
-                <div class="field"><label for="room-zone">Zone</label><input id="room-zone" type="text"></div>
-                <div class="field"><label for="room-world">World</label><input id="room-world" type="text"></div>
-                <div class="field"><label for="room-region">Map Region</label><input id="room-region" type="text"></div>
-                <div class="field"><label for="room-map-x">Map X</label><input id="room-map-x" type="number" step="1"></div>
-                <div class="field"><label for="room-map-y">Map Y</label><input id="room-map-y" type="number" step="1"></div>
-                <div class="field"><label for="room-atmosphere">Atmosphere</label><select id="room-atmosphere"><option value="">Auto / none</option></select></div>
-                <div class="field full"><label for="room-desc">Room Description</label><textarea id="room-desc" spellcheck="true"></textarea></div>
-              </div>
-              <div class="builder-actions">
-                <button id="diff-room" type="button">Preview Room Change</button>
-                <button id="write-room" type="button">Save Room</button>
-              </div>
-              <details class="raw-panel">
-                <summary>Advanced Source</summary>
-                <textarea id="room-json" spellcheck="false"></textarea>
-              </details>
-            </section>
+          <details class="raw-panel">
+            <summary>Source</summary>
+            <textarea id="room-json" style="min-height: 100px;"></textarea>
+          </details>
+        </section>
 
-            <section id="editor-tab-exits" class="editor-tab-panel" data-editor-panel="exits" role="tabpanel">
-              <h3>Outgoing Exits</h3>
-              <p>Create paths from this room to another room. Advanced source is available when needed.</p>
-              <div id="exit-list" class="selector-list"></div>
-              <div id="exit-path-summary" class="path-summary">
-                <h4>Path Summary</h4>
-                <p>Select or draft an exit to see source, destination, and reverse-exit status.</p>
-                <div id="exit-reverse-status" class="badge-row"></div>
-                <div class="editor-toolbar">
-                  <button id="open-source-room" class="secondary" type="button">Open Source Room</button>
-                  <button id="open-destination-room" class="secondary" type="button">Open Destination Room</button>
-                  <button id="create-reverse-exit" class="secondary" type="button">Create Reverse Exit</button>
-                </div>
-              </div>
-              <div class="field-grid">
-                <div class="field"><label for="exit-id">Exit Id</label><input id="exit-id" type="text"></div>
-                <div class="field"><label for="exit-key">Exit Key</label><input id="exit-key" type="text"></div>
-                <div class="field"><label for="exit-direction">Direction</label><input id="exit-direction" type="text"></div>
-                <div class="field"><label for="exit-label">Map Label</label><input id="exit-label" type="text"></div>
-                <div class="field"><label for="exit-source">Source Room</label><select id="exit-source"></select></div>
-                <div class="field"><label for="exit-destination">Destination Room</label><select id="exit-destination"></select></div>
-                <div class="field full"><label for="exit-aliases">Aliases</label><input id="exit-aliases" type="text" placeholder="comma separated, e.g. north, n, gate"></div>
-                <div class="field"><label for="exit-required-quest">Required Quest</label><input id="exit-required-quest" type="text"></div>
-                <div class="field"><label for="exit-boss-gate">Boss Gate</label><input id="exit-boss-gate" type="text"></div>
-                <div class="field full"><label for="exit-lock-message">Lock Message</label><input id="exit-lock-message" type="text"></div>
-              </div>
-              <div class="editor-toolbar">
-                <button id="new-exit" class="secondary" type="button">New Exit Draft</button>
-                <button id="diff-exit" type="button">Preview Exit Change</button>
-                <button id="write-exit" type="button">Save Exit</button>
-              </div>
-              <details class="raw-panel">
-                <summary>Advanced Source</summary>
-                <textarea id="exit-json" spellcheck="false"></textarea>
-              </details>
-            </section>
+        <section id="editor-tab-exits" class="editor-tab-panel" data-editor-panel="exits">
+          <div id="exit-list" class="selector-list"></div>
+          <div class="field-grid" style="margin-top: 12px;">
+            <div class="field"><label for="exit-id">Id</label><input id="exit-id" type="text"></div>
+            <div class="field"><label for="exit-key">Key</label><input id="exit-key" type="text"></div>
+            <div class="field"><label for="exit-direction">Dir</label><input id="exit-direction" type="text"></div>
+            <div class="field"><label for="exit-source">From</label><select id="exit-source"></select></div>
+            <div class="field"><label for="exit-destination">To</label><select id="exit-destination"></select></div>
+          </div>
+          <div class="stack">
+            <button id="write-exit" type="button">Save Exit</button>
+            <button id="diff-exit" class="secondary" type="button">Preview Exit</button>
+            <button id="new-exit" class="secondary" type="button">New Exit</button>
+            <div id="exit-reverse-status" class="status" style="font-size: 0.8rem;" hidden></div>
+            <button id="create-reverse-exit" class="secondary" type="button" hidden>Create Reverse Exit</button>
+          </div>
+          <details class="raw-panel" style="margin-top: 12px;">
+            <summary>Advanced & Source</summary>
+            <div class="field-grid" style="margin-top: 10px;">
+              <div class="field"><label for="exit-label">Label</label><input id="exit-label" type="text"></div>
+              <div class="field"><label for="exit-aliases">Aliases (CSV)</label><input id="exit-aliases" type="text"></div>
+              <div class="field"><label for="exit-required-quest">Quest Req</label><input id="exit-required-quest" type="text"></div>
+              <div class="field"><label for="exit-lock-message">Lock Msg</label><input id="exit-lock-message" type="text"></div>
+              <div class="field"><label for="exit-boss-gate">Boss Gate</label><input id="exit-boss-gate" type="text"></div>
+            </div>
+            <div class="stack" style="margin-top: 10px;">
+              <button id="sync-exit-form" class="secondary" type="button">Sync Source</button>
+              <button id="open-source-room" class="secondary" type="button">Go to Source</button>
+              <button id="open-destination-room" class="secondary" type="button">Go to Dest</button>
+            </div>
+            <textarea id="exit-json" style="min-height: 100px; margin-top: 10px;"></textarea>
+          </details>
+        </section>
 
-            <section class="related-panel" id="related-content">
-              <h3>Related Content</h3>
-              <p>Shows how the selected room is used by paths, systems, quests, boss gates, fishing, and activities.</p>
-              <div id="related-exits" class="badge-row"></div>
-              <div id="related-systems" class="badge-row"></div>
-              <div id="related-quests" class="badge-row"></div>
-            </section>
+        <section id="editor-tab-entities" class="editor-tab-panel" data-editor-panel="entities">
+          <div id="entity-list" class="selector-list"></div>
+          <div class="field-grid" style="margin-top: 12px;">
+            <div class="field"><label for="entity-id">Id</label><input id="entity-id" type="text"></div>
+            <div class="field"><label for="entity-key">Key</label><input id="entity-key" type="text"></div>
+            <div class="field"><label for="entity-kind">Kind</label><select id="entity-kind"><option value="npc">npc</option><option value="readable">readable</option><option value="interactable">interactable</option></select></div>
+            <div class="field full">
+              <div class="field-label-row">
+                <label for="entity-desc">Description</label>
+                <button id="muse-entity-desc" class="muse" type="button">Suggest</button>
+              </div>
+              <textarea id="entity-desc" style="min-height: 120px;"></textarea>
+            </div>
+          </div>
+          <div class="stack">
+            <button id="write-entity" type="button">Save Entity</button>
+            <button id="diff-entity" class="secondary" type="button">Preview Entity</button>
+            <button id="new-entity" class="secondary" type="button">New Entity</button>
+          </div>
+          <details class="raw-panel" style="margin-top: 12px;">
+            <summary>Advanced & Source</summary>
+            <div class="field-grid" style="margin-top: 10px;">
+              <div class="field"><label for="entity-aliases">Aliases (CSV)</label><input id="entity-aliases" type="text"></div>
+              <div class="field"><label for="entity-gender">Gender</label><select id="entity-gender"><option value="nonbinary">nonbinary</option><option value="male">male</option><option value="female">female</option></select></div>
+              <div class="field"><label for="entity-location">Location</label><select id="entity-location"></select></div>
+            </div>
+            <div class="stack" style="margin-top: 10px;">
+              <button id="sync-entity-form" class="secondary" type="button">Sync Source</button>
+            </div>
+            <textarea id="entity-json" style="min-height: 100px; margin-top: 10px;"></textarea>
+          </details>
+        </section>
 
-            <section id="editor-tab-entities" class="editor-tab-panel" data-editor-panel="entities" role="tabpanel">
-              <h3>Room Entities</h3>
-              <p>Place people, signs, vendors, portals, and interactable objects in the selected room.</p>
-              <div id="entity-list" class="selector-list"></div>
-              <div class="field-grid">
-                <div class="field"><label for="entity-id">Entity Id</label><input id="entity-id" type="text"></div>
-                <div class="field"><label for="entity-key">Entity Key</label><input id="entity-key" type="text"></div>
-                <div class="field"><label for="entity-kind">Entity Kind</label><select id="entity-kind"><option value="npc">npc</option><option value="readable">readable</option><option value="interactable">interactable</option><option value="vendor">vendor</option><option value="portal">portal</option></select></div>
-                <div class="field"><label for="entity-location">Entity Location</label><select id="entity-location"></select></div>
-                <div class="field full"><label for="entity-aliases">Aliases</label><input id="entity-aliases" type="text" placeholder="comma separated, e.g. mayor, elric"></div>
-                <div class="field entity-kind-fields" data-kind-field="npc"><label for="entity-gender">Gender</label><select id="entity-gender"><option value="">Choose gender</option><option value="female">female</option><option value="male">male</option><option value="nonbinary">nonbinary</option></select></div>
-                <div class="field full"><label for="entity-desc">Entity Description</label><textarea id="entity-desc" spellcheck="true"></textarea></div>
-              </div>
-              <div class="editor-toolbar">
-                <button id="new-entity" class="secondary" type="button">New Entity Draft</button>
-                <button id="diff-entity" type="button">Preview Entity Change</button>
-                <button id="write-entity" type="button">Save Entity</button>
-              </div>
-              <details class="raw-panel">
-                <summary>Advanced Source</summary>
-                <textarea id="entity-json" spellcheck="false"></textarea>
-              </details>
-            </section>
+        <section id="editor-tab-path" class="editor-tab-panel" data-editor-panel="path">
+          <div class="stack">
+            <div class="field"><label for="path-source">Source</label><select id="path-source"></select></div>
+            <div class="field"><label for="path-destination">Destination</label><select id="path-destination"></select></div>
+            <div class="field-grid">
+              <div class="field"><label for="path-forward-key">Forward</label><input id="path-forward-key" type="text" placeholder="north"></div>
+              <div class="field"><label for="path-reverse-key">Reverse</label><input id="path-reverse-key" type="text" placeholder="south"></div>
+            </div>
+            <label style="font-size: 0.85rem;"><input id="path-one-way" type="checkbox"> One-way</label>
+            <div id="path-preview" class="status" style="font-size: 0.85rem;">Ready to stage.</div>
+            <div class="stack">
+              <button id="preview-path" class="secondary" type="button">Stage Path Preview</button>
+              <button id="write-path" type="button">Save Path Drafts</button>
+            </div>
           </div>
         </section>
-      </div>
 
-      <div class="panel">
-        <div class="panel-head">
-          <h2>Activity</h2>
-          <p>Shows load results, validation issues, and change previews after you ask for them.</p>
-        </div>
-        <div class="panel-body">
-          <div id="status" class="status">Waiting for room selection.</div>
-          <pre id="output"></pre>
-        </div>
+        <section class="related-panel" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line);">
+          <h3>Context</h3>
+          <div id="related-exits" class="badge-row"></div>
+          <div id="related-quests" class="badge-row"></div>
+        </section>
+
+        <section class="panel" style="margin-top: auto; border: 0; box-shadow: none; background: transparent;">
+          <pre id="output" style="max-height: 120px; font-size: 0.75rem;"></pre>
+        </section>
       </div>
     </section>
   </div>
@@ -643,6 +721,7 @@
     const loadButton = document.getElementById("load-room");
     const diffRoomButton = document.getElementById("diff-room");
     const writeRoomButton = document.getElementById("write-room");
+    const ghostRoomButton = document.getElementById("ghost-room");
     const exitIdInput = document.getElementById("exit-id");
     const exitKeyInput = document.getElementById("exit-key");
     const exitDirectionInput = document.getElementById("exit-direction");
@@ -677,6 +756,7 @@
     const editorTabPanels = Array.from(document.querySelectorAll("[data-editor-panel]"));
     const validateButton = document.getElementById("validate-content");
     const reloadButton = document.getElementById("reload-content");
+    const reloadRoomsButton = document.getElementById("reload-rooms");
     const regionFilter = document.getElementById("region-filter");
     const graphWrap = document.getElementById("graph-wrap");
     const worldGraph = document.getElementById("world-graph");
@@ -706,9 +786,13 @@
     const pathPreview = document.getElementById("path-preview");
     const previewPathButton = document.getElementById("preview-path");
     const writePathButton = document.getElementById("write-path");
-    const relatedExits = document.getElementById("related-exits");
-    const relatedSystems = document.getElementById("related-systems");
     const relatedQuests = document.getElementById("related-quests");
+    const museRoomDescButton = document.getElementById("muse-room-desc");
+    const museEntityDescButton = document.getElementById("muse-entity-desc");
+    const toggleHeat = document.getElementById("toggle-heat");
+    const toggleIcons = document.getElementById("toggle-icons");
+    const toggleIssues = document.getElementById("toggle-issues");
+    const toggleQuests = document.getElementById("toggle-quests");
 
     let rooms = [];
     let exits = [];
@@ -733,7 +817,7 @@
     const GRAPH_MARGIN = 420;
 
     function setBusy(isBusy) {
-      for (const button of [loadButton, diffRoomButton, writeRoomButton, syncExitFormButton, newExitButton, diffExitButton, writeExitButton, syncEntityFormButton, newEntityButton, diffEntityButton, writeEntityButton, validateButton, reloadButton, fitGraphButton, connectRoomsButton, previewPathButton, writePathButton]) {
+      for (const button of [loadButton, diffRoomButton, writeRoomButton, ghostRoomButton, syncExitFormButton, newExitButton, diffExitButton, writeExitButton, syncEntityFormButton, newEntityButton, diffEntityButton, writeEntityButton, validateButton, reloadButton, fitGraphButton, connectRoomsButton, previewPathButton, writePathButton, museRoomDescButton, museEntityDescButton]) {
         if (button) button.disabled = isBusy;
       }
       writePositionButton.disabled = isBusy || !pendingRoomPosition;
@@ -797,40 +881,69 @@
     }
 
     function fillAtmosphereSelect(selectedValue = "") {
-      roomAtmosphereSelect.innerHTML = "";
-      const auto = document.createElement("option");
-      auto.value = "";
-      auto.textContent = "Auto / none";
-      roomAtmosphereSelect.appendChild(auto);
+      const roomId = roomIdInput.value || "";
+      roomAtmosphereSelect.innerHTML = '<option value="">None</option>';
       for (const profile of atmosphereProfiles) {
         const option = document.createElement("option");
         option.value = profile.id;
-        option.textContent = `${profile.label || profile.id}${profile.meta ? ` (${profile.meta})` : ""}`;
+        let label = profile.label;
+        if (!selectedValue && (
+          (roomId.startsWith("blackfen_") && profile.id === "blackfen_rain_fog") ||
+          (roomId.startsWith("old_barrow_") && profile.id === "barrow_darkness") ||
+          (roomId.startsWith("drowned_weir_") && profile.id === "drowned_wrong_light") ||
+          (roomId.includes("chapel") && profile.id === "chapel_lamplight") ||
+          (roomId.includes("observatory") && profile.id === "observatory_lampwork")
+        )) {
+          label += " (Recommended)";
+        }
+        option.textContent = label;
         roomAtmosphereSelect.appendChild(option);
       }
       roomAtmosphereSelect.value = selectedValue || "";
     }
 
-    function renderRooms(filter = "") {
-      const token = filter.trim().toLowerCase();
-      const filtered = rooms.filter((entry) => !token || [entry.id, entry.label, entry.meta].some((value) => String(value || "").toLowerCase().includes(token)));
-      roomList.innerHTML = "";
-      for (const entry of filtered) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "room-row" + (entry.id === selectedRoomId ? " active" : "");
-        button.innerHTML = `<strong>${entry.label || entry.id}</strong><span>${entry.id}${entry.meta ? ` · ${entry.meta}` : ""}</span>`;
-        button.addEventListener("click", () => selectRoom(entry.id, entry.label, entry.meta));
-        roomList.appendChild(button);
+    function getCookie(name) {
+      const prefix = `${name}=`;
+      for (const part of String(document.cookie || "").split(";")) {
+        const trimmed = part.trim();
+        if (trimmed.startsWith(prefix)) return trimmed.substring(prefix.length);
       }
+      return "";
     }
 
     function roomRegion(room) {
       return room.map_region || room.zone || room.meta || "Unmapped";
     }
 
+    async function apiFetch(path, options = {}) {
+      const { allowErrorPayload = false, ...requestOptions } = options;
+      const response = await fetch(`${API_ROOT}${path}`, {
+        credentials: "same-origin",
+        headers: { 
+          "Content-Type": "application/json", 
+          "X-CSRFToken": getCookie("csrftoken"),
+          ...(requestOptions.headers || {}) 
+        },
+        ...requestOptions,
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || (payload.ok === false && !allowErrorPayload)) {
+        throw new Error(payload.error || `Request failed with ${response.status}`);
+      }
+      return payload;
+    }
+
     function roomById(roomId) {
       return rooms.find((room) => room.id === roomId) || null;
+    }
+
+    function renderRooms(token = "") {
+      const filtered = rooms.filter((entry) => {
+        const matchesToken = !token || [entry.id, entry.label, entry.meta].some((value) => String(value || "").toLowerCase().includes(token.toLowerCase()));
+        const matchesRegion = !selectedRegion || roomRegion(entry) === selectedRegion;
+        return matchesToken && matchesRegion;
+      });
+      renderSelector(roomList, filtered, selectedRoomId, (roomId, label, meta) => selectRoom(roomId, label, meta), (entry) => ({ title: entry.label || entry.id, meta: entry.id }));
     }
 
     function selectedRoomIsPersisted() {
@@ -868,8 +981,8 @@
       const maxX = xs.length ? Math.max(...xs) : 0;
       const minY = ys.length ? Math.min(...ys) : 0;
       const maxY = ys.length ? Math.max(...ys) : 0;
-      const width = Math.max(900, (maxX - minX + 1) * MAP_STEP + GRAPH_MARGIN * 2);
-      const height = Math.max(620, (maxY - minY + 1) * MAP_STEP + GRAPH_MARGIN * 2);
+      const width = Math.max(1200, (maxX - minX + 1) * MAP_STEP + GRAPH_MARGIN * 2);
+      const height = Math.max(800, (maxY - minY + 1) * MAP_STEP + GRAPH_MARGIN * 2);
       return {
         width,
         height,
@@ -1068,7 +1181,7 @@
         const draft = {
           aliases: [],
           desc: payload.desc || "",
-          gender: payload.gender || "",
+          gender: payload.gender || (incoming.kind === "world-npc" ? "nonbinary" : ""),
           id: payload.id || `${selectedRoomId || "room"}_${incoming.kind === "world-readable" ? "readable" : "npc"}`,
           key: payload.key || (incoming.kind === "world-readable" ? "Readable" : "NPC"),
           kind: payload.kind || (incoming.kind === "world-readable" ? "readable" : "npc"),
@@ -1157,6 +1270,7 @@
       const coordinateOwners = new Map();
       const issues = [];
       for (const room of visibleRooms) {
+        if (!room.has_desc) issues.push(`Room ${room.id} is missing a description.`);
         const key = `${Number(room.map_x || 0)},${Number(room.map_y || 0)}`;
         const current = coordinateOwners.get(key) || [];
         current.push(room.id);
@@ -1186,6 +1300,38 @@
         const line = document.createElement("div");
         line.textContent = `${issues.length - 10} more issue(s).`;
         graphIssues.appendChild(line);
+      }
+    }
+
+    function drawQuestThreads(visibleRooms, layout, container) {
+      const questToRooms = new Map();
+      for (const room of visibleRooms) {
+        for (const questId of (room.involved_quests || [])) {
+          const list = questToRooms.get(questId) || [];
+          list.push(room);
+          questToRooms.set(questId, list);
+        }
+      }
+      for (const [questId, rooms] of questToRooms.entries()) {
+        if (rooms.length < 2) continue;
+        for (let i = 0; i < rooms.length - 1; i++) {
+          const r1 = rooms[i];
+          const r2 = rooms[i+1];
+          const p1 = roomPoint(r1, layout);
+          const p2 = roomPoint(r2, layout);
+          const x1 = p1.x + NODE_WIDTH / 2;
+          const y1 = p1.y + NODE_HEIGHT / 2;
+          const x2 = p2.x + NODE_WIDTH / 2;
+          const y2 = p2.y + NODE_HEIGHT / 2;
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("class", "quest-thread");
+          line.setAttribute("x1", x1);
+          line.setAttribute("y1", y1);
+          line.setAttribute("x2", x2);
+          line.setAttribute("y2", y2);
+          line.innerHTML = `<title>Quest: ${questId}</title>`;
+          container.appendChild(line);
+        }
       }
     }
 
@@ -1248,6 +1394,10 @@
         const line = drawExitLine(exit, layout, visibleIds, outgoingPairs);
         if (line.hasAttribute("d")) graphLines.appendChild(line);
       }
+      
+      if (toggleQuests.checked) {
+        drawQuestThreads(visibleRooms, layout, graphLines);
+      }
       for (const existing of Array.from(worldGraph.querySelectorAll(".room-node"))) existing.remove();
       const issues = collectGraphIssues(visibleRooms, visibleExits);
       const warningIds = new Set();
@@ -1282,6 +1432,42 @@
         content.appendChild(title);
         content.appendChild(meta);
         node.appendChild(content);
+
+        const iconContainer = document.createElement("div");
+        iconContainer.className = "node-icons";
+        
+        if (toggleIcons.checked) {
+          if (room.activities && room.activities.includes("fishing")) {
+            const icon = document.createElement("div");
+            icon.className = "node-icon";
+            icon.textContent = "🎣";
+            icon.title = "Fishing Spot";
+            iconContainer.appendChild(icon);
+          }
+          if (room.activities && room.activities.includes("cooking")) {
+            const icon = document.createElement("div");
+            icon.className = "node-icon";
+            icon.textContent = "🍳";
+            icon.title = "Cooking Station";
+            iconContainer.appendChild(icon);
+          }
+        }
+
+        if (toggleIssues.checked && warningIds.has(room.id)) {
+          const icon = document.createElement("div");
+          icon.className = "node-icon issue";
+          icon.textContent = "!";
+          icon.title = "Validation Issue";
+          iconContainer.appendChild(icon);
+        }
+
+        if (toggleHeat.checked && room.encounter_count > 0) {
+          if (room.encounter_count >= 3) node.classList.add("heat-high");
+          else if (room.encounter_count >= 2) node.classList.add("heat-med");
+          else node.classList.add("heat-low");
+        }
+
+        node.appendChild(iconContainer);
 
         content.addEventListener("click", () => handleGraphRoomClick(room.id));
         content.addEventListener("pointerdown", (event) => startRoomDrag(event, room.id, layout));
@@ -1481,26 +1667,13 @@
       }
     }
 
-    async function apiFetch(path, options = {}) {
-      const { allowErrorPayload = false, ...requestOptions } = options;
-      const response = await fetch(`${API_ROOT}${path}`, {
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json", ...(requestOptions.headers || {}) },
-        ...requestOptions,
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || (payload.ok === false && !allowErrorPayload)) {
-        throw new Error(payload.error || `Request failed with ${response.status}`);
-      }
-      return payload;
-    }
 
     function buildExitDraft() {
       return { aliases: ["n"], direction: "north", id: `${selectedRoomId || "new_room"}_exit_draft`, key: "north", label: "", source: selectedRoomId || "", destination: "" };
     }
 
     function buildEntityDraft() {
-      return { aliases: [], desc: "", gender: "", id: `${selectedRoomId || "new_room"}_entity_draft`, key: "New Entity", kind: "npc", location: selectedRoomId || "" };
+      return { aliases: [], desc: "", gender: "nonbinary", id: `${selectedRoomId || "new_room"}_entity_draft`, key: "New Entity", kind: "npc", location: selectedRoomId || "" };
     }
 
     function populateRoomForm(payload) {
@@ -1538,7 +1711,7 @@
       entityKindSelect.value = payload.kind || "npc";
       if (payload.location) entityLocationSelect.value = payload.location;
       entityAliasesInput.value = formatCsv(payload.aliases || []);
-      entityGenderSelect.value = payload.gender || "";
+      entityGenderSelect.value = payload.kind === "npc" ? (payload.gender || "nonbinary") : (payload.gender || "");
       entityDescInput.value = payload.desc || "";
       syncEntityKindFields();
     }
@@ -1656,8 +1829,8 @@
         { label: "Entity location", value: payload.location },
         { label: "Entity description", value: payload.desc },
       ]);
-      if (payload.kind === "npc" && !String(payload.gender || "").trim()) {
-        messages.push("NPC gender is required.");
+      if (payload.kind === "npc" && !["male", "female", "nonbinary"].includes(String(payload.gender || "").trim())) {
+        messages.push("NPC gender must be male, female, or nonbinary.");
       }
       if (!showValidation(messages)) {
         setStatus("Entity form is incomplete.", "bad");
@@ -1792,6 +1965,7 @@
         fillRoomSelect(pathDestinationSelect, "", true);
         renderRooms(roomSearch.value);
         renderGraph();
+        console.log(`Loaded ${rooms.length} rooms and ${exits.length} exits.`);
         setStatus(`Loaded ${rooms.length} rooms and ${exits.length} exits.`, "good");
       } catch (error) {
         setStatus(error.message, "bad");
@@ -2039,73 +2213,131 @@
       } finally { setBusy(false); }
     }
 
-    roomSearch.addEventListener("input", () => renderRooms(roomSearch.value));
+    if (roomSearch) roomSearch.addEventListener("input", () => renderRooms(roomSearch.value));
     for (const button of editorTabButtons) {
       button.addEventListener("click", () => setEditorTab(button.dataset.editorTab));
     }
-    loadButton.addEventListener("click", loadPreview);
-    newRoomButton.addEventListener("click", () => createRoomFromDraft(roomDraftFromPoint(graphWrap.getBoundingClientRect().left + graphWrap.clientWidth / 2, graphWrap.getBoundingClientRect().top + graphWrap.clientHeight / 2)));
-    diffRoomButton.addEventListener("click", () => mutateRoom(false));
-    writeRoomButton.addEventListener("click", () => mutateRoom(true));
+    if (loadButton) loadButton.addEventListener("click", loadPreview);
+    if (newRoomButton) newRoomButton.addEventListener("click", () => createRoomFromDraft(roomDraftFromPoint(graphWrap.getBoundingClientRect().left + graphWrap.clientWidth / 2, graphWrap.getBoundingClientRect().top + graphWrap.clientHeight / 2)));
+    if (diffRoomButton) diffRoomButton.addEventListener("click", () => mutateRoom(false));
+    if (writeRoomButton) writeRoomButton.addEventListener("click", () => mutateRoom(true));
     if (syncExitFormButton) syncExitFormButton.addEventListener("click", () => { if (syncExitFormToJson()) setStatus("Exit source updated.", "good"); });
-    newExitButton.addEventListener("click", () => stageExitDraft(buildExitDraft(), "New exit draft staged. Preview or save it from Outgoing Exits."));
-    diffExitButton.addEventListener("click", () => mutateExit(false));
-    writeExitButton.addEventListener("click", () => mutateExit(true));
+    if (newExitButton) newExitButton.addEventListener("click", () => stageExitDraft(buildExitDraft(), "New exit draft staged. Preview or save it from Outgoing Exits."));
+    if (diffExitButton) diffExitButton.addEventListener("click", () => mutateExit(false));
+    if (writeExitButton) writeExitButton.addEventListener("click", () => mutateExit(true));
     if (syncEntityFormButton) syncEntityFormButton.addEventListener("click", () => { if (syncEntityFormToJson()) setStatus("Room object source updated.", "good"); });
-    newEntityButton.addEventListener("click", () => stageEntityDraft(buildEntityDraft(), "New room object draft staged. Preview or save it from Room Entities."));
-    diffEntityButton.addEventListener("click", () => mutateEntity(false));
-    writeEntityButton.addEventListener("click", () => mutateEntity(true));
-    entityKindSelect.addEventListener("change", syncEntityKindFields);
-    validateButton.addEventListener("click", validateContent);
-    reloadButton.addEventListener("click", reloadContent);
-    regionFilter.addEventListener("change", () => { selectedRegion = regionFilter.value; connectSourceRoomId = ""; renderGraph(); fitGraph(); });
+    if (newEntityButton) newEntityButton.addEventListener("click", () => stageEntityDraft(buildEntityDraft(), "New room object draft staged. Preview or save it from Room Entities."));
+    if (diffEntityButton) diffEntityButton.addEventListener("click", () => mutateEntity(false));
+    if (writeEntityButton) writeEntityButton.addEventListener("click", () => mutateEntity(true));
+    if (entityKindSelect) entityKindSelect.addEventListener("change", syncEntityKindFields);
+    if (validateButton) validateButton.addEventListener("click", validateContent);
+    if (reloadButton) reloadButton.addEventListener("click", reloadContent);
+    if (reloadRoomsButton) reloadRoomsButton.addEventListener("click", loadRooms);
+    if (regionFilter) regionFilter.addEventListener("change", () => { 
+      selectedRegion = regionFilter.value; 
+      connectSourceRoomId = ""; 
+      renderRooms(roomSearch.value);
+      renderGraph(); 
+      fitGraph(); 
+    });
     const openRoomMenu = (event, roomId = "") => {
       event.preventDefault();
       event.stopPropagation();
       hideGraphMenu();
       openGraphMenu(event.clientX, event.clientY, roomId);
     };
-    graphWrap.addEventListener("contextmenu", openRoomMenu);
-    graphWrap.addEventListener("click", (event) => {
+    if (graphWrap) graphWrap.addEventListener("contextmenu", openRoomMenu);
+    if (graphWrap) graphWrap.addEventListener("click", (event) => {
       if (worldMode !== "add-room") return;
       if (event.target !== graphWrap && event.target !== worldGraph) return;
       createRoomFromDraft(roomDraftFromPoint(event.clientX, event.clientY));
     });
-    worldGraph.addEventListener("contextmenu", openRoomMenu);
-    graphMenuAddRoom.addEventListener("click", () => {
+    if (worldGraph) worldGraph.addEventListener("contextmenu", openRoomMenu);
+    if (graphMenuAddRoom) graphMenuAddRoom.addEventListener("click", () => {
       if (pendingGraphDraft) createRoomFromDraft(pendingGraphDraft);
       hideGraphMenu();
     });
-    graphMenuDeleteRoom.addEventListener("click", () => {
+    if (graphMenuDeleteRoom) graphMenuDeleteRoom.addEventListener("click", () => {
       const roomId = graphMenuDeleteRoom.dataset.roomId;
       if (roomId) deleteRoom(roomId, true);
       hideGraphMenu();
     });
-    window.addEventListener("resize", hideGraphMenu);
-    window.addEventListener("scroll", hideGraphMenu, true);
-    fitGraphButton.addEventListener("click", fitGraph);
-    connectRoomsButton.addEventListener("click", () => {
+    if (connectRoomsButton) connectRoomsButton.addEventListener("click", () => {
       setWorldMode(worldMode === "path" ? "select" : "path");
       setStatus(worldMode === "path" ? "Create Path mode enabled. Choose a source room." : "Create Path mode disabled.");
     });
-    modeSelectButton.addEventListener("click", () => setWorldMode("select"));
-    modeAddRoomButton.addEventListener("click", () => setWorldMode("add-room"));
-    modePathButton.addEventListener("click", () => setWorldMode("path"));
-    modeMoveButton.addEventListener("click", () => setWorldMode("move"));
-    modeIssuesButton.addEventListener("click", () => setWorldMode("issues"));
-    previewPathButton.addEventListener("click", stageCurrentPathControls);
-    writePathButton.addEventListener("click", writePathDraft);
-    pathSourceSelect.addEventListener("change", () => { pathDraft = null; renderPathPreview(); });
-    pathDestinationSelect.addEventListener("change", () => { pathDraft = null; renderPathPreview(); });
-    pathForwardKeyInput.addEventListener("input", renderPathPreview);
-    pathReverseKeyInput.addEventListener("input", renderPathPreview);
-    pathOneWayInput.addEventListener("change", renderPathPreview);
-    openSourceRoomButton.addEventListener("click", () => openPathRoom(exitSourceSelect.value));
-    openDestinationRoomButton.addEventListener("click", () => openPathRoom(exitDestinationSelect.value));
-    createReverseExitButton.addEventListener("click", stageReverseFromCurrentExit);
-    writePositionButton.addEventListener("click", writePendingPosition);
+    if (modeSelectButton) modeSelectButton.addEventListener("click", () => setWorldMode("select"));
+    if (modeAddRoomButton) modeAddRoomButton.addEventListener("click", () => setWorldMode("add-room"));
+    if (modePathButton) modePathButton.addEventListener("click", () => setWorldMode("path"));
+    if (modeMoveButton) modeMoveButton.addEventListener("click", () => setWorldMode("move"));
+    if (modeIssuesButton) modeIssuesButton.addEventListener("click", () => setWorldMode("issues"));
+    if (previewPathButton) previewPathButton.addEventListener("click", stageCurrentPathControls);
+    if (writePathButton) writePathButton.addEventListener("click", writePathDraft);
+    if (pathSourceSelect) pathSourceSelect.addEventListener("change", () => { pathDraft = null; renderPathPreview(); });
+    if (pathDestinationSelect) pathDestinationSelect.addEventListener("change", () => { pathDraft = null; renderPathPreview(); });
+    if (pathForwardKeyInput) pathForwardKeyInput.addEventListener("input", renderPathPreview);
+    if (pathReverseKeyInput) pathReverseKeyInput.addEventListener("input", renderPathPreview);
+    if (pathOneWayInput) pathOneWayInput.addEventListener("change", renderPathPreview);
+    if (openSourceRoomButton) openSourceRoomButton.addEventListener("click", () => openPathRoom(exitSourceSelect.value));
+    if (openDestinationRoomButton) openDestinationRoomButton.addEventListener("click", () => openPathRoom(exitDestinationSelect.value));
+    if (createReverseExitButton) createReverseExitButton.addEventListener("click", stageReverseFromCurrentExit);
+    if (writePositionButton) writePositionButton.addEventListener("click", writePendingPosition);
     window.addEventListener("pointermove", updateRoomDrag);
     window.addEventListener("pointerup", stopRoomDrag);
+    window.addEventListener("resize", hideGraphMenu);
+    window.addEventListener("scroll", hideGraphMenu, true);
+    fitGraphButton.addEventListener("click", fitGraph);
+
+    museRoomDescButton.addEventListener("click", async () => {
+      try {
+        setBusy(true);
+        const inspiration = await creatorTools.fetchInspiration("room_description", {
+          room_id: roomIdInput.value,
+          zone: roomZoneInput.value
+        });
+        if (inspiration && inspiration.desc) {
+          roomDescInput.value = inspiration.desc;
+          setStatus("The Muse has provided a description.", "good");
+        }
+      } catch (err) {
+        setStatus(err.message, "bad");
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    museEntityDescButton.addEventListener("click", async () => {
+      try {
+        setBusy(true);
+        const inspiration = await creatorTools.fetchInspiration("npc", {
+          room_id: roomIdInput.value,
+          zone: roomZoneInput.value
+        });
+        if (inspiration) {
+          if (inspiration.desc) entityDescInput.value = inspiration.desc;
+          if (inspiration.key && !entityKeyInput.value) entityKeyInput.value = inspiration.key;
+          setStatus("The Muse has suggested NPC details.", "good");
+        }
+      } catch (err) {
+        setStatus(err.message, "bad");
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    ghostRoomButton.addEventListener("click", () => {
+      const roomId = roomIdInput.value;
+      if (!roomId) return;
+      setBusy(true);
+      creatorTools.apiFetch("/codex/ghost", { method: "POST", body: JSON.stringify({ room_id: roomId }) })
+        .then((payload) => {
+          setStatus(payload.message, "good");
+        })
+        .catch((err) => setStatus(err.message, "bad"))
+        .finally(() => setBusy(false));
+    });
+
+    [toggleHeat, toggleIcons, toggleIssues, toggleQuests].forEach(cb => cb.addEventListener("change", renderGraph));
 
     loadRooms().then(fitGraph);
   </script>
