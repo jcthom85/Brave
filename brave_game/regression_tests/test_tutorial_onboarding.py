@@ -13,7 +13,7 @@ from world.resting import room_allows_rest
 from world.browser_views import build_combat_view
 from world.content import get_content_registry
 from world.interactions import get_entity_response
-from world.questing import advance_enemy_defeat, advance_room_visit, ensure_starter_quests, unlock_quest
+from world.questing import advance_enemy_defeat, advance_read_readable, advance_room_visit, ensure_starter_quests, unlock_quest
 from world.questing import get_tracked_quest_payload
 from world.tutorial import (
     TUTORIAL_COMBAT_INTRO_PAGES,
@@ -150,6 +150,18 @@ class TutorialOnboardingTests(unittest.TestCase):
             ],
             popup_payloads,
         )
+
+    def test_reading_evidence_completes_readable_proof_quest(self):
+        character = DummyCharacter()
+        unlock_quest(character, "proof_old_fence_cut_tally")
+
+        self.assertEqual("active", character.db.brave_quests["proof_old_fence_cut_tally"]["status"])
+
+        advance_read_readable(character, "old_fence_cut_tally")
+
+        quest_state = character.db.brave_quests["proof_old_fence_cut_tally"]
+        self.assertEqual("completed", quest_state["status"])
+        self.assertTrue(quest_state["objectives"][0]["completed"])
 
     def test_entering_training_yard_does_not_complete_practice_before_harl(self):
         character = DummyCharacter()

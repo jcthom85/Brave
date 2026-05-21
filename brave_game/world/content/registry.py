@@ -262,6 +262,16 @@ class QuestContentRegistry:
             buckets[region].append(quest_key)
         return grouped
 
+    def get_quests_for_room(self, room_id):
+        involved = []
+        for quest_id, quest in self.quests.items():
+            for obj in quest.get("objectives", []):
+                # Many objectives use 'room_id' or 'location' to ground them
+                if obj.get("room_id") == room_id or obj.get("location") == room_id:
+                    involved.append(quest_id)
+                    break
+        return involved
+
 
 @dataclass(frozen=True)
 class WorldContentRegistry:

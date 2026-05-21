@@ -1,8 +1,8 @@
 {
   "_meta": {
     "last_action": "publish",
-    "last_modified_at": "2026-05-07T23:46:13.900688+00:00",
-    "last_modified_by": "jctest3",
+    "last_modified_at": "2026-05-20T00:08:40.858734+00:00",
+    "last_modified_by": "jctest",
     "last_target": "world",
     "stage": "live"
   },
@@ -2450,6 +2450,7 @@
       "map_x": 1,
       "map_y": 1,
       "safe": false,
+      "world": "Brave",
       "zone": "Blackfen Approach"
     },
     {

@@ -27,6 +27,11 @@ def _prerequisites_met(quest_log, definition):
     return all(quest_log.get(quest_key, {}).get("status") == "completed" for quest_key in definition.get("prerequisites", []))
 
 
+def _is_optional_quest(quest_key):
+    definition = QUEST_CONTENT.quests.get(quest_key, {})
+    return bool(definition.get("optional"))
+
+
 def _count_inventory_item(character, template_id):
     return sum(
         entry.get("quantity", 0)
@@ -323,10 +328,11 @@ def _sync_tracked_quest(character, quest_log, messages):
         character.db.brave_tracked_quest = None
         changed = True
 
-    if suppressed or not active_keys:
+    primary_active_keys = [quest_key for quest_key in active_keys if not _is_optional_quest(quest_key)]
+    if suppressed or not primary_active_keys:
         return changed
 
-    new_tracked = active_keys[0]
+    new_tracked = primary_active_keys[0]
     if getattr(character.db, "brave_tracked_quest", None) != new_tracked:
         character.db.brave_tracked_quest = new_tracked
         changed = True
@@ -380,47 +386,55 @@ def _complete_ready_quests(character, quest_log, messages):
 
 
 def _sync_quest_log(character, quest_log, messages):
-    changed = False
+    if getattr(character.ndb, "brave_syncing_quests", False):
+        return False
+    
+    character.ndb.brave_syncing_quests = True
+    try:
+        changed = False
 
-    for quest_key in QUEST_CONTENT.starting_quests:
-        definition = QUEST_CONTENT.quests.get(quest_key)
-        if not definition:
-            continue
+        for quest_key in QUEST_CONTENT.starting_quests:
+            definition = QUEST_CONTENT.quests.get(quest_key)
+            if not definition:
+                continue
 
-        if (
-            quest_key == "rats_in_the_kettle"
-            and quest_key not in quest_log
-            and not bool(getattr(character.db, "brave_harl_cellar_job_assigned", False))
-        ):
-            continue
-            
-        if quest_key not in quest_log:
-            quest_log[quest_key] = _build_initial_quest_state(character, quest_key, definition, quest_log)
-            changed = True
-        else:
-            changed = _normalize_quest_state(quest_key, quest_log[quest_key]) or changed
             if (
-                quest_log[quest_key].get("status") == "locked"
-                and not definition.get("prerequisites")
+                quest_key == "rats_in_the_kettle"
+                and quest_key not in quest_log
+                and not bool(getattr(character.db, "brave_harl_cellar_job_assigned", False))
             ):
-                # SPECIAL CASE: We don't want rats_in_the_kettle to auto-unlock even if it has no prereqs (it does, but just in case)
-                if quest_key == "rats_in_the_kettle":
-                    continue
-                quest_log[quest_key]["status"] = "active"
+                continue
+                
+            if quest_key not in quest_log:
+                quest_log[quest_key] = _build_initial_quest_state(character, quest_key, definition, quest_log)
                 changed = True
+            else:
+                changed = _normalize_quest_state(quest_key, quest_log[quest_key]) or changed
+                if (
+                    quest_log[quest_key].get("status") == "locked"
+                    and not definition.get("prerequisites")
+                ):
+                    # SPECIAL CASE: We don't want rats_in_the_kettle to auto-unlock even if it has no prereqs (it does, but just in case)
+                    if quest_key == "rats_in_the_kettle":
+                        continue
+                    quest_log[quest_key]["status"] = "active"
+                    changed = True
 
-    while True:
-        progressed = False
-        progressed = _unlock_available_quests(character, quest_log, messages) or progressed
-        progressed = _sync_collect_item_progress(character, quest_log, messages) or progressed
-        progressed = _complete_ready_quests(character, quest_log, messages) or progressed
-        if not progressed:
-            break
-        changed = True
+        while True:
+            progressed = False
+            progressed = _unlock_available_quests(character, quest_log, messages) or progressed
+            progressed = _sync_collect_item_progress(character, quest_log, messages) or progressed
+            progressed = _complete_ready_quests(character, quest_log, messages) or progressed
+            if not progressed:
+                break
+            changed = True
 
-    changed = _sync_tracked_quest(character, quest_log, messages) or changed
+        changed = _sync_tracked_quest(character, quest_log, messages) or changed
 
-    return changed
+        return changed
+    finally:
+        character.ndb.brave_syncing_quests = False
+
 
 
 def ensure_starter_quests(character):
@@ -433,6 +447,7 @@ def ensure_starter_quests(character):
         character.db.brave_quests = quest_log
 
     return quest_log
+
 
 
 def unlock_quest(character, quest_key):

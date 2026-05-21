@@ -309,14 +309,24 @@ def get_entity_response(character, entity, action, is_action=False):
     if is_action and action == "talk" and response:
         speech_line = " ".join(str(response).replace("\n", " ").split())
         if speech_line:
-            sentence_end = min(
-                [index for index in (speech_line.find("."), speech_line.find("!"), speech_line.find("?")) if index >= 0]
-                or [-1]
-            )
-            if sentence_end >= 0:
-                speech_line = speech_line[: sentence_end + 1]
-            if len(speech_line) > 150:
-                speech_line = speech_line[:147].rstrip() + "..."
+            # Find the best cutoff point: the last punctuation within 150 chars,
+            # or just truncate at 150 if no punctuation is found in a good spot.
+            limit = 150
+            if len(speech_line) > limit:
+                # Look for the last punctuation before the limit
+                punctuations = (".", "!", "?")
+                cutoff = -1
+                for i in range(limit - 1, limit - 50, -1):  # Look back up to 50 chars for a sentence break
+                    if speech_line[i] in punctuations:
+                        cutoff = i + 1
+                        break
+                
+                if cutoff > 0:
+                    speech_line = speech_line[:cutoff].strip()
+                else:
+                    # Hard truncate if no punctuation found in the last 50 chars
+                    speech_line = speech_line[:limit-3].rstrip() + "..."
+
 
             from world.browser_panels import broadcast_npc_speech, send_npc_speech_event
 

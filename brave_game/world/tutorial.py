@@ -59,17 +59,17 @@ CLASS_ABILITY_HINTS = {
 LANTERNFALL_WELCOME_PAGES = [
     {
         "title": "A New Hero Arrives!",
-        "text": "Brambleford is a town of warmth and light, but today the shadows are growing long. You are here because the town needs heart, muscle, and a hero. Your journey starts now—let's get you moving!",
+        "text": "The bell sounds before dawn. A lantern is dead on the south road, and Brambleford is counting every hand that can still hold steady.",
         "icon": "auto_awesome",
     },
     {
         "title": "Lanternfall",
-        "text": "The bell hits before dawn. A south road lantern has gone black, and the cart dragged through Brambleford's gate carries cut harness, clawed mud, and fence splinters. Sergeant Tamsin says you can stand, so now the yard finds out whether you can help.",
+        "text": "Cut harness. Clawed mud. Fence splinters. The cart at the gate brings no answers, only proof that something has reached the road.",
         "icon": "bell",
     },
     {
         "title": "No Time To Drift",
-        "text": "Brambleford is warm behind you and wide awake around you. Sergeant Tamsin has one hand on the yard gate and one job for you: get your bearings before panic gets a vote.",
+        "text": "Sergeant Tamsin is waiting in the yard. Get your bearings, take the lesson, and prove you can be useful before the road gets worse.",
         "icon": "explore",
     },
 ]

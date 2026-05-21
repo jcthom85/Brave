@@ -9,6 +9,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
 from world.content import get_content_registry
+from world.content.preview import preview_quest, preview_readable
 from world.content.validation import validate_content_registry
 
 
@@ -50,6 +51,16 @@ class ContentValidationTests(unittest.TestCase):
                             "type": "collect_item",
                             "item_id": "missing_item",
                             "description": "Collect something impossible.",
+                        },
+                        {
+                            "type": "read_readable",
+                            "readable_id": "missing_readable_objective",
+                            "description": "Read missing evidence.",
+                        },
+                        {
+                            "type": "read_readable",
+                            "readable_id": "mira_fenleaf",
+                            "description": "Read the wrong kind of entity.",
                         }
                     ],
                     "rewards": {"items": [{"item": "missing_item", "quantity": 1}]},
@@ -139,6 +150,8 @@ class ContentValidationTests(unittest.TestCase):
         self.assertTrue(any("Item militia_blade references unknown allowed class" in error for error in errors))
         self.assertTrue(any("has unknown prerequisite" in error for error in errors))
         self.assertTrue(any("collects unknown item" in error for error in errors))
+        self.assertTrue(any("reads unknown readable entity" in error for error in errors))
+        self.assertTrue(any("read_readable objective requires readable entity kind" in error for error in errors))
         self.assertTrue(any("rewards unknown item" in error for error in errors))
         self.assertTrue(any("unknown source room" in error for error in errors))
         self.assertTrue(any("unknown location room" in error for error in errors))
@@ -270,3 +283,22 @@ class ContentValidationTests(unittest.TestCase):
         self.assertTrue(any("Room hidden_draft_room is unreachable from live start roots" in error for error in errors))
         self.assertTrue(any("Map region brambleford has inconsistent zone label casing" in error for error in errors))
         self.assertFalse(any("waivered_isolated_room" in error for error in errors))
+
+    def test_readable_objective_preview_links_evidence(self):
+        quest_preview = preview_quest("proof_old_fence_cut_tally")
+        self.assertIsNotNone(quest_preview)
+        self.assertTrue(
+            any(
+                readable["entity_id"] == "old_fence_cut_tally"
+                for readable in quest_preview["linked_content"]["readables"]
+            )
+        )
+
+        readable_preview = preview_readable("old_fence_cut_tally")
+        self.assertIsNotNone(readable_preview)
+        self.assertTrue(
+            any(
+                quest["quest_key"] == "proof_old_fence_cut_tally"
+                for quest in readable_preview["quest_links"]
+            )
+        )

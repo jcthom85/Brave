@@ -449,6 +449,7 @@
         count: data.count || 1,
         enemy_tag: data.enemy_tag || '',
         npc_id: data.npc_id || '',
+        readable_id: data.readable_id || '',
       };
     }
 
@@ -518,7 +519,7 @@
       typeField.className = 'field';
       typeField.innerHTML = '<label>Objective Type</label>';
       const typeSelect = document.createElement('select');
-      for (const value of ['visit_room', 'collect_item', 'defeat_enemy', 'talk_to_npc']) {
+      for (const value of ['visit_room', 'collect_item', 'defeat_enemy', 'talk_to_npc', 'read_readable']) {
         const option = document.createElement('option');
         option.value = value;
         option.textContent = value.replace(/_/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase());
@@ -530,17 +531,28 @@
         if (row.type === 'visit_room') {
           row.item_id = '';
           row.enemy_tag = '';
+          row.npc_id = '';
+          row.readable_id = '';
         } else if (row.type === 'collect_item') {
           row.room_id = '';
           row.enemy_tag = '';
+          row.npc_id = '';
+          row.readable_id = '';
         } else if (row.type === 'defeat_enemy') {
           row.room_id = '';
           row.item_id = '';
           row.npc_id = '';
+          row.readable_id = '';
+        } else if (row.type === 'talk_to_npc') {
+          row.room_id = '';
+          row.item_id = '';
+          row.enemy_tag = '';
+          row.readable_id = '';
         } else {
           row.room_id = '';
           row.item_id = '';
           row.enemy_tag = '';
+          row.npc_id = '';
         }
         renderObjectiveRows();
         updateQuestSummary();
@@ -614,7 +626,7 @@
         tagInput.addEventListener('input', () => { row.enemy_tag = tagInput.value; updateQuestSummary(); });
         tagField.appendChild(tagInput);
         targetRow.appendChild(tagField);
-      } else {
+      } else if (row.type === 'talk_to_npc') {
         const npcField = document.createElement('div');
         npcField.className = 'field';
         npcField.innerHTML = '<label>NPC / Entity Target</label>';
@@ -628,12 +640,26 @@
         npcSelect.addEventListener('change', () => { row.npc_id = npcSelect.value; updateQuestSummary(); });
         npcField.appendChild(npcSelect);
         targetRow.appendChild(npcField);
+      } else {
+        const readableField = document.createElement('div');
+        readableField.className = 'field';
+        readableField.innerHTML = '<label>Readable Target</label>';
+        const readableSelect = document.createElement('select');
+        fillSelect(readableSelect, entities.filter((entry) => entry.meta === 'readable'), {
+          placeholder: 'Select readable',
+          includeBlank: true,
+          selectedValue: row.readable_id,
+          labelBuilder: (entry) => `${entry.label || entry.id} (${entry.id})`,
+        });
+        readableSelect.addEventListener('change', () => { row.readable_id = readableSelect.value; updateQuestSummary(); });
+        readableField.appendChild(readableSelect);
+        targetRow.appendChild(readableField);
       }
       card.appendChild(targetRow);
 
       const hint = document.createElement('div');
       hint.className = 'objective-hint';
-      hint.textContent = row.type === 'visit_room' ? 'The player must reach a specific room.' : row.type === 'collect_item' ? 'The player must collect a specific item.' : row.type === 'defeat_enemy' ? 'The player must defeat enemies with the matching tag.' : 'The player must talk to a specific NPC/entity.';
+      hint.textContent = row.type === 'visit_room' ? 'The player must reach a specific room.' : row.type === 'collect_item' ? 'The player must collect a specific item.' : row.type === 'defeat_enemy' ? 'The player must defeat enemies with the matching tag.' : row.type === 'talk_to_npc' ? 'The player must talk to a specific NPC/entity.' : 'The player must read a specific readable object.';
       card.appendChild(hint);
       objectiveList.appendChild(card);
     }
@@ -738,9 +764,12 @@
             const tag = row.enemy_tag || 'no enemy tag selected';
             const suggestion = enemyTags.find((entry) => entry.id === tag.toLowerCase());
             pill.textContent = `${row.description || 'Defeat enemy'} · ${suggestion ? suggestion.label : tag}`;
-          } else {
+          } else if (row.type === 'talk_to_npc') {
             const entity = entities.find((entry) => entry.id === row.npc_id);
             pill.textContent = `${row.description || 'Talk to NPC'} · ${(entity && entity.label) || row.npc_id || 'no NPC/entity selected'}`;
+          } else {
+            const readable = entities.find((entry) => entry.id === row.readable_id);
+            pill.textContent = `${row.description || 'Read object'} · ${(readable && readable.label) || row.readable_id || 'no readable selected'}`;
           }
         }
         objectivePreview.appendChild(pill);
@@ -786,6 +815,8 @@
             payload.enemy_tag = row.enemy_tag.trim();
           } else if (row.type === 'talk_to_npc') {
             payload.npc_id = row.npc_id;
+          } else if (row.type === 'read_readable') {
+            payload.readable_id = row.readable_id;
           }
           return payload;
         }),
@@ -846,6 +877,7 @@
         }
         if (row.type === 'defeat_enemy' && !String(row.enemy_tag || '').trim()) messages.push(`Objective ${index + 1} enemy tag is required.`);
         if (row.type === 'talk_to_npc' && !String(row.npc_id || '').trim()) messages.push(`Objective ${index + 1} NPC/entity target is required.`);
+        if (row.type === 'read_readable' && !String(row.readable_id || '').trim()) messages.push(`Objective ${index + 1} readable target is required.`);
       });
       rewardRows.forEach((row, index) => {
         if (!row.item) messages.push(`Reward Item ${index + 1} must have an item selected.`);
@@ -881,6 +913,7 @@
       if (kind === 'quest-reward') return JSON.stringify({ item: data.template_id || data.item || 'item_key', quantity: 1 }, null, 2);
       if (kind === 'enemy-objective') return JSON.stringify({ type: 'defeat_enemy', enemy_tag: data.enemy_tag || 'enemy_tag', description: 'Defeat the marked enemies.' }, null, 2);
       if (kind === 'dialogue-hook') return JSON.stringify({ type: 'talk_to_npc', npc_id: data.entity_id || data.id || 'npc_id', description: 'Talk to the NPC.' }, null, 2);
+      if (kind === 'readable-objective') return JSON.stringify({ type: 'read_readable', readable_id: data.entity_id || data.id || 'readable_id', description: 'Read the evidence.' }, null, 2);
       return JSON.stringify(data, null, 2);
     }
 
@@ -936,6 +969,7 @@
           ],
           enemies: objectiveRows.filter((row) => row.type === 'defeat_enemy' && row.enemy_tag).map((row) => ({ enemy_tag: row.enemy_tag, name: (enemyTags.find((entry) => entry.id === row.enemy_tag) || {}).label, role: 'objective' })),
           entities: objectiveRows.filter((row) => row.type === 'talk_to_npc' && row.npc_id).map((row) => ({ entity_id: row.npc_id, name: (entities.find((entry) => entry.id === row.npc_id) || {}).label, role: 'objective' })),
+          readables: objectiveRows.filter((row) => row.type === 'read_readable' && row.readable_id).map((row) => ({ entity_id: row.readable_id, name: (entities.find((entry) => entry.id === row.readable_id) || {}).label, role: 'objective' })),
           prerequisites: prerequisiteRows.filter((row) => row.value).map((row) => ({ quest_key: row.value, title: (quests.find((entry) => entry.id === row.value) || {}).label })),
         };
       }
@@ -943,6 +977,7 @@
       for (const item of linked.items || []) addLinkCard(item.name || item.template_id, `Item ${item.role}: ${item.template_id}`, '/creator/items/', payloadSnippet('quest-reward', item), 'quest-reward');
       for (const enemy of linked.enemies || []) addLinkCard(enemy.name || enemy.enemy_tag, `Enemy objective tag: ${enemy.enemy_tag}`, '/creator/encounters/', payloadSnippet('enemy-objective', enemy), 'quest-defeat');
       for (const entity of linked.entities || []) addLinkCard(entity.name || entity.entity_id, `Dialogue/NPC objective: ${entity.entity_id}`, '/creator/dialogue/', payloadSnippet('dialogue-hook', entity), 'quest-talk-objective');
+      for (const readable of linked.readables || []) addLinkCard(readable.name || readable.entity_id, `Readable objective: ${readable.entity_id}`, '/creator/dialogue/', payloadSnippet('readable-objective', readable), 'quest-readable-objective');
       for (const prereq of linked.prerequisites || []) addLinkCard(prereq.title || prereq.quest_key, `Prerequisite quest: ${prereq.quest_key}`, '/creator/quests/', '');
       if (!questLinkGrid.children.length) {
         addLinkCard('No linked content yet', 'Add an objective or reward to generate builder links and payload snippets.', null, payloadSnippet('quest-gated-exit'));
@@ -960,6 +995,9 @@
       } else if (incoming.kind === 'quest-talk-objective') {
         objectiveRows.push(createObjectiveRow({ type: 'talk_to_npc', description: payload.description || 'Talk to the NPC.', npc_id: payload.npc_id || payload.entity_id || payload.id || '' }));
         renderObjectiveRows();
+      } else if (incoming.kind === 'quest-readable-objective') {
+        objectiveRows.push(createObjectiveRow({ type: 'read_readable', description: payload.description || 'Read the evidence.', readable_id: payload.readable_id || payload.entity_id || payload.id || '' }));
+        renderObjectiveRows();
       } else {
         return false;
       }
@@ -970,6 +1008,7 @@
     creatorTools.registerApplyHandler('quest-reward', applyQuestIncoming);
     creatorTools.registerApplyHandler('quest-defeat', applyQuestIncoming);
     creatorTools.registerApplyHandler('quest-talk-objective', applyQuestIncoming);
+    creatorTools.registerApplyHandler('quest-readable-objective', applyQuestIncoming);
 
     function applyQuestPreset(preset) {
       setActivePreset(preset);

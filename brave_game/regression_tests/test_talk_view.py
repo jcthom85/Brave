@@ -27,6 +27,7 @@ class DummyNPC:
 
 class DummyCharacter:
     def __init__(self):
+        self.ndb = SimpleNamespace()
         self.location = SimpleNamespace(
             db=SimpleNamespace(brave_world="Brave", brave_zone="Brambleford")
         )

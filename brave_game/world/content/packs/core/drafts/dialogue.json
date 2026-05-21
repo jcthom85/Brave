@@ -1,19 +1,21 @@
 {
   "_meta": {
-    "last_action": "publish",
-    "last_modified_at": "2026-05-07T23:46:13.910818+00:00",
-    "last_modified_by": "jctest3",
-    "last_target": "dialogue",
-    "stage": "live"
+    "last_action": "remove",
+    "last_modified_at": "2026-05-20T20:32:38.452475+00:00",
+    "last_modified_by": "codex-cli",
+    "last_target": "test_mayors_hall_clerk",
+    "stage": "draft"
   },
   "static_read_responses": {
     "barrow_marker_stone": "The lichen-sunk stone reads: HERE KEEP FAITH WITH THE OLD FIELD. DISTURB NOTHING. LIGHT YOUR LANTERN. LEAVE BEFORE THE LAST BELL. One lower name strip has worked loose, and the dirt beneath it is cleaner than the grave around it should allow.",
+    "barrow_votive_ring": "Most of the chapel candles died normally. The ones nearest the dais have wax trails climbing the stone against gravity, each thread pointing toward Edric's slab like a finger that lost patience.",
     "blackreed_standard": "A black marsh reed is stitched over a split road line. Not heraldry. A toll notice in cloth, declaring who gets to pass beneath this hill and who gets left in the rain.",
     "blackwater_lens_frame": "The lens frame is bent around a cold white core like the brass tried to hold the light in place and learned too late that it was the part being reshaped instead.",
     "boglight_lantern": "The lantern cage is cold, but something pale still clings to the green glass from the inside. One scratched note on the hook reads: IF IT LOOKS LIKE A GUIDE LIGHT, IT ISN'T.",
     "carrion_stake_circle": "Most of the stakes were hammered by anxious human hands. The newer cuts across them were not. A crow skull has been tied to the tallest one with reed cord and black bog thread.",
     "cellar_warning_slate": "Uncle Pib's chalk scrawl reads: IF YOU ARE HOLDING THIS SLATE, THE RATS HAVE NOT EATEN YOU. GOOD. CLEAR THEM OUT BEFORE THEY RUIN THE STORES. IF THE ROAD STAYS CUT, FLOUR BECOMES STRATEGIC.",
     "dawn_bell": "The bell's bronze lip is etched with a prayer worn soft by generations of hands: LET MORNING FIND US, LET MEMORY REST, LET THE LOST HEAR THE WAY HOME. Those who kneel beneath it before a hard road still say the chapel answers. Pray if you mean to test that.",
+    "drifted_reed_tags": "Mira's survey knots are clean and identical, but the tags sit at three different heights. The reeds did not grow that way overnight. Something moved the marks without using the mud.",
     "drowned_survey_marker": "The old survey cut reads: SOUTH WEIR LINE / BLACKWATER FEED / LAMP HOUSE EAST. A newer scratch over it is less official and more useful: IF THE LIGHT IS STILL BURNING, TURN IT WRONGER OR TURN IT OFF.",
     "edrics_slab": "The cracked slab still carries a knightly carving beneath the moss: SIR EDRIC VALE, WHO HELD THE LINE UNTIL THE LINE OUTLIVED HIM.",
     "family_post_sign": "The sign names the family post as a rally point for new hands, visiting kin, and anyone still learning which gate leads to work and which gate leads to trouble.",
@@ -47,12 +49,14 @@
     "tutorial_supply_board": "Quartermaster notes list loaner gear, bandage counts, and the rule written twice in darker chalk: take what keeps you alive, return what keeps the next person alive too.",
     "watchtower_warning_post": "The old carving reads: BORDER WATCH POST THREE. KEEP FIRE LOW. SIGNAL SOUTH IF THE RIDGE MOVES. Someone newer has cut a reply beneath it: TOO LATE FOR THAT.",
     "weir_keepers_plaque": "The greened plaque reads: KEEP SOUTH LIGHT TRIMMED. HOLD THE LOCK LINE. MAINTAIN NIGHT SIGNAL FOR BRAMBLEFORD APPROACH. The words are ordinary civic orders. The wet brass around them is not.",
-    "woods_wardstone": "The chalk marks are fresh enough to smear under a thumb. Beneath the warning DO NOT FOLLOW THE QUIET, an older cut mark faces west toward the barrow route: a boundary sign, not a prayer. Someone has recently rubbed charcoal over it and stopped before the line could flake away.",
-    "barrow_votive_ring": "Most of the chapel candles died normally. The ones nearest the dais have wax trails climbing the stone against gravity, each thread pointing toward Edric's slab like a finger that lost patience.",
-    "drifted_reed_tags": "Mira's survey knots are clean and identical, but the tags sit at three different heights. The reeds did not grow that way overnight. Something moved the marks without using the mud."
+    "woods_wardstone": "The chalk marks are fresh enough to smear under a thumb. Beneath the warning DO NOT FOLLOW THE QUIET, an older cut mark faces west toward the barrow route: a boundary sign, not a prayer. Someone has recently rubbed charcoal over it and stopped before the line could flake away."
   },
   "talk_rules": {
     "brother_alden": [
+      {
+        "completed": "proof_barrow_votive_ring",
+        "text": "\"Wax does not climb stone unless something is answering from beneath it. The votive ring gives the chapel a direction, and direction is better than dread.\""
+      },
       {
         "active": "names_under_dusk",
         "text": "\"The old field is not waking as an army. That would be simpler and worse in a more honest way. Start at Marker Row, find the loose name, and see whether the circle beyond it has begun answering. Bring me proof before I turn fear into prayer and call it wisdom.\""
@@ -90,6 +94,10 @@
       }
     ],
     "captain_harl_rowan": [
+      {
+        "completed": "proof_numbered_signal_arrows",
+        "text": "\"Numbered arrows mean command work. Blackreed was measuring roads, not just firing from them. That turns a robbery problem into a position problem. Good find.\""
+      },
       {
         "active": "the_ridge_tally",
         "text": "\"Blackreed is not just robbing wagons if he has the old tower organized. Get to the ledge, check the breach yard, and bring me anything that reads like a count. A thief takes. A commander sorts first.\""
@@ -201,6 +209,10 @@
       }
     ],
     "joss_veller": [
+      {
+        "completed": "proof_sluice_work_order_plate",
+        "text": "\"Coilback-seven on a civic plate is not a ghost story. It is an old order still being obeyed after everyone with sense stopped signing work slips. That gives me a lever.\""
+      },
       {
         "active": "clamp_marks_under_blackwater",
         "text": "\"The shard says the line is carrying orders. I need the clamp that held those orders to the stone. Check the causeway sockets, then the Sluice Walk. If the stamps match, this is a public work gone wrong, not a ghost with theatrical habits.\""
@@ -351,6 +363,14 @@
     ],
     "mira_fenleaf": [
       {
+        "completed": "proof_old_fence_cut_tally",
+        "text": "\"That tally is ugly in the useful way. Ruk was counting cuts, rails, and wagon marks because the road was a plan to him, not a tantrum. Good. Now we can answer a plan with one of our own.\""
+      },
+      {
+        "completed": "proof_drifted_reed_tags",
+        "text": "\"Those reed tags moved without mud taking credit. That means the marsh is being handled, not merely haunted. I hate that distinction, but it tells us where to look next.\""
+      },
+      {
         "active": "marks_that_drift",
         "text": "\"The Reedflats tags should hold still unless water or hands move them. They are not holding still. Check them against Carrion Rise, then watch Boglight Hollow. If the lights move against the wind, the marsh is misreading the road for us.\""
       },
@@ -486,6 +506,10 @@
     ],
     "sister_maybelle": [
       {
+        "completed": "proof_moonleaf_warning_ribbon",
+        "text": "\"The ribbon confirms it, then. The moonleaf is not afraid of the woods. It is leaning away from the barrows. I will send Alden the gentle version, which is still going to ruin his afternoon.\""
+      },
+      {
         "active": "chalk_for_the_quiet_stone",
         "text": "\"Take this chalk and do not make it dramatic. Find the old stone path, copy the mark cleanly, and bring back a moonleaf sprig if the roots are still growing wrong around it. If the warning faces the barrows, I want to know before Alden has to pretend he is not worried.\""
       },
@@ -542,6 +566,10 @@
       }
     ],
     "uncle_pib_underbough": [
+      {
+        "completed": "proof_sludge_run_flour_sack",
+        "text": "\"That is my flour mark wearing goblin sludge like a bad hat. If they are sorting stolen food under the road, they are not scavenging. They are supplying. I dislike the difference very much.\""
+      },
       {
         "active": "what_the_pot_took",
         "text": "\"If the goblins have a whole kitchen under the road, I would like to know whether it is eating my kitchen. Look through the midden and that feast hall of theirs. Bring back a label, a sack scrap, anything with a town mark on it. Preferably not the soup.\""

@@ -121,6 +121,7 @@ def _validate_item_content(registry, errors):
 def _validate_quest_content(registry, errors):
     items = registry.items
     quests = registry.quests
+    entity_by_id = {str(entity.get("id") or ""): entity for entity in registry.world.entities}
 
     for quest_key in quests.starting_quests:
         if quest_key not in quests.quests:
@@ -139,11 +140,20 @@ def _validate_quest_content(registry, errors):
         for objective in definition.get("objectives", []):
             if objective.get("type") == "talk_to_npc":
                 npc_id = str(objective.get("npc_id") or "").strip()
-                entity_ids = {str(entity.get("id") or "") for entity in registry.world.entities}
                 if not npc_id:
                     errors.append(f"Quest {quest_key} has a talk_to_npc objective without an npc_id")
-                elif npc_id not in entity_ids:
+                elif npc_id not in entity_by_id:
                     errors.append(f"Quest {quest_key} talks to unknown NPC/entity: {npc_id}")
+                continue
+            if objective.get("type") == "read_readable":
+                readable_id = str(objective.get("readable_id") or "").strip()
+                entity = entity_by_id.get(readable_id)
+                if not readable_id:
+                    errors.append(f"Quest {quest_key} has a read_readable objective without a readable_id")
+                elif not entity:
+                    errors.append(f"Quest {quest_key} reads unknown readable entity: {readable_id}")
+                elif entity.get("kind") != "readable":
+                    errors.append(f"Quest {quest_key} read_readable objective requires readable entity kind: {readable_id}")
                 continue
             if objective.get("type") != "collect_item":
                 if objective.get("type") == "defeat_enemy":

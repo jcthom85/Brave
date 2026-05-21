@@ -325,6 +325,7 @@ def preview_quest(quest_key, registry=None):
     linked_items = []
     linked_enemies = []
     linked_entities = []
+    linked_readables = []
     for objective in quest.get("objectives", []):
         entry = dict(objective)
         item_id = objective.get("item_id")
@@ -345,6 +346,11 @@ def preview_quest(quest_key, registry=None):
             entity = next((entity for entity in registry.world.entities if entity.get("id") == npc_id), {})
             entry["npc_name"] = entity.get("key")
             linked_entities.append({"entity_id": npc_id, "name": entry.get("npc_name"), "role": "objective", "room_id": entity.get("location")})
+        readable_id = objective.get("readable_id")
+        if readable_id:
+            entity = registry.world.get_entity(readable_id) or {}
+            entry["readable_name"] = entity.get("key")
+            linked_readables.append({"entity_id": readable_id, "name": entry.get("readable_name"), "role": "objective", "room_id": entity.get("location")})
         objectives.append(entry)
 
     rewards = []
@@ -361,7 +367,7 @@ def preview_quest(quest_key, registry=None):
     ]
     route = []
     for index, objective in enumerate(objectives, start=1):
-        target_name = objective.get("room_name") or objective.get("item_name") or objective.get("enemy_name") or objective.get("npc_name") or objective.get("room_id") or objective.get("item_id") or objective.get("enemy_tag") or objective.get("npc_id") or "No target"
+        target_name = objective.get("room_name") or objective.get("item_name") or objective.get("enemy_name") or objective.get("npc_name") or objective.get("readable_name") or objective.get("room_id") or objective.get("item_id") or objective.get("enemy_tag") or objective.get("npc_id") or objective.get("readable_id") or "No target"
         route.append({"step": index, "type": objective.get("type"), "description": objective.get("description"), "target": target_name})
 
     return {
@@ -378,6 +384,7 @@ def preview_quest(quest_key, registry=None):
             "items": linked_items,
             "enemies": linked_enemies,
             "entities": linked_entities,
+            "readables": linked_readables,
             "prerequisites": prerequisites,
         },
     }
@@ -500,13 +507,32 @@ def preview_readable(entity_id, registry=None):
         return None
     room_id = entity.get("location")
     room = registry.world.get_room(room_id) if room_id else None
+    quest_links = []
+    for quest_key, quest in registry.quests.quests.items():
+        objectives = [
+            dict(objective)
+            for objective in quest.get("objectives", [])
+            if objective.get("readable_id") == entity_id
+        ]
+        if objectives:
+            quest_links.append(
+                {
+                    "quest_key": quest_key,
+                    "title": quest.get("title", quest_key),
+                    "region": registry.quests.get_quest_region(quest_key),
+                    "objective_count": len(objectives),
+                    "objectives": objectives,
+                }
+            )
     return {
         "entity": entity,
         "room": room,
         "text": registry.dialogue.get_static_read_response(entity_id),
+        "quest_links": quest_links,
         "linked_content": {
             "room": {"room_id": room_id, "name": room.get("key")} if room else None,
             "entity_kind": entity.get("kind"),
+            "quests": quest_links,
         },
     }
 
