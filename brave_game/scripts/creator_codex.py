@@ -264,11 +264,21 @@ def run_batch_payload(source, *, review_note=None):
     }
 
 
+def publish_payload(domain=None):
+    from commands.brave_creator import publish_content
+
+    mutations = publish_content(domain, author="codex-cli")
+    return {"ok": True, "published": [m.domain for m in mutations]}
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="Use Brave Creator draft tools from Codex CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("context")
     subparsers.add_parser("drift")
+
+    publish = subparsers.add_parser("publish")
+    publish.add_argument("domain", nargs="?", help="Optional domain to publish (world, items, etc.).")
 
     recipes = subparsers.add_parser("recipes")
     recipes.add_argument("kind", nargs="?", help="Optional mutation kind to print.")
@@ -328,6 +338,8 @@ def main(argv=None):
         _print(context_payload())
     elif args.command == "drift":
         _print(drift_payload())
+    elif args.command == "publish":
+        _print(publish_payload(args.domain))
     elif args.command == "recipes":
         _print(recipes_payload(args.kind))
     elif args.command == "preview":

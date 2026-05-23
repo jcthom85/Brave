@@ -72,6 +72,7 @@ def _item(
     marker_icon=None,
     on_open_command=None,
     dismiss_bubble_speaker=None,
+    shimmer=False,
 ):
     item = {"text": text}
     if icon:
@@ -106,6 +107,8 @@ def _item(
         item["on_open_command"] = on_open_command
     if dismiss_bubble_speaker:
         item["dismiss_bubble_speaker"] = dismiss_bubble_speaker
+    if shimmer:
+        item["shimmer"] = True
     return item
 
 def _line(text, *, icon=None):
@@ -200,6 +203,7 @@ def _entry(
     rarity_label=None,
     rarity_tone=None,
     rarity_target=None,
+    shimmer=False,
 ):
     entry = {
         "title": title,
@@ -215,6 +219,8 @@ def _entry(
         entry["hide_icon"] = True
     if selected:
         entry["selected"] = True
+    if shimmer:
+        entry["shimmer"] = True
     if combat_state:
         entry["combat_state"] = list(combat_state)
     if entry_ref:

@@ -5,6 +5,7 @@ from collections import deque
 from evennia.utils import search
 
 from world.content import get_content_registry
+from world.questing import is_objective_revealed
 from world.resting import room_allows_rest
 
 
@@ -268,6 +269,8 @@ def _tracked_quest_room_ids(character):
     state_objectives = active_state.get("objectives") or []
     room_ids = set()
     for index, objective in enumerate(objectives):
+        if not is_objective_revealed(active_state, index, objective):
+            continue
         objective_state = state_objectives[index] if index < len(state_objectives) else {}
         if objective_state.get("completed"):
             continue

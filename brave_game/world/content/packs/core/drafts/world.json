@@ -1,9 +1,9 @@
 {
   "_meta": {
-    "last_action": "remove",
-    "last_modified_at": "2026-05-20T20:32:38.441892+00:00",
+    "last_action": "upsert",
+    "last_modified_at": "2026-05-21T21:23:53.942297+00:00",
     "last_modified_by": "codex-cli",
-    "last_target": "test_mayors_hall_clerk",
+    "last_target": "tutorial_respawn_note",
     "stage": "draft"
   },
   "entities": [
@@ -716,6 +716,19 @@
       "key": "damaged cart",
       "kind": "readable",
       "location": "tutorial_wayfarers_yard"
+    },
+    {
+      "aliases": [
+        "note",
+        "scrawled note",
+        "rough note",
+        "paper"
+      ],
+      "desc": "A rough note is nailed to one of the timber posts, its edges curled and stained by feed and damp straw.",
+      "id": "tutorial_respawn_note",
+      "key": "scrawled note",
+      "kind": "readable",
+      "location": "tutorial_vermin_pens"
     },
     {
       "aliases": [
@@ -2632,8 +2645,8 @@
       "key": "Lower Lanternworks",
       "map_icon": "L",
       "map_region": "brambleford",
-      "map_x": 0,
-      "map_y": 0,
+      "map_x": 2,
+      "map_y": 1,
       "safe": true,
       "world": "Brave",
       "zone": "Brambleford"

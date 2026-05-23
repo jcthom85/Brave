@@ -113,6 +113,68 @@ class JournalViewTests(unittest.TestCase):
         self.assertNotIn("Tutorial", labels)
         self.assertNotIn("Completed Quests", labels)
 
+    def test_journal_view_hides_unrevealed_quest_objectives(self):
+        character = DummyCharacter(
+            quests={"rats_in_the_kettle": _quest_state("rats_in_the_kettle", "active")},
+            tracked="rats_in_the_kettle",
+            tutorial={"status": "inactive", "step": None, "flags": {}},
+        )
+
+        view = build_quests_view(character)
+        tracked_lines = view.get("sections", [])[1].get("items", [])[0].get("lines", [])
+
+        self.assertEqual(
+            ["Talk to Uncle Pib Underbough."],
+            [line.get("text") for line in tracked_lines if isinstance(line, dict)],
+        )
+
+        character.db.brave_quests["rats_in_the_kettle"]["objectives"][0]["completed"] = True
+        character.db.brave_quests["rats_in_the_kettle"]["objectives"][0]["progress"] = 1
+        view = build_quests_view(character)
+        tracked_lines = view.get("sections", [])[1].get("items", [])[0].get("lines", [])
+
+        self.assertEqual(
+            [
+                "Talk to Uncle Pib Underbough.",
+                "Head down into the Rat and Kettle Cellar beneath the inn.",
+                "Defeat 3 thorn rats before they ruin more stores. (0/3)",
+            ],
+            [line.get("text") for line in tracked_lines if isinstance(line, dict)],
+        )
+
+    def test_journal_view_migrates_old_rats_objective_state(self):
+        old_state = {
+            "status": "active",
+            "objectives": [
+                {
+                    "description": "Head down into the Rat and Kettle Cellar beneath the inn.",
+                    "completed": False,
+                    "progress": 0,
+                    "required": 1,
+                },
+                {
+                    "description": "Defeat 3 thorn rats before they ruin more stores.",
+                    "completed": False,
+                    "progress": 0,
+                    "required": 3,
+                },
+            ],
+        }
+        character = DummyCharacter(
+            quests={"rats_in_the_kettle": old_state},
+            tracked="rats_in_the_kettle",
+            tutorial={"status": "inactive", "step": None, "flags": {}},
+        )
+
+        view = build_quests_view(character)
+        tracked_lines = view.get("sections", [])[1].get("items", [])[0].get("lines", [])
+
+        self.assertEqual(
+            ["Talk to Uncle Pib Underbough."],
+            [line.get("text") for line in tracked_lines if isinstance(line, dict)],
+        )
+        self.assertEqual("Talk to Uncle Pib Underbough.", old_state["objectives"][0]["description"])
+
     def test_journal_view_switches_to_completed_regions(self):
         completed_key = STARTING_QUESTS[1]
         later_completed_key = "bridgework_for_joss"

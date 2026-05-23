@@ -1,153 +1,74 @@
 {
   "_meta": {
     "last_action": "publish",
-    "last_modified_at": "2026-05-20T00:08:40.858734+00:00",
-    "last_modified_by": "jctest",
+    "last_modified_at": "2026-05-21T21:24:47.371211+00:00",
+    "last_modified_by": "codex-cli",
     "last_target": "world",
     "stage": "live"
   },
   "entities": [
     {
       "aliases": [
-        "board",
-        "notice board",
-        "notices"
+        "marker stone",
+        "marker",
+        "stone"
       ],
-      "desc": "Pinned notices mention goblin-cut fences, missing flour, wolves too bold for comfort, and one fresh alarm sheet about the dead south-road lantern. The newest ink is still dark.",
-      "id": "town_notice_board",
-      "key": "town notice board",
+      "desc": "A lichen-streaked stone lists half-legible names beneath a carved sunburst. The oldest letters have been scratched at from the inside rather than worn away from weather.",
+      "id": "barrow_marker_stone",
+      "key": "weathered marker stone",
       "kind": "readable",
-      "location": "brambleford_town_green"
+      "location": "old_barrow_field_marker_row"
     },
     {
       "aliases": [
-        "captain",
-        "harl",
-        "rowan"
+        "votives",
+        "candle stubs",
+        "votive ring",
+        "candles"
       ],
-      "desc": "The old militia captain watches everything with the calm patience of a man who has seen too many panicked recruits and intends to keep you alive through sheer refusal.",
-      "gender": "male",
-      "id": "captain_harl_rowan",
-      "key": "Captain Harl Rowan",
-      "kind": "npc",
-      "location": "brambleford_training_yard"
-    },
-    {
-      "aliases": [
-        "elira",
-        "mistress",
-        "trainer",
-        "thorne"
-      ],
-      "desc": "Mistress Elira watches practice the way a smith watches heat: not for noise, but for whether the shape is actually changing. Her voice looks patient, but not indulgent.",
-      "gender": "female",
-      "id": "mistress_elira_thorne",
-      "key": "Mistress Elira Thorne",
-      "kind": "npc",
-      "location": "brambleford_mastery_hall"
-    },
-    {
-      "aliases": [
-        "tamsin",
-        "sergeant",
-        "vale"
-      ],
-      "desc": "Sergeant Tamsin stands at the yard gate with alarm-bell tension in her shoulders and absolute control in her voice. She looks ready to turn panic into a checklist by force of will.",
-      "gender": "female",
-      "id": "sergeant_tamsin_vale",
-      "key": "Sergeant Tamsin Vale",
-      "kind": "npc",
-      "location": "tutorial_wayfarers_yard"
-    },
-    {
-      "aliases": [
-        "cart",
-        "damaged cart",
-        "road cart",
-        "harness",
-        "splinters"
-      ],
-      "desc": "A road cart leans beside the yard gate with one wheel packed in clawed mud and fence splinters. The harness has not snapped; it has been cut clean through.",
-      "id": "tutorial_damaged_cart",
-      "key": "damaged cart",
+      "desc": "A ring of chapel candle stubs circles the barrow stones, each wick pinched out neatly except for the ones nearest the dais, where the wax has run uphill in pale threads.",
+      "id": "barrow_votive_ring",
+      "key": "barrow votive ring",
       "kind": "readable",
-      "location": "tutorial_wayfarers_yard"
+      "location": "old_barrow_field_barrow_circle"
     },
     {
       "aliases": [
-        "nella",
-        "quartermaster",
-        "cobb"
+        "standard",
+        "banner",
+        "flag",
+        "blackreed banner"
       ],
-      "desc": "Nella can judge a traveler's preparedness from twenty paces and improve it from ten. This morning she has three crates open, a south-road slate under one elbow, and no patience for mystery pockets.",
-      "gender": "female",
-      "id": "quartermaster_nella_cobb",
-      "key": "Quartermaster Nella Cobb",
-      "kind": "npc",
-      "location": "tutorial_quartermaster_shed"
-    },
-    {
-      "aliases": [
-        "board",
-        "supply board",
-        "chalk board",
-        "chalkboard"
-      ],
-      "desc": "A square slate board hangs beside the crate stacks, its lettering neat enough to suggest that sloppy people are corrected here as quickly as sloppy packs. A fresh line across the top reads: SOUTH LANTERN OUT.",
-      "id": "tutorial_supply_board",
-      "key": "supply board",
+      "desc": "A dark standard whips from an iron hook at the tower crown, its cloth patched but carefully kept so the symbol still reads at distance.",
+      "id": "blackreed_standard",
+      "key": "Blackreed standard",
       "kind": "readable",
-      "location": "tutorial_quartermaster_shed"
+      "location": "ruined_watchtower_blackreed_roost"
     },
     {
       "aliases": [
-        "peep",
-        "courier",
-        "marrow"
+        "lens",
+        "lens frame",
+        "lamp lens",
+        "frame"
       ],
-      "desc": "Peep has chalk on one sleeve, route twine around one wrist, and a quick bright look that belongs to someone halfway through three errands at once.",
-      "gender": "male",
-      "id": "courier_peep_marrow",
-      "key": "Courier Peep Marrow",
-      "kind": "npc",
-      "location": "tutorial_family_post"
-    },
-    {
-      "aliases": [
-        "sign",
-        "post sign",
-        "family sign"
-      ],
-      "desc": "A weatherproof sign hangs beside the route pegs, written in the thick practical strokes of someone tired of people getting separated in avoidable ways.",
-      "id": "family_post_sign",
-      "key": "family post sign",
+      "desc": "A broken lamp lens frame stands around the cold white heart of the room. Its brass ribs bend outward, pressed by a light that learned to push back.",
+      "id": "blackwater_lens_frame",
+      "key": "blackwater lens frame",
       "kind": "readable",
-      "location": "tutorial_family_post"
+      "location": "drowned_weir_blackwater_lamp_house"
     },
     {
       "aliases": [
-        "brask",
-        "ringhand"
+        "lantern",
+        "bog lantern",
+        "fen lantern"
       ],
-      "desc": "Brask leans on the rail like a man who has watched enough bad first fights to know exactly when to bark and when to let a lesson land on its own. The pens below rattle every time the road bell rolls through the yard.",
-      "gender": "male",
-      "id": "ringhand_brask",
-      "key": "Ringhand Brask",
-      "kind": "npc",
-      "location": "tutorial_sparring_ring"
-    },
-    {
-      "aliases": [
-        "mayor",
-        "elric",
-        "thorne"
-      ],
-      "desc": "Mayor Elric stands held together by lists, weather reports, and a refusal to waste words. He carries the town's worry with practiced economy.",
-      "gender": "male",
-      "id": "mayor_elric_thorne",
-      "key": "Mayor Elric Thorne",
-      "kind": "npc",
-      "location": "brambleford_mayors_hall"
+      "desc": "A drowned lantern cage hangs from a bent willow root above the hollow. Its green glass panes are clouded from within, the last light spoiled before it died.",
+      "id": "boglight_lantern",
+      "key": "boglight lantern",
+      "kind": "readable",
+      "location": "blackfen_approach_boglight_hollow"
     },
     {
       "aliases": [
@@ -164,31 +85,154 @@
     },
     {
       "aliases": [
-        "uncle pib",
-        "pib",
-        "innkeeper"
+        "captain",
+        "harl",
+        "rowan"
       ],
-      "desc": "Uncle Pib moves between kettles and tables with practiced ease, ladle in hand and one eye on the room. Crisis, hunger, and bad weather all get the same treatment here: heat, timing, and a joke if the kettle allows it.",
-      "emote_response": "Uncle Pib gives a small, knowing nod and goes back to the kettle.",
+      "desc": "The old militia captain watches everything with the calm patience of a man who has seen too many panicked recruits and intends to keep you alive through sheer refusal.",
       "gender": "male",
-      "id": "uncle_pib_underbough",
-      "key": "Uncle Pib Underbough",
+      "id": "captain_harl_rowan",
+      "key": "Captain Harl Rowan",
       "kind": "npc",
-      "location": "brambleford_lantern_rest_inn"
+      "location": "brambleford_training_yard"
     },
     {
       "aliases": [
-        "leda",
-        "thornwick",
-        "outfitter",
-        "shopkeeper"
+        "stakes",
+        "stake circle",
+        "circle"
       ],
-      "desc": "Leda has measuring cord around one wrist, chalk on one sleeve, and the sharp practical eyes of someone who can tell whether a pair of boots will fail before the road does.",
-      "gender": "female",
-      "id": "leda_thornwick",
-      "key": "Leda Thornwick",
+      "desc": "Old watch stakes and bird bones have been driven into the mudbank in a rough circle, less a defense than a record of how many times the marsh has already ignored warnings.",
+      "id": "carrion_stake_circle",
+      "key": "carrion stake circle",
+      "kind": "readable",
+      "location": "blackfen_approach_carrion_rise"
+    },
+    {
+      "aliases": [
+        "slate",
+        "warning slate",
+        "chalk slate"
+      ],
+      "desc": "A slate has been nailed to a post beside the stair, listing inventory losses, rude sketches of rats, and a fresh line from Uncle Pib promising soup to anyone who clears the place out.",
+      "id": "cellar_warning_slate",
+      "key": "cellar warning slate",
+      "kind": "readable",
+      "location": "brambleford_rat_and_kettle_cellar"
+    },
+    {
+      "aliases": [
+        "peep",
+        "courier",
+        "marrow"
+      ],
+      "desc": "Peep has chalk on one sleeve, route twine around one wrist, and a quick bright look that belongs to someone halfway through three errands at once.",
+      "gender": "male",
+      "id": "courier_peep_marrow",
+      "key": "Courier Peep Marrow",
       "kind": "npc",
-      "location": "brambleford_outfitters"
+      "location": "tutorial_family_post"
+    },
+    {
+      "aliases": [
+        "bell",
+        "chapel bell",
+        "brass bell"
+      ],
+      "desc": "The bell hangs above the little altar in a brass frame polished by careful hands. Its tone is meant to greet the morning, though right now it feels more like a promise against the dark.",
+      "id": "dawn_bell",
+      "key": "dawn bell",
+      "kind": "readable",
+      "location": "brambleford_chapel_dawn_bell"
+    },
+    {
+      "aliases": [
+        "tags",
+        "survey tags",
+        "reed tags",
+        "marker tags"
+      ],
+      "desc": "Three survey tags hang from reed stems at different heights, though the knots are identical and the mud below them shows no footprints coming or going.",
+      "id": "drifted_reed_tags",
+      "key": "drifted reed tags",
+      "kind": "readable",
+      "location": "blackfen_approach_reedflats"
+    },
+    {
+      "aliases": [
+        "marker",
+        "survey marker",
+        "stake"
+      ],
+      "desc": "A stone survey marker leans out of the black water with old civic cuts still visible beneath layers of silt and marsh rot.",
+      "id": "drowned_survey_marker",
+      "key": "drowned survey marker",
+      "kind": "readable",
+      "location": "drowned_weir_drowned_causeway"
+    },
+    {
+      "aliases": [
+        "slab",
+        "knight slab",
+        "edric",
+        "sir edric"
+      ],
+      "desc": "The carved slab shows a knight at prayer beneath a rising sun. Around the folded hands, the stone has been gripped smooth by generations of frightened fingers.",
+      "id": "edrics_slab",
+      "key": "Edric's slab",
+      "kind": "readable",
+      "location": "old_barrow_field_sunken_dais"
+    },
+    {
+      "aliases": [
+        "sign",
+        "post sign",
+        "family sign"
+      ],
+      "desc": "A weatherproof sign hangs beside the route pegs, written in the thick practical strokes of someone tired of people getting separated in avoidable ways.",
+      "id": "family_post_sign",
+      "key": "family post sign",
+      "kind": "readable",
+      "location": "tutorial_family_post"
+    },
+    {
+      "aliases": [
+        "cauldron",
+        "pot",
+        "stew pot",
+        "blackiron cauldron"
+      ],
+      "desc": "A blackened cauldron bubbles over a trench fire, full of something too thick to slosh cleanly and too busy to welcome questions.",
+      "id": "feast_hall_cauldron",
+      "key": "blackiron cauldron",
+      "kind": "readable",
+      "location": "goblin_warrens_feast_hall"
+    },
+    {
+      "aliases": [
+        "waypost",
+        "post",
+        "fen post",
+        "trail post"
+      ],
+      "desc": "A half-sunk road post leans over the wet track, its old route marks mostly hidden beneath reed scratches and a newer charcoal warning.",
+      "id": "fenreach_waypost",
+      "key": "fenreach waypost",
+      "kind": "readable",
+      "location": "blackfen_approach_fenreach_track"
+    },
+    {
+      "aliases": [
+        "order board",
+        "forge board",
+        "orders",
+        "board"
+      ],
+      "desc": "A broad slate board hangs beside the workbench, listing nail orders, hinge repairs, and a smaller section marked 'field kit improvements' in blocky chalk.",
+      "id": "forge_order_board",
+      "key": "forge order board",
+      "kind": "readable",
+      "location": "brambleford_ironroot_forge"
     },
     {
       "aliases": [
@@ -202,6 +246,32 @@
       "key": "Great Catch Log",
       "kind": "readable",
       "location": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
+        "post",
+        "warning",
+        "warning post",
+        "stake"
+      ],
+      "desc": "A split cedar post has been driven into the earth beside the stones. Knife-scored marks and a strip of grey fur hang from it as a warning to anyone pressing deeper.",
+      "id": "hunters_warning_post",
+      "key": "hunter's warning post",
+      "kind": "readable",
+      "location": "whispering_woods_old_stone_path"
+    },
+    {
+      "aliases": [
+        "joss",
+        "veller",
+        "lamplighter"
+      ],
+      "desc": "Joss Veller carries lens scraps, south-line notes, and the expression of a man who would rather solve a frightening truth than let the town name it badly first.",
+      "gender": "male",
+      "id": "joss_veller",
+      "key": "Joss Veller",
+      "kind": "npc",
+      "location": "brambleford_great_observatory"
     },
     {
       "aliases": [
@@ -247,54 +317,17 @@
     },
     {
       "aliases": [
-        "chalkboard",
-        "price board",
-        "sale board",
-        "board"
+        "leda",
+        "thornwick",
+        "outfitter",
+        "shopkeeper"
       ],
-      "desc": "A chalkboard near the counter lists current trade notes, repair promises, and a large underlined reminder that muddy boots cost extra if they are set on the display rugs.",
-      "id": "outfitters_chalkboard",
-      "key": "outfitters chalkboard",
-      "kind": "readable",
+      "desc": "Leda has measuring cord around one wrist, chalk on one sleeve, and the sharp practical eyes of someone who can tell whether a pair of boots will fail before the road does.",
+      "gender": "female",
+      "id": "leda_thornwick",
+      "key": "Leda Thornwick",
+      "kind": "npc",
       "location": "brambleford_outfitters"
-    },
-    {
-      "aliases": [
-        "slate",
-        "warning slate",
-        "chalk slate"
-      ],
-      "desc": "A slate has been nailed to a post beside the stair, listing inventory losses, rude sketches of rats, and a fresh line from Uncle Pib promising soup to anyone who clears the place out.",
-      "id": "cellar_warning_slate",
-      "key": "cellar warning slate",
-      "kind": "readable",
-      "location": "brambleford_rat_and_kettle_cellar"
-    },
-    {
-      "aliases": [
-        "maybelle",
-        "sister",
-        "healer"
-      ],
-      "desc": "Sister Maybelle keeps a satchel of herbs, bandages, and dried roots within easy reach. She looks soft-spoken until someone mentions preventable injury.",
-      "gender": "female",
-      "id": "sister_maybelle",
-      "key": "Sister Maybelle",
-      "kind": "npc",
-      "location": "brambleford_lantern_rest_inn"
-    },
-    {
-      "aliases": [
-        "mira",
-        "fenleaf",
-        "hunter"
-      ],
-      "desc": "Mira studies the road with a hunter's stillness. She has the look of someone who notices every broken branch and trusts almost none of them.",
-      "gender": "female",
-      "id": "mira_fenleaf",
-      "key": "Mira Fenleaf",
-      "kind": "npc",
-      "location": "brambleford_east_gate"
     },
     {
       "aliases": [
@@ -308,72 +341,6 @@
       "key": "loaner pole rack",
       "kind": "readable",
       "location": "brambleford_hobbyists_wharf"
-    },
-    {
-      "aliases": [
-        "torren",
-        "ironroot",
-        "smith",
-        "blacksmith"
-      ],
-      "desc": "Torren is a broad-shouldered dwarf with soot in his beard, forearms like split oak, and the calm expression of a man who has already decided whether your gear deserves saving.",
-      "gender": "male",
-      "id": "torren_ironroot",
-      "key": "Torren Ironroot",
-      "kind": "npc",
-      "location": "brambleford_ironroot_forge"
-    },
-    {
-      "aliases": [
-        "veska",
-        "flint",
-        "mender",
-        "fixer"
-      ],
-      "desc": "Veska keeps one sleeve rolled, one glove half-on, and a workbench laid out like a threat against carelessness. Lanterns, traps, arguments: she studies the broken pieces first and only speaks when the repair has become obvious.",
-      "gender": "female",
-      "id": "mender_veska_flint",
-      "key": "Mender Veska Flint",
-      "kind": "npc",
-      "location": "brambleford_menders_shed"
-    },
-    {
-      "aliases": [
-        "order board",
-        "forge board",
-        "orders",
-        "board"
-      ],
-      "desc": "A broad slate board hangs beside the workbench, listing nail orders, hinge repairs, and a smaller section marked 'field kit improvements' in blocky chalk.",
-      "id": "forge_order_board",
-      "key": "forge order board",
-      "kind": "readable",
-      "location": "brambleford_ironroot_forge"
-    },
-    {
-      "aliases": [
-        "joss",
-        "veller",
-        "lamplighter"
-      ],
-      "desc": "Joss Veller carries lens scraps, south-line notes, and the expression of a man who would rather solve a frightening truth than let the town name it badly first.",
-      "gender": "male",
-      "id": "joss_veller",
-      "key": "Joss Veller",
-      "kind": "npc",
-      "location": "brambleford_great_observatory"
-    },
-    {
-      "aliases": [
-        "lens",
-        "telescope",
-        "great lens"
-      ],
-      "desc": "The observatory's great lens turns with an almost living smoothness. Constellations are etched along its brass rings beside stranger marks that look more like routes than stars.",
-      "id": "star_lens",
-      "key": "star lens",
-      "kind": "readable",
-      "location": "brambleford_great_observatory"
     },
     {
       "aliases": [
@@ -392,43 +359,6 @@
     },
     {
       "aliases": [
-        "ledger",
-        "civic ledger",
-        "petition book"
-      ],
-      "desc": "A wide ledger lies open to a page of fence repairs, flour shortages, dim lantern reports, and a fresh line underlined twice: BARROW LIGHTS FAILING AFTER DUSK.",
-      "id": "mayors_ledger",
-      "key": "mayor's ledger",
-      "kind": "readable",
-      "location": "brambleford_mayors_hall"
-    },
-    {
-      "aliases": [
-        "bell",
-        "chapel bell",
-        "brass bell"
-      ],
-      "desc": "The bell hangs above the little altar in a brass frame polished by careful hands. Its tone is meant to greet the morning, though right now it feels more like a promise against the dark.",
-      "id": "dawn_bell",
-      "key": "dawn bell",
-      "kind": "readable",
-      "location": "brambleford_chapel_dawn_bell"
-    },
-    {
-      "aliases": [
-        "vitrine",
-        "trophies",
-        "trophy case",
-        "display"
-      ],
-      "desc": "Glass-fronted cases and labeled plinths wait for proof that Brambleford's little family can come back from strange places carrying stranger victories.",
-      "id": "trophy_vitrine",
-      "key": "family trophy vitrine",
-      "kind": "readable",
-      "location": "brambleford_trophy_hall"
-    },
-    {
-      "aliases": [
         "plaque",
         "lanternworks plaque",
         "brass plaque",
@@ -442,78 +372,42 @@
     },
     {
       "aliases": [
-        "marker stone",
-        "marker",
-        "stone"
+        "mayor",
+        "elric",
+        "thorne"
       ],
-      "desc": "A lichen-streaked stone lists half-legible names beneath a carved sunburst. The oldest letters have been scratched at from the inside rather than worn away from weather.",
-      "id": "barrow_marker_stone",
-      "key": "weathered marker stone",
-      "kind": "readable",
-      "location": "old_barrow_field_marker_row"
+      "desc": "Mayor Elric stands held together by lists, weather reports, and a refusal to waste words. He carries the town's worry with practiced economy.",
+      "gender": "male",
+      "id": "mayor_elric_thorne",
+      "key": "Mayor Elric Thorne",
+      "kind": "npc",
+      "location": "brambleford_mayors_hall"
     },
     {
       "aliases": [
-        "slab",
-        "knight slab",
-        "edric",
-        "sir edric"
+        "ledger",
+        "civic ledger",
+        "petition book"
       ],
-      "desc": "The carved slab shows a knight at prayer beneath a rising sun. Around the folded hands, the stone has been gripped smooth by generations of frightened fingers.",
-      "id": "edrics_slab",
-      "key": "Edric's slab",
+      "desc": "A wide ledger lies open to a page of fence repairs, flour shortages, dim lantern reports, and a fresh line underlined twice: BARROW LIGHTS FAILING AFTER DUSK.",
+      "id": "mayors_ledger",
+      "key": "mayor's ledger",
       "kind": "readable",
-      "location": "old_barrow_field_sunken_dais"
+      "location": "brambleford_mayors_hall"
     },
     {
       "aliases": [
-        "warning post",
-        "post",
-        "stake"
+        "veska",
+        "flint",
+        "mender",
+        "fixer"
       ],
-      "desc": "An old militia warning post leans beside the climb, the original carving half-cut away by newer knife marks and weather.",
-      "id": "watchtower_warning_post",
-      "key": "watchtower warning post",
-      "kind": "readable",
-      "location": "ruined_watchtower_approach"
-    },
-    {
-      "aliases": [
-        "brazier",
-        "signal fire",
-        "watchfire"
-      ],
-      "desc": "A broad iron brazier sits in the broken yard with fresh soot in it and a rack of damp kindling stacked close at hand.",
-      "id": "signal_brazier",
-      "key": "signal brazier",
-      "kind": "readable",
-      "location": "ruined_watchtower_breach_yard"
-    },
-    {
-      "aliases": [
-        "standard",
-        "banner",
-        "flag",
-        "blackreed banner"
-      ],
-      "desc": "A dark standard whips from an iron hook at the tower crown, its cloth patched but carefully kept so the symbol still reads at distance.",
-      "id": "blackreed_standard",
-      "key": "Blackreed standard",
-      "kind": "readable",
-      "location": "ruined_watchtower_blackreed_roost"
-    },
-    {
-      "aliases": [
-        "slate",
-        "map",
-        "scratch map",
-        "scratch-map"
-      ],
-      "desc": "A broken roofing slate has been scratched over with goblin route marks, stew counts, and a crude crown symbol deeper in the hill.",
-      "id": "sinkmouth_scratch_map",
-      "key": "scratch-map slate",
-      "kind": "readable",
-      "location": "goblin_warrens_sinkmouth_cut"
+      "desc": "Veska keeps one sleeve rolled, one glove half-on, and a workbench laid out like a threat against carelessness. Lanterns, traps, arguments: she studies the broken pieces first and only speaks when the repair has become obvious.",
+      "gender": "female",
+      "id": "mender_veska_flint",
+      "key": "Mender Veska Flint",
+      "kind": "npc",
+      "location": "brambleford_menders_shed"
     },
     {
       "aliases": [
@@ -529,66 +423,16 @@
     },
     {
       "aliases": [
-        "cauldron",
-        "pot",
-        "stew pot",
-        "blackiron cauldron"
+        "mira",
+        "fenleaf",
+        "hunter"
       ],
-      "desc": "A blackened cauldron bubbles over a trench fire, full of something too thick to slosh cleanly and too busy to welcome questions.",
-      "id": "feast_hall_cauldron",
-      "key": "blackiron cauldron",
-      "kind": "readable",
-      "location": "goblin_warrens_feast_hall"
-    },
-    {
-      "aliases": [
-        "throne",
-        "lid throne",
-        "seat",
-        "crown seat"
-      ],
-      "desc": "The court seat is a rough-backed stone chair plated in bent lid metal, split shields, and enough grease-dark polish to suggest regular use by something proud and disgusting.",
-      "id": "potking_lid_throne",
-      "key": "lid-throne",
-      "kind": "readable",
-      "location": "goblin_warrens_pot_kings_court"
-    },
-    {
-      "aliases": [
-        "waypost",
-        "post",
-        "fen post",
-        "trail post"
-      ],
-      "desc": "A half-sunk road post leans over the wet track, its old route marks mostly hidden beneath reed scratches and a newer charcoal warning.",
-      "id": "fenreach_waypost",
-      "key": "fenreach waypost",
-      "kind": "readable",
-      "location": "blackfen_approach_fenreach_track"
-    },
-    {
-      "aliases": [
-        "lantern",
-        "bog lantern",
-        "fen lantern"
-      ],
-      "desc": "A drowned lantern cage hangs from a bent willow root above the hollow. Its green glass panes are clouded from within, the last light spoiled before it died.",
-      "id": "boglight_lantern",
-      "key": "boglight lantern",
-      "kind": "readable",
-      "location": "blackfen_approach_boglight_hollow"
-    },
-    {
-      "aliases": [
-        "stakes",
-        "stake circle",
-        "circle"
-      ],
-      "desc": "Old watch stakes and bird bones have been driven into the mudbank in a rough circle, less a defense than a record of how many times the marsh has already ignored warnings.",
-      "id": "carrion_stake_circle",
-      "key": "carrion stake circle",
-      "kind": "readable",
-      "location": "blackfen_approach_carrion_rise"
+      "desc": "Mira studies the road with a hunter's stillness. She has the look of someone who notices every broken branch and trusts almost none of them.",
+      "gender": "female",
+      "id": "mira_fenleaf",
+      "key": "Mira Fenleaf",
+      "kind": "npc",
+      "location": "brambleford_east_gate"
     },
     {
       "aliases": [
@@ -604,90 +448,43 @@
     },
     {
       "aliases": [
-        "marker",
-        "survey marker",
-        "stake"
+        "elira",
+        "mistress",
+        "trainer",
+        "thorne"
       ],
-      "desc": "A stone survey marker leans out of the black water with old civic cuts still visible beneath layers of silt and marsh rot.",
-      "id": "drowned_survey_marker",
-      "key": "drowned survey marker",
-      "kind": "readable",
-      "location": "drowned_weir_drowned_causeway"
+      "desc": "Mistress Elira watches practice the way a smith watches heat: not for noise, but for whether the shape is actually changing. Her voice looks patient, but not indulgent.",
+      "gender": "female",
+      "id": "mistress_elira_thorne",
+      "key": "Mistress Elira Thorne",
+      "kind": "npc",
+      "location": "brambleford_mastery_hall"
     },
     {
       "aliases": [
-        "plaque",
-        "weir plaque",
-        "keepers plaque",
-        "keeper's plaque"
+        "ribbon",
+        "herb ribbon",
+        "moonleaf tag",
+        "tag"
       ],
-      "desc": "A brass plaque hangs crooked on the drowned ironwork, greened by bad water and lit from below by a line of light that should not still be in service.",
-      "id": "weir_keepers_plaque",
-      "key": "weir-keeper's plaque",
+      "desc": "A careful cloth ribbon marks a moonleaf patch at the glade edge. The knot is Maybelle's tidy work, but the stems beside it are bent away from the barrow path.",
+      "id": "moonleaf_warning_ribbon",
+      "key": "moonleaf warning ribbon",
       "kind": "readable",
-      "location": "drowned_weir_lantern_weir"
+      "location": "whispering_woods_briar_glade"
     },
     {
       "aliases": [
-        "chain",
-        "lock chain",
-        "gate chain"
+        "arrows",
+        "signal arrows",
+        "spent arrows",
+        "fletching"
       ],
-      "desc": "A gate chain the thickness of a forearm runs from the drowned lock wall into black water below, drawn tight enough to hum when the wrong light pulses through the chamber.",
-      "id": "sunken_lock_chain",
-      "key": "sunken lock chain",
+      "desc": "A bundle of spent signal arrows lies under the ledge lip. Their black-dyed fletching is numbered by route, not by target.",
+      "id": "numbered_signal_arrows",
+      "key": "numbered signal arrows",
       "kind": "readable",
-      "location": "drowned_weir_sunken_lock"
-    },
-    {
-      "aliases": [
-        "lens",
-        "lens frame",
-        "lamp lens",
-        "frame"
-      ],
-      "desc": "A broken lamp lens frame stands around the cold white heart of the room. Its brass ribs bend outward, pressed by a light that learned to push back.",
-      "id": "blackwater_lens_frame",
-      "key": "blackwater lens frame",
-      "kind": "readable",
-      "location": "drowned_weir_blackwater_lamp_house"
-    },
-    {
-      "aliases": [
-        "block",
-        "chopping block",
-        "ruks block"
-      ],
-      "desc": "A hacked-up stump serves as a work block for ruined fence rails. Deep blade scores suggest whoever uses it values force over craft.",
-      "id": "ruks_chopping_block",
-      "key": "Ruk's chopping block",
-      "kind": "readable",
-      "location": "goblin_road_fencebreaker_camp"
-    },
-    {
-      "aliases": [
-        "wardstone",
-        "stone",
-        "waystone"
-      ],
-      "desc": "A weathered standing stone has been ringed with old wax and newer chalk marks. Someone has been trying to keep the woods civil with whatever protection they still remember.",
-      "id": "woods_wardstone",
-      "key": "old wardstone",
-      "kind": "readable",
-      "location": "whispering_woods_trailhead"
-    },
-    {
-      "aliases": [
-        "post",
-        "warning",
-        "warning post",
-        "stake"
-      ],
-      "desc": "A split cedar post has been driven into the earth beside the stones. Knife-scored marks and a strip of grey fur hang from it as a warning to anyone pressing deeper.",
-      "id": "hunters_warning_post",
-      "key": "hunter's warning post",
-      "kind": "readable",
-      "location": "whispering_woods_old_stone_path"
+      "location": "ruined_watchtower_archers_ledge"
     },
     {
       "aliases": [
@@ -705,42 +502,117 @@
     },
     {
       "aliases": [
-        "ribbon",
-        "herb ribbon",
-        "moonleaf tag",
-        "tag"
+        "chalkboard",
+        "price board",
+        "sale board",
+        "board"
       ],
-      "desc": "A careful cloth ribbon marks a moonleaf patch at the glade edge. The knot is Maybelle's tidy work, but the stems beside it are bent away from the barrow path.",
-      "id": "moonleaf_warning_ribbon",
-      "key": "moonleaf warning ribbon",
+      "desc": "A chalkboard near the counter lists current trade notes, repair promises, and a large underlined reminder that muddy boots cost extra if they are set on the display rugs.",
+      "id": "outfitters_chalkboard",
+      "key": "outfitters chalkboard",
       "kind": "readable",
-      "location": "whispering_woods_briar_glade"
+      "location": "brambleford_outfitters"
     },
     {
       "aliases": [
-        "votives",
-        "candle stubs",
-        "votive ring",
-        "candles"
+        "throne",
+        "lid throne",
+        "seat",
+        "crown seat"
       ],
-      "desc": "A ring of chapel candle stubs circles the barrow stones, each wick pinched out neatly except for the ones nearest the dais, where the wax has run uphill in pale threads.",
-      "id": "barrow_votive_ring",
-      "key": "barrow votive ring",
+      "desc": "The court seat is a rough-backed stone chair plated in bent lid metal, split shields, and enough grease-dark polish to suggest regular use by something proud and disgusting.",
+      "id": "potking_lid_throne",
+      "key": "lid-throne",
       "kind": "readable",
-      "location": "old_barrow_field_barrow_circle"
+      "location": "goblin_warrens_pot_kings_court"
     },
     {
       "aliases": [
-        "arrows",
-        "signal arrows",
-        "spent arrows",
-        "fletching"
+        "nella",
+        "quartermaster",
+        "cobb"
       ],
-      "desc": "A bundle of spent signal arrows lies under the ledge lip. Their black-dyed fletching is numbered by route, not by target.",
-      "id": "numbered_signal_arrows",
-      "key": "numbered signal arrows",
+      "desc": "Nella can judge a traveler's preparedness from twenty paces and improve it from ten. This morning she has three crates open, a south-road slate under one elbow, and no patience for mystery pockets.",
+      "gender": "female",
+      "id": "quartermaster_nella_cobb",
+      "key": "Quartermaster Nella Cobb",
+      "kind": "npc",
+      "location": "tutorial_quartermaster_shed"
+    },
+    {
+      "aliases": [
+        "brask",
+        "ringhand"
+      ],
+      "desc": "Brask leans on the rail like a man who has watched enough bad first fights to know exactly when to bark and when to let a lesson land on its own. The pens below rattle every time the road bell rolls through the yard.",
+      "gender": "male",
+      "id": "ringhand_brask",
+      "key": "Ringhand Brask",
+      "kind": "npc",
+      "location": "tutorial_sparring_ring"
+    },
+    {
+      "aliases": [
+        "block",
+        "chopping block",
+        "ruks block"
+      ],
+      "desc": "A hacked-up stump serves as a work block for ruined fence rails. Deep blade scores suggest whoever uses it values force over craft.",
+      "id": "ruks_chopping_block",
+      "key": "Ruk's chopping block",
       "kind": "readable",
-      "location": "ruined_watchtower_archers_ledge"
+      "location": "goblin_road_fencebreaker_camp"
+    },
+    {
+      "aliases": [
+        "tamsin",
+        "sergeant",
+        "vale"
+      ],
+      "desc": "Sergeant Tamsin stands at the yard gate with alarm-bell tension in her shoulders and absolute control in her voice. She looks ready to turn panic into a checklist by force of will.",
+      "gender": "female",
+      "id": "sergeant_tamsin_vale",
+      "key": "Sergeant Tamsin Vale",
+      "kind": "npc",
+      "location": "tutorial_wayfarers_yard"
+    },
+    {
+      "aliases": [
+        "brazier",
+        "signal fire",
+        "watchfire"
+      ],
+      "desc": "A broad iron brazier sits in the broken yard with fresh soot in it and a rack of damp kindling stacked close at hand.",
+      "id": "signal_brazier",
+      "key": "signal brazier",
+      "kind": "readable",
+      "location": "ruined_watchtower_breach_yard"
+    },
+    {
+      "aliases": [
+        "slate",
+        "map",
+        "scratch map",
+        "scratch-map"
+      ],
+      "desc": "A broken roofing slate has been scratched over with goblin route marks, stew counts, and a crude crown symbol deeper in the hill.",
+      "id": "sinkmouth_scratch_map",
+      "key": "scratch-map slate",
+      "kind": "readable",
+      "location": "goblin_warrens_sinkmouth_cut"
+    },
+    {
+      "aliases": [
+        "maybelle",
+        "sister",
+        "healer"
+      ],
+      "desc": "Sister Maybelle keeps a satchel of herbs, bandages, and dried roots within easy reach. She looks soft-spoken until someone mentions preventable injury.",
+      "gender": "female",
+      "id": "sister_maybelle",
+      "key": "Sister Maybelle",
+      "kind": "npc",
+      "location": "brambleford_lantern_rest_inn"
     },
     {
       "aliases": [
@@ -757,19 +629,6 @@
     },
     {
       "aliases": [
-        "tags",
-        "survey tags",
-        "reed tags",
-        "marker tags"
-      ],
-      "desc": "Three survey tags hang from reed stems at different heights, though the knots are identical and the mud below them shows no footprints coming or going.",
-      "id": "drifted_reed_tags",
-      "key": "drifted reed tags",
-      "kind": "readable",
-      "location": "blackfen_approach_reedflats"
-    },
-    {
-      "aliases": [
         "work order",
         "order plate",
         "maintenance plate",
@@ -780,6 +639,160 @@
       "key": "sluice work-order plate",
       "kind": "readable",
       "location": "drowned_weir_sluice_walk"
+    },
+    {
+      "aliases": [
+        "lens",
+        "telescope",
+        "great lens"
+      ],
+      "desc": "The observatory's great lens turns with an almost living smoothness. Constellations are etched along its brass rings beside stranger marks that look more like routes than stars.",
+      "id": "star_lens",
+      "key": "star lens",
+      "kind": "readable",
+      "location": "brambleford_great_observatory"
+    },
+    {
+      "aliases": [
+        "chain",
+        "lock chain",
+        "gate chain"
+      ],
+      "desc": "A gate chain the thickness of a forearm runs from the drowned lock wall into black water below, drawn tight enough to hum when the wrong light pulses through the chamber.",
+      "id": "sunken_lock_chain",
+      "key": "sunken lock chain",
+      "kind": "readable",
+      "location": "drowned_weir_sunken_lock"
+    },
+    {
+      "aliases": [
+        "torren",
+        "ironroot",
+        "smith",
+        "blacksmith"
+      ],
+      "desc": "Torren is a broad-shouldered dwarf with soot in his beard, forearms like split oak, and the calm expression of a man who has already decided whether your gear deserves saving.",
+      "gender": "male",
+      "id": "torren_ironroot",
+      "key": "Torren Ironroot",
+      "kind": "npc",
+      "location": "brambleford_ironroot_forge"
+    },
+    {
+      "aliases": [
+        "board",
+        "notice board",
+        "notices"
+      ],
+      "desc": "Pinned notices mention goblin-cut fences, missing flour, wolves too bold for comfort, and one fresh alarm sheet about the dead south-road lantern. The newest ink is still dark.",
+      "id": "town_notice_board",
+      "key": "town notice board",
+      "kind": "readable",
+      "location": "brambleford_town_green"
+    },
+    {
+      "aliases": [
+        "vitrine",
+        "trophies",
+        "trophy case",
+        "display"
+      ],
+      "desc": "Glass-fronted cases and labeled plinths wait for proof that Brambleford's little family can come back from strange places carrying stranger victories.",
+      "id": "trophy_vitrine",
+      "key": "family trophy vitrine",
+      "kind": "readable",
+      "location": "brambleford_trophy_hall"
+    },
+    {
+      "aliases": [
+        "cart",
+        "damaged cart",
+        "road cart",
+        "harness",
+        "splinters"
+      ],
+      "desc": "A road cart leans beside the yard gate with one wheel packed in clawed mud and fence splinters. The harness has not snapped; it has been cut clean through.",
+      "id": "tutorial_damaged_cart",
+      "key": "damaged cart",
+      "kind": "readable",
+      "location": "tutorial_wayfarers_yard"
+    },
+    {
+      "aliases": [
+        "note",
+        "scrawled note",
+        "rough note",
+        "paper"
+      ],
+      "desc": "A rough note is nailed to one of the timber posts, its edges curled and stained by feed and damp straw.",
+      "id": "tutorial_respawn_note",
+      "key": "scrawled note",
+      "kind": "readable",
+      "location": "tutorial_vermin_pens"
+    },
+    {
+      "aliases": [
+        "board",
+        "supply board",
+        "chalk board",
+        "chalkboard"
+      ],
+      "desc": "A square slate board hangs beside the crate stacks, its lettering neat enough to suggest that sloppy people are corrected here as quickly as sloppy packs. A fresh line across the top reads: SOUTH LANTERN OUT.",
+      "id": "tutorial_supply_board",
+      "key": "supply board",
+      "kind": "readable",
+      "location": "tutorial_quartermaster_shed"
+    },
+    {
+      "aliases": [
+        "uncle pib",
+        "pib",
+        "innkeeper"
+      ],
+      "desc": "Uncle Pib moves between kettles and tables with practiced ease, ladle in hand and one eye on the room. Crisis, hunger, and bad weather all get the same treatment here: heat, timing, and a joke if the kettle allows it.",
+      "emote_response": "Uncle Pib gives a small, knowing nod and goes back to the kettle.",
+      "gender": "male",
+      "id": "uncle_pib_underbough",
+      "key": "Uncle Pib Underbough",
+      "kind": "npc",
+      "location": "brambleford_lantern_rest_inn"
+    },
+    {
+      "aliases": [
+        "warning post",
+        "post",
+        "stake"
+      ],
+      "desc": "An old militia warning post leans beside the climb, the original carving half-cut away by newer knife marks and weather.",
+      "id": "watchtower_warning_post",
+      "key": "watchtower warning post",
+      "kind": "readable",
+      "location": "ruined_watchtower_approach"
+    },
+    {
+      "aliases": [
+        "plaque",
+        "weir plaque",
+        "keepers plaque",
+        "keeper's plaque"
+      ],
+      "desc": "A brass plaque hangs crooked on the drowned ironwork, greened by bad water and lit from below by a line of light that should not still be in service.",
+      "id": "weir_keepers_plaque",
+      "key": "weir-keeper's plaque",
+      "kind": "readable",
+      "location": "drowned_weir_lantern_weir"
+    },
+    {
+      "aliases": [
+        "wardstone",
+        "stone",
+        "waystone"
+      ],
+      "desc": "A weathered standing stone has been ringed with old wax and newer chalk marks. Someone has been trying to keep the woods civil with whatever protection they still remember.",
+      "id": "woods_wardstone",
+      "key": "old wardstone",
+      "kind": "readable",
+      "location": "whispering_woods_trailhead"
     }
   ],
   "exits": [
@@ -2632,8 +2645,8 @@
       "key": "Lower Lanternworks",
       "map_icon": "L",
       "map_region": "brambleford",
-      "map_x": 0,
-      "map_y": 0,
+      "map_x": 2,
+      "map_y": 1,
       "safe": true,
       "world": "Brave",
       "zone": "Brambleford"

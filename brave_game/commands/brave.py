@@ -14,9 +14,10 @@ from world.content.registry import get_content_registry
 from world.interactions import get_entity_emote_response
 from world.party import get_present_party_members
 from world.genders import get_brave_pronoun
+from world.questing import get_visible_objective_states
 from world.resonance import get_resource_label, get_stat_label
 from world.screen_text import format_entry, wrap_text
-from world.tutorial import TUTORIAL_STEPS, ensure_tutorial_state
+from world.tutorial import CLASS_ABILITY_HINTS, TUTORIAL_STEPS, ensure_tutorial_state
 
 
 def _normalize_token(value):
@@ -351,12 +352,17 @@ def _format_tutorial_screen_block(character, completed_only=False):
     flags = state.get("flags", {})
     current_step_key = state.get("step")
     current_order = TUTORIAL_STEPS[current_step_key]["order"] if current_step_key else 999
+    class_key = str(getattr(character.db, "brave_class", "") or "").lower()
+    ability_name = CLASS_ABILITY_HINTS.get(class_key, "your class skill")
     
     if completed_only:
         blocks = []
         for step_key, step in TUTORIAL_STEPS.items():
             if status == "completed" or (step["order"] < current_order):
-                blocks.append(format_entry(step["title"] + " [Tutorial Completed]", details=[step["summary"]]))
+                summary = step["summary"]
+                if step_key == "clear_the_pens":
+                    summary = f"Start a fight in the vermin pens, read the enemy line, use {ability_name}, patch yourself up, and win cleanly."
+                blocks.append(format_entry(step["title"] + " [Tutorial Completed]", details=[summary]))
         return blocks
 
     if status == "completed":
@@ -374,10 +380,9 @@ def _format_tutorial_screen_block(character, completed_only=False):
     elif step_key == "pack_before_walk":
         checks = [
             f"[{'x' if flags.get('talked_nella') else ' '}] Let Quartermaster Nella check your kit.",
-            f"[{'x' if flags.get('viewed_gear') else ' '}] Check your gear.",
             f"[{'x' if flags.get('viewed_pack') else ' '}] Open your pack.",
+            f"[{'x' if flags.get('viewed_gear') else ' '}] Check your gear.",
             f"[{'x' if flags.get('read_supply_board') else ' '}] Read the supply board.",
-            f"[{'x' if flags.get('returned_to_wayfarers_yard') else ' '}] Return west to Wayfarer's Yard.",
         ]
     elif step_key == "stand_your_ground":
         checks = [
@@ -385,7 +390,8 @@ def _format_tutorial_screen_block(character, completed_only=False):
         ]
     elif step_key == "clear_the_pens":
         checks = [
-            f"[{'x' if flags.get('used_class_ability') else ' '}] Use your class skill in combat.",
+            f"[{'x' if flags.get('used_class_ability') else ' '}] Use {ability_name} in combat.",
+            f"[{'x' if flags.get('used_combat_consumable') else ' '}] Apply a Field Bandage in combat.",
             f"[{'x' if flags.get('won_vermin_fight') else ' '}] Win one fight in the Vermin Pens.",
         ]
     elif step_key == "fit_your_clasp":
@@ -405,7 +411,10 @@ def _format_tutorial_screen_block(character, completed_only=False):
             f"[{'x' if flags.get('talked_harl') else ' '}] Report to Captain Harl Rowan in the Training Yard.",
         ]
 
-    details = [step["summary"]]
+    summary = step["summary"]
+    if step_key == "clear_the_pens":
+        summary = f"Start a fight in the vermin pens, read the enemy line, use {ability_name}, patch yourself up, and win cleanly."
+    details = [summary]
     details.extend(checks)
     return format_entry(step["title"] + " [Tutorial]", details=details)
 
@@ -421,7 +430,7 @@ def _format_quest_screen_block(character, quest_key, tracked_key=None):
     status = state.get("status", "active").replace("_", " ").title()
     details = [definition["summary"], f"Given by: {definition['giver']}"]
 
-    for objective in state.get("objectives", []):
+    for objective in get_visible_objective_states(quest_key, state):
         progress_suffix = ""
         if objective.get("required", 1) > 1:
             progress_suffix = f" ({objective.get('progress', 0)}/{objective.get('required', 1)})"

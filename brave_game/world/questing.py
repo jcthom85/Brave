@@ -23,6 +23,43 @@ def _build_initial_objective_state(objective):
     }
 
 
+def is_objective_revealed(quest_state, objective_index, objective_definition):
+    """Return whether an objective should currently be shown and progressed."""
+
+    reveal_after = objective_definition.get("revealed_after")
+    if reveal_after is None:
+        return True
+    try:
+        reveal_after = int(reveal_after)
+    except (TypeError, ValueError):
+        return True
+    if reveal_after < 0:
+        return True
+
+    objectives = quest_state.get("objectives") or []
+    if reveal_after >= len(objectives):
+        return False
+    return bool(objectives[reveal_after].get("completed"))
+
+
+def get_visible_objective_states(quest_key, quest_state):
+    """Return objective states whose definition reveal rules are currently met."""
+
+    definition = QUEST_CONTENT.quests.get(quest_key) or {}
+    definition_objectives = definition.get("objectives") or []
+    if definition_objectives and quest_state and quest_state.get("status") != "completed":
+        _normalize_quest_state(quest_key, quest_state)
+    state_objectives = quest_state.get("objectives") or []
+    visible = []
+    for index, objective_definition in enumerate(definition_objectives):
+        if index >= len(state_objectives):
+            continue
+        if not is_objective_revealed(quest_state, index, objective_definition):
+            continue
+        visible.append(state_objectives[index])
+    return visible
+
+
 def _prerequisites_met(quest_log, definition):
     return all(quest_log.get(quest_key, {}).get("status") == "completed" for quest_key in definition.get("prerequisites", []))
 
@@ -202,6 +239,20 @@ def _normalize_quest_state(quest_key, quest_state):
     objectives = quest_state.get("objectives", [])
     changed = False
 
+    if quest_key == "rats_in_the_kettle" and objectives:
+        first_description = definition["objectives"][0]["description"]
+        if objectives[0].get("description") != first_description:
+            had_progress = any(
+                objective.get("completed") or objective.get("progress", 0) > 0
+                for objective in objectives
+            )
+            talk_objective = _build_initial_objective_state(definition["objectives"][0])
+            if had_progress:
+                talk_objective["completed"] = True
+                talk_objective["progress"] = talk_objective["required"]
+            objectives.insert(0, talk_objective)
+            changed = True
+
     if len(objectives) < len(definition["objectives"]):
         for objective in definition["objectives"][len(objectives) :]:
             objectives.append(_build_initial_objective_state(objective))
@@ -352,6 +403,8 @@ def _sync_collect_item_progress(character, quest_log, messages):
             continue
 
         for index, objective in enumerate(definition["objectives"]):
+            if not is_objective_revealed(state, index, objective):
+                continue
             if objective.get("type") != "collect_item":
                 continue
 
@@ -609,7 +662,7 @@ def get_tracked_quest_payload(character):
         
     state = (character.db.brave_quests or {}).get(quest_key, {})
     objectives = []
-    for objective in state.get("objectives", []):
+    for objective in get_visible_objective_states(quest_key, state):
         text = objective.get("description", "Objective")
         required = objective.get("required", 1)
         if required > 1:
@@ -646,7 +699,7 @@ def format_quest_block(character, quest_key):
         f"  {definition['summary']}",
         f"  Given by: {definition['giver']}",
     ]
-    for objective in state["objectives"]:
+    for objective in get_visible_objective_states(quest_key, state):
         marker = "x" if objective["completed"] else " "
         progress_suffix = ""
         if objective.get("required", 1) > 1:
@@ -682,6 +735,8 @@ def advance_room_visit(character, room):
             continue
 
         for index, objective in enumerate(definition["objectives"]):
+            if not is_objective_revealed(state, index, objective):
+                continue
             objective_state = state["objectives"][index]
             if objective_state["completed"]:
                 continue
@@ -725,6 +780,8 @@ def advance_talk_to_npc(character, npc_id):
             continue
 
         for index, objective in enumerate(definition["objectives"]):
+            if not is_objective_revealed(state, index, objective):
+                continue
             objective_state = state["objectives"][index]
             if objective_state["completed"]:
                 continue
@@ -766,6 +823,8 @@ def advance_read_readable(character, readable_id):
             continue
 
         for index, objective in enumerate(definition["objectives"]):
+            if not is_objective_revealed(state, index, objective):
+                continue
             objective_state = state["objectives"][index]
             if objective_state["completed"]:
                 continue
@@ -808,6 +867,8 @@ def advance_enemy_defeat(character, enemy_tags):
             continue
 
         for index, objective in enumerate(definition["objectives"]):
+            if not is_objective_revealed(state, index, objective):
+                continue
             objective_state = state["objectives"][index]
             if objective_state["completed"]:
                 continue

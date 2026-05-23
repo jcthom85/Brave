@@ -28,6 +28,35 @@ from world.tutorial import (
 )
 
 
+ZONE_RECOMMENDED_LEVELS = {
+    "brambleford": 0,
+    "wayfarer's yard": 0,
+    "goblin road": 1,
+    "whispering woods": 2,
+    "old barrow field": 3,
+    "goblin warrens": 4,
+    "ruined watchtower": 4,
+    "blackfen approach": 5,
+    "drowned weir": 5,
+}
+
+
+def get_recommended_level(zone_name):
+    """Return the recommended minimum level for a given zone string."""
+    if not zone_name:
+        return 0
+    zone_lower = str(zone_name).strip().lower()
+
+    if zone_lower in ZONE_RECOMMENDED_LEVELS:
+        return ZONE_RECOMMENDED_LEVELS[zone_lower]
+
+    for key, val in ZONE_RECOMMENDED_LEVELS.items():
+        if key in zone_lower or zone_lower in key:
+            return val
+
+    return 0
+
+
 def build_room_view(room, looker, *, visible_threats=None, visible_entities=None, visible_chars=None):
     """Return a browser-first room view for exploration and movement."""
 
@@ -64,6 +93,29 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
     visible_items = _format_room_entity_items(looker, visible_entities, visible_chars)
     room_action_items = _format_room_context_action_items(room, looker)
     sections = []
+
+    # Insert danger level warning banner if player is underleveled for the zone
+    zone_name = getattr(room.db, "brave_zone", None) or region_name
+    rec_level = get_recommended_level(zone_name)
+    player_level = int(getattr(looker.db, "brave_level", 1) or 1)
+
+    if rec_level > player_level:
+        warning_item = _item(
+            f"RECOMMENDED LEVEL {rec_level} · This area is dangerous for adventurers under level {rec_level}.",
+            icon="warning",
+        )
+        sections.append(
+            _section(
+                "",
+                "warning",
+                "list",
+                items=[warning_item],
+                variant="danger-recommendation",
+                span="wide",
+                hide_label=True,
+            )
+        )
+
     tutorial_guidance = []
     welcome_pages = []
 
@@ -116,12 +168,14 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
 
     guidance_eyebrow = None
     guidance_title = None
+    tutorial_shimmers = []
     if is_tutorial_active(looker):
         mechanical = get_tutorial_mechanical_guidance(looker)
         if mechanical:
             tutorial_guidance = mechanical["guidance"]
             guidance_eyebrow = mechanical["eyebrow"]
             guidance_title = mechanical["title"]
+            tutorial_shimmers = mechanical.get("shimmers", [])
 
     sections.append(
         _section(
@@ -170,6 +224,7 @@ def build_room_view(room, looker, *, visible_threats=None, visible_entities=None
         "guidance": tutorial_guidance,
         "guidance_eyebrow": guidance_eyebrow,
         "guidance_title": guidance_title,
+        "shimmers": tutorial_shimmers,
         "welcome_pages": welcome_pages,
         "room_actions": room_action_items,
         "social_presence": _build_room_social_presence(looker, visible_chars),

@@ -44,6 +44,24 @@ class Exit(ObjectParent, DefaultExit):
 
         block_message = get_tutorial_exit_block(traversing_object, target_location)
         if block_message:
-            traversing_object.msg(block_message)
+            from world.browser_panels import send_room_activity_event, send_webclient_event
+            from world.browser_ui import _picker, _picker_option
+
+            send_room_activity_event(traversing_object, block_message, cls="out", category="tutorial")
+            send_webclient_event(
+                traversing_object,
+                brave_picker=_picker(
+                    "Gate Held",
+                    title_icon="shield",
+                    body=[block_message],
+                    options=[
+                        _picker_option(
+                            "Understood",
+                            icon="check_circle",
+                            close_picker=True,
+                        )
+                    ],
+                ),
+            )
             return
         super().at_traverse(traversing_object, target_location, **kwargs)

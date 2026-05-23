@@ -245,6 +245,16 @@ class ContentValidationTests(unittest.TestCase):
                     "zone": "Brambleford",
                 },
                 {
+                    "id": "duplicate_map_coord_room",
+                    "key": "Duplicate Map Coord Room",
+                    "desc": "A room intentionally sharing another room's map coordinate for validation coverage.",
+                    "map_region": "brambleford",
+                    "map_x": 0,
+                    "map_y": 0,
+                    "safe": True,
+                    "zone": "Brambleford",
+                },
+                {
                     "id": "waivered_isolated_room",
                     "key": "Waivered Isolated Room",
                     "desc": "A finished isolated room that explicitly opts out of graph shipping checks.",
@@ -280,6 +290,7 @@ class ContentValidationTests(unittest.TestCase):
         self.assertTrue(any("Room new_room_0_3 uses a placeholder key" in error for error in errors))
         self.assertTrue(any("Room new_room_0_3 uses a placeholder or too-short description" in error for error in errors))
         self.assertTrue(any("Room new_room_0_3 is isolated without validation.allow_isolated" in error for error in errors))
+        self.assertTrue(any("Map region brambleford has duplicate coordinates (0, 0)" in error for error in errors))
         self.assertTrue(any("Room hidden_draft_room is unreachable from live start roots" in error for error in errors))
         self.assertTrue(any("Map region brambleford has inconsistent zone label casing" in error for error in errors))
         self.assertFalse(any("waivered_isolated_room" in error for error in errors))

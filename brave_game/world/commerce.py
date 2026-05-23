@@ -1,6 +1,7 @@
 """Town commerce helpers for configurable Brave shops."""
 
 from world.content import get_content_registry
+from world.questing import is_objective_revealed
 
 
 def _registry():
@@ -122,6 +123,8 @@ def get_reserved_quantity(character, template_id):
             continue
 
         for index, objective in enumerate(definition.get("objectives", [])):
+            if not is_objective_revealed(state, index, objective):
+                continue
             if objective.get("type") != "collect_item":
                 continue
             if objective.get("item_id") != template_id:

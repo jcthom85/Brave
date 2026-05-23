@@ -508,7 +508,7 @@ class CmdTarget(BraveCharacterCommand):
       target <enemy>
 
     Readies a basic attack against the nearest enemy or a chosen target. The
-    legacy `attack` alias is accepted for old clients and typed commands, but
+    legacy `attack` alias is accepted for old clients, but
     `fight` is the only command that starts or joins an encounter.
     """
 
@@ -535,6 +535,40 @@ class CmdTarget(BraveCharacterCommand):
             return
 
         self._refresh_combat_scene(encounter, character)
+        self.msg(message)
+
+
+class CmdGuard(BraveCharacterCommand):
+    """
+    Queue a defensive guard in combat.
+
+    Usage:
+      guard
+      wait
+
+    Raises a free baseline guard for the next exchange. Class abilities such as
+    warrior Defend still use `use <ability>`.
+    """
+
+    key = "guard"
+    aliases = ["brace", "wait"]
+    help_category = "Brave"
+
+    def _refresh_combat_scene(self, encounter, character):
+        _refresh_combat_scene(self, encounter, character)
+
+    def func(self):
+        character = self.get_character()
+        if not character:
+            return
+
+        encounter = self.get_encounter(character, require=True)
+        if not encounter:
+            return
+
+        ok, message = encounter.queue_guard(character)
+        if ok:
+            self._refresh_combat_scene(encounter, character)
         self.msg(message)
 
 

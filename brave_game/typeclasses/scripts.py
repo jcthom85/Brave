@@ -79,7 +79,14 @@ from world.race_perks import (
     get_wounded_damage_bonus,
 )
 from world.rewards import format_reward_summary, merge_reward_entries, roll_enemy_rewards
-from world.tutorial import get_tutorial_defeat_room, is_tutorial_solo_combat_room, record_encounter_victory
+from world.tutorial import (
+    TUTORIAL_COMBAT_CONSUMABLE_ID,
+    get_tutorial_combat_phase,
+    get_tutorial_defeat_room,
+    is_tutorial_solo_combat_room,
+    record_encounter_victory,
+    record_tutorial_combat_consumable,
+)
 
 COMBAT_BOSS_CREDIT_RATIO = (2, 3)
 COMBAT_ACTION_SCORE_CAP = 3.0
@@ -93,6 +100,7 @@ COMBAT_MAX_BOSS_ENEMIES = 3
 COMBAT_FINISH_FX_DELAY = 1.6
 COMBAT_DEFEAT_REFRESH_DELAY = 1.3
 COMBAT_DEFEAT_SILVER_LOSS = 5
+COMBAT_PLAYER_READY_TIMEOUT_MS = 5000
 
 
 def _normalize_token(value):
@@ -360,6 +368,7 @@ ROOM_THREAT_SKULL_DELTA = 3
 ROOM_THREAT_RESPAWN_DELAY = 45
 
 DEFAULT_ATTACK_ATB_PROFILE = normalize_atb_profile({"windup_ticks": 0, "recovery_ticks": 1, "interruptible": False})
+DEFAULT_GUARD_ATB_PROFILE = normalize_atb_profile({"windup_ticks": 0, "recovery_ticks": 1, "interruptible": False})
 DEFAULT_FLEE_ATB_PROFILE = normalize_atb_profile({"windup_ticks": 1, "recovery_ticks": 0, "telegraph": True})
 DEFAULT_ENEMY_ATTACK_ATB_PROFILE = normalize_atb_profile({"windup_ticks": 0, "recovery_ticks": 1, "interruptible": False})
 
@@ -1923,6 +1932,45 @@ class BraveEncounter(Script):
         states.pop(self._actor_atb_key(character=character, enemy=enemy, companion=companion), None)
         self.db.atb_states = states
 
+    def _tutorial_phase_for(self, character):
+        return get_tutorial_combat_phase(character, self)
+
+    def _actor_has_pending_or_active_action(self, character):
+        pending = dict(self.db.pending_actions or {})
+        if pending.get(str(character.id)):
+            return True
+        state = self._get_actor_atb_state(character=character)
+        return bool(state.get("current_action") and state.get("phase") in {"winding", "resolving"})
+
+    def _tutorial_pause_phase(self):
+        phases = {
+            BraveEncounter._tutorial_phase_for(self, participant)
+            for participant in self.get_active_player_participants()
+            if not BraveEncounter._actor_has_pending_or_active_action(self, participant)
+        }
+        if "ability" in phases:
+            return "ability"
+        if "item" in phases:
+            return "item"
+        return ""
+
+    def _tutorial_required_action_message(self, phase):
+        if phase == "ability":
+            return "Brask has paused the lesson. Use an Ability before the fight moves on."
+        if phase == "item":
+            return "Brask has paused the lesson. Use Items and apply a Field Bandage before the fight moves on."
+        return ""
+
+    def _validate_tutorial_queued_action(self, character, action_kind, action_key=None):
+        phase = BraveEncounter._tutorial_phase_for(self, character)
+        if not phase or phase == "finish" or BraveEncounter._actor_has_pending_or_active_action(self, character):
+            return True, ""
+        if phase == "ability" and action_kind == "ability":
+            return True, ""
+        if phase == "item" and action_kind == "item" and action_key == TUTORIAL_COMBAT_CONSUMABLE_ID:
+            return True, ""
+        return False, BraveEncounter._tutorial_required_action_message(self, phase)
+
     def _player_action_timing(self, action):
         kind = (action or {}).get("kind")
         if kind == "ability":
@@ -1933,7 +1981,12 @@ class BraveEncounter(Script):
             return get_item_atb_profile(action.get("item"), use)
         if kind == "flee":
             return dict(DEFAULT_FLEE_ATB_PROFILE)
+        if kind == "guard":
+            return dict(DEFAULT_GUARD_ATB_PROFILE)
         return dict(DEFAULT_ATTACK_ATB_PROFILE)
+
+    def _player_ready_timeout_ms(self, character):
+        return COMBAT_PLAYER_READY_TIMEOUT_MS
 
     def _enemy_action_timing(self, enemy):
         template_key = (enemy or {}).get("template_key")
@@ -2235,16 +2288,6 @@ class BraveEncounter(Script):
             self._get_participant_contribution(character)
             self._spawn_ranger_companion(character)
             character.ndb.brave_encounter = self
-            from world.browser_panels import send_browser_notice_event
-
-            send_browser_notice_event(
-                character,
-                "You join the fight.",
-                title="Combat",
-                tone="danger",
-                icon="swords",
-                duration_ms=2600,
-            )
         else:
             character.ndb.brave_encounter = self
             self._get_participant_contribution(character)
@@ -2260,6 +2303,10 @@ class BraveEncounter(Script):
     def queue_attack(self, character, target_query=None):
         """Queue a basic attack."""
 
+        ok, message = BraveEncounter._validate_tutorial_queued_action(self, character, "attack")
+        if not ok:
+            return False, message
+
         target = self.find_enemy(target_query)
         if target_query and not target:
             return False, "No enemy here matches that target."
@@ -2270,6 +2317,19 @@ class BraveEncounter(Script):
         target_text = _combat_target_name(target, "the nearest enemy")
         self._refresh_browser_combat_views()
         return True, f"You ready an attack against {target_text}."
+
+    def queue_guard(self, character):
+        """Queue the universal guard action."""
+
+        ok, message = BraveEncounter._validate_tutorial_queued_action(self, character, "guard")
+        if not ok:
+            return False, message
+
+        pending = dict(self.db.pending_actions or {})
+        pending[str(character.id)] = {"kind": "guard"}
+        self.db.pending_actions = pending
+        self._refresh_browser_combat_views()
+        return True, "You raise your guard for the next exchange."
 
     def queue_ability(self, character, raw_ability, target_query=None):
         """Queue an ability for the next combat round."""
@@ -2284,6 +2344,10 @@ class BraveEncounter(Script):
             return False, f"{_ability_display_name(character, ability_key)} is a passive trait and is always active."
         if not ability or ability["class"] != character.db.brave_class:
             return False, "That ability is not available to your current class in this slice."
+
+        ok, message = BraveEncounter._validate_tutorial_queued_action(self, character, "ability", ability_key)
+        if not ok:
+            return False, message
 
         unlocked = {_normalize_token(name) for name in character.get_unlocked_abilities()}
         if ability_key not in unlocked:
@@ -2342,6 +2406,10 @@ class BraveEncounter(Script):
     def queue_flee(self, character):
         """Queue a retreat back to the previous room."""
 
+        ok, message = BraveEncounter._validate_tutorial_queued_action(self, character, "flee")
+        if not ok:
+            return False, message
+
         destination = self._get_flee_destination(character)
         if not destination:
             return False, "You do not have a clear route to fall back from here."
@@ -2364,6 +2432,10 @@ class BraveEncounter(Script):
             return False, f"Be more specific. That could mean: {names}"
         if not match:
             return False, "You do not have a combat-usable consumable matching that."
+
+        ok, message = BraveEncounter._validate_tutorial_queued_action(self, character, "item", match)
+        if not ok:
+            return False, message
 
         use = get_item_use_profile(match, context="combat") or {}
         target_type = use.get("target", "self")
@@ -2392,6 +2464,7 @@ class BraveEncounter(Script):
         self.db.pending_actions = pending
 
         target_text = "the field" if target_type == "none" else _combat_target_name(target, character.key)
+        record_tutorial_combat_consumable(character, match, self)
         self._refresh_browser_combat_views()
         return True, f"You ready {ITEM_TEMPLATES[match]['name']} for {target_text}."
 
@@ -3234,6 +3307,18 @@ class BraveEncounter(Script):
         damage = self._weapon_damage(derived["attack_power"], target["armor"], bonus=bonus)
         self._damage_enemy(character, target, damage, extra_text=extra_text)
 
+    def _execute_guard(self, character):
+        derived = self._get_effective_derived(character)
+        level = max(1, int(getattr(character.db, "brave_level", 1) or 1))
+        state = self._get_participant_state(character)
+        guard_value = 3 + level + max(0, int(derived.get("armor", 0) or 0) // 4)
+        state["guard"] = max(int(state.get("guard", 0) or 0), guard_value)
+        self._save_participant_state(character, state)
+        self._apply_reaction_guard(character, character, amount=max(2, guard_value // 2), label="Guard")
+        self.obj.msg_contents(f"{character.key} keeps guard and waits for a safer opening.")
+        self._record_participant_contribution(character, meaningful=True, mitigation=guard_value, utility=1)
+        self._add_threat(character, 2)
+
     def _execute_ability(self, character, action):
         ability = ABILITY_LIBRARY[action["ability"]]
         ability_name = _ability_display_name(character, action["ability"])
@@ -3369,7 +3454,7 @@ class BraveEncounter(Script):
         pending = dict(self.db.pending_actions or {})
         action = pending.pop(str(character.id), None)
         self.db.pending_actions = pending
-        return action or {"kind": "attack", "target": None}
+        return action or {"kind": "guard"}
 
     def _resolve_player_action(self, character, action):
         if action["kind"] == "attack":
@@ -3377,6 +3462,9 @@ class BraveEncounter(Script):
             if target and target["hp"] <= 0:
                 target = self._default_enemy_target()
             self._execute_basic_attack(character, target=target)
+            return
+        if action["kind"] == "guard":
+            self._execute_guard(character)
             return
         if action["kind"] == "ability":
             self._execute_ability(character, action)
@@ -3391,8 +3479,16 @@ class BraveEncounter(Script):
         tick_ms = self._atb_tick_ms()
         state = tick_atb_state(self._get_actor_atb_state(character=character), tick_ms=tick_ms)
         if state.get("phase") == "ready":
-            action = self._consume_player_pending_action(character)
-            state = start_atb_action(state, action, self._player_action_timing(action), tick_ms=tick_ms)
+            pending = dict(self.db.pending_actions or {})
+            has_pending_action = bool(pending.get(str(character.id)))
+            ready_timeout_ms = max(1, int(self._player_ready_timeout_ms(character) or 1))
+            now_ms = int(round(time.time() * 1000))
+            started_at_ms = int(state.get("phase_started_at_ms", now_ms) or now_ms)
+            state["phase_duration_ms"] = ready_timeout_ms
+            state["phase_started_at_ms"] = started_at_ms
+            if has_pending_action or now_ms - started_at_ms >= ready_timeout_ms:
+                action = self._consume_player_pending_action(character)
+                state = start_atb_action(state, action, self._player_action_timing(action), tick_ms=tick_ms)
         if state.get("phase") == "resolving":
             action = dict(state.get("current_action") or {"kind": "attack", "target": None})
             self._resolve_player_action(character, action)
@@ -3772,13 +3868,19 @@ class BraveEncounter(Script):
             cleanup_gate_instance(self)
 
     def at_repeat(self):
-        self.db.round += 1
         active_participants = self.get_active_player_participants()
         active_enemies = self.get_active_enemies()
 
         if not active_participants:
             self._finish_party_defeat("|rThe fight breaks wrong, and the danger keeps the road.|n")
             return
+
+        if active_enemies and BraveEncounter._tutorial_pause_phase(self):
+            self._refresh_browser_combat_views()
+            return
+
+        self.db.round += 1
+
         if not active_enemies:
             self._schedule_victory_sequence("|gThe last of them falls. The way is clear for now.|n")
             return

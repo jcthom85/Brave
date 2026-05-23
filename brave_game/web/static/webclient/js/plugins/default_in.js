@@ -19,8 +19,8 @@ let defaultInPlugin = (function () {
     var INPUT_CONTEXT_COMMAND = "command";
     var focusOnKeydown = true;
     var placeholderByMode = {
-        chat: "Say something nearby. Prefix with / to send a command.",
-        command: "Type a command. Try: map, n, e, sheet, talk mira, fight",
+        chat: "Say something nearby.",
+        command: "Quick input. Most actions are available as buttons.",
     };
     var playInputMode = INPUT_MODE_CHAT;
     var inputContext = INPUT_CONTEXT_COMMAND;

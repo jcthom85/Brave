@@ -32,6 +32,11 @@ ATMOSPHERE_PROFILES = {
         "layers": ["floor_glow", "southline_pulse"],
         "intensity": "medium",
     },
+    "lantern_rest_hearth": {
+        "key": "lantern_rest_hearth",
+        "layers": ["hearth_flicker", "cozy_shadows"],
+        "intensity": "low",
+    },
 }
 
 
@@ -73,6 +78,8 @@ def get_room_atmosphere(room):
     room_key = _normal(getattr(room, "key", ""))
     combined = " ".join(part for part in (room_id, map_region, zone, room_key) if part)
 
+    if room_id == "brambleford_lantern_rest_inn" or "lantern rest inn" in combined:
+        return dict(ATMOSPHERE_PROFILES["lantern_rest_hearth"])
     if room_id == "brambleford_lower_lanternworks":
         return dict(ATMOSPHERE_PROFILES["lanternworks_glow"])
     if room_id == "brambleford_great_observatory":

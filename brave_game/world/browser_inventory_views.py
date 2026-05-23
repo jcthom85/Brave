@@ -29,6 +29,7 @@ from world.browser_ui import (
 from world.data.items import get_item_rarity_label
 from world.item_rarity import build_item_rarity_chip, build_item_rarity_display
 from world.resonance import format_ability_display
+from world.tutorial import ensure_tutorial_state, get_tutorial_view_shimmers, is_tutorial_active
 
 PACK_KIND_ORDER = ("consumable", "ingredient", "loot", "equipment")
 
@@ -158,6 +159,13 @@ def _build_gear_entry(character, slot, template_id):
     detail_lines = _format_equipment_effect_lines(item, character)
     body = [summary_text, *detail_lines]
     tooltip = _sheet_detail_tooltip(item_name, slot_label, body)
+
+    shimmer = False
+    if slot == "trinket" and is_tutorial_active(character):
+        state = ensure_tutorial_state(character)
+        if state.get("step") == "fit_your_clasp" and not state["flags"].get("equipped_wayfarer_clasp"):
+            shimmer = True
+
     return _entry(
         slot_label,
         meta=item_name,
@@ -167,10 +175,18 @@ def _build_gear_entry(character, slot, template_id):
         **build_item_rarity_display(item),
         picker=_build_gear_slot_picker(character, slot, equipped_template_id=template_id),
         tooltip=tooltip,
+        shimmer=shimmer,
     )
 
 def _build_empty_gear_entry(character, slot):
     slot_label = _gear_slot_label(slot)
+
+    shimmer = False
+    if slot == "trinket" and is_tutorial_active(character):
+        state = ensure_tutorial_state(character)
+        if state.get("step") == "fit_your_clasp" and not state["flags"].get("equipped_wayfarer_clasp"):
+            shimmer = True
+
     return _entry(
         slot_label,
         meta="Empty",
@@ -178,6 +194,7 @@ def _build_empty_gear_entry(character, slot):
         icon=GEAR_SLOT_ICONS.get(slot, "inventory_2"),
         picker=_build_gear_slot_picker(character, slot),
         tooltip=_sheet_detail_tooltip(slot_label, "Empty", []),
+        shimmer=shimmer,
     )
 
 def build_gear_view(character, feedback=None):
@@ -191,16 +208,6 @@ def build_gear_view(character, feedback=None):
         for slot in EQUIPMENT_SLOTS
     ]
     sections = []
-    if feedback:
-        sections.append(
-            _section(
-                "Power Feedback",
-                "trending_up",
-                "lines",
-                lines=[feedback],
-                span="wide",
-            )
-        )
     sections.append(
         _section(
             "",
@@ -208,12 +215,22 @@ def build_gear_view(character, feedback=None):
             "entries",
             items=slot_entries,
             hide_label=True,
-            span="wide",
+            span=None if feedback else "wide",
             variant="slots",
         )
     )
+    if feedback:
+        sections.append(
+            _section(
+                "Power Feedback",
+                "trending_up",
+                "lines",
+                lines=[feedback],
+                variant="feedback",
+            )
+        )
 
-    return {
+    view = {
         **_make_view(
             "",
             "Gear",
@@ -227,6 +244,10 @@ def build_gear_view(character, feedback=None):
         ),
         "variant": "gear",
     }
+    shimmers = get_tutorial_view_shimmers(character, "gear")
+    if shimmers:
+        view["shimmers"] = shimmers
+    return view
 
 def _pack_item_icon(item):
     kind = get_item_category(item)
@@ -465,7 +486,7 @@ def build_pack_view(character):
             )
         )
 
-    return {
+    view = {
         **_make_view(
             "",
             "Pack",
@@ -479,3 +500,7 @@ def build_pack_view(character):
         ),
         "variant": "pack",
     }
+    shimmers = get_tutorial_view_shimmers(character, "pack")
+    if shimmers:
+        view["shimmers"] = shimmers
+    return view

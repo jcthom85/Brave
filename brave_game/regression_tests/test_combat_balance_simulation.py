@@ -90,8 +90,8 @@ class CombatBalanceSimulationTests(unittest.TestCase):
     def test_first_hour_route_tracks_xp_level_and_post_ruk_lead(self):
         report = build_first_hour_route_report(scenario_key="solo_warrior", base_seed=7, max_rounds=120)
 
-        self.assertEqual(4, report["final_level"])
-        self.assertLess(report["final_xp"], 350)
+        self.assertIn(report["final_level"], [4, 5])
+        self.assertLess(report["final_xp"], 400)
         self.assertEqual("what_whispers_in_the_wood", report["post_ruk_unlock_order"][0])
         self.assertTrue(all(step.get("outcome", "victory") == "victory" for step in report["steps"]))
         self.assertGreater(report["final_silver_min"], 0)

@@ -1,10 +1,10 @@
 {
   "_meta": {
-    "last_action": "publish",
-    "last_modified_at": "2026-05-07T23:46:13.893286+00:00",
-    "last_modified_by": "jctest3",
-    "last_target": "items",
-    "stage": "live"
+    "last_action": "remove",
+    "last_modified_at": "2026-05-20T20:32:38.432052+00:00",
+    "last_modified_by": "codex-cli",
+    "last_target": "test_healing_tonic",
+    "stage": "draft"
   },
   "bonus_labels": {
     "accuracy": "Accuracy",
@@ -364,6 +364,13 @@
       "summary": "A quick silver-sided river fish common around the town wharf.",
       "value": 4
     },
+    "brass_focus_gear": {
+      "category": "loot",
+      "kind": "loot",
+      "name": "Brass Focus Gear",
+      "summary": "A heavy, precisely-machined brass gear meant to align a lantern projector. Joss has already filed off the piece that kept the Picture House from working.",
+      "value": 15
+    },
     "briar_heart": {
       "kind": "loot",
       "name": "Briar Heart",
@@ -545,13 +552,6 @@
       "stackable": true,
       "summary": "A damp reed-map marked twice in Mira's hand, showing survey tags pulled off course by lights moving against the wind.",
       "value": 11
-    },
-    "brass_focus_gear": {
-      "category": "loot",
-      "kind": "loot",
-      "name": "Brass Focus Gear",
-      "summary": "A heavy, precisely-machined brass gear meant to align a lantern projector. Joss has already filed off the piece that kept the Picture House from working.",
-      "value": 15
     },
     "edrics_signet": {
       "kind": "loot",
@@ -933,13 +933,6 @@
       "slot": "off_hand",
       "summary": "A palm-sized focus crystal wrapped in brass wire from old Brambleford lanterns."
     },
-    "maze_lantern_pin": {
-      "kind": "loot",
-      "name": "Lantern Pixel Pin",
-      "stackable": true,
-      "summary": "A bright enamel pin shaped like a little maze-lantern grin. Joss only parts with them when a cabinet sings for somebody.",
-      "value": 0
-    },
     "lanternlined_robes": {
       "bonuses": {
         "armor": 2,
@@ -1074,6 +1067,13 @@
       "name": "Marshsong Staff",
       "slot": "main_hand",
       "summary": "A thorn staff rebuilt with fen resin and wispglass until the grain hums like water remembering moonlight."
+    },
+    "maze_lantern_pin": {
+      "kind": "loot",
+      "name": "Lantern Pixel Pin",
+      "stackable": true,
+      "summary": "A bright enamel pin shaped like a little maze-lantern grin. Joss only parts with them when a cabinet sings for somebody.",
+      "value": 0
     },
     "mercy_votive": {
       "kind": "consumable",

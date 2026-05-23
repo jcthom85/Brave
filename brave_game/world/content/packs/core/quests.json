@@ -1,8 +1,8 @@
 {
   "_meta": {
     "last_action": "publish",
-    "last_modified_at": "2026-05-20T00:08:40.850438+00:00",
-    "last_modified_by": "jctest",
+    "last_modified_at": "2026-05-21T21:24:47.366239+00:00",
+    "last_modified_by": "codex-cli",
     "last_target": "quests",
     "stage": "live"
   },
@@ -28,6 +28,13 @@
     "miretooths_claim": "Blackfen",
     "names_under_dusk": "Old Barrow Field",
     "practice_makes_heroes": "Brambleford",
+    "proof_barrow_votive_ring": "Old Barrow Field",
+    "proof_drifted_reed_tags": "Blackfen",
+    "proof_moonleaf_warning_ribbon": "Whispering Woods",
+    "proof_numbered_signal_arrows": "Ruined Watchtower",
+    "proof_old_fence_cut_tally": "Goblin Road",
+    "proof_sludge_run_flour_sack": "Goblin Warrens",
+    "proof_sluice_work_order_plate": "Drowned Weir",
     "rails_for_the_return": "Goblin Road",
     "rats_in_the_kettle": "Brambleford",
     "repair_the_picture_house": "Brambleford",
@@ -42,14 +49,7 @@
     "the_ridge_tally": "Ruined Watchtower",
     "the_south_light": "Drowned Weir",
     "what_the_pot_took": "Goblin Warrens",
-    "what_whispers_in_the_wood": "Whispering Woods",
-    "proof_old_fence_cut_tally": "Goblin Road",
-    "proof_moonleaf_warning_ribbon": "Whispering Woods",
-    "proof_barrow_votive_ring": "Old Barrow Field",
-    "proof_numbered_signal_arrows": "Ruined Watchtower",
-    "proof_sludge_run_flour_sack": "Goblin Warrens",
-    "proof_drifted_reed_tags": "Blackfen",
-    "proof_sluice_work_order_plate": "Drowned Weir"
+    "what_whispers_in_the_wood": "Whispering Woods"
   },
   "quests": {
     "bell_before_the_road": {
@@ -656,6 +656,150 @@
       "summary": "Report to Captain Harl after the alarm and get pointed at the first town problem.",
       "title": "Practice Makes Heroes"
     },
+    "proof_barrow_votive_ring": {
+      "giver": "Brother Alden",
+      "next_step": "Read the votive ring at the Barrow Circle.",
+      "objectives": [
+        {
+          "description": "Read the barrow votive ring near the old stones.",
+          "readable_id": "barrow_votive_ring",
+          "type": "read_readable"
+        }
+      ],
+      "optional": true,
+      "prerequisites": [
+        "lanterns_at_dusk"
+      ],
+      "rewards": {
+        "xp": 25
+      },
+      "summary": "Read the votive ring and confirm the chapel candles are answering Sir Edric's slab.",
+      "title": "Barrow Votive Ring"
+    },
+    "proof_drifted_reed_tags": {
+      "giver": "Mira Fenleaf",
+      "next_step": "Read the drifted reed tags in the Reedflats.",
+      "objectives": [
+        {
+          "description": "Read the drifted reed tags in the Reedflats.",
+          "readable_id": "drifted_reed_tags",
+          "type": "read_readable"
+        }
+      ],
+      "optional": true,
+      "prerequisites": [
+        "bogwater_rumors"
+      ],
+      "rewards": {
+        "xp": 25
+      },
+      "summary": "Read the tags and confirm something moved Mira's markers without leaving tracks.",
+      "title": "Drifted Reed Tags"
+    },
+    "proof_moonleaf_warning_ribbon": {
+      "giver": "Sister Maybelle",
+      "next_step": "Read Maybelle's warning ribbon in the Briar Glade.",
+      "objectives": [
+        {
+          "description": "Read the moonleaf warning ribbon in the Briar Glade.",
+          "readable_id": "moonleaf_warning_ribbon",
+          "type": "read_readable"
+        }
+      ],
+      "optional": true,
+      "prerequisites": [
+        "ruk_the_fence_cutter"
+      ],
+      "rewards": {
+        "xp": 20
+      },
+      "summary": "Read the ribbon and confirm the moonleaf is leaning away from the barrow route.",
+      "title": "Moonleaf Warning Ribbon"
+    },
+    "proof_numbered_signal_arrows": {
+      "giver": "Captain Harl Rowan",
+      "next_step": "Read the numbered signal arrows on Archer's Ledge.",
+      "objectives": [
+        {
+          "description": "Read the numbered signal arrows under Archer's Ledge.",
+          "readable_id": "numbered_signal_arrows",
+          "type": "read_readable"
+        }
+      ],
+      "optional": true,
+      "prerequisites": [
+        "smoke_on_the_ridge"
+      ],
+      "rewards": {
+        "silver": 3,
+        "xp": 25
+      },
+      "summary": "Read the arrows and prove Blackreed was measuring routes, not merely ambushing wagons.",
+      "title": "Numbered Signal Arrows"
+    },
+    "proof_old_fence_cut_tally": {
+      "giver": "Mira Fenleaf",
+      "next_step": "Read Mira's cut tally at the Old Fence Line.",
+      "objectives": [
+        {
+          "description": "Read the old fence cut tally at the Old Fence Line.",
+          "readable_id": "old_fence_cut_tally",
+          "type": "read_readable"
+        }
+      ],
+      "optional": true,
+      "prerequisites": [
+        "rats_in_the_kettle"
+      ],
+      "rewards": {
+        "silver": 2,
+        "xp": 20
+      },
+      "summary": "Read the tally and bring Mira proof that the rail cuts follow a pattern.",
+      "title": "Fence Cut Tally"
+    },
+    "proof_sludge_run_flour_sack": {
+      "giver": "Uncle Pib Underbough",
+      "next_step": "Read the marked flour sack in the Sludge Run.",
+      "objectives": [
+        {
+          "description": "Read the sludge-run flour sack in the warrens.",
+          "readable_id": "sludge_run_flour_sack",
+          "type": "read_readable"
+        }
+      ],
+      "optional": true,
+      "prerequisites": [
+        "below_the_fencebreakers"
+      ],
+      "rewards": {
+        "silver": 2,
+        "xp": 25
+      },
+      "summary": "Read the sack and prove Brambleford stores are being organized under the road.",
+      "title": "Sludge-Run Flour Sack"
+    },
+    "proof_sluice_work_order_plate": {
+      "giver": "Joss Veller",
+      "next_step": "Read the work-order plate on the Sluice Walk.",
+      "objectives": [
+        {
+          "description": "Read the sluice work-order plate on the Sluice Walk.",
+          "readable_id": "sluice_work_order_plate",
+          "type": "read_readable"
+        }
+      ],
+      "optional": true,
+      "prerequisites": [
+        "bridgework_for_joss"
+      ],
+      "rewards": {
+        "silver": 3,
+        "xp": 30
+      },
+      "summary": "Read the plate and confirm the wrong light is following an old civic order.",
+      "title": "Sluice Work-Order Plate"
+    },
     "rails_for_the_return": {
       "giver": "Mira Fenleaf",
       "next_step": "Take Mira's repair tally back to the East Gate, then decide whether to finish Ruk or follow the road's deeper trouble.",
@@ -698,7 +842,13 @@
       "next_step": "Go east to the East Gate and speak with Mira Fenleaf about the cut road.",
       "objectives": [
         {
+          "description": "Talk to Uncle Pib Underbough.",
+          "npc_id": "uncle_pib_underbough",
+          "type": "talk_to_npc"
+        },
+        {
           "description": "Head down into the Rat and Kettle Cellar beneath the inn.",
+          "revealed_after": 0,
           "room_id": "brambleford_rat_and_kettle_cellar",
           "type": "visit_room"
         },
@@ -706,6 +856,7 @@
           "count": 3,
           "description": "Defeat 3 thorn rats before they ruin more stores.",
           "enemy_tag": "rat",
+          "revealed_after": 0,
           "type": "defeat_enemy"
         }
       ],
@@ -1114,150 +1265,6 @@
       },
       "summary": "Scout the first reaches of Whispering Woods and find where the old unease is thickest.",
       "title": "What Whispers in the Wood"
-    },
-    "proof_old_fence_cut_tally": {
-      "giver": "Mira Fenleaf",
-      "next_step": "Read Mira's cut tally at the Old Fence Line.",
-      "objectives": [
-        {
-          "description": "Read the old fence cut tally at the Old Fence Line.",
-          "readable_id": "old_fence_cut_tally",
-          "type": "read_readable"
-        }
-      ],
-      "prerequisites": [
-        "rats_in_the_kettle"
-      ],
-      "rewards": {
-        "xp": 20,
-        "silver": 2
-      },
-      "summary": "Read the tally and bring Mira proof that the rail cuts follow a pattern.",
-      "title": "Fence Cut Tally",
-      "optional": true
-    },
-    "proof_moonleaf_warning_ribbon": {
-      "giver": "Sister Maybelle",
-      "next_step": "Read Maybelle's warning ribbon in the Briar Glade.",
-      "objectives": [
-        {
-          "description": "Read the moonleaf warning ribbon in the Briar Glade.",
-          "readable_id": "moonleaf_warning_ribbon",
-          "type": "read_readable"
-        }
-      ],
-      "prerequisites": [
-        "ruk_the_fence_cutter"
-      ],
-      "rewards": {
-        "xp": 20
-      },
-      "summary": "Read the ribbon and confirm the moonleaf is leaning away from the barrow route.",
-      "title": "Moonleaf Warning Ribbon",
-      "optional": true
-    },
-    "proof_barrow_votive_ring": {
-      "giver": "Brother Alden",
-      "next_step": "Read the votive ring at the Barrow Circle.",
-      "objectives": [
-        {
-          "description": "Read the barrow votive ring near the old stones.",
-          "readable_id": "barrow_votive_ring",
-          "type": "read_readable"
-        }
-      ],
-      "prerequisites": [
-        "lanterns_at_dusk"
-      ],
-      "rewards": {
-        "xp": 25
-      },
-      "summary": "Read the votive ring and confirm the chapel candles are answering Sir Edric's slab.",
-      "title": "Barrow Votive Ring",
-      "optional": true
-    },
-    "proof_numbered_signal_arrows": {
-      "giver": "Captain Harl Rowan",
-      "next_step": "Read the numbered signal arrows on Archer's Ledge.",
-      "objectives": [
-        {
-          "description": "Read the numbered signal arrows under Archer's Ledge.",
-          "readable_id": "numbered_signal_arrows",
-          "type": "read_readable"
-        }
-      ],
-      "prerequisites": [
-        "smoke_on_the_ridge"
-      ],
-      "rewards": {
-        "xp": 25,
-        "silver": 3
-      },
-      "summary": "Read the arrows and prove Blackreed was measuring routes, not merely ambushing wagons.",
-      "title": "Numbered Signal Arrows",
-      "optional": true
-    },
-    "proof_sludge_run_flour_sack": {
-      "giver": "Uncle Pib Underbough",
-      "next_step": "Read the marked flour sack in the Sludge Run.",
-      "objectives": [
-        {
-          "description": "Read the sludge-run flour sack in the warrens.",
-          "readable_id": "sludge_run_flour_sack",
-          "type": "read_readable"
-        }
-      ],
-      "prerequisites": [
-        "below_the_fencebreakers"
-      ],
-      "rewards": {
-        "xp": 25,
-        "silver": 2
-      },
-      "summary": "Read the sack and prove Brambleford stores are being organized under the road.",
-      "title": "Sludge-Run Flour Sack",
-      "optional": true
-    },
-    "proof_drifted_reed_tags": {
-      "giver": "Mira Fenleaf",
-      "next_step": "Read the drifted reed tags in the Reedflats.",
-      "objectives": [
-        {
-          "description": "Read the drifted reed tags in the Reedflats.",
-          "readable_id": "drifted_reed_tags",
-          "type": "read_readable"
-        }
-      ],
-      "prerequisites": [
-        "bogwater_rumors"
-      ],
-      "rewards": {
-        "xp": 25
-      },
-      "summary": "Read the tags and confirm something moved Mira's markers without leaving tracks.",
-      "title": "Drifted Reed Tags",
-      "optional": true
-    },
-    "proof_sluice_work_order_plate": {
-      "giver": "Joss Veller",
-      "next_step": "Read the work-order plate on the Sluice Walk.",
-      "objectives": [
-        {
-          "description": "Read the sluice work-order plate on the Sluice Walk.",
-          "readable_id": "sluice_work_order_plate",
-          "type": "read_readable"
-        }
-      ],
-      "prerequisites": [
-        "bridgework_for_joss"
-      ],
-      "rewards": {
-        "xp": 30,
-        "silver": 3
-      },
-      "summary": "Read the plate and confirm the wrong light is following an old civic order.",
-      "title": "Sluice Work-Order Plate",
-      "optional": true
     }
   },
   "starting_quests": [

@@ -1,8 +1,8 @@
 {
   "_meta": {
     "last_action": "publish",
-    "last_modified_at": "2026-05-07T23:46:13.906718+00:00",
-    "last_modified_by": "jctest3",
+    "last_modified_at": "2026-05-21T21:24:47.380177+00:00",
+    "last_modified_by": "codex-cli",
     "last_target": "encounters",
     "stage": "live"
   },
@@ -762,6 +762,37 @@
       "target_strategy": "lowest_hp",
       "xp": 76
     },
+    "lens_warden": {
+      "accuracy": 75,
+      "armor": 3,
+      "attack_kind": "spell",
+      "attack_power": 10,
+      "desc": "A hovering lanternwork plate that tracks movement through cracked glass and answers with hard pulses of south-line light.",
+      "dodge": 7,
+      "loot": [
+        {
+          "chance": 0.5,
+          "item": "fractured_circuit"
+        },
+        {
+          "chance": 0.45,
+          "item": "flux_coil"
+        }
+      ],
+      "max_hp": 38,
+      "name": "Lens Warden",
+      "silver": [
+        4,
+        7
+      ],
+      "spell_power": 12,
+      "tags": [
+        "construct",
+        "weir",
+        "ranged"
+      ],
+      "xp": 28
+    },
     "mag_clamp_drone": {
       "accuracy": 73,
       "armor": 3,
@@ -1091,37 +1122,6 @@
         "raider"
       ],
       "xp": 55
-    },
-    "lens_warden": {
-      "accuracy": 75,
-      "armor": 3,
-      "attack_kind": "spell",
-      "attack_power": 10,
-      "desc": "A hovering lanternwork plate that tracks movement through cracked glass and answers with hard pulses of south-line light.",
-      "dodge": 7,
-      "loot": [
-        {
-          "chance": 0.5,
-          "item": "fractured_circuit"
-        },
-        {
-          "chance": 0.45,
-          "item": "flux_coil"
-        }
-      ],
-      "max_hp": 38,
-      "name": "Lens Warden",
-      "silver": [
-        4,
-        7
-      ],
-      "spell_power": 12,
-      "tags": [
-        "construct",
-        "weir",
-        "ranged"
-      ],
-      "xp": 28
     },
     "scrap_hound": {
       "accuracy": 70,
@@ -2305,19 +2305,12 @@
     "tutorial_vermin_pens": [
       {
         "enemies": [
+          "tutorial_thorn_rat",
           "tutorial_thorn_rat"
         ],
-        "intro": "Straw erupts under the rail and a thorn rat bolts straight at the nearest warm ankle.",
+        "intro": "Straw erupts under the rail as two thorn rats bolt for the nearest warm ankle, exactly the kind of controlled trouble Brask wanted.",
         "key": "yard_scuttle",
         "title": "Yard Scuttle"
-      },
-      {
-        "enemies": [
-          "tutorial_thorn_rat"
-        ],
-        "intro": "A burr-matted rat launches itself out of a feed bin with all the confidence of a creature that has never once paid for grain.",
-        "key": "bin_raider",
-        "title": "Bin Raider"
       }
     ],
     "whispering_woods_briar_glade": [

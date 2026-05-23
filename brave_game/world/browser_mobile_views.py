@@ -17,7 +17,7 @@ from world.data.items import get_item_rarity_key, get_item_rarity_label, get_ite
 from world.item_rarity import build_item_rarity_chip, build_item_rarity_display
 from world.browser_ui import _picker
 from world.party import get_character_by_id, get_follow_target, get_party_leader, get_party_members
-from world.questing import get_tracked_quest
+from world.questing import get_tracked_quest, get_visible_objective_states
 from world.resonance import get_resource_label, get_stat_label
 
 def _build_mobile_pack_payload(character):
@@ -192,7 +192,7 @@ def _build_mobile_quests_payload(character):
     def summarize(quest_key):
         definition = QUESTS.get(quest_key, {})
         state = quest_state.get(quest_key, {})
-        objectives = list(state.get("objectives", []))
+        objectives = get_visible_objective_states(quest_key, state)
         remaining = [objective for objective in objectives if not objective.get("completed")]
         next_objective = remaining[0] if remaining else None
         return {
@@ -208,7 +208,7 @@ def _build_mobile_quests_payload(character):
                 "text": _format_objective_progress(objective),
                 "completed": bool(objective.get("completed")),
             }
-            for objective in list(quest_state.get(tracked_key, {}).get("objectives", []))[:5]
+            for objective in get_visible_objective_states(tracked_key, quest_state.get(tracked_key, {}))[:5]
         ]
 
     return {

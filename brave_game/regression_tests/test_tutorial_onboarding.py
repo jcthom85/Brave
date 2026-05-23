@@ -10,13 +10,13 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
 from world.resting import room_allows_rest
-from world.browser_views import build_combat_view
+from world.browser_views import build_combat_view, build_gear_view, build_pack_view
 from world.content import get_content_registry
 from world.interactions import get_entity_response
 from world.questing import advance_enemy_defeat, advance_read_readable, advance_room_visit, ensure_starter_quests, unlock_quest
 from world.questing import get_tracked_quest_payload
+from typeclasses.scripts import BraveEncounter
 from world.tutorial import (
-    TUTORIAL_COMBAT_INTRO_PAGES,
     LANTERNFALL_WELCOME_PAGES,
     begin_tutorial,
     ensure_tutorial_state,
@@ -26,18 +26,24 @@ from world.tutorial import (
     get_tutorial_combat_intro_pages,
     get_tutorial_mechanical_guidance,
     get_tutorial_combat_focus,
+    get_tutorial_combat_phase,
     get_tutorial_exit_block,
     get_tutorial_entity_response,
+    get_tutorial_objective_entries,
     is_tutorial_solo_combat_room,
     record_command_event,
     record_encounter_victory,
+    record_tutorial_combat_consumable,
     should_show_lanternfall_recap,
 )
 from commands.brave import _format_tutorial_screen_block
+from typeclasses.exits import Exit
 
 
 class DummyCharacter:
     def __init__(self):
+        self.id = 7
+        self.key = "Dad"
         self.db = SimpleNamespace(
             brave_tutorial=None,
             brave_tutorial_current_step=None,
@@ -45,6 +51,7 @@ class DummyCharacter:
             brave_tracked_quest=None,
             brave_track_suppressed=False,
             brave_harl_cellar_job_assigned=False,
+            brave_equipment={},
             brave_inventory=[],
             brave_silver=0,
             brave_xp=0,
@@ -62,7 +69,14 @@ class DummyCharacter:
         return []
 
     def add_item_to_inventory(self, template_id, quantity=1):
+        for entry in self.db.brave_inventory:
+            if entry["template"] == template_id:
+                entry["quantity"] += quantity
+                return
         self.db.brave_inventory.append({"template": template_id, "quantity": quantity})
+
+    def get_inventory_quantity(self, template_id):
+        return sum(entry["quantity"] for entry in self.db.brave_inventory if entry["template"] == template_id)
 
 
 def _room(room_id, *, safe=True, rest_allowed=False):
@@ -129,6 +143,11 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertEqual("completed", character.db.brave_quests["practice_makes_heroes"]["status"])
         self.assertEqual("active", character.db.brave_quests["rats_in_the_kettle"]["status"])
         self.assertEqual("rats_in_the_kettle", character.db.brave_tracked_quest)
+        payload = get_tracked_quest_payload(character)
+        self.assertEqual(
+            ["Talk to Uncle Pib Underbough."],
+            [objective["text"] for objective in payload["objectives"]],
+        )
 
     def test_unlocking_quest_sends_new_quest_popup_payload(self):
         character = DummyCharacter()
@@ -204,6 +223,8 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertIn("South road lantern went black", response)
         self.assertIn("cut harness", response)
         self.assertIn("Head east to Nella", response)
+        self.assertIn("Click the East button", response)
+        self.assertIn("arrows and WASD also move you", response)
         self.assertTrue(character.db.brave_tutorial["flags"]["talked_tamsin"])
 
     def test_tutorial_overlay_updates_after_tamsin_points_to_nella(self):
@@ -217,7 +238,8 @@ class TutorialOnboardingTests(unittest.TestCase):
         get_tutorial_entity_response(character, _entity("sergeant_tamsin_vale"), "talk", is_action=True)
 
         after = get_tutorial_mechanical_guidance(character)
-        self.assertIn("Go east to the Quartermaster Shed", after["guidance"][0][0])
+        self.assertIn("Click the East button", after["guidance"][0][0])
+        self.assertIn("arrows and WASD also move you", after["guidance"][0][0])
         self.assertIn("Quartermaster Nella", after["guidance"][0][0])
         self.assertNotIn("Click Sergeant Tamsin", after["guidance"][0][0])
         self.assertEqual(["Head east to Quartermaster Shed", "Nella is checking road kits"], get_tutorial_focus(character, character.location))
@@ -235,19 +257,27 @@ class TutorialOnboardingTests(unittest.TestCase):
 
         get_tutorial_entity_response(character, _entity("quartermaster_nella_cobb"), "talk", is_action=True)
         guidance = get_tutorial_mechanical_guidance(character)["guidance"][0][0]
-        self.assertIn("Open Gear", guidance)
-
-        record_command_event(character, "gear")
-        guidance = get_tutorial_mechanical_guidance(character)["guidance"][0][0]
         self.assertIn("Open Pack", guidance)
+        self.assertEqual(["pack"], get_tutorial_mechanical_guidance(character)["shimmers"])
+
+        pack_view = build_pack_view(character)
+        self.assertEqual(["close"], pack_view.get("shimmers"))
 
         record_command_event(character, "pack")
+        guidance = get_tutorial_mechanical_guidance(character)["guidance"][0][0]
+        self.assertIn("Open Gear", guidance)
+        self.assertEqual(["gear"], get_tutorial_mechanical_guidance(character)["shimmers"])
+
+        gear_view = build_gear_view(character)
+        self.assertEqual(["close"], gear_view.get("shimmers"))
+
+        record_command_event(character, "gear")
         guidance = get_tutorial_mechanical_guidance(character)["guidance"][0][0]
         self.assertIn("Read the supply board", guidance)
 
         get_tutorial_entity_response(character, _entity("tutorial_supply_board"), "read", is_action=True)
         guidance = get_tutorial_mechanical_guidance(character)["guidance"][0][0]
-        self.assertIn("Return west to Wayfarer's Yard", guidance)
+        self.assertIn("Ringhand Brask", guidance)
 
     def test_terminal_tutorial_journal_matches_required_handoff_order(self):
         character = DummyCharacter()
@@ -264,7 +294,15 @@ class TutorialOnboardingTests(unittest.TestCase):
         character.db.brave_tutorial = state
 
         pack_step = "\n".join(_format_tutorial_screen_block(character))
-        self.assertIn("Return west to Wayfarer's Yard.", pack_step)
+        self.assertIn("Read the supply board.", pack_step)
+        self.assertNotIn("Return west to Wayfarer's Yard.", pack_step)
+        tutorial_entry = get_tutorial_objective_entries(character)
+        self.assertEqual("Kit Before the Gate", tutorial_entry["title"])
+        self.assertIn("Use direction buttons to move; arrows and WASD also work", tutorial_entry["summary"])
+        self.assertNotIn(
+            "Return west to Wayfarer's Yard.",
+            [objective["text"] for objective in tutorial_entry["objectives"]],
+        )
 
         state["flags"].update(
             {
@@ -274,6 +312,7 @@ class TutorialOnboardingTests(unittest.TestCase):
                 "returned_to_wayfarers_yard": True,
                 "talked_brask": True,
                 "used_class_ability": True,
+                "used_combat_consumable": True,
                 "won_vermin_fight": True,
                 "received_wayfarer_clasp": True,
             }
@@ -284,6 +323,66 @@ class TutorialOnboardingTests(unittest.TestCase):
         clasp_step = "\n".join(_format_tutorial_screen_block(character))
         self.assertIn("Equip the Wayfarer Clasp from Gear.", clasp_step)
         self.assertNotIn("gear equip trinket clasp", clasp_step)
+
+    def test_clear_pens_guidance_names_class_skill(self):
+        character = DummyCharacter()
+        character.db.brave_class = "ranger"
+        begin_tutorial(character)
+        state = ensure_tutorial_state(character)
+        state["flags"].update(
+            {
+                "talked_tamsin": True,
+                "visited_quartermaster_shed": True,
+                "returned_to_wayfarers_yard": True,
+                "talked_nella": True,
+                "viewed_gear": True,
+                "viewed_pack": True,
+                "read_supply_board": True,
+                "talked_brask": True,
+            }
+        )
+        state["step"] = "clear_the_pens"
+        character.db.brave_tutorial = state
+        character.location = _room("tutorial_sparring_ring")
+
+        guidance = get_tutorial_mechanical_guidance(character)["guidance"][0][0]
+        self.assertIn("start a fight", guidance)
+        self.assertIn("use Quick Shot once", guidance)
+        self.assertNotIn("class skill", guidance)
+        self.assertIn("Use Quick Shot in combat.", "\n".join(_format_tutorial_screen_block(character)))
+        tutorial_entry = get_tutorial_objective_entries(character)
+        self.assertIn(
+            "Use Quick Shot in combat.",
+            [objective["text"] for objective in tutorial_entry["objectives"]],
+        )
+        self.assertIn("use Quick Shot", tutorial_entry["summary"])
+
+    def test_brask_dialogue_is_direct_and_names_class_skill(self):
+        character = DummyCharacter()
+        character.db.brave_class = "mage"
+        begin_tutorial(character)
+        state = ensure_tutorial_state(character)
+        state["flags"].update(
+            {
+                "talked_tamsin": True,
+                "visited_quartermaster_shed": True,
+                "returned_to_wayfarers_yard": True,
+                "talked_nella": True,
+                "viewed_gear": True,
+                "viewed_pack": True,
+                "read_supply_board": True,
+            }
+        )
+        state["step"] = "stand_your_ground"
+        character.db.brave_tutorial = state
+
+        response = get_tutorial_entity_response(character, _entity("ringhand_brask"), "talk", is_action=True)
+
+        self.assertIn("Go south into the Vermin Pens", response)
+        self.assertIn("Use Firebolt once", response)
+        self.assertIn("Field Bandage", response)
+        self.assertNotIn("Rail marks the ring", response)
+        self.assertTrue(character.db.brave_tutorial["flags"]["talked_brask"])
 
     def test_damaged_cart_shows_road_evidence_without_advancing_required_flow(self):
         character = DummyCharacter()
@@ -314,6 +413,9 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertEqual("clear_the_pens", ensure_tutorial_state(character)["step"])
 
         record_command_event(character, "class_ability")
+        self.assertEqual("clear_the_pens", ensure_tutorial_state(character)["step"])
+
+        record_tutorial_combat_consumable(character, "field_bandage", SimpleNamespace(obj=_room("tutorial_vermin_pens", safe=False)))
         self.assertEqual("fit_your_clasp", ensure_tutorial_state(character)["step"])
         self.assertEqual([{"template": "wayfarer_clasp", "quantity": 1}], character.db.brave_inventory)
 
@@ -362,13 +464,102 @@ class TutorialOnboardingTests(unittest.TestCase):
                 "talked_brask": True,
             }
         )
+        state["step"] = "clear_the_pens"
         character.db.brave_tutorial = state
         encounter = SimpleNamespace(obj=_room("tutorial_vermin_pens", safe=False))
 
         self.assertTrue(is_tutorial_solo_combat_room(encounter.obj))
         focus = get_tutorial_combat_focus(character, encounter)
         self.assertEqual("Use Strike", focus[0]["title"])
-        self.assertTrue(any("HP" in entry["text"] for entry in focus))
+        self.assertTrue(any("paused" in entry["text"] for entry in focus))
+
+        record_command_event(character, "class_ability")
+        self.assertEqual("item", get_tutorial_combat_phase(character, encounter))
+        focus = get_tutorial_combat_focus(character, encounter)
+        self.assertEqual("Use Field Bandage", focus[0]["title"])
+        self.assertEqual(1, character.get_inventory_quantity("field_bandage"))
+
+        record_tutorial_combat_consumable(character, "field_bandage", encounter)
+        self.assertEqual("finish", get_tutorial_combat_phase(character, encounter))
+        focus = get_tutorial_combat_focus(character, encounter)
+        self.assertEqual("Finish The Fight", focus[0]["title"])
+        self.assertIn("Guard instead", focus[0]["text"])
+
+    def test_tutorial_combat_focus_only_applies_to_brask_combat_step(self):
+        character = DummyCharacter()
+        begin_tutorial(character)
+        state = ensure_tutorial_state(character)
+        state["flags"].update(
+            {
+                "talked_tamsin": True,
+                "visited_quartermaster_shed": True,
+                "returned_to_wayfarers_yard": True,
+                "talked_nella": True,
+                "viewed_gear": True,
+                "viewed_pack": True,
+                "read_supply_board": True,
+            }
+        )
+        state["step"] = "stand_your_ground"
+        character.db.brave_tutorial = state
+        encounter = SimpleNamespace(obj=_room("tutorial_vermin_pens", safe=False))
+
+        self.assertEqual([], get_tutorial_combat_focus(character, encounter))
+
+        state["flags"]["talked_brask"] = True
+        state["flags"]["used_class_ability"] = True
+        state["flags"]["used_combat_consumable"] = True
+        state["flags"]["won_vermin_fight"] = True
+        state["step"] = "fit_your_clasp"
+        character.db.brave_tutorial = state
+        self.assertEqual([], get_tutorial_combat_focus(character, encounter))
+
+    def test_tutorial_combat_pause_waits_for_required_action(self):
+        character = DummyCharacter()
+        begin_tutorial(character)
+        state = ensure_tutorial_state(character)
+        state["flags"].update(
+            {
+                "talked_tamsin": True,
+                "visited_quartermaster_shed": True,
+                "returned_to_wayfarers_yard": True,
+                "talked_nella": True,
+                "viewed_gear": True,
+                "viewed_pack": True,
+                "read_supply_board": True,
+                "talked_brask": True,
+            }
+        )
+        state["step"] = "clear_the_pens"
+        character.db.brave_tutorial = state
+        encounter = SimpleNamespace(
+            obj=_room("tutorial_vermin_pens", safe=False),
+            db=SimpleNamespace(pending_actions={}),
+            get_active_player_participants=lambda: [character],
+            _get_actor_atb_state=lambda character=None: {"phase": "charging"},
+        )
+        encounter._actor_has_pending_or_active_action = lambda participant: BraveEncounter._actor_has_pending_or_active_action(encounter, participant)
+        encounter._tutorial_phase_for = lambda participant: BraveEncounter._tutorial_phase_for(encounter, participant)
+        encounter._tutorial_required_action_message = lambda phase: BraveEncounter._tutorial_required_action_message(encounter, phase)
+
+        self.assertEqual("ability", BraveEncounter._tutorial_pause_phase(encounter))
+        ok, message = BraveEncounter._validate_tutorial_queued_action(encounter, character, "attack")
+        self.assertFalse(ok)
+        self.assertIn("Use an Ability", message)
+        ok, _message = BraveEncounter._validate_tutorial_queued_action(encounter, character, "ability", "strike")
+        self.assertTrue(ok)
+
+        encounter.db.pending_actions = {str(character.id): {"kind": "ability", "ability": "strike"}}
+        self.assertEqual("", BraveEncounter._tutorial_pause_phase(encounter))
+
+        encounter.db.pending_actions = {}
+        record_command_event(character, "class_ability")
+        self.assertEqual("item", BraveEncounter._tutorial_pause_phase(encounter))
+        ok, message = BraveEncounter._validate_tutorial_queued_action(encounter, character, "ability", "strike")
+        self.assertFalse(ok)
+        self.assertIn("Field Bandage", message)
+        ok, _message = BraveEncounter._validate_tutorial_queued_action(encounter, character, "item", "field_bandage")
+        self.assertTrue(ok)
 
     def test_tutorial_combat_intro_pages_show_once_for_first_vermin_fight(self):
         character = DummyCharacter()
@@ -392,8 +583,9 @@ class TutorialOnboardingTests(unittest.TestCase):
 
         pages = get_tutorial_combat_intro_pages(character, encounter)
 
-        self.assertEqual(TUTORIAL_COMBAT_INTRO_PAGES, pages)
         self.assertEqual("First Fight", pages[0]["title"])
+        self.assertIn("use Strike", pages[-1]["text"])
+        self.assertNotIn("use your class skill", pages[-1]["text"])
         self.assertEqual("Begin Fight", pages[-1]["cta_label"])
         self.assertTrue(character.db.brave_tutorial_combat_intro_shown)
         self.assertEqual([], get_tutorial_combat_intro_pages(character, encounter))
@@ -419,7 +611,7 @@ class TutorialOnboardingTests(unittest.TestCase):
 
         self.assertEqual([], get_tutorial_combat_intro_pages(character, SimpleNamespace(obj=_room("goblin_road_old_fence_line", safe=False))))
 
-        state["flags"].update({"used_class_ability": True, "won_vermin_fight": True})
+        state["flags"].update({"used_class_ability": True, "used_combat_consumable": True, "won_vermin_fight": True})
         character.db.brave_tutorial = state
         self.assertEqual([], get_tutorial_combat_intro_pages(character, SimpleNamespace(obj=_room("tutorial_vermin_pens", safe=False))))
 
@@ -447,7 +639,9 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertFalse(getattr(character.db, "brave_tutorial_combat_intro_shown", False))
 
         character.sessions = SimpleNamespace(count=lambda: 1)
-        self.assertEqual(TUTORIAL_COMBAT_INTRO_PAGES, get_tutorial_combat_intro_pages(character, SimpleNamespace(obj=_room("tutorial_vermin_pens", safe=False))))
+        pages = get_tutorial_combat_intro_pages(character, SimpleNamespace(obj=_room("tutorial_vermin_pens", safe=False)))
+        self.assertEqual("First Fight", pages[0]["title"])
+        self.assertIn("use Strike", pages[-1]["text"])
 
     def test_tutorial_combat_focus_is_rendered_as_overlay_guidance(self):
         class CombatDummyCharacter:
@@ -469,6 +663,12 @@ class TutorialOnboardingTests(unittest.TestCase):
 
             def get_unlocked_abilities(self):
                 return ["Strike"]
+
+            def add_item_to_inventory(self, template_id, quantity=1):
+                self.db.brave_inventory.append({"template": template_id, "quantity": quantity})
+
+            def get_inventory_quantity(self, template_id):
+                return sum(entry["quantity"] for entry in self.db.brave_inventory if entry["template"] == template_id)
 
         class CombatDummyEncounter:
             def __init__(self, room):
@@ -514,13 +714,15 @@ class TutorialOnboardingTests(unittest.TestCase):
                 "talked_brask": True,
             }
         )
+        state["step"] = "clear_the_pens"
         character.db.brave_tutorial = state
         view = build_combat_view(CombatDummyEncounter(_room("tutorial_vermin_pens", safe=False)), character)
 
         self.assertEqual("Training Focus", view.get("guidance_title"))
         self.assertEqual("Combat Tutorial", view.get("guidance_eyebrow"))
         self.assertTrue(view.get("guidance"))
-        self.assertEqual(TUTORIAL_COMBAT_INTRO_PAGES, view.get("welcome_pages"))
+        self.assertEqual("First Fight", view.get("welcome_pages", [])[0]["title"])
+        self.assertIn("use Strike", view.get("welcome_pages", [])[-1]["text"])
         self.assertTrue(character.db.brave_tutorial_combat_intro_shown)
         self.assertNotIn("Training Focus", [section.get("label") for section in view.get("sections", [])])
 
@@ -582,6 +784,7 @@ class TutorialOnboardingTests(unittest.TestCase):
                 "returned_to_wayfarers_yard": True,
                 "talked_brask": True,
                 "used_class_ability": True,
+                "used_combat_consumable": True,
                 "won_vermin_fight": True,
                 "received_wayfarer_clasp": True,
                 "equipped_wayfarer_clasp": True,
@@ -591,6 +794,35 @@ class TutorialOnboardingTests(unittest.TestCase):
         character.db.brave_tutorial = state
 
         self.assertIsNone(get_tutorial_exit_block(character, training_yard))
+
+    def test_blocked_tutorial_exit_uses_readable_style_modal_and_activity(self):
+        character = DummyCharacter()
+        destination = _room("brambleford_training_yard")
+        exit_obj = SimpleNamespace(
+            key="south",
+            db=SimpleNamespace(brave_required_quest=None, brave_boss_gate=None),
+        )
+        block_message = "Tamsin stops you at the gate. Talk to Sergeant Tamsin first."
+
+        with (
+            patch("world.tutorial.get_tutorial_exit_block", return_value=block_message),
+            patch("world.browser_panels.send_room_activity_event") as send_activity,
+            patch("world.browser_panels.send_webclient_event") as send_webclient,
+        ):
+            Exit.at_traverse(exit_obj, character, destination)
+
+        send_activity.assert_called_once_with(character, block_message, cls="out", category="tutorial")
+        send_webclient.assert_called_once()
+        self.assertIs(send_webclient.call_args.args[0], character)
+        picker = send_webclient.call_args.kwargs["brave_picker"]
+        self.assertEqual("Gate Held", picker["title"])
+        self.assertEqual("shield", picker["title_icon"])
+        self.assertNotIn("subtitle", picker)
+        self.assertEqual([block_message], picker["body"])
+        self.assertEqual(
+            [{"label": "Understood", "icon": "check_circle", "close_picker": True}],
+            picker["options"],
+        )
 
     def test_tutorial_gate_block_names_current_missing_lesson(self):
         character = DummyCharacter()
@@ -619,7 +851,7 @@ class TutorialOnboardingTests(unittest.TestCase):
         state = ensure_tutorial_state(character)
         state["flags"]["read_supply_board"] = True
         character.db.brave_tutorial = state
-        self.assertIn("Return west", get_tutorial_exit_block(character, training_yard))
+        self.assertIn("Sparring Ring", get_tutorial_exit_block(character, training_yard))
 
     def test_optional_ui_and_family_lessons_do_not_block_graduation(self):
         character = DummyCharacter()
@@ -636,6 +868,7 @@ class TutorialOnboardingTests(unittest.TestCase):
                 "returned_to_wayfarers_yard": True,
                 "talked_brask": True,
                 "used_class_ability": True,
+                "used_combat_consumable": True,
                 "won_vermin_fight": True,
                 "received_wayfarer_clasp": True,
                 "equipped_wayfarer_clasp": True,
@@ -659,6 +892,7 @@ class TutorialOnboardingTests(unittest.TestCase):
         pens = encounters.room_encounters["tutorial_vermin_pens"]
         enemy_ids = [enemy_id for encounter in pens for enemy_id in encounter["enemies"]]
 
+        self.assertEqual(1, len(pens))
         self.assertEqual(["tutorial_thorn_rat", "tutorial_thorn_rat"], enemy_ids)
         self.assertGreater(encounters.enemy_templates["tutorial_thorn_rat"]["max_hp"], encounters.enemy_templates["thorn_rat"]["max_hp"])
         self.assertLess(encounters.enemy_templates["tutorial_thorn_rat"]["attack_power"], encounters.enemy_templates["thorn_rat"]["attack_power"])
@@ -682,7 +916,24 @@ class TutorialOnboardingTests(unittest.TestCase):
 
         get_entity_response(character, _entity("captain_harl_rowan"), "talk", is_action=True)
         self.assertEqual("rats_in_the_kettle", character.db.brave_tracked_quest)
-        self.assertIn("stores matter", get_entity_response(character, _entity("uncle_pib_underbough"), "talk"))
+        self.assertEqual(
+            ["Talk to Uncle Pib Underbough."],
+            [objective["text"] for objective in get_tracked_quest_payload(character)["objectives"]],
+        )
+
+        advance_room_visit(character, _room("brambleford_rat_and_kettle_cellar", safe=False))
+        self.assertFalse(character.db.brave_quests["rats_in_the_kettle"]["objectives"][1]["completed"])
+
+        self.assertIn("stores matter", get_entity_response(character, _entity("uncle_pib_underbough"), "talk", is_action=True))
+        payload = get_tracked_quest_payload(character)
+        self.assertEqual(
+            [
+                "Talk to Uncle Pib Underbough.",
+                "Head down into the Rat and Kettle Cellar beneath the inn.",
+                "Defeat 3 thorn rats before they ruin more stores. (0/3)",
+            ],
+            [objective["text"] for objective in payload["objectives"]],
+        )
 
         advance_room_visit(character, _room("brambleford_rat_and_kettle_cellar", safe=False))
         for _index in range(3):

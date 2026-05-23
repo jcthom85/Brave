@@ -373,14 +373,12 @@ class CmdItem(BraveCharacterCommand):
 
 class CmdTravel(BraveCharacterCommand):
     """
-    Travel using simple destination names.
+    Show available travel routes from the current room.
 
     Usage:
       travel
-      travel <destination>
 
-    With no arguments, shows available travel options from your current room.
-    With a destination, moves you along a matching exit.
+    Shows available travel options from your current room.
     """
 
     key = "travel"
@@ -421,8 +419,8 @@ class CmdTravel(BraveCharacterCommand):
             (
                 "Travel Notes",
                 [
-                    *wrap_text("You can type the direction directly, like |wn|n or |we|n.", indent="  "),
-                    *wrap_text("Use |wtravel <destination>|n if you prefer named fallback.", indent="  "),
+                    *wrap_text("Choose a route from the list, or use direction buttons in the browser.", indent="  "),
+                    *wrap_text("Arrows and WASD also move you.", indent="  "),
                 ],
             ),
         ]

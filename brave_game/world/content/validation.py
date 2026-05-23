@@ -181,6 +181,7 @@ def _validate_world_content(registry, errors):
     inbound_exits = {room_id: [] for room_id in room_ids}
     outbound_exits = {room_id: [] for room_id in room_ids}
     zones_by_region = {}
+    map_coords = {}
 
     for room in world.rooms:
         room_id = str(room.get("id") or "")
@@ -206,6 +207,16 @@ def _validate_world_content(registry, errors):
         zone = room.get("zone")
         if map_region and zone:
             zones_by_region.setdefault(map_region, {}).setdefault(str(zone).lower(), set()).add(str(zone))
+        if map_region and room.get("map_x") is not None and room.get("map_y") is not None:
+            coord = (str(map_region), room.get("map_x"), room.get("map_y"))
+            previous_room_id = map_coords.get(coord)
+            if previous_room_id:
+                errors.append(
+                    f"Map region {map_region} has duplicate coordinates "
+                    f"({room.get('map_x')}, {room.get('map_y')}): {previous_room_id}, {room_id}"
+                )
+            else:
+                map_coords[coord] = room_id
 
     for exit_data in world.exits:
         source = exit_data.get("source")

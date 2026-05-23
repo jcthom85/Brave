@@ -136,6 +136,18 @@ class GearViewTests(unittest.TestCase):
         self.assertEqual("Empty", snack_picker.get("subtitle"))
         self.assertEqual(["Trail Mix Satchel"], [option.get("label") for option in snack_picker.get("options", [])])
 
+    def test_gear_power_feedback_renders_as_right_side_section(self):
+        character = DummyCharacter()
+
+        view = build_gear_view(character, feedback="Power rises by 2.")
+
+        slots, feedback = view.get("sections", [])
+        self.assertEqual("slots", slots.get("variant"))
+        self.assertNotIn("span", slots)
+        self.assertEqual("Power Feedback", feedback.get("label"))
+        self.assertEqual("feedback", feedback.get("variant"))
+        self.assertEqual(["Power rises by 2."], feedback.get("lines"))
+
     def test_gear_panel_lists_every_slot(self):
         character = DummyCharacter(
             equipment={

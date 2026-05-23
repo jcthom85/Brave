@@ -800,6 +800,54 @@ class RoomViewTests(unittest.TestCase):
 
         self.assertTrue(view.get("first_room_discovery"))
 
+    def test_lantern_rest_inn_uses_hearth_atmosphere(self):
+        room = DummyRoom()
+        room.key = "Lantern Rest Inn"
+        room.db.brave_room_id = "brambleford_lantern_rest_inn"
+        room.db.brave_zone = "Brambleford"
+
+        view = build_room_view(room, DummyCharacter())
+
+        self.assertEqual("lantern_rest_hearth", view["atmosphere"]["key"])
+        self.assertEqual(["hearth_flicker", "cozy_shadows"], view["atmosphere"]["layers"])
+
+    def test_danger_recommendation_warning_banner_shown_when_underleveled(self):
+        room = DummyRoom()
+        room.key = "Whispering Woods Path"
+        room.db.brave_zone = "Whispering Woods"
+
+        # Whispering Woods has recommended level 2.
+        # Character level 1 (underleveled).
+        character = DummyCharacter()
+        character.db.brave_level = 1
+
+        view = build_room_view(room, character)
+
+        # Check sections. The warning banner should be the very first section if present.
+        warning_section = view["sections"][0]
+        self.assertEqual("danger-recommendation", warning_section.get("variant"))
+        self.assertTrue(warning_section.get("hide_label"))
+        self.assertEqual("wide", warning_section.get("span"))
+        self.assertEqual(1, len(warning_section.get("items", [])))
+        self.assertIn("RECOMMENDED LEVEL 2", warning_section["items"][0]["text"])
+
+    def test_no_danger_warning_banner_shown_when_properly_leveled(self):
+        room = DummyRoom()
+        room.key = "Whispering Woods Path"
+        room.db.brave_zone = "Whispering Woods"
+
+        # Whispering Woods has recommended level 2.
+        # Character level 2 (equal).
+        character = DummyCharacter()
+        character.db.brave_level = 2
+
+        view = build_room_view(room, character)
+
+        # The warning banner should not be present. The first section should be the navpad (routes)
+        first_section = view["sections"][0]
+        self.assertNotEqual("danger-recommendation", first_section.get("variant"))
+
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -698,7 +698,13 @@
       "next_step": "Go east to the East Gate and speak with Mira Fenleaf about the cut road.",
       "objectives": [
         {
+          "description": "Talk to Uncle Pib Underbough.",
+          "npc_id": "uncle_pib_underbough",
+          "type": "talk_to_npc"
+        },
+        {
           "description": "Head down into the Rat and Kettle Cellar beneath the inn.",
+          "revealed_after": 0,
           "room_id": "brambleford_rat_and_kettle_cellar",
           "type": "visit_room"
         },
@@ -706,6 +712,7 @@
           "count": 3,
           "description": "Defeat 3 thorn rats before they ruin more stores.",
           "enemy_tag": "rat",
+          "revealed_after": 0,
           "type": "defeat_enemy"
         }
       ],

@@ -1,4 +1,5 @@
 import os
+import time
 import unittest
 from types import SimpleNamespace
 
@@ -42,6 +43,74 @@ class CombatAtbLoopTests(unittest.TestCase):
         self.assertEqual("charging", state["phase"])
         self.assertEqual(4, state["ticks_remaining"])
         self.assertEqual({str(character.id): {"kind": "attack", "target": None}}, encounter.db.pending_actions)
+
+    def test_ready_player_waits_for_input_before_timeout(self):
+        character = DummyCharacter()
+        now_ms = int(round(time.time() * 1000))
+        encounter = SimpleNamespace(
+            db=SimpleNamespace(
+                atb_states={
+                    "p:7": {
+                        "phase": "ready",
+                        "gauge": 400,
+                        "ready_gauge": 400,
+                        "phase_started_at_ms": now_ms,
+                    }
+                },
+                pending_actions={},
+            ),
+            resolved=[],
+        )
+
+        encounter._actor_atb_key = lambda character=None, enemy=None, companion=None: BraveEncounter._actor_atb_key(encounter, character=character, enemy=enemy, companion=companion)
+        encounter._default_atb_fill_rate = lambda character=None, enemy=None, companion=None: 100
+        encounter._atb_tick_ms = lambda: 1000
+        encounter._player_ready_timeout_ms = lambda character: 5000
+        encounter._get_actor_atb_state = lambda character=None, enemy=None, companion=None: BraveEncounter._get_actor_atb_state(encounter, character=character, enemy=enemy, companion=companion)
+        encounter._save_actor_atb_state = lambda state, character=None, enemy=None, companion=None: BraveEncounter._save_actor_atb_state(encounter, state, character=character, enemy=enemy, companion=companion)
+        encounter._consume_player_pending_action = lambda character: BraveEncounter._consume_player_pending_action(encounter, character)
+        encounter._player_action_timing = lambda action: BraveEncounter._player_action_timing(encounter, action)
+        encounter._resolve_player_action = lambda character, action: encounter.resolved.append((character.id, dict(action)))
+
+        BraveEncounter._advance_player_atb(encounter, character)
+
+        self.assertEqual([], encounter.resolved)
+        state = encounter.db.atb_states["p:7"]
+        self.assertEqual("ready", state["phase"])
+        self.assertEqual(5000, state["phase_duration_ms"])
+
+    def test_ready_player_times_out_to_guard(self):
+        character = DummyCharacter()
+        now_ms = int(round(time.time() * 1000))
+        encounter = SimpleNamespace(
+            db=SimpleNamespace(
+                atb_states={
+                    "p:7": {
+                        "phase": "ready",
+                        "gauge": 400,
+                        "ready_gauge": 400,
+                        "phase_started_at_ms": now_ms - 6000,
+                    }
+                },
+                pending_actions={},
+            ),
+            resolved=[],
+        )
+
+        encounter._actor_atb_key = lambda character=None, enemy=None, companion=None: BraveEncounter._actor_atb_key(encounter, character=character, enemy=enemy, companion=companion)
+        encounter._default_atb_fill_rate = lambda character=None, enemy=None, companion=None: 100
+        encounter._atb_tick_ms = lambda: 1000
+        encounter._player_ready_timeout_ms = lambda character: 5000
+        encounter._get_actor_atb_state = lambda character=None, enemy=None, companion=None: BraveEncounter._get_actor_atb_state(encounter, character=character, enemy=enemy, companion=companion)
+        encounter._save_actor_atb_state = lambda state, character=None, enemy=None, companion=None: BraveEncounter._save_actor_atb_state(encounter, state, character=character, enemy=enemy, companion=companion)
+        encounter._consume_player_pending_action = lambda character: BraveEncounter._consume_player_pending_action(encounter, character)
+        encounter._player_action_timing = lambda action: BraveEncounter._player_action_timing(encounter, action)
+        encounter._resolve_player_action = lambda character, action: encounter.resolved.append((character.id, dict(action)))
+
+        BraveEncounter._advance_player_atb(encounter, character)
+
+        self.assertEqual([(7, {"kind": "guard"})], encounter.resolved)
+        self.assertEqual({}, encounter.db.pending_actions)
 
     def test_advance_enemy_atb_starts_charging_before_resolution(self):
         enemy = {"id": "e1", "template_key": "bog_creeper", "key": "Bog Creeper"}

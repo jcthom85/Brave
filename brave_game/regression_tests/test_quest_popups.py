@@ -181,19 +181,30 @@ class QuestPopupTests(unittest.TestCase):
         self.assertIn(".brave-view--room .brave-view__section--vicinity .brave-view__mini-action span:not(.brave-view__mini-action-icon):not(.brave-icon)", css_source)
         self.assertIn("min-width: 2.35rem;", css_source)
 
-    def test_tutorial_close_button_uses_short_label_and_accent_colors(self):
+    def test_tutorial_objectives_overlay_has_no_manual_close_button(self):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertNotIn("aria-label='Close objectives'", default_out_source)
+        self.assertNotIn("brave-objectives-sheet__close-mark", default_out_source)
+        self.assertNotIn("brave-objectives-sheet__close-label", default_out_source)
+        self.assertNotIn("Close Guide", default_out_source)
+
+    def test_combat_without_guidance_preserves_visible_tutorial_overlay(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("viewData.variant === \"combat\"", default_out_source)
+        self.assertIn("host.classList.contains(\"brave-objectives-sheet--tutorial\")", default_out_source)
+        self.assertIn("document.body.classList.contains(\"brave-objectives-active\")", default_out_source)
+        self.assertIn("host.setAttribute(\"aria-hidden\", \"false\");", default_out_source)
+
+    def test_tutorial_overlay_does_not_steal_combat_action_clicks(self):
         css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
 
-        self.assertIn("brave-objectives-sheet__close-mark", default_out_source)
-        self.assertIn("brave-objectives-sheet__close-label", default_out_source)
-        self.assertNotIn("Close Guide", default_out_source)
-        self.assertIn("background: rgba(var(--brave-obj-accent-rgb), 0.08);", css_source)
-        self.assertIn("border: 1px solid rgba(var(--brave-obj-accent-rgb), 0.22);", css_source)
-        self.assertIn("color: color-mix(in srgb, var(--brave-obj-accent) 74%, var(--brave-text-soft));", css_source)
-        self.assertIn(".brave-objectives-sheet__close-mark", css_source)
-        self.assertIn("width: 32px;\n        min-width: 32px;\n        height: 32px;", css_source)
-        self.assertIn("width: 14px;\n        height: 14px;", css_source)
+        self.assertIn(
+            "body[data-brave-scene=\"combat\"] #brave-objectives-sheet.brave-objectives-sheet--tutorial .brave-objectives-sheet__panel",
+            css_source,
+        )
+        self.assertIn("pointer-events: none;", css_source)
 
 
 if __name__ == "__main__":

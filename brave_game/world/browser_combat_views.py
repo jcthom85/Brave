@@ -226,6 +226,12 @@ def build_combat_view(encounter, character):
     def atb_chip(state, *, label_ready="Ready", ready_tone="accent"):
         phase = (state or {}).get("phase")
         if phase == "ready":
+            duration_ms = int((state or {}).get("phase_duration_ms", 0) or 0)
+            started_at_ms = int((state or {}).get("phase_started_at_ms", 0) or 0)
+            if duration_ms > 0 and started_at_ms > 0:
+                remaining_ms = max(0, duration_ms - max(0, render_now_ms - started_at_ms))
+                if remaining_ms > 0:
+                    return _chip(f"Guard in {max(1, int((remaining_ms + 999) // 1000))}", "shield", "warn")
             return _chip(label_ready, "bolt", ready_tone)
         if phase == "winding":
             ticks = display_atb_ticks((state or {}).get("ticks_remaining", 0))
@@ -252,7 +258,10 @@ def build_combat_view(encounter, character):
 
         value = gauge
         tone = "atb"
-        if phase in {"ready", "resolving", "winding"}:
+        if phase == "ready" and phase_duration_ms > 0:
+            value = max(0, min(100, int(round((phase_remaining_ms / phase_duration_ms) * 100))))
+            tone = "warn" if not enemy else "danger"
+        elif phase in {"ready", "resolving", "winding"}:
             value = 100
             tone = "danger" if enemy else "good"
             if phase == "winding":
@@ -578,6 +587,7 @@ def build_combat_view(encounter, character):
             actions=[
                 build_combat_action_picker("Abilities", "bolt", combat_actions.get("abilities", []), "No usable combat abilities."),
                 build_combat_action_picker("Items", "lunch_dining", combat_actions.get("items", []), "No combat consumables packed."),
+                _action("Guard", "guard", "shield", tone="good"),
                 _action("Flee", "flee", "logout", tone="danger"),
             ],
             sections=[

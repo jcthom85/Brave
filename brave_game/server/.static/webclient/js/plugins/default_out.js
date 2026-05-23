@@ -52,6 +52,7 @@ let defaultout_plugin = (function () {
     var currentRoomVoiceBubbles = [];
     var currentWelcomePages = [];
     var lastTutorialContentHash = "";
+    var lastTutorialShimmers = [];
     var currentWelcomePageIndex = 0;
     var currentRoomVoiceBubbleTimers = {};
     var currentRoomVoiceBubbleRemovalTimers = {};
@@ -96,6 +97,10 @@ let defaultout_plugin = (function () {
     var pendingTutorialFireworks = false;
     var currentPickerData = null;
     var currentBossGateData = null;
+    var currentMenuViewOverlayData = null;
+    var pendingMenuViewCommand = "";
+    var pendingMenuViewCommandUntil = 0;
+    var menuViewOverlaySceneRailSnapshot = null;
     var currentPickerAnchorRect = null;
     var currentPickerSourceId = "";
     var pendingQuestOverlayQueue = [];
@@ -409,6 +414,14 @@ let defaultout_plugin = (function () {
     };
 
     var isCombatUiActive = function () {
+        if (
+            victoryTransitionActive
+            || pendingCombatResultReturnTransition
+            || (currentViewData && currentViewData.variant === "combat-result")
+            || (document.body && document.body.getAttribute("data-brave-scene") === "victory")
+        ) {
+            return false;
+        }
         if (combatViewTransitionActive || (currentViewData && currentViewData.variant === "combat")) {
             return true;
         }
@@ -758,7 +771,7 @@ let defaultout_plugin = (function () {
     var syncRoomVoiceBubblePositions = function () {
         var overlay = document.getElementById("brave-room-voice-overlay-desktop");
         if (!overlay || !currentRoomVoiceBubbles.length) return;
-        
+
         currentRoomVoiceBubbles.forEach(function (bubble) {
             if (isSelfRoomVoiceBubble(bubble)) {
                 return;
@@ -775,13 +788,13 @@ let defaultout_plugin = (function () {
                     }
                 } catch (e) {}
             }
-            
+
             var bubbleEl = overlay.querySelector("[data-brave-room-voice-id='" + bubble.id + "']");
             if (target && bubbleEl && target.offsetWidth > 0) {
                 var targetRect = target.getBoundingClientRect();
                 var scrollContainer = target.closest(".brave-view__list") || target.closest(".scene-card__list") || target.closest(".scene-rail__panel");
                 var isHidden = false;
-                
+
                 if (scrollContainer) {
                     var containerRect = scrollContainer.getBoundingClientRect();
                     // Check if the card has scrolled completely out of view
@@ -789,7 +802,7 @@ let defaultout_plugin = (function () {
                         isHidden = true;
                     }
                 }
-                
+
                 bubbleEl.style.position = "fixed";
                 bubbleEl.style.top = (targetRect.top - bubbleEl.offsetHeight - 12) + "px";
                 bubbleEl.style.left = targetRect.left + "px";
@@ -797,7 +810,7 @@ let defaultout_plugin = (function () {
                 bubbleEl.style.bottom = "auto";
                 bubbleEl.style.right = "auto";
                 bubbleEl.style.zIndex = "100";
-                
+
                 if (isHidden) {
                     bubbleEl.style.opacity = "0";
                     bubbleEl.style.pointerEvents = "none";
@@ -869,7 +882,7 @@ let defaultout_plugin = (function () {
                 currentRoomVoiceBubbleActive.mobile = mobileActive;
             }
         }
-        
+
         syncRoomVoiceBubblePositions();
     };
 
@@ -2759,7 +2772,7 @@ let defaultout_plugin = (function () {
 
         var mapMarkup =
             "<button type='button' class='brave-view__mobile-map brave-click'"
-            + " data-brave-command='map' title='Open map'>"
+            + " data-brave-command='map' data-brave-menu-view-command='1' title='Open map'>"
             + "<span class='brave-view__mobile-utility-label'>Micromap</span>"
             + (currentMapGrid
                 ? "<div class='brave-view__mobile-map-grid'>" + renderMapGrid(currentMapGrid, "brave-view__map-grid--compact") + "</div>"
@@ -2803,11 +2816,20 @@ let defaultout_plugin = (function () {
 
     var buildMobileUtilityButton = function (key, label, iconName, active, badgeCount) {
         var activeClass = active ? " brave-mobile-tools__button--active" : "";
+        var shimmerClass = "";
+        if (key === "menu") {
+            var hasShimmeringOption = (buildDesktopMenuPicker().options || []).some(function (opt) {
+                return opt.command && lastTutorialShimmers.indexOf(opt.command) !== -1;
+            });
+            if (hasShimmeringOption) {
+                shimmerClass = " brave-shimmer";
+            }
+        }
         var badgeMarkup = badgeCount > 0
             ? "<span class='brave-mobile-tools__button-badge' aria-label='" + escapeHtml(String(badgeCount)) + " new activity messages'>" + escapeHtml(String(badgeCount > 9 ? "9+" : badgeCount)) + "</span>"
             : "";
         return (
-            "<button type='button' class='brave-mobile-tools__button" + activeClass + "' data-brave-mobile-panel='" + escapeHtml(key) + "' aria-label='" + escapeHtml(label) + "'>"
+            "<button type='button' class='brave-mobile-tools__button" + activeClass + shimmerClass + "' data-brave-mobile-panel='" + escapeHtml(key) + "' aria-label='" + escapeHtml(label) + "'>"
             + icon(iconName, "brave-mobile-tools__button-icon")
             + "<span>" + escapeHtml(label) + "</span>"
             + badgeMarkup
@@ -2935,8 +2957,9 @@ let defaultout_plugin = (function () {
     };
 
     var buildMobilePrimaryActionMarkup = function (label, command) {
+        var shimmerClass = lastTutorialShimmers.indexOf(command) !== -1 ? " brave-shimmer" : "";
         return (
-            "<button type='button' class='brave-mobile-sheet__action brave-click' data-brave-command='" + escapeHtml(command) + "'>"
+            "<button type='button' class='brave-mobile-sheet__action brave-click" + shimmerClass + "' data-brave-command='" + escapeHtml(command) + "'>"
             + escapeHtml(label)
             + "</button>"
         );
@@ -3640,6 +3663,7 @@ let defaultout_plugin = (function () {
         return {
             picker_id: "settings-menu",
             picker_kind: "menu",
+            large: true,
             title: "Settings",
             title_icon: "settings",
             options: [
@@ -3961,7 +3985,7 @@ let defaultout_plugin = (function () {
         var ctaLabel = isLast ? (page.cta_label || "Begin Adventure") : "Next";
 
         host.innerHTML =
-            "<div class='brave-objectives-sheet__backdrop brave-objectives-sheet__backdrop--welcome' data-brave-objectives-toggle='1'></div>"
+            "<div class='brave-objectives-sheet__backdrop brave-objectives-sheet__backdrop--welcome'></div>"
             + "<div class='brave-objectives-sheet__panel brave-objectives-sheet__panel--welcome' role='dialog' aria-modal='true'>"
             + "<div class='brave-objectives-sheet__head'>"
             + "<div class='brave-objectives-sheet__eyebrow'>Step " + (currentWelcomePageIndex + 1) + " of " + currentWelcomePages.length + "</div>"
@@ -4066,8 +4090,35 @@ let defaultout_plugin = (function () {
         }
 
         var objectives = viewData && viewData.guidance;
+
+        // If no guidance is provided, and this isn't an explicit clear request (guidance: []),
+        // then we should preserve the existing objective state. This happens during room
+        // refreshes or system view updates that don't carry tutorial data.
+        if (objectives === undefined) {
+            if (viewData && Array.isArray(viewData.welcome_pages) && viewData.welcome_pages.length) {
+                // Proceed to welcome pages
+            } else {
+                return;
+            }
+        }
+
         if (!Array.isArray(objectives) || !objectives.length) {
+            if (
+                viewData
+                && viewData.variant === "combat"
+                && host.classList.contains("brave-objectives-sheet--tutorial")
+                && !host.classList.contains("brave-objectives-sheet--welcome")
+                && document.body.classList.contains("brave-objectives-active")
+            ) {
+                host.setAttribute("aria-hidden", "false");
+                host.style.removeProperty("display");
+                if (typeof restoreMainScrollPositions === "function") {
+                    restoreMainScrollPositions(scrollSnapshots);
+                }
+                return;
+            }
             lastTutorialContentHash = "";
+            lastTutorialShimmers = [];
             host.innerHTML = "";
             host.setAttribute("aria-hidden", "true");
             host.style.display = "none";
@@ -4102,6 +4153,7 @@ let defaultout_plugin = (function () {
         });
         var hasChanged = currentHash !== lastTutorialContentHash;
         lastTutorialContentHash = currentHash;
+        lastTutorialShimmers = (viewData && Array.isArray(viewData.shimmers)) ? viewData.shimmers : [];
 
         if (
             !hasChanged
@@ -4133,10 +4185,6 @@ let defaultout_plugin = (function () {
             + "</span>"
             + "<span class='brave-objectives-sheet__count'>" + escapeHtml(String(remainingCount || objectives.length)) + "</span>"
             + icon(mobileObjectivesExpanded ? "expand_more" : "expand_less", "brave-objectives-sheet__expand-icon")
-            + "</button>"
-            + "<button type='button' class='brave-objectives-sheet__close' data-brave-objectives-toggle='1' aria-label='Close objectives'>"
-            + "<span class='brave-objectives-sheet__close-mark' aria-hidden='true'></span>"
-            + "<span class='brave-objectives-sheet__close-label'>Close</span>"
             + "</button>"
             + "</div>"
             + "<div class='brave-objectives-sheet__body'>"
@@ -4197,7 +4245,7 @@ let defaultout_plugin = (function () {
                 canvas.width = lastWidth = width;
                 canvas.height = lastHeight = height;
             }
-            
+
             ctx.clearRect(0, 0, width, height);
 
             var centerX = width / 2;
@@ -4215,21 +4263,21 @@ let defaultout_plugin = (function () {
             ctx.beginPath();
             ctx.lineWidth = 3;
             ctx.strokeStyle = "rgba(234, 199, 131, 0.35)";
-            
+
             for (var i = 0; i <= segments; i++) {
                 var angle = (i / segments) * Math.PI * 2;
-                
+
                 // Decoupled mirrored frequency map
                 var relIdx = Math.abs(segments / 2 - i) / (segments / 2);
                 var dataIdx = Math.floor(relIdx * 24);
                 var rawVal = dataArray[dataIdx] / 255;
-                
+
                 smoothedData[i] += (rawVal - smoothedData[i]) * 0.12;
-                
+
                 var r = radius + (smoothedData[i] * radius * 0.6);
                 var x = centerX + Math.cos(angle) * r;
                 var y = centerY + Math.sin(angle) * r;
-                
+
                 if (i === 0) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
             }
@@ -4250,7 +4298,7 @@ let defaultout_plugin = (function () {
         var title = escapeHtml(movie.title || pickerData.title || "Great Frontier");
         var cards = movie.cards || [];
         var options = Array.isArray(pickerData.options) ? pickerData.options : [];
-        
+
         return (
             "<div class='" + backdropClass + "' data-brave-picker-close='1'></div>"
             + "<div class='" + panelClass + " brave-picker-sheet__panel--movie-showing' role='dialog' aria-modal='true' aria-label='" + title + "'" + panelStyle + ">"
@@ -4421,6 +4469,9 @@ let defaultout_plugin = (function () {
         var panelClass = anchoredMenu
             ? "brave-picker-sheet__panel brave-picker-sheet__panel--popover"
             : "brave-picker-sheet__panel";
+        if (pickerData && pickerData.large) {
+            panelClass += " brave-picker-sheet__panel--large-menu";
+        }
         var backdropClass = anchoredMenu
             ? "brave-picker-sheet__backdrop brave-picker-sheet__backdrop--clear"
             : "brave-picker-sheet__backdrop";
@@ -4486,10 +4537,13 @@ let defaultout_plugin = (function () {
                     ? "<div class='brave-picker-sheet__options'>"
                         + pickerOptions.map(function (option) {
                             var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
+                            var shimmerClass = (option && option.command && lastTutorialShimmers.indexOf(option.command) !== -1) ? " brave-shimmer" : "";
+                            var menuViewAttr = (option && isMenuViewCommand(option.command)) ? " data-brave-menu-view-command='1'" : "";
                             var optionRarityClass = option && option.rarity_tone ? " brave-rarity-name brave-rarity-name--" + escapeHtml(option.rarity_tone) : "";
                             return (
-                                "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + "'"
+                                "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + shimmerClass + "'"
                                 + commandAttrs(option, false)
+                                + menuViewAttr
                                 + ">"
                                 + "<span class='brave-picker-sheet__option-icon'>"
                                 + icon(option && option.icon ? option.icon : "arrow_right_alt")
@@ -4961,6 +5015,7 @@ let defaultout_plugin = (function () {
             picker_id: "main-menu",
             picker_kind: "menu",
             title: "Menu",
+            large: true,
             options: [
                 { label: "Character Sheet", icon: "person", command: "sheet" },
                 { label: "Gear", icon: "shield", command: "gear" },
@@ -4969,9 +5024,55 @@ let defaultout_plugin = (function () {
                 { label: "Map", icon: "map", command: "map" },
                 { label: "Party", icon: "group", command: "party" },
                 { label: "Settings", icon: "settings", picker: buildSettingsPicker() },
-                { label: "Quit", icon: "logout", command: "quit", tone: "danger" }
+                {
+                    label: "Quit",
+                    icon: "logout",
+                    tone: "danger",
+                    picker: {
+                        picker_id: "quit-menu",
+                        picker_kind: "menu",
+                        large: true,
+                        title: "Quit",
+                        title_icon: "logout",
+                        body: ["Leave the current session and return to the account screen."],
+                        options: [
+                            { label: "Quit Game", icon: "logout", command: "quit", tone: "danger" }
+                        ]
+                    }
+                }
             ]
         };
+    };
+
+    var MENU_VIEW_COMMANDS = {
+        sheet: true,
+        gear: true,
+        pack: true,
+        quests: true,
+        quest: true,
+        journal: true,
+        map: true,
+        party: true,
+    };
+
+    var MENU_VIEW_VARIANTS = {
+        sheet: true,
+        gear: true,
+        pack: true,
+        quests: true,
+        journal: true,
+        map: true,
+        party: true,
+    };
+
+    var isMenuViewCommand = function (command) {
+        var normalized = String(command || "").trim().toLowerCase();
+        for (var key in MENU_VIEW_COMMANDS) {
+            if (normalized === key || normalized.indexOf(key + " ") === 0) {
+                return true;
+            }
+        }
+        return false;
     };
 
     var buildMenuOptionsMarkup = function (options) {
@@ -4979,9 +5080,12 @@ let defaultout_plugin = (function () {
             "<div class='brave-picker-sheet__options brave-mobile-sheet__menu-options'>"
             + (options || []).map(function (option) {
                 var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
+                var shimmerClass = (option && option.command && lastTutorialShimmers.indexOf(option.command) !== -1) ? " brave-shimmer" : "";
+                var menuViewAttr = (option && isMenuViewCommand(option.command)) ? " data-brave-menu-view-command='1'" : "";
                 return (
-                    "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + "'"
+                    "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + shimmerClass + "'"
                     + commandAttrs(option, false)
+                    + menuViewAttr
                     + ">"
                     + "<span class='brave-picker-sheet__option-icon'>"
                     + icon(option && option.icon ? option.icon : "menu")
@@ -4995,6 +5099,166 @@ let defaultout_plugin = (function () {
             }).join("")
             + "</div>"
         );
+    };
+
+    var refreshTutorialShimmerControls = function () {
+        var hasShimmeringMenuOption = (buildDesktopMenuPicker().options || []).some(function (opt) {
+            return opt.command && lastTutorialShimmers.indexOf(opt.command) !== -1;
+        });
+        Array.prototype.forEach.call(document.querySelectorAll(".brave-view__menu-button"), function (button) {
+            button.classList.toggle("brave-shimmer", hasShimmeringMenuOption);
+        });
+        Array.prototype.forEach.call(document.querySelectorAll(".brave-mobile-tools__button[data-brave-mobile-panel='menu']"), function (button) {
+            button.classList.toggle("brave-shimmer", hasShimmeringMenuOption);
+        });
+        if (currentPickerData && currentPickerData.picker_kind === "menu") {
+            renderPickerSheet();
+        }
+    };
+
+    var shouldRenderMenuViewOverlay = function (viewData) {
+        if (!viewData || !MENU_VIEW_VARIANTS[String(viewData.variant || "")]) {
+            return false;
+        }
+        if (currentMenuViewOverlayData) {
+            return true;
+        }
+        if (!pendingMenuViewCommand || Date.now() > pendingMenuViewCommandUntil) {
+            return false;
+        }
+        return true;
+    };
+
+    var isMenuViewOverlayOpeningOrActive = function () {
+        return !!(
+            currentMenuViewOverlayData
+            || (pendingMenuViewCommand && Date.now() <= pendingMenuViewCommandUntil)
+        );
+    };
+
+    var captureMenuViewOverlaySceneRail = function () {
+        var ids = ["scene-card", "scene-pack-panel", "scene-vicinity-panel"];
+        var snapshot = {};
+        ids.forEach(function (id) {
+            var node = document.getElementById(id);
+            if (!node) {
+                return;
+            }
+            snapshot[id] = {
+                html: node.innerHTML,
+                className: node.className,
+                title: node.getAttribute("title"),
+                role: node.getAttribute("role"),
+                tabindex: node.getAttribute("tabindex"),
+                command: node.getAttribute("data-brave-command"),
+            };
+        });
+        menuViewOverlaySceneRailSnapshot = snapshot;
+    };
+
+    var restoreMenuViewOverlaySceneRail = function () {
+        var snapshot = menuViewOverlaySceneRailSnapshot;
+        menuViewOverlaySceneRailSnapshot = null;
+        if (!snapshot) {
+            return;
+        }
+        Object.keys(snapshot).forEach(function (id) {
+            var node = document.getElementById(id);
+            var state = snapshot[id];
+            if (!node || !state) {
+                return;
+            }
+            node.innerHTML = state.html || "";
+            node.className = state.className || "";
+            ["title", "role", "tabindex", "data-brave-command"].forEach(function (name) {
+                var key = name === "data-brave-command" ? "command" : name;
+                if (state[key] === null || typeof state[key] === "undefined") {
+                    node.removeAttribute(name);
+                } else {
+                    node.setAttribute(name, state[key]);
+                }
+            });
+        });
+        syncSceneRailLayout();
+    };
+
+    var restoreMenuViewOverlayRoomContext = function () {
+        var roomView = isRoomLikeView(currentViewData)
+            ? currentViewData
+            : (isRoomLikeView(currentRoomViewData) ? currentRoomViewData : null);
+        if (!roomView) {
+            return;
+        }
+        setBodyState("view", roomView.variant || "room");
+        applyReactiveState(roomView.reactive || { scene: "explore" });
+        syncInputContextForView(roomView);
+    };
+
+    var clearMenuViewOverlay = function (options) {
+        options = options || {};
+        var root = document.getElementById("brave-menu-view-overlay");
+        if (root && root.parentNode) {
+            root.parentNode.removeChild(root);
+        }
+        currentMenuViewOverlayData = null;
+        pendingMenuViewCommand = "";
+        pendingMenuViewCommandUntil = 0;
+        if (document.body) {
+            document.body.classList.remove("brave-menu-view-overlay-active");
+        }
+        if (options.restoreRail !== false) {
+            restoreMenuViewOverlaySceneRail();
+            restoreMenuViewOverlayRoomContext();
+        } else {
+            menuViewOverlaySceneRailSnapshot = null;
+        }
+    };
+
+    var isMenuViewOverlayCloseCommandTarget = function (target) {
+        return !!(
+            currentMenuViewOverlayData
+            && target
+            && target.closest
+            && target.closest("#brave-menu-view-overlay")
+            && String(target.getAttribute("data-brave-command") || "").trim().toLowerCase() === "look"
+        );
+    };
+
+    var closeMenuViewOverlayFromTarget = function (target) {
+        if (!isMenuViewOverlayCloseCommandTarget(target)) {
+            return false;
+        }
+        playUiSound("close");
+        clearMenuViewOverlay();
+        return true;
+    };
+
+    var renderMenuViewOverlay = function (viewData, viewMarkup) {
+        var root = document.getElementById("brave-menu-view-overlay");
+        var pickerHost = document.getElementById("brave-picker-sheet");
+        var overlayHost = (pickerHost && pickerHost.parentNode) || document.body;
+        if (!root) {
+            root = document.createElement("div");
+            root.id = "brave-menu-view-overlay";
+            root.className = "brave-menu-view-overlay";
+        }
+        if (root.parentNode !== overlayHost) {
+            overlayHost.appendChild(root);
+        }
+        currentMenuViewOverlayData = viewData || {};
+        pendingMenuViewCommand = "";
+        pendingMenuViewCommandUntil = 0;
+        if (document.body) {
+            document.body.classList.add("brave-menu-view-overlay-active");
+        }
+        root.innerHTML =
+            "<div class='brave-menu-view-overlay__backdrop' data-brave-menu-view-close='1'></div>"
+            + "<section class='brave-menu-view-overlay__panel' role='dialog' aria-modal='true' tabindex='0'>"
+            + viewMarkup
+            + "</section>";
+        refreshTutorialShimmerControls();
+        syncOpenCombatPickerFromDom();
+        focusViewAutofocusField();
     };
 
     var positionDesktopToolbar = function () {
@@ -6932,7 +7196,18 @@ let defaultout_plugin = (function () {
             var phase = meter.getAttribute("data-atb-phase") || "charging";
             fill.style.transitionDuration = "0ms";
             if (phase !== "charging") {
-                if (phase === "ready" || phase === "resolving" || phase === "winding") {
+                if (phase === "ready") {
+                    var readyRemainingMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-remaining") || "0"));
+                    var readyDurationMs = Math.max(0, parseFloat(meter.getAttribute("data-atb-phase-duration") || "0"));
+                    var readyPercent = readyDurationMs > 0 ? Math.max(0, Math.min(100, (readyRemainingMs / readyDurationMs) * 100)) : 100;
+                    fill.style.width = readyPercent.toFixed(2) + "%";
+                    if (readyRemainingMs > 0 && readyPercent > 0) {
+                        window.requestAnimationFrame(function () {
+                            fill.style.transitionDuration = readyRemainingMs + "ms";
+                            fill.style.width = "0%";
+                        });
+                    }
+                } else if (phase === "resolving" || phase === "winding") {
                     fill.style.width = "100%";
                 } else if (phase === "recovering" || phase === "cooldown") {
                     fill.style.width = "0%";
@@ -7034,6 +7309,7 @@ let defaultout_plugin = (function () {
             veil.classList.remove("brave-intro-veil--active");
             window.setTimeout(function () {
                 veil.classList.remove("brave-intro-veil--character-load");
+                veil.innerHTML = "";
                 if (isCharacterLoadVeil) {
                     characterLoadVeilStartedAt = 0;
                     document.body.classList.remove("brave-character-load-transition-active");
@@ -7091,9 +7367,82 @@ let defaultout_plugin = (function () {
         resetAllScrollPositions();
     };
 
-    var startGameIntroVeil = function () {
+    var startGameIntroVeil = function (commandText) {
         var veil = document.getElementById("brave-intro-veil");
         if (veil) {
+            // Extract Character Name (Query DOM before renderCharacterLoadHold clears it!)
+            var charName = "Your Adventurer";
+            if (commandText && typeof commandText === "string") {
+                var trimmed = commandText.trim();
+                var lower = trimmed.toLowerCase();
+                if (lower !== "finish play") {
+                    // Try to look up the exact clicked action element in the active DOM
+                    var matchedEl = document.querySelector('[data-brave-command="' + trimmed.replace(/"/g, '\\"') + '"]');
+                    if (!matchedEl) {
+                        var allCmdEls = document.querySelectorAll('[data-brave-command]');
+                        for (var i = 0; i < allCmdEls.length; i++) {
+                            if (allCmdEls[i].getAttribute('data-brave-command').trim().toLowerCase() === lower) {
+                                matchedEl = allCmdEls[i];
+                                break;
+                            }
+                        }
+                    }
+
+                    if (matchedEl) {
+                        var text = "";
+                        var card = matchedEl.closest(".scene-card") || matchedEl.closest(".brave-view__entry") || matchedEl.closest(".brave-view__list-item") || matchedEl.closest(".brave-view__section") || matchedEl;
+                        var heading = card ? card.querySelector("h1, h2, h3, h4, .brave-view__list-title, .brave-view__entry-title, .title, .name") : null;
+
+                        if (heading) {
+                            text = heading.textContent || "";
+                        } else {
+                            text = matchedEl.textContent || "";
+                        }
+
+                        if (!text.trim() && card) {
+                            text = card.textContent || "";
+                        }
+
+                        var namePart = text.trim();
+                        // Strip leading slot indices like "1. " or "[1] "
+                        namePart = namePart.replace(/^\[?\d+\]?[\s\.\-:]+/, "");
+                        // Strip action keywords
+                        namePart = namePart.replace(/^(play|select|choose|summon)\s+/i, "");
+                        // Strip text from separator points (like bullet points or level ranges)
+                        var indexParen = namePart.indexOf("(");
+                        if (indexParen !== -1) { namePart = namePart.substring(0, indexParen); }
+                        var indexDash = namePart.indexOf(" - ");
+                        if (indexDash !== -1) { namePart = namePart.substring(0, indexDash); }
+                        var indexComma = namePart.indexOf(",");
+                        if (indexComma !== -1) { namePart = namePart.substring(0, indexComma); }
+                        var indexDot = namePart.indexOf("·");
+                        if (indexDot !== -1) { namePart = namePart.substring(0, indexDot); }
+                        var indexBullet = namePart.indexOf("•");
+                        if (indexBullet !== -1) { namePart = namePart.substring(0, indexBullet); }
+                        namePart = namePart.replace(/[\r\n\t]+/g, " ").replace(/\s+/g, " ").trim();
+
+                        if (namePart && !/^\d+$/.test(namePart)) {
+                            charName = namePart;
+                        }
+                    }
+
+                    // Fallback to command text parsing if DOM lookup was not possible
+                    if (charName === "Your Adventurer" || /^\d+$/.test(charName)) {
+                        var parts = trimmed.split(/\s+/);
+                        if (parts.length > 1) {
+                            var action = parts[0].toLowerCase();
+                            if (action === "play" || action === "puppet" || action === "ic") {
+                                var rawPart = trimmed.substring(parts[0].length).trim();
+                                rawPart = rawPart.replace(/['"]/g, "").trim();
+                                if (rawPart && !/^\d+$/.test(rawPart)) {
+                                    charName = rawPart;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             renderCharacterLoadHold();
             pendingCharacterLoadRoomViewData = null;
             pendingCharacterLoadRoomViewOptions = null;
@@ -7101,6 +7450,50 @@ let defaultout_plugin = (function () {
                 window.clearTimeout(pendingCharacterLoadRoomViewTimeout);
                 pendingCharacterLoadRoomViewTimeout = null;
             }
+
+            // Clean & capitalize name if entirely lowercase/uppercase
+            if (charName && (charName === charName.toLowerCase() || charName === charName.toUpperCase())) {
+                charName = charName.split(/\s+/).map(function (word) {
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }).join(" ");
+            }
+
+            // Setup randomized flavor text
+            var loreTexts = [
+                "Deep in the Whispering Woods, ancient runes pulse with forgotten power...",
+                "Goblins patrol the roads tonight; keep your daggers sharp and ears open...",
+                "The hearth fire of Brambleford glows warm, offering respite to weary travelers...",
+                "The Drowned Weir holds secrets that the water was never meant to tell...",
+                "Gathering magical embers and packing traveler rations...",
+                "Preparing the realm's geometry and tuning the ambient winds...",
+                "Dusting off ancient maps and shining your adventuring gear..."
+            ];
+            var loreText = loreTexts[Math.floor(Math.random() * loreTexts.length)];
+
+            var escapeHtml = function (str) {
+                return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            };
+
+            // Inject premium glassmorphic loader
+            var html = '<div class="brave-intro-veil__bg-glow"></div>' +
+                '<div class="brave-intro-veil__particles">' +
+                    '<div class="brave-intro-veil__particle brave-intro-veil__particle--1"></div>' +
+                    '<div class="brave-intro-veil__particle brave-intro-veil__particle--2"></div>' +
+                    '<div class="brave-intro-veil__particle brave-intro-veil__particle--3"></div>' +
+                '</div>' +
+                '<div class="brave-intro-veil__card">' +
+                    '<div class="brave-intro-veil__spinner-container">' +
+                        '<div class="brave-intro-veil__spinner-rune"></div>' +
+                        '<div class="brave-intro-veil__spinner-center">✦</div>' +
+                    '</div>' +
+                    '<h2 class="brave-intro-veil__title">Summoning ' + escapeHtml(charName) + '</h2>' +
+                    '<div class="brave-intro-veil__subtitle">Entering the World</div>' +
+                    '<div class="brave-intro-veil__divider"></div>' +
+                    '<p class="brave-intro-veil__flavor-text">' + escapeHtml(loreText) + '</p>' +
+                '</div>';
+
+            veil.innerHTML = html;
+
             veil.classList.add("brave-intro-veil--character-load");
             void veil.offsetWidth;
             characterLoadVeilStartedAt = Date.now();
@@ -7582,6 +7975,80 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var renderVictoryOverlayPairs = function (items) {
+        return "<div class='brave-victory-transition__pairs'>"
+            + (items || []).map(function (entry) {
+                return "<div class='brave-victory-transition__pair'>"
+                    + "<span class='brave-victory-transition__pair-label'>"
+                    + (entry && entry.icon ? icon(entry.icon, "brave-victory-transition__pair-icon") : "")
+                    + escapeHtml(entry && entry.label ? entry.label : "")
+                    + "</span>"
+                    + "<strong class='brave-victory-transition__pair-value'>" + escapeHtml(entry && entry.value ? entry.value : "") + "</strong>"
+                    + "</div>";
+            }).join("")
+            + "</div>";
+    };
+
+    var renderVictoryOverlayList = function (items) {
+        return "<div class='brave-victory-transition__list'>"
+            + (items || []).map(function (entry) {
+                return "<div class='brave-victory-transition__list-item'>"
+                    + "<span class='brave-victory-transition__list-icon'>" + icon(entry && entry.icon ? entry.icon : "category") + "</span>"
+                    + "<span class='brave-victory-transition__list-text'>" + escapeHtml(entry && entry.text ? entry.text : "") + "</span>"
+                    + "</div>";
+            }).join("")
+            + "</div>";
+    };
+
+    var renderVictoryOverlayEntries = function (items) {
+        return "<div class='brave-victory-transition__entries'>"
+            + (items || []).map(function (entry) {
+                var lines = Array.isArray(entry && entry.lines) ? entry.lines : [];
+                return "<div class='brave-victory-transition__entry'>"
+                    + "<span class='brave-victory-transition__entry-icon'>" + icon(entry && entry.icon ? entry.icon : "task_alt") + "</span>"
+                    + "<span class='brave-victory-transition__entry-copy'>"
+                    + (entry && entry.meta ? "<span class='brave-victory-transition__entry-meta'>" + escapeHtml(entry.meta) + "</span>" : "")
+                    + "<strong>" + escapeHtml(entry && entry.title ? entry.title : "") + "</strong>"
+                    + (lines.length ? "<span>" + lines.map(escapeHtml).join("<br>") + "</span>" : "")
+                    + "</span>"
+                    + "</div>";
+            }).join("")
+            + "</div>";
+    };
+
+    var renderVictoryOverlayLines = function (lines) {
+        return "<div class='brave-victory-transition__lines'>"
+            + (lines || []).map(function (line) {
+                return "<div class='brave-victory-transition__line'>" + escapeHtml(line) + "</div>";
+            }).join("")
+            + "</div>";
+    };
+
+    var renderVictoryOverlaySection = function (section) {
+        section = section || {};
+        var kind = section.kind || "";
+        var body = "";
+        if (kind === "pairs") {
+            body = renderVictoryOverlayPairs(section.items || []);
+        } else if (kind === "list") {
+            body = renderVictoryOverlayList(section.items || []);
+        } else if (kind === "entries") {
+            body = renderVictoryOverlayEntries(section.items || []);
+        } else if (kind === "lines") {
+            body = renderVictoryOverlayLines(section.lines || []);
+        }
+        if (!body) {
+            return "";
+        }
+        return "<section class='brave-victory-transition__section'>"
+            + "<div class='brave-victory-transition__section-head'>"
+            + "<span class='brave-victory-transition__section-icon'>" + icon(section.icon || "military_tech") + "</span>"
+            + "<span>" + escapeHtml(section.label || "Victory") + "</span>"
+            + "</div>"
+            + body
+            + "</section>";
+    };
+
     var removePixelParticles = function () {
         Array.prototype.forEach.call(document.querySelectorAll(".brave-pixel-particle"), function (particle) {
             if (particle && particle.parentNode) {
@@ -7811,6 +8278,7 @@ let defaultout_plugin = (function () {
         overlay.id = "brave-victory-transition";
         overlay.className = "brave-victory-transition";
         var title = viewData && viewData.title ? String(viewData.title) : "VICTORY!";
+        var sections = Array.isArray(viewData && viewData.sections) ? viewData.sections : [];
         overlay.innerHTML =
             "<div class='brave-victory-transition__wash'></div>"
             + "<div class='brave-victory-transition__glow'></div>"
@@ -7820,6 +8288,13 @@ let defaultout_plugin = (function () {
                     + "<span>Encounter Clear</span>"
                 + "</div>"
                 + "<div class='brave-victory-transition__title'>" + escapeHtml(title) + "</div>"
+                + "<div class='brave-victory-transition__subtitle'>The fight is over. Take the win, then return to the field.</div>"
+                + "<div class='brave-victory-transition__body'>"
+                    + sections.map(renderVictoryOverlaySection).join("")
+                + "</div>"
+                + "<div class='brave-victory-transition__actions'>"
+                    + "<button type='button' class='brave-victory-transition__continue brave-click' data-brave-victory-continue='1'>Continue</button>"
+                + "</div>"
             + "</div>";
         document.body.appendChild(overlay);
     };
@@ -7865,7 +8340,7 @@ let defaultout_plugin = (function () {
     };
 
     var startVictoryTransition = function (viewData) {
-        if (!isVictoryResultView(viewData) || prefersReducedMotion()) {
+        if (!isVictoryResultView(viewData)) {
             return false;
         }
         clearVictoryTransitionState();
@@ -7874,21 +8349,18 @@ let defaultout_plugin = (function () {
         victoryTransitionActive = true;
         combatViewTransitionActive = false;
         pendingCombatResultReturnTransition = true;
+        currentViewData = viewData;
         if (document.body) {
             document.body.classList.add("brave-victory-transition-active");
+            setBodyState("view", "combat-result");
         }
+        var victoryReactive = {};
+        Object.keys(viewData.reactive || {}).forEach(function (key) {
+            victoryReactive[key] = viewData.reactive[key];
+        });
+        victoryReactive.scene = "victory";
+        applyReactiveState(victoryReactive);
         showVictoryTransitionOverlay(viewData);
-        pendingVictoryTransitionTimeout = window.setTimeout(function () {
-            var queuedViewData = pendingVictoryTransitionViewData;
-            pendingVictoryTransitionTimeout = null;
-            pendingVictoryTransitionViewData = null;
-            if (!queuedViewData) {
-                clearVictoryTransitionState();
-                return;
-            }
-            renderMainView(queuedViewData, { skipVictoryTransition: true });
-            finishVictoryTransitionOverlay();
-        }, 780);
         return true;
     };
 
@@ -9188,6 +9660,7 @@ let defaultout_plugin = (function () {
                     + "</div>"
                 : "<div class='scene-pack-panel__empty'>Pack is empty.</div>");
         panel.setAttribute("data-brave-command", "pack");
+        panel.setAttribute("data-brave-menu-view-command", "1");
         panel.setAttribute("title", "pack");
         panel.setAttribute("role", "button");
         panel.setAttribute("tabindex", "0");
@@ -9248,6 +9721,7 @@ let defaultout_plugin = (function () {
         var card = document.getElementById("scene-card");
         if (card) {
             card.setAttribute("data-brave-command", "quests");
+            card.setAttribute("data-brave-menu-view-command", "1");
             card.setAttribute("title", "quests");
             card.setAttribute("role", "button");
             card.setAttribute("tabindex", "0");
@@ -9967,6 +10441,9 @@ let defaultout_plugin = (function () {
                 if (entry && entry.selected) {
                     rowClass += " brave-view__entry--selected";
                 }
+                if (entry && entry.shimmer) {
+                    rowClass += " brave-shimmer";
+                }
                 var combatStateAttr = "";
                 if (entry && Array.isArray(entry.combat_state) && entry.combat_state.length) {
                     combatStateAttr = " data-combat-state='" + escapeHtml(entry.combat_state.join(" ")) + "'";
@@ -10024,6 +10501,9 @@ let defaultout_plugin = (function () {
                     }
                     if (entry && entry.selected) {
                         rowClass += " brave-view__entry--selected";
+                    }
+                    if (entry && entry.shimmer) {
+                        rowClass += " brave-shimmer";
                     }
                     if (entry && Array.isArray(entry.sidecars) && entry.sidecars.length) {
                         rowClass += " brave-view__entry--has-sidecars";
@@ -10161,16 +10641,21 @@ let defaultout_plugin = (function () {
                 return "";
             }
             var toneClass = entry && entry.tone ? " brave-view__action--" + escapeHtml(entry.tone) : "";
+            var shimmers = viewData && Array.isArray(viewData.shimmers) ? viewData.shimmers : lastTutorialShimmers;
+            var label = entry && entry.text ? entry.text : entry && entry.label ? entry.label : "Back";
+            var command = entry && entry.command ? entry.command : "";
+            var shouldShimmer = shimmers.indexOf(command) !== -1 || (String(label).toLowerCase() === "close" && shimmers.indexOf("close") !== -1);
+            var shimmerClass = shouldShimmer ? " brave-shimmer" : "";
             var aria = entry && (entry.aria_label || entry.label)
                 ? " aria-label='" + escapeHtml(entry.aria_label || entry.label) + "'"
                 : "";
             return (
-                "<button type='button' class='brave-view__action brave-view__back brave-click" + toneClass + "'"
+                "<button type='button' class='brave-view__action brave-view__back brave-click" + toneClass + shimmerClass + "'"
                 + commandAttrs(entry, false)
                 + aria
                 + ">"
                 + icon(entry && entry.icon ? entry.icon : "arrow_back", "brave-view__action-icon brave-view__action-icon--back")
-                + "<span>" + escapeHtml(entry && entry.text ? entry.text : entry && entry.label ? entry.label : "Back") + "</span>"
+                + "<span>" + escapeHtml(label) + "</span>"
                 + "</button>"
             );
         };
@@ -10179,9 +10664,15 @@ let defaultout_plugin = (function () {
             if (isMobileViewport() || !isRoomLikeView(viewData)) {
                 return "";
             }
+            var menuPicker = buildDesktopMenuPicker();
+            var hasShimmeringOption = (menuPicker.options || []).some(function (opt) {
+                return opt.command && lastTutorialShimmers.indexOf(opt.command) !== -1;
+            });
+            var shimmerClass = hasShimmeringOption ? " brave-shimmer" : "";
+
             return (
-                "<button type='button' class='brave-view__menu-button brave-click'"
-                + " data-brave-picker='" + escapeHtml(JSON.stringify(buildDesktopMenuPicker())) + "'"
+                "<button type='button' class='brave-view__menu-button brave-click" + shimmerClass + "'"
+                + " data-brave-picker='" + escapeHtml(JSON.stringify(menuPicker)) + "'"
                 + " aria-label='Open menu'"
                 + " title='menu'>"
                 + "<span>MENU</span>"
@@ -10210,7 +10701,7 @@ let defaultout_plugin = (function () {
             }
             var mapMarkup = viewData.micromap ? renderRoomCardMicromap(viewData.micromap) : "";
             return (
-                "<div class='brave-view__micromap brave-click' data-brave-command='map' title='Open map' role='button' tabindex='0' aria-label='Open map'>"
+                "<div class='brave-view__micromap brave-click' data-brave-command='map' data-brave-menu-view-command='1' title='Open map' role='button' tabindex='0' aria-label='Open map'>"
                 + mapMarkup
                 + "</div>"
             );
@@ -10334,6 +10825,17 @@ let defaultout_plugin = (function () {
             + "</div>"
             + renderFooterLink()
             + "</div>";
+
+        if (shouldRenderMenuViewOverlay(viewData)) {
+            renderMenuViewOverlay(viewData, viewMarkup);
+            renderDesktopToolbar();
+            syncMobileShell();
+            scheduleQuestOverlayQueueCheck(80);
+            return;
+        }
+        if (currentMenuViewOverlayData && (isRoomLikeView(viewData) || viewData.variant === "combat" || viewData.variant === "combat-result")) {
+            clearMenuViewOverlay({ restoreRail: false });
+        }
 
         if (
             pendingCombatSwapTimeout
@@ -10724,10 +11226,11 @@ let defaultout_plugin = (function () {
         syncCombatActionTray();
     };
 
-    var sendBrowserCommand = function (command, confirmText) {
+    var sendBrowserCommand = function (command, confirmText, options) {
         if (!command || !plugin_handler || !plugin_handler.onSend) {
             return;
         }
+        options = options || {};
         var normalizedCommand = String(command || "").trim().toLowerCase();
         var braveAudio = getBraveAudio();
         if (confirmText && !window.confirm(confirmText)) {
@@ -10748,12 +11251,33 @@ let defaultout_plugin = (function () {
             || normalizedCommand.indexOf("puppet ") === 0
             || normalizedCommand === "finish play"
         ) {
-            startGameIntroVeil();
+            startGameIntroVeil(command);
         }
         if (normalizedCommand.indexOf("bossgate ") !== 0 && normalizedCommand !== "bossgate") {
             clearPickerSheet();
         }
         clearBrowserNotice();
+        if (options.menuView && isMenuViewCommand(normalizedCommand)) {
+            if (!currentMenuViewOverlayData) {
+                captureMenuViewOverlaySceneRail();
+            }
+            pendingMenuViewCommand = normalizedCommand;
+            pendingMenuViewCommandUntil = Date.now() + 10000;
+        } else if (
+            currentMenuViewOverlayData
+            && (
+                isRoomNavigationCommand(normalizedCommand)
+                || normalizedCommand === "look"
+                || normalizedCommand === "quit"
+                || normalizedCommand === "play"
+                || normalizedCommand.indexOf("play ") === 0
+                || normalizedCommand === "ic"
+                || normalizedCommand.indexOf("ic ") === 0
+                || normalizedCommand === "finish play"
+            )
+        ) {
+            clearMenuViewOverlay();
+        }
         if (isMobileViewport()) {
             if (currentMobileUtilityTab) {
                 currentMobileUtilityTab = null;
@@ -12295,6 +12819,14 @@ let defaultout_plugin = (function () {
     };
 
     var handleBrowserInteractionEvent = function (event) {
+        var menuViewCloseTarget = closestFromEventTarget(event, "[data-brave-menu-view-close]");
+        if (menuViewCloseTarget) {
+            claimBrowserInteractionEvent(event);
+            playUiSound("close");
+            clearMenuViewOverlay();
+            return true;
+        }
+
         var quantityAdjustTarget = closestFromEventTarget(event, "[data-brave-picker-quantity-adjust]");
         if (quantityAdjustTarget) {
             var quantityContainer = quantityAdjustTarget.closest("[data-brave-picker-quantity-control]");
@@ -12380,7 +12912,12 @@ let defaultout_plugin = (function () {
             prefillBrowserInput(target.getAttribute("data-brave-prefill"));
             return true;
         }
-        sendBrowserCommand(target.getAttribute("data-brave-command"), target.getAttribute("data-brave-confirm"));
+        if (closeMenuViewOverlayFromTarget(target)) {
+            return true;
+        }
+        sendBrowserCommand(target.getAttribute("data-brave-command"), target.getAttribute("data-brave-confirm"), {
+            menuView: target.hasAttribute("data-brave-menu-view-command")
+        });
         return true;
     };
 
@@ -12551,6 +13088,22 @@ let defaultout_plugin = (function () {
                 setRoomActivityTab(activityTabTarget.getAttribute("data-brave-activity-tab"));
                 return;
             }
+            var victoryContinueTarget = event.target.closest("[data-brave-victory-continue]");
+            if (victoryContinueTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                playUiSound("select");
+                var victoryViewData = pendingVictoryTransitionViewData;
+                pendingCombatResultReturnTransition = true;
+                currentViewData = victoryViewData || currentViewData || { variant: "combat-result" };
+                if (document.body) {
+                    setBodyState("view", "combat-result");
+                    setBodyState("scene", "victory");
+                }
+                finishVictoryTransitionOverlay();
+                sendBrowserCommand("look");
+                return;
+            }
             var welcomeNext = event.target.closest("[data-brave-welcome-next]");
             if (welcomeNext) {
                 event.preventDefault();
@@ -12666,7 +13219,12 @@ let defaultout_plugin = (function () {
                 prefillBrowserInput(target.getAttribute("data-brave-prefill"));
                 return;
             }
-            sendBrowserCommand(target.getAttribute("data-brave-command"), target.getAttribute("data-brave-confirm"));
+            if (closeMenuViewOverlayFromTarget(target)) {
+                return;
+            }
+            sendBrowserCommand(target.getAttribute("data-brave-command"), target.getAttribute("data-brave-confirm"), {
+                menuView: target.hasAttribute("data-brave-menu-view-command")
+            });
         }, true);
 
         document.addEventListener("submit", function (event) {
@@ -12886,6 +13444,9 @@ let defaultout_plugin = (function () {
             event.preventDefault();
             event.stopPropagation();
             suppressBrowserClickUntil = Date.now() + 320;
+            if (closeMenuViewOverlayFromTarget(directTarget)) {
+                return;
+            }
             if (directTarget.hasAttribute("data-brave-connection-screen")) {
                 playTitleMenuSound();
                 openConnectionScreen(directTarget.getAttribute("data-brave-connection-screen"));
@@ -12902,7 +13463,9 @@ let defaultout_plugin = (function () {
                 prefillBrowserInput(directTarget.getAttribute("data-brave-prefill"));
                 return;
             }
-            sendBrowserCommand(directTarget.getAttribute("data-brave-command"), directTarget.getAttribute("data-brave-confirm"));
+            sendBrowserCommand(directTarget.getAttribute("data-brave-command"), directTarget.getAttribute("data-brave-confirm"), {
+                menuView: directTarget.hasAttribute("data-brave-menu-view-command")
+            });
         }, { capture: true, passive: false });
 
         document.addEventListener("pointercancel", function (event) {
@@ -13023,6 +13586,9 @@ let defaultout_plugin = (function () {
                 event.preventDefault();
                 event.stopPropagation();
                 suppressBrowserClickUntil = Date.now() + 320;
+                if (closeMenuViewOverlayFromTarget(directTarget)) {
+                    return;
+                }
                 if (directTarget.hasAttribute("data-brave-connection-screen")) {
                     playTitleMenuSound();
                     openConnectionScreen(directTarget.getAttribute("data-brave-connection-screen"));
@@ -13039,7 +13605,9 @@ let defaultout_plugin = (function () {
                     prefillBrowserInput(directTarget.getAttribute("data-brave-prefill"));
                     return;
                 }
-                sendBrowserCommand(directTarget.getAttribute("data-brave-command"), directTarget.getAttribute("data-brave-confirm"));
+                sendBrowserCommand(directTarget.getAttribute("data-brave-command"), directTarget.getAttribute("data-brave-confirm"), {
+                    menuView: directTarget.hasAttribute("data-brave-menu-view-command")
+                });
             }, { capture: true, passive: false });
 
             document.addEventListener("touchcancel", function (event) {
@@ -13131,6 +13699,9 @@ let defaultout_plugin = (function () {
             }
             event.preventDefault();
             event.stopPropagation();
+            if (closeMenuViewOverlayFromTarget(target)) {
+                return;
+            }
             if (target.hasAttribute("data-brave-connection-screen")) {
                 openConnectionScreen(target.getAttribute("data-brave-connection-screen"));
                 return;
@@ -13144,7 +13715,9 @@ let defaultout_plugin = (function () {
                 prefillBrowserInput(target.getAttribute("data-brave-prefill"));
                 return;
             }
-            sendBrowserCommand(target.getAttribute("data-brave-command"), target.getAttribute("data-brave-confirm"));
+            sendBrowserCommand(target.getAttribute("data-brave-command"), target.getAttribute("data-brave-confirm"), {
+                menuView: target.hasAttribute("data-brave-menu-view-command")
+            });
         }, true);
 
         document.addEventListener("focusin", function (event) {
@@ -13454,6 +14027,9 @@ let defaultout_plugin = (function () {
 
         if (cmdname === "brave_scene") {
             var scenePayload = getOobPayload(args, kwargs, "brave_scene", {});
+            if (isMenuViewOverlayOpeningOrActive()) {
+                return true;
+            }
             currentRoomSceneData = (scenePayload && typeof scenePayload === "object") ? scenePayload : {};
             if (isCombatUiActive()) {
                 return true;
@@ -13491,6 +14067,9 @@ let defaultout_plugin = (function () {
 
         if (cmdname === "brave_panel") {
             var panelPayload = getOobPayload(args, kwargs, "brave_panel", {});
+            if (isMenuViewOverlayOpeningOrActive() && !isCombatPanelData(panelPayload || {})) {
+                return true;
+            }
             if (isCombatPanelData(panelPayload || {}) && !isCombatUiActive()) {
                 pendingCombatPanelData = panelPayload || {};
                 return true;
@@ -13567,8 +14146,19 @@ let defaultout_plugin = (function () {
 
         if (cmdname === "brave_objectives_update") {
             var refreshPayload = getOobPayload(args, kwargs, "brave_objectives_update", {}) || {};
-            if (refreshPayload.tutorial) {
-                renderObjectives({ guidance: refreshPayload.tutorial.guidance, guidance_eyebrow: refreshPayload.tutorial.eyebrow, guidance_title: refreshPayload.tutorial.title });
+            if (refreshPayload.tutorial !== undefined) {
+                if (refreshPayload.tutorial) {
+                    renderObjectives({
+                        guidance: refreshPayload.tutorial.guidance,
+                        guidance_eyebrow: refreshPayload.tutorial.eyebrow,
+                        guidance_title: refreshPayload.tutorial.title,
+                        shimmers: refreshPayload.tutorial.shimmers
+                    });
+                    refreshTutorialShimmerControls();
+                } else {
+                    renderObjectives({ guidance: [] });
+                    refreshTutorialShimmerControls();
+                }
             }
             if (refreshPayload.tracked_quest && canRenderSceneRailNow()) {
                 renderSceneCard({ tracked_quest: refreshPayload.tracked_quest });
@@ -13663,7 +14253,9 @@ let defaultout_plugin = (function () {
                 return true;
             }
             if (
-                (currentViewData && currentViewData.variant === "combat-result")
+                document.getElementById("brave-victory-transition")
+                || pendingCombatResultReturnTransition
+                || (currentViewData && currentViewData.variant === "combat-result")
                 || document.querySelector("#messagewindow .brave-view--combat-result")
             ) {
                 return true;

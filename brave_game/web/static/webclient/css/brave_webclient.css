@@ -1417,6 +1417,10 @@ body.brave-command-armed .inputfieldwrapper:focus-within::after {
     display: none;
 }
 
+body.brave-menu-view-overlay-active #brave-picker-sheet {
+    z-index: 5060;
+}
+
 #brave-notice-stack {
     position: fixed;
     right: 20px;
@@ -1479,6 +1483,16 @@ body.brave-objectives-welcome-active #brave-picker-sheet {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     pointer-events: auto;
+}
+
+.brave-picker-sheet__panel--large-menu {
+    width: min(720px, calc(100% - 32px));
+    max-height: min(92vh, 860px);
+    padding: clamp(18px, 2.4vw, 26px);
+}
+
+.brave-picker-sheet__panel--large-menu .brave-picker-sheet__options {
+    grid-template-columns: minmax(0, 1fr);
 }
 
 .brave-picker-sheet__head {
@@ -2179,6 +2193,10 @@ body.brave-objectives-welcome-active #brave-picker-sheet {
         width: min(560px, calc(100% - 20px));
         max-height: calc(100dvh - 20px);
         padding: 14px;
+    }
+
+    .brave-picker-sheet__panel--large-menu {
+        max-height: min(92dvh, 800px);
     }
 
     .brave-audio-settings {
@@ -4252,6 +4270,31 @@ body.brave-objectives-welcome-active #brave-picker-sheet {
     text-align: left;
     cursor: pointer;
     pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.scene-card__item-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.09),
+        transparent
+    );
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+}
+
+.scene-card__item-button:hover::after,
+.scene-card__item-button:focus-visible::after {
+    left: 150%;
 }
 
 .scene-card__item-row .brave-view__inline-actions {
@@ -4484,6 +4527,79 @@ body.brave-mainview-active .scene-rail {
         linear-gradient(180deg, rgba(6, 9, 7, 0.98), rgba(6, 9, 7, 0.96) 78%, rgba(6, 9, 7, 0));
 }
 
+.brave-menu-view-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 54;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(14px, 3vw, 34px);
+    font-family: var(--brave-ui-font-family);
+}
+
+.brave-menu-view-overlay__backdrop {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 12%, rgba(var(--brave-accent-rgb), 0.1), transparent 42%),
+        rgba(4, 6, 5, 0.76);
+    backdrop-filter: blur(8px);
+}
+
+.brave-menu-view-overlay__panel {
+    position: relative;
+    z-index: 1;
+    width: min(1180px, 100%);
+    height: min(80vh, 750px);
+    max-height: min(88vh, 920px);
+    overflow: auto;
+    padding: clamp(14px, 2.2vw, 24px);
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 74%, rgba(var(--brave-accent-rgb), 0.16));
+    border-radius: 18px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 24%),
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface) 96%, #050806), #050806);
+    box-shadow:
+        0 28px 80px rgba(0, 0, 0, 0.58),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.brave-menu-view-overlay__panel:focus {
+    outline: none;
+}
+
+.brave-menu-view-overlay__panel > .brave-view {
+    width: 100%;
+    max-width: none;
+}
+
+.brave-menu-view-overlay__panel .brave-view__hero {
+    padding-top: 18px;
+}
+
+.brave-menu-view-overlay__panel .brave-view__back {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    align-self: center;
+}
+
+@media screen and (max-width: 720px) {
+    .brave-menu-view-overlay {
+        align-items: center;
+        padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    }
+
+    .brave-menu-view-overlay__panel {
+        width: min(100%, 560px);
+        height: calc(100dvh - 24px);
+        max-height: calc(100dvh - 24px);
+        border-radius: 14px;
+        padding: 12px;
+    }
+}
+
 body[data-brave-scene="combat"] #messagewindow > .brave-sticky-view {
     border-radius: 28px;
     overflow: hidden;
@@ -4541,6 +4657,11 @@ body[data-brave-scene="combat"] #messagewindow > .brave-sticky-view {
     gap: 12px;
 }
 
+.brave-view--gear:has(.brave-view__section--feedback) .brave-view__sections {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.42fr);
+    align-items: start;
+}
+
 .brave-view--gear .brave-view__section {
     padding: 12px 14px 14px;
     border-color: color-mix(in srgb, var(--brave-world-line) 66%, rgba(var(--brave-accent-rgb), 0.08));
@@ -4564,6 +4685,20 @@ body[data-brave-scene="combat"] #messagewindow > .brave-sticky-view {
         radial-gradient(circle at 0 0, color-mix(in srgb, var(--brave-world-surface-tint-strong) 84%, transparent), transparent 40%),
         linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint-soft) 96%, transparent), transparent 22%),
         rgba(255, 255, 255, 0.028);
+}
+
+.brave-view--gear .brave-view__section--feedback {
+    position: sticky;
+    top: 16px;
+    min-height: 0;
+}
+
+.brave-view--gear .brave-view__section--feedback .brave-view__lines {
+    gap: 8px;
+}
+
+.brave-view--gear .brave-view__section--feedback .brave-view__line {
+    line-height: 1.42;
 }
 
 .brave-view--gear .brave-view__section--slots .brave-view__entries {
@@ -4648,6 +4783,17 @@ body[data-brave-scene="combat"] #messagewindow > .brave-sticky-view {
 
     .brave-view--gear .brave-view__section--slots .brave-view__entry-meta {
         text-align: left;
+    }
+}
+
+@media screen and (max-width: 1099px) {
+    .brave-view--gear:has(.brave-view__section--feedback) .brave-view__sections {
+        grid-template-columns: 1fr;
+    }
+
+    .brave-view--gear .brave-view__section--feedback {
+        position: static;
+        top: auto;
     }
 }
 
@@ -12042,7 +12188,6 @@ body[data-brave-scene="arcade"] .brave-view--arcade .brave-view__actions {
 body[data-brave-theme="hearth"] .content,
 body[data-brave-theme="hearth"] #messagewindow,
 body[data-brave-theme="hearth"] .inputwrap,
-body[data-brave-theme="hearth"] .scene-rail__panel,
 body[data-brave-theme="hearth"] .scene-card,
 body[data-brave-theme="hearth"] .brave-view__mobile-pack,
 body[data-brave-theme="hearth"] .brave-view__mobile-map,
@@ -12061,6 +12206,18 @@ body[data-brave-theme="hearth"] .brave-view__entry {
         inset 0 1px 0 rgba(255, 247, 229, 0.07),
         inset 0 0 0 1px rgba(255, 224, 171, 0.02),
         var(--brave-shadow);
+}
+
+body[data-brave-theme="hearth"] .scene-rail__panel {
+    border-color: color-mix(in srgb, var(--brave-world-line) 62%, var(--brave-border));
+    background:
+        radial-gradient(circle at 0 0, var(--brave-state-surface-tint), transparent 48%),
+        radial-gradient(circle at 100% 0, color-mix(in srgb, var(--brave-world-surface-tint-soft) 82%, rgba(255, 247, 229, 0.04)), transparent 42%),
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-world-surface-tint) 86%, rgba(255, 247, 229, 0.03)), transparent 28%),
+        linear-gradient(180deg, var(--brave-surface-deep-top), var(--brave-surface-deep-bottom));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 247, 229, 0.04),
+        0 12px 24px rgba(0, 0, 0, 0.18);
 }
 
 body[data-brave-theme="hearth"] .minimap-overlay,
@@ -12089,6 +12246,72 @@ body[data-brave-theme="hearth"] .brave-view__entry {
     box-shadow:
         inset 0 1px 0 rgba(255, 247, 229, 0.06),
         0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+/* Region-Based Theming overrides */
+.scene-card[data-brave-region*="brambleford" i],
+.scene-card[data-brave-region*="wayfarer" i] {
+    --brave-accent: #f3af56;
+    --brave-accent-rgb: 243, 175, 86;
+    --brave-world-line: rgba(243, 175, 86, 0.28);
+    --brave-world-surface-tint-strong: rgba(243, 175, 86, 0.22);
+    --brave-world-surface-tint: rgba(243, 175, 86, 0.12);
+    --brave-world-surface-tint-soft: rgba(243, 175, 86, 0.08);
+}
+
+.scene-card[data-brave-region*="goblin road" i] {
+    --brave-accent: #8da494;
+    --brave-accent-rgb: 141, 164, 148;
+    --brave-world-line: rgba(141, 164, 148, 0.24);
+    --brave-world-surface-tint-strong: rgba(141, 164, 148, 0.18);
+    --brave-world-surface-tint: rgba(141, 164, 148, 0.10);
+    --brave-world-surface-tint-soft: rgba(141, 164, 148, 0.06);
+}
+
+.scene-card[data-brave-region*="whispering woods" i] {
+    --brave-accent: #54c979;
+    --brave-accent-rgb: 84, 201, 121;
+    --brave-world-line: rgba(84, 201, 121, 0.32);
+    --brave-world-surface-tint-strong: rgba(84, 201, 121, 0.24);
+    --brave-world-surface-tint: rgba(84, 201, 121, 0.14);
+    --brave-world-surface-tint-soft: rgba(84, 201, 121, 0.08);
+}
+
+.scene-card[data-brave-region*="old barrow" i] {
+    --brave-accent: #dacbb2;
+    --brave-accent-rgb: 218, 203, 178;
+    --brave-world-line: rgba(218, 203, 178, 0.24);
+    --brave-world-surface-tint-strong: rgba(218, 203, 178, 0.18);
+    --brave-world-surface-tint: rgba(218, 203, 178, 0.10);
+    --brave-world-surface-tint-soft: rgba(218, 203, 178, 0.06);
+}
+
+.scene-card[data-brave-region*="goblin warrens" i] {
+    --brave-accent: #ee6346;
+    --brave-accent-rgb: 238, 99, 70;
+    --brave-world-line: rgba(238, 99, 70, 0.34);
+    --brave-world-surface-tint-strong: rgba(238, 99, 70, 0.26);
+    --brave-world-surface-tint: rgba(238, 99, 70, 0.16);
+    --brave-world-surface-tint-soft: rgba(238, 99, 70, 0.10);
+}
+
+.scene-card[data-brave-region*="watchtower" i] {
+    --brave-accent: #6aa3c9;
+    --brave-accent-rgb: 106, 163, 201;
+    --brave-world-line: rgba(106, 163, 201, 0.28);
+    --brave-world-surface-tint-strong: rgba(106, 163, 201, 0.22);
+    --brave-world-surface-tint: rgba(106, 163, 201, 0.12);
+    --brave-world-surface-tint-soft: rgba(106, 163, 201, 0.08);
+}
+
+.scene-card[data-brave-region*="blackfen" i],
+.scene-card[data-brave-region*="drowned weir" i] {
+    --brave-accent: #a3b85c;
+    --brave-accent-rgb: 163, 184, 92;
+    --brave-world-line: rgba(163, 184, 92, 0.28);
+    --brave-world-surface-tint-strong: rgba(163, 184, 92, 0.20);
+    --brave-world-surface-tint: rgba(163, 184, 92, 0.12);
+    --brave-world-surface-tint-soft: rgba(163, 184, 92, 0.08);
 }
 
 body[data-brave-theme="signalglass"] .content,
@@ -13518,7 +13741,7 @@ body.brave-scene-combat-enter .inputwrap {
 #brave-victory-transition {
     position: fixed;
     inset: 0;
-    z-index: 1210;
+    z-index: 5050;
     pointer-events: auto;
     overflow: hidden;
     opacity: 1;
@@ -13533,10 +13756,9 @@ body.brave-scene-combat-enter .inputwrap {
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(circle at 50% 42%, rgba(var(--brave-accent-rgb), 0.12), transparent 26%),
-        radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--brave-good) 14%, transparent), transparent 42%),
-        linear-gradient(180deg, var(--brave-bg-top), var(--brave-bg-bottom));
-    backdrop-filter: blur(12px) saturate(0.8);
+        radial-gradient(circle at 50% 36%, rgba(var(--brave-accent-rgb), 0.18), transparent 28%),
+        radial-gradient(circle at 50% 72%, color-mix(in srgb, var(--brave-good) 16%, transparent), transparent 42%),
+        linear-gradient(180deg, rgb(4, 7, 10), rgb(2, 4, 7));
     animation: brave-victory-wash 1240ms cubic-bezier(0.16, 0.84, 0.18, 1) forwards;
 }
 
@@ -13562,18 +13784,44 @@ body.brave-scene-combat-enter .inputwrap {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: min(520px, calc(100vw - 40px));
-    padding: 22px 24px 24px;
-    border: 1px solid var(--brave-border);
-    border-radius: var(--brave-radius-card);
+    width: min(720px, calc(100vw - 40px));
+    max-height: min(86vh, 780px);
+    display: grid;
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+    padding: 28px 30px 26px;
+    border: 1px solid color-mix(in srgb, var(--brave-accent) 36%, var(--brave-border));
+    border-radius: var(--brave-radius-panel);
     background:
-        radial-gradient(circle at 50% 0, rgba(var(--brave-accent-rgb), 0.08), transparent 42%),
-        linear-gradient(180deg, var(--brave-surface-top), var(--brave-surface-bottom));
+        radial-gradient(circle at 50% 0, rgba(var(--brave-accent-rgb), 0.16), transparent 42%),
+        radial-gradient(circle at 6% 10%, color-mix(in srgb, var(--brave-good) 10%, rgb(var(--brave-surface-soft-rgb))), transparent 32%),
+        linear-gradient(180deg, rgb(var(--brave-surface-soft-rgb)), rgb(8, 13, 18));
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.05),
-        var(--brave-shadow);
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 0 1px rgba(var(--brave-accent-rgb), 0.1),
+        0 34px 90px rgba(0, 0, 0, 0.72),
+        0 0 70px rgba(var(--brave-accent-rgb), 0.18);
     text-align: center;
+    overflow: hidden;
     animation: brave-victory-card 1240ms cubic-bezier(0.16, 0.84, 0.18, 1) forwards;
+}
+
+.brave-victory-transition__card::before,
+.brave-victory-transition__card::after {
+    content: "";
+    position: absolute;
+    left: 28px;
+    right: 28px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(var(--brave-accent-rgb), 0.54), transparent);
+    pointer-events: none;
+}
+
+.brave-victory-transition__card::before {
+    top: 16px;
+}
+
+.brave-victory-transition__card::after {
+    bottom: 16px;
 }
 
 .brave-victory-transition__eyebrow {
@@ -13594,7 +13842,7 @@ body.brave-scene-combat-enter .inputwrap {
 .brave-victory-transition__title {
     margin-top: 12px;
     color: var(--brave-text-bright);
-    font-size: calc(2rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-size: calc(3.1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
     font-weight: 800;
     line-height: 1;
     letter-spacing: 0.08em;
@@ -13602,6 +13850,182 @@ body.brave-scene-combat-enter .inputwrap {
     text-shadow:
         0 0 22px rgba(var(--brave-accent-rgb), 0.16),
         0 12px 30px rgba(0, 0, 0, 0.48);
+}
+
+.brave-victory-transition__subtitle {
+    margin: 12px auto 0;
+    max-width: 38rem;
+    color: var(--brave-text-soft);
+    font-family: var(--brave-narrative-font-family);
+    letter-spacing: var(--brave-narrative-letter-spacing);
+    font-size: calc(1rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.45;
+}
+
+.brave-victory-transition__body {
+    min-height: 0;
+    margin-top: 22px;
+    display: grid;
+    gap: 12px;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.brave-victory-transition__section {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, var(--brave-world-line) 68%, rgba(var(--brave-accent-rgb), 0.18));
+    border-radius: var(--brave-radius-card-tight);
+    background:
+        radial-gradient(circle at 0 0, rgba(var(--brave-accent-rgb), 0.1), transparent 48%),
+        rgba(255, 255, 255, 0.035);
+    text-align: left;
+}
+
+.brave-victory-transition__section-head,
+.brave-victory-transition__pair-label,
+.brave-victory-transition__list-item,
+.brave-victory-transition__entry {
+    display: flex;
+    align-items: center;
+}
+
+.brave-victory-transition__section-head {
+    gap: 8px;
+    color: var(--brave-text-bright);
+    font-family: var(--brave-ui-font-family);
+    font-size: calc(0.78rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.brave-victory-transition__section-icon,
+.brave-victory-transition__pair-icon,
+.brave-victory-transition__list-icon,
+.brave-victory-transition__entry-icon {
+    color: var(--brave-accent);
+}
+
+.brave-victory-transition__pairs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.brave-victory-transition__pair {
+    display: grid;
+    gap: 4px;
+    padding: 12px;
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.14);
+    border-radius: var(--brave-radius-card-tight);
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.brave-victory-transition__pair-label {
+    gap: 6px;
+    color: var(--brave-text-dim);
+    font-size: calc(0.72rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    text-transform: uppercase;
+}
+
+.brave-victory-transition__pair-value {
+    color: var(--brave-text-bright);
+    font-size: calc(1.55rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1;
+}
+
+.brave-victory-transition__list,
+.brave-victory-transition__entries,
+.brave-victory-transition__lines {
+    display: grid;
+    gap: 8px;
+}
+
+.brave-victory-transition__list-item,
+.brave-victory-transition__entry,
+.brave-victory-transition__line {
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--brave-radius-card-tight);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--brave-text-soft);
+}
+
+.brave-victory-transition__entry {
+    align-items: flex-start;
+}
+
+.brave-victory-transition__entry-copy {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.brave-victory-transition__entry-copy strong {
+    color: var(--brave-text-bright);
+    font-weight: 750;
+}
+
+.brave-victory-transition__entry-meta {
+    color: var(--brave-text-dim);
+    font-size: calc(0.68rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    text-transform: uppercase;
+}
+
+.brave-victory-transition__actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.brave-victory-transition__continue {
+    min-width: 13rem;
+    min-height: 44px;
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.52);
+    border-radius: var(--brave-radius-card-tight);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-accent-rgb), 0.34), rgba(var(--brave-accent-rgb), 0.16)),
+        rgba(255, 255, 255, 0.04);
+    color: var(--brave-text-bright);
+    font-family: var(--brave-ui-font-family);
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+}
+
+.brave-victory-transition__continue:hover,
+.brave-victory-transition__continue:focus-visible {
+    border-color: rgba(var(--brave-accent-rgb), 0.72);
+    background:
+        linear-gradient(180deg, rgba(var(--brave-accent-rgb), 0.42), rgba(var(--brave-accent-rgb), 0.2)),
+        rgba(255, 255, 255, 0.06);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 680px) {
+    .brave-victory-transition__card {
+        width: calc(100vw - 24px);
+        max-height: calc(100dvh - 24px);
+        padding: 22px 18px 20px;
+    }
+
+    .brave-victory-transition__title {
+        font-size: calc(2.2rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    }
+
+    .brave-victory-transition__pairs {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .brave-victory-transition__continue {
+        width: 100%;
+    }
 }
 
 body.brave-victory-transition-active .content,
@@ -16917,6 +17341,7 @@ body[data-brave-motion="reduced"] .brave-combat-ghost {
 
 .scene-pack-panel__items {
     display: grid;
+    align-content: start;
     gap: 8px;
     flex: 1 1 auto;
     min-height: 0;
@@ -18717,6 +19142,7 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
 }
 
 #brave-objectives-sheet.brave-objectives-sheet--tutorial {
+    z-index: 5040;
     --brave-obj-accent: #00f2ff;
     --brave-obj-accent-rgb: 0, 242, 255;
     --brave-obj-bg: linear-gradient(180deg, rgb(10, 20, 30), rgb(4, 8, 12));
@@ -18732,6 +19158,10 @@ body[data-brave-view="connection"] .brave-view--connection .brave-view__entry-ba
 
 #brave-objectives-sheet.brave-objectives-sheet--tutorial .brave-objectives-sheet__panel {
     border-width: 2px;
+}
+
+body[data-brave-scene="combat"] #brave-objectives-sheet.brave-objectives-sheet--tutorial .brave-objectives-sheet__panel {
+    pointer-events: none;
 }
 
 #brave-objectives-sheet.brave-objectives-sheet--tutorial[aria-hidden="false"] .brave-objectives-sheet__panel {
@@ -19235,48 +19665,13 @@ body.brave-character-load-transition-active .brave-pixel-particle {
 }
 
 #brave-intro-veil.brave-intro-veil--character-load::after {
-    content: "Entering the world";
-    position: absolute;
-    left: 50%;
-    top: calc(50% - 14px);
-    transform: translate(-50%, -50%);
-    font-family: var(--brave-ui-font-family);
-    font-size: 0.82rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--brave-text-dim);
-    opacity: 0;
-    transition: opacity 700ms ease 180ms;
-}
-
-#brave-intro-veil.brave-intro-veil--character-load.brave-intro-veil--active::after {
-    opacity: 1;
+    display: none !important;
+    content: none !important;
 }
 
 #brave-intro-veil.brave-intro-veil--character-load::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: calc(50% + 22px);
-    width: 118px;
-    height: 2px;
-    border-radius: 999px;
-    background:
-        linear-gradient(90deg, transparent, rgba(var(--brave-accent-rgb), 0.58), transparent),
-        rgba(var(--brave-accent-rgb), 0.12);
-    box-shadow:
-        0 0 12px rgba(var(--brave-accent-rgb), 0.1),
-        0 0 28px rgba(var(--brave-accent-rgb), 0.06);
-    opacity: 0;
-    transform: translateX(-50%);
-    transform-origin: center;
-    transition: opacity 700ms ease 220ms;
-}
-
-#brave-intro-veil.brave-intro-veil--character-load.brave-intro-veil--active::before {
-    opacity: 1;
-    animation: brave-world-entry-pulse 1.9s ease-in-out infinite;
+    display: none !important;
+    content: none !important;
 }
 
 @keyframes brave-world-entry-pulse {
@@ -19672,7 +20067,7 @@ body.brave-character-load-transition-active .brave-pixel-particle {
     inset: 0;
     z-index: 0;
     opacity: 0.4;
-    background: 
+    background:
         radial-gradient(circle at 30% 30%, rgba(91, 20, 25, 0.45), transparent 60%),
         radial-gradient(circle at 70% 70%, rgba(20, 25, 91, 0.35), transparent 60%);
     filter: blur(80px);
@@ -19805,4 +20200,349 @@ x;
     0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
     50% { opacity: 1; }
     100% { transform: translate(var(--p-x), var(--p-y)) rotate(var(--p-rotate)) scale(0); opacity: 0; }
+}
+
+@keyframes brave-button-shimmer {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.75); }
+    100% { filter: brightness(1); }
+}
+
+.brave-shimmer {
+    animation: brave-button-shimmer 1.5s ease-in-out infinite !important;
+}
+
+/* Overriding shimmer to be extremely visible */
+.brave-shimmer {
+    animation: brave-button-shimmer 1.2s ease-in-out infinite !important;
+    outline: 2px solid rgba(var(--brave-accent-rgb), 0.8) !important;
+    outline-offset: 2px !important;
+    z-index: 10 !important;
+}
+
+@keyframes brave-button-shimmer {
+    0% { filter: brightness(1); box-shadow: 0 0 0 rgba(var(--brave-accent-rgb), 0); }
+    50% { filter: brightness(2.2); box-shadow: 0 0 25px rgba(var(--brave-accent-rgb), 0.9); }
+    100% { filter: brightness(1); box-shadow: 0 0 0 rgba(var(--brave-accent-rgb), 0); }
+}
+
+/* ==========================================================================
+   Cozy Lantern Rest Hearth & Fire Flicker Atmosphere
+   ========================================================================== */
+.brave-room-atmosphere__layer--hearth_flicker {
+    opacity: 0.62;
+    background:
+        radial-gradient(circle at 50% 100%, rgba(253, 110, 32, 0.22) 0%, rgba(253, 60, 20, 0.08) 50%, transparent 80%),
+        radial-gradient(circle at 35% 90%, rgba(255, 170, 0, 0.16) 0%, transparent 60%);
+    animation: brave-room-hearth-flicker 4s infinite ease-in-out;
+}
+
+.brave-room-atmosphere__layer--cozy_shadows {
+    opacity: 0.88;
+    mix-blend-mode: multiply;
+    background: radial-gradient(ellipse at 50% 30%, transparent 20%, rgba(12, 6, 2, 0.55) 100%);
+    animation: brave-room-cozy-shadows 8s infinite alternate ease-in-out;
+}
+
+@keyframes brave-room-hearth-flicker {
+    0%, 100% {
+        opacity: 0.52;
+        filter: brightness(0.96) saturate(0.94);
+        transform: scale(1) translate3d(0, 0, 0);
+    }
+    14% {
+        opacity: 0.66;
+        filter: brightness(1.12) saturate(1.15);
+        transform: scale(1.02) translate3d(-1px, 2px, 0);
+    }
+    28% {
+        opacity: 0.48;
+        filter: brightness(0.88) saturate(0.85);
+        transform: scale(0.98) translate3d(1px, -1px, 0);
+    }
+    45% {
+        opacity: 0.62;
+        filter: brightness(1.05) saturate(1.08);
+        transform: scale(1.01) translate3d(0px, 1px, 0);
+    }
+    58% {
+        opacity: 0.54;
+        filter: brightness(0.94) saturate(0.92);
+        transform: scale(0.99) translate3d(-1px, -2px, 0);
+    }
+    72% {
+        opacity: 0.72;
+        filter: brightness(1.18) saturate(1.22);
+        transform: scale(1.03) translate3d(2px, 3px, 0);
+    }
+    85% {
+        opacity: 0.58;
+        filter: brightness(0.98) saturate(0.98);
+        transform: scale(1) translate3d(-2px, 0px, 0);
+    }
+}
+
+@keyframes brave-room-cozy-shadows {
+    0% {
+        transform: scale(1) translate3d(0, 0, 0);
+        opacity: 0.84;
+    }
+    100% {
+        transform: scale(1.05) translate3d(2px, -3px, 0);
+        opacity: 0.94;
+    }
+}
+
+/* ==========================================================================
+   Pulsing Glassmorphic Danger Level Warning Card
+   ========================================================================== */
+.brave-view--room .brave-view__section--danger-recommendation {
+    grid-column: 1 / -1;
+    margin-bottom: 4px;
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    background:
+        radial-gradient(circle at 0 0, rgba(239, 68, 68, 0.16), transparent 50%),
+        radial-gradient(circle at 100% 0, rgba(239, 68, 68, 0.08), transparent 40%),
+        linear-gradient(180deg, rgba(239, 68, 68, 0.06), transparent 22%),
+        linear-gradient(180deg, color-mix(in srgb, var(--brave-surface-soft-top) 86%, transparent), color-mix(in srgb, var(--brave-surface-soft-bottom) 90%, transparent));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.02),
+        0 8px 16px rgba(0, 0, 0, 0.16);
+    animation: brave-danger-pulse 3s infinite ease-in-out;
+}
+
+.brave-view--room .brave-view__section--danger-recommendation .brave-view__bullet {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-radius: 6px;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brave-view--room .brave-view__section--danger-recommendation .brave-view__list-text {
+    color: #f87171 !important;
+    font-size: calc(0.92rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    font-weight: 600;
+}
+
+@keyframes brave-danger-pulse {
+    0%, 100% {
+        border-color: rgba(239, 68, 68, 0.24);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.02),
+            0 8px 16px rgba(0, 0, 0, 0.16);
+    }
+    50% {
+        border-color: rgba(239, 68, 68, 0.52);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.02),
+            0 8px 24px rgba(239, 68, 68, 0.12),
+            0 12px 32px rgba(0, 0, 0, 0.24);
+    }
+}
+
+/* ==========================================================================
+   Premium "Entering the World" Loading Screen
+   ========================================================================== */
+#brave-intro-veil.brave-intro-veil--character-load {
+    background: radial-gradient(circle at center, #0b1c14 0%, #060c09 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.brave-intro-veil__bg-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, rgba(202, 138, 4, 0.03) 40%, transparent 70%);
+    animation: brave-glow-breath 8s ease-in-out infinite alternate;
+}
+
+@keyframes brave-glow-breath {
+    0% {
+        opacity: 0.6;
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1.08);
+    }
+}
+
+.brave-intro-veil__particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.brave-intro-veil__particle {
+    position: absolute;
+    background: radial-gradient(circle, rgba(202, 138, 4, 0.18) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.brave-intro-veil__particle--1 {
+    top: 20%;
+    left: 15%;
+    width: 250px;
+    height: 250px;
+    animation: brave-dust-pan 30s linear infinite alternate;
+}
+
+.brave-intro-veil__particle--2 {
+    bottom: 15%;
+    right: 10%;
+    width: 320px;
+    height: 320px;
+    animation: brave-dust-pan-reverse 35s linear infinite alternate;
+}
+
+.brave-intro-veil__particle--3 {
+    top: 50%;
+    left: 70%;
+    width: 180px;
+    height: 180px;
+    animation: brave-dust-pan-slow 40s linear infinite alternate;
+}
+
+@keyframes brave-dust-pan {
+    0% { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(80px, -50px, 0) scale(1.2); }
+}
+
+@keyframes brave-dust-pan-reverse {
+    0% { transform: translate3d(0, 0, 0) scale(1.1); }
+    100% { transform: translate3d(-70px, 60px, 0) scale(0.9); }
+}
+
+@keyframes brave-dust-pan-slow {
+    0% { transform: translate3d(0, 0, 0) scale(0.95); opacity: 0.4; }
+    100% { transform: translate3d(-40px, -80px, 0) scale(1.15); opacity: 0.8; }
+}
+
+.brave-intro-veil__card {
+    position: relative;
+    z-index: 10;
+    width: 90%;
+    max-width: 440px;
+    padding: 36px 28px;
+    border-radius: 16px;
+    border: 1px solid rgba(202, 138, 4, 0.15);
+    background: linear-gradient(135deg, rgba(15, 27, 22, 0.65), rgba(8, 14, 11, 0.8));
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.04),
+        0 12px 36px rgba(0, 0, 0, 0.48),
+        0 4px 12px rgba(16, 185, 129, 0.05);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1200ms cubic-bezier(0.16, 1, 0.3, 1), transform 1200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#brave-intro-veil.brave-intro-veil--active .brave-intro-veil__card {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.brave-intro-veil__spinner-container {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 24px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brave-intro-veil__spinner-rune {
+    position: absolute;
+    inset: 0;
+    border: 2px dashed rgba(202, 138, 4, 0.42);
+    border-radius: 50%;
+    animation: brave-rune-rotate 8s linear infinite;
+    box-shadow: 0 0 15px rgba(202, 138, 4, 0.06);
+}
+
+.brave-intro-veil__spinner-center {
+    font-size: 1.4rem;
+    color: #eab308;
+    text-shadow: 0 0 10px rgba(234, 179, 8, 0.58), 0 0 20px rgba(16, 185, 129, 0.3);
+    animation: brave-celestial-spin 3s ease-in-out infinite alternate;
+}
+
+@keyframes brave-rune-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes brave-celestial-spin {
+    0% { transform: rotate(0deg) scale(0.9); opacity: 0.8; }
+    100% { transform: rotate(180deg) scale(1.15); opacity: 1; }
+}
+
+.brave-intro-veil__title {
+    margin: 0 0 4px 0;
+    font-family: var(--brave-ui-font-family);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #f6f8f6;
+    letter-spacing: 0.03em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.brave-intro-veil__subtitle {
+    font-family: var(--brave-ui-font-family);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: #eab308;
+    opacity: 0.85;
+    margin-bottom: 20px;
+}
+
+.brave-intro-veil__divider {
+    height: 1px;
+    width: 60px;
+    background: linear-gradient(90deg, transparent, rgba(202, 138, 4, 0.38), transparent);
+    margin: 0 auto 20px auto;
+}
+
+.brave-intro-veil__flavor-text {
+    font-family: var(--brave-ui-font-family);
+    font-size: 0.88rem;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--brave-text-dim);
+    margin: 0;
+    min-height: 48px;
+}
+
+/* Accessibility: Prefer Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .brave-intro-veil__bg-glow,
+    .brave-intro-veil__particle,
+    .brave-intro-veil__spinner-rune,
+    .brave-intro-veil__spinner-center {
+        animation: none !important;
+        transform: none !important;
+        opacity: 0.8 !important;
+    }
+}
+
+body[data-brave-motion="reduced"] .brave-intro-veil__bg-glow,
+body[data-brave-motion="reduced"] .brave-intro-veil__particle,
+body[data-brave-motion="reduced"] .brave-intro-veil__spinner-rune,
+body[data-brave-motion="reduced"] .brave-intro-veil__spinner-center {
+    animation: none !important;
+    transform: none !important;
+    opacity: 0.8 !important;
 }

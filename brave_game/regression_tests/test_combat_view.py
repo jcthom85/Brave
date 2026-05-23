@@ -2,6 +2,7 @@ import os
 import sys
 import types
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -17,6 +18,12 @@ chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 sys.modules.setdefault("world.chargen", chargen_stub)
 
 from world.browser_views import build_combat_view
+from typeclasses.scripts import BraveEncounter
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_OUT_PATH = REPO_ROOT / "brave_game/web/static/webclient/js/plugins/default_out.js"
+WEBCLIENT_CSS_PATH = REPO_ROOT / "brave_game/web/static/webclient/css/brave_webclient.css"
 
 
 class DummyRoom:
@@ -139,6 +146,63 @@ def _picker_option(picker, label, *, meta=None):
 
 
 class CombatViewTests(unittest.TestCase):
+    def test_joining_combat_does_not_send_join_notice_popup(self):
+        room = DummyRoom()
+        room.db.brave_room_id = "brush_line"
+        messages = []
+        character = SimpleNamespace(
+            id=7,
+            key="Dad",
+            location=room,
+            db=SimpleNamespace(brave_resources={"hp": 30}),
+            ndb=SimpleNamespace(),
+            ensure_brave_character=lambda: None,
+            msg=lambda message: messages.append(message),
+        )
+        encounter = SimpleNamespace(
+            obj=room,
+            db=SimpleNamespace(
+                participants=[],
+                participant_states={},
+                threat={},
+                encounter_intro="",
+                encounter_title="Brush Line",
+            ),
+            get_active_player_participants=lambda: [],
+            get_registered_participants=lambda: [],
+            _companion_state_template=lambda: {},
+            _save_actor_atb_state=lambda state, character=None: None,
+            _default_atb_fill_rate=lambda character=None: 100,
+            _atb_tick_ms=lambda: 500,
+            _get_participant_contribution=lambda participant: {},
+            _spawn_ranger_companion=lambda participant, announce=True: None,
+            _refresh_browser_combat_views=lambda: None,
+        )
+
+        with patch("world.browser_panels.send_browser_notice_event") as send_browser_notice_event:
+            ok, error = BraveEncounter.add_participant(encounter, character)
+
+        self.assertTrue(ok)
+        self.assertIsNone(error)
+        self.assertEqual([character.id], encounter.db.participants)
+        self.assertIs(encounter, character.ndb.brave_encounter)
+        send_browser_notice_event.assert_not_called()
+
+    def test_victory_result_renders_as_modal_over_combat_view(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+        css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("var renderVictoryOverlaySection = function (section)", default_out_source)
+        self.assertIn("data-brave-victory-continue='1'", default_out_source)
+        self.assertIn("sendBrowserCommand(\"look\");", default_out_source)
+        self.assertIn("victoryReactive.scene = \"victory\";", default_out_source)
+        self.assertIn("currentViewData = victoryViewData || currentViewData || { variant: \"combat-result\" };", default_out_source)
+        self.assertIn("document.getElementById(\"brave-victory-transition\")", default_out_source)
+        self.assertNotIn("renderMainView(queuedViewData, { skipVictoryTransition: true });", default_out_source)
+        self.assertIn("#brave-victory-transition {\n    position: fixed;\n    inset: 0;\n    z-index: 5050;", css_source)
+        self.assertIn("linear-gradient(180deg, rgb(4, 7, 10), rgb(2, 4, 7));", css_source)
+        self.assertIn(".brave-victory-transition__continue", css_source)
+
     def test_targeted_ally_ability_uses_picker_targets(self):
         room = DummyRoom()
         healer = DummyCharacter(
@@ -196,7 +260,8 @@ class CombatViewTests(unittest.TestCase):
         self.assertEqual([], view.get("chips", []))
         self.assertEqual([], view.get("welcome_pages", []))
         self.assertEqual("2 Allies • 1 Foe", view.get("subtitle", ""))
-        self.assertEqual(["Abilities", "Items", "Flee"], [action.get("label") for action in view.get("actions", [])])
+        self.assertEqual(["Abilities", "Items", "Guard", "Flee"], [action.get("label") for action in view.get("actions", [])])
+        self.assertEqual("guard", _action(view, "Guard").get("command"))
         self.assertIsNot(_action(view, "Flee").get("icon_only"), True)
 
         party = _section(view, "Heroes")

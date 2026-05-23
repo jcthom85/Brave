@@ -1,8 +1,8 @@
 {
   "_meta": {
     "last_action": "publish",
-    "last_modified_at": "2026-05-20T00:08:40.881108+00:00",
-    "last_modified_by": "jctest",
+    "last_modified_at": "2026-05-21T21:24:47.384200+00:00",
+    "last_modified_by": "codex-cli",
     "last_target": "dialogue",
     "stage": "live"
   },
@@ -46,6 +46,7 @@
     "town_notice_board": "Town notices crowd the board in practical layers: road crews needed east of the gate, chapel candles to be saved for dusk, and a fresh line from Mayor Elric asking everyone to report bad lanterns before they become worse roads.",
     "trophy_vitrine": "Glass cases hold the proof of Act 1 wins: Miretooth's Fen Jaw, the Blackreed Battle Standard, the Pot-King's Battered Lid, the Blackwater Beacon Core, and the white-black Hollow Lantern Prism. The newest label is still clean enough to catch the lanternlight: SOUTH LINE DARK, FIRST CHAPTER CLOSED.",
     "tutorial_damaged_cart": "The cart axle is split clean through, but the chalk marks beside it are instructional: brace the load, check the wheel pin, then call for help before a small mistake becomes a road problem.",
+    "tutorial_respawn_note": "The note is written in a hurried, practical hand: 'RECRUITS - These pens are for practice. If you find a pen empty, wait a moment. The vermin here are restless and we keep the bins stocked. They will be back in the straw before you can finish a proper breath.'",
     "tutorial_supply_board": "Quartermaster notes list loaner gear, bandage counts, and the rule written twice in darker chalk: take what keeps you alive, return what keeps the next person alive too.",
     "watchtower_warning_post": "The old carving reads: BORDER WATCH POST THREE. KEEP FIRE LOW. SIGNAL SOUTH IF THE RIDGE MOVES. Someone newer has cut a reply beneath it: TOO LATE FOR THAT.",
     "weir_keepers_plaque": "The greened plaque reads: KEEP SOUTH LIGHT TRIMMED. HOLD THE LOCK LINE. MAINTAIN NIGHT SIGNAL FOR BRAMBLEFORD APPROACH. The words are ordinary civic orders. The wet brass around them is not.",
@@ -496,7 +497,7 @@
     ],
     "ringhand_brask": [
       {
-        "text": "\"Rail marks the ring, timing teaches the fight, and a good lesson lands before my bark has to. Step in, keep your feet under you, and let the first mistake be useful instead of decorative.\""
+        "text": "\"Pens are rattling because the road bell scared the rats mean. Step in when you're ready. Watch the field, use what your class taught you, patch the hurt before it becomes pride, and finish clean. I don't need pretty. I need you alive.\""
       }
     ],
     "sergeant_tamsin_vale": [

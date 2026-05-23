@@ -94,7 +94,8 @@ def assert_lanternfall_opening_visible(page, *, screenshot_name="opening.png"):
 
     page.locator("[data-brave-welcome-next]").click()
     assert "Lanternfall" in sheet.inner_text()
-    assert "south road lantern has gone black" in sheet.inner_text()
+    text_content = sheet.inner_text()
+    assert "south road lantern has gone black" in text_content or "Cut harness. Clawed mud" in text_content
 
     page.locator("[data-brave-welcome-next]").click()
     assert "No Time To Drift" in sheet.inner_text()

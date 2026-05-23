@@ -338,7 +338,7 @@ class CmdBraveDelete(COMMAND_DEFAULT_CLASS):
 
         prompt = (
             f"|rThis will permanently destroy '{character.key}'. This cannot be undone.|n "
-            "Type |wyes|n to confirm."
+            "Enter |wyes|n to confirm."
         )
         get_input(self.account, prompt, _callback, session=self.session)
 

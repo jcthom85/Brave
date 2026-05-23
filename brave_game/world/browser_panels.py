@@ -14,7 +14,7 @@ from world.forging import get_forge_entries
 from world.item_rarity import build_item_rarity_display
 from world.navigation import format_route_hint, visible_exits
 from world.party import get_follow_target, get_party_leader, get_party_members
-from world.questing import get_active_quests, get_completed_quests, get_tracked_quest
+from world.questing import get_active_quests, get_completed_quests, get_tracked_quest, get_visible_objective_states
 from world.resonance import get_resource_label, get_resonance_label, get_stat_label
 from world.tutorial import get_tutorial_objective_entries
 
@@ -1074,7 +1074,7 @@ def build_quests_panel(character):
         tracked_state = quest_log.get(tracked_key, {})
         remaining = [
             objective
-            for objective in tracked_state.get("objectives", [])
+            for objective in get_visible_objective_states(tracked_key, tracked_state)
             if not objective.get("completed")
         ]
         tracked_lines = [tracked_definition["title"]]

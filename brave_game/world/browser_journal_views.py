@@ -17,7 +17,7 @@ from world.browser_ui import (
     _reactive_from_character,
     _section,
 )
-from world.questing import get_tracked_quest
+from world.questing import get_tracked_quest, get_visible_objective_states
 from world.tutorial import (
     TUTORIAL_STEPS,
     ensure_tutorial_state,
@@ -32,7 +32,7 @@ def _build_tutorial_entry(character):
     step_key = state.get("step") or "first_steps"
     step = TUTORIAL_STEPS[step_key]
     tutorial_objectives = get_tutorial_objective_entries(character) or {}
-    lines = [step["summary"]]
+    lines = [tutorial_objectives.get("summary") or step["summary"]]
     lines.extend(
         _line(
             objective.get("text", "Objective"),
@@ -60,7 +60,7 @@ def _get_expanded_completed_quest(character):
 def _build_journal_quest_picker(character, quest_key, *, tracked_key=None, nearby_npcs=None):
     state = (character.db.brave_quests or {}).get(quest_key, {})
     definition = QUESTS[quest_key]
-    all_objectives = list(state.get("objectives", []))
+    all_objectives = get_visible_objective_states(quest_key, state)
     completed = state.get("status") == "completed"
     options = []
 
@@ -91,7 +91,7 @@ def _build_journal_quest_entry(character, quest_key, *, tracked_key=None, nearby
     state = (character.db.brave_quests or {}).get(quest_key, {})
     definition = QUESTS[quest_key]
     completed = state.get("status") == "completed"
-    all_objectives = list(state.get("objectives", []))
+    all_objectives = get_visible_objective_states(quest_key, state)
     remaining_objectives = [
         objective for objective in all_objectives if not objective.get("completed")
     ]
