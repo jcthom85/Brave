@@ -5066,6 +5066,18 @@ let defaultout_plugin = (function () {
         rail.style.bottom = Math.max(0, Math.round(hostRect.bottom - rowBottom)) + "px";
     };
 
+    var scheduleSceneRailPosition = function () {
+        if (window.requestAnimationFrame) {
+            window.requestAnimationFrame(function () {
+                positionSceneRail();
+                window.requestAnimationFrame(positionSceneRail);
+            });
+        } else {
+            positionSceneRail();
+        }
+        window.setTimeout(positionSceneRail, 120);
+    };
+
     var renderDesktopToolbar = function () {
         var toolbar = document.getElementById("toolbar");
         if (!toolbar) {
@@ -5217,11 +5229,7 @@ let defaultout_plugin = (function () {
         rail.classList.toggle("scene-rail--card-hidden", !hasCard);
         rail.classList.toggle("scene-rail--detail-hidden", !hasCard && !hasPack && !hasVicinity);
         rail.classList.toggle("scene-rail--empty", !hasCard && !hasPack && !hasVicinity);
-        if (window.requestAnimationFrame) {
-            window.requestAnimationFrame(positionSceneRail);
-        } else {
-            positionSceneRail();
-        }
+        scheduleSceneRailPosition();
     };
 
     var escapeHtml = function (value) {
@@ -8681,7 +8689,10 @@ let defaultout_plugin = (function () {
             window.requestAnimationFrame(apply);
         }
         window.setTimeout(apply, 0);
-        window.setTimeout(apply, 80);
+        window.setTimeout(function () {
+            apply();
+            scheduleSceneRailPosition();
+        }, 80);
     };
 
     var captureMainScrollPositions = function () {
@@ -10458,6 +10469,9 @@ let defaultout_plugin = (function () {
                 applyStickyMarkup();
             }
             focusViewAutofocusField();
+            if (isRoomLikeView(viewData)) {
+                scheduleSceneRailPosition();
+            }
             scheduleQuestOverlayQueueCheck(80);
             return;
         }
@@ -10539,6 +10553,9 @@ let defaultout_plugin = (function () {
             } else {
                 focusViewAutofocusField();
                 resetAllScrollPositions();
+            }
+            if (isRoomLikeView(viewData)) {
+                scheduleSceneRailPosition();
             }
             if (!options.skipCombatTransition && leavingCombatResult) {
                 startCombatReturnOverlay(viewData);
