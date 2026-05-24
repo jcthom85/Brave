@@ -105,6 +105,8 @@ class CombatFxTests(unittest.TestCase):
 
         BraveEncounter._damage_enemy(encounter, attacker, enemy, 10)
 
+        self.assertEqual("p:17", events[0].get("source_ref"))
+        self.assertTrue(events[0].get("lunge"))
         self.assertTrue(events[0].get("defeat"))
         self.assertEqual("e:e2", events[0].get("target_ref"))
 
@@ -165,6 +167,9 @@ class CombatFxTests(unittest.TestCase):
 
         self.assertIn('event.kind === "action"', default_out_source)
         self.assertIn("animateCombatSourceFxFromSnapshot", default_out_source)
+        self.assertIn("animateCombatLunge(attackerNode, targetNode);", default_out_source)
+        self.assertNotIn("animateCombatLungeFromSnapshots", default_out_source)
+        self.assertIn("event && event.defeat && !event.lunge && isCombatUiActive()", default_out_source)
         self.assertIn('mapped.kind === "defend" ? "guard"', default_out_source)
         self.assertIn('mapped.kind === "miss" ? "miss"', default_out_source)
         self.assertIn("brave-combat-floater--critical", css_source)

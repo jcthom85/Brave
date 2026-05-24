@@ -34,6 +34,20 @@ BRAVE_TEMPLATE_DIR = BRAVE_GAME_DIR / "web" / "templates"
 if BRAVE_TEMPLATE_DIR.exists():
     TEMPLATES[0]["DIRS"] = [str(BRAVE_TEMPLATE_DIR), *TEMPLATES[0].get("DIRS", [])]
 
+# Dynamic static asset versioning for cache-busting on server restart
+import time
+BRAVE_REAL_STATIC_VERSION = f"prod-{int(time.time())}"
+
+def brave_static_version_processor(request):
+    return {
+        "brave_real_static_v": BRAVE_REAL_STATIC_VERSION,
+        "brave_static_v": BRAVE_REAL_STATIC_VERSION,
+    }
+
+TEMPLATES[0]["OPTIONS"].setdefault("context_processors", []).append(
+    "server.conf.settings.brave_static_version_processor"
+)
+
 ######################################################################
 # Evennia base server config
 ######################################################################

@@ -6631,35 +6631,6 @@ let defaultout_plugin = (function () {
         }, 240);
     };
 
-    var animateCombatLungeFromSnapshots = function (attackerSnapshot, targetSnapshot) {
-        if (!attackerSnapshot || !targetSnapshot || !attackerSnapshot.rect || !targetSnapshot.rect) {
-            return;
-        }
-        var created = createCombatGhostElement(attackerSnapshot);
-        if (!created || !created.ghost) {
-            return;
-        }
-        var ghost = created.ghost;
-        var host = created.host;
-        var attackerRect = attackerSnapshot.rect;
-        var targetRect = targetSnapshot.rect;
-        var dx = (targetRect.left + (targetRect.width / 2)) - (attackerRect.left + (attackerRect.width / 2));
-        var dy = (targetRect.top + (targetRect.height / 2)) - (attackerRect.top + (attackerRect.height / 2));
-        var magnitude = Math.sqrt((dx * dx) + (dy * dy));
-        if (!magnitude) {
-            if (host.parentNode) {
-                host.parentNode.removeChild(host);
-            }
-            return;
-        }
-        var lungeDistance = Math.min(18, Math.max(8, magnitude * 0.08));
-        ghost.style.setProperty("--brave-combat-lunge-x", ((dx / magnitude) * lungeDistance).toFixed(2) + "px");
-        ghost.style.setProperty("--brave-combat-lunge-y", ((dy / magnitude) * lungeDistance).toFixed(2) + "px");
-        ghost.style.willChange = "transform";
-        ghost.style.animation = "brave-combat-card-lunge 300ms cubic-bezier(0.2, 0.86, 0.24, 1) 1";
-        removeCombatOverlayNodeLater(host, 360);
-    };
-
     var parseMarkupRoot = function (markup) {
         var shell = document.createElement("div");
         shell.innerHTML = String(markup || "");
@@ -7167,7 +7138,7 @@ let defaultout_plugin = (function () {
             return;
         }
         var event = normalizeCombatEvent(payload);
-        if (event && event.defeat && isCombatUiActive()) {
+        if (event && event.defeat && !event.lunge && isCombatUiActive()) {
             var targetNode = findCombatEntryForEvent(event, "target");
             var targetSnapshot = targetNode ? captureCombatEntrySnapshot(targetNode) : null;
             if (targetNode) {
@@ -8288,7 +8259,6 @@ let defaultout_plugin = (function () {
                     + "<span>Encounter Clear</span>"
                 + "</div>"
                 + "<div class='brave-victory-transition__title'>" + escapeHtml(title) + "</div>"
-                + "<div class='brave-victory-transition__subtitle'>The fight is over. Take the win, then return to the field.</div>"
                 + "<div class='brave-victory-transition__body'>"
                     + sections.map(renderVictoryOverlaySection).join("")
                 + "</div>"

@@ -24,11 +24,11 @@ class NarrativeTypographyTests(unittest.TestCase):
         picker_body = _css_block(css, ".brave-picker-sheet__bodyline")
         self.assertIn("font-family: var(--brave-narrative-font-family);", picker_body)
         self.assertIn("letter-spacing: var(--brave-narrative-letter-spacing);", picker_body)
-        self.assertIn("font-size: calc(1.14rem * var(--brave-text-scale) * var(--brave-font-size-scale));", picker_body)
+        self.assertIn("font-size: calc(1.08rem * var(--brave-text-scale) * var(--brave-font-size-scale));", picker_body)
         self.assertIn("line-height: 1.58;", picker_body)
 
         room_description = _css_block(css, ".brave-view--room .brave-view__subtitle")
-        self.assertIn("font-size: calc(1.16rem * var(--brave-text-scale) * var(--brave-font-size-scale));", room_description)
+        self.assertIn("font-size: calc(1.10rem * var(--brave-text-scale) * var(--brave-font-size-scale));", room_description)
         self.assertIn("line-height: 1.62;", room_description)
 
         mobile_intro = _css_block(css, ".brave-mobile-sheet__empty--intro")

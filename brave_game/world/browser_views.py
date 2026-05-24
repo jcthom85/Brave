@@ -378,6 +378,7 @@ def build_chargen_view(account, state, *, error=None):
                     background_icon=get_race_icon(race_key, race_data),
                     command=race_key,
                     hide_icon=True,
+                    selected=(state.get("race") == race_key),
                     chips=[
                         *([_chip("Current", "check_circle", "good")] if state.get("race") == race_key else []),
                         _chip(feel_label, feel_icon, "muted"),
@@ -404,6 +405,7 @@ def build_chargen_view(account, state, *, error=None):
                     background_icon=get_class_icon(class_key, class_data),
                     command=class_key,
                     hide_icon=True,
+                    selected=(state.get("class") == class_key),
                     chips=[
                         *([_chip("Current", "check_circle", "good")] if state.get("class") == class_key else []),
                         _chip(upkeep_label, "tune", "muted"),

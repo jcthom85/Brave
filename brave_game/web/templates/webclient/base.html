@@ -93,7 +93,8 @@
     <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-dark-theme.css" />
     <link type="text/css" rel="stylesheet" href={% static "webclient/css/goldenlayout.css" %} />
 
-    {% with brave_static_v="20260505movieview20" %}
+    {# brave_static_v="20260505movieview20" #}
+    {% with brave_static_v=brave_real_static_v %}
     {% block guilib_import %}
         <script>
         window.BRAVE_AUDIO_MANIFEST_URL = "{% static 'webclient/audio/manifest.json' %}?v={{ brave_static_v }}";
