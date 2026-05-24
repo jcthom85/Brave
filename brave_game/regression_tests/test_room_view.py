@@ -744,6 +744,16 @@ class RoomViewTests(unittest.TestCase):
         self.assertFalse(discover_room(character, room))
         self.assertEqual(["goblin_warrens_entry"], character.db.brave_discovered_rooms)
 
+    def test_discover_room_falls_back_to_id_if_brave_room_id_missing(self):
+        character = DummyCharacter()
+        room = DummyMappedRoom(None)
+        delattr(room.db, "brave_room_id")
+        room.id = 999
+
+        self.assertTrue(discover_room(character, room))
+        self.assertFalse(discover_room(character, room))
+        self.assertEqual(["999"], character.db.brave_discovered_rooms)
+
     def test_discover_region_records_region_once(self):
         character = DummyCharacter()
         room = DummyMappedRoom("goblin_warrens_entry")

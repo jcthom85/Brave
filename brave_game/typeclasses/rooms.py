@@ -161,8 +161,12 @@ class Room(ObjectParent, DefaultRoom):
                 looker,
                 brave_view=room_view,
             )
-            if hasattr(getattr(looker, "ndb", None), "brave_first_region_discovery"):
-                looker.ndb.brave_first_region_discovery = False
+            ndb = getattr(looker, "ndb", None)
+            if ndb:
+                if hasattr(ndb, "brave_first_region_discovery"):
+                    ndb.brave_first_region_discovery = False
+                if hasattr(ndb, "brave_first_room_discovery"):
+                    ndb.brave_first_room_discovery = False
 
         if _only_web_sessions(looker):
             return ""

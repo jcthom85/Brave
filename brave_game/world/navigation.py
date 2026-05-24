@@ -408,7 +408,7 @@ def discover_room(character, room):
     if not character or not room:
         return False
 
-    room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+    room_id = getattr(getattr(room, "db", None), "brave_room_id", None) or getattr(room, "id", None)
     if not room_id:
         return False
 
