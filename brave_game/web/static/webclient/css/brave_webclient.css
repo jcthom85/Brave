@@ -4448,6 +4448,7 @@ body.brave-mainview-active .scene-rail {
     flex-direction: column;
     gap: 18px;
     max-width: 980px;
+    position: relative;
 }
 
 .brave-view__titlebar {
@@ -4474,8 +4475,10 @@ body.brave-mainview-active .scene-rail {
 }
 
 .brave-view__menu-button {
-    margin-left: auto;
-    flex: 0 0 auto;
+    position: absolute;
+    top: 31px;
+    right: 33px;
+    z-index: 99;
     min-height: 36px;
     padding: 7px 12px;
     border: 1px solid color-mix(in srgb, var(--brave-world-line) 76%, rgba(var(--brave-accent-rgb), 0.18));

@@ -10751,7 +10751,6 @@ let defaultout_plugin = (function () {
                             + (viewData.eyebrow ? "<span>" + escapeHtml(viewData.eyebrow) + "</span>" : "")
                             + "</div>"
                         : "")
-                    + renderDesktopMenuAction()
                     + "</div>"
                 : "")
             + renderRoomMicromap()
@@ -10770,6 +10769,7 @@ let defaultout_plugin = (function () {
 
         var viewMarkup =
             "<div class='brave-view" + variantClass + toneClass + "'>"
+            + renderDesktopMenuAction()
             + "<div class='brave-view__hero'>"
             + (viewData.wordmark ? "<div class='brave-view__wordmark' aria-label='" + escapeHtml(viewData.wordmark) + "'><span class='brave-view__wordmark-text'>" + escapeHtml(viewData.wordmark) + "</span></div>" : "")
             + (isRoomLikeView(viewData)
