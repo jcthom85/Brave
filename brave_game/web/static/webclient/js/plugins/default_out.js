@@ -53,6 +53,32 @@ let defaultout_plugin = (function () {
     var currentWelcomePages = [];
     var lastTutorialContentHash = "";
     var lastTutorialShimmers = [];
+    var checkShimmerInArray = function (command, shimmersArray) {
+        if (!command || !shimmersArray || !shimmersArray.length) {
+            return false;
+        }
+        var normalize = function (cmd) {
+            if (!cmd) return "";
+            var s = String(cmd).trim().toLowerCase().replace(/_/g, " ");
+            if (s === "north" || s === "n") return "n";
+            if (s === "south" || s === "s") return "s";
+            if (s === "east" || s === "e") return "e";
+            if (s === "west" || s === "w") return "w";
+            if (s === "up" || s === "u") return "u";
+            if (s === "down" || s === "d") return "d";
+            return s;
+        };
+        var normalizedCmd = normalize(command);
+        for (var i = 0; i < shimmersArray.length; i++) {
+            if (normalize(shimmersArray[i]) === normalizedCmd) {
+                return true;
+            }
+        }
+        return false;
+    };
+    var checkCommandShimmer = function (command) {
+        return checkShimmerInArray(command, lastTutorialShimmers);
+    };
     var currentWelcomePageIndex = 0;
     var currentRoomVoiceBubbleTimers = {};
     var currentRoomVoiceBubbleRemovalTimers = {};
@@ -1184,8 +1210,10 @@ let defaultout_plugin = (function () {
 
     var canRenderSceneRailNow = function () {
         return !!(
-            currentViewData
-            && isRoomLikeView(currentViewData)
+            (
+                (currentViewData && isRoomLikeView(currentViewData))
+                || (currentMenuViewOverlayData && currentRoomViewData && isRoomLikeView(currentRoomViewData))
+            )
             && document.body
             && document.body.getAttribute("data-brave-scene") === "explore"
         );
@@ -1439,6 +1467,9 @@ let defaultout_plugin = (function () {
         }
         if (document.body) {
             document.body.classList.remove("brave-arcade-overlay-active");
+        }
+        if (typeof renderDesktopSceneMenu === "function") {
+            renderDesktopSceneMenu();
         }
     };
 
@@ -2819,7 +2850,7 @@ let defaultout_plugin = (function () {
         var shimmerClass = "";
         if (key === "menu") {
             var hasShimmeringOption = (buildDesktopMenuPicker().options || []).some(function (opt) {
-                return opt.command && lastTutorialShimmers.indexOf(opt.command) !== -1;
+                return opt.command && checkCommandShimmer(opt.command);
             });
             if (hasShimmeringOption) {
                 shimmerClass = " brave-shimmer";
@@ -2957,7 +2988,7 @@ let defaultout_plugin = (function () {
     };
 
     var buildMobilePrimaryActionMarkup = function (label, command) {
-        var shimmerClass = lastTutorialShimmers.indexOf(command) !== -1 ? " brave-shimmer" : "";
+        var shimmerClass = checkCommandShimmer(command) ? " brave-shimmer" : "";
         return (
             "<button type='button' class='brave-mobile-sheet__action brave-click" + shimmerClass + "' data-brave-command='" + escapeHtml(command) + "'>"
             + escapeHtml(label)
@@ -3283,6 +3314,9 @@ let defaultout_plugin = (function () {
             document.body.classList.remove("brave-picker-active");
         }
         scheduleQuestOverlayQueueCheck();
+        if (typeof renderDesktopSceneMenu === "function") {
+            renderDesktopSceneMenu();
+        }
     };
 
     var clearBrowserNotice = function () {
@@ -3299,11 +3333,19 @@ let defaultout_plugin = (function () {
             document.body.classList.remove("brave-notice-active");
             document.body.classList.remove("brave-quest-notice-active");
         }
+        if (typeof renderDesktopSceneMenu === "function") {
+            renderDesktopSceneMenu();
+        }
     };
 
     var handleEscapeKey = function () {
         if (currentPickerData) {
             clearPickerSheet();
+            return true;
+        }
+        var desktopSceneMenu = document.getElementById("brave-desktop-scene-menu");
+        if (desktopSceneMenu && desktopSceneMenu.classList.contains("brave-desktop-scene-menu--open")) {
+            closeDesktopSceneMenuPanel();
             return true;
         }
         if (isMobileCommandTrayOpen()) {
@@ -3954,6 +3996,9 @@ let defaultout_plugin = (function () {
         if (typeof restoreMainScrollPositions === "function") {
             restoreMainScrollPositions(scrollSnapshots);
         }
+        if (typeof renderDesktopSceneMenu === "function") {
+            renderDesktopSceneMenu();
+        }
     };
 
     var setMobileObjectivesExpanded = function (expanded) {
@@ -4537,7 +4582,7 @@ let defaultout_plugin = (function () {
                     ? "<div class='brave-picker-sheet__options'>"
                         + pickerOptions.map(function (option) {
                             var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
-                            var shimmerClass = (option && option.command && lastTutorialShimmers.indexOf(option.command) !== -1) ? " brave-shimmer" : "";
+                            var shimmerClass = (option && option.command && checkCommandShimmer(option.command)) ? " brave-shimmer" : "";
                             var menuViewAttr = (option && isMenuViewCommand(option.command)) ? " data-brave-menu-view-command='1'" : "";
                             var optionRarityClass = option && option.rarity_tone ? " brave-rarity-name brave-rarity-name--" + escapeHtml(option.rarity_tone) : "";
                             return (
@@ -4561,6 +4606,7 @@ let defaultout_plugin = (function () {
         }
         host.setAttribute("aria-hidden", "false");
         document.body.classList.add("brave-picker-active");
+        renderDesktopSceneMenu();
         syncPickerQuantityControl(host);
     };
 
@@ -4782,6 +4828,7 @@ let defaultout_plugin = (function () {
             + "</section>";
         host.setAttribute("aria-hidden", "false");
         document.body.classList.add("brave-picker-active");
+        renderDesktopSceneMenu();
         return true;
     };
 
@@ -5080,7 +5127,7 @@ let defaultout_plugin = (function () {
             "<div class='brave-picker-sheet__options brave-mobile-sheet__menu-options'>"
             + (options || []).map(function (option) {
                 var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
-                var shimmerClass = (option && option.command && lastTutorialShimmers.indexOf(option.command) !== -1) ? " brave-shimmer" : "";
+                var shimmerClass = (option && option.command && checkCommandShimmer(option.command)) ? " brave-shimmer" : "";
                 var menuViewAttr = (option && isMenuViewCommand(option.command)) ? " data-brave-menu-view-command='1'" : "";
                 return (
                     "<button type='button' class='brave-picker-sheet__option brave-click" + toneClass + shimmerClass + "'"
@@ -5103,7 +5150,7 @@ let defaultout_plugin = (function () {
 
     var refreshTutorialShimmerControls = function () {
         var hasShimmeringMenuOption = (buildDesktopMenuPicker().options || []).some(function (opt) {
-            return opt.command && lastTutorialShimmers.indexOf(opt.command) !== -1;
+            return opt.command && checkCommandShimmer(opt.command);
         });
         Array.prototype.forEach.call(document.querySelectorAll(".brave-view__menu-button"), function (button) {
             button.classList.toggle("brave-shimmer", hasShimmeringMenuOption);
@@ -5113,6 +5160,96 @@ let defaultout_plugin = (function () {
         });
         if (currentPickerData && currentPickerData.picker_kind === "menu") {
             renderPickerSheet();
+        }
+
+        // Dynamically toggle shimmers on all command-bearing interactive controls
+        Array.prototype.forEach.call(document.querySelectorAll("[data-brave-command]"), function (element) {
+            if (element.closest("#scene-card, #scene-pack-panel, #scene-vicinity-panel")) {
+                element.classList.remove("brave-shimmer");
+                return;
+            }
+            var command = element.getAttribute("data-brave-command");
+            var shouldShimmer = checkCommandShimmer(command);
+            element.classList.toggle("brave-shimmer", shouldShimmer);
+        });
+
+        // Also handle the Close / Back action specifically if it has a Close label but different/no command attribute
+        Array.prototype.forEach.call(document.querySelectorAll(".brave-view__back"), function (element) {
+            var label = element.textContent || element.innerText || "";
+            var command = element.getAttribute("data-brave-command") || "";
+            var shouldShimmer = checkCommandShimmer(command) || (label.trim().toLowerCase() === "close" && checkShimmerInArray("close", lastTutorialShimmers));
+            element.classList.toggle("brave-shimmer", shouldShimmer);
+        });
+    };
+
+    var buildDesktopMenuButtonMarkup = function () {
+        var menuPicker = buildDesktopMenuPicker();
+        var hasShimmeringOption = (menuPicker.options || []).some(function (opt) {
+            return opt.command && checkCommandShimmer(opt.command);
+        });
+        var shimmerClass = hasShimmeringOption ? " brave-shimmer" : "";
+
+        return (
+            "<button type='button' class='brave-view__menu-button brave-click" + shimmerClass + "'"
+            + " data-brave-desktop-scene-menu-toggle='1'"
+            + " data-brave-picker='" + escapeHtml(JSON.stringify(menuPicker)) + "'"
+            + " aria-label='Open menu'"
+            + " aria-expanded='false'"
+            + " title='menu'>"
+            + "<span>MENU</span>"
+            + "</button>"
+        );
+    };
+
+    var syncDesktopMenuButton = function (button) {
+        if (!button) {
+            return;
+        }
+        var menuPicker = buildDesktopMenuPicker();
+        var hasShimmeringOption = (menuPicker.options || []).some(function (opt) {
+            return opt.command && checkCommandShimmer(opt.command);
+        });
+        button.setAttribute("data-brave-picker", JSON.stringify(menuPicker));
+        button.classList.toggle("brave-shimmer", hasShimmeringOption);
+    };
+
+    var renderDesktopSceneMenuOptionsMarkup = function (options) {
+        return (
+            "<div class='brave-desktop-scene-menu__panel' role='menu' aria-label='Menu'>"
+            + (options || []).map(function (option) {
+                var toneClass = option && option.tone ? " brave-desktop-scene-menu__option--" + escapeHtml(option.tone) : "";
+                var shimmerClass = (option && option.command && checkCommandShimmer(option.command)) ? " brave-shimmer" : "";
+                var menuViewAttr = (option && isMenuViewCommand(option.command)) ? " data-brave-menu-view-command='1'" : "";
+                return (
+                    "<button type='button' class='brave-desktop-scene-menu__option brave-click" + toneClass + shimmerClass + "'"
+                    + commandAttrs(option, false)
+                    + menuViewAttr
+                    + " role='menuitem'>"
+                    + "<span class='brave-desktop-scene-menu__option-icon'>"
+                    + icon(option && option.icon ? option.icon : "menu")
+                    + "</span>"
+                    + "<span class='brave-desktop-scene-menu__option-label'>" + escapeHtml(option && option.label ? option.label : "") + "</span>"
+                    + "</button>"
+                );
+            }).join("")
+            + "</div>"
+        );
+    };
+
+    var closeDesktopSceneMenuPanel = function () {
+        var host = document.getElementById("brave-desktop-scene-menu");
+        if (!host) {
+            return;
+        }
+        host.classList.remove("brave-desktop-scene-menu--open");
+        host.removeAttribute("data-brave-desktop-scene-menu-open");
+        var button = host.querySelector(".brave-view__menu-button");
+        if (button) {
+            button.setAttribute("aria-expanded", "false");
+        }
+        var panel = host.querySelector(".brave-desktop-scene-menu__panel");
+        if (panel && panel.parentNode) {
+            panel.parentNode.removeChild(panel);
         }
     };
 
@@ -5212,6 +5349,7 @@ let defaultout_plugin = (function () {
         } else {
             menuViewOverlaySceneRailSnapshot = null;
         }
+        renderDesktopSceneMenu();
     };
 
     var isMenuViewOverlayCloseCommandTarget = function (target) {
@@ -5251,6 +5389,7 @@ let defaultout_plugin = (function () {
         if (document.body) {
             document.body.classList.add("brave-menu-view-overlay-active");
         }
+        renderDesktopSceneMenu();
         root.innerHTML =
             "<div class='brave-menu-view-overlay__backdrop' data-brave-menu-view-close='1'></div>"
             + "<section class='brave-menu-view-overlay__panel' role='dialog' aria-modal='true' tabindex='0'>"
@@ -5292,6 +5431,164 @@ let defaultout_plugin = (function () {
         }
     };
 
+    var clearDesktopSceneMenu = function () {
+        var host = document.getElementById("brave-desktop-scene-menu");
+        if (!host) {
+            return;
+        }
+        closeDesktopSceneMenuPanel();
+        host.setAttribute("aria-hidden", "true");
+    };
+
+    var shouldRenderDesktopSceneMenu = function () {
+        return !!(
+            !isMobileViewport()
+            && currentViewData
+            && isRoomLikeView(currentViewData)
+            && document.body
+            && document.body.getAttribute("data-brave-scene") === "explore"
+            && !document.body.classList.contains("brave-menu-view-overlay-active")
+            && !document.body.classList.contains("brave-arcade-overlay-active")
+            && !document.body.classList.contains("brave-notice-active")
+            && !document.body.classList.contains("brave-objectives-welcome-active")
+            && !document.body.classList.contains("brave-picker-active")
+            && !document.body.classList.contains("brave-activity-active")
+            && !document.body.classList.contains("brave-movie-active")
+            && !document.body.classList.contains("brave-fishing-active")
+            && !document.body.classList.contains("brave-region-transition-active")
+            && !document.body.classList.contains("brave-victory-transition-active")
+            && !document.body.classList.contains("brave-mobile-sheet-active")
+        );
+    };
+
+    var getDesktopSceneMenuLayout = function () {
+        var host = document.getElementById("brave-desktop-scene-menu");
+        if (!host || host.getAttribute("aria-hidden") !== "false") {
+            return null;
+        }
+        var rail = document.getElementById("scene-rail");
+        if (!rail) {
+            clearDesktopSceneMenu();
+            return null;
+        }
+
+        var railRect = rail.getBoundingClientRect();
+        var button = host.querySelector(".brave-view__menu-button");
+        var buttonWidth = button ? button.offsetWidth : 34;
+
+        // Position in the gutter, aligning the button's right edge exactly 24px to the left of the rail
+        var center = railRect.left - 24 - buttonWidth;
+
+        // Align top perfectly with the top of the sidebar rail (y = 40px)
+        var top = 40;
+
+        var room = document.querySelector("#messagewindow > .brave-sticky-view > .brave-view--room")
+            || document.querySelector("#messagewindow > .brave-view--room");
+        var roomRect = room ? room.getBoundingClientRect() : null;
+
+        var canPullDown = true;
+        if (roomRect) {
+            // Check if the menu button left edge (located at center) would collide with the room view
+            if (center <= roomRect.right + 12) {
+                canPullDown = false;
+            }
+        }
+
+        return {
+            center: center,
+            top: top,
+            gapWidth: roomRect ? (railRect.left - roomRect.right) : 999,
+            panelWidth: 320, // uniform premium dropdown menu width
+            canPullDown: canPullDown,
+        };
+    };
+
+    var positionDesktopSceneMenu = function () {
+        var host = document.getElementById("brave-desktop-scene-menu");
+        var layout = getDesktopSceneMenuLayout();
+        if (!host || !layout) {
+            return;
+        }
+        host.style.left = Math.round(layout.center) + "px";
+        host.style.top = Math.round(layout.top) + "px";
+        host.style.setProperty("--brave-desktop-scene-menu-panel-width", layout.panelWidth + "px");
+        if (!layout.canPullDown) {
+            closeDesktopSceneMenuPanel();
+        }
+    };
+
+    var renderDesktopSceneMenu = function () {
+        if (!shouldRenderDesktopSceneMenu()) {
+            clearDesktopSceneMenu();
+            return;
+        }
+        var host = document.getElementById("brave-desktop-scene-menu");
+        var mount = document.body;
+        if (!host) {
+            host = document.createElement("div");
+            host.id = "brave-desktop-scene-menu";
+            host.className = "brave-desktop-scene-menu";
+        }
+        if (host.parentNode !== mount) {
+            mount.appendChild(host);
+        }
+        host.setAttribute("aria-hidden", "false");
+        if (!host.querySelector(".brave-view__menu-button")) {
+            host.innerHTML = buildDesktopMenuButtonMarkup();
+        } else {
+            syncDesktopMenuButton(host.querySelector(".brave-view__menu-button"));
+        }
+        positionDesktopSceneMenu();
+    };
+
+    var openDesktopSceneMenuPanel = function () {
+        var host = document.getElementById("brave-desktop-scene-menu");
+        var layout = getDesktopSceneMenuLayout();
+        if (!host || !layout || !layout.canPullDown) {
+            return false;
+        }
+        if (!host.querySelector(".brave-desktop-scene-menu__panel")) {
+            host.insertAdjacentHTML("beforeend", renderDesktopSceneMenuOptionsMarkup(buildDesktopMenuPicker().options));
+        }
+        host.classList.add("brave-desktop-scene-menu--open");
+        host.setAttribute("data-brave-desktop-scene-menu-open", "1");
+        var button = host.querySelector(".brave-view__menu-button");
+        if (button) {
+            button.setAttribute("aria-expanded", "true");
+        }
+        positionDesktopSceneMenu();
+        return true;
+    };
+
+    var toggleDesktopSceneMenuPanel = function () {
+        var host = document.getElementById("brave-desktop-scene-menu");
+        if (!host) {
+            return false;
+        }
+        if (host.classList.contains("brave-desktop-scene-menu--open")) {
+            closeDesktopSceneMenuPanel();
+            return true;
+        }
+        return openDesktopSceneMenuPanel();
+    };
+
+    var handleDesktopSceneMenuToggle = function (target) {
+        if (
+            !target
+            || !target.closest
+            || !target.closest("#brave-desktop-scene-menu")
+            || !target.hasAttribute("data-brave-desktop-scene-menu-toggle")
+            || isMobileViewport()
+        ) {
+            return false;
+        }
+        clearPickerSheet();
+        if (toggleDesktopSceneMenuPanel()) {
+            return true;
+        }
+        return openPickerFromTarget(target);
+    };
+
     var positionSceneRail = function () {
         var rail = document.getElementById("scene-rail");
         var host = document.getElementById("main-sub");
@@ -5328,6 +5625,7 @@ let defaultout_plugin = (function () {
             vicinitySection.getBoundingClientRect().bottom
         );
         rail.style.bottom = Math.max(0, Math.round(hostRect.bottom - rowBottom)) + "px";
+        positionDesktopSceneMenu();
     };
 
     var scheduleSceneRailPosition = function () {
@@ -5340,6 +5638,7 @@ let defaultout_plugin = (function () {
             positionSceneRail();
         }
         window.setTimeout(positionSceneRail, 120);
+        window.setTimeout(positionDesktopSceneMenu, 120);
     };
 
     var renderDesktopToolbar = function () {
@@ -5793,8 +6092,10 @@ let defaultout_plugin = (function () {
         }
         var label = getMobileDirectionLabel(entry);
         var ariaLabel = getMobileDirectionAriaLabel(entry);
+        var shouldShimmer = checkCommandShimmer(entry.command);
+        var buttonClass = "brave-view__navcard brave-click " + positionClass + (shouldShimmer ? " brave-shimmer" : "");
         return (
-            "<button type='button' class='brave-view__navcard brave-click " + positionClass + "'"
+            "<button type='button' class='" + buttonClass + "'"
             + commandAttrs(entry, false)
             + (ariaLabel ? " aria-label='" + escapeHtml(ariaLabel) + "'" : "")
             + ">"
@@ -5819,8 +6120,10 @@ let defaultout_plugin = (function () {
             + visibleItems.map(function (entry) {
                 var label = getMobileDirectionLabel(entry);
                 var ariaLabel = getMobileDirectionAriaLabel(entry);
+                var shouldShimmer = checkCommandShimmer(entry.command);
+                var shimmerClass = shouldShimmer ? " brave-shimmer" : "";
                 return (
-                    "<button type='button' class='brave-view__nav-centercard brave-click'"
+                    "<button type='button' class='brave-view__nav-centercard brave-click" + shimmerClass + "'"
                     + commandAttrs(entry, false)
                     + (ariaLabel ? " aria-label='" + escapeHtml(ariaLabel) + "'" : "")
                     + ">"
@@ -7578,11 +7881,12 @@ let defaultout_plugin = (function () {
             + actions.map(function (entry) {
                 var toneClass = entry && entry.tone ? " brave-view__mini-action--" + escapeHtml(entry.tone) : "";
                 var iconOnlyClass = entry && entry.icon_only ? " brave-view__mini-action--icon-only" : "";
+                var shimmerClass = entry && checkCommandShimmer(entry.command) ? " brave-shimmer" : "";
                 var aria = entry && (entry.aria_label || entry.label)
                     ? " aria-label='" + escapeHtml(entry.aria_label || entry.label) + "'"
                     : "";
                 return (
-                    "<button type='button' class='brave-view__mini-action brave-click" + toneClass + iconOnlyClass + "'"
+                    "<button type='button' class='brave-view__mini-action brave-click" + toneClass + iconOnlyClass + shimmerClass + "'"
                     + commandAttrs(entry, false)
                     + aria
                     + ">"
@@ -9087,6 +9391,7 @@ let defaultout_plugin = (function () {
         clearPackPanel();
         clearVicinityPanel();
         clearSceneCard();
+        clearDesktopSceneMenu();
         syncSceneRailLayout();
         syncMobileShell();
     };
@@ -9696,6 +10001,16 @@ let defaultout_plugin = (function () {
             card.setAttribute("role", "button");
             card.setAttribute("tabindex", "0");
             card.classList.add("scene-card--clickable", "scene-card--scrollable", "brave-click");
+            if (menuViewOverlaySceneRailSnapshot) {
+                menuViewOverlaySceneRailSnapshot["scene-card"] = {
+                    html: card.innerHTML,
+                    className: card.className,
+                    title: card.getAttribute("title"),
+                    role: card.getAttribute("role"),
+                    tabindex: card.getAttribute("tabindex"),
+                    command: card.getAttribute("data-brave-command"),
+                };
+            }
         }
         syncMobileShell();
     };
@@ -9976,13 +10291,18 @@ let defaultout_plugin = (function () {
                     if (interactive) {
                         rowClass += " brave-click brave-click--row";
                     }
+                    var shouldShimmer = checkCommandShimmer(entry && entry.command);
                     var hasInlineActions = !!(entry && Array.isArray(entry.actions) && entry.actions.length);
+                    if (shouldShimmer && !hasInlineActions) {
+                        rowClass += " brave-shimmer";
+                    }
                     if (interactive && hasInlineActions) {
                         rowClass += " brave-view__list-item--with-actions";
+                        var primaryClass = "brave-view__list-primary brave-click brave-click--row" + (shouldShimmer ? " brave-shimmer" : "");
                         return (
                             "<li class='brave-view__list-row'" + speakerAttr + ">"
                             + "<div class='" + rowClass + "'>"
-                            + "<button type='button' class='brave-view__list-primary brave-click brave-click--row'"
+                            + "<button type='button' class='" + primaryClass + "'"
                             + commandAttrs(entry, false)
                             + ">"
                             + "<div class='brave-view__list-main'>"
@@ -10202,7 +10522,8 @@ let defaultout_plugin = (function () {
                 if (!entry || !entry.command) {
                     return "<div class='brave-view__navslot " + positionClass.replace("navcard", "navslot") + "'></div>";
                 }
-                var classes = "brave-view__navcard brave-click " + positionClass;
+                var shouldShimmer = checkCommandShimmer(entry.command);
+                var classes = "brave-view__navcard brave-click " + positionClass + (shouldShimmer ? " brave-shimmer" : "");
                 var content =
                     "<span class='brave-view__navcard-badge'>" + escapeHtml(entry.badge || "") + "</span>"
                     + "<span class='brave-view__navcard-label'>" + escapeHtml(entry.label || "") + "</span>";
@@ -10229,8 +10550,10 @@ let defaultout_plugin = (function () {
                     "<div class='" + centerClass + "'>"
                     + "<div class='" + stackClass + "'>"
                     + visibleItems.map(function (entry) {
+                        var shouldShimmer = checkCommandShimmer(entry.command);
+                        var shimmerClass = shouldShimmer ? " brave-shimmer" : "";
                         return (
-                            "<button type='button' class='brave-view__nav-centercard brave-click'"
+                            "<button type='button' class='brave-view__nav-centercard brave-click" + shimmerClass + "'"
                             + commandAttrs(entry, false)
                             + ">"
                             + "<span class='brave-view__nav-chip-badge'>" + escapeHtml(entry.badge || "") + "</span>"
@@ -10411,7 +10734,7 @@ let defaultout_plugin = (function () {
                 if (entry && entry.selected) {
                     rowClass += " brave-view__entry--selected";
                 }
-                if (entry && entry.shimmer) {
+                if ((entry && entry.shimmer) || (entry && checkCommandShimmer(entry.command))) {
                     rowClass += " brave-shimmer";
                 }
                 var combatStateAttr = "";
@@ -10472,7 +10795,7 @@ let defaultout_plugin = (function () {
                     if (entry && entry.selected) {
                         rowClass += " brave-view__entry--selected";
                     }
-                    if (entry && entry.shimmer) {
+                    if ((entry && entry.shimmer) || (entry && checkCommandShimmer(entry.command))) {
                         rowClass += " brave-shimmer";
                     }
                     if (entry && Array.isArray(entry.sidecars) && entry.sidecars.length) {
@@ -10614,7 +10937,7 @@ let defaultout_plugin = (function () {
             var shimmers = viewData && Array.isArray(viewData.shimmers) ? viewData.shimmers : lastTutorialShimmers;
             var label = entry && entry.text ? entry.text : entry && entry.label ? entry.label : "Back";
             var command = entry && entry.command ? entry.command : "";
-            var shouldShimmer = shimmers.indexOf(command) !== -1 || (String(label).toLowerCase() === "close" && shimmers.indexOf("close") !== -1);
+            var shouldShimmer = checkShimmerInArray(command, shimmers) || (String(label).toLowerCase() === "close" && checkShimmerInArray("close", shimmers));
             var shimmerClass = shouldShimmer ? " brave-shimmer" : "";
             var aria = entry && (entry.aria_label || entry.label)
                 ? " aria-label='" + escapeHtml(entry.aria_label || entry.label) + "'"
@@ -10626,26 +10949,6 @@ let defaultout_plugin = (function () {
                 + ">"
                 + icon(entry && entry.icon ? entry.icon : "arrow_back", "brave-view__action-icon brave-view__action-icon--back")
                 + "<span>" + escapeHtml(label) + "</span>"
-                + "</button>"
-            );
-        };
-
-        var renderDesktopMenuAction = function () {
-            if (isMobileViewport() || !isRoomLikeView(viewData)) {
-                return "";
-            }
-            var menuPicker = buildDesktopMenuPicker();
-            var hasShimmeringOption = (menuPicker.options || []).some(function (opt) {
-                return opt.command && lastTutorialShimmers.indexOf(opt.command) !== -1;
-            });
-            var shimmerClass = hasShimmeringOption ? " brave-shimmer" : "";
-
-            return (
-                "<button type='button' class='brave-view__menu-button brave-click" + shimmerClass + "'"
-                + " data-brave-picker='" + escapeHtml(JSON.stringify(menuPicker)) + "'"
-                + " aria-label='Open menu'"
-                + " title='menu'>"
-                + "<span>MENU</span>"
                 + "</button>"
             );
         };
@@ -10769,7 +11072,6 @@ let defaultout_plugin = (function () {
 
         var viewMarkup =
             "<div class='brave-view" + variantClass + toneClass + "'>"
-            + renderDesktopMenuAction()
             + "<div class='brave-view__hero'>"
             + (viewData.wordmark ? "<div class='brave-view__wordmark' aria-label='" + escapeHtml(viewData.wordmark) + "'><span class='brave-view__wordmark-text'>" + escapeHtml(viewData.wordmark) + "</span></div>" : "")
             + (isRoomLikeView(viewData)
@@ -10903,6 +11205,7 @@ let defaultout_plugin = (function () {
                     pendingCombatPanelData = null;
                 }
                 renderDesktopToolbar();
+                renderDesktopSceneMenu();
                 syncMobileShell();
                 if (viewData.variant === "combat") {
                     applySuppressedCombatEntries();
@@ -11003,6 +11306,7 @@ let defaultout_plugin = (function () {
             }
             renderPackPanel();
             renderDesktopToolbar();
+            renderDesktopSceneMenu();
             syncMobileShell();
             if (viewData.variant === "combat") {
                 applySuppressedCombatEntries();
@@ -11298,6 +11602,9 @@ let defaultout_plugin = (function () {
         }
         if (shouldRestoreArcadeRoom) {
             restoreArcadeRoomView();
+        }
+        if (typeof renderDesktopSceneMenu === "function") {
+            renderDesktopSceneMenu();
         }
     };
 
@@ -12797,6 +13104,25 @@ let defaultout_plugin = (function () {
             return true;
         }
 
+        var desktopSceneMenuToggleTarget = closestFromEventTarget(event, "[data-brave-desktop-scene-menu-toggle]");
+        if (desktopSceneMenuToggleTarget && desktopSceneMenuToggleTarget.closest("#brave-desktop-scene-menu")) {
+            claimBrowserInteractionEvent(event);
+            playUiSound("menu");
+            handleDesktopSceneMenuToggle(desktopSceneMenuToggleTarget);
+            return true;
+        }
+
+        var desktopSceneMenu = document.getElementById("brave-desktop-scene-menu");
+        if (
+            desktopSceneMenu
+            && desktopSceneMenu.classList.contains("brave-desktop-scene-menu--open")
+            && event.target
+            && event.target.closest
+            && !event.target.closest("#brave-desktop-scene-menu")
+        ) {
+            closeDesktopSceneMenuPanel();
+        }
+
         var quantityAdjustTarget = closestFromEventTarget(event, "[data-brave-picker-quantity-adjust]");
         if (quantityAdjustTarget) {
             var quantityContainer = quantityAdjustTarget.closest("[data-brave-picker-quantity-control]");
@@ -12867,6 +13193,9 @@ let defaultout_plugin = (function () {
         }
         if (target.hasAttribute("data-brave-picker")) {
             playUiSound("menu");
+            if (target.closest("#brave-desktop-scene-menu")) {
+                closeDesktopSceneMenuPanel();
+            }
             if (isMobileViewport()) {
                 currentMobileUtilityTab = null;
                 currentMobileUtilityPresentation = "sheet";
@@ -12884,6 +13213,9 @@ let defaultout_plugin = (function () {
         }
         if (closeMenuViewOverlayFromTarget(target)) {
             return true;
+        }
+        if (target.closest("#brave-desktop-scene-menu")) {
+            closeDesktopSceneMenuPanel();
         }
         sendBrowserCommand(target.getAttribute("data-brave-command"), target.getAttribute("data-brave-confirm"), {
             menuView: target.hasAttribute("data-brave-menu-view-command")
@@ -13712,10 +14044,15 @@ let defaultout_plugin = (function () {
         window.addEventListener("resize", function () {
             syncMobileShell();
             positionDesktopToolbar();
+            closeDesktopSceneMenuPanel();
             if (window.requestAnimationFrame) {
-                window.requestAnimationFrame(positionSceneRail);
+                window.requestAnimationFrame(function () {
+                    positionSceneRail();
+                    renderDesktopSceneMenu();
+                });
             } else {
                 positionSceneRail();
+                renderDesktopSceneMenu();
             }
             syncArcadeBodyState();
             if (currentArcadeState && currentArcadeState.fitScreen) {

@@ -648,6 +648,7 @@ class CmdGear(BraveCharacterCommand):
     help_category = "Brave"
 
     def _render_gear(self, character, feedback=None):
+        record_command_event(character, "gear")
         equipment = character.db.brave_equipment or {}
         slot_blocks = []
         for slot in ITEM_CONTENT.equipment_slots:
@@ -674,7 +675,6 @@ class CmdGear(BraveCharacterCommand):
             sections=sections,
         )
         self.scene_msg(screen, panel=build_gear_panel(character), view=build_gear_view(character, feedback=feedback))
-        record_command_event(character, "gear")
 
     def _resolve_slot(self, query):
         token = _normalize_query(query)
@@ -835,6 +835,7 @@ class CmdPack(BraveCharacterCommand):
                 self.msg(f"You aren't carrying anything named '{self.args}'.")
                 return
 
+        record_command_event(character, "pack")
         inventory = list(character.db.brave_inventory or [])
         total_pieces = sum(entry.get("quantity", 0) for entry in inventory)
         grouped = {kind: [] for kind in PACK_KIND_ORDER}
@@ -871,7 +872,6 @@ class CmdPack(BraveCharacterCommand):
             sections=sections,
         )
         self.scene_msg(screen, panel=build_pack_panel(character), view=build_pack_view(character))
-        record_command_event(character, "pack")
 
 
 class CmdCompanion(BraveCharacterCommand):

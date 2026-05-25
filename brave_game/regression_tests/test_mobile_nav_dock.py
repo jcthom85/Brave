@@ -33,11 +33,21 @@ class MobileNavDockTests(unittest.TestCase):
 
     def test_tutorial_objective_updates_refresh_menu_shimmer(self):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+        css_source = CSS_PATH.read_text(encoding="utf-8")
+        room_card_start = default_out_source.index("var heroSceneMarkup =")
+        room_card_end = default_out_source.index("var viewMarkup =", room_card_start)
+        room_card_markup = default_out_source[room_card_start:room_card_end]
 
         self.assertIn("var refreshTutorialShimmerControls = function ()", default_out_source)
         self.assertIn('document.querySelectorAll(".brave-view__menu-button")', default_out_source)
         self.assertIn("button.classList.toggle(\"brave-shimmer\", hasShimmeringMenuOption);", default_out_source)
         self.assertIn("refreshTutorialShimmerControls();", default_out_source)
+        self.assertIn("var renderDesktopSceneMenu = function ()", default_out_source)
+        self.assertIn("buildDesktopMenuButtonMarkup();", default_out_source)
+        self.assertIn("data-brave-desktop-scene-menu-toggle='1'", default_out_source)
+        self.assertIn("var openDesktopSceneMenuPanel = function ()", default_out_source)
+        self.assertIn(".brave-desktop-scene-menu--open .brave-desktop-scene-menu__panel", css_source)
+        self.assertNotIn("renderDesktopMenuAction()", room_card_markup)
 
     def test_menu_view_commands_open_large_overlay(self):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")

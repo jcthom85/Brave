@@ -179,7 +179,7 @@ TUTORIAL_STEPS = {
     "catch_your_breath": {
         "order": 6,
         "title": "Catch Your Breath",
-        "summary": "Return to Wayfarer's Yard and rest. Brave hands recover before they report.",
+        "summary": "Return to Yard Commons and rest. Brave hands recover before they report.",
         "how_to": "Click the Rest button in the Vicinity panel to recover your health and resources.",
     },
     "through_the_gate": {
@@ -367,7 +367,7 @@ def get_tutorial_blocker_hint(state, character=None):
     if step == "fit_your_clasp":
         return "Equip the Wayfarer Clasp you earned before you report in."
     if step == "catch_your_breath":
-        return "Rest in Wayfarer's Yard before you report to Captain Harl."
+        return "Rest in Yard Commons before you report to Captain Harl."
     return "Finish the yard lesson before you report to Captain Harl."
 
 
@@ -737,7 +737,7 @@ def _tutorial_guidance_text(character, step_key, flags):
         return "Open Gear, select the TRINKET slot, and equip the Wayfarer Clasp trinket before you report."
 
     if step_key == "catch_your_breath":
-        return "Rest in Wayfarer's Yard, then head south when you are recovered."
+        return "Rest in Yard Commons, then head south when you are recovered."
 
     if step_key == "through_the_gate":
         return "Head south to the Training Yard and talk to Captain Harl Rowan."
@@ -813,7 +813,7 @@ def format_tutorial_block(character):
         )
     elif step_key == "catch_your_breath":
         lines.append(
-            f"  [{'x' if flags.get('rested_after_fight') else ' '}] Rest in Wayfarer's Yard."
+            f"  [{'x' if flags.get('rested_after_fight') else ' '}] Rest in Yard Commons."
         )
     elif step_key == "through_the_gate":
         lines.append(
@@ -860,7 +860,7 @@ def get_tutorial_objective_entries(character):
         add("Optional: Check the map.", "viewed_map")
         add("Optional: Open your journal.", "viewed_journal")
     elif step_key == "catch_your_breath":
-        add("Rest in Wayfarer's Yard.", "rested_after_fight")
+        add("Rest in Yard Commons.", "rested_after_fight")
     elif step_key == "through_the_gate":
         add("Report to Captain Harl Rowan in the Training Yard.", "talked_harl")
 
@@ -923,9 +923,9 @@ def get_tutorial_focus(character, room):
         if room_id == TUTORIAL_START_ROOM_ID:
             return ["Use rest before reporting in", "Head south after you recover"]
         if room_id == TUTORIAL_VERMIN_ROOM_ID:
-            return ["Head north to the Sparring Ring", "Return east to Wayfarer's Yard"]
+            return ["Head north to the Sparring Ring", "Return east to Yard Commons"]
         if room_id == "tutorial_sparring_ring":
-            return ["Head east to Wayfarer's Yard", "Use rest there"]
+            return ["Head east to Yard Commons", "Use rest there"]
 
     if step == "fit_your_clasp":
         if room_id == TUTORIAL_VERMIN_ROOM_ID:
@@ -1202,13 +1202,57 @@ def get_tutorial_menu_shimmers(character):
         return []
     step_key = state.get("step") or "first_steps"
     flags = state.get("flags") or {}
-    if step_key == "pack_before_walk" and flags.get("talked_nella"):
+
+    # Step 1: first_steps
+    if step_key == "first_steps":
+        if not flags.get("talked_tamsin"):
+            return ["talk sergeant_tamsin_vale"]
+        if not flags.get("visited_quartermaster_shed"):
+            return ["e"]
+
+    # Step 2: pack_before_walk
+    if step_key == "pack_before_walk":
+        if not flags.get("talked_nella"):
+            return ["talk quartermaster_nella_cobb"]
         if not flags.get("viewed_pack"):
             return ["pack"]
         if not flags.get("viewed_gear"):
             return ["gear"]
-    if step_key == "fit_your_clasp" and not flags.get("equipped_wayfarer_clasp"):
-        return ["gear"]
+        if not flags.get("read_supply_board"):
+            return ["read tutorial_supply_board"]
+        return ["w"]
+
+    # Step 3: stand_your_ground
+    if step_key == "stand_your_ground":
+        if not flags.get("talked_brask"):
+            return ["talk ringhand_brask"]
+        return ["w"]
+
+    # Step 4: clear_the_pens
+    if step_key == "clear_the_pens":
+        if not flags.get("talked_brask"):
+            return ["talk ringhand_brask"]
+        room = getattr(character, "location", None)
+        room_id = getattr(getattr(room, "db", None), "brave_room_id", None)
+        if room_id == TUTORIAL_VERMIN_ROOM_ID and not flags.get("won_vermin_fight"):
+            return ["fight"]
+
+    # Step 5: fit_your_clasp
+    if step_key == "fit_your_clasp":
+        if not flags.get("equipped_wayfarer_clasp"):
+            return ["gear"]
+
+    # Step 6: catch_your_breath
+    if step_key == "catch_your_breath":
+        if not flags.get("rested_after_fight"):
+            return ["rest"]
+        return ["s"]
+
+    # Step 7: through_the_gate
+    if step_key == "through_the_gate":
+        if not flags.get("talked_harl"):
+            return ["talk captain_harl_rowan"]
+
     return []
 
 
@@ -1220,10 +1264,17 @@ def get_tutorial_view_shimmers(character, view_name):
         return []
     step_key = state.get("step") or "first_steps"
     flags = state.get("flags") or {}
-    if step_key != "pack_before_walk" or not flags.get("talked_nella"):
-        return []
-    if view_name == "pack" and not flags.get("viewed_pack"):
-        return ["close"]
-    if view_name == "gear" and flags.get("viewed_pack") and not flags.get("viewed_gear"):
-        return ["close"]
+
+    # Step 2: pack_before_walk checks
+    if step_key == "pack_before_walk" and flags.get("talked_nella"):
+        if view_name == "pack" and not flags.get("viewed_pack"):
+            return ["close"]
+        if view_name == "gear" and flags.get("viewed_pack") and not flags.get("viewed_gear"):
+            return ["close"]
+
+    # Step 5: fit_your_clasp trinket equip
+    if step_key == "fit_your_clasp" and not flags.get("equipped_wayfarer_clasp"):
+        if view_name == "gear":
+            return ["gear equip trinket wayfarer_clasp"]
+
     return []

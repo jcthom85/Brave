@@ -295,12 +295,12 @@ class TutorialOnboardingTests(unittest.TestCase):
 
         pack_step = "\n".join(_format_tutorial_screen_block(character))
         self.assertIn("Read the supply board.", pack_step)
-        self.assertNotIn("Return west to Wayfarer's Yard.", pack_step)
+        self.assertNotIn("Return west to Yard Commons.", pack_step)
         tutorial_entry = get_tutorial_objective_entries(character)
         self.assertEqual("Kit Before the Gate", tutorial_entry["title"])
         self.assertIn("Use direction buttons to move; arrows and WASD also work", tutorial_entry["summary"])
         self.assertNotIn(
-            "Return west to Wayfarer's Yard.",
+            "Return west to Yard Commons.",
             [objective["text"] for objective in tutorial_entry["objectives"]],
         )
 

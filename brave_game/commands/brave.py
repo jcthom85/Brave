@@ -404,7 +404,7 @@ def _format_tutorial_screen_block(character, completed_only=False):
         ]
     elif step_key == "catch_your_breath":
         checks = [
-            f"[{'x' if flags.get('rested_after_fight') else ' '}] Rest in Wayfarer's Yard.",
+            f"[{'x' if flags.get('rested_after_fight') else ' '}] Rest in Yard Commons.",
         ]
     elif step_key == "through_the_gate":
         checks = [

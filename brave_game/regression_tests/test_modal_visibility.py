@@ -8,6 +8,30 @@ from regression_tests.live_opening_harness import (
 from regression_tests.ui_contract_fixtures import build_room_fixture, build_room_scene_fixture
 
 
+def seed_room_view(page):
+    room = build_room_fixture(version=1)
+    scene = build_room_scene_fixture(version=1)
+    page.goto(f"{BASE_URL}/webclient/test", wait_until="networkidle")
+    page.wait_for_function("() => !!(window.plugins && window.plugins.defaultout && window.plugin_handler)", timeout=15000)
+    page.evaluate(
+        """({ room, scene }) => {
+            const plugin = window.plugins.defaultout;
+            const emit = (cmd, payload) => {
+                const kwargs = {};
+                kwargs[cmd] = payload;
+                plugin.onUnknownCmd(cmd, [], kwargs);
+            };
+            plugin.onUnknownCmd("brave_clear_all", [], { brave_clear_all: {} });
+            emit("brave_view", room);
+            emit("brave_scene", scene);
+            window.__sent = [];
+            window.plugin_handler.onSend = (cmd) => { window.__sent.push(cmd); };
+        }""",
+        {"room": room, "scene": scene},
+    )
+    page.wait_for_selector(".brave-view--room", state="visible", timeout=10000)
+
+
 def test_welcome_modal_visibility():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -16,6 +40,117 @@ def test_welcome_modal_visibility():
         try:
             create_fresh_character(page)
             assert_lanternfall_opening_visible(page, screenshot_name="mobile_welcome_modal.png")
+        finally:
+            browser.close()
+
+
+def test_desktop_scene_menu_pulls_down_when_gutter_fits():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1920, "height": 1000})
+        try:
+            seed_room_view(page)
+            page.wait_for_function(
+                """() => {
+                    const rail = document.getElementById("scene-rail")?.getBoundingClientRect();
+                    const room = document.querySelector("#messagewindow > .brave-view--room")?.getBoundingClientRect();
+                    const menu = document.querySelector(".brave-view__menu-button")?.getBoundingClientRect();
+                    if (!rail || !room || !menu) return false;
+                    return menu.left > room.right && rail.left - menu.right >= 24 && rail.left - menu.right <= 72;
+                }""",
+                timeout=10000,
+            )
+            placement = page.evaluate(
+                """() => {
+                    const rail = document.getElementById("scene-rail").getBoundingClientRect();
+                    const room = document.querySelector("#messagewindow > .brave-view--room").getBoundingClientRect();
+                    const menu = document.querySelector(".brave-view__menu-button").getBoundingClientRect();
+                    return {
+                        menuLeft: menu.left,
+                        menuRight: menu.right,
+                        roomRight: room.right,
+                        railLeft: rail.left,
+                    };
+                }"""
+            )
+            assert placement["menuLeft"] > placement["roomRight"]
+            assert 24 <= placement["railLeft"] - placement["menuRight"] <= 72
+            page.locator(".brave-view__menu-button").click()
+            page.wait_for_selector(
+                "#brave-desktop-scene-menu.brave-desktop-scene-menu--open .brave-desktop-scene-menu__panel",
+                state="visible",
+                timeout=10000,
+            )
+            assert page.locator("#brave-picker-sheet[aria-hidden='false']").count() == 0
+            page.get_by_role("menuitem", name="Gear").click()
+            page.wait_for_function("() => (window.__sent || []).includes('gear')", timeout=10000)
+        finally:
+            browser.close()
+
+
+def test_desktop_scene_menu_falls_back_to_picker_when_gutter_is_tight():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1180, "height": 900})
+        try:
+            seed_room_view(page)
+            page.locator(".brave-view__menu-button").click()
+            page.wait_for_selector("#brave-picker-sheet[aria-hidden='false']", state="visible", timeout=10000)
+            assert page.locator("#brave-desktop-scene-menu.brave-desktop-scene-menu--open").count() == 0
+        finally:
+            browser.close()
+
+
+def test_desktop_scene_menu_hides_behind_readable_picker():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1920, "height": 1000})
+        try:
+            seed_room_view(page)
+            page.wait_for_selector("#brave-desktop-scene-menu[aria-hidden='false']", state="visible", timeout=10000)
+            before = page.evaluate(
+                """() => {
+                    const menu = document.getElementById("brave-desktop-scene-menu");
+                    return {
+                        left: menu ? menu.style.left : null,
+                        top: menu ? menu.style.top : null,
+                    };
+                }"""
+            )
+            assert before["left"]
+            assert before["top"]
+            page.evaluate(
+                """() => {
+                    const readable = Array.from(document.querySelectorAll("[data-brave-picker]"))
+                        .find((node) => (node.getAttribute("data-brave-picker") || "").includes("Kitchen Hearth"));
+                    if (!readable) throw new Error("Readable picker target not found");
+                    readable.click();
+                }"""
+            )
+            page.wait_for_selector("#brave-picker-sheet[aria-hidden='false']", state="visible", timeout=10000)
+            state = page.evaluate(
+                """() => {
+                    const menu = document.getElementById("brave-desktop-scene-menu");
+                    const picker = document.getElementById("brave-picker-sheet");
+                    return {
+                        menuAriaHidden: menu ? menu.getAttribute("aria-hidden") : null,
+                        menuDisplay: menu ? getComputedStyle(menu).display : null,
+                        menuLeft: menu ? menu.style.left : null,
+                        menuTop: menu ? menu.style.top : null,
+                        menuHit: document.elementFromPoint(
+                            menu.getBoundingClientRect().left + 4,
+                            menu.getBoundingClientRect().top + 4
+                        )?.closest("#brave-desktop-scene-menu") !== null,
+                        pickerDisplay: picker ? getComputedStyle(picker).display : null,
+                    };
+                }"""
+            )
+            assert state["pickerDisplay"] == "block"
+            assert state["menuAriaHidden"] == "true"
+            assert state["menuDisplay"] == "none"
+            assert state["menuLeft"] == before["left"]
+            assert state["menuTop"] == before["top"]
+            assert state["menuHit"] is False
         finally:
             browser.close()
 

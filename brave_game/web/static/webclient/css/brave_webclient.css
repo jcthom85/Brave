@@ -4474,34 +4474,120 @@ body.brave-mainview-active .scene-rail {
     margin: 0;
 }
 
+@keyframes metallic-sheen {
+    0% { left: -150%; }
+    24% { left: 150%; }
+    100% { left: 150%; }
+}
+
+@keyframes metallic-sheen-vertical {
+    0% { top: -150%; }
+    24% { top: 150%; }
+    100% { top: 150%; }
+}
+
+@keyframes gold-breath {
+    0% {
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 8px 16px rgba(0, 0, 0, 0.14), 0 0 4px rgba(225, 191, 133, 0.06);
+        border-color: color-mix(in srgb, var(--brave-world-line) 76%, rgba(var(--brave-accent-rgb), 0.18));
+    }
+    50% {
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 22px rgba(0, 0, 0, 0.18), 0 0 10px rgba(225, 191, 133, 0.22);
+        border-color: rgba(var(--brave-accent-rgb), 0.32);
+    }
+    100% {
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 8px 16px rgba(0, 0, 0, 0.14), 0 0 4px rgba(225, 191, 133, 0.06);
+        border-color: color-mix(in srgb, var(--brave-world-line) 76%, rgba(var(--brave-accent-rgb), 0.18));
+    }
+}
+
 .brave-view__menu-button {
-    position: absolute;
-    top: 31px;
-    right: 33px;
-    z-index: 99;
-    min-height: 36px;
-    padding: 7px 12px;
+    position: relative;
+    overflow: hidden;
+    margin-left: auto;
+    flex: 0 0 auto;
+    min-width: 34px;
+    width: 34px;
+    min-height: 160px;
+    padding: 20px 0;
     border: 1px solid color-mix(in srgb, var(--brave-world-line) 76%, rgba(var(--brave-accent-rgb), 0.18));
-    border-radius: 12px;
+    border-radius: 10px;
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 42%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05), transparent 42%),
         linear-gradient(180deg, var(--brave-surface-soft-top), var(--brave-surface-soft-bottom));
     color: var(--brave-text-bright);
     font-family: inherit;
-    font-size: calc(0.7rem * var(--brave-text-scale) * var(--brave-font-size-scale));
-    letter-spacing: calc(var(--brave-letter-spacing) + 0.08em);
+    font-size: calc(0.86rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    letter-spacing: calc(var(--brave-letter-spacing) + 0.22em);
     text-transform: uppercase;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.04),
         0 10px 20px rgba(0, 0, 0, 0.16);
     cursor: pointer;
+    animation: gold-breath 6s infinite ease-in-out;
+    transition:
+        border-color 220ms ease,
+        background 220ms ease,
+        transform 100ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        box-shadow 220ms ease;
+
+    /* Upright vertical stacked letters layout */
+    writing-mode: vertical-lr;
+    text-orientation: upright;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.1;
+}
+
+.brave-view__menu-button::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 14px;
+    bottom: 14px;
+    width: 6px;
+    transform: translateX(-50%);
+    background:
+        radial-gradient(circle, var(--brave-accent) 2px, transparent 2px) top / 6px 6px no-repeat,
+        radial-gradient(circle, var(--brave-accent) 2px, transparent 2px) bottom / 6px 6px no-repeat;
+    opacity: 0.65;
+    pointer-events: none;
+    filter: drop-shadow(0 0 1px rgba(var(--brave-accent-rgb), 0.5));
+}
+
+.brave-view__menu-button::after {
+    content: '';
+    position: absolute;
+    top: -150%;
+    left: 0;
+    width: 100%;
+    height: 60%;
+    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.08), rgba(var(--brave-accent-rgb), 0.16), rgba(255, 255, 255, 0.08), transparent);
+    transform: skewY(-25deg);
+    animation: metallic-sheen-vertical 8s infinite ease-in-out;
+    pointer-events: none;
 }
 
 .brave-view__menu-button:hover,
 .brave-view__menu-button:focus-visible {
-    border-color: rgba(var(--brave-accent-rgb), 0.3);
-    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(var(--brave-accent-rgb), 0.4);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 12px 24px rgba(0, 0, 0, 0.22),
+        0 0 12px rgba(var(--brave-accent-rgb), 0.28);
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 42%),
+        linear-gradient(180deg, var(--brave-surface-soft-top), var(--brave-surface-soft-bottom));
     outline: none;
+    animation-play-state: paused;
+}
+
+.brave-view__menu-button:active {
+    transform: translateY(1.5px);
+    box-shadow:
+        inset 0 1px 2px rgba(0, 0, 0, 0.3),
+        0 2px 4px rgba(0, 0, 0, 0.16);
 }
 
 .brave-view__back {
@@ -18563,6 +18649,12 @@ body.brave-mobile-input-open #inputsend {
     }
 }
 
+/* Chargen clean layout: hide redundant eyebrows and timeline progress chips */
+.brave-view--chargen .brave-view__eyebrow,
+.brave-view--chargen .brave-view__chips {
+    display: none !important;
+}
+
 /* Front door polish: title, login, account roster, and character creation. */
 .brave-view--account,
 .brave-view--connection,
@@ -21124,10 +21216,17 @@ body[data-brave-view="chargen"]::before {
     }
 
     body[data-brave-view="connection"] .brave-view__subtitle,
-    body[data-brave-view="account"] .brave-view__subtitle,
-    body[data-brave-view="chargen"] .brave-view__subtitle {
+    body[data-brave-view="account"] .brave-view__subtitle {
         position: absolute !important;
         bottom: 32px !important;
+        left: 32px !important;
+        margin: 0 !important;
+        font-size: 1rem !important;
+    }
+
+    body[data-brave-view="chargen"] .brave-view__subtitle {
+        position: absolute !important;
+        bottom: 152px !important;
         left: 32px !important;
         margin: 0 !important;
         font-size: 1rem !important;
@@ -21323,4 +21422,130 @@ body[data-brave-motion="reduced"] .brave-view--chargen .brave-view__wordmark-tex
     animation: none !important;
     transform: none !important;
     background-attachment: scroll !important;
+}
+
+/* 7. Desktop Scene Menu (Dropdown dropdown menu) */
+.brave-desktop-scene-menu {
+    position: absolute;
+    z-index: 5040;
+}
+
+#brave-desktop-scene-menu[aria-hidden="true"] {
+    display: none;
+    pointer-events: none;
+}
+
+body.brave-picker-active #brave-desktop-scene-menu {
+    display: none;
+    pointer-events: none;
+}
+
+.brave-desktop-scene-menu__panel {
+    display: none;
+    position: absolute;
+    top: 50px;
+    right: 33px;
+    width: var(--brave-desktop-scene-menu-panel-width, 320px);
+    background: rgba(10, 18, 24, 0.95);
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.22);
+    border-radius: var(--brave-radius-card, 12px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(var(--brave-accent-rgb), 0.15);
+    padding: 12px;
+    z-index: 5050;
+}
+.brave-desktop-scene-menu--open .brave-desktop-scene-menu__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.brave-desktop-scene-menu__option {
+    background: rgba(18, 22, 19, 0.45);
+    color: var(--brave-text-bright);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition:
+        border-color 250ms ease,
+        background-color 250ms ease,
+        box-shadow 250ms ease;
+    border: 1px solid rgba(var(--brave-accent-rgb), 0.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.brave-desktop-scene-menu__option::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(var(--brave-accent-rgb), 0.1), transparent);
+    opacity: 0;
+    transition: opacity 250ms ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.brave-desktop-scene-menu__option:hover::before,
+.brave-desktop-scene-menu__option:focus-visible::before {
+    opacity: 1;
+}
+
+.brave-desktop-scene-menu__option:hover,
+.brave-desktop-scene-menu__option:focus-visible {
+    border-color: rgba(var(--brave-accent-rgb), 0.45);
+    background: rgba(22, 28, 24, 0.75);
+    box-shadow: 0 0 10px rgba(var(--brave-accent-rgb), 0.12);
+    outline: none;
+}
+
+.brave-desktop-scene-menu__option--danger {
+    border-color: rgba(181, 86, 71, 0.38);
+}
+
+.brave-desktop-scene-menu__option-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: rgba(var(--brave-accent-rgb), 0.12);
+    color: var(--brave-text-bright);
+    position: relative;
+    z-index: 1;
+    transition:
+        transform 250ms cubic-bezier(0.25, 0.8, 0.25, 1),
+        background-color 250ms ease,
+        box-shadow 250ms ease;
+}
+
+.brave-desktop-scene-menu__option:hover .brave-desktop-scene-menu__option-icon,
+.brave-desktop-scene-menu__option:focus-visible .brave-desktop-scene-menu__option-icon {
+    transform: scale(1.1) translateX(2px);
+    background-color: rgba(var(--brave-accent-rgb), 0.22);
+    box-shadow: 0 0 8px rgba(var(--brave-accent-rgb), 0.25);
+}
+
+.brave-desktop-scene-menu__option-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--brave-text-bright);
+    font-size: calc(0.82rem * var(--brave-text-scale) * var(--brave-font-size-scale));
+    line-height: 1.2;
+    position: relative;
+    z-index: 1;
+    transition: transform 250ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.brave-desktop-scene-menu__option:hover .brave-desktop-scene-menu__option-label,
+.brave-desktop-scene-menu__option:focus-visible .brave-desktop-scene-menu__option-label {
+    transform: translateX(6px);
 }

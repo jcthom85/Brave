@@ -100,7 +100,7 @@ class CombatDefeatTests(unittest.TestCase):
         _delay_mock,
         _send_webclient_event,
     ):
-        destination = DummyRoom("Wayfarer's Yard")
+        destination = DummyRoom("Yard Commons")
         get_tutorial_defeat_room.return_value = destination
         get_room.return_value = DummyRoom("Brambleford")
         character = DummyCharacter()

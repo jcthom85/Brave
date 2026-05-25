@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT_PATH = REPO_ROOT / "brave_game/web/static/webclient/js/plugins/default_out.js"
 WEBCLIENT_CSS_PATH = REPO_ROOT / "brave_game/web/static/webclient/css/brave_webclient.css"
 AUDIO_JS_PATH = REPO_ROOT / "brave_game/web/static/webclient/js/brave_audio.js"
+BRAVE_PROFILE_PATH = REPO_ROOT / "brave_game/commands/brave_profile.py"
 
 
 class QuestPopupTests(unittest.TestCase):
@@ -205,6 +206,62 @@ class QuestPopupTests(unittest.TestCase):
             css_source,
         )
         self.assertIn("pointer-events: none;", css_source)
+
+    def test_tutorial_shimmer_targets_vicinity_name_and_inline_action_not_whole_card(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn(
+            'var shimmerClass = entry && checkCommandShimmer(entry.command) ? " brave-shimmer" : "";',
+            default_out_source,
+        )
+        self.assertIn(
+            'if (shouldShimmer && !hasInlineActions) {\n'
+            '                        rowClass += " brave-shimmer";\n'
+            '                    }',
+            default_out_source,
+        )
+        self.assertIn(
+            'var primaryClass = "brave-view__list-primary brave-click brave-click--row" + (shouldShimmer ? " brave-shimmer" : "");',
+            default_out_source,
+        )
+
+    def test_tutorial_menu_shimmer_does_not_light_scene_rail_cards(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn(
+            'if (element.closest("#scene-card, #scene-pack-panel, #scene-vicinity-panel")) {\n'
+            '                element.classList.remove("brave-shimmer");\n'
+            '                return;\n'
+            '            }',
+            default_out_source,
+        )
+        self.assertIn('button.classList.toggle("brave-shimmer", hasShimmeringMenuOption);', default_out_source)
+        self.assertIn('var shimmerClass = (option && option.command && checkCommandShimmer(option.command)) ? " brave-shimmer" : "";', default_out_source)
+
+    def test_tutorial_objective_refresh_updates_tracked_card_while_menu_overlay_is_open(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn(
+            "|| (currentMenuViewOverlayData && currentRoomViewData && isRoomLikeView(currentRoomViewData))",
+            default_out_source,
+        )
+        self.assertIn('if (menuViewOverlaySceneRailSnapshot) {', default_out_source)
+        self.assertIn('menuViewOverlaySceneRailSnapshot["scene-card"] = {', default_out_source)
+
+    def test_pack_and_gear_mark_tutorial_progress_before_rendering_views(self):
+        source = BRAVE_PROFILE_PATH.read_text(encoding="utf-8")
+
+        gear_method = source[source.index("    def _render_gear"):source.index("    def _resolve_slot")]
+        self.assertLess(
+            gear_method.index('record_command_event(character, "gear")'),
+            gear_method.index("build_gear_view(character"),
+        )
+
+        pack_method = source[source.index("class CmdPack"):source.index("class CmdCompanion")]
+        self.assertLess(
+            pack_method.index('record_command_event(character, "pack")'),
+            pack_method.index("build_pack_view(character)"),
+        )
 
 
 if __name__ == "__main__":

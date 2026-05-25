@@ -1205,7 +1205,7 @@
       "direction": "south",
       "id": "family_post_to_wayfarers_yard",
       "key": "south",
-      "label": "Wayfarer's Yard",
+      "label": "Yard Commons",
       "source": "tutorial_family_post"
     },
     {
@@ -1381,7 +1381,7 @@
       "direction": "north",
       "id": "gate_walk_to_wayfarers_yard",
       "key": "north",
-      "label": "Wayfarer's Yard",
+      "label": "Yard Commons",
       "source": "tutorial_gate_walk"
     },
     {
@@ -1868,7 +1868,7 @@
       "direction": "west",
       "id": "quartermaster_shed_to_wayfarers_yard",
       "key": "west",
-      "label": "Wayfarer's Yard",
+      "label": "Yard Commons",
       "source": "tutorial_quartermaster_shed"
     },
     {
@@ -2020,7 +2020,7 @@
       "direction": "east",
       "id": "sparring_ring_to_wayfarers_yard",
       "key": "east",
-      "label": "Wayfarer's Yard",
+      "label": "Yard Commons",
       "source": "tutorial_sparring_ring"
     },
     {
@@ -3031,7 +3031,7 @@
     {
       "desc": "A compact fenced yard sits just above the main training grounds, laid out with a central post, clear lanes, and enough room to make mistakes without wandering into real danger. This morning the bell is hammering somewhere below, and every adult in the yard is moving like the road just asked a question nobody wanted.",
       "id": "tutorial_wayfarers_yard",
-      "key": "Wayfarer's Yard",
+      "key": "Yard Commons",
       "map_icon": "W",
       "map_region": "wayfarers_yard",
       "map_x": 0,

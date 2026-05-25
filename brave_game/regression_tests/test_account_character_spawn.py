@@ -39,7 +39,7 @@ class AccountCharacterSpawnTests(unittest.TestCase):
     def test_first_character_spawns_in_tutorial_instead_of_limbo(self):
         account = SimpleNamespace(db=SimpleNamespace(brave_tutorial_completed=False))
         limbo = SimpleNamespace(key="Limbo")
-        tutorial_room = SimpleNamespace(key="Wayfarer's Yard")
+        tutorial_room = SimpleNamespace(key="Yard Commons")
         character = DummyCharacter(limbo)
         calls = []
 
@@ -60,7 +60,7 @@ class AccountCharacterSpawnTests(unittest.TestCase):
     def test_later_character_still_spawns_in_tutorial(self):
         account = SimpleNamespace(db=SimpleNamespace(brave_tutorial_completed=True))
         limbo = SimpleNamespace(key="Limbo")
-        tutorial_room = SimpleNamespace(key="Wayfarer's Yard")
+        tutorial_room = SimpleNamespace(key="Yard Commons")
         character = DummyCharacter(limbo)
 
         with patch("world.spawning.ensure_brave_world", lambda: None), patch(
@@ -80,7 +80,7 @@ class AccountCharacterSpawnTests(unittest.TestCase):
     def test_unstarted_existing_character_in_training_yard_repairs_to_tutorial(self):
         account = SimpleNamespace(db=SimpleNamespace(brave_tutorial_completed=True))
         training_yard = SimpleNamespace(key="Training Yard", db=SimpleNamespace(brave_room_id="brambleford_training_yard"))
-        tutorial_room = SimpleNamespace(key="Wayfarer's Yard", db=SimpleNamespace(brave_room_id="tutorial_wayfarers_yard"))
+        tutorial_room = SimpleNamespace(key="Yard Commons", db=SimpleNamespace(brave_room_id="tutorial_wayfarers_yard"))
         character = DummyCharacter(training_yard)
         character.db.brave_harl_cellar_job_assigned = False
 
@@ -97,7 +97,7 @@ class AccountCharacterSpawnTests(unittest.TestCase):
     def test_completed_tutorial_character_stays_where_they_are(self):
         account = SimpleNamespace(db=SimpleNamespace(brave_tutorial_completed=True))
         training_yard = SimpleNamespace(key="Training Yard", db=SimpleNamespace(brave_room_id="brambleford_training_yard"))
-        tutorial_room = SimpleNamespace(key="Wayfarer's Yard", db=SimpleNamespace(brave_room_id="tutorial_wayfarers_yard"))
+        tutorial_room = SimpleNamespace(key="Yard Commons", db=SimpleNamespace(brave_room_id="tutorial_wayfarers_yard"))
         character = DummyCharacter(training_yard)
         character.db.brave_tutorial = {"status": "completed", "step": None, "flags": {}}
 

@@ -215,7 +215,7 @@ class BraveCharacterCommandTests(unittest.TestCase):
 
     def test_rest_restores_at_authored_rest_site(self):
         command = object.__new__(CmdRest)
-        room = SimpleNamespace(key="Wayfarer's Yard", db=SimpleNamespace(brave_room_id="tutorial_wayfarers_yard", brave_safe=True, brave_rest_allowed=True))
+        room = SimpleNamespace(key="Yard Commons", db=SimpleNamespace(brave_room_id="tutorial_wayfarers_yard", brave_safe=True, brave_rest_allowed=True))
         character = SimpleNamespace(
             key="Dad",
             location=room,
@@ -241,7 +241,7 @@ class BraveCharacterCommandTests(unittest.TestCase):
             command.func()
 
         self.assertEqual([True], restored)
-        send_rest_event.assert_called_once_with(character, location_name="Wayfarer's Yard")
+        send_rest_event.assert_called_once_with(character, location_name="Yard Commons")
         broadcast_room_activity.assert_called_once_with(
             room,
             "Dad takes a moment to rest and recover.",
