@@ -647,7 +647,7 @@ def get_tracked_quest_payload(character):
         return {
             "title": tutorial["title"],
             "giver": "Wayfarer's Yard",
-            "objectives": tutorial["objectives"][:4],
+            "objectives": tutorial["objectives"],
             "line": tutorial["summary"],
             "kind": "tutorial",
         }

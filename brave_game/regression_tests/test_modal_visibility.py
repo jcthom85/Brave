@@ -5,7 +5,7 @@ from regression_tests.live_opening_harness import (
     assert_lanternfall_opening_visible,
     create_fresh_character,
 )
-from regression_tests.ui_contract_fixtures import build_room_fixture, build_room_scene_fixture
+from regression_tests.ui_contract_fixtures import build_room_fixture, build_room_scene_fixture, combat_scenarios
 
 
 def seed_room_view(page):
@@ -32,6 +32,23 @@ def seed_room_view(page):
     page.wait_for_selector(".brave-view--room", state="visible", timeout=10000)
 
 
+def seed_combat_view(page):
+    combat = combat_scenarios()["solo_regular"]
+    page.goto(f"{BASE_URL}/webclient/test", wait_until="networkidle")
+    page.wait_for_function("() => !!(window.plugins && window.plugins.defaultout && window.plugin_handler)", timeout=15000)
+    page.evaluate(
+        """(combat) => {
+            const plugin = window.plugins.defaultout;
+            plugin.onUnknownCmd("brave_clear_all", [], { brave_clear_all: {} });
+            plugin.onUnknownCmd("brave_view", [], { brave_view: combat });
+            window.__sent = [];
+            window.plugin_handler.onSend = (cmd) => { window.__sent.push(cmd); };
+        }""",
+        combat,
+    )
+    page.wait_for_selector(".brave-view--combat", state="visible", timeout=10000)
+
+
 def test_welcome_modal_visibility():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -40,6 +57,49 @@ def test_welcome_modal_visibility():
         try:
             create_fresh_character(page)
             assert_lanternfall_opening_visible(page, screenshot_name="mobile_welcome_modal.png")
+        finally:
+            browser.close()
+
+
+def test_victory_continue_suppresses_raw_return_look_text():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1440, "height": 900})
+        try:
+            seed_combat_view(page)
+            victory = {
+                "variant": "combat-result",
+                "title": "VICTORY!",
+                "sections": [{"label": "Rewards", "kind": "lines", "lines": ["XP +1"]}],
+                "reactive": {"scene": "victory"},
+            }
+            page.evaluate(
+                """(victory) => {
+                    window.plugins.defaultout.onUnknownCmd("brave_view", [], { brave_view: victory });
+                }""",
+                victory,
+            )
+            page.wait_for_selector("#brave-victory-transition", state="visible", timeout=10000)
+            page.locator("[data-brave-victory-continue]").click()
+            page.wait_for_function("() => (window.__sent || []).includes('look')", timeout=10000)
+            page.evaluate(
+                """() => {
+                    const plugin = window.plugins.defaultout;
+                    plugin.onText(["look"], { cls: "inp" });
+                    plugin.onText(["Yard Commons\\nExits: north"], { cls: "out", type: "look" });
+                }"""
+            )
+            leaked = page.evaluate(
+                """() => {
+                    const mwin = document.getElementById("messagewindow");
+                    return {
+                        text: mwin ? mwin.textContent : "",
+                        strayCount: mwin ? mwin.querySelectorAll(":scope > .out, :scope > .inp").length : -1,
+                    };
+                }"""
+            )
+            assert "Yard Commons" not in leaked["text"]
+            assert leaked["strayCount"] == 0
         finally:
             browser.close()
 
@@ -224,6 +284,35 @@ def test_menu_overlay_close_preserves_exploration_and_nested_picker_stacks_above
             page.locator(".brave-view__menu-button").click()
             page.get_by_text("Gear", exact=True).click()
             page.wait_for_selector("#brave-menu-view-overlay .brave-view--gear", state="visible", timeout=10000)
+
+            overlay_state = page.evaluate(
+                """() => ({
+                    scene: document.body.getAttribute("data-brave-scene"),
+                    sceneCardText: document.getElementById("scene-card")?.innerText || "",
+                    packPanelText: document.getElementById("scene-pack-panel")?.innerText || "",
+                    roomStillMounted: !!document.querySelector("#messagewindow .brave-view--room"),
+                    menuAriaHidden: document.getElementById("brave-desktop-scene-menu")?.getAttribute("aria-hidden") || null,
+                    menuDisplay: document.getElementById("brave-desktop-scene-menu")
+                        ? getComputedStyle(document.getElementById("brave-desktop-scene-menu")).display
+                        : null,
+                    menuObstructed: (() => {
+                        const menu = document.getElementById("brave-desktop-scene-menu");
+                        if (!menu) return false;
+                        const rect = menu.getBoundingClientRect();
+                        return document.elementFromPoint(
+                            rect.left + Math.min(8, Math.max(1, rect.width / 2)),
+                            rect.top + Math.min(8, Math.max(1, rect.height / 2))
+                        )?.closest("#brave-menu-view-overlay") !== null;
+                    })(),
+                })"""
+            )
+            assert overlay_state["scene"] == "explore"
+            assert overlay_state["roomStillMounted"] is True
+            assert "First Watch" in overlay_state["sceneCardText"]
+            assert "Innkeeper's Fish Pie" in overlay_state["packPanelText"]
+            assert overlay_state["menuAriaHidden"] == "false"
+            assert overlay_state["menuDisplay"] != "none"
+            assert overlay_state["menuObstructed"] is True
 
             page.locator("#brave-menu-view-overlay .brave-view__entry").first.click()
             page.wait_for_selector("#brave-picker-sheet[aria-hidden='false']", state="visible", timeout=10000)

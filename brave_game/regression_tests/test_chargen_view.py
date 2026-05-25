@@ -2,6 +2,7 @@ import os
 import sys
 import types
 import unittest
+from pathlib import Path
 
 import django
 
@@ -26,6 +27,9 @@ from world.browser_views import build_chargen_view
 from world.content import get_content_registry
 
 CONTENT = get_content_registry()
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_OUT_PATH = REPO_ROOT / "brave_game/web/static/webclient/js/plugins/default_out.js"
+WEBCLIENT_CSS_PATH = REPO_ROOT / "brave_game/web/static/webclient/css/brave_webclient.css"
 
 
 def _section(view, label):
@@ -41,6 +45,34 @@ class DummyAccount:
 
 
 class ChargenViewTests(unittest.TestCase):
+    def test_chargen_hero_places_icon_title_before_logo_and_description(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+        css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
+
+        self.assertIn('var titlebarMarkup = ((viewData.title_icon || viewData.title || viewData.back_action)', default_out_source)
+        self.assertIn("var wordmarkMarkup = viewData.wordmark ?", default_out_source)
+        self.assertIn("var chargenHeroMarkup = titlebarMarkup + wordmarkMarkup + subtitleMarkup;", default_out_source)
+        self.assertIn('viewData.variant === "chargen"\n                ? chargenHeroMarkup', default_out_source)
+        self.assertIn('icon(viewData.title_icon, "brave-view__title-icon")', default_out_source)
+        self.assertIn('body[data-brave-view="chargen"] .brave-view__titlebar', css_source)
+        self.assertIn("top: 32px !important;", css_source)
+
+    def test_all_chargen_steps_keep_title_icons(self):
+        steps = [
+            "menunode_choose_race",
+            "menunode_choose_class",
+            "menunode_choose_gender",
+            "menunode_choose_name",
+            "menunode_confirm",
+        ]
+
+        for step in steps:
+            with self.subTest(step=step):
+                view = build_chargen_view(DummyAccount(), {"step": step, "name": "Aria"})
+                self.assertTrue(view.get("title"))
+                self.assertTrue(view.get("subtitle"))
+                self.assertTrue(view.get("title_icon"))
+
     def test_name_step_renders_inline_form_payload(self):
         view = build_chargen_view(DummyAccount(), {"step": "menunode_choose_name", "name": "Aria"})
 

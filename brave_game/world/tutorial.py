@@ -860,6 +860,9 @@ def get_tutorial_objective_entries(character):
         add("Optional: Check the map.", "viewed_map")
         add("Optional: Open your journal.", "viewed_journal")
     elif step_key == "catch_your_breath":
+        if flags.get("received_wayfarer_clasp") and flags.get("equipped_wayfarer_clasp"):
+            add("Recover the Wayfarer Clasp.", "received_wayfarer_clasp")
+            add("Equip the Wayfarer Clasp from Gear.", "equipped_wayfarer_clasp")
         add("Rest in Yard Commons.", "rested_after_fight")
     elif step_key == "through_the_gate":
         add("Report to Captain Harl Rowan in the Training Yard.", "talked_harl")

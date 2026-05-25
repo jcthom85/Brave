@@ -197,6 +197,8 @@ class CombatViewTests(unittest.TestCase):
         self.assertIn("sendBrowserCommand(\"look\");", default_out_source)
         self.assertIn("victoryReactive.scene = \"victory\";", default_out_source)
         self.assertIn("currentViewData = victoryViewData || currentViewData || { variant: \"combat-result\" };", default_out_source)
+        self.assertIn("suppressNextLookText = true;\n                finishVictoryTransitionOverlay();\n                sendBrowserCommand(\"look\");", default_out_source)
+        self.assertIn("String(rawText || \"\").trim().toLowerCase() === \"look\"", default_out_source)
         self.assertIn("document.getElementById(\"brave-victory-transition\")", default_out_source)
         self.assertNotIn("renderMainView(queuedViewData, { skipVictoryTransition: true });", default_out_source)
         self.assertIn("#brave-victory-transition {\n    position: fixed;\n    inset: 0;\n    z-index: 5050;", css_source)

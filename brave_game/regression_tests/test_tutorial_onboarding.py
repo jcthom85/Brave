@@ -908,6 +908,57 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertEqual("Wayfarer's Yard", payload["giver"])
         self.assertTrue(any("Tamsin" in objective["text"] for objective in payload["objectives"]))
 
+    def test_clasp_tutorial_tracked_payload_keeps_checked_objectives_visible(self):
+        character = DummyCharacter()
+        begin_tutorial(character)
+        state = ensure_tutorial_state(character)
+        state["flags"].update(
+            {
+                "talked_tamsin": True,
+                "visited_quartermaster_shed": True,
+                "talked_nella": True,
+                "viewed_gear": True,
+                "viewed_pack": True,
+                "read_supply_board": True,
+                "talked_brask": True,
+                "used_class_ability": True,
+                "used_combat_consumable": True,
+                "won_vermin_fight": True,
+                "received_wayfarer_clasp": True,
+                "viewed_sheet": True,
+                "viewed_map": True,
+                "viewed_journal": True,
+            }
+        )
+        state["step"] = "fit_your_clasp"
+        character.db.brave_tutorial = state
+
+        payload = get_tracked_quest_payload(character)
+        self.assertEqual("Fit Your Clasp", payload["title"])
+        self.assertEqual(
+            [
+                ("Recover the Wayfarer Clasp.", True),
+                ("Equip the Wayfarer Clasp from Gear.", False),
+                ("Optional: Open your sheet or stats.", True),
+                ("Optional: Check the map.", True),
+                ("Optional: Open your journal.", True),
+            ],
+            [(objective["text"], objective["completed"]) for objective in payload["objectives"]],
+        )
+
+        record_command_event(character, "equip_gear")
+        payload = get_tracked_quest_payload(character)
+
+        self.assertEqual("Catch Your Breath", payload["title"])
+        self.assertEqual(
+            [
+                ("Recover the Wayfarer Clasp.", True),
+                ("Equip the Wayfarer Clasp from Gear.", True),
+                ("Rest in Yard Commons.", False),
+            ],
+            [(objective["text"], objective["completed"]) for objective in payload["objectives"]],
+        )
+
     def test_first_hour_route_tracks_clear_handoffs_through_ruk(self):
         character = DummyCharacter()
         character.db.brave_tutorial = {"status": "completed", "step": None, "flags": {}}

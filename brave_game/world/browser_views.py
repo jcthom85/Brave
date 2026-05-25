@@ -588,47 +588,55 @@ def build_account_view(account):
 
     roster_entries = []
     can_create = available_slots is None or available_slots > 0 or has_pending
-    if can_create:
-        create_lines = []
-        create_meta = None
-        create_icon = "person_add"
-        create_chips = []
-        create_actions = []
-        if has_pending:
-            create_meta = None
-            create_icon = "edit_note"
-            create_chips.append(_chip("Draft", "edit_note", "warn"))
-            create_lines = [
-                f"Name: {pending.get('name') or '-'}",
-                f"Race: {RACES.get(pending.get('race'), {}).get('name', '-')}",
-                f"Class: {CLASSES.get(pending.get('class'), {}).get('name', '-')}",
-            ]
-            create_title = "Resume Character Creation"
-            create_actions.append(
-                _action(
-                    "Discard draft",
-                    "create discard",
-                    "trash",
-                    tone="danger",
-                    confirm="Discard this saved character draft?",
-                    icon_only=True,
-                    aria_label="Discard saved character draft",
-                )
-            )
-        else:
-            create_title = "Create Character"
-
-        roster_entries.append(
-            _entry(
-                create_title,
-                meta=create_meta,
-                lines=create_lines,
-                icon=create_icon,
-                command="create",
-                chips=create_chips,
-                actions=create_actions,
+    create_lines = []
+    create_meta = None
+    create_icon = "person_add"
+    create_badge = None
+    create_command = "create"
+    create_chips = []
+    create_actions = []
+    if has_pending:
+        create_icon = "edit_note"
+        create_chips.append(_chip("Draft", "edit_note", "warn"))
+        create_lines = [
+            f"Name: {pending.get('name') or '-'}",
+            f"Race: {RACES.get(pending.get('race'), {}).get('name', '-')}",
+            f"Class: {CLASSES.get(pending.get('class'), {}).get('name', '-')}",
+        ]
+        create_title = "Resume Character Creation"
+        create_actions.append(
+            _action(
+                "Discard draft",
+                "create discard",
+                "trash",
+                tone="danger",
+                confirm="Discard this saved character draft?",
+                icon_only=True,
+                aria_label="Discard saved character draft",
             )
         )
+    elif can_create:
+        create_title = "Create Character"
+    else:
+        create_title = "Create Character"
+        create_badge = "X"
+        create_icon = None
+        create_command = None
+        create_chips.append(_chip("Full", "block", "warn"))
+        create_lines = ["All slots filled.", "Delete a slot to create."]
+
+    roster_entries.append(
+        _entry(
+            create_title,
+            meta=create_meta,
+            lines=create_lines,
+            icon=create_icon,
+            badge=create_badge,
+            command=create_command,
+            chips=create_chips,
+            actions=create_actions,
+        )
+    )
 
     for index, character in enumerate(characters, start=1):
         character.ensure_brave_character()

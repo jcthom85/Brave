@@ -76,16 +76,18 @@ class DummyCharacters:
 
 
 class DummyAccount:
-    def __init__(self, characters=None, draft=None, last_played=None):
+    def __init__(self, characters=None, draft=None, last_played=None, available_slots=2, max_slots=3):
         self.characters = DummyCharacters(characters or [])
         self.db = types.SimpleNamespace(_last_puppet=last_played, brave_chargen=draft)
         self.key = "Tester"
+        self._available_slots = available_slots
+        self._max_slots = max_slots
 
     def get_available_character_slots(self):
-        return 2
+        return self._available_slots
 
     def get_character_slots(self):
-        return 3
+        return self._max_slots
 
 
 class ConnectionViewTests(unittest.TestCase):
@@ -138,6 +140,21 @@ class AccountViewTests(unittest.TestCase):
         self.assertIsNone(entry.get("meta"))
         commands = [action.get("command") for action in entry.get("actions", [])]
         self.assertEqual(["delete 1 --force"], commands)
+
+    def test_account_view_keeps_disabled_create_card_when_slots_are_full(self):
+        characters = [DummyCharacter(f"Hero{i}") for i in range(1, 11)]
+        account = DummyAccount(characters=characters, available_slots=0, max_slots=10)
+
+        view = build_account_view(account)
+
+        roster = view.get("sections", [])[0]
+        entries = roster.get("items", [])
+        create = entries[0]
+        self.assertEqual("Create Character", create.get("title"))
+        self.assertEqual("X", create.get("badge"))
+        self.assertNotIn("command", create)
+        self.assertEqual(["All slots filled.", "Delete a slot to create."], create.get("lines"))
+        self.assertEqual(11, len(entries))
 
 
 class ChargenViewTests(unittest.TestCase):

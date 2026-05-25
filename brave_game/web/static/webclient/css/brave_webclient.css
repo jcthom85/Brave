@@ -18781,6 +18781,18 @@ body.brave-mobile-input-open #inputsend {
     text-transform: none;
 }
 
+.brave-view--chargen .brave-view__titlebar {
+    align-items: center;
+}
+
+.brave-view--chargen .brave-view__title {
+    color: var(--brave-frontdoor-title);
+}
+
+.brave-view--chargen .brave-view__title-icon {
+    color: var(--brave-frontdoor-accent-strong);
+}
+
 .brave-view--account .brave-view__sections,
 .brave-view--connection .brave-view__sections,
 .brave-view--chargen .brave-view__sections {
@@ -18867,6 +18879,14 @@ body.brave-mobile-input-open #inputsend {
 .brave-view--account .brave-view__entry {
     padding: 20px;
     min-height: 110px;
+}
+
+.brave-view--account .brave-view__entry-head {
+    align-items: center;
+}
+
+.brave-view--account .brave-view__entry-heading {
+    align-content: center;
 }
 
 .brave-view--connection .brave-view__section--list .brave-view__list-item.brave-click {
@@ -18976,6 +18996,31 @@ body.brave-mobile-input-open #inputsend {
     transform: scale(1.12) rotate(15deg);
     color: var(--brave-frontdoor-accent-strong);
     filter: drop-shadow(0 0 8px rgba(var(--brave-frontdoor-accent-rgb), 0.45));
+}
+
+.brave-view--account .brave-view__entry:first-child:not(.brave-click) {
+    border-color: rgba(208, 122, 115, 0.42);
+    background:
+        linear-gradient(135deg, rgba(208, 122, 115, 0.08), transparent 52%),
+        rgba(12, 17, 22, 0.92);
+    color: var(--brave-frontdoor-muted);
+    cursor: default;
+}
+
+.brave-view--account .brave-view__entry:first-child:not(.brave-click):hover {
+    border-color: rgba(208, 122, 115, 0.42);
+    background:
+        linear-gradient(135deg, rgba(208, 122, 115, 0.08), transparent 52%),
+        rgba(12, 17, 22, 0.92);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+    transform: none;
+}
+
+.brave-view--account .brave-view__entry:first-child:not(.brave-click) .brave-view__entry-badge {
+    border-color: rgba(208, 122, 115, 0.45);
+    background: rgba(208, 122, 115, 0.14);
+    color: var(--brave-frontdoor-danger);
+    font-weight: 800;
 }
 
 .brave-view--account .brave-view__entry .brave-view__entry-icon {
@@ -21226,10 +21271,21 @@ body[data-brave-view="chargen"]::before {
 
     body[data-brave-view="chargen"] .brave-view__subtitle {
         position: absolute !important;
-        bottom: 152px !important;
+        bottom: 44px !important;
         left: 32px !important;
         margin: 0 !important;
         font-size: 1rem !important;
+    }
+
+    body[data-brave-view="chargen"] .brave-view__wordmark-text {
+        bottom: 86px !important;
+    }
+
+    body[data-brave-view="chargen"] .brave-view__titlebar {
+        position: absolute !important;
+        top: 32px !important;
+        left: 32px !important;
+        margin: 0 !important;
     }
 
     /* Lower the BACK and LOGOUT action buttons to the bottom-right corner to separate them from the logo */
@@ -21437,6 +21493,11 @@ body[data-brave-motion="reduced"] .brave-view--chargen .brave-view__wordmark-tex
 
 body.brave-picker-active #brave-desktop-scene-menu {
     display: none;
+    pointer-events: none;
+}
+
+body.brave-menu-view-overlay-active #brave-desktop-scene-menu {
+    z-index: 40;
     pointer-events: none;
 }
 

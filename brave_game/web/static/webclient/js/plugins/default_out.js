@@ -1212,7 +1212,11 @@ let defaultout_plugin = (function () {
         return !!(
             (
                 (currentViewData && isRoomLikeView(currentViewData))
-                || (currentMenuViewOverlayData && currentRoomViewData && isRoomLikeView(currentRoomViewData))
+                || (
+                    (currentMenuViewOverlayData || (pendingMenuViewCommand && Date.now() <= pendingMenuViewCommandUntil))
+                    && currentRoomViewData
+                    && isRoomLikeView(currentRoomViewData)
+                )
             )
             && document.body
             && document.body.getAttribute("data-brave-scene") === "explore"
@@ -5331,6 +5335,22 @@ let defaultout_plugin = (function () {
         syncInputContextForView(roomView);
     };
 
+    var renderCurrentRoomSceneRail = function () {
+        var roomView = isRoomLikeView(currentRoomViewData)
+            ? currentRoomViewData
+            : (isRoomLikeView(currentViewData) ? currentViewData : null);
+        if (!roomView) {
+            return;
+        }
+        renderPackPanel();
+        renderVicinityPanel(roomView);
+        if (currentRoomSceneData !== null) {
+            renderSceneCard(currentRoomSceneData);
+        }
+        syncSceneRailLayout();
+        syncMobileShell();
+    };
+
     var clearMenuViewOverlay = function (options) {
         options = options || {};
         var root = document.getElementById("brave-menu-view-overlay");
@@ -5344,8 +5364,9 @@ let defaultout_plugin = (function () {
             document.body.classList.remove("brave-menu-view-overlay-active");
         }
         if (options.restoreRail !== false) {
-            restoreMenuViewOverlaySceneRail();
+            menuViewOverlaySceneRailSnapshot = null;
             restoreMenuViewOverlayRoomContext();
+            renderCurrentRoomSceneRail();
         } else {
             menuViewOverlaySceneRailSnapshot = null;
         }
@@ -5389,6 +5410,8 @@ let defaultout_plugin = (function () {
         if (document.body) {
             document.body.classList.add("brave-menu-view-overlay-active");
         }
+        restoreMenuViewOverlayRoomContext();
+        renderCurrentRoomSceneRail();
         renderDesktopSceneMenu();
         root.innerHTML =
             "<div class='brave-menu-view-overlay__backdrop' data-brave-menu-view-close='1'></div>"
@@ -5447,7 +5470,6 @@ let defaultout_plugin = (function () {
             && isRoomLikeView(currentViewData)
             && document.body
             && document.body.getAttribute("data-brave-scene") === "explore"
-            && !document.body.classList.contains("brave-menu-view-overlay-active")
             && !document.body.classList.contains("brave-arcade-overlay-active")
             && !document.body.classList.contains("brave-notice-active")
             && !document.body.classList.contains("brave-objectives-welcome-active")
@@ -11042,6 +11064,22 @@ let defaultout_plugin = (function () {
             );
         };
 
+        var titlebarMarkup = ((viewData.title_icon || viewData.title || viewData.back_action)
+            ? "<div class='brave-view__titlebar'>"
+                + ((viewData.title_icon || viewData.title)
+                    ? "<div class='brave-view__title'>"
+                        + (viewData.title_icon ? icon(viewData.title_icon, "brave-view__title-icon") : "")
+                        + (viewData.title ? "<span>" + escapeHtml(viewData.title) + "</span>" : "")
+                        + "</div>"
+                    : "")
+                + renderBackAction(viewData.back_action)
+                + "</div>"
+            : "");
+        var subtitleMarkup = viewData.subtitle ? "<div class='brave-view__subtitle'>" + escapeHtml(viewData.subtitle) + "</div>" : "";
+        var wordmarkMarkup = viewData.wordmark ? "<div class='brave-view__wordmark' aria-label='" + escapeHtml(viewData.wordmark) + "'><span class='brave-view__wordmark-text'>" + escapeHtml(viewData.wordmark) + "</span></div>" : "";
+        var heroTitleMarkup = titlebarMarkup + subtitleMarkup;
+        var chargenHeroMarkup = titlebarMarkup + wordmarkMarkup + subtitleMarkup;
+
         var heroSceneMarkup =
             (((viewData.eyebrow_icon || viewData.eyebrow) || (!isMobileViewport() && isRoomLikeView(viewData)))
                 ? "<div class='brave-view__hero-topbar'>"
@@ -11057,31 +11095,21 @@ let defaultout_plugin = (function () {
                     + "</div>"
                 : "")
             + renderRoomMicromap()
-            + ((viewData.title_icon || viewData.title || viewData.back_action)
-                ? "<div class='brave-view__titlebar'>"
-                    + ((viewData.title_icon || viewData.title)
-                        ? "<div class='brave-view__title'>"
-                            + (viewData.title_icon ? icon(viewData.title_icon, "brave-view__title-icon") : "")
-                            + (viewData.title ? "<span>" + escapeHtml(viewData.title) + "</span>" : "")
-                            + "</div>"
-                        : "")
-                    + renderBackAction(viewData.back_action)
-                    + "</div>"
-                : "")
-            + (viewData.subtitle ? "<div class='brave-view__subtitle'>" + escapeHtml(viewData.subtitle) + "</div>" : "");
+            + heroTitleMarkup;
 
         var viewMarkup =
             "<div class='brave-view" + variantClass + toneClass + "'>"
             + "<div class='brave-view__hero'>"
-            + (viewData.wordmark ? "<div class='brave-view__wordmark' aria-label='" + escapeHtml(viewData.wordmark) + "'><span class='brave-view__wordmark-text'>" + escapeHtml(viewData.wordmark) + "</span></div>" : "")
-            + (isRoomLikeView(viewData)
+            + (viewData.variant === "chargen"
+                ? chargenHeroMarkup
+                : wordmarkMarkup + (isRoomLikeView(viewData)
                 ? "<div class='brave-view__room-scene-card"
                     + (shouldApplyRoomSceneEnterClass ? " brave-view__room-scene-card--enter" : "")
                     + (shouldAnimateRegionSceneCard ? " brave-view__room-scene-card--region-change" : "")
                     + (shouldAnimateFirstRegionDiscoverySceneCard ? " brave-view__room-scene-card--first-region-discovery" : "")
                     + (shouldAnimateFirstRoomDiscoverySceneCard ? " brave-view__room-scene-card--first-room-discovery" : "")
                     + "' data-brave-room-id='" + escapeHtml((nextRoomSceneMeta && nextRoomSceneMeta.roomId) || "") + "' data-brave-region='" + escapeHtml((nextRoomSceneMeta && nextRoomSceneMeta.regionName) || "") + "'>" + renderRoomAtmosphere(viewData.atmosphere) + heroSceneMarkup + "</div>"
-                : heroSceneMarkup)
+                : heroSceneMarkup))
             + renderMobileRoomUtility()
             + (Array.isArray(viewData.chips) && viewData.chips.length
                 ? "<div class='brave-view__chips'>" + viewData.chips.map(renderChip).join("") + "</div>"
@@ -11532,9 +11560,9 @@ let defaultout_plugin = (function () {
         }
         clearBrowserNotice();
         if (options.menuView && isMenuViewCommand(normalizedCommand)) {
-            if (!currentMenuViewOverlayData) {
-                captureMenuViewOverlaySceneRail();
-            }
+            menuViewOverlaySceneRailSnapshot = null;
+            restoreMenuViewOverlayRoomContext();
+            renderCurrentRoomSceneRail();
             pendingMenuViewCommand = normalizedCommand;
             pendingMenuViewCommandUntil = Date.now() + 10000;
         } else if (
@@ -13402,6 +13430,7 @@ let defaultout_plugin = (function () {
                     setBodyState("view", "combat-result");
                     setBodyState("scene", "victory");
                 }
+                suppressNextLookText = true;
                 finishVictoryTransitionOverlay();
                 sendBrowserCommand("look");
                 return;
@@ -14235,7 +14264,13 @@ let defaultout_plugin = (function () {
         ) {
             return true;
         }
-        if (kwargs && kwargs.type === "look" && suppressNextLookText) {
+        if (
+            suppressNextLookText
+            && (
+                (kwargs && kwargs.type === "look")
+                || (typeof cls === "string" && cls.indexOf("inp") !== -1 && String(rawText || "").trim().toLowerCase() === "look")
+            )
+        ) {
             return true;
         }
         var combatActiveAtTextStart = isCombatUiActive();
@@ -14527,6 +14562,12 @@ let defaultout_plugin = (function () {
                 return true;
             }
             if (isPreservedSystemViewActive() && !shouldAllowCurrentRoomRefreshNavigation()) {
+                return true;
+            }
+            if (isMenuViewOverlayOpeningOrActive()) {
+                allowNextRoomRefreshNavigationUntil = 0;
+                restoreMenuViewOverlayRoomContext();
+                renderCurrentRoomSceneRail();
                 return true;
             }
             allowNextRoomRefreshNavigationUntil = 0;
