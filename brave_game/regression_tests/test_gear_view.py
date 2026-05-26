@@ -136,6 +136,37 @@ class GearViewTests(unittest.TestCase):
         self.assertEqual("Empty", snack_picker.get("subtitle"))
         self.assertEqual(["Trail Mix Satchel"], [option.get("label") for option in snack_picker.get("options", [])])
 
+    def test_wayfarer_clasp_shimmers_in_trinket_picker_during_tutorial(self):
+        character = DummyCharacter(inventory=[{"template": "wayfarer_clasp", "quantity": 1}])
+        character.db.brave_tutorial = {
+            "status": "active",
+            "step": "fit_your_clasp",
+            "flags": {
+                "talked_tamsin": True,
+                "visited_quartermaster_shed": True,
+                "talked_nella": True,
+                "viewed_gear": True,
+                "viewed_pack": True,
+                "read_supply_board": True,
+                "talked_brask": True,
+                "used_class_ability": True,
+                "used_combat_consumable": True,
+                "won_vermin_fight": True,
+                "received_wayfarer_clasp": True,
+                "equipped_wayfarer_clasp": False,
+            },
+        }
+
+        view = build_gear_view(character)
+        trinket = view.get("sections", [])[0].get("items", [])[8]
+        options = trinket.get("picker", {}).get("options", [])
+
+        self.assertTrue(trinket.get("shimmer"))
+        self.assertEqual(["gear equip trinket wayfarer_clasp"], view.get("shimmers"))
+        self.assertEqual("Wayfarer Clasp", options[0].get("label"))
+        self.assertEqual("gear equip trinket wayfarer_clasp", options[0].get("command"))
+        self.assertTrue(options[0].get("shimmer"))
+
     def test_gear_power_feedback_renders_as_right_side_section(self):
         character = DummyCharacter()
 

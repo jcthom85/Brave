@@ -274,6 +274,7 @@ def _picker_option(
     rarity_key=None,
     rarity_label=None,
     rarity_tone=None,
+    shimmer=False,
 ):
     option = {"label": label}
     if command:
@@ -300,6 +301,8 @@ def _picker_option(
         option["rarity_label"] = rarity_label
     if rarity_tone:
         option["rarity_tone"] = rarity_tone
+    if shimmer:
+        option["shimmer"] = True
     return option
 
 def _picker(

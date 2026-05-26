@@ -2,7 +2,6 @@
 
 from world.browser_context import (
     QUESTS,
-    STARTING_QUESTS,
     get_quest_region,
     group_quest_keys_by_region,
 )
@@ -17,7 +16,7 @@ from world.browser_ui import (
     _reactive_from_character,
     _section,
 )
-from world.questing import get_tracked_quest, get_visible_objective_states
+from world.questing import get_journal_quest_keys, get_tracked_quest, get_visible_objective_states
 from world.tutorial import (
     TUTORIAL_STEPS,
     ensure_tutorial_state,
@@ -199,14 +198,15 @@ def build_quests_view(character):
         nearby_npcs=nearby_npcs,
         detailed=True,
     ) if tracked_key and not tutorial_active else None
+    journal_quest_keys = get_journal_quest_keys(character)
     active_keys = [
         quest_key
-        for quest_key in STARTING_QUESTS
+        for quest_key in journal_quest_keys
         if (character.db.brave_quests or {}).get(quest_key, {}).get("status") == "active"
     ]
     completed_keys = [
         quest_key
-        for quest_key in STARTING_QUESTS
+        for quest_key in journal_quest_keys
         if (character.db.brave_quests or {}).get(quest_key, {}).get("status") == "completed"
     ]
 

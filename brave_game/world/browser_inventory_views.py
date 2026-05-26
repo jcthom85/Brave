@@ -114,6 +114,7 @@ def _build_gear_slot_picker(character, slot, equipped_template_id=None):
         subtitle = "Empty"
 
     candidates = []
+    tutorial_shimmers = set(get_tutorial_view_shimmers(character, "gear"))
     for entry in getattr(character, "get_equippable_inventory", lambda **kwargs: [])(slot=slot):
         template_id = entry.get("template")
         quantity = max(0, int(entry.get("quantity", 0) or 0))
@@ -128,13 +129,15 @@ def _build_gear_slot_picker(character, slot, equipped_template_id=None):
         option_meta = f"{get_item_rarity_label(template)} · {option_meta}"
         if quantity > 1:
             option_meta = f"x{quantity} · {option_meta}"
+        command = f"gear equip {slot} {template_id}"
         options.append(
             _picker_option(
                 template.get("name", template_id.replace("_", " ").title()),
-                command=f"gear equip {slot} {template_id}",
+                command=command,
                 icon="north_east",
                 meta=option_meta,
                 tone="accent",
+                shimmer=command in tutorial_shimmers,
                 **build_item_rarity_display(template),
             )
         )

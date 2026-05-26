@@ -1157,12 +1157,11 @@ def _talk_harl(character, is_action=False):
         )
 
     if is_action:
-        _set_flag(character, "talked_harl")
-        complete_tutorial(character)
-
         from world.questing import advance_talk_to_npc, ensure_starter_quests, unlock_quest
 
         advance_talk_to_npc(character, "captain_harl_rowan")
+        _set_flag(character, "talked_harl")
+        character.db.brave_harl_cellar_job_assigned = True
         unlock_quest(character, "rats_in_the_kettle")
         ensure_starter_quests(character)
 

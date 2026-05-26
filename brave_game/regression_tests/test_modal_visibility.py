@@ -116,7 +116,8 @@ def test_desktop_scene_menu_pulls_down_when_gutter_fits():
                     const room = document.querySelector("#messagewindow > .brave-view--room")?.getBoundingClientRect();
                     const menu = document.querySelector(".brave-view__menu-button")?.getBoundingClientRect();
                     if (!rail || !room || !menu) return false;
-                    return menu.left > room.right && rail.left - menu.right >= 24 && rail.left - menu.right <= 72;
+                    const railGap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--brave-rail-gap"));
+                    return menu.left > room.right && Math.abs((rail.left - menu.right) - railGap) <= 1;
                 }""",
                 timeout=10000,
             )
@@ -134,7 +135,8 @@ def test_desktop_scene_menu_pulls_down_when_gutter_fits():
                 }"""
             )
             assert placement["menuLeft"] > placement["roomRight"]
-            assert 24 <= placement["railLeft"] - placement["menuRight"] <= 72
+            rail_gap = page.evaluate('parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--brave-rail-gap"))')
+            assert abs((placement["railLeft"] - placement["menuRight"]) - rail_gap) <= 1
             page.locator(".brave-view__menu-button").click()
             page.wait_for_selector(
                 "#brave-desktop-scene-menu.brave-desktop-scene-menu--open .brave-desktop-scene-menu__panel",

@@ -229,7 +229,11 @@ class QuestPopupTests(unittest.TestCase):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
 
         self.assertIn(
-            'if (element.closest("#scene-card, #scene-pack-panel, #scene-vicinity-panel")) {\n'
+            'if (element.closest("#scene-card, #scene-pack-panel")) {\n'
+            '                element.classList.remove("brave-shimmer");\n'
+            '                return;\n'
+            '            }\n'
+            '            if (element.closest("#scene-vicinity-panel") && !element.classList.contains("brave-room-actions__button")) {\n'
             '                element.classList.remove("brave-shimmer");\n'
             '                return;\n'
             '            }',
@@ -237,6 +241,37 @@ class QuestPopupTests(unittest.TestCase):
         )
         self.assertIn('button.classList.toggle("brave-shimmer", hasShimmeringMenuOption);', default_out_source)
         self.assertIn('var shimmerClass = (option && option.command && checkCommandShimmer(option.command)) ? " brave-shimmer" : "";', default_out_source)
+
+    def test_tutorial_shimmer_lights_room_action_buttons_in_vicinity_rail(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("var shouldShimmer = checkCommandShimmer(action.command);", default_out_source)
+        self.assertIn(
+            'var buttonClass = "brave-room-actions__button brave-click" + (shouldShimmer ? " brave-shimmer" : "");',
+            default_out_source,
+        )
+
+    def test_desktop_menu_gap_matches_scene_rail_column_gap(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn('getPropertyValue("--brave-rail-gap")', default_out_source)
+        self.assertIn("var center = railRect.left - railGapValue - buttonWidth;", default_out_source)
+
+    def test_journal_popup_refreshes_when_quest_state_changes(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn('if (cmdname === "brave_journal_update")', default_out_source)
+        self.assertIn('currentMenuViewOverlayData && String(currentMenuViewOverlayData.variant || "") === "journal"', default_out_source)
+        self.assertIn("renderMainView(journalView || {});", default_out_source)
+        self.assertIn('var menuViewAttr = (entry && isMenuViewCommand(entry.command)) ? " data-brave-menu-view-command=\'1\'" : "";', default_out_source)
+
+    def test_picker_options_honor_explicit_tutorial_shimmer_payloads(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        self.assertIn(
+            'var shimmerClass = ((option && option.shimmer) || (option && option.command && checkCommandShimmer(option.command))) ? " brave-shimmer" : "";',
+            default_out_source,
+        )
 
     def test_tutorial_objective_refresh_updates_tracked_card_while_menu_overlay_is_open(self):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")

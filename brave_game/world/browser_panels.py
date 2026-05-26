@@ -35,7 +35,6 @@ ITEM_TEMPLATES = ITEM_CONTENT.item_templates
 get_item_category = ITEM_CONTENT.get_item_category
 
 QUESTS = QUEST_CONTENT.quests
-STARTING_QUESTS = QUEST_CONTENT.starting_quests
 group_quest_keys_by_region = QUEST_CONTENT.group_quest_keys_by_region
 PORTALS = SYSTEMS_CONTENT.portals
 PORTAL_STATUS_LABELS = SYSTEMS_CONTENT.portal_status_labels

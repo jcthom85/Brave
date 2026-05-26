@@ -149,7 +149,14 @@ def _refresh_tracked_quest_scene(character):
         return
 
     tracked = get_tracked_quest_payload(character)
-    send_webclient_event(character, brave_scene={"tracked_quest": tracked} if tracked else {})
+    payload = {"brave_scene": {"tracked_quest": tracked} if tracked else {}}
+    try:
+        from world.browser_journal_views import build_quests_view
+
+        payload["brave_journal_update"] = {"view": build_quests_view(character)}
+    except Exception:
+        pass
+    send_webclient_event(character, **payload)
 
 
 def _send_progress_notice(character, messages):
@@ -368,7 +375,11 @@ def _unlock_available_quests(character, quest_log, messages):
 
 def _sync_tracked_quest(character, quest_log, messages):
     changed = False
-    active_keys = [quest_key for quest_key in QUEST_CONTENT.starting_quests if quest_log.get(quest_key, {}).get("status") == "active"]
+    active_keys = [
+        quest_key
+        for quest_key in _ordered_defined_journal_quest_keys(quest_log)
+        if quest_log.get(quest_key, {}).get("status") == "active"
+    ]
     tracked = getattr(character.db, "brave_tracked_quest", None)
     suppressed = bool(getattr(character.db, "brave_track_suppressed", False))
 
@@ -560,14 +571,47 @@ def get_active_quests(character):
     """Return active quest keys in stable order."""
 
     quest_log = character.db.brave_quests or {}
-    return [quest_key for quest_key in QUEST_CONTENT.starting_quests if quest_log.get(quest_key, {}).get("status") == "active"]
+    return [
+        quest_key
+        for quest_key in get_journal_quest_keys(character)
+        if quest_log.get(quest_key, {}).get("status") == "active"
+    ]
 
 
 def get_completed_quests(character):
     """Return completed quest keys in stable order."""
 
     quest_log = character.db.brave_quests or {}
-    return [quest_key for quest_key in QUEST_CONTENT.starting_quests if quest_log.get(quest_key, {}).get("status") == "completed"]
+    return [
+        quest_key
+        for quest_key in get_journal_quest_keys(character)
+        if quest_log.get(quest_key, {}).get("status") == "completed"
+    ]
+
+
+def get_journal_quest_keys(character):
+    """Return defined quest keys relevant to this character in stable journal order."""
+
+    quest_log = character.db.brave_quests or {}
+    return _ordered_defined_journal_quest_keys(quest_log)
+
+
+def _ordered_defined_journal_quest_keys(quest_log):
+    """Return known quest keys from the catalog plus any extra defined quest-log keys."""
+
+    quest_log = quest_log or {}
+    ordered = []
+    seen = set()
+    for quest_key in QUEST_CONTENT.starting_quests:
+        if quest_key in QUEST_CONTENT.quests:
+            ordered.append(quest_key)
+            seen.add(quest_key)
+    for quest_key in QUEST_CONTENT.quests:
+        if quest_key in seen or quest_key not in quest_log:
+            continue
+        ordered.append(quest_key)
+        seen.add(quest_key)
+    return ordered
 
 
 def get_tracked_quest(character):

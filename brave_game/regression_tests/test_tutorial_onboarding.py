@@ -136,7 +136,8 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertNotIn("rats_in_the_kettle", character.db.brave_quests)
         self.assertEqual("practice_makes_heroes", character.db.brave_tracked_quest)
 
-        response = get_entity_response(character, _entity("captain_harl_rowan"), "talk", is_action=True)
+        with patch("world.tutorial.get_room", return_value=None):
+            response = get_entity_response(character, _entity("captain_harl_rowan"), "talk", is_action=True)
 
         self.assertIn("south lantern is out", response.lower())
         self.assertTrue(character.db.brave_harl_cellar_job_assigned)
@@ -148,6 +149,41 @@ class TutorialOnboardingTests(unittest.TestCase):
             ["Talk to Uncle Pib Underbough."],
             [objective["text"] for objective in payload["objectives"]],
         )
+
+    def test_tutorial_harl_talk_completes_practice_without_room_change(self):
+        character = DummyCharacter()
+        begin_tutorial(character)
+        ensure_starter_quests(character)
+        state = ensure_tutorial_state(character)
+        state["flags"].update(
+            {
+                "talked_tamsin": True,
+                "visited_quartermaster_shed": True,
+                "talked_nella": True,
+                "viewed_gear": True,
+                "viewed_pack": True,
+                "read_supply_board": True,
+                "talked_brask": True,
+                "used_class_ability": True,
+                "used_combat_consumable": True,
+                "won_vermin_fight": True,
+                "received_wayfarer_clasp": True,
+                "equipped_wayfarer_clasp": True,
+                "rested_after_fight": True,
+            }
+        )
+        character.db.brave_tutorial = state
+        character.location = _room("brambleford_training_yard")
+
+        with patch("world.tutorial.get_room", return_value=None):
+            response = get_entity_response(character, _entity("captain_harl_rowan"), "talk", is_action=True)
+
+        self.assertIn("Tamsin sent you through", response)
+        self.assertEqual("completed", character.db.brave_tutorial["status"])
+        self.assertEqual("completed", character.db.brave_quests["practice_makes_heroes"]["status"])
+        self.assertTrue(character.db.brave_quests["practice_makes_heroes"]["objectives"][0]["completed"])
+        self.assertEqual("active", character.db.brave_quests["rats_in_the_kettle"]["status"])
+        self.assertEqual("rats_in_the_kettle", character.db.brave_tracked_quest)
 
     def test_unlocking_quest_sends_new_quest_popup_payload(self):
         character = DummyCharacter()
@@ -420,7 +456,11 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertEqual([{"template": "wayfarer_clasp", "quantity": 1}], character.db.brave_inventory)
 
         record_command_event(character, "equip_gear")
+        character.location = _room("tutorial_wayfarers_yard", rest_allowed=True)
         self.assertEqual("catch_your_breath", ensure_tutorial_state(character)["step"])
+        guidance = get_tutorial_mechanical_guidance(character)
+        self.assertIn("Rest in Yard Commons", guidance["guidance"][0][0])
+        self.assertEqual(["rest"], guidance["shimmers"])
 
         record_command_event(character, "rest")
         self.assertEqual("through_the_gate", ensure_tutorial_state(character)["step"])

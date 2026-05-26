@@ -5,7 +5,6 @@ from world.browser_context import (
     ITEM_TEMPLATES,
     QUESTS,
     RACES,
-    STARTING_QUESTS,
     get_item_category,
     get_quest_region,
 )
@@ -17,7 +16,7 @@ from world.data.items import get_item_rarity_key, get_item_rarity_label, get_ite
 from world.item_rarity import build_item_rarity_chip, build_item_rarity_display
 from world.browser_ui import _picker
 from world.party import get_character_by_id, get_follow_target, get_party_leader, get_party_members
-from world.questing import get_tracked_quest, get_visible_objective_states
+from world.questing import get_journal_quest_keys, get_tracked_quest, get_visible_objective_states
 from world.resonance import get_resource_label, get_stat_label
 
 def _build_mobile_pack_payload(character):
@@ -178,14 +177,15 @@ def _build_mobile_character_payload(character):
 def _build_mobile_quests_payload(character):
     quest_state = getattr(character.db, "brave_quests", None) or {}
     tracked_key = get_tracked_quest(character)
+    journal_quest_keys = get_journal_quest_keys(character)
     active_keys = [
         quest_key
-        for quest_key in STARTING_QUESTS
+        for quest_key in journal_quest_keys
         if quest_state.get(quest_key, {}).get("status") == "active"
     ]
     completed_keys = [
         quest_key
-        for quest_key in STARTING_QUESTS
+        for quest_key in journal_quest_keys
         if quest_state.get(quest_key, {}).get("status") == "completed"
     ]
 

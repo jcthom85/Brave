@@ -5,6 +5,7 @@ import unittest
 import json
 import tempfile
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import django
 
@@ -20,10 +21,14 @@ chargen_stub.has_chargen_progress = lambda *args, **kwargs: False
 chargen_stub.start_brave_chargen = lambda *args, **kwargs: None
 sys.modules.setdefault("world.chargen", chargen_stub)
 
+from world.browser_mobile_views import _build_mobile_quests_payload
+from world.browser_panels import build_quests_panel
 from world.browser_views import build_quests_view
 from world.content import registry as content_registry
 from world.content.registry import reload_content_registry
 from world.data.quests import QUESTS, STARTING_QUESTS
+from world.questing import _refresh_tracked_quest_scene, get_completed_quests
+from commands.brave_profile import _resolve_completed_quest_query
 from commands.brave import _format_quest_screen_block
 
 
@@ -196,6 +201,64 @@ class JournalViewTests(unittest.TestCase):
         labels = [section.get("label") for section in view.get("sections", [])]
         self.assertEqual(["", "Brambleford", "Drowned Weir"], labels)
         self.assertEqual("entries", view.get("sections", [])[1].get("kind"))
+
+    def test_journal_view_includes_defined_non_starting_completed_quests(self):
+        quest_key = "repair_the_picture_house"
+        character = DummyCharacter(
+            quests={quest_key: _quest_state(quest_key, "completed")},
+            tracked=None,
+            tutorial={"status": "inactive", "step": None, "flags": {}},
+            journal_tab="completed",
+        )
+
+        view = build_quests_view(character)
+        brambleford = _section(view, "Brambleford")
+        titles = [item.get("title") for item in brambleford.get("items", [])]
+
+        self.assertIn("Repair the Picture House", titles)
+        self.assertIn(quest_key, get_completed_quests(character))
+        self.assertEqual(quest_key, _resolve_completed_quest_query(character, "repair the picture"))
+
+        panel = build_quests_panel(character)
+        region_section = next(section for section in panel.get("sections", []) if section.get("label") == "Regions")
+        self.assertIn("Brambleford · 1 quest", [item.get("text") for item in region_section.get("items", [])])
+
+        mobile_payload = _build_mobile_quests_payload(character)
+        self.assertEqual(1, mobile_payload.get("completed_count"))
+        self.assertEqual(["Repair the Picture House"], [item.get("title") for item in mobile_payload.get("completed", [])])
+
+    def test_quest_refresh_sends_journal_update_for_open_popup(self):
+        quest_key = "repair_the_picture_house"
+        character = DummyCharacter(
+            quests={quest_key: _quest_state(quest_key, "completed")},
+            tracked=None,
+            tutorial={"status": "inactive", "step": None, "flags": {}},
+            journal_tab="completed",
+        )
+
+        with patch("world.browser_panels.send_webclient_event") as send_webclient_event:
+            _refresh_tracked_quest_scene(character)
+
+        payload = send_webclient_event.call_args.kwargs
+        self.assertIn("brave_journal_update", payload)
+        view = payload["brave_journal_update"]["view"]
+        self.assertEqual("journal", view.get("variant"))
+        brambleford = _section(view, "Brambleford")
+        self.assertEqual(["Repair the Picture House"], [item.get("title") for item in brambleford.get("items", [])])
+
+    def test_journal_view_skips_unknown_completed_quest_log_entries(self):
+        character = DummyCharacter(
+            quests={"legacy_unknown_quest": {"status": "completed", "objectives": []}},
+            tracked=None,
+            tutorial={"status": "inactive", "step": None, "flags": {}},
+            journal_tab="completed",
+        )
+
+        view = build_quests_view(character)
+        completed = _section(view, "Completed Quests")
+
+        self.assertEqual("No completed quests yet.", completed.get("items", [])[0].get("title"))
+        self.assertEqual([], get_completed_quests(character))
 
     def test_journal_view_keeps_empty_states(self):
         character = DummyCharacter(

@@ -24,6 +24,8 @@ from world.mastery import (
 )
 from world.questing import (
     clear_tracked_quest,
+    get_completed_quests,
+    get_journal_quest_keys,
     get_tracked_quest,
     resolve_active_quest_query,
     set_tracked_quest,
@@ -124,11 +126,7 @@ def _normalize_query(value):
 
 
 def _resolve_completed_quest_query(character, query):
-    completed_keys = [
-        quest_key
-        for quest_key in QUEST_CONTENT.starting_quests
-        if (character.db.brave_quests or {}).get(quest_key, {}).get("status") == "completed"
-    ]
+    completed_keys = get_completed_quests(character)
     token = "".join(char for char in (query or "").lower() if char.isalnum())
     if not token:
         return None
@@ -1034,7 +1032,7 @@ class CmdQuests(BraveCharacterCommand):
         active_blocks = {}
         completed_blocks = {}
         tracked_block = None
-        for quest_key in QUEST_CONTENT.starting_quests:
+        for quest_key in get_journal_quest_keys(character):
             state = (character.db.brave_quests or {}).get(quest_key)
             if not state or state.get("status") == "locked":
                 continue

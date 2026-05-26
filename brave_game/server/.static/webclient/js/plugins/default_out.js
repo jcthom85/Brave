@@ -4586,7 +4586,7 @@ let defaultout_plugin = (function () {
                     ? "<div class='brave-picker-sheet__options'>"
                         + pickerOptions.map(function (option) {
                             var toneClass = option && option.tone ? " brave-picker-sheet__option--" + escapeHtml(option.tone) : "";
-                            var shimmerClass = (option && option.command && checkCommandShimmer(option.command)) ? " brave-shimmer" : "";
+                            var shimmerClass = ((option && option.shimmer) || (option && option.command && checkCommandShimmer(option.command))) ? " brave-shimmer" : "";
                             var menuViewAttr = (option && isMenuViewCommand(option.command)) ? " data-brave-menu-view-command='1'" : "";
                             var optionRarityClass = option && option.rarity_tone ? " brave-rarity-name brave-rarity-name--" + escapeHtml(option.rarity_tone) : "";
                             return (
@@ -5168,7 +5168,11 @@ let defaultout_plugin = (function () {
 
         // Dynamically toggle shimmers on all command-bearing interactive controls
         Array.prototype.forEach.call(document.querySelectorAll("[data-brave-command]"), function (element) {
-            if (element.closest("#scene-card, #scene-pack-panel, #scene-vicinity-panel")) {
+            if (element.closest("#scene-card, #scene-pack-panel")) {
+                element.classList.remove("brave-shimmer");
+                return;
+            }
+            if (element.closest("#scene-vicinity-panel") && !element.classList.contains("brave-room-actions__button")) {
                 element.classList.remove("brave-shimmer");
                 return;
             }
@@ -5497,9 +5501,16 @@ let defaultout_plugin = (function () {
         var railRect = rail.getBoundingClientRect();
         var button = host.querySelector(".brave-view__menu-button");
         var buttonWidth = button ? button.offsetWidth : 34;
+        var railGapValue = 14;
+        if (window.getComputedStyle) {
+            var computedGap = parseFloat(window.getComputedStyle(document.documentElement).getPropertyValue("--brave-rail-gap"));
+            if (!Number.isNaN(computedGap) && computedGap > 0) {
+                railGapValue = computedGap;
+            }
+        }
 
-        // Position in the gutter, aligning the button's right edge exactly 24px to the left of the rail
-        var center = railRect.left - 24 - buttonWidth;
+        // Position in the gutter, matching the button-to-card gap to the rail column gap.
+        var center = railRect.left - railGapValue - buttonWidth;
 
         // Align top perfectly with the top of the sidebar rail (y = 40px)
         var top = 40;
@@ -9771,7 +9782,8 @@ let defaultout_plugin = (function () {
                 var title = action.tooltip || action.detail || action.label || action.text || "";
                 var text = action.label || action.text || "";
                 var iconName = action.icon || "bolt";
-                var buttonClass = "brave-room-actions__button brave-click";
+                var shouldShimmer = checkCommandShimmer(action.command);
+                var buttonClass = "brave-room-actions__button brave-click" + (shouldShimmer ? " brave-shimmer" : "");
                 if (text.toLowerCase() === "emote") {
                     buttonClass += " brave-room-actions__button--emote";
                 }
@@ -10934,12 +10946,14 @@ let defaultout_plugin = (function () {
                     var toneClass = entry && entry.tone ? " brave-view__action--" + escapeHtml(entry.tone) : "";
                     var iconOnlyClass = entry && entry.icon_only ? " brave-view__action--icon-only" : "";
                     var noIcon = !!(entry && entry.no_icon);
+                    var menuViewAttr = (entry && isMenuViewCommand(entry.command)) ? " data-brave-menu-view-command='1'" : "";
                     var aria = entry && (entry.aria_label || entry.label)
                         ? " aria-label='" + escapeHtml(entry.aria_label || entry.label) + "'"
                         : "";
                     return (
                         "<button type='button' class='brave-view__action brave-click" + toneClass + iconOnlyClass + "'"
                         + commandAttrs(entry, false)
+                        + menuViewAttr
                         + aria
                         + ">"
                         + (noIcon ? "" : icon(entry && entry.icon ? entry.icon : "chevron_right", "brave-view__action-icon"))
@@ -14380,6 +14394,15 @@ let defaultout_plugin = (function () {
                 return true;
             }
             renderSceneCard(scenePayload || {});
+            return true;
+        }
+
+        if (cmdname === "brave_journal_update") {
+            var journalPayload = getOobPayload(args, kwargs, "brave_journal_update", {}) || {};
+            var journalView = journalPayload.view || {};
+            if (currentMenuViewOverlayData && String(currentMenuViewOverlayData.variant || "") === "journal") {
+                renderMainView(journalView || {});
+            }
             return true;
         }
 
