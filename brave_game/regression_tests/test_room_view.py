@@ -21,6 +21,7 @@ from world.browser_views import (
     WELCOME_PAGES,
     _build_world_interaction_picker,
     build_map_view,
+    build_prayer_view,
     build_room_view,
 )
 from world.navigation import build_map_snapshot, build_minimap_snapshot, discover_region, discover_room
@@ -104,6 +105,7 @@ class DummyCharacter:
             brave_party_leader_id=None,
             brave_party_invites=[],
             brave_follow_target_id=None,
+            brave_quests={},
             brave_tutorial={},
             brave_welcome_shown=False,
             brave_discovered_rooms=[],
@@ -222,6 +224,49 @@ class RoomViewTests(unittest.TestCase):
 
         self.assertEqual("chapel_lamplight", view["atmosphere"]["key"])
         self.assertEqual(["lamplight", "dust_motes"], view["atmosphere"]["layers"])
+
+    def test_chapel_room_action_explains_prayer_blessing(self):
+        room = DummyRoom()
+        room.key = "Chapel of the Dawn Bell"
+        room.db.brave_room_id = "brambleford_chapel_dawn_bell"
+        room.db.brave_zone = "Brambleford"
+        character = DummyCharacter()
+
+        view = build_room_view(room, character)
+        prayer_action = next(item for item in view.get("room_actions", []) if item.get("command") == "pray")
+
+        self.assertEqual("Pray for Blessing", prayer_action.get("text"))
+        self.assertEqual("Receive the Dawn Bell blessing for your next encounter.", prayer_action.get("detail"))
+
+        character.db.brave_chapel_blessing = {"name": "Dawn Bell Blessing"}
+        active_view = build_room_view(room, character)
+        active_action = next(item for item in active_view.get("room_actions", []) if item.get("command") == "pray")
+
+        self.assertEqual("Blessing Active", active_action.get("text"))
+        self.assertEqual("Review the one-encounter Dawn Bell bonuses.", active_action.get("detail"))
+
+    def test_prayer_view_is_compact_fallback_for_popup_flow(self):
+        character = DummyCharacter()
+        blessing = {
+            "name": "Dawn Bell Blessing",
+            "duration": "Until your next encounter ends.",
+            "bonuses": {"max_hp": 8, "armor": 2, "accuracy": 2},
+            "rite": {},
+        }
+
+        view = build_prayer_view(character, blessing=blessing, applied=True)
+        sections = {section.get("label"): section for section in view.get("sections", [])}
+
+        self.assertEqual("Dawn Bell Blessing", view.get("title"))
+        self.assertEqual("Active for your next encounter.", view.get("subtitle"))
+        self.assertNotIn("Status", sections)
+        self.assertEqual(["Effect"], list(sections))
+        effect_entry = sections["Effect"]["items"][0]
+        self.assertEqual("Character Sheet > Effects has the details.", effect_entry.get("meta"))
+        effect_lines = " ".join(line for entry in sections["Effect"]["items"] for line in entry.get("lines", []))
+        self.assertIn("Bonuses:", effect_lines)
+        self.assertIn("Until your next encounter ends.", effect_lines)
+        self.assertEqual(["Effects", "Close"], [action.get("label") for action in view.get("actions", [])])
 
     def test_room_view_surfaces_cook_and_mastery_as_room_actions(self):
         room = DummyRoom()

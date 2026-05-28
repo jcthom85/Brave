@@ -199,6 +199,10 @@ class SheetViewTests(unittest.TestCase):
             ["Cozy"],
             [chip.get("label") for chip in effects.get("items", [])[0].get("chips", [])],
         )
+        blessing_entry = effects.get("items", [])[1]
+        self.assertIn("Until sunset.", blessing_entry.get("lines", []))
+        self.assertIn("Bonuses: Armor +2", blessing_entry.get("lines", []))
+        self.assertEqual(["Next Encounter"], [chip.get("label") for chip in blessing_entry.get("chips", [])])
 
 
 if __name__ == "__main__":

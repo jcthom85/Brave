@@ -10,10 +10,11 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
 
 from world.resting import room_allows_rest
+from world.browser_panels import send_objectives_refresh
 from world.browser_views import build_combat_view, build_gear_view, build_pack_view
 from world.content import get_content_registry
 from world.interactions import get_entity_response
-from world.questing import advance_enemy_defeat, advance_read_readable, advance_room_visit, ensure_starter_quests, unlock_quest
+from world.questing import advance_enemy_defeat, advance_read_readable, advance_room_visit, advance_talk_to_npc, ensure_starter_quests, unlock_quest
 from world.questing import get_tracked_quest_payload
 from typeclasses.scripts import BraveEncounter
 from world.tutorial import (
@@ -184,6 +185,68 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertTrue(character.db.brave_quests["practice_makes_heroes"]["objectives"][0]["completed"])
         self.assertEqual("active", character.db.brave_quests["rats_in_the_kettle"]["status"])
         self.assertEqual("rats_in_the_kettle", character.db.brave_tracked_quest)
+
+    def test_harl_talk_refresh_clears_stale_tutorial_shimmers(self):
+        character = DummyCharacter()
+        begin_tutorial(character)
+        ensure_starter_quests(character)
+        state = ensure_tutorial_state(character)
+        state["flags"].update(
+            {
+                "talked_tamsin": True,
+                "visited_quartermaster_shed": True,
+                "talked_nella": True,
+                "viewed_gear": True,
+                "viewed_pack": True,
+                "read_supply_board": True,
+                "talked_brask": True,
+                "used_class_ability": True,
+                "used_combat_consumable": True,
+                "won_vermin_fight": True,
+                "received_wayfarer_clasp": True,
+                "equipped_wayfarer_clasp": True,
+                "rested_after_fight": True,
+            }
+        )
+        character.db.brave_tutorial = state
+        character.location = _room("brambleford_training_yard")
+
+        with patch("world.browser_panels.send_webclient_event") as send_event, patch("world.tutorial.get_room", return_value=None):
+            get_entity_response(character, _entity("captain_harl_rowan"), "talk", is_action=True)
+
+        objective_updates = [
+            call.kwargs["brave_objectives_update"]
+            for call in send_event.call_args_list
+            if "brave_objectives_update" in call.kwargs
+        ]
+        self.assertTrue(objective_updates)
+        self.assertTrue(any(update.get("tutorial") is None for update in objective_updates))
+        self.assertEqual("completed", character.db.brave_quests["practice_makes_heroes"]["status"])
+
+    def test_objectives_refresh_sends_empty_tutorial_payload_to_clear_shimmers(self):
+        character = DummyCharacter()
+        character.db.brave_tutorial = {"status": "completed", "step": None, "flags": {}}
+        character.db.brave_quests = {
+            "rats_in_the_kettle": {
+                "status": "active",
+                "objectives": [
+                    {
+                        "description": "Talk to Uncle Pib Underbough.",
+                        "completed": False,
+                        "progress": 0,
+                        "required": 1,
+                    }
+                ],
+            }
+        }
+        character.db.brave_tracked_quest = "rats_in_the_kettle"
+
+        with patch("world.browser_panels.send_webclient_event") as send_event:
+            send_objectives_refresh(character)
+
+        payload = send_event.call_args.kwargs["brave_objectives_update"]
+        self.assertIsNone(payload.get("tutorial"))
+        self.assertEqual("Rats in the Kettle", payload["tracked_quest"]["title"])
 
     def test_unlocking_quest_sends_new_quest_popup_payload(self):
         character = DummyCharacter()
@@ -1069,6 +1132,43 @@ class TutorialOnboardingTests(unittest.TestCase):
         self.assertIn("Ruk is dead", board)
         self.assertIn("road might breathe again", board)
         self.assertIn("woods have gone strange", get_entity_response(character, _entity("mira_fenleaf"), "talk"))
+
+    def test_rats_cellar_visit_updates_tracker_without_progress_popup(self):
+        character = DummyCharacter()
+        character.db.brave_tutorial = {"status": "completed", "step": None, "flags": {}}
+        character.location = _room("brambleford_training_yard")
+        ensure_starter_quests(character)
+
+        get_entity_response(character, _entity("captain_harl_rowan"), "talk", is_action=True)
+        get_entity_response(character, _entity("uncle_pib_underbough"), "talk", is_action=True)
+
+        with patch("world.browser_panels.send_browser_notice_event") as send_browser_notice_event:
+            advance_room_visit(character, _room("brambleford_rat_and_kettle_cellar", safe=False))
+
+        send_browser_notice_event.assert_not_called()
+        self.assertTrue(character.db.brave_quests["rats_in_the_kettle"]["objectives"][1]["completed"])
+        payload = get_tracked_quest_payload(character)
+        self.assertEqual(
+            "Defeat 3 thorn rats before they ruin more stores. (0/3)",
+            next(objective["text"] for objective in payload["objectives"] if not objective["completed"]),
+        )
+
+    def test_talk_objective_updates_tracker_without_progress_popup(self):
+        character = DummyCharacter()
+        character.db.brave_tutorial = {"status": "completed", "step": None, "flags": {}}
+        character.location = _room("brambleford_training_yard")
+        ensure_starter_quests(character)
+        get_entity_response(character, _entity("captain_harl_rowan"), "talk", is_action=True)
+
+        with patch("world.browser_panels.send_browser_notice_event") as send_browser_notice_event:
+            advance_talk_to_npc(character, "uncle_pib_underbough")
+
+        send_browser_notice_event.assert_not_called()
+        self.assertTrue(character.db.brave_quests["rats_in_the_kettle"]["objectives"][0]["completed"])
+        self.assertEqual(
+            "Head down into the Rat and Kettle Cellar beneath the inn.",
+            next(objective["text"] for objective in get_tracked_quest_payload(character)["objectives"] if not objective["completed"]),
+        )
 
 
 if __name__ == "__main__":

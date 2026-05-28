@@ -11,7 +11,7 @@ django.setup()
 
 from commands.brave import BraveCharacterCommand
 from commands.brave_explore import CmdRest
-from commands.brave_town import CmdMovie
+from commands.brave_town import CmdMovie, CmdPray
 from world.browser_panels import format_speech_activity
 from world.browser_room_helpers import _format_room_context_action_items
 from world.movies import GREAT_FRONTIER_MOVIES, build_movie_picker, build_movie_view, resolve_movie
@@ -212,6 +212,37 @@ class BraveCharacterCommandTests(unittest.TestCase):
         command.func()
 
         self.assertEqual(["You need a proper rest spot before you can recover. Try the Lantern Rest Inn or another marked resting place."], sent)
+
+    def test_pray_sends_compact_overlay_without_replacing_scene(self):
+        command = object.__new__(CmdPray)
+        web_session = SimpleNamespace(protocol_key="websocket")
+        room = SimpleNamespace(key="Chapel of the Dawn Bell", db=SimpleNamespace(brave_room_id="brambleford_chapel_dawn_bell"))
+        character = SimpleNamespace(
+            key="Dad",
+            location=room,
+            db=SimpleNamespace(brave_race="human", brave_class="warrior", brave_chapel_blessing={}),
+            sessions=_DummySessions([web_session]),
+        )
+        character.ensure_brave_character = lambda: character
+        character.recalculate_stats = lambda: None
+        command.caller = character
+        command.session = web_session
+        command.get_encounter = lambda *_args, **_kwargs: None
+        command.send_other_sessions = lambda *_args, **_kwargs: None
+        sent = []
+        command.msg = lambda *args, **kwargs: sent.append({"args": args, "kwargs": kwargs})
+
+        with patch("commands.brave_town.send_webclient_event") as send_event:
+            command.func()
+
+        self.assertEqual(1, send_event.call_count)
+        payload = send_event.call_args.kwargs["brave_prayer"]
+        self.assertEqual("Prayer Answered", payload.get("eyebrow"))
+        self.assertEqual("Active for your next encounter.", payload.get("message"))
+        self.assertEqual("Details are in Character Sheet > Effects.", payload.get("sheet_hint"))
+        self.assertIn("Dawn Bell Blessing", character.db.brave_chapel_blessing.get("name"))
+        self.assertFalse(any("brave_clear" in event["kwargs"] for event in sent))
+        self.assertFalse(any("brave_view" in event["kwargs"] for event in sent))
 
     def test_rest_restores_at_authored_rest_site(self):
         command = object.__new__(CmdRest)

@@ -3678,6 +3678,58 @@ let defaultout_plugin = (function () {
         }, 3400);
     };
 
+    var renderPrayerOverlay = function (payload) {
+        payload = payload || {};
+        var overlay = document.createElement("div");
+        var summary = payload.summary || "";
+        var rite = payload.rite || "";
+        overlay.className = "brave-prayer-overlay";
+        overlay.setAttribute("role", "status");
+        overlay.setAttribute("aria-live", "polite");
+        overlay.setAttribute("aria-atomic", "true");
+        overlay.innerHTML =
+            "<div class='brave-prayer-overlay__veil'></div>"
+            + "<div class='brave-prayer-overlay__panel'>"
+            + "<div class='brave-prayer-overlay__sigil'>"
+            + "<span class='material-icons' aria-hidden='true'>wb_sunny</span>"
+            + "<span class='brave-prayer-overlay__ring brave-prayer-overlay__ring--one'></span>"
+            + "<span class='brave-prayer-overlay__ring brave-prayer-overlay__ring--two'></span>"
+            + "</div>"
+            + "<div class='brave-prayer-overlay__eyebrow'>" + escapeHtml(payload.eyebrow || "Prayer Answered") + "</div>"
+            + "<div class='brave-prayer-overlay__title'>" + escapeHtml(payload.title || "Dawn Bell Blessing") + "</div>"
+            + "<div class='brave-prayer-overlay__message'>" + escapeHtml(payload.message || "Active for your next encounter.") + "</div>"
+            + (summary ? "<div class='brave-prayer-overlay__summary'>" + escapeHtml(summary) + "</div>" : "")
+            + (rite ? "<div class='brave-prayer-overlay__rite'>" + escapeHtml(rite) + "</div>" : "")
+            + "<div class='brave-prayer-overlay__hint'>" + escapeHtml(payload.sheet_hint || "Details are in Character Sheet > Effects.") + "</div>"
+            + "</div>";
+        document.body.appendChild(overlay);
+
+        var dismissed = false;
+        var dismissTimer = null;
+        var dismissOverlay = function () {
+            if (dismissed) {
+                return;
+            }
+            dismissed = true;
+            if (dismissTimer) {
+                window.clearTimeout(dismissTimer);
+            }
+            overlay.classList.remove("brave-prayer-overlay--active");
+            window.setTimeout(function () {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+            }, 650);
+        };
+        overlay.addEventListener("click", dismissOverlay);
+        window.setTimeout(function () {
+            overlay.classList.add("brave-prayer-overlay--active");
+        }, 30);
+        dismissTimer = window.setTimeout(function () {
+            dismissOverlay();
+        }, 4200);
+    };
+
     var buildAudioSettingsPicker = function () {
         return {
             picker_id: "audio-settings",
@@ -14555,6 +14607,11 @@ let defaultout_plugin = (function () {
 
         if (cmdname === "brave_rest") {
             renderRestOverlay(getOobPayload(args, kwargs, "brave_rest", {}) || {});
+            return true;
+        }
+
+        if (cmdname === "brave_prayer") {
+            renderPrayerOverlay(getOobPayload(args, kwargs, "brave_prayer", {}) || {});
             return true;
         }
 

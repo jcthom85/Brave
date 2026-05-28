@@ -395,6 +395,7 @@ def build_sheet_view(character):
                 meta="Blessing",
                 icon="wb_sunny",
                 lines=blessing_lines,
+                chips=[_chip("Next Encounter", "schedule", "good")],
             )
         )
 

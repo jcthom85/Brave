@@ -587,10 +587,12 @@ def _format_room_context_action_items(room, viewer):
         blessing = get_active_blessing(viewer)
         items.append(
             _item(
-                "Pray" if not blessing else "Review Blessing",
-                icon="notifications_active",
+                "Pray for Blessing" if not blessing else "Blessing Active",
+                icon="wb_sunny" if not blessing else "notifications_active",
                 command="pray",
-                detail=None if not blessing else "Dawn Bell blessing active.",
+                detail="Receive the Dawn Bell blessing for your next encounter."
+                if not blessing
+                else "Review the one-encounter Dawn Bell bonuses.",
             )
         )
 

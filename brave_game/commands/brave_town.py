@@ -12,7 +12,6 @@ from world.browser_panels import (
 from world.browser_views import (
     build_cook_view,
     build_forge_view,
-    build_prayer_view,
     build_shop_view,
     build_tinker_view,
 )
@@ -671,7 +670,23 @@ class CmdPray(BraveCharacterCommand):
             else "The chapel's blessing still rests on you.",
             sections=[("Blessing", lines)],
         )
-        self.scene_msg(screen, view=build_prayer_view(character, blessing=blessing, applied=applied))
+        payload = {
+            "title": blessing.get("name", "Dawn Bell Blessing"),
+            "eyebrow": "Prayer Answered" if applied else "Blessing Active",
+            "message": "Active for your next encounter." if applied else "Still active for your next encounter.",
+            "summary": bonus_text,
+            "duration": blessing.get("duration", "Until your next encounter ends."),
+            "applied": applied,
+            "sheet_hint": "Details are in Character Sheet > Effects.",
+        }
+        if rite.get("name"):
+            payload["rite"] = rite["name"]
+        session = self.get_web_session()
+        if session:
+            send_webclient_event(character, session=session, brave_prayer=payload)
+            self.send_other_sessions(screen)
+            return
+        self.msg(screen)
 
 
 class CmdTalk(BraveCharacterCommand):

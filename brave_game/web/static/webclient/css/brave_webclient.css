@@ -20529,6 +20529,152 @@ body.brave-character-load-transition-active .brave-pixel-particle {
     100% { transform: scaleX(1); opacity: 1; }
 }
 
+.brave-prayer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10025;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.brave-prayer-overlay__veil {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 42%, rgba(246, 202, 107, 0.24), rgba(15, 22, 25, 0.86) 42%, rgba(5, 7, 9, 0.96)),
+        linear-gradient(180deg, rgba(16, 42, 39, 0.92), rgba(7, 8, 10, 0.98));
+    opacity: 0;
+    transition: opacity 0.45s ease;
+}
+
+.brave-prayer-overlay--active .brave-prayer-overlay__veil {
+    opacity: 1;
+}
+
+.brave-prayer-overlay__panel {
+    position: relative;
+    width: min(430px, 100%);
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    color: var(--brave-text-bright);
+    transform: translateY(16px) scale(0.94);
+    opacity: 0;
+    transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brave-prayer-overlay--active .brave-prayer-overlay__panel {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.brave-prayer-overlay__sigil {
+    position: relative;
+    width: 112px;
+    height: 112px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 6px;
+    border: 1px solid rgba(246, 202, 107, 0.44);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle, rgba(255, 238, 171, 0.98), rgba(238, 173, 70, 0.76) 50%, rgba(35, 128, 119, 0.34));
+    box-shadow:
+        0 0 34px rgba(246, 202, 107, 0.42),
+        0 0 90px rgba(54, 149, 139, 0.24);
+    animation: brave-prayer-sigil-ring 1.8s ease-in-out infinite;
+}
+
+.brave-prayer-overlay__sigil .material-icons {
+    position: relative;
+    z-index: 2;
+    font-size: 52px;
+    color: rgba(32, 28, 16, 0.9);
+}
+
+.brave-prayer-overlay__ring {
+    position: absolute;
+    inset: -14px;
+    border: 1px solid rgba(246, 202, 107, 0.44);
+    border-radius: 50%;
+    animation: brave-prayer-ring 1.7s ease-out infinite;
+}
+
+.brave-prayer-overlay__ring--two {
+    inset: -28px;
+    border-color: rgba(88, 181, 159, 0.32);
+    animation-delay: 0.28s;
+}
+
+.brave-prayer-overlay__eyebrow,
+.brave-prayer-overlay__hint,
+.brave-prayer-overlay__rite {
+    font-family: var(--brave-ui-font-family);
+}
+
+.brave-prayer-overlay__eyebrow {
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(255, 219, 132, 0.95);
+}
+
+.brave-prayer-overlay__title {
+    font-family: var(--brave-dialogue-font-family);
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    line-height: 1;
+    text-transform: uppercase;
+    text-shadow: 0 0 28px rgba(246, 202, 107, 0.34);
+}
+
+.brave-prayer-overlay__message,
+.brave-prayer-overlay__summary {
+    font-family: var(--brave-ui-font-family);
+    font-size: 1rem;
+    color: var(--brave-text-muted);
+}
+
+.brave-prayer-overlay__summary {
+    max-width: 24rem;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border: 1px solid rgba(246, 202, 107, 0.26);
+    border-radius: 999px;
+    background: rgba(10, 14, 15, 0.56);
+    color: rgba(255, 239, 194, 0.96);
+}
+
+.brave-prayer-overlay__rite {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: rgba(126, 219, 195, 0.96);
+}
+
+.brave-prayer-overlay__hint {
+    margin-top: 10px;
+    font-size: 0.78rem;
+    color: rgba(190, 201, 196, 0.82);
+}
+
+@keyframes brave-prayer-sigil-ring {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+}
+
+@keyframes brave-prayer-ring {
+    0% { opacity: 0.72; transform: scale(0.76); }
+    100% { opacity: 0; transform: scale(1.22); }
+}
+
 /* Pixel Firework Particles */
 .brave-pixel-particle {
     position: fixed;

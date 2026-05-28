@@ -160,28 +160,19 @@ def _refresh_tracked_quest_scene(character):
 
 
 def _send_progress_notice(character, messages):
-    """Send quest progress through browser notices without dropping telnet text."""
+    """Send intermediate quest progress to non-web sessions only."""
 
     if not messages:
         return
 
     try:
-        from world.browser_panels import send_browser_notice_event
+        from world.browser_panels import send_text_to_non_web_sessions
     except Exception:
         for message in messages:
             character.msg(message)
         return
 
-    notice_fields = _build_quest_update_notice(messages)
-    send_browser_notice_event(
-        character,
-        "\n".join(messages),
-        title="Quest Updated",
-        tone="good",
-        icon="menu_book" if notice_fields else "task_alt",
-        duration_ms=4600,
-        **notice_fields,
-    )
+    send_text_to_non_web_sessions(character, "\n".join(messages))
 
 
 def pop_recent_quest_updates(character):

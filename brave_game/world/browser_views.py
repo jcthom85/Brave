@@ -919,69 +919,56 @@ def build_theme_view(current_theme_key=None):
 
 
 def build_prayer_view(character, *, blessing=None, applied=False):
-    """Return a browser-first main view for the Chapel blessing."""
+    """Return a compact fallback view for clients without the prayer popup."""
 
     blessing = blessing or get_active_blessing(character)
     blessing_name = blessing.get("name", "Dawn Bell Blessing")
     duration = blessing.get("duration", "Until your next encounter ends.")
     bonus_text = _format_context_bonus_summary(blessing.get("bonuses", {}), character)
     rite = dict(blessing.get("rite") or {})
-
-    chips = [
-        _chip(blessing_name, "wb_sunny", "accent"),
-        _chip("One encounter", "schedule", "muted"),
-    ]
+    status_title = "Prayer Answered" if applied else "Blessing Active"
+    lines = [duration]
+    if bonus_text:
+        lines.append("Bonuses: " + bonus_text)
     if rite.get("name"):
-        chips.append(_chip(rite["name"], "workspace_premium", "good"))
-
-    sections = [
-        _section(
-            "Blessing",
-            "wb_sunny",
-            "lines",
-            lines=[
-                "The bell's steadier note settles into you and follows you back onto the road.",
-                duration,
-                "Bonuses: " + bonus_text if bonus_text else "No mechanical bonus recorded.",
-            ],
-        ),
-    ]
-    if rite:
-        sections.append(
-            _section(
-                "Class Rite",
-                "workspace_premium",
-                "lines",
-                lines=[rite.get("summary", ""), *(rite.get("lines") or [])],
-            )
-        )
-    sections.append(
-        _section(
-            "Chapel Notes",
-            "church",
-            "list",
-            items=[
-                _item("Brother Alden watches the west-side trouble and the barrow line.", icon="forum"),
-                _item("Sister Maybelle tends the hurt and keeps the town practical about what bravery costs.", icon="forum"),
-                _item("Return here before a harder run when you want the Dawn Bell at your back.", icon="flag"),
-            ],
-        )
-    )
+        lines.append("Rite: " + rite["name"])
 
     subtitle = (
-        "The Dawn Bell answers and steadies you for the next hard road."
+        "Active for your next encounter."
         if applied
-        else "The Dawn Bell's ward still rests on you."
+        else "Still active for your next encounter."
     )
 
     return _make_view(
         "Chapel Of The Dawn Bell",
-        "Dawn Bell",
+        "Dawn Bell Blessing",
         eyebrow_icon="church",
         title_icon="wb_sunny",
         subtitle=subtitle,
-        chips=chips,
-        sections=sections,
+        chips=[
+            _chip(status_title, "wb_sunny", "good"),
+            _chip("Next Encounter", "schedule", "muted"),
+        ],
+        sections=[
+            _section(
+                "Effect",
+                "shield",
+                "entries",
+                items=[
+                    _entry(
+                        blessing_name,
+                        icon="shield",
+                        meta="Character Sheet > Effects has the details.",
+                        badge="Active",
+                        lines=lines,
+                    )
+                ],
+            )
+        ],
+        actions=[
+            _action("Effects", "sheet", "badge", tone="muted"),
+            _action("Close", "look", "close", tone="muted"),
+        ],
         back=True,
         reactive=_reactive_from_character(character, scene="chapel"),
     )

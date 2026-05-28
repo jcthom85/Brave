@@ -155,8 +155,7 @@ def send_objectives_refresh(target):
     
     # 1. Mechanical Tutorial Guidance
     mechanical = get_tutorial_mechanical_guidance(target)
-    if mechanical:
-        payload["tutorial"] = mechanical
+    payload["tutorial"] = mechanical or None
 
     # 2. Narrative Tracked Quest
     tracked = get_tracked_quest_payload(target)

@@ -50,6 +50,18 @@ class QuestPopupTests(unittest.TestCase):
         self.assertIn('braveAudio.handleRest(payload);', default_out_source)
         self.assertIn('overlay.addEventListener("click", dismissOverlay);', default_out_source)
 
+    def test_default_out_wires_prayer_overlay(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+        css_source = WEBCLIENT_CSS_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("var renderPrayerOverlay = function (payload)", default_out_source)
+        self.assertIn('if (cmdname === "brave_prayer")', default_out_source)
+        self.assertIn('overlay.className = "brave-prayer-overlay";', default_out_source)
+        self.assertIn("Details are in Character Sheet > Effects.", default_out_source)
+        self.assertIn('overlay.addEventListener("click", dismissOverlay);', default_out_source)
+        self.assertIn(".brave-prayer-overlay", css_source)
+        self.assertIn("@keyframes brave-prayer-ring", css_source)
+
     def test_default_out_opens_server_sent_picker_payloads(self):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
 
