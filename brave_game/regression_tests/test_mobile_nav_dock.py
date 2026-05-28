@@ -8,6 +8,15 @@ CSS_PATH = REPO_ROOT / "brave_game/web/static/webclient/css/brave_webclient.css"
 
 
 class MobileNavDockTests(unittest.TestCase):
+    def test_activity_popups_stack_above_menu_controls(self):
+        css_source = CSS_PATH.read_text(encoding="utf-8")
+
+        self.assertIn(".brave-activity-overlay {\n    position: fixed;\n    inset: 0;\n    z-index: 5060;", css_source)
+        self.assertIn(".brave-fishing-minigame {\n    position: fixed;\n    inset: 0;\n    z-index: 5060;", css_source)
+        self.assertIn(".brave-desktop-scene-menu {\n    position: absolute;\n    z-index: 5040;", css_source)
+        self.assertIn(".brave-desktop-scene-menu__panel {\n    display: none;\n    position: absolute;", css_source)
+        self.assertIn("    z-index: 5050;\n}\n.brave-desktop-scene-menu--open .brave-desktop-scene-menu__panel", css_source)
+
     def test_mobile_movement_pad_defaults_expanded(self):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
 
@@ -74,6 +83,27 @@ class MobileNavDockTests(unittest.TestCase):
         self.assertIn("body.brave-menu-view-overlay-active #brave-picker-sheet", css_source)
         self.assertIn(".brave-picker-sheet__panel--large-menu", css_source)
         self.assertIn("grid-template-columns: minmax(0, 1fr);", css_source)
+
+    def test_fishing_overlay_keeps_desktop_menu_mounted(self):
+        default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")
+
+        should_render_start = default_out_source.index("var shouldRenderDesktopSceneMenu = function ()")
+        should_render_end = default_out_source.index("var getDesktopSceneMenuLayout = function ()", should_render_start)
+        should_render_block = default_out_source[should_render_start:should_render_end]
+        clear_start = default_out_source.index("var clearFishingMinigame = function ()")
+        clear_end = default_out_source.index("var getFishingRoot = function ()", clear_start)
+        clear_block = default_out_source[clear_start:clear_end]
+        setup_start = default_out_source.index("var renderFishingSetupOverlay = function (payload)")
+        setup_end = default_out_source.index("var fishingOutcomeCommand = function", setup_start)
+        setup_block = default_out_source[setup_start:setup_end]
+        minigame_start = default_out_source.index("var startFishingMinigame = function (payload)")
+        minigame_end = default_out_source.index("var showFishingResult = function", minigame_start)
+        minigame_block = default_out_source[minigame_start:minigame_end]
+
+        self.assertNotIn('classList.contains("brave-fishing-active")', should_render_block)
+        self.assertIn("renderDesktopSceneMenu();", clear_block)
+        self.assertIn("renderDesktopSceneMenu();", setup_block)
+        self.assertIn("renderDesktopSceneMenu();", minigame_block)
 
     def test_first_room_discovery_paints_room_text_without_region_transition(self):
         default_out_source = DEFAULT_OUT_PATH.read_text(encoding="utf-8")

@@ -2331,7 +2331,7 @@ body.brave-objectives-welcome-active #brave-picker-sheet {
 .brave-activity-overlay {
     position: fixed;
     inset: 0;
-    z-index: 1215;
+    z-index: 5060;
     display: grid;
     place-items: center;
     padding: 18px;
@@ -3055,7 +3055,7 @@ body.brave-objectives-welcome-active #brave-picker-sheet {
 .brave-fishing-minigame {
     position: fixed;
     inset: 0;
-    z-index: 1220;
+    z-index: 5060;
     display: grid;
     place-items: center;
     padding: 18px;

@@ -5480,7 +5480,6 @@ let defaultout_plugin = (function () {
             && !document.body.classList.contains("brave-picker-active")
             && !document.body.classList.contains("brave-activity-active")
             && !document.body.classList.contains("brave-movie-active")
-            && !document.body.classList.contains("brave-fishing-active")
             && !document.body.classList.contains("brave-region-transition-active")
             && !document.body.classList.contains("brave-victory-transition-active")
             && !document.body.classList.contains("brave-mobile-sheet-active")
@@ -12403,6 +12402,9 @@ let defaultout_plugin = (function () {
         if (document.body) {
             document.body.classList.remove("brave-fishing-active");
         }
+        if (typeof renderDesktopSceneMenu === "function") {
+            renderDesktopSceneMenu();
+        }
     };
 
     var getFishingRoot = function () {
@@ -12532,6 +12534,9 @@ let defaultout_plugin = (function () {
             + "</section>";
         document.body.appendChild(root);
         document.body.classList.add("brave-fishing-active");
+        if (typeof renderDesktopSceneMenu === "function") {
+            renderDesktopSceneMenu();
+        }
         bindFishingMinigameControls(root);
         currentFishingGame = {
             data: data,
@@ -12877,6 +12882,9 @@ let defaultout_plugin = (function () {
             + "</section>";
         document.body.appendChild(root);
         document.body.classList.add("brave-fishing-active");
+        if (typeof renderDesktopSceneMenu === "function") {
+            renderDesktopSceneMenu();
+        }
         bindFishingMinigameControls(root);
         currentFishingGame = {
             data: data,
